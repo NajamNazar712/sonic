@@ -12,7 +12,7 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
-use App\Http\Models\InvoicingCycle;
+use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\Rates\HistoryBookingTypeCharges;
 use App\Http\Models\Rates\HistoryCashHandlingCharge;
 use App\Http\Models\Rates\HistoryDiscountCharge;
@@ -875,6 +875,7 @@ class AdminDashboardController extends Controller
     public function viewBankInfo($id){
         $user = User::find($id);
         $bank = $user->bank;
+//        return $bank;
         $returnHTML = view('admin/components/bank')->with(['bank'=>$bank,'user'=>$user])->render();
         return response()->json($returnHTML);
     }
@@ -986,10 +987,10 @@ class AdminDashboardController extends Controller
             $messages = [
                 'on_wa_range_up.*.required' => 'The overnight range up field is required.',
                 'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
-                'on_wa_range_up.*.between' => 'The overnight range up field must be between 0 to 99.99.',
+                'on_wa_range_up.*.between' => 'The overnight range up field must be between 0 to 999.99',
                 'on_wa_range_down.*.required' => 'The overnight range down field is required.',
                 'on_wa_range_down.*.numeric' => 'The overnight range down field must be numeric or decimal.',
-                'on_wa_range_down.*.between' => 'The overnight range down field must be between 0 to 99.99.',
+                'on_wa_range_down.*.between' => 'The overnight range down field must be between 0 to 999.99',
                 'on_wa_spkg.*.numeric' => 'The overnight KG Range field must be numeric.',
                 'on_wa_local_charges.*.required' => 'The overnight local charges field is required.',
                 'on_wa_local_charges.*.numeric' => 'The overnight local charges field must be numeric.',
@@ -1045,10 +1046,10 @@ class AdminDashboardController extends Controller
                 //overland starts
                 'ol_wa_range_up.*.required' => 'The overland range up field is required.',
                 'ol_wa_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
-                'ol_wa_range_up.*.between' => 'The overland range up field must be between 0 to 99.99.',
+                'ol_wa_range_up.*.between' => 'The overland range up field must be between 0 to 999.99',
                 'ol_wa_range_down.*.required' => 'The overland range down field is required.',
                 'ol_wa_range_down.*.numeric' => 'The overland range down field must be numeric or decimal.',
-                'ol_wa_range_down.*.between' => 'The overland range down field must be between 0 to 99.99.',
+                'ol_wa_range_down.*.between' => 'The overland range down field must be between 0 to 999.99',
                 'ol_wa_spkg.*.numeric' => 'The overland KG Range field must be numeric.',
                 'ol_wa_local_charges.*.required' => 'The overland local charges field is required.',
                 'ol_wa_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
@@ -1104,10 +1105,10 @@ class AdminDashboardController extends Controller
                 //overland end and detain starts
                 'detain_wa_range_up.*.required' => 'The detain range up field is required.',
                 'detain_wa_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
-                'detain_wa_range_up.*.between' => 'The detain range up field must be between 0 to 99.99.',
+                'detain_wa_range_up.*.between' => 'The detain range up field must be between 0 to 999.99',
                 'detain_wa_range_down.*.required' => 'The detain range down field is required.',
                 'detain_wa_range_down.*.numeric' => 'The detain range down field must be numeric or decimal.',
-                'detain_wa_range_down.*.between' => 'The detain range down field must be between 0 to 99.99.',
+                'detain_wa_range_down.*.between' => 'The detain range down field must be between 0 to 999.99',
                 'detain_wa_spkg.*.numeric' => 'The detain KG Range field must be numeric.',
                 'detain_wa_local_charges.*.required' => 'The detain local charges field is required.',
                 'detain_wa_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
@@ -1163,10 +1164,10 @@ class AdminDashboardController extends Controller
                 //detain ends and sameday starts
                 'sameday_wa_range_up.*.required' => 'The sameday range up field is required.',
                 'sameday_wa_range_up.*.numeric' => 'The sameday range up field must be numeric or decimal.',
-                'sameday_wa_range_up.*.between' => 'The sameday range up field must be between 0 to 99.99.',
+                'sameday_wa_range_up.*.between' => 'The sameday range up field must be between 0 to 999.99',
                 'sameday_wa_range_down.*.required' => 'The sameday range down field is required.',
                 'sameday_wa_range_down.*.numeric' => 'The sameday range down field must be numeric or decimal.',
-                'sameday_wa_range_down.*.between' => 'The sameday range down field must be between 0 to 99.99.',
+                'sameday_wa_range_down.*.between' => 'The sameday range down field must be between 0 to 999.99',
                 'sameday_wa_spkg.*.numeric' => 'The sameday KG Range field must be numeric.',
                 'sameday_wa_local_charges.*.required' => 'The sameday local charges field is required.',
                 'sameday_wa_local_charges.*.numeric' => 'The sameday local charges field must be numeric.',
@@ -1227,8 +1228,8 @@ class AdminDashboardController extends Controller
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
-                    'on_wa_range_up.*' => 'required|numeric|between:0,1000',
-                    'on_wa_range_down.*' => 'required|numeric|between:0,1000',
+                    'on_wa_range_up.*' => 'required|numeric|between:0,10000',
+                    'on_wa_range_down.*' => 'required|numeric|between:0,10000',
                     'on_wa_local_charges.*' => 'required|numeric',
                     'on_class_0_charges.*' => 'required|numeric',
                     'on_class_1_charges.*' => 'required',
@@ -1262,8 +1263,8 @@ class AdminDashboardController extends Controller
             //overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
                 $ol_validations = [
-                    'ol_wa_range_up.*' => 'required|numeric|between:0,1000',
-                    'ol_wa_range_down.*' => 'required|numeric|between:0,1000',
+                    'ol_wa_range_up.*' => 'required|numeric|between:0,10000',
+                    'ol_wa_range_down.*' => 'required|numeric|between:0,10000',
                     'ol_wa_local_charges.*' => 'required|numeric',
                     'ol_class_0_charges.*' => 'required|numeric',
                     'ol_class_1_charges.*' => 'required',
@@ -1297,8 +1298,8 @@ class AdminDashboardController extends Controller
             //overland
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
                 $detain_validations = [
-                    'detain_wa_range_up.*' => 'required|numeric|between:0,1000',
-                    'detain_wa_range_down.*' => 'required|numeric|between:0,1000',
+                    'detain_wa_range_up.*' => 'required|numeric|between:0,10000',
+                    'detain_wa_range_down.*' => 'required|numeric|between:0,10000',
                     'detain_wa_local_charges.*' => 'required|numeric',
                     'detain_class_0_charges.*' => 'required|numeric',
                     'detain_class_1_charges.*' => 'required',
@@ -1332,8 +1333,8 @@ class AdminDashboardController extends Controller
             //sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
                 $sameday_validations = [
-                    'sameday_wa_range_up.*' => 'required|numeric|between:0,1000',
-                    'sameday_wa_range_down.*' => 'required|numeric|between:0,1000',
+                    'sameday_wa_range_up.*' => 'required|numeric|between:0,10000',
+                    'sameday_wa_range_down.*' => 'required|numeric|between:0,10000',
                     'sameday_wa_local_charges.*' => 'required|numeric',
                     'sameday_class_0_charges.*' => 'required|numeric',
                     'sameday_wa_spkg.*' => 'numeric',
@@ -2515,10 +2516,10 @@ class AdminDashboardController extends Controller
             $messages = [
                 'on_wa_range_up.*.required' => 'The overnight range up field is required.',
                 'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
-                'on_wa_range_up.*.between' => 'The overnight range up field must be between 0 to 99.99.',
+                'on_wa_range_up.*.between' => 'The overnight range up field must be between 0 to 999.99',
                 'on_wa_range_down.*.required' => 'The overnight range down field is required.',
                 'on_wa_range_down.*.numeric' => 'The overnight range down field must be numeric or decimal.',
-                'on_wa_range_down.*.between' => 'The overnight range down field must be between 0 to 99.99.',
+                'on_wa_range_down.*.between' => 'The overnight range down field must be between 0 to 999.99',
                 'on_wa_spkg.*.numeric' => 'The overnight KG Range field must be numeric.',
                 'on_wa_local_charges.*.required' => 'The overnight local charges field is required.',
                 'on_wa_local_charges.*.numeric' => 'The overnight local charges field must be numeric.',
@@ -2575,10 +2576,10 @@ class AdminDashboardController extends Controller
                 //overland starts
                 'ol_wa_range_up.*.required' => 'The overland range up field is required.',
                 'ol_wa_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
-                'ol_wa_range_up.*.between' => 'The overland range up field must be between 0 to 99.99.',
+                'ol_wa_range_up.*.between' => 'The overland range up field must be between 0 to 999.99',
                 'ol_wa_range_down.*.required' => 'The overland range down field is required.',
                 'ol_wa_range_down.*.numeric' => 'The overland range down field must be numeric or decimal.',
-                'ol_wa_range_down.*.between' => 'The overland range down field must be between 0 to 99.99.',
+                'ol_wa_range_down.*.between' => 'The overland range down field must be between 0 to 999.99',
                 'ol_wa_spkg.*.numeric' => 'The overland KG Range field must be numeric.',
                 'ol_wa_local_charges.*.required' => 'The overland local charges field is required.',
                 'ol_wa_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
@@ -2634,10 +2635,10 @@ class AdminDashboardController extends Controller
                 //overland end and detain starts
                 'detain_wa_range_up.*.required' => 'The detain range up field is required.',
                 'detain_wa_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
-                'detain_wa_range_up.*.between' => 'The detain range up field must be between 0 to 99.99.',
+                'detain_wa_range_up.*.between' => 'The detain range up field must be between 0 to 999.99',
                 'detain_wa_range_down.*.required' => 'The detain range down field is required.',
                 'detain_wa_range_down.*.numeric' => 'The detain range down field must be numeric or decimal.',
-                'detain_wa_range_down.*.between' => 'The detain range down field must be between 0 to 99.99.',
+                'detain_wa_range_down.*.between' => 'The detain range down field must be between 0 to 999.99',
                 'detain_wa_spkg.*.numeric' => 'The detain KG Range field must be numeric.',
                 'detain_wa_local_charges.*.required' => 'The detain local charges field is required.',
                 'detain_wa_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
@@ -2693,10 +2694,10 @@ class AdminDashboardController extends Controller
                 //detain ends and sameday starts
                 'sameday_wa_range_up.*.required' => 'The sameday range up field is required.',
                 'sameday_wa_range_up.*.numeric' => 'The sameday range up field must be numeric or decimal.',
-                'sameday_wa_range_up.*.between' => 'The sameday range up field must be between 0 to 99.99.',
+                'sameday_wa_range_up.*.between' => 'The sameday range up field must be between 0 to 999.99',
                 'sameday_wa_range_down.*.required' => 'The sameday range down field is required.',
                 'sameday_wa_range_down.*.numeric' => 'The sameday range down field must be numeric or decimal.',
-                'sameday_wa_range_down.*.between' => 'The sameday range down field must be between 0 to 99.99.',
+                'sameday_wa_range_down.*.between' => 'The sameday range down field must be between 0 to 999.99',
                 'sameday_wa_spkg.*.numeric' => 'The sameday KG Range field must be numeric.',
                 'sameday_wa_local_charges.*.required' => 'The sameday local charges field is required.',
                 'sameday_wa_local_charges.*.numeric' => 'The sameday local charges field must be numeric.',
@@ -2757,8 +2758,8 @@ class AdminDashboardController extends Controller
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
-                    'on_wa_range_up.*' => 'required|numeric|between:0,1000',
-                    'on_wa_range_down.*' => 'required|numeric|between:0,1000',
+                    'on_wa_range_up.*' => 'required|numeric|between:0,10000',
+                    'on_wa_range_down.*' => 'required|numeric|between:0,10000',
                     'on_wa_local_charges.*' => 'required|numeric',
                     'on_class_0_charges.*' => 'required|numeric',
                     'on_class_1_charges.*' => 'required',
@@ -2792,8 +2793,8 @@ class AdminDashboardController extends Controller
             //overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
                 $ol_validations = [
-                    'ol_wa_range_up.*' => 'required|numeric|between:0,1000',
-                    'ol_wa_range_down.*' => 'required|numeric|between:0,1000',
+                    'ol_wa_range_up.*' => 'required|numeric|between:0,10000',
+                    'ol_wa_range_down.*' => 'required|numeric|between:0,10000',
                     'ol_wa_local_charges.*' => 'required|numeric',
                     'ol_class_0_charges.*' => 'required|numeric',
                     'ol_class_1_charges.*' => 'required',
@@ -2827,8 +2828,8 @@ class AdminDashboardController extends Controller
             //overland
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
                 $detain_validations = [
-                    'detain_wa_range_up.*' => 'required|numeric|between:0,1000',
-                    'detain_wa_range_down.*' => 'required|numeric|between:0,1000',
+                    'detain_wa_range_up.*' => 'required|numeric|between:0,10000',
+                    'detain_wa_range_down.*' => 'required|numeric|between:0,10000',
                     'detain_wa_local_charges.*' => 'required|numeric',
                     'detain_class_0_charges.*' => 'required|numeric',
                     'detain_class_1_charges.*' => 'required',
@@ -2862,8 +2863,8 @@ class AdminDashboardController extends Controller
             //sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
                 $sameday_validations = [
-                    'sameday_wa_range_up.*' => 'required|numeric|between:0,1000',
-                    'sameday_wa_range_down.*' => 'required|numeric|between:0,1000',
+                    'sameday_wa_range_up.*' => 'required|numeric|between:0,10000',
+                    'sameday_wa_range_down.*' => 'required|numeric|between:0,10000',
                     'sameday_wa_local_charges.*' => 'required|numeric',
                     'sameday_class_0_charges.*' => 'required|numeric',
                     'sameday_wa_spkg.*' => 'numeric',
@@ -4481,10 +4482,10 @@ class AdminDashboardController extends Controller
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
-            'on_wa_range_up.*.between' => 'The overnight range up field must be between 0 to 99.99.',
+            'on_wa_range_up.*.between' => 'The overnight range up field must be between 0 to 999.99',
             'on_wa_range_down.*.required' => 'The overnight range down field is required.',
             'on_wa_range_down.*.numeric' => 'The overnight range down field must be numeric or decimal.',
-            'on_wa_range_down.*.between' => 'The overnight range down field must be between 0 to 99.99.',
+            'on_wa_range_down.*.between' => 'The overnight range down field must be between 0 to 999.99',
             'on_wa_spkg.*.numeric' => 'The overnight KG Range field must be numeric.',
             'on_wa_local_charges.*.required' => 'The overnight local charges field is required.',
             'on_wa_local_charges.*.numeric' => 'The overnight local charges field must be numeric.',
@@ -4541,10 +4542,10 @@ class AdminDashboardController extends Controller
             //overland starts
             'ol_wa_range_up.*.required' => 'The overland range up field is required.',
             'ol_wa_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
-            'ol_wa_range_up.*.between' => 'The overland range up field must be between 0 to 99.99.',
+            'ol_wa_range_up.*.between' => 'The overland range up field must be between 0 to 999.99',
             'ol_wa_range_down.*.required' => 'The overland range down field is required.',
             'ol_wa_range_down.*.numeric' => 'The overland range down field must be numeric or decimal.',
-            'ol_wa_range_down.*.between' => 'The overland range down field must be between 0 to 99.99.',
+            'ol_wa_range_down.*.between' => 'The overland range down field must be between 0 to 999.99',
             'ol_wa_spkg.*.numeric' => 'The overland KG Range field must be numeric.',
             'ol_wa_local_charges.*.required' => 'The overland local charges field is required.',
             'ol_wa_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
@@ -4600,10 +4601,10 @@ class AdminDashboardController extends Controller
             //overland end and detain starts
             'detain_wa_range_up.*.required' => 'The detain range up field is required.',
             'detain_wa_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
-            'detain_wa_range_up.*.between' => 'The detain range up field must be between 0 to 99.99.',
+            'detain_wa_range_up.*.between' => 'The detain range up field must be between 0 to 999.99',
             'detain_wa_range_down.*.required' => 'The detain range down field is required.',
             'detain_wa_range_down.*.numeric' => 'The detain range down field must be numeric or decimal.',
-            'detain_wa_range_down.*.between' => 'The detain range down field must be between 0 to 99.99.',
+            'detain_wa_range_down.*.between' => 'The detain range down field must be between 0 to 999.99',
             'detain_wa_spkg.*.numeric' => 'The detain KG Range field must be numeric.',
             'detain_wa_local_charges.*.required' => 'The detain local charges field is required.',
             'detain_wa_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
@@ -4659,10 +4660,10 @@ class AdminDashboardController extends Controller
             //detain ends and sameday starts
             'sameday_wa_range_up.*.required' => 'The sameday range up field is required.',
             'sameday_wa_range_up.*.numeric' => 'The sameday range up field must be numeric or decimal.',
-            'sameday_wa_range_up.*.between' => 'The sameday range up field must be between 0 to 99.99.',
+            'sameday_wa_range_up.*.between' => 'The sameday range up field must be between 0 to 999.99',
             'sameday_wa_range_down.*.required' => 'The sameday range down field is required.',
             'sameday_wa_range_down.*.numeric' => 'The sameday range down field must be numeric or decimal.',
-            'sameday_wa_range_down.*.between' => 'The sameday range down field must be between 0 to 99.99.',
+            'sameday_wa_range_down.*.between' => 'The sameday range down field must be between 0 to 999.99',
             'sameday_wa_spkg.*.numeric' => 'The sameday KG Range field must be numeric.',
             'sameday_wa_local_charges.*.required' => 'The sameday local charges field is required.',
             'sameday_wa_local_charges.*.numeric' => 'The sameday local charges field must be numeric.',
@@ -4723,8 +4724,8 @@ class AdminDashboardController extends Controller
 
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
             $on_validations = [
-                'on_wa_range_up.*' => 'required|numeric|between:0,1000',
-                'on_wa_range_down.*' => 'required|numeric|between:0,1000',
+                'on_wa_range_up.*' => 'required|numeric|between:0,10000',
+                'on_wa_range_down.*' => 'required|numeric|between:0,10000',
                 'on_wa_local_charges.*' => 'required|numeric',
                 'on_class_0_charges.*' => 'required|numeric',
                 'on_class_1_charges.*' => 'required',
@@ -4758,8 +4759,8 @@ class AdminDashboardController extends Controller
         //overland
         if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
             $ol_validations = [
-                'ol_wa_range_up.*' => 'required|numeric|between:0,1000',
-                'ol_wa_range_down.*' => 'required|numeric|between:0,1000',
+                'ol_wa_range_up.*' => 'required|numeric|between:0,10000',
+                'ol_wa_range_down.*' => 'required|numeric|between:0,10000',
                 'ol_wa_local_charges.*' => 'required|numeric',
                 'ol_class_0_charges.*' => 'required|numeric',
                 'ol_class_1_charges.*' => 'required',
@@ -4793,8 +4794,8 @@ class AdminDashboardController extends Controller
         //overland
         if($request->has('detain_main_switch') && $request->detain_main_switch == 'on'){
             $detain_validations = [
-                'detain_wa_range_up.*' => 'required|numeric|between:0,1000',
-                'detain_wa_range_down.*' => 'required|numeric|between:0,1000',
+                'detain_wa_range_up.*' => 'required|numeric|between:0,10000',
+                'detain_wa_range_down.*' => 'required|numeric|between:0,10000',
                 'detain_wa_local_charges.*' => 'required|numeric',
                 'detain_class_0_charges.*' => 'required|numeric',
                 'detain_class_1_charges.*' => 'required',
@@ -4828,8 +4829,8 @@ class AdminDashboardController extends Controller
         //sameday
         if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
             $sameday_validations = [
-                'sameday_wa_range_up.*' => 'required|numeric|between:0,1000',
-                'sameday_wa_range_down.*' => 'required|numeric|between:0,1000',
+                'sameday_wa_range_up.*' => 'required|numeric|between:0,10000',
+                'sameday_wa_range_down.*' => 'required|numeric|between:0,10000',
                 'sameday_wa_local_charges.*' => 'required|numeric',
                 'sameday_class_0_charges.*' => 'required|numeric',
                 'sameday_wa_spkg.*'=>'numeric',
@@ -5662,7 +5663,7 @@ class AdminDashboardController extends Controller
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                         ->where('spt.status','=',0);
                 })
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','users.account_type_id','rab.name as rates_added_by','rabb.name as rates_authorized_by'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -5742,21 +5743,32 @@ class AdminDashboardController extends Controller
 
                 }
                 if($sale_check != null && $result->status != 2) {
-                    if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
-                        if($result->status != 2) {
-                            $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
-                        }
-                    } else {
-                        if (session('role_id') == 1 || in_array(6, session('permissions'))) {
-                            if($result->account_type_id == 1){
-                                $dropdown .= '<button onclick="window.open(\'' . route('admin.add.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
+                    if($result->account_type_id == 1){
+                        if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
+                            if($result->status != 2) {
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+                            }
+                        } else {
+                            if (session('role_id') == 1 || in_array(6, session('permissions'))) {
+                                    $dropdown .= '<button onclick="window.open(\'' . route('admin.add.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
 
-                            }else{
+
+                            }
+                        }
+                    }else{
+                        if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
+                            if($result->status != 2) {
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+                            }
+                        } else {
+                            if (session('role_id') == 1 || in_array(6, session('permissions'))) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.add.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
+
 
                             }
                         }
                     }
+
 
                 }
                 if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions')))) {
@@ -5837,13 +5849,12 @@ class AdminDashboardController extends Controller
 
     public function userProfile($id)
     {
-        $invoicing = InvoicingCycle::all();
         $user = User::find($id);
         $product = Product::find($user->product_id);
         $products = Product::all();
         $banks = BanksList::all();
         $city_list = City::where('status',1)->get();
-        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing]);
+        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products]);
     }
 
     public function updateProfile(Request $request)
@@ -5871,7 +5882,7 @@ class AdminDashboardController extends Controller
             AdminLogs::create([
                 'admin_id'=>Auth::id(),
                 'user_id'=>$user_id
-                
+
             ]);
         }
         else
@@ -5888,7 +5899,7 @@ class AdminDashboardController extends Controller
     {
 
         $user_id = $request->user_id;
-        $user = User::find($user_id);
+
         //1 for Admin, 0 for User
 
         $request->validate([
@@ -5897,22 +5908,13 @@ class AdminDashboardController extends Controller
             'account_no'=>'required|string|max:255',
             'account_title'=>'required|string|max:255',
             'iban'=>'required|string|max:255',
-//            'payment_mode'=>'required|string|max:255',
-            'payment_cycle'=>'required|string|max:255',
-            'invoicing_cycle_id' => 'required',
+            'payment_mode'=>'required|string|max:255',
+            'payment_cycle'=>'required|string|max:255'
         ]);
 
-        $generation_date = null;
-        if($request->invoicing_cycle_id == 2){
-            $generation_date = null;
-        }else{
-            $generation_date = $request->generation_date;
-        }
-        if($user->account_type_id == 1){
-            UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_cycle'=>$request->payment_cycle, 'invoicing_cycle_id' => $request->invoicing_cycle_id,'generation_date' => $generation_date]);
-        }else if($user->account_type_id == 2){
-            UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_cycle'=>$request->payment_cycle, 'invoicing_cycle_id' => $request->invoicing_cycle_id,'generation_date' => $generation_date, 'billing_person_name' => $request->billing_person_name, 'billing_person_phone' => $request->billing_person_phone, 'billing_person_email' => $request->billing_person_email, 'billing_address' => $request->billing_address]);
-        }
+
+        UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
+            'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_mode'=>$request->payment_mode,'payment_cycle'=>$request->payment_cycle]);
             AdminLogs::create([
                 'admin_id' => Auth::id(),
                 'user_id' => $user_id
@@ -6168,7 +6170,7 @@ class AdminDashboardController extends Controller
                 'pickup'=>($request->has('walk_in_pickup'))? 1:0,
                 'delivery'=>($request->has('walk_in_delivery'))? 1:0,
             ]);
-            
+
             City::where('id',$city->id)->update(['hub_id'=>$city->id]);
 
             foreach ($request->delivery as $booking_type_id => $shipping_modes) {

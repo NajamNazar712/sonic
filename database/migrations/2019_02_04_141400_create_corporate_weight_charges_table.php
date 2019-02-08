@@ -20,7 +20,6 @@ class CreateCorporateWeightChargesTable extends Migration
             $table->integer('delivery_type_id');
             $table->float('range_up', 8, 2);
             $table->float('range_down', 8, 2);
-            $table->integer('flat');
             $table->integer('local_or_6hr');
             $table->integer('national_charges_class_0');
             $table->string('national_charges_class_1');

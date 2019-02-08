@@ -81,13 +81,13 @@
                                                 <div class="row" id="">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_up}}" name="on_door_range_up[{{$index}}]" {{ (($index == 0 || $index == 1) ? 'disabled' : '') }}>
+                                                            <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_up}}" name="on_door_range_up[{{$index}}]" {{ (($index == 0 || $index == 1) ? 'disabled' : '') }}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_down}}" name="on_door_range_down[{{$index}}]" {{ (($index == 0) ? 'disabled' : '') }}>
+                                                            <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_down}}" name="on_door_range_down[{{$index}}]" {{ (($index == 0) ? 'disabled' : '') }}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -176,13 +176,13 @@
                                                 <div class="row" id="">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_up}}" name="on_hub_range_up[{{$index}}]" {{ (($index == 0 || $index == 1) ? 'disabled' : '') }}>
+                                                            <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_up}}" name="on_hub_range_up[{{$index}}]" {{ (($index == 0 || $index == 1) ? 'disabled' : '') }}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_down}}" name="on_hub_range_down[{{$index}}]" {{ (($index == 0) ? 'disabled' : '') }}>
+                                                            <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_down}}" name="on_hub_range_down[{{$index}}]" {{ (($index == 0) ? 'disabled' : '') }}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -222,35 +222,7 @@
                                         <div>
                                             <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="hub_waddition_btn"><i class="la la-plus"></i></button>
                                         </div>
-                                        <div class="row mt-2">
 
-                                            <div class="col-md-3 text-center">
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" >Replacement</span>
-                                                        </div>
-                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[1][0]->replacement_charges}}" name="on_replacement_charges">
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text" >%</span>
-                                                        </div>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" >Try &amp; Buy</span>
-                                                        </div>
-                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[1][0]->try_and_buy_charges}}" name="on_tnb_charges">
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text" >%</span>
-                                                        </div>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-                                        </div>
                                         <hr>
                                         <div class="row">
                                             <div class="col-md-2">
@@ -415,46 +387,6 @@
                                         </div>
 
                                         <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Packaging Charges</h3>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="on_packaging_switch" class="switchery packagingChargesOvernight" data-color="success" data-size="sm" checked/>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row packaging-charges-div-overnight">
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Small Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="on_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[1][0]->sm_flyer}}">
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Medium Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="on_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[1][0]->md_flyer}}">
-                                                </fieldset>
-                                            </div>
-
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Large Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="on_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[1][0]->lg_flyer}}">
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Box</label>
-                                                <fieldset class="form-group">
-                                                    <input name="on_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[1][0]->box_flyer}}">
-                                                </fieldset>
-                                            </div>
-                                        </div>
-
-                                        <hr>
                                         <div class="">
                                             <h3 class="card-title">Discount Rates</h3>
                                         </div>
@@ -541,21 +473,7 @@
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col text-center">
-                                                <fieldset>
-                                                    <div class="input-group input-group-sm form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Packaging</span>
-                                                        </div>
-                                                        <div class="input-group-prepend">
-                                                              <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_packaging_switch"/>
-                                                              </span>
-                                                        </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_packaging_rate" disabled>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
+
                                         </div>
 
                                     </div>
@@ -622,13 +540,13 @@
                                                 <div class="row">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_up}}" name="ol_door_range_up[{{$index}}]" {{ (($index == 0 || $index == 1) ? 'disabled' : '') }}>
+                                                            <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_up}}" name="ol_door_range_up[{{$index}}]" {{ (($index == 0 || $index == 1) ? 'disabled' : '') }}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_down}}" name="ol_door_range_down[{{$index}}]" {{ (($index == 0) ? 'disabled' : '') }}>
+                                                            <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_down}}" name="ol_door_range_down[{{$index}}]" {{ (($index == 0) ? 'disabled' : '') }}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -713,37 +631,37 @@
                                                 <div class="row">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_up}}" name="ol_door_range_up[{{$index}}]" {{ (($index == 0 || $index == 1) ? 'disabled' : '') }}>
+                                                            <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_up}}" name="ol_hub_range_up[{{$index}}]" {{ (($index == 0 || $index == 1) ? 'disabled' : '') }}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_down}}" name="ol_door_range_down[{{$index}}]" {{ (($index == 0) ? 'disabled' : '') }}>
+                                                            <input type="text" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_down}}" name="ol_hub_range_down[{{$index}}]" {{ (($index == 0) ? 'disabled' : '') }}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->local_or_6hr}}" name="ol_door_local_charges[{{$index}}]">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->local_or_6hr}}" name="ol_hub_local_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_0}}" name="ol_door_class_0_charges[{{$index}}]">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_0}}" name="ol_hub_class_0_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div> <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_1}}" name="ol_door_class_1_charges[{{$index}}]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_1}}" name="ol_hub_class_1_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_2}}" name="ol_door_class_2_charges[{{$index}}]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_2}}" name="ol_hub_class_2_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_3}}" name="ol_door_class_3_charges[{{$index}}]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_3}}" name="ol_hub_class_3_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
@@ -757,34 +675,7 @@
                                         <div>
                                             <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="overland_hub_weightadd"><i class="la la-plus"></i></button>
                                         </div>
-                                        <div class="row mt-2">
-                                            <div class="col-md-3 text-center">
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text">Replacement</span>
-                                                        </div>
-                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" name="ol_replacement_charges" value="{{$shippingType[2][0]->replacement_charges}}">
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">%</span>
-                                                        </div>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text">Try &amp; Buy</span>
-                                                        </div>
-                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" name="ol_tnb_charges" value="{{$shippingType[2][0]->try_and_buy_charges}}">
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">%</span>
-                                                        </div>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-                                        </div>
+
                                         <hr>
                                         <div class="row">
                                             <div class="col-md-2">
@@ -948,46 +839,6 @@
                                         </div>
 
                                         <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Packaging Charges</h3>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="ol_packaging_switch" class="switchery packagingChargesOverland" data-color="success" data-size="sm" checked/>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row packaging-charges-div-overland">
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Small Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="ol_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[2][0]->sm_flyer}}">
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Medium Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="ol_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[2][0]->md_flyer}}">
-                                                </fieldset>
-                                            </div>
-
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Large Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="ol_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[2][0]->lg_flyer}}">
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Box</label>
-                                                <fieldset class="form-group">
-                                                    <input name="ol_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[2][0]->box_flyer}}">
-                                                </fieldset>
-                                            </div>
-                                        </div>
-
-                                        <hr>
                                         <div class="">
                                             <h3 class="card-title">Discount Rates</h3>
                                         </div>
@@ -1073,21 +924,7 @@
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col text-center">
-                                                <fieldset>
-                                                    <div class="input-group input-group-sm form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Packaging</span>
-                                                        </div>
-                                                        <div class="input-group-prepend">
-                                                              <span class="input-group-text" id="radio-addon3">
-                                                                <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_packaging_switch"/>
-                                                              </span>
-                                                        </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_packaging_rate" disabled>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
+
                                         </div>
 
                                     </div>
@@ -1269,7 +1106,7 @@
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_1}}" name="detain_class_1_charges[{{$index}}]">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_1}}" name="detain_hub_class_1_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
@@ -1294,34 +1131,7 @@
                                         <div class="mb-2">
                                             <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="detain_hub_weightadd"><i class="la la-plus"></i></button>
                                         </div>
-                                        <div class="row mt-2">
-                                            <div class="col-md-3 text-center">
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text">Replacement</span>
-                                                        </div>
-                                                        <input type="text"  class="form-control percent" name="detain_replacement_charges" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[3][0]->replacement_charges}}">
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">%</span>
-                                                        </div>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text">Try &amp; Buy</span>
-                                                        </div>
-                                                        <input type="text"  class="form-control percent" name="detain_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[3][0]->try_and_buy_charges}}">
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">%</span>
-                                                        </div>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-                                        </div>
+
                                         <hr>
                                         <div class="row">
                                             <div class="col-md-2">
@@ -1486,46 +1296,6 @@
                                         </div>
 
                                         <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Packaging Charges</h3>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="detain_packaging_switch" class="switchery packagingChargesDetain" data-color="success" data-size="sm" checked/>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row packaging-charges-div-detain">
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Small Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="detain_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[3][0]->sm_flyer}}">
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Medium Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="detain_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[3][0]->md_flyer}}">
-                                                </fieldset>
-                                            </div>
-
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Large Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="detain_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[3][0]->lg_flyer}}">
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Box</label>
-                                                <fieldset class="form-group">
-                                                    <input name="detain_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[3][0]->box_flyer}}">
-                                                </fieldset>
-                                            </div>
-                                        </div>
-
-                                        <hr>
                                         <div class="">
                                             <h3 class="card-title">Discount Rates</h3>
                                         </div>
@@ -1612,21 +1382,6 @@
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col text-center">
-                                                <fieldset>
-                                                    <div class="input-group input-group-sm form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Packaging</span>
-                                                        </div>
-                                                        <div class="input-group-prepend">
-                                                              <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_packaging_switch"/>
-                                                              </span>
-                                                        </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_packaging_rate" disabled>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
                                         </div>
 
                                     </div>
@@ -1784,34 +1539,7 @@
                                         <div class="mb-2">
                                             <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="sameday_hub_weightadd"><i class="la la-plus"></i></button>
                                         </div>
-                                        <div class="row mt-2">
-                                            <div class="col-md-3 text-center">
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text">Replacement</span>
-                                                        </div>
-                                                        <input type="text"  class="form-control percent" name="sameday_replacement_charges" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[4][0]->replacement_charges}}">
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">%</span>
-                                                        </div>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text">Try & Buy</span>
-                                                        </div>
-                                                        <input type="text"  class="form-control percent" name="sameday_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[4][0]->try_and_buy_charges}}">
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">%</span>
-                                                        </div>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-                                        </div>
+
                                         <hr>
                                         <div class="row">
                                             <div class="col-md-2">
@@ -1976,44 +1704,6 @@
                                         </div>
 
                                         <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Packaging Charges</h3>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="sameday_packaging_switch" class="switchery packagingChargesSameday" data-color="success" data-size="sm" checked/>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row packaging-charges-div-sameday">
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Small Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="sameday_flyer_sm" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{$packagingCharges[4][0]->sm_flyer}}">
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Medium Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="sameday_flyer_md" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{$packagingCharges[4][0]->md_flyer}}">
-                                                </fieldset>
-                                            </div>
-
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Large Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="sameday_flyer_lg" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{$packagingCharges[4][0]->lg_flyer}}">
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Box</label>
-                                                <fieldset class="form-group">
-                                                    <input name="sameday_flyer_box" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{$packagingCharges[4][0]->box_flyer}}">
-                                                </fieldset>
-                                            </div>
-                                        </div>
 
                                         <hr>
                                         <div class="">
@@ -2101,21 +1791,6 @@
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col text-center">
-                                                <fieldset>
-                                                    <div class="input-group input-group-sm form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Packaging</span>
-                                                        </div>
-                                                        <div class="input-group-prepend">
-                                                              <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_packaging_switch"/>
-                                                              </span>
-                                                        </div>
-                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_packaging_rate" disabled>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
                                         </div>
 
                                     </div>
@@ -2264,18 +1939,7 @@
             });
         });
 
-        var on_door_min = $('input[name="on_door_mcw_charges"]').val();
-        on_door_min = parseInt(on_door_min);
-        // $('input[name="on_door_range_down[0]"]').removeClass('decimal');
-        // $('input[name="on_door_range_down[0]"]').inputmask({
-        //     'alias': 'decimal',
-        //     'allowMinus': false,
-        //     'allowPlus': false,
-        //     'rightAlign': false,
-        //     'digits': 3,
-        //     'min': 0.00,
-        //     'max': on_door_min
-        // });
+
         $('.decimal').inputmask({
             'alias': 'decimal',
             'allowMinus': false,
@@ -2317,21 +1981,15 @@
             'rightAlign': false,
             regex: '^\\d{1,9}(\\.\\d{1,2})?%?$'
         });
-        // $('.decpercent').inputmask({
-        //     regex: '^\\d{1,9}(\\.\\d{1,2})?%?$',
-        // });
 
-        //Inputmask({ regex: "\\d{1,9}(\\.\\d{1,2})?%?$" }).mask('.decpercent');
         $(".daterange").daterangepicker();
 
         //Overnight
-        // var clickCheckbox = Array.prototype.slice.call(document.querySelector('.switchery.weightAdditionOvernight'));
-        //var clickCheckbox = document.querySelector('.switchery.weightAdditionOvernight');
+
         var cashhandlingswitch = document.querySelector('.switchery.cashChargesOvernight');
         var insuranceChargesSwitch = document.querySelector('.switchery.insuranceChargesOvernight');
         var returnChargesSwitch = document.querySelector('.switchery.returnChargesOvernight');
         var fuelChargesSwitch = document.querySelector('.switchery.fuelSurchargeOvernight');
-        var packagingChargesSwitch = document.querySelector('.switchery.packagingChargesOvernight');
 
 
 
@@ -2518,23 +2176,12 @@
 
             }
         };
-        // Packaging Charges Overnight
-        packagingChargesSwitch.onchange = function () {
-            if(packagingChargesSwitch.checked === true){
-                $('.packaging-charges-div-overnight').find('input').prop('disabled',false);
-            }else if(packagingChargesSwitch.checked === false){
-                $('.packaging-charges-div-overnight').find('input').prop('disabled',true);
-
-            }
-        };
-
 
         //Overland
         //var weightAdditionOverland = document.querySelector('.switchery.weightAdditionOverland0');
         var cashhandlingswitchOverland = document.querySelector('.switchery.cashChargesOverland');
         var insuranceChargesSwitchOverland = document.querySelector('.switchery.insuranceChargesoverland');
         var returnChargesSwitchOverland = document.querySelector('.switchery.returnChargesOverland');
-        var packagingChargesSwitchOverland = document.querySelector('.switchery.packagingChargesOverland');
         var fuelChargesSwitchOL = document.querySelector('.switchery.fuelSurchargeOverland');
 
         //Overland
@@ -2681,23 +2328,12 @@
 
             }
         };
-        // Packaging Charges Overnight
-        packagingChargesSwitchOverland.onchange = function () {
-            if(packagingChargesSwitchOverland.checked === true){
-                // $('.cash-handling-div').
-                $('.packaging-charges-div-overland').find('input').prop('disabled',false);
-            }else if(packagingChargesSwitchOverland.checked === false){
-                $('.packaging-charges-div-overland').find('input').prop('disabled',true);
-
-            }
-        };
         //overland end
         //detain
         //var weightAdditionDetain = document.querySelector('.switchery.weightAdditionDetain0');
         var cashhandlingswitchDetain = document.querySelector('.switchery.cashChargesDetain');
         var insuranceChargesSwitchDetain = document.querySelector('.switchery.insuranceChargesdetain');
         var returnChargesSwitchDetain = document.querySelector('.switchery.returnChargesDetain');
-        var packagingChargesSwitchDetain = document.querySelector('.switchery.packagingChargesDetain');
         var fuelChargesSwitchDetain = document.querySelector('.switchery.fuelSurchargeDetain');
 
         //detain
@@ -2708,6 +2344,7 @@
 
             let htmdiv1 = '<div class="row" id="detain_door_weight_row'+detain_door_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_range_up['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_range_down['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_local_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_0_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_1_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_2_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_3_charges['+detain_door_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span id="detain_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 detain_weight_close"><i class="ft-x"></i></span></div></div>';
+            $('.weight-addition-detain').append(htmdiv1);
 
             masks();
 
@@ -2724,6 +2361,7 @@
 
             let htmdiv1 = '<div class="row" id="detain_hub_weight_row'+detain_hub_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_range_up['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_range_down['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_local_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_0_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_1_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_2_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_3_charges['+detain_hub_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span id="detain_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 detain_weight_close"><i class="ft-x"></i></span></div></div>';
+            $('.hub-weight-addition-detain').append(htmdiv1);
 
             masks();
 
@@ -2842,16 +2480,7 @@
 
             }
         };
-        // Packaging Charges Overnight
-        packagingChargesSwitchDetain.onchange = function () {
-            if(packagingChargesSwitchDetain.checked === true){
-                // $('.cash-handling-div').
-                $('.packaging-charges-div-detain').find('input').prop('disabled',false);
-            }else if(packagingChargesSwitchDetain.checked === false){
-                $('.packaging-charges-div-detain').find('input').prop('disabled',true);
 
-            }
-        };
 
         //Detain end
         //sameday start
@@ -2859,20 +2488,8 @@
         var cashhandlingswitchSameday = document.querySelector('.switchery.cashChargesSameday');
         var insuranceChargesSwitchSameday = document.querySelector('.switchery.insuranceChargessameday');
         var returnChargesSwitchSameday = document.querySelector('.switchery.returnChargesSameday');
-        var packagingChargesSwitchSameday = document.querySelector('.switchery.packagingChargesSameday');
         var fuelChargesSwitchSameday = document.querySelector('.switchery.fuelSurchargeSameday');
 
-        // weightAdditionSameday.onchange = function () {
-        //     if (weightAdditionSameday.checked === true) {
-        //         // $(this).next('.spkg').attr('disabled','');
-        //         // $(this).closest('div.col-md-2').find('input.spkg').attr('disabled','');
-        //         $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-        //
-        //     } else if (weightAdditionSameday.checked === false) {
-        //         $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-        //
-        //     }
-        // };
         //detain
 
 
@@ -2898,7 +2515,7 @@
 
             let htmdiv1 = '<div class="row" id="sameday_hub_weight_row'+sameday_hub_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_range_up['+sameday_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_range_down['+sameday_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_local_charges['+sameday_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_hub_class_0_charges['+sameday_hub_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span id="sameday_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 sameday_weight_close"><i class="ft-x"></i></span></div></div>';
-            $('.weight-addition-sameday').append(htmdiv1);
+            $('.hub-weight-addition-sameday').append(htmdiv1);
 
             masks();
 
@@ -3017,14 +2634,6 @@
 
             }
         };
-        // Packaging Charges Overnight
-        packagingChargesSwitchSameday.onchange = function () {
-            if(packagingChargesSwitchSameday.checked === true){
-                $('.packaging-charges-div-sameday').find('input').prop('disabled',false);
-            }else if(packagingChargesSwitchSameday.checked === false){
-                $('.packaging-charges-div-sameday').find('input').prop('disabled',true);
-            }
-        };
 
         //Detain end
         //end sameday
@@ -3044,12 +2653,10 @@
         ondiscountSwitch[3].onchange = function () {
             ONdiscount(ondiscountSwitch[3]);
         };
-        ondiscountSwitch[4].onchange = function () {
-            ONdiscount(ondiscountSwitch[4]);
-        };
-        // $.each(ondiscountSwitch,function () {
-        //     console.log('heeee');
-        // });
+        // ondiscountSwitch[4].onchange = function () {
+        //     ONdiscount(ondiscountSwitch[4]);
+        // };
+
         function ONdiscount(eve) {
             if(eve.checked === true){
 
@@ -3060,7 +2667,7 @@
             }else if(eve.checked === false){
                 $(eve).parent().parent().next().prop('disabled',true);
 
-                if(ondiscountSwitch[0].checked === true || ondiscountSwitch[1].checked === true || ondiscountSwitch[2].checked === true || ondiscountSwitch[3].checked === true || ondiscountSwitch[4].checked === true){
+                if(ondiscountSwitch[0].checked === true || ondiscountSwitch[1].checked === true || ondiscountSwitch[2].checked === true || ondiscountSwitch[3].checked === true){
                     $('input[name="on_discount_title"]').prop('disabled',false);
                     $('input[name="on_daterange"]').prop('disabled',false);
                 }else{
@@ -3086,9 +2693,7 @@
         overlandDiscountSwitch[3].onchange = function () {
             OLdiscount(overlandDiscountSwitch[3]);
         };
-        overlandDiscountSwitch[4].onchange = function () {
-            OLdiscount(overlandDiscountSwitch[4]);
-        };
+
         function OLdiscount(eveOver) {
             if(eveOver.checked === true){
 
@@ -3099,7 +2704,7 @@
             }else if(eveOver.checked === false){
                 $(eveOver).parent().parent().next().prop('disabled',true);
 
-                if(overlandDiscountSwitch[0].checked === true || overlandDiscountSwitch[1].checked === true || overlandDiscountSwitch[2].checked === true || overlandDiscountSwitch[3].checked === true || overlandDiscountSwitch[4].checked === true){
+                if(overlandDiscountSwitch[0].checked === true || overlandDiscountSwitch[1].checked === true || overlandDiscountSwitch[2].checked === true || overlandDiscountSwitch[3].checked === true){
                     $('input[name="ol_discount_title"]').prop('disabled',false);
                     $('input[name="ol_daterange"]').prop('disabled',false);
                 }else{
@@ -3126,9 +2731,7 @@
         detainDiscountSwitch[3].onchange = function () {
             Detaindiscount(detainDiscountSwitch[3]);
         };
-        detainDiscountSwitch[4].onchange = function () {
-            Detaindiscount(detainDiscountSwitch[4]);
-        };
+
         function Detaindiscount(eveDet) {
             if(eveDet.checked === true){
 
@@ -3139,7 +2742,7 @@
             }else if(eveDet.checked === false){
                 $(eveDet).parent().parent().next().prop('disabled',true);
 
-                if(detainDiscountSwitch[0].checked === true || detainDiscountSwitch[1].checked === true || detainDiscountSwitch[2].checked === true || detainDiscountSwitch[3].checked === true || detainDiscountSwitch[4].checked === true){
+                if(detainDiscountSwitch[0].checked === true || detainDiscountSwitch[1].checked === true || detainDiscountSwitch[2].checked === true || detainDiscountSwitch[3].checked === true){
                     $('input[name="detain_discount_title"]').prop('disabled',false);
                     $('input[name="detain_daterange"]').prop('disabled',false);
                 }else{
@@ -3165,9 +2768,7 @@
         samedayDiscountSwitch[3].onchange = function () {
             SamedayDiscount(samedayDiscountSwitch[3]);
         };
-        samedayDiscountSwitch[4].onchange = function () {
-            SamedayDiscount(samedayDiscountSwitch[4]);
-        };
+
         function SamedayDiscount(eveSameday) {
             if(eveSameday.checked === true){
 
@@ -3178,7 +2779,7 @@
             }else if(eveSameday.checked === false){
                 $(eveSameday).parent().parent().next().prop('disabled',true);
 
-                if(samedayDiscountSwitch[0].checked === true || samedayDiscountSwitch[1].checked === true || samedayDiscountSwitch[2].checked === true || samedayDiscountSwitch[3].checked === true || samedayDiscountSwitch[4].checked === true){
+                if(samedayDiscountSwitch[0].checked === true || samedayDiscountSwitch[1].checked === true || samedayDiscountSwitch[2].checked === true || samedayDiscountSwitch[3].checked === true ){
                     $('input[name="sameday_discount_title"]').prop('disabled',false);
                     $('input[name="sameday_daterange"]').prop('disabled',false);
                 }else{
@@ -3188,55 +2789,6 @@
 
             }
         }
-        //Main switches
-        // overnightSwitch.onchange = function() {
-        //     if(overnightSwitch.checked === true){
-        //         errors = 0;
-        //     }else if(overnightSwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        // overlandSwitch.onchange = function() {
-        //     if(overlandSwitch.checked === true){
-        //         errors = 0;
-        //     }else if(overlandSwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        // detainSwitch.onchange = function() {
-        //     if(detainSwitch.checked === true){
-        //         errors = 0;
-        //     }else if(detainSwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        // samedayDiscountSwitch.onchange = function() {
-        //     if(samedaySwitch.checked === true){
-        //         errors = 0;
-        //     }else if(samedaySwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        //
-
-
-        // var overnight_switch = new Switchery('#overnight_switch');
-
-        // $('#overnight_switch').bind('change', function() {
-        //     // var switchery = new Switchery(overnightSwitch);
-        //     // overnight_switch.disable();
-        //     // setTimeout(function(){ overnightSwitch.disable(); }, 1000);
-        //     if(this.checked == true){
-        //         $('#overnight').collapse('show');
-        //     }else{
-        //         $('#overnight').collapse('hide');
-        //     }
-        // });
-        // $("#overnight_switch").dblclick(function (event)
-        // {
-        //     console.log('double');
-        //     event.preventDefault();
-        // });
 
 
         var overnightSwitch = document.querySelector('.switchery.on-main-switch');
@@ -3254,6 +2806,18 @@
                 if (overnightSwitch.checked == true || overlandSwitch.checked == true || detainSwitch.checked == true || samedaySwitch.checked == true) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
+                    if(overnightSwitch.checked == true){
+                        $('#overnight input.weight_range').prop('disabled', false);
+                    }
+                    if(overlandSwitch.checked == true){
+                        $('#overland input.weight_range').prop('disabled', false);
+                    }
+                    if(detainSwitch.checked == true){
+                        $('#detain input.weight_range').prop('disabled', false);
+                    }
+                    if(samedaySwitch.checked == true){
+                        $('#sameday input.weight_range').prop('disabled', false);
+                    }
                     swal({
                         title: 'Please Wait!',
                         text: 'Your rates are being added!',

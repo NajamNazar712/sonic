@@ -21,7 +21,6 @@ class CreateCorporateDiscountChargesTable extends Migration
             $table->string('cash')->nullable();
             $table->string('insurance')->nullable();
             $table->string('return')->nullable();
-            $table->string('packaging')->nullable();
             $table->timestamp('to')->nullable();
             $table->timestamp('from')->nullable();
             $table->string('title')->nullable();
