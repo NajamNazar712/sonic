@@ -23,6 +23,7 @@ use App\Http\Models\Rates\PendingCorporateCashHandlingCharges;
 use App\Http\Models\Rates\PendingCorporateDiscountCharge;
 use App\Http\Models\Rates\PendingCorporateFuelSurcharge;
 use App\Http\Models\Rates\PendingCorporateInsuranceCharges;
+use App\Http\Models\Rates\PendingCorporateMinChargeableWeight;
 use App\Http\Models\Rates\PendingCorporateRateStatus;
 use App\Http\Models\Rates\PendingCorporateReturnCharges;
 use App\Http\Models\Rates\PendingCorporateWeightCharge;
@@ -2945,6 +2946,7 @@ class AdminCorporateAccountsController extends Controller
             PendingCorporateReturnCharges::where('user_id', $id)->delete();
             PendingCorporateFuelSurcharge::where('user_id', $id)->delete();
             PendingCorporateDiscountCharge::where('user_id', $id)->delete();
+            PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $ONRateAlready = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
@@ -2980,6 +2982,24 @@ class AdminCorporateAccountsController extends Controller
                             };
                         } else {
                             $wa_spkg[$index] = 0;
+                        }
+
+                        if ($request->overnight_door_min_chargeable_weight != null) {
+                            PendingCorporateMinChargeableWeight::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'delivery_type_id' => 1,
+                                'min_chargeable_weight' => $request->on_door_mcw_charges
+                            ]);
+                                }
+
+                        if ($request->overnight_hub_min_chargeable_weight != null) {
+                            PendingCorporateMinChargeableWeight::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'delivery_type_id' => 2,
+                                'min_chargeable_weight' => $request->on_hub_mcw_charges
+                            ]);
                         }
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
@@ -3038,29 +3058,25 @@ class AdminCorporateAccountsController extends Controller
                             'fuel_surcharge' => $request->overnight_fuel_surcharge
                         ]);
                     }
-                    $discount_cash = null;
-                    $discount_weight = null;
-                    $discount_insurance = null;
-                    $discount_return = null;
-                    $discount_packaging = null;
+                    $discount_cash = 0;
+                    $discount_weight = 0;
+                    $discount_insurance = 0;
+                    $discount_return = 0;
 
                     if ($request->has('on_discount_weight_switch') && $request->on_discount_weight_switch == 'on') {
-                        $discount_weight = $request->on_discount_weight_rate != null ? $request->on_discount_weight_rate : null;
+                        $discount_weight = $request->on_discount_weight_rate != null ? $request->on_discount_weight_rate : 0;
 //                    $discount_weight = $request->on_discount_weight_rate;
                     }
                     if ($request->has('on_discount_cash_switch') && $request->on_discount_cash_switch == 'on') {
-                        $discount_cash = $request->on_discount_cash_rate != null ? $request->on_discount_cash_rate : null;
+                        $discount_cash = $request->on_discount_cash_rate != null ? $request->on_discount_cash_rate : 0;
                     }
                     if ($request->has('on_discount_insurance_switch') && $request->on_discount_insurance_switch == 'on') {
-                        $discount_insurance = $request->on_discount_insurance_rate != null ? $request->on_discount_insurance_rate : null;
+                        $discount_insurance = $request->on_discount_insurance_rate != null ? $request->on_discount_insurance_rate : 0;
                     }
                     if ($request->has('on_discount_return_switch') && $request->on_discount_return_switch == 'on') {
-                        $discount_return = $request->on_discount_return_rate != null ? $request->on_discount_insurance_rate : null;
+                        $discount_return = $request->on_discount_return_rate != null ? $request->on_discount_insurance_rate : 0;
                     }
-                    if ($request->has('on_discount_packaging_switch') && $request->on_discount_packaging_switch == 'on') {
-                        $discount_packaging = $request->on_discount_packaging_rate != null ? $request->on_discount_packaging_rate : null;
-                    }
-                    if ($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
+                    if ($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0) {
 
 
                         $date_str = $request->on_daterange;
@@ -3079,7 +3095,6 @@ class AdminCorporateAccountsController extends Controller
                             'cash' => $discount_cash,
                             'insurance' => $discount_insurance,
                             'return' => $discount_return,
-                            'packaging' => $discount_packaging,
                             'to' => $to,
                             'from' => $from,
                             'added_by' => Auth::id()
@@ -3125,6 +3140,23 @@ class AdminCorporateAccountsController extends Controller
                             };
                         } else {
                             $wa_spkg_overland[$index] = 0;
+                        }
+                        if ($request->overland_door_min_chargeable_weight != null) {
+                            PendingCorporateMinChargeableWeight::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'delivery_type_id' => 1,
+                                'min_chargeable_weight' => $request->on_door_mcw_charges
+                            ]);
+                        }
+
+                        if ($request->overland_hub_min_chargeable_weight != null) {
+                            PendingCorporateMinChargeableWeight::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'delivery_type_id' => 2,
+                                'min_chargeable_weight' => $request->on_hub_mcw_charges
+                            ]);
                         }
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
@@ -3181,29 +3213,26 @@ class AdminCorporateAccountsController extends Controller
                             'fuel_surcharge' => $request->overland_fuel_surcharge
                         ]);
                     }
-                    $discount_cash = null;
-                    $discount_weight = null;
-                    $discount_insurance = null;
-                    $discount_return = null;
-                    $discount_packaging = null;
+                    $discount_cash = 0;
+                    $discount_weight = 0;
+                    $discount_insurance = 0;
+                    $discount_return = 0;
 
                     if ($request->has('ol_discount_weight_switch') && $request->ol_discount_weight_switch == 'on') {
-                        $discount_weight = $request->ol_discount_weight_rate != null ? $request->ol_discount_weight_rate : null;
+                        $discount_weight = $request->ol_discount_weight_rate != 0 ? $request->ol_discount_weight_rate : 0;
 //                    $discount_weight = $request->ol_discount_weight_rate;
                     }
                     if ($request->has('ol_discount_cash_switch') && $request->ol_discount_cash_switch == 'on') {
-                        $discount_cash = $request->ol_discount_cash_rate != null ? $request->ol_discount_cash_rate : null;
+                        $discount_cash = $request->ol_discount_cash_rate != 0 ? $request->ol_discount_cash_rate : 0;
                     }
                     if ($request->has('ol_discount_insurance_switch') && $request->ol_discount_insurance_switch == 'on') {
-                        $discount_insurance = $request->ol_discount_insurance_rate != null ? $request->ol_discount_insurance_rate : null;
+                        $discount_insurance = $request->ol_discount_insurance_rate != 0 ? $request->ol_discount_insurance_rate : 0;
                     }
                     if ($request->has('ol_discount_return_switch') && $request->ol_discount_return_switch == 'on') {
-                        $discount_return = $request->ol_discount_return_rate != null ? $request->ol_discount_insurance_rate : null;
+                        $discount_return = $request->ol_discount_return_rate != 0 ? $request->ol_discount_insurance_rate : 0;
                     }
-                    if ($request->has('ol_discount_packaging_switch') && $request->ol_discount_packaging_switch == 'on') {
-                        $discount_packaging = $request->ol_discount_packaging_rate != null ? $request->ol_discount_packaging_rate : null;
-                    }
-                    if ($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
+
+                    if ($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0) {
 
 
                         $date_str = $request->ol_daterange;
@@ -3222,7 +3251,6 @@ class AdminCorporateAccountsController extends Controller
                             'cash' => $discount_cash,
                             'insurance' => $discount_insurance,
                             'return' => $discount_return,
-                            'packaging' => $discount_packaging,
                             'to' => $to,
                             'from' => $from,
                             'added_by' => Auth::id()
@@ -3268,6 +3296,23 @@ class AdminCorporateAccountsController extends Controller
                             };
                         } else {
                             $wa_spkg_detain[$index] = 0;
+                        }
+                        if ($request->detain_door_min_chargeable_weight != null) {
+                            PendingCorporateMinChargeableWeight::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'delivery_type_id' => 1,
+                                'min_chargeable_weight' => $request->on_door_mcw_charges
+                            ]);
+                        }
+
+                        if ($request->detain_hub_min_chargeable_weight != null) {
+                            PendingCorporateMinChargeableWeight::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'delivery_type_id' => 2,
+                                'min_chargeable_weight' => $request->on_hub_mcw_charges
+                            ]);
                         }
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
@@ -3324,29 +3369,25 @@ class AdminCorporateAccountsController extends Controller
                             'fuel_surcharge' => $request->detain_fuel_surcharge
                         ]);
                     }
-                    $discount_cash = null;
-                    $discount_weight = null;
-                    $discount_insurance = null;
-                    $discount_return = null;
-                    $discount_packaging = null;
+                    $discount_cash = 0;
+                    $discount_weight = 0;
+                    $discount_insurance = 0;
+                    $discount_return = 0;
 
                     if ($request->has('detain_discount_weight_switch') && $request->detain_discount_weight_switch == 'on') {
-                        $discount_weight = $request->detain_discount_weight_rate != null ? $request->detain_discount_weight_rate : null;
+                        $discount_weight = $request->detain_discount_weight_rate != null ? $request->detain_discount_weight_rate : 0;
 //                    $discount_weight = $request->detain_discount_weight_rate;
                     }
                     if ($request->has('detain_discount_cash_switch') && $request->detain_discount_cash_switch == 'on') {
-                        $discount_cash = $request->detain_discount_cash_rate != null ? $request->detain_discount_cash_rate : null;
+                        $discount_cash = $request->detain_discount_cash_rate != null ? $request->detain_discount_cash_rate : 0;
                     }
                     if ($request->has('detain_discount_insurance_switch') && $request->detain_discount_insurance_switch == 'on') {
-                        $discount_insurance = $request->detain_discount_insurance_rate != null ? $request->detain_discount_insurance_rate : null;
+                        $discount_insurance = $request->detain_discount_insurance_rate != null ? $request->detain_discount_insurance_rate : 0;
                     }
                     if ($request->has('detain_discount_return_switch') && $request->detain_discount_return_switch == 'on') {
-                        $discount_return = $request->detain_discount_return_rate != null ? $request->detain_discount_insurance_rate : null;
+                        $discount_return = $request->detain_discount_return_rate != null ? $request->detain_discount_insurance_rate : 0;
                     }
-                    if ($request->has('detain_discount_packaging_switch') && $request->detain_discount_packaging_switch == 'on') {
-                        $discount_packaging = $request->detain_discount_packaging_rate != null ? $request->detain_discount_packaging_rate : null;
-                    }
-                    if ($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
+                    if ($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0) {
 
 
                         $date_str = $request->detain_daterange;
@@ -3365,7 +3406,6 @@ class AdminCorporateAccountsController extends Controller
                             'cash' => $discount_cash,
                             'insurance' => $discount_insurance,
                             'return' => $discount_return,
-                            'packaging' => $discount_packaging,
                             'to' => $to,
                             'from' => $from,
                             'added_by' => Auth::id()
@@ -3410,6 +3450,23 @@ class AdminCorporateAccountsController extends Controller
                             };
                         } else {
                             $wa_spkg_sameday[$index] = 0;
+                        }
+                        if ($request->sameday_door_min_chargeable_weight != null) {
+                            PendingCorporateMinChargeableWeight::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'delivery_type_id' => 1,
+                                'min_chargeable_weight' => $request->on_door_mcw_charges
+                            ]);
+                        }
+
+                        if ($request->sameday_hub_min_chargeable_weight != null) {
+                            PendingCorporateMinChargeableWeight::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'delivery_type_id' => 2,
+                                'min_chargeable_weight' => $request->on_hub_mcw_charges
+                            ]);
                         }
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
@@ -3466,29 +3523,25 @@ class AdminCorporateAccountsController extends Controller
                             'fuel_surcharge' => $request->sameday_fuel_surcharge
                         ]);
                     }
-                    $discount_cash = null;
-                    $discount_weight = null;
-                    $discount_insurance = null;
-                    $discount_return = null;
-                    $discount_packaging = null;
+                    $discount_cash = 0;
+                    $discount_weight = 0;
+                    $discount_insurance = 0;
+                    $discount_return = 0;
 
                     if ($request->has('sameday_discount_weight_switch') && $request->sameday_discount_weight_switch == 'on') {
-                        $discount_weight = $request->sameday_discount_weight_rate != null ? $request->sameday_discount_weight_rate : null;
+                        $discount_weight = $request->sameday_discount_weight_rate != null ? $request->sameday_discount_weight_rate : 0;
 //                    $discount_weight = $request->sameday_discount_weight_rate;
                     }
                     if ($request->has('sameday_discount_cash_switch') && $request->sameday_discount_cash_switch == 'on') {
-                        $discount_cash = $request->sameday_discount_cash_rate != null ? $request->sameday_discount_cash_rate : null;
+                        $discount_cash = $request->sameday_discount_cash_rate != null ? $request->sameday_discount_cash_rate : 0;
                     }
                     if ($request->has('sameday_discount_insurance_switch') && $request->sameday_discount_insurance_switch == 'on') {
-                        $discount_insurance = $request->sameday_discount_insurance_rate != null ? $request->sameday_discount_insurance_rate : null;
+                        $discount_insurance = $request->sameday_discount_insurance_rate != null ? $request->sameday_discount_insurance_rate : 0;
                     }
                     if ($request->has('sameday_discount_return_switch') && $request->sameday_discount_return_switch == 'on') {
-                        $discount_return = $request->sameday_discount_return_rate != null ? $request->sameday_discount_insurance_rate : null;
+                        $discount_return = $request->sameday_discount_return_rate != null ? $request->sameday_discount_insurance_rate : 0;
                     }
-                    if ($request->has('sameday_discount_packaging_switch') && $request->sameday_discount_packaging_switch == 'on') {
-                        $discount_packaging = $request->sameday_discount_packaging_rate != null ? $request->sameday_discount_packaging_rate : null;
-                    }
-                    if ($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
+                    if ($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0) {
 
 
                         $date_str = $request->sameday_daterange;
@@ -3568,6 +3621,70 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => $switches['return_charges'],
                         'packaging_charges' => $switches['packaging_charges'],
                         'fuel_charges' => $switches['fuel_charges']
+                    ]);
+                }
+                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->first()) {
+                    PendingCorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'delivery_type_id' => 1,
+                        'min_chargeable_weight' => $request->on_door_mcw_charges
+                    ]);
+                }
+                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 2, 'delivery_type_id' => 1])->first()) {
+                    PendingCorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'delivery_type_id' => 1,
+                        'min_chargeable_weight' => $request->on_door_mcw_charges
+                    ]);
+                }
+                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 3, 'delivery_type_id' => 1])->first()) {
+                    PendingCorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'delivery_type_id' => 1,
+                        'min_chargeable_weight' => $request->on_door_mcw_charges
+                    ]);
+                }
+                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 4, 'delivery_type_id' => 1])->first()) {
+                    PendingCorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'delivery_type_id' => 1,
+                        'min_chargeable_weight' => $request->on_door_mcw_charges
+                    ]);
+                }
+                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->first()) {
+                    PendingCorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'delivery_type_id' => 2,
+                        'min_chargeable_weight' => $request->on_door_mcw_charges
+                    ]);
+                }
+                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->first()) {
+                    PendingCorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'delivery_type_id' => 2,
+                        'min_chargeable_weight' => $request->on_door_mcw_charges
+                    ]);
+                }
+                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->first()) {
+                    PendingCorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'delivery_type_id' => 2,
+                        'min_chargeable_weight' => $request->on_door_mcw_charges
+                    ]);
+                }
+                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->first()) {
+                    PendingCorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'delivery_type_id' => 2,
+                        'min_chargeable_weight' => $request->on_door_mcw_charges
                     ]);
                 }
                 if($weights = CorporateWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
