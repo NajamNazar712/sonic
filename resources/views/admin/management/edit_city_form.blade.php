@@ -114,7 +114,7 @@
             </div>
             <div class="col">
                 <fieldset class="">
-                            <input type="checkbox" name="walk_in_pickup" class="icheckbox" {{($walk_in_city->pickup == 1)? 'checked':''}}>
+                            <input type="checkbox" name="walk_in_pickup" class="icheckbox" {{(isset($walk_in_city) && $walk_in_city->pickup == 1)? 'checked':''}}>
                             <label for="walk_in_pickup" class="">Pickup</label>
                 </fieldset>
             </div>
@@ -125,7 +125,7 @@
             </div>
             <div class="col">
                 <fieldset class="">
-                    <input type="checkbox" name="walk_in_delivery" class="icheckbox" {{($walk_in_city->delivery == 1)? 'checked':''}}>
+                    <input type="checkbox" name="walk_in_delivery" class="icheckbox" {{(isset($walk_in_city) && $walk_in_city->delivery == 1)? 'checked':''}}>
                     <label for="walk_in_delivery" class="">Delivery</label>
                 </fieldset>
             </div>
