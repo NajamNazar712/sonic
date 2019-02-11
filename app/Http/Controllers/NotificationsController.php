@@ -218,9 +218,9 @@ class NotificationsController extends Controller
             self::sms($body, $to);
           }
           else if ($id == 4) {
-            $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number'];
+            $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity'];
 
-            $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number'];
+            $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity'];
 
             $present_fields = array();
 
@@ -263,6 +263,21 @@ class NotificationsController extends Controller
               $details['order_id'] = $shipment->order_id;
               $details['weight'] = $shipment->actual_weight;
               $details['tracking_number'] = $shipment->tracking_number;
+
+              if ($shipment->service_type_id == 1 || $shipment->service_type_id == 2) {
+                foreach ($shipment->items as $item) {
+                  if ($item->type == 0) {
+                    $details['item_product_type'] = $item->product->product_name;
+                    $details['item_description'] = $item->description;
+                    $details['item_quantity'] = $item->quantity;
+                  }
+                }
+              }
+              else {
+                $details['item_product_type'] = '';
+                $details['item_description'] = '';
+                $details['item_quantity'] = '';
+              }
 
               $user_wise_shipments[$shipment->user_id][] = $details;
             }
