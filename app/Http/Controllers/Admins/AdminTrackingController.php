@@ -134,6 +134,7 @@ class AdminTrackingController extends Controller
                         $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                         $journey_details['status'] = $journey->status->name;
                         $journey_details['user'] = $journey->admin->name;
+                        $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';
 
                         $details['payment_history'][] = $journey_details;
                     }
