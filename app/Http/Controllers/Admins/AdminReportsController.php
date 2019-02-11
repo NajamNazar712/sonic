@@ -1131,7 +1131,7 @@ class AdminReportsController extends Controller
             })            ->leftjoin('cargo_consignments as ccss','ccss.id', '=', 'cccc.cargo_consignment_id')
             ->leftjoin('cargo_consignments as ccssr','ccssr.id', '=', 'ccrc.cargo_consignment_id')
             ->leftjoin('shipment_status as lssv','lssv.id','=','lsjv.shipper_status_id')
-            ->select('fatstatus.created_at as first_attempt','ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as first_delivery_note_id','dnss.delivery_note_id as last_delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','lstatus.created_at as last_status_date','fs.name as first_status','ls.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc', 'ccss.id as cargo_number', 'ccss.created_at as cargo_date_time', 'ccss.type as return_type', 'ccss.id as return_cargo_number', 'ccss.created_at as return_cargo_date_time')
+            ->select('fatstatus.created_at as first_attempt','ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as first_delivery_note_id','dnss.delivery_note_id as last_delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','lstatus.created_at as last_status_date','fs.name as first_status','ls.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc', 'ccss.id as cargo_number', 'ccss.created_at as cargo_date_time', 'ccssr.type as return_type', 'ccssr.id as return_cargo_number', 'ccssr.created_at as return_cargo_date_time')
             ->groupBy('shipments.id');
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -3979,9 +3979,10 @@ class AdminReportsController extends Controller
                     $rows = City::join('shipments as s', 'cities.id', '=', 's.consignee_city_id');
 
                     if ($type == 'pending') {
-                        $rows = $rows->join('user_shipping_infos as usi', 'usi.user_id', '=', 's.pickup_address_id')
+                        $rows = $rows->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+                        ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
                         ->join('zone_class_cities as zcc', function($join) {
-                            $join->on('cities.zone_id', '=', 'zcc.zone_id')
+                            $join->on('pc.zone_id', '=', 'zcc.zone_id')
                             ->on('s.consignee_city_id', '=', 'zcc.city_id');
                         })
                         ->leftjoin('delivery_note_shipments as dns', function($join) {
@@ -4069,9 +4070,10 @@ class AdminReportsController extends Controller
                         ->join('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id');
                     }
                     else if ($type == 'delivery_tomorrow') {
-                        $rows = $rows->join('user_shipping_infos as usi', 'usi.user_id', '=', 's.pickup_address_id')
+                        $rows = $rows->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+                        ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
                         ->join('zone_class_cities as zcc', function($join) {
-                            $join->on('cities.zone_id', '=', 'zcc.zone_id')
+                            $join->on('pc.zone_id', '=', 'zcc.zone_id')
                             ->on('s.consignee_city_id', '=', 'zcc.city_id');
                         })
                         ->leftjoin('delivery_note_shipments as dns', function($join) {
@@ -4081,7 +4083,7 @@ class AdminReportsController extends Controller
                         ->leftjoin('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id')
                         ->join('shipments_journey as sj', function($join) {
                             $join->on('s.id', '=', 'sj.shipment_id')
-                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 4 and hour(shipments_journey.created_at) >= 13 and zcc.class in (2, 3) and (dns.delivery_note_id is null or date(dn.created_at) > date(shipments_journey.created_at)))'));
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 4 and (hour(shipments_journey.created_at) >= 13 or zcc.class in (2, 3)) and (dns.delivery_note_id is null or date(dn.created_at) > date(shipments_journey.created_at)))'));
                         });
                     }
                     else if ($type == 'delivery_note_pending') {
@@ -4143,6 +4145,9 @@ class AdminReportsController extends Controller
                         if (!$export) {
                             $counts[$hub]['total_ratio'] .= '%';
                         }
+                        else {
+                            $counts[$hub]['total_ratio'] = ($counts[$hub]['total_ratio'] / 100);
+                        }
                     }
                     else {
                         $counts[$hub]['total'] = 0;
@@ -4160,6 +4165,9 @@ class AdminReportsController extends Controller
 
                         if (!$export) {
                             $counts[$hub]['grand_total_ratio'] .= '%';
+                        }
+                        else {
+                            $counts[$hub]['grand_total_ratio'] = ($counts[$hub]['grand_total_ratio'] / 100);
                         }
                     }
                     else {
@@ -4216,14 +4224,14 @@ class AdminReportsController extends Controller
 
         $details = array();
 
-        $details[] = ['Hubs', 'Shipment - Pending', 'Shipment - Delivered', 'Shipment - Delivery Unsuccessful', 'Shipment - Not Attempted', 'Shipment - On Hold', 'Shipment - Non Service Area', 'Shipment - Misrouted', 'Shipment - On Hold for Self Collection', 'Return - Confirmation Pending', 'Shipment - Lost', 'Return - Confirm', 'Correct Status', 'Fake Status', 'Total', 'Ratio', 'Delivery Tomorrow', 'Deivery Note Pending Shipment', 'Grand Total', 'Ratio'];
+        $details[] = ['Hubs', 'Pending', 'Delivered', 'Delivery Unsuccessful', 'Not Attempted', 'On Hold', 'Non Service Area', 'Misrouted', 'On Hold for Self Collection', 'Confirmation Pending', 'Lost', 'Confirm', 'Correct Status', 'Fake Status', 'Total', 'Ratio', 'Delivery Tomorrow', 'Delivery Note Pending', 'Grand Total', 'Ratio'];
 
         $result = $this->debriefing_data($date, $hub, $zone, TRUE);
 
         if ($result['status'] == 0) {
             $types = ['pending', 'delivered', 'delivery_unsucessful', 'not_attempted', 'on_hold', 'non_service_area', 'misrouted', 'on_hold_for_self_collection', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total', 'total_ratio', 'delivery_tomorrow', 'delivery_note_pending', 'grand_total', 'grand_total_ratio'];
 
-            $type_names = ['pending' => 'Shipment - Pending', 'delivered' => 'Shipment - Delivered', 'delivery_unsucessful' => 'Shipment - Delivery Unsuccessful', 'not_attempted' => 'Shipment - Not Attempted', 'on_hold' => 'Shipment - On Hold', 'non_service_area' => 'Shipment - Non Service Area', 'misrouted' => 'Shipment - Misrouted', 'on_hold_for_self_collection' => 'Shipment - On Hold for Self Collection', 'confirmation_pending' => 'Return - Confirmation Pending', 'lost' => 'Shipment - Lost', 'confirm' => 'Return - Confirm', 'correct_status' => 'Correct Status', 'fake_status' => 'Fake Status', 'total' => 'Total', 'total_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'delivery_note_pending' => 'Deivery Note Pending Shipment', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
+            $type_names = ['pending' => 'Pending', 'delivered' => 'Delivered', 'delivery_unsucessful' => 'Delivery Unsuccessful', 'not_attempted' => 'Not Attempted', 'on_hold' => 'On Hold', 'non_service_area' => 'Non Service Area', 'misrouted' => 'Misrouted', 'on_hold_for_self_collection' => 'On Hold for Self Collection', 'confirmation_pending' => 'Confirmation Pending', 'lost' => 'Lost', 'confirm' => 'Confirm', 'correct_status' => 'Correct Status', 'fake_status' => 'Fake Status', 'total' => 'Total', 'total_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'delivery_note_pending' => 'Delivery Note Pending', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
 
             foreach ($result['counts'] as $hub => $count) {
                 $row = array();
@@ -4266,31 +4274,28 @@ class AdminReportsController extends Controller
 
             $spreadsheet->getActiveSheet()->setTitle('Overall')->fromArray($details, NULL);
 
-            $row_index = 0;
-            $column_index = 0;
-
             foreach ($result['shipments'] as $type => $hubs) {
                 $details = array();
 
                 foreach ($hubs as $hub => $tracking_numbers) {
-                    $details[$column_index][$row_index] = $hub;
+                    $detail = array();
 
-                    $column_index++;
+                    $detail[] = $hub;
 
                     foreach ($tracking_numbers as $tracking_number) {
-                        $details[$column_index][$row_index] = $tracking_number;
-
-                        $column_index++;
+                        $detail[] = $tracking_number;
                     }
 
-                    $row_index++;
+                    $details[] = $detail;
                 }
+
+                $details = array_map(null, ...$details);
 
                 $spreadsheet->createSheet()->setTitle($type_names[$type]);
 
                 $spreadsheet->setActiveSheetIndexByName($type_names[$type]);
 
-                for ($counter = 1; $counter <= $column_index; $counter++) {
+                for ($counter = 1; $counter <= count($hubs); $counter++) {
                     $column_name = Coordinate::stringFromColumnIndex($counter);
 
                     $spreadsheet->getActiveSheet()->getStyle($column_name)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
