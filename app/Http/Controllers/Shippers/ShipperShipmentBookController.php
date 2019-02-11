@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\ShipmentsAirWaybillJourneyController;
 use App\Http\Controllers\NotificationsController;
 
 use App\Http\Models\BookingType;
@@ -126,6 +127,8 @@ class ShipperShipmentBookController extends Controller
 
     public function __construct() {
         $this->middleware('auth:web,substitute_users')->except('print_air_waybill');
+
+        $this->middleware('auth:admin,web,substitute_users')->only('print_air_waybill');
 
         $this->middleware('Permission');
     }
@@ -399,392 +402,411 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function print_air_waybill(Request $request) {
-        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+        $user_type = NULL;
+        $user_id = NULL;
 
-        $html = '
-                <!doctype html>
-                <html lang="en">
-                  <head>
-                    <meta charset="utf-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        if (Auth::guard('admin')->check()) {
+            $user_type = 3;
+        }
+        else if (Auth::guard('web')->check()) {
+            $user_type = 1;
+        }
+        else if (Auth::guard('substitute_users')->check()) {
+            $user_type = 2;
+        }
 
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+        if ($user_type) {
+            $user_id = Auth::id();
 
-                    <title>Air Waybill</title>
+            $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
-                    <style>
-                      @page {
-                        size: A4 portrait;
-                      }
+            $html = '
+                    <!doctype html>
+                    <html lang="en">
+                      <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-                      * {
-                        -webkit-print-color-adjust: exact !important;
-                        color-adjust: exact !important;
-                      }
+                        <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
 
-                      body {
-                        background: none !important;
-                        color: #09262e !important;
-                        font-size: 0.9rem !important;
-                      }
+                        <title>Air Waybill</title>
 
-                      hr {
-                        border-top: 1px dashed #000000;
-                      }
+                        <style>
+                          @page {
+                            size: A4 portrait;
+                          }
 
-                      table.table-bordered {
-                        page-break-inside: avoid;
-                      }
+                          * {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                          }
 
-                      table.table-bordered tbody tr td {
-                        width: 12.5% !important;
-                        border: 1px solid #09262e !important;
-                      }
+                          body {
+                            background: none !important;
+                            color: #09262e !important;
+                            font-size: 0.9rem !important;
+                          }
 
-                      .color.primary {
-                        background: #c8c8c8 !important;
-                      }
+                          hr {
+                            border-top: 1px dashed #000000;
+                          }
 
-                      .color.secondary {
-                        background: #ebebeb !important;
-                      }
+                          table.table-bordered {
+                            page-break-inside: avoid;
+                          }
 
-                      .border {
-                        border: 1px solid #09262e !important;
-                      }
+                          table.table-bordered tbody tr td {
+                            width: 12.5% !important;
+                            border: 1px solid #09262e !important;
+                          }
 
-                      .border.twice {
-                        border-width: 2px !important;
-                      }
+                          .color.primary {
+                            background: #c8c8c8 !important;
+                          }
 
-                      .border.twice-top {
-                        border-top-width: 2px !important;
-                      }
+                          .color.secondary {
+                            background: #ebebeb !important;
+                          }
 
-                      .border.twice-bottom {
-                        border-bottom-width: 2px !important;
-                      }
+                          .border {
+                            border: 1px solid #09262e !important;
+                          }
 
-                      .border.twice-left {
-                        border-left-width: 2px !important;
-                      }
+                          .border.twice {
+                            border-width: 2px !important;
+                          }
 
-                      .border.twice-right {
-                        border-right-width: 2px !important;
-                      }
+                          .border.twice-top {
+                            border-top-width: 2px !important;
+                          }
 
-                      td.replacement span {
-                        width: 22px;
-                      }
+                          .border.twice-bottom {
+                            border-bottom-width: 2px !important;
+                          }
 
-                      td.replacement span img {
-                        display: block;
-                        width: 100%;
-                        margin: auto;
-                        background: #c8c8c8;
-                        border-radius: 25px;
-                      }
-                    </style>
-                  </head>
-                  <body>
-                    <div>
-      ';
+                          .border.twice-left {
+                            border-left-width: 2px !important;
+                          }
 
-        $shipment_details = '';
+                          .border.twice-right {
+                            border-right-width: 2px !important;
+                          }
 
-        foreach($request->ids as $id) {
-            $shipment = Shipment::find($id);
+                          td.replacement span {
+                            width: 22px;
+                          }
 
-            if ($request->has('admin') || session('user_id') == $shipment->user_id) {
-                $table_start = '
-                      <table class="table table-sm table-bordered border twice">
-                        <tbody>
-                          <tr>
-                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
-                            <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . $shipment->tracking_number . '</strong></span>
-                            </td>
+                          td.replacement span img {
+                            display: block;
+                            width: 100%;
+                            margin: auto;
+                            background: #c8c8c8;
+                            border-radius: 25px;
+                          }
+                        </style>
+                      </head>
+                      <body>
+                        <div>
+            ';
 
-                            <td class="color primary border twice-left"><strong>Serivce</strong></td>
-                ';
+            $shipment_details = '';
 
-                if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
-                    $table_start  .= '
-                            <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+            foreach($request->ids as $id) {
+                $shipment = Shipment::find($id);
+
+                ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
+
+                if ($request->has('admin') || session('user_id') == $shipment->user_id) {
+                    $table_start = '
+                          <table class="table table-sm table-bordered border twice">
+                            <tbody>
+                              <tr>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                                <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                  <span><strong>' . $shipment->tracking_number . '</strong></span>
+                                </td>
+
+                                <td class="color primary border twice-left"><strong>Serivce</strong></td>
                     ';
-                }
-                else if ($shipment->booking_type_id == 2) {
-                    $table_start  .= '
-                            <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
-                    ';
-                }
-                else if ($shipment->booking_type_id == 3) {
-                    $table_start  .= '
-                            <td><strong>' . $shipment->booking_type->booking_type . ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')' . '</strong></td>
-                    ';
-                }
-                else {
-                    $table_start  .= '
-                            <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
-                    ';
-                }
 
-                $table_start  .= '
-                            <td class="color primary"><strong>Datetime</strong></td>
-                            <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
-                            <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
-          ';
-
-                $table_start .= '
-                            <td class="color primary"><strong>Order ID</strong></td>
-                            <td>' . $shipment->order_id . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
-                            <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
-                            <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                            <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
-                          </tr>
-                          <tr>
-                            <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
-                            <td colspan="4" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Name</strong></td>
-                ';
-
-                if ($shipment->booking_type_id != 4) {
-                    $table_start .= '
-                            <td colspan="3" class="border twice-right">' . $shipment->user->name . '</td>
-                    ';
-                }
-                else {
-                    $table_start .= '
-                            <td colspan="3" class="border twice-right">' . $shipment->user->name . ' (' . $shipment->pickup_address->poc . ')</td>
-                    ';
-                }
-
-                $table_start .= '
-                            <td class="color secondary border twice-left"><strong>Name</strong></td>
-                            <td colspan="3">' . $shipment->consignee_name . '</td>
-                          </tr>
-
-                          <tr>
-                ';
-
-                if ($shipment->information_display == 1) {
-                    if ($shipment->booking_type_id != 4) {
-                        $table_start .= '
-                            <td class="color secondary"><strong>Address</strong></td>
-                            <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
+                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
+                        $table_start  .= '
+                                <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+                        ';
+                    }
+                    else if ($shipment->booking_type_id == 2) {
+                        $table_start  .= '
+                                <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
+                        ';
+                    }
+                    else if ($shipment->booking_type_id == 3) {
+                        $table_start  .= '
+                                <td><strong>' . $shipment->booking_type->booking_type . ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')' . '</strong></td>
                         ';
                     }
                     else {
-                        $table_start .= '
-                            <td class="color secondary"><strong>Address</strong></td>
-                            <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
+                        $table_start  .= '
+                                <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
                         ';
                     }
-                }
-                else {
-                    $table_start .= '
-                            <td rowspan="2" colspan="4" class="border twice-bottom twice-right"></td>
-                    ';
-                }
 
-                $table_start .= '
-                            <td class="color secondary border twice-left"><strong>Address</strong></td>
-                            <td colspan="3">' . $shipment->consignee_address . '</td>
-                          </tr>
-                          <tr>
-                ';
-
-                if ($shipment->information_display == 1) {
-                    if ($shipment->booking_type_id != 4) {
-                        $table_start .= '
-                            <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                            <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                        ';
-                    }
-                    else {
-                        $table_start .= '
-                            <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                            <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                        ';
-                    }
-                }
-                else {
-                }
-
-                $table_start .= '
-                            <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
-                            <td colspan="3" class="border twice-bottom">' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                          </tr>
-          ';
-
-                $table_end = '
-                          <tr>
-                            <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
-                            <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
-                            <td class="color primary border twice-top twice-bottom twice-left"><strong>Estimated Weight</strong></td>
-                            <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
-                          </tr>
-                          <tr>
-                ';
-
-                if ($shipment->booking_type_id != 4) {
-                    $table_end .= '
-                            <td class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
-                            <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->payment_mode->mode . '</strong></td>
-                    ';
-                }
-                else {
-                    $table_end .= '
-                            <td class="color primary border twice-top twice-bottom twice-left"><strong>Charges Mode</strong></td>
-                            <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->charges_mode->charges_mode . '</strong></td>
-                    ';
-                }
-
-                $table_end .= '
-                          </tr>
-                          <tr>
-                            <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
-                ';
-
-                if ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1) {
-                    $table_end .= '
-                            <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
-                    ';
-                }
-                else {
-                    $table_end .= '
-                            <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
-                    ';
-                }
-
-                $table_end .= '
-                          </tr>
-                          <tr>
-                            <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
-                          </tr>
-                        </tbody>
-                      </table>
-
-                      <hr>
-          ';
-
-                if ($shipment->booking_type_id == 1  || $shipment->booking_type_id == 4) {
-                    $shipment_details .= $table_start;
-
-                    $item = $shipment->items->first();
-
-                    $shipment_details .= '
-                        <tr>
-                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
-                          <td class="color secondary border twice-top"><strong>Type</strong></td>
-                          <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
-                          <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                          <td>' . $item->quantity . '</td>
-                          <td colspan="2" class="border twice-top"></td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
-                        </tr>
-            ';
-
-                    $shipment_details .= $table_end;
-                }
-                else if ($shipment->booking_type_id == 2) {
-                    $shipment_details .= $table_start;
-
-                    $items = $shipment->items;
-
-                    $item = $items[0];
-
-                    $shipment_details .= '
-                        <tr>
-                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Delivery Item</strong></td>
-                          <td class="color secondary border twice-top"><strong>Type</strong></td>
-                          <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
-                          <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                          <td>' . $item->quantity . '</td>
-                          <td colspan="2" class="border twice-top"></td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
-                        </tr>
-            ';
-
-                    $item = $items[1];
-
-                    $shipment_details .= '
-                        <tr>
-                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Replacement Item</strong></td>
-                          <td class="color secondary border twice-top"><strong>Type</strong></td>
-                          <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
-                          <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                          <td>' . $item->quantity . '</td>
-                          <td colspan="2" class="border twice-top"></td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
-                        </tr>
-            ';
-
-                    $shipment_details .= $table_end;
-                }
-                else if ($shipment->booking_type_id == 3) {
-                    $shipment_details .= $table_start;
-
-                    foreach ($shipment->items as $item) {
-                        $shipment_details .= '
-                        <tr>
-                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
-                          <td class="color secondary border twice-top"><strong>Type</strong></td>
-                          <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
-                          <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                          <td>' . $item->quantity . '</td>
-                          <td class="color secondary border twice-top"><strong>Price</strong></td>
-                          <td class="border twice-top">Rs ' . number_format($item->price) . '</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
-                        </tr>
+                    $table_start  .= '
+                                <td class="color primary"><strong>Datetime</strong></td>
+                                <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
+                              </tr>
+                              <tr>
+                                <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
+                                <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
               ';
+
+                    $table_start .= '
+                                <td class="color primary"><strong>Order ID</strong></td>
+                                <td>' . $shipment->order_id . '</td>
+                              </tr>
+                              <tr>
+                                <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
+                                <td class="color primary border twice-bottom"><strong>Destination</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                              </tr>
+                              <tr>
+                                <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
+                                <td colspan="4" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="color secondary"><strong>Name</strong></td>
+                    ';
+
+                    if ($shipment->booking_type_id != 4) {
+                        $table_start .= '
+                                <td colspan="3" class="border twice-right">' . $shipment->user->name . '</td>
+                        ';
+                    }
+                    else {
+                        $table_start .= '
+                                <td colspan="3" class="border twice-right">' . $shipment->user->name . ' (' . $shipment->pickup_address->poc . ')</td>
+                        ';
                     }
 
-                    $shipment_details .= $table_end;
+                    $table_start .= '
+                                <td class="color secondary border twice-left"><strong>Name</strong></td>
+                                <td colspan="3">' . $shipment->consignee_name . '</td>
+                              </tr>
+
+                              <tr>
+                    ';
+
+                    if ($shipment->information_display == 1) {
+                        if ($shipment->booking_type_id != 4) {
+                            $table_start .= '
+                                <td class="color secondary"><strong>Address</strong></td>
+                                <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
+                            ';
+                        }
+                        else {
+                            $table_start .= '
+                                <td class="color secondary"><strong>Address</strong></td>
+                                <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
+                            ';
+                        }
+                    }
+                    else {
+                        $table_start .= '
+                                <td rowspan="2" colspan="4" class="border twice-bottom twice-right"></td>
+                        ';
+                    }
+
+                    $table_start .= '
+                                <td class="color secondary border twice-left"><strong>Address</strong></td>
+                                <td colspan="3">' . $shipment->consignee_address . '</td>
+                              </tr>
+                              <tr>
+                    ';
+
+                    if ($shipment->information_display == 1) {
+                        if ($shipment->booking_type_id != 4) {
+                            $table_start .= '
+                                <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
+                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                            ';
+                        }
+                        else {
+                            $table_start .= '
+                                <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
+                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                            ';
+                        }
+                    }
+                    else {
+                    }
+
+                    $table_start .= '
+                                <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
+                                <td colspan="3" class="border twice-bottom">' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+                              </tr>
+              ';
+
+                    $table_end = '
+                              <tr>
+                                <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
+                                <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
+                                <td class="color primary border twice-top twice-bottom twice-left"><strong>Estimated Weight</strong></td>
+                                <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
+                              </tr>
+                              <tr>
+                    ';
+
+                    if ($shipment->booking_type_id != 4) {
+                        $table_end .= '
+                                <td class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
+                                <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->payment_mode->mode . '</strong></td>
+                        ';
+                    }
+                    else {
+                        $table_end .= '
+                                <td class="color primary border twice-top twice-bottom twice-left"><strong>Charges Mode</strong></td>
+                                <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->charges_mode->charges_mode . '</strong></td>
+                        ';
+                    }
+
+                    $table_end .= '
+                              </tr>
+                              <tr>
+                                <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
+                    ';
+
+                    if ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1) {
+                        $table_end .= '
+                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
+                        ';
+                    }
+                    else {
+                        $table_end .= '
+                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
+                        ';
+                    }
+
+                    $table_end .= '
+                              </tr>
+                              <tr>
+                                <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
+                              </tr>
+                            </tbody>
+                          </table>
+
+                          <hr>
+              ';
+
+                    if ($shipment->booking_type_id == 1  || $shipment->booking_type_id == 4) {
+                        $shipment_details .= $table_start;
+
+                        $item = $shipment->items->first();
+
+                        $shipment_details .= '
+                            <tr>
+                              <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
+                              <td class="color secondary border twice-top"><strong>Type</strong></td>
+                              <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                              <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                              <td>' . $item->quantity . '</td>
+                              <td colspan="2" class="border twice-top"></td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                              <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                            </tr>
+                ';
+
+                        $shipment_details .= $table_end;
+                    }
+                    else if ($shipment->booking_type_id == 2) {
+                        $shipment_details .= $table_start;
+
+                        $items = $shipment->items;
+
+                        $item = $items[0];
+
+                        $shipment_details .= '
+                            <tr>
+                              <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Delivery Item</strong></td>
+                              <td class="color secondary border twice-top"><strong>Type</strong></td>
+                              <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                              <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                              <td>' . $item->quantity . '</td>
+                              <td colspan="2" class="border twice-top"></td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                              <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                            </tr>
+                ';
+
+                        $item = $items[1];
+
+                        $shipment_details .= '
+                            <tr>
+                              <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Replacement Item</strong></td>
+                              <td class="color secondary border twice-top"><strong>Type</strong></td>
+                              <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                              <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                              <td>' . $item->quantity . '</td>
+                              <td colspan="2" class="border twice-top"></td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                              <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                            </tr>
+                ';
+
+                        $shipment_details .= $table_end;
+                    }
+                    else if ($shipment->booking_type_id == 3) {
+                        $shipment_details .= $table_start;
+
+                        foreach ($shipment->items as $item) {
+                            $shipment_details .= '
+                            <tr>
+                              <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
+                              <td class="color secondary border twice-top"><strong>Type</strong></td>
+                              <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                              <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                              <td>' . $item->quantity . '</td>
+                              <td class="color secondary border twice-top"><strong>Price</strong></td>
+                              <td class="border twice-top">Rs ' . number_format($item->price) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                              <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                            </tr>
+                  ';
+                        }
+
+                        $shipment_details .= $table_end;
+                    }
                 }
             }
-        }
 
-        $html .= $shipment_details;
-
-        if ($request->has('twice')) {
             $html .= $shipment_details;
+
+            if ($request->has('twice')) {
+                $html .= $shipment_details;
+            }
+
+            $html .= '
+                        </div>
+
+                        <script>
+                          window.onload = function() {
+                            window.print();
+                          }
+                        </script>
+                      </body>
+                    </html>
+            ';
+
+            return $html;
         }
-
-        $html .= '
-                    </div>
-
-                    <script>
-                      window.onload = function() {
-                        window.print();
-                      }
-                    </script>
-                  </body>
-                </html>
-      ';
-
-        return $html;
     }
 
     public function excel_index() {
