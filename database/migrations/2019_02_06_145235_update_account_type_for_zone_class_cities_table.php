@@ -15,7 +15,7 @@ class UpdateAccountTypeForZoneClassCitiesTable extends Migration
     {
         //
         Schema::table('zone_class_cities', function (Blueprint $table) {
-            $table->integer('account_type_id')->default(1);
+            $table->integer('zone_classification_id')->default(1);
         });
     }
 
@@ -28,7 +28,7 @@ class UpdateAccountTypeForZoneClassCitiesTable extends Migration
     {
         //
         Schema::table('zone_class_cities', function (Blueprint $table) {
-            $table->dropColumn('account_type_id');
+            $table->dropColumn('zone_classification_id');
         });
     }
 }
