@@ -2052,7 +2052,7 @@ class AdminReportsController extends Controller
                 if (session('department_id') != 7){
                     $booked = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('id', '=', $hub->id);
-                    })->whereBetween('created_at',[$date_from,$date_to])->count();
+                    })->whereBetween('created_at',[$date_from,$date_to])->where('shipments.packaging_material_request', 0)->count();
                     $received = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('id', '=', $hub->id);
                     })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
