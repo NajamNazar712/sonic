@@ -264,7 +264,7 @@ class NotificationsController extends Controller
               $details['weight'] = $shipment->actual_weight;
               $details['tracking_number'] = $shipment->tracking_number;
 
-              if ($shipment->service_type_id == 1 || $shipment->service_type_id == 2) {
+              if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
                 foreach ($shipment->items as $item) {
                   if ($item->type == 0) {
                     $details['item_product_type'] = $item->product->product_name;
