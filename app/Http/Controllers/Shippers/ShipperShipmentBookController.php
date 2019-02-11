@@ -1223,7 +1223,7 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $charges_mode_id, $amount, $payment_mode_id) {
+    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id) {
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -1246,6 +1246,7 @@ class ShipperShipmentBookController extends Controller
 
         $shipment->estimated_weight = $estimated_weight;
         $shipment->shipping_mode_id = $shipping_mode_id;
+        $shipment->same_day_timing_id = $same_day_timing_id;
 
         $shipment->amount = $amount;
         $shipment->payment_mode_id = $payment_mode_id;
@@ -1365,6 +1366,13 @@ class ShipperShipmentBookController extends Controller
                     $special_instructions = NULL;
                 }
 
+                if ($request->input('shipping_mode') == 4) {
+                    $same_day_timing_id = $request->input('same-day_timing');
+                }
+                else {
+                    $same_day_timing_id = NULL;
+                }
+
                 $estimated_weight = $request->input('estimated_weight');
                 $shipping_mode_id = $request->input('shipping_mode');
                 $delivery_type_id = $request->delivery_type;
@@ -1373,33 +1381,102 @@ class ShipperShipmentBookController extends Controller
                 $amount = str_replace(',', '', $request->input('amount'));
                 $payment_mode_id = $request->input('payment_mode');
 
-                $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $charges_mode_id, $amount, $payment_mode_id);
+                $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $delivery_type_id, $charges_mode_id, $amount, $payment_mode_id);
 
                 $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
-                $product_type_id = $request->input('product_type');
+                if ($service_type_id == 1) {
+                    $product_type_id = $request->input('product_type');
 
-                if ($request->filled('item_description')) {
-                    $item_description = $request->input('item_description');
-                }
-                else {
-                    $item_description = NULL;
-                }
+                    if ($request->filled('item_description')) {
+                        $item_description = $request->input('item_description');
+                    }
+                    else {
+                        $item_description = NULL;
+                    }
 
-                $item_quantity = $request->input('item_quantity');
+                    $item_quantity = $request->input('item_quantity');
 
-                if ($request->filled('insurance')) {
-                    $price = str_replace(',', '', $request->input('item_price'));
-                    $insurance = TRUE;
+                    if ($request->filled('insurance')) {
+                        $price = str_replace(',', '', $request->input('item_price'));
+                        $insurance = TRUE;
+                    }
+                    else {
+                        $price = NULL;
+                        $insurance = FALSE;
+                    }
+
+                    $type = 0;
+
+                    $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
                 }
-                else {
+                else if ($service_type_id == 2) {
+                    $product_type_id = $request->input('product_type');
+
+                    if ($request->filled('item_description')) {
+                        $item_description = $request->input('item_description');
+                    }
+                    else {
+                        $item_description = NULL;
+                    }
+
+                    $item_quantity = $request->input('item_quantity');
+
+                    if ($request->filled('insurance')) {
+                        $price = str_replace(',', '', $request->input('item_price'));
+                        $insurance = TRUE;
+                    }
+                    else {
+                        $price = NULL;
+                        $insurance = FALSE;
+                    }
+
+                    $type = 0;
+
+                    $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+
+                    $product_type_id = $request->input('replacement_product_type');
+
+                    if ($request->filled('replacement_item_description')) {
+                        $item_description = $request->input('replacement_item_description');
+                    }
+                    else {
+                        $item_description = NULL;
+                    }
+
+                    $item_quantity = $request->input('replacement_item_quantity');
                     $price = NULL;
-                    $insurance = FALSE;
+                    $insurance = NULL;
+                    $type = 1;
+
+                    $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
                 }
+                else if ($service_type_id == 3) {
+                    foreach ($request->input('try_and_buy') as $try_and_buy) {
+                        $product_type_id = $try_and_buy['product_type'];
 
-                $type = 0;
+                        if (isset($try_and_buy['item_description']) && !empty($try_and_buy['item_description'])) {
+                            $item_description = $try_and_buy['item_description'];
+                        }
+                        else {
+                            $item_description = NULL;
+                        }
 
-                $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+                        $item_quantity = $try_and_buy['item_quantity'];
+                        $price = str_replace(',', '', $try_and_buy['item_price']);
+
+                        if (isset($try_and_buy['insurance']) && !empty($try_and_buy['insurance'])) {
+                            $insurance = TRUE;
+                        }
+                        else {
+                            $insurance = FALSE;
+                        }
+
+                        $type = 2;
+
+                        $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+                    }
+                }
 
                 NotificationsController::send(2, $shipment_id);
 
@@ -1654,23 +1731,37 @@ class ShipperShipmentBookController extends Controller
                             <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
                           </tr>
                           <tr>
+                ';
+
+            if ($shipment->booking_type_id != 4) {
+                $table_end .= '
+                            <td class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
+                            <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->payment_mode->mode . '</strong></td>
+                    ';
+            }
+            else {
+                $table_end .= '
                             <td class="color primary border twice-top twice-bottom twice-left"><strong>Charges Mode</strong></td>
                             <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->charges_mode->charges_mode . '</strong></td>
+                    ';
+            }
+
+            $table_end .= '
                           </tr>
                           <tr>
                             <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
                 ';
 
-                if ($shipment->charges_mode_id == 1) {
-                    $table_end .= '
+            if ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1) {
+                $table_end .= '
                             <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
                     ';
-                }
-                else {
-                    $table_end .= '
+            }
+            else {
+                $table_end .= '
                             <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
                     ';
-                }
+            }
 
             $table_end .= '
                           </tr>
@@ -1702,6 +1793,70 @@ class ShipperShipmentBookController extends Controller
                           <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
                         </tr>
             ';
+
+                $shipment_details .= $table_end;
+            }
+            else if ($shipment->booking_type_id == 2) {
+                $shipment_details .= $table_start;
+
+                $items = $shipment->items;
+
+                $item = $items[0];
+
+                $shipment_details .= '
+                        <tr>
+                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Delivery Item</strong></td>
+                          <td class="color secondary border twice-top"><strong>Type</strong></td>
+                          <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                          <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                          <td>' . $item->quantity . '</td>
+                          <td colspan="2" class="border twice-top"></td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                        </tr>
+            ';
+
+                $item = $items[1];
+
+                $shipment_details .= '
+                        <tr>
+                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Replacement Item</strong></td>
+                          <td class="color secondary border twice-top"><strong>Type</strong></td>
+                          <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                          <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                          <td>' . $item->quantity . '</td>
+                          <td colspan="2" class="border twice-top"></td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                        </tr>
+            ';
+
+                $shipment_details .= $table_end;
+            }
+            else if ($shipment->booking_type_id == 3) {
+                $shipment_details .= $table_start;
+
+                foreach ($shipment->items as $item) {
+                    $shipment_details .= '
+                        <tr>
+                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
+                          <td class="color secondary border twice-top"><strong>Type</strong></td>
+                          <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                          <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                          <td>' . $item->quantity . '</td>
+                          <td class="color secondary border twice-top"><strong>Price</strong></td>
+                          <td class="border twice-top">Rs ' . number_format($item->price) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                        </tr>
+              ';
+                }
 
                 $shipment_details .= $table_end;
             }

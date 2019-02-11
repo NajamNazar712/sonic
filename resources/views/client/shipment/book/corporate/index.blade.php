@@ -10,6 +10,8 @@
             <div class="content-body">
                 <h1 class="mb-1">
                     Book a Shipment (Corporate)
+                    <span id="selected_service_type_name">{{ (Session::has('service_type_name')) ? ('(' . Session::get('service_type_name') . ')') : '' }}</span>
+                    <button type="button" class="btn btn-primary d-block mt-1 ml-auto d-sm-block mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
                 </h1>
 
                 <div class="card">
@@ -20,7 +22,7 @@
                             <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.corporate.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
-                                <input type="hidden" name="selected_service_type" id="selected_service_type" value="1">
+                                <input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ Session::get('service_type_id') }}">
 
                                 <div class="row">
                                     <div class="col col_custom">
@@ -164,6 +166,91 @@
                                             </div>
                                         </div>
 
+                                        <div id="replacement" class="mb-1 d-none">
+                                            <h4 class="text-center m-0 p-1 bg-dark white border border-dark rounded-top">Replacement</h4>
+
+                                            <div class="pt-1 pl-1 pr-1 border border-light rounded-bottom">
+                                                <div class="form-group">
+                                                    <select name="replacement_product_type" class="select2" id="replacement_product_type" data-rule-required="true" data-msg-required="Product Type is required">
+                                                        @foreach($products as $product)
+                                                            <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="250" data-msg-maxlength="Item Description can be maximum 250 characters"></textarea>
+                                                </div>
+
+                                                <div class="form-group input-group">
+                                                    <input type="text" name="replacement_item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div id="try_and_buy" class="d-none">
+                                            <div class="repeater mb-1">
+                                                <div data-repeater-list="try_and_buy">
+                                                    <div class="product mb-1" data-repeater-item>
+                                                        <div class="d-flex justify-content-between align-items-center bg-dark border border-dark rounded-top">
+                                                            <h4 class="m-1 white">Product #<span>1</span></h4>
+                                                            <button data-repeater-delete type="button" class="btn btn-icon btn-danger btn-sm mr-1"><i class="ft-x"></i></button>
+                                                        </div>
+
+                                                        <div class="pt-1 pl-1 pr-1 border border-light rounded-bottom">
+                                                            <div class="form-group">
+                                                                <select name="product_type" class="select2" data-rule-required="true" data-msg-required="Product Type is required">
+                                                                    @foreach($products as $product)
+                                                                        <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="250" data-msg-maxlength="Item Description can be maximum 250 characters"></textarea>
+                                                            </div>
+
+                                                            <div class="form-group input-group">
+                                                                <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quanity is required">
+                                                            </div>
+
+                                                            <div class="form-group input-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text">Rs</span>
+                                                                </div>
+
+                                                                <input type="text" name="item_price" class="form-control rounded-right price" placeholder="Product Value*" data-rule-required="true" data-msg-required="Product Value is required">
+                                                            </div>
+
+                                                            <div class="form-group text-center p-1 border border-light rounded">
+                                                                <label class="d-block">Insurance</label>
+                                                                <input type="checkbox" name="insurance" class="switch hidden insurance">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group text-right">
+                                                    <button data-repeater-create type="button" class="btn btn-block btn-primary">Add</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_quantity">Total Quantity: <span>0</span></p>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Product(s) Value: Rs <span>0</span></p>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="form-group text-center p-1 border border-light rounded">
+                                                    <label class="d-block">Type of Package</label>
+                                                    <input type="checkbox" name="package_type" class="switch hidden package_type" id="package_type" checked="checked" data-off-label="Partial" data-on-label="Complete">
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
 												<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -240,6 +327,35 @@
                     </div>
                 </div>
 
+                <div class="modal fade" id="select_service_type" role="dialog" aria-labelledby="select_service_type_title" aria-hidden="true">
+                    <div class="modal-dialog modal-sm" role="document">
+                        <div class="modal-content">
+                            <form class="form-horizontal">
+                                {{ csrf_field() }}
+
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="select_service_type_title">Select Service Type</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="control-group">
+                                        <div class="controls">
+                                            <select name="service_type" class="select2" id="service_type">
+                                                @foreach($booking_types as $booking_type)
+                                                    <option value="{{ $booking_type->id }}">{{ $booking_type->booking_type }}</option>
+                                                @endforeach
+                                            </select>
+
+                                            <label id="service_type-error" class="danger d-none">Service Type is required.</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary mx-auto">Select</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -410,6 +526,74 @@
                 }
             }
 
+            $('#select_service_type').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: false
+            });
+
+            $('#select_service_type form #service_type').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Service Type*'
+            });
+
+            var service_type = '';
+
+            @if (!Session::has('service_type_id'))
+            $('#select_service_type').modal('show');
+            @else
+                service_type = '{{ Session::get('service_type_id') }}';
+
+            if (service_type == 2) {
+                $('#replacement').removeClass('d-none');
+            }
+            if (service_type == 3) {
+                $('#regular').addClass('d-none');
+                $('#try_and_buy').removeClass('d-none');
+            }
+
+            $('#select_service_type form #service_type').val(service_type).trigger('change');
+            @endif
+
+            $('#select_service_type form').bind('submit', function(e) {
+                e.preventDefault();
+
+                var selected = $('#select_service_type form #service_type').find(':selected');
+
+                service_type = selected.val();
+
+                if (service_type !== '' && service_type !== undefined && service_type !== null) {
+                    $('#select_service_type form #service_type-error').addClass('d-none');
+
+                    if (service_type == 1) {
+                        $('#regular').removeClass('d-none');
+                        $('#replacement').addClass('d-none');
+                        $('#try_and_buy').addClass('d-none');
+                    }
+                    else if (service_type == 2) {
+                        $('#regular').removeClass('d-none');
+                        $('#replacement').removeClass('d-none');
+                        $('#try_and_buy').addClass('d-none');
+                    }
+                    else if (service_type == 3) {
+                        $('#regular').addClass('d-none');
+                        $('#replacement').addClass('d-none');
+                        $('#try_and_buy').removeClass('d-none');
+                    }
+
+                    $('#booking_form #selected_service_type').val(service_type);
+
+                    $('#selected_service_type_name').html('(' + selected.html() + ')');
+
+                    $('#select_service_type').modal('hide');
+
+                    shipping_modes();
+                }
+                else {
+                    $('#select_service_type form #service_type-error').removeClass('d-none');
+                }
+            });
+
             $('#delivery_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Delivery Type*'
@@ -514,6 +698,113 @@
                 }
             });
 
+            $('#replacement_product_type').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Product Type*'
+            }).bind('change', function() {
+                $(this).valid();
+            });
+
+            $('#try_and_buy .select2').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Product Type*'
+            }).bind('change', function() {
+                $(this).valid();
+            });
+
+            $('#try_and_buy .repeater').repeater({
+                isFirstItemUndeletable: true,
+                show: function() {
+                    $(this).find('.select2-container--default').remove();
+
+                    $(this).find('.select2').prepend('<option value="" selected="selected"></option>').select2({
+                        width: '100%',
+                        placeholder: 'Product Type*'
+                    }).bind('change', function() {
+                        $(this).valid();
+                    });
+
+                    $(this).slideDown();
+
+                    $('html, body').animate({
+                        scrollTop: ($(this).offset().top - $('.header-navbar').height())
+                    }, 1000);
+
+                    $(this).find('.quantity').TouchSpin({
+                        min: 1,
+                        max: 1000,
+                        buttondown_class: 'btn btn-primary rounded-left',
+                        buttonup_class: 'btn btn-primary rounded-right',
+                        buttondown_txt: '<i class="ft-minus"></i>',
+                        buttonup_txt: '<i class="ft-plus"></i>'
+                    }).bind('input change', function() {
+                        if ($(this).hasClass('danger')) {
+                            $(this).valid();
+                        }
+
+                        if (service_type == 3) {
+                            try_and_buy_total_quantity();
+                        }
+                    });
+
+                    $('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
+
+                    $(this).find('.price').inputmask({
+                        'alias': 'integer',
+                        'allowMinus': false,
+                        'allowPlus': false,
+                        'groupSeparator': ',',
+                        'autoGroup': true,
+                        'min': 1,
+                        'max': 100000
+                    }).bind('input change', function() {
+                        if (service_type == 3) {
+                            try_and_buy_total_price();
+                        }
+                    });
+
+                    var insurance = $(this).find('.insurance');
+
+                    insurance.parent('.form-group').children('.btn-group').remove();
+
+                    insurance.checkboxpicker();
+
+                    try_and_buy_product_numbering();
+                },
+                hide: function(delete_element) {
+                    var id = $(this).children('div').children('h4').children('span').html();
+
+                    swal({
+                        title: 'Are you sure?',
+                        text: 'You want to delete Product #' + id + '?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'Close',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Delete',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            $(this).slideUp(delete_element);
+
+                            try_and_buy_product_numbering();
+                        }
+                    });
+                }
+            });
+
             $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Mode of Shipping*',
@@ -529,6 +820,13 @@
                 else {
                     $('#shipping_same-day').addClass('d-none');
                 }
+            });
+
+            $('#same-day_timing').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Same-day Timing*'
+            }).bind('change', function() {
+                $(this).valid();
             });
 
             $('#payment_mode').prepend('<option value="" selected="selected"></option>').select2({
