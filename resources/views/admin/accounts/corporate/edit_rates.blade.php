@@ -3028,6 +3028,7 @@
                             <div class="text-center mt-2">
                                 <div class="form-group">
                                     <input type="hidden" id="authorize" name="authorize">
+                                    <input type="hidden" name="approve" id="approve">
                                     <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Update Rates</button>
 
                                     @if ($shipper->status == 1 && (session('role_id') == 1 || in_array(8, session('permissions'))))
