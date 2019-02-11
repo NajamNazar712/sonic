@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Cargo Return Shipment Report')
+@section('title', 'Cargo Returns Shipment Report')
 
 @section('content')
     <h1 class="mb-1">
-        Cargo Return Shipment Report
+        Cargo Returns Shipment Report
     </h1>
 
     <div class="card">
@@ -64,16 +64,17 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Tracking No..</th>
+                        <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Return Confirm Date</th>
                         <th class="border-primary border-darken-1">Cargo No.</th>
                         <th class="border-primary border-darken-1">Cargo Creation Date</th>
                         <th class="border-primary border-darken-1">Dispatching Aging</th>
                         <th class="border-primary border-darken-1">Origin City</th>
                         <th class="border-primary border-darken-1">Origin Hub</th>
-                        <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Destination City</th>
+                        <th class="border-primary border-darken-1">Destination Hub</th>
+                        <th class="border-primary border-darken-1">Return Confirm Aging</th>
                     </tr>
                     </thead>
                 </table>
@@ -214,7 +215,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.cargo_received.list') }}',
+                        url: '{{ route('admin.reports.cargo_returns_shipment.list') }}',
                         data: {
                             'page': 'all',
                             'search_origin': $('#search_origin').val(),
@@ -226,40 +227,32 @@
                             head = [];
 
                             head.push('S. No');
+                            head.push('Tracking Number');
+                            head.push('Status');
+                            head.push('Return Confirm Date');
                             head.push('Cargo No.');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Shipment(s)');
-                            head.push('Shipping Mode');
-                            head.push('Cargo Type');
-                            head.push('Shipments Weight');
-                            head.push('Chargeable Weight');
-                            head.push('Actual Weight');
-                            head.push('Vendor Weight');
-                            head.push('Transitted By');
-                            head.push('Transit Date');
-                            head.push('Received By');
-                            head.push('Received Date');
-                            head.push('Aging');
+                            head.push('Cargo Creation Date');
+                            head.push('Dispatching Aging');
+                            head.push('Origin City');
+                            head.push('Origin Hub');
+                            head.push('Destination City');
+                            head.push('Destination Hub');
+                            head.push('Return Confirm Aging');
                             $.each(result.data, function (index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.cargo_id);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.shipments);
-                                row.push(values.shipping_mode);
-                                row.push(values.cargo_type);
-                                row.push(values.shipments_weight);
-                                row.push(values.chargeable_weight);
-                                row.push(values.actual_weight);
-                                row.push(values.vendor_weight);
-                                row.push(values.transit_by);
-                                row.push(values.transit_at);
-                                row.push(values.received_by);
-                                row.push(values.received_at);
-                                row.push(values.aging);
+                                row.push(values.tracking_number);
+                                row.push(values.status);
+                                row.push(values.return_confirm_date);
+                                row.push(values.cargo_no);
+                                row.push(values.cargo_creation_date);
+                                row.push(values.dispatching_aging);
+                                row.push(values.origin_city);
+                                row.push(values.origin_hub);
+                                row.push(values.destination_city);
+                                row.push(values.destination_hub);
+                                row.push(values.return_confirm_aging);
 
                                 body.push(row);
                             });
@@ -279,7 +272,7 @@
                         extend: 'excelHtml5',
                         title: 'Cargo Returns Shipment Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    },
+                    }
 
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -289,14 +282,14 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.cargo_returns_shipment.list') }}',
-                    // data: function (d) {
-                    //     d.search_origin = $('#search_origin').val();
-                    //     d.search_destination = $('#search_destination').val();
-                    //     d.search_date_from = $('input[name="search_date_from_formatted"]').val();
-                    //     d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-                    // }
+                    data: function (d) {
+                        d.search_origin = $('#search_origin').val();
+                        d.search_destination = $('#search_destination').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                    }
                 },
-                order: [[12, 'asc']],
+                order: [[3, 'desc']],
                 columns: [
                     {
                         orderable: false,
@@ -308,13 +301,17 @@
                             return '';
                         }
                     },
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'status', name: 'ss.name', class: 'align-middle status'},
-                    {data: 'return_confirm_date', name: 'sjrc.created_at', class: 'align-middle return_confirm_date'},
+                    {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'status', name: 'ss.id', class: 'align-middle status'},
+                    {data: 'return_confirm_date', name: 'shipments_journey.created_at', class: 'align-middle return_confirm_date'},
                     {data: 'cargo_no', name: 'cc.id', class: 'align-middle cargo_no'},
                     {data: 'cargo_creation_date', name: 'cc.created_at', class: 'align-middle cargo_creation_date'},
+                    {data: 'dispatching_aging', name: 'dispatching_aging', class: 'align-middle dispatching_aging'},
+                    {data: 'origin_city', name: 'cou.name', class: 'align-middle origin_city'},
                     {data: 'origin_hub', name: 'co.name', class: 'align-middle origin_hub'},
+                    {data: 'destination_city', name: 'cds.name', class: 'align-middle destination_city'},
                     {data: 'destination_hub', name: 'cd.name', class: 'align-middle destination_hub'},
+                    {data: 'return_confirm_aging', name: 'return_confirm_aging', class: 'align-middle return_confirm_aging'}
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
