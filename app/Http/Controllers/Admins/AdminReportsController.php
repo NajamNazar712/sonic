@@ -2467,20 +2467,24 @@ class AdminReportsController extends Controller
                 $shipper_row = array();
                 $shipper_row[] = $serial_number_shippers;
                 $shipper_row[] = $shipper->name;
-                $shipper_row[] = $shipper_booked;
-                $shipper_row[] = $shipper_received;
-                $shipper_row[] = $shipper_rev_wo_gst;
-                $shipper_row[] = $shipper_cod;
+                $shipper_row[] = number_format($shipper_booked);
+                $shipper_row[] = number_format($shipper_received);
+                $shipper_row[] = number_format($shipper_rev_wo_gst);
+                $shipper_row[] = number_format($shipper_cod);
                 $shipper_row[] = $shipper_actual_weight;
                 $shipper_row[] = $shipper_chargeable_weight;
-                $shipper_row[] = $shipper_avg_revenue;
-                $shipper_row[] = $shipper_avg_cash_collection;
-                $shipper_row[] = $shipper_rev_on_cash_collection;
+                $avg_revenue = round($shipper_avg_revenue,2);
+                $shipper_row[] = number_format($avg_revenue);
+                $avg_cash_coll = round($shipper_avg_cash_collection,2);
+                $shipper_row[] = $avg_cash_coll;
+                $avg_rev_cc = round($shipper_rev_on_cash_collection,2);
+                $shipper_row[] = number_format($avg_rev_cc);
 
                 $details_shipper[] = $shipper_row;
                 $serial_number_shippers++;
             }
         }
+//        return $details_shipper;
         $spreadsheet = new Spreadsheet();
         $cell_st =[
             'font' =>['bold' => true],
