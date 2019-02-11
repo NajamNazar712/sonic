@@ -82,25 +82,25 @@
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 scrollX: true,
-                "autoWidth": false,
+                autoWidth : false,
                 paging:false,
-                ordering:false,
+                // ordering:false,
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {name: 'tracking_number', class: 'align-middle tracking_number'},
-                    {name: 'destination', class: 'align-middle destination form-group'},
-                    {name: 'consignee_name', class: 'align-middle consignee_name form-group'},
-                    {name: 'address', class: 'align-middle address form-group'},
-                    {name: 'phone', class: 'align-middle phone form-group'},
-                    {name: 'phone2', class: 'align-middle phone2'},
-                    {name: 'email', class: 'align-middle email'},
-                    {name: 'amount', class: 'align-middle amount'},
-                    {name: 'action', class: 'align-middle action'}
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
+                    {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false},
+                    {name: 'destination', class: 'align-middle destination form-group', orderable: false},
+                    {name: 'consignee_name', class: 'align-middle consignee_name form-group', orderable: false},
+                    {name: 'address', class: 'align-middle address form-group', orderable: false},
+                    {name: 'phone', class: 'align-middle phone form-group', orderable: false},
+                    {name: 'phone2', class: 'align-middle phone2', orderable: false},
+                    {name: 'email', class: 'align-middle email', orderable: false},
+                    {name: 'amount', class: 'align-middle amount', orderable: false},
+                    {name: 'action', class: 'align-middle action',searchable: false , orderable: false}
                 ],
                 rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    // var info = table.page.info();
+                    //
+                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
 
@@ -151,8 +151,11 @@
                                         var email = '<input class="form-control" name="consignee_email['+data.details.id+']" value="'+data.details.consignee_email+'" placeholder="Enter email">';
                                         var city = '<select class="select2 form-control consignee_city_select_'+data.details.id+'" name="consignee_city['+data.details.id+']"></select>';
                                         var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
-                                        table.row.add([0, data.details.tracking_number, city, name, address, phone1, phone2, email, data.details.amount,action]).node().id = data.details.id;
+                                        var rowNo = table.rows().count();
+
+                                        table.row.add([rowNo + 1, data.details.tracking_number, city, name, address, phone1, phone2, email, data.details.amount,action]).node().id = data.details.id;
                                         table.draw(false);
+                                        table.order([0, 'desc']).draw();
 
                                         shipment_ids.push(data.details.id);
 
