@@ -4318,5 +4318,38 @@ class AdminReportsController extends Controller
 
         $writer->save('php://output');
     }
+    public function cargo_returns_shipment_index(){
+        $cities = City::select('id','name')->where('hub',1)->get();
+        return view('admin.reports.cargo_returns_shipment_report')->with('cities', $cities);
+    }
+    public function cargo_returns_shipment_list(Request $request){
+        $cargo_returns_Shipment = Shipment::leftjoin('cargo_consignment_shipments as ccs', 'ccs.shipment_id', '=', 'shipments.id')
+            ->leftjoin('shipments_journey as sj', function($join){
+             $join->on('sj.shipment_id', '=', 'shipments.id')
+                 ->where('sj.id','=', DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,21))'));
+            })
+            ->leftjoin('shipments_journey as sjrc', function($join){
+             $join->on('sj.shipment_id', '=', 'shipments.id')
+                 ->where('sj.id','=', DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20)'));
+            })
+            ->leftjoin('shipments_journey as sja', function($join){
+                $join->on('sja.shipment_id', '=', 'shipments.id')
+                    ->where('sja.id','=', DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 23)'));
+            })
+            ->leftjoin('shipments_journey as sjd', function($join){
+                $join->on('sja.shipment_id', '=', 'shipments.id')
+                    ->where('sja.id','=', DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 25)'));
+            })
+            ->leftjoin('cargo_consignments as cc', function($join) {
+                $join->on('cc.id', '=', 'ccs.cargo_consignment_id')
+                    ->where('cc.id', '=', DB::raw('(select id from cargo_consignments where cargo_consignments.id = ccs.cargo_consignment_id and cargo_consignments.type = 2)'));
+                    })
+            ->leftjoin('cities as co', 'co.id', '=', 'cc.origin_hub_id')
+            ->leftjoin('cities as cd', 'cd.id', '=', 'cc.destination_hub_id')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'sj.shipper_status_id')
+            ->select('shipments.tracking_number as tracking_number', 'ss.name as status', 'sjrc.created_at as return_confirm_date', 'cc.id as cargo_no', 'cc.created_at as cargo_creation_date', 'co.name as origin_hub', 'cd.name as destination_hub');
+        $cargo_returns_Shipment = Datatables::of($cargo_returns_Shipment);
+            return $cargo_returns_Shipment->make(true);
+    }
 }
 

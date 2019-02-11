@@ -349,6 +349,10 @@
 						@if (session('role_id') == 1 || in_array(170, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.debriefing.index') }}">Debriefing</a></li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(170, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.cargo_returns_shipment.index') }}">Cargo Returns Shipment</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

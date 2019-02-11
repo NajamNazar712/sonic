@@ -857,6 +857,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminReportsController@debriefing_list')->name('list');
             Route::get('export', 'Admins\AdminReportsController@debriefing_export')->name('export');
         });
+        Route::prefix('cargo_returns_shipment')->name('cargo_returns_shipment.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@cargo_returns_shipment_index')->name('index');
+//            Route::get('list', 'Admins\AdminReportsController@call_verification_list')->name('list');
+
+        });
     });
 
     //Reports end
