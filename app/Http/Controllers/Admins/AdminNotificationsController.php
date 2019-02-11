@@ -146,7 +146,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['company_name', 'service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_address', 'consignee_city', 'order_id', 'shipping_mode', 'amount', 'payment_mode', 'tracking_number'];
         }
         else if ($id == 4) {
-            $details['fields'] = ['company_name', 'arrival_at', 'pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number'];
+            $details['fields'] = ['company_name', 'arrival_at', 'pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity'];
         }
         else if ($id == 5) {
             $details['fields'] = ['cargo_number', 'company_name', 'departure_at', 'order_id', 'tracking_number'];
