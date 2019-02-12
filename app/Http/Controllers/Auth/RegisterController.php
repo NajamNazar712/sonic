@@ -207,12 +207,7 @@ class RegisterController extends Controller
                 ]);
             }
         }
-        $generation_date = null;
-        if($data['cycle_of_invoicing'] == 2){
-            $generation_date = null;
-        }else{
-            $generation_date = $data['generation_date'];
-        }
+
         if($data['nature_of_account'] == 1){
 
             UserBankInfo::create([
@@ -223,11 +218,16 @@ class RegisterController extends Controller
                 'account_title'=>$data['account_title'],
                 'iban'=>$data['iban_no'],
                 'payment_cycle'=>$data['cycle_of_payment'],
-                'city_id'=>$data['bank_city'],
-                'invoicing_cycle_id' => $data['cycle_of_invoicing'],
-                'generation_date' => $generation_date
+                'city_id'=>$data['bank_city']
             ]);
         }else{
+            $generation_date = null;
+            if($data['cycle_of_invoicing'] == 2){
+                $generation_date = null;
+            }else{
+                $generation_date = $data['generation_date'];
+            }
+
             UserBankInfo::create([
                 'user_id'=>$newUser->id,
                 'bank_name'=>$data['bank_name'],

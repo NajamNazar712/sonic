@@ -168,6 +168,7 @@
                                                 <td><b>Payment Cycle</b></td>
                                                 <td>{{$user->bank->payment_cycle}}</td>
                                             </tr>
+                                            @if($user->account_type_id == 2)
                                             <tr>
                                                 <td><b>Invoicing Cycle</b></td>
                                                 <td>{{$user->bank->invoicing->name}}</td>
@@ -178,7 +179,7 @@
                                                 <td>{{$user->bank->generation_date}}</td>
                                             </tr>
                                             @endif
-                                            @if($user->account_type_id == 2)
+
                                                 <tr>
                                                     <td><b>Billing Person Name</b></td>
                                                     <td>{{$user->bank->billing_person_name}}</td>
