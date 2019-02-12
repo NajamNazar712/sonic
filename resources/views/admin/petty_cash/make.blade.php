@@ -97,6 +97,9 @@
         .custom-col-width{
             min-width: 150px;
         }
+        th.expense_amount, th.reference_no{
+            width: 80px;
+        }
         .custom-hub-col-width{
             min-width: 100px;
         }
@@ -128,51 +131,63 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('.reference_no').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-            });
+            // $('.reference_no').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false,
+            //     'rightAlign': false,
+            // });
             $('#select_statement_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Hub',
                 width:'100%',
                 allowClear:true
             });
-            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(2)->toDateString() }}';
-            var future_date_limit = '{{ Carbon\Carbon::now()->addDays(28)->toDateString() }}';
+
 
             $('#make_statement_form #select_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                min: new Date(old_date_limit),
-                max: new Date(future_date_limit),
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    // if (context.select) {
-                    //     $('#make_statement_form #select_date_to').pickadate('picker').set('min', $('#make_statement_form #select_date_from').pickadate('picker').get('select'));
-                    // }
+                    if (context.select) {
+                        var current_date = $('input[name="select_date_from_formatted"]').val();
+                        var future = future_date(current_date);
+                        $('#make_statement_form #select_date_to').pickadate('picker').set({'select': future},{muted: true});
+                    }
                 }
             });
+
+            function future_date(from_date) {
+                var today = new Date(from_date);
+                // var tomorrow = new Date();
+                today.setDate(today.getDate()+32);
+                return today
+            }
+
             $('#make_statement_form #select_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                min: new Date(old_date_limit),
-                max: new Date(future_date_limit),
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    // if (context.select) {
-                    //     $('#make_statement_form #select_date_from').pickadate('picker').set('max', $('#make_statement_form #select_date_to').pickadate('picker').get('select'));
-                    // }
+                    if (context.select) {
+                        var current_date = $('input[name="select_date_to_formatted"]').val();
+                        var past = past_date(current_date);
+                        $('#make_statement_form #select_date_from').pickadate('picker').set({'select': past},{muted: true});
+                    }
                 }
             });
-
+            function past_date(to_date) {
+                var today = new Date(to_date);
+                // var tomorrow = new Date();
+                today.setDate(today.getDate()-32);
+                return today;
+            }
             var selected_rows = [];
             var rows_count = 0;
             var table = $('#datatable').DataTable({
@@ -230,13 +245,14 @@
             $.validator.addMethod("reference_no",
                 function(value, element) {
                     result = false;
-                    if(value > 3) {
+                    if(value.length > 3) {
                         $.ajax({
                             type: "POST",
                             async: false,
                             url: '{!! route('admin.petty_cash.make.reference') !!}', // script to validate in server side
-                            data: {reference_id: value,'_token': '{!! csrf_token() !!}'},
+                            data: {reference: value,'_token': '{!! csrf_token() !!}'},
                             success: function (data) {
+
                                 if(data === "false"){
                                     result = true;
                                 }else{
@@ -264,10 +280,10 @@
                 var hub_select = '<select class="form-control hub_select select2" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="City is required"></select>';
                 var date_input = '<div class="form-group input-group mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date (From) is required"></div>';
 
-                var expense_detail_input = '<input class="form-control" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required">';
+                var expense_detail_input = '<textarea class="form-control" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
                 var amount_input = '<input class="form-control amount" name="amount['+rows_count+']" placeholder="Amount"  data-rule-required="true" data-msg-required="Amount is required">';
                 var reference_input = '<input class="form-control reference_row" name="reference['+rows_count+']" placeholder="Reference No" data-rule-required="true" data-msg-required="Reference No. is required">';
-                var remarks_input = '<input class="form-control" name="remarks['+rows_count+']" placeholder="Remarks">';
+                var remarks_input = '<textarea class="form-control" name="remarks['+rows_count+']" placeholder="Remarks"></textarea>';
                 if(rows_count == 1){
                     var remove = '';
                 }else{
