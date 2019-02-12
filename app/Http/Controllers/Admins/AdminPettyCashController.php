@@ -33,7 +33,7 @@ class AdminPettyCashController extends Controller
     }
 
     public function make_petty_cash_statement_check_reference(Request $request){
-        $reference = $request->reference_id;
+        $reference = $request->reference;
         if(PettyCashStatement::where('reference_no',$reference)->exists()){
             return "true";
         }else{
@@ -274,10 +274,11 @@ class AdminPettyCashController extends Controller
 
                 $dropdown .= '<a href="'.$route.'" class="dropdown-item" ><i class="ft-eye"></i> View Details</a>';
 
-                if(session('role_id') == 1 || ($petty->status == 0 && (session('role_id') == 9) || session('role_id') == 10) || ($petty->status == 1 && (session('role_id') == 3) || session('role_id') == 8 || session('role_id') == 20) || ($petty->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
-
-                    $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div>Approve</button>';
-
+//                if((session('role_id') == 1) || ($petty->status == 0 && (session('role_id') == 9) || session('role_id') == 10) || ($petty->status == 1 && (session('role_id') == 3) || session('role_id') == 8 || session('role_id') == 20) || ($petty->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
+                if((session('role_id') == 1) || in_array(173, session('permissions'))){
+                    if((session('role_id') == 1) || ($petty->status == 0 && session('department_id') == 6) || ($petty->status == 1 && (session('department_id') == 6)) || ($petty->status == 2 && session('department_id') == 4)) {
+                        $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div>Approve</button>';
+                    }
                 }
                 return $dropdown;
             });
@@ -286,6 +287,11 @@ class AdminPettyCashController extends Controller
         }
         if ($search_date = $request->get('search_creation_date')) {
             $petty->whereDate('petty_cash_statements.created_at', $search_date);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $petty->whereBetween('petty_cash_statements.created_at', [$from,$to]);
         }
         return $petty->make(true);
     }
