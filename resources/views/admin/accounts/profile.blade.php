@@ -168,6 +168,7 @@
                                     <td><b>Payment Cycle</b></td>
                                     <td>{{$user->bank->payment_cycle}}</td>
                                 </tr>
+                                @if($user->bank->invoicing_cycle_id != null)
                                 <tr>
                                     <td><b>Invoicing Cycle</b></td>
                                     <td>{{$user->bank->invoicing->name}}</td>
@@ -176,6 +177,7 @@
                                     <td><b>Generation Date</b></td>
                                     <td>{{$user->bank->generation_date}}</td>
                                 </tr>
+                                @endif
                                 @if($user->account_type_id == 2)
                                     <tr>
                                         <td><b>Billing Person Name</b></td>
@@ -435,13 +437,14 @@
                                         </select>
                                     </div>
                                 </div>
+
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
                                         <label>Invoicing Cycle</label>
                                         <span class="danger">*</span>
                                         <select name="invoicing_cycle_id" id="invoicing_cycle" data-rule-required="true" data-msg-required="Invoicing Cycle is required" class="select2 form-control required">
                                             @foreach($invoicing_cycle as $cycle)
-                                            <option value="{{$cycle->id}}" {{ $user->bank->invoicing_cycle_id == $cycle->id ? 'selected' : '' }}>{{$cycle->name}}</option>
+                                            <option value="{{$cycle->id}}" {{ ($user->bank->invoicing_cycle_id != null)? $user->bank->invoicing_cycle_id:'' == $cycle->id ? 'selected' : '' }}>{{$cycle->name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -450,6 +453,7 @@
 
 
                             </div>
+
                             @if($user->account_type_id == 2)
                                 <div class="col-6">
                                     <div class="form-group row">

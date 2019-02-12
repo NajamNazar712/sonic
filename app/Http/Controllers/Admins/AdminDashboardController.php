@@ -13,6 +13,7 @@ use App\Http\Models\AdminLogs;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\InvoicingCycle;
 use App\Http\Models\Rates\HistoryBookingTypeCharges;
 use App\Http\Models\Rates\HistoryCashHandlingCharge;
 use App\Http\Models\Rates\HistoryDiscountCharge;
@@ -5863,9 +5864,11 @@ class AdminDashboardController extends Controller
         $product = Product::find($user->product_id);
         $products = Product::all();
         $banks = BanksList::all();
+        $invoicing_cycle = InvoicingCycle::all();
         $city_list = City::where('status',1)->get();
-        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products]);
+        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle]);
     }
+
 
     public function updateProfile(Request $request)
     {
@@ -5909,7 +5912,7 @@ class AdminDashboardController extends Controller
     {
 
         $user_id = $request->user_id;
-
+        $user = User::find($user_id);
         //1 for Admin, 0 for User
 
         $request->validate([
@@ -5918,13 +5921,36 @@ class AdminDashboardController extends Controller
             'account_no'=>'required|string|max:255',
             'account_title'=>'required|string|max:255',
             'iban'=>'required|string|max:255',
-            'payment_mode'=>'required|string|max:255',
             'payment_cycle'=>'required|string|max:255'
         ]);
+        $generation_date = null;
+        if($request->invoicing_cycle_id == 2){
+            $generation_date = null;
+        }else{
+            $generation_date = $request->generation_date;
+        }
 
+        if($user->account_type_id == 1){
+            UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
+                'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_cycle'=>$request->payment_cycle,'invoicing_cycle_id' => $request->invoicing_cycle_id,'generation_date' => $generation_date]);
 
-        UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
-            'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_mode'=>$request->payment_mode,'payment_cycle'=>$request->payment_cycle]);
+        }else{
+            UserBankInfo::where('user_id',$user_id)->update([
+                    'bank_branch'=>$request->bank_branch,
+                    'bank_name'=>$request->bank_name,
+                    'account_no'=>$request->account_no,
+                    'account_title'=>$request->account_title,
+                    'iban'=>$request->iban,
+                    'city_id'=>$request->bank_city,
+                    'payment_cycle'=>$request->payment_cycle,
+                    'invoicing_cycle_id' => $request->invoicing_cycle_id,
+                    'generation_date' => $generation_date,
+                    'billing_person_name' => $request->billing_person_name,
+                    'billing_person_phone' => $request->billing_person_phone,
+                    'billing_person_email' => $request->billing_person_email,
+                    'billing_address' => $request->billing_address
+            ]);
+        }
         AdminLogs::create([
             'admin_id' => Auth::id(),
             'user_id' => $user_id
