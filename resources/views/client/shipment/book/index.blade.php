@@ -9,6 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
+{{--					@php(dd($user->shipping[0]['id']))--}}
 					Book a Shipment
 					<span id="selected_service_type_name">{{ (Session::has('service_type_name')) ? ('(' . Session::get('service_type_name') . ')') : '' }}</span>
 					<button type="button" class="btn btn-primary d-block mt-1 ml-auto d-sm-block mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
@@ -38,7 +39,6 @@
 
 										<div class="form-group">
 											<select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
-												<option value="0">New</option>
 
 												@php ($default_pickup_address = FALSE)
 
@@ -47,12 +47,13 @@
 														@if ($shipping_information['default_address'] == 1)
 															@php ($default_pickup_address = TRUE)
 
-															<option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+															<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
 														@else
 															<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
 														@endif
 													@endif
 												@endforeach
+												<option value="0">New</option>
 											</select>
 										</div>
 
@@ -608,10 +609,11 @@
 				}
 			});
 
+			{{--console.log(@json($user->shipping[0]['id']));--}}
 
-			@if (!$default_pickup_address)
-				$('#pickup_address').prepend('<option value="" selected="selected"></option>');
-			@endif
+			{{--@if (!$default_pickup_address)--}}
+				{{--$('#pickup_address').prepend('<option value="" selected="selected"></option>');--}}
+			{{--@endif--}}
 
 			$('#pickup_address').select2({
 				width: '100%',
@@ -841,7 +843,7 @@
 				$(this).valid();
 			});
 
-			$('#payment_mode').prepend('<option value="" selected="selected"></option>').select2({
+			$('#payment_mode').select2({
 				width: '100%',
 				placeholder: 'Mode of Payment*'
 			}).bind('change', function() {
