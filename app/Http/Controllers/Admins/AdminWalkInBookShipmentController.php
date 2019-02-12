@@ -148,7 +148,7 @@ class AdminWalkInBookShipmentController extends Controller
         $products = Product::orderBy('product_name')->get();
         $shipping_mode = ShippingMode::where('id','!=', 4)->get();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
-        $charges_modes = ChargesModes::get();
+        $charges_modes = ChargesModes::where('id','!=', 3)->get();
         return view('admin.shipment.book.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user_shipping_infos' => $user_shipping_infos, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'consignee_cities' => $consignee_cities]);
     }
 
@@ -371,100 +371,120 @@ class AdminWalkInBookShipmentController extends Controller
     }
 
     public function print_air_waybill(Request $request) {
-        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+        $user_type = NULL;
+        $user_id = NULL;
 
-        $html = '
-                <!doctype html>
-                <html lang="en">
-                  <head>
-                    <meta charset="utf-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        if (Auth::guard('admin')->check()) {
+            $user_type = 3;
+        }
+        else if (Auth::guard('web')->check()) {
+            $user_type = 1;
+        }
+        else if (Auth::guard('substitute_users')->check()) {
+            $user_type = 2;
+        }
 
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+        if ($user_type) {
+            $user_id = Auth::id();
 
-                    <title>Air Waybill</title>
+            $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
-                    <style>
-                      @page {
-                        size: A4 portrait;
-                      }
+            $html = '
+                    <!doctype html>
+                    <html lang="en">
+                      <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-                      * {
-                        -webkit-print-color-adjust: exact !important;
-                        color-adjust: exact !important;
-                      }
+                        <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
 
-                      body {
-                        background: none !important;
-                        color: #09262e !important;
-                        font-size: 0.9rem !important;
-                      }
+                        <title>Air Waybill</title>
 
-                      hr {
-                        border-top: 1px dashed #000000;
-                      }
+                        <style>
+                          @page {
+                            size: A4 portrait;
+                          }
 
-                      table.table-bordered {
-                        page-break-inside: avoid;
-                      }
+                          * {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                          }
 
-                      table.table-bordered tbody tr td {
-                        width: 12.5% !important;
-                        border: 1px solid #09262e !important;
-                      }
+                          body {
+                            background: none !important;
+                            color: #09262e !important;
+                            font-size: 0.9rem !important;
+                          }
 
-                      .color.primary {
-                        background: #c8c8c8 !important;
-                      }
+                          hr {
+                            border-top: 1px dashed #000000;
+                          }
 
-                      .color.secondary {
-                        background: #ebebeb !important;
-                      }
+                          table.table-bordered {
+                            page-break-inside: avoid;
+                          }
 
-                      .border {
-                        border: 1px solid #09262e !important;
-                      }
+                          table.table-bordered tbody tr td {
+                            width: 12.5% !important;
+                            border: 1px solid #09262e !important;
+                          }
 
-                      .border.twice {
-                        border-width: 2px !important;
-                      }
+                          .color.primary {
+                            background: #c8c8c8 !important;
+                          }
 
-                      .border.twice-top {
-                        border-top-width: 2px !important;
-                      }
+                          .color.secondary {
+                            background: #ebebeb !important;
+                          }
 
-                      .border.twice-bottom {
-                        border-bottom-width: 2px !important;
-                      }
+                          .border {
+                            border: 1px solid #09262e !important;
+                          }
 
-                      .border.twice-left {
-                        border-left-width: 2px !important;
-                      }
+                          .border.twice {
+                            border-width: 2px !important;
+                          }
 
-                      .border.twice-right {
-                        border-right-width: 2px !important;
-                      }
+                          .border.twice-top {
+                            border-top-width: 2px !important;
+                          }
 
-                      td.replacement span {
-                        width: 22px;
-                      }
+                          .border.twice-bottom {
+                            border-bottom-width: 2px !important;
+                          }
 
-                      td.replacement span img {
-                        display: block;
-                        width: 100%;
-                        margin: auto;
-                        background: #c8c8c8;
-                        border-radius: 25px;
-                      }
-                    </style>
-                  </head>
-                  <body>
-                    <div>
-      ';
-        $shipment_details = '';
-        $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
-        $user_id = $check_id['setting_value'];
+                          .border.twice-left {
+                            border-left-width: 2px !important;
+                          }
+
+                          .border.twice-right {
+                            border-right-width: 2px !important;
+                          }
+
+                          td.replacement span {
+                            width: 22px;
+                          }
+
+                          td.replacement span img {
+                            display: block;
+                            width: 100%;
+                            margin: auto;
+                            background: #c8c8c8;
+                            border-radius: 25px;
+                          }
+                        </style>
+                      </head>
+                      <body>
+                        <div>
+            ';
+
+            $shipment_details = '';
+
+            $check_id = GlobalSettings::select('setting_value')->where('type', 'Walk-In')->first();
+            $user_id = $check_id['setting_value'];
+
             $shipment = Shipment::where('id',$request->ids)->first();
+
             if ($user_id == $shipment->user_id) {
                 $table_start = '
                       <table class="table table-sm table-bordered border twice">
@@ -486,119 +506,121 @@ class AdminWalkInBookShipmentController extends Controller
                           <tr>
                             <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
                             <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
-          ';
+                ';
 
                 $table_start .= '
-                            <td class="color primary"><strong>Order ID</strong></td>
-                            <td>' . $shipment->order_id . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
-                            <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
-                            <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                            <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
-                          </tr>
-                          <tr>
-                            <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
-                            <td colspan="4" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Name</strong></td>
-                            <td colspan="3" class="border twice-right">' . $shipment->user->name . ' (' . $shipment->pickup_address->poc . ')</td>
-                            <td class="color secondary border twice-left"><strong>Name</strong></td>
-                            <td colspan="3">' . $shipment->consignee_name . '</td>
-                          </tr>
+                                <td class="color primary"><strong>Order ID</strong></td>
+                                <td>' . $shipment->order_id . '</td>
+                              </tr>
+                              <tr>
+                                <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
+                                <td class="color primary border twice-bottom"><strong>Destination</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                              </tr>
+                              <tr>
+                                <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
+                                <td colspan="4" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="color secondary"><strong>Name</strong></td>
+                                <td colspan="3" class="border twice-right">' . $shipment->user->name . ' (' . $shipment->pickup_address->poc . ')</td>
+                                <td class="color secondary border twice-left"><strong>Name</strong></td>
+                                <td colspan="3">' . $shipment->consignee_name . '</td>
+                              </tr>
 
-                          <tr>
-                            <td class="color secondary"><strong>Address</strong></td>
-                            <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
-                            <td class="color secondary border twice-left"><strong>Address</strong></td>
-                            <td colspan="3">' . $shipment->consignee_address . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                            <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
-                            <td colspan="3" class="border twice-bottom">' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                          </tr>
-          ';
+                              <tr>
+                                <td class="color secondary"><strong>Address</strong></td>
+                                <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
+                                <td class="color secondary border twice-left"><strong>Address</strong></td>
+                                <td colspan="3">' . $shipment->consignee_address . '</td>
+                              </tr>
+                              <tr>
+                                <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
+                                    <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                                <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
+                                <td colspan="3" class="border twice-bottom">' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+                              </tr>
+                ';
 
                 $table_end = '
-                          <tr>
-                            <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
-                            <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
-                            <td class="color primary border twice-top twice-bottom twice-left"><strong>Estimated Weight</strong></td>
-                            <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
-                          </tr>
-                          <tr>
-                            <td class="color primary border twice-top twice-bottom twice-left"><strong>Charges Mode</strong></td>
-                            <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->charges_mode->charges_mode . '</strong></td>
-                          </tr>
-                          <tr>
-                            <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
+                              <tr>
+                                <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
+                                <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
+                                <td class="color primary border twice-top twice-bottom twice-left"><strong>Estimated Weight</strong></td>
+                                <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="color primary border twice-top twice-bottom twice-left"><strong>Charges Mode</strong></td>
+                                <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->charges_mode->charges_mode . '</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
                 ';
 
                 if ($shipment->charges_mode_id == 1) {
                     $table_end .= '
-                            <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
+                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
                     ';
                 }
                 else {
                     $table_end .= '
-                            <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
+                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
                     ';
                 }
 
                 $table_end .= '
-                          </tr>
-                          <tr>
-                            <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
-                          </tr>
-                        </tbody>
-                      </table>
+                              </tr>
+                              <tr>
+                                <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
+                              </tr>
+                            </tbody>
+                          </table>
 
-                      <hr>
-          ';
-                    $shipment_details .= $table_start;
+                          <hr>
+                ';
 
-                    $item = $shipment->items->first();
+                $shipment_details .= $table_start;
 
-                    $shipment_details .= '
-                        <tr>
-                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
-                          <td class="color secondary border twice-top"><strong>Type</strong></td>
-                          <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
-                          <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                          <td>' . $item->quantity . '</td>
-                          <td colspan="2" class="border twice-top"></td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
-                        </tr>
-            ';
+                $item = $shipment->items->first();
 
-                    $shipment_details .= $table_end;
+                $shipment_details .= '
+                            <tr>
+                              <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
+                              <td class="color secondary border twice-top"><strong>Type</strong></td>
+                              <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                              <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                              <td>' . $item->quantity . '</td>
+                              <td colspan="2" class="border twice-top"></td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                              <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                            </tr>
+                ';
+
+                $shipment_details .= $table_end;
             }
 
-        $html .= $shipment_details;
-
-        if ($request->has('twice')) {
             $html .= $shipment_details;
+
+            if ($request->has('twice')) {
+                $html .= $shipment_details;
+            }
+
+            $html .= '
+                        </div>
+
+                        <script>
+                          window.onload = function() {
+                            window.print();
+                          }
+                        </script>
+                      </body>
+                    </html>
+            ';
+
+            return $html;
         }
-
-        $html .= '
-                    </div>
-
-                    <script>
-                      window.onload = function() {
-                        window.print();
-                      }
-                    </script>
-                  </body>
-                </html>
-      ';
-
-        return $html;
     }
 }

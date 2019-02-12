@@ -468,6 +468,8 @@ input:focus ~ .bg-primary {
   .btn-outline-primary:hover {
     background-color: #64a0d2;
     color: #FFF !important; }
+  .btn-outline-primary:disabled {
+    color: #64a0d2; }
   .btn-outline-primary.btn-glow {
     box-shadow: 0px 1px 20px 1px rgba(35, 120, 190, 0.6); }
 

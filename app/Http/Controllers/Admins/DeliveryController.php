@@ -1315,7 +1315,7 @@ class DeliveryController extends Controller
                     ->where('sj.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc'])
             ->where('delivery_notes.id', $id);
 
         return Datatables::of($deliveries)
@@ -1425,8 +1425,14 @@ class DeliveryController extends Controller
                     }
                     return '<input type="checkbox" name="call_verification[' . $deliveries->shId . ']" ' . $check . '>';
                 }
-
-
+            })
+            ->addColumn('fake_status', function ($deliveries) {
+                if ($deliveries->fake_status == 1) {
+                    $check = 'checked';
+                } else {
+                    $check = '';
+                }
+                return '<input type="checkbox" name="fake_status[' . $deliveries->shId . ']" ' . $check . '>';
             })
             ->make(true);
     }
@@ -1451,8 +1457,17 @@ class DeliveryController extends Controller
                 $in_new_delivery_note = DeliveryNoteShipment::where('delivery_note_id', '>', $delivery_note_id)->where('shipment_id', $shipment)->exists();
                 $shipper_status_details = Shipment::where('id', $shipment)->first();
                 $call = "call_verification.$shipment";
+                $fake = "fake_status.$shipment";
                 $status_drop = "status_drop.$shipment";
                 $reasonId = "reason_drop.$shipment";
+                $verify_fake = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
+                if ($request->has($fake)) {
+                    $verify_fake->fake_status = 1;
+                    $verify_fake->save();
+                } else {
+                    $verify_fake->fake_status = 0;
+                    $verify_fake->save();
+                }
                 if (!$in_new_delivery_note) {
                     if (!in_array($shipper_status_details->shipper_status_id, $return_status_array)) {
 

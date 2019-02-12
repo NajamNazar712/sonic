@@ -296,9 +296,16 @@ class Permission
             'reports.negative_balance_customers.list' => 148,
             'reports.call_verification.index' => 153,
             'reports.call_verification.list' => 153,
-
             'reports.petty_cash.index' => 156,
             'reports.petty_cash.list' => 156,
+            'reports.fake_status.index' => 169,
+            'reports.fake_status.list' => 169,
+            'reports.fake_status.shipments.total' => 169,
+            'reports.fake_status.shipments.undelivered' => 169,
+            'reports.fake_status.fake_status_shipment' => 169,
+            'reports.debriefing.index' => 170,
+            'reports.debriefing.list' => 170,
+            'reports.debriefing.export' => 170,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -376,7 +383,8 @@ class Permission
             'settings.ticker.store' => 152,
 
 			'settings.walk_in.index' => 154,
-            'settings.walk_in.store' => 154,            'settings.petty_cash.heads.index' => 157,
+            'settings.walk_in.store' => 154,
+            'settings.petty_cash.heads.index' => 157,
             'settings.petty_cash.heads.list' => 157,
             'settings.petty_cash.heads.add' => 159,
             'settings.petty_cash.heads.edit' => 160,
@@ -390,6 +398,9 @@ class Permission
             'settings.petty_cash.titles.active' => 165,
             'settings.petty_cash.titles.inactive' => 166,
 
+            'settings.auto_invoice_generation_and_due_date.index' => 171,
+            'settings.auto_invoice_generation_and_due_date.store' => 171,
+
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118,
@@ -401,6 +412,8 @@ class Permission
         'shipper' => [
             'shipment.book.index' => 1,
             'shipment.book.store' => 1,
+            'shipment.book.corporate.index' => 1,
+            'shipment.book.corporate.store' => 1,
             'shipment.book.order_id' => 1,
             'shipment.book.excel_index' => 1,
             'shipment.book.excel_store' => 1,

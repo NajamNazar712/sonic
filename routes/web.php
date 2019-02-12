@@ -49,9 +49,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
+            Route::get('index', 'Shippers\ShipperShipmentBookController@corporate_index')->name('corporate.index');
+            Route::post('corporate_store', 'Shippers\ShipperShipmentBookController@corporate_store')->name('corporate.store');
             Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
             Route::post('shipping_modes', 'Shippers\ShipperShipmentBookController@shipping_modes')->name('shipping_modes');
             Route::post('print_air_waybill', 'Shippers\ShipperShipmentBookController@print_air_waybill')->name('print_air_waybill');
+            Route::post('corporate_invoice', 'Shippers\ShipperShipmentBookController@corporate_invoice')->name('corporate_invoice');
             Route::post('check', 'Shippers\ShipperShipmentBookController@check')->name('check');
 
             Route::prefix('excel')->name('excel_')->group(function () {
@@ -230,7 +233,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('edit.rates.submit');
     //
     Route::get('/accounts/{id}/view/rates','Admins\AdminDashboardController@viewRates')->name('view.rates');
+    Route::prefix('corporate')->name('corporate.')->group(function (){
+        Route::get('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_index')->name('add.rates');
+        Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_submit')->name('add.rates');
+        Route::get('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_index')->name('edit.rates');
+        Route::put('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_submit')->name('edit.rates');
+        Route::get('{id}/view/rates','Admins\AdminCorporateAccountsController@view_rates_index')->name('view.rates');
 
+    });
     //ajax request
 
 
@@ -844,6 +854,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('download', 'Admins\AdminReportsController@sales_person_performance_download')->name('download');
         });
 
+		Route::prefix('fake_status')->name('fake_status.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@fake_status_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@fake_status_list')->name('list');
+            Route::post('shipments/total','Admins\AdminReportsController@fake_status_shipments_total')->name('shipments.total');
+            Route::post('shipments/undelivered','Admins\AdminReportsController@fake_status_shipments_undelivered')->name('shipments.undelivered');
+            Route::post('fake_status_shipment','Admins\AdminReportsController@fake_status_shipments')->name('fake_status_shipment');
+        });
+
+		Route::prefix('debriefing')->name('debriefing.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@debriefing_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@debriefing_list')->name('list');
+            Route::get('export', 'Admins\AdminReportsController@debriefing_export')->name('export');
+        });
     });
 
     //Reports end
@@ -896,6 +919,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('walk_in')->name('walk_in.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@walk_in_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@walk_in_store')->name('store');
+        });
+        Route::prefix('auto_invoice_generation_and_due_date')->name('auto_invoice_generation_and_due_date.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@auto_invoice_generation_and_due_date_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@auto_invoice_generation_and_due_date_store')->name('store');
         });
         Route::prefix('petty_cash')->name('petty_cash.')->group(function (){
            Route::prefix('heads')->name('heads.')->group(function (){
