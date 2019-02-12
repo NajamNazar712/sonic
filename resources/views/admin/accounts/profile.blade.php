@@ -168,17 +168,20 @@
                                     <td><b>Payment Cycle</b></td>
                                     <td>{{$user->bank->payment_cycle}}</td>
                                 </tr>
-                                @if($user->bank->invoicing_cycle_id != null)
-                                <tr>
-                                    <td><b>Invoicing Cycle</b></td>
-                                    <td>{{$user->bank->invoicing->name}}</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Generation Date</b></td>
-                                    <td>{{$user->bank->generation_date}}</td>
-                                </tr>
-                                @endif
+
+
+
                                 @if($user->account_type_id == 2)
+                                    <tr>
+                                        <td><b>Invoicing Cycle</b></td>
+                                        <td>{{$user->bank->invoicing->name}}</td>
+                                    </tr>
+                                    @if($user->bank->invoicing_cycle_id != 2)
+                                        <tr>
+                                            <td><b>Generation Date</b></td>
+                                            <td>{{$user->bank->generation_date}}</td>
+                                        </tr>
+                                    @endif
                                     <tr>
                                         <td><b>Billing Person Name</b></td>
                                         <td>{{$user->bank->billing_person_name}}</td>
@@ -437,7 +440,9 @@
                                         </select>
                                     </div>
                                 </div>
-
+                            </div>
+                                @if($user->account_type_id == 2)
+                                <div class="col-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
                                         <label>Invoicing Cycle</label>
@@ -450,11 +455,11 @@
                                     </div>
                                 </div>
                                 <div id="generation_div" class="d-none"></div>
+                                </div>
 
 
-                            </div>
 
-                            @if($user->account_type_id == 2)
+
                                 <div class="col-6">
                                     <div class="form-group row">
                                         <div class="form-group col-md-9">

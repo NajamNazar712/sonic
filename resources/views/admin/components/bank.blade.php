@@ -30,19 +30,20 @@
             <th class="border-primary border-darken-1 align-middle text-center">Payment Cycle</th>
             <td class="align-middle text-center">{{$bank->payment_cycle}}</td>
         </tr>
-        @if($bank->invoicing_cycle_id != null)
+        @if($user->account_type_id == 2)
+
         <tr role="row">
             <th class="border-primary border-darken-1 align-middle text-center">Invoicing Cycle </th>
             <td class="align-middle text-center">{{$bank->invoicing->name}}</td>
         </tr>
-        @if($bank->invoicing_cycle_id == 1 || $bank->invoicing_cycle_id == 3)
+            @if($bank->invoicing_cycle_id != 2)
             <tr role="row">
                 <th class="border-primary border-darken-1 align-middle text-center">Generation Date</th>
                 <td class="align-middle text-center">{{$bank->generation_date}}</td>
             </tr>
             @endif
-        @endif
-    @if($user->account_type_id == 2)
+
+
         <tr role="row">
             <th class="border-primary border-darken-1 align-middle text-center">Billing Person Name</th>
             <td class="align-middle text-center">{{$bank->billing_person_name}}</td>

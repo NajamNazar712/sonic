@@ -5923,18 +5923,19 @@ class AdminDashboardController extends Controller
             'iban'=>'required|string|max:255',
             'payment_cycle'=>'required|string|max:255'
         ]);
-        $generation_date = null;
-        if($request->invoicing_cycle_id == 2){
-            $generation_date = null;
-        }else{
-            $generation_date = $request->generation_date;
-        }
+
 
         if($user->account_type_id == 1){
             UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
-                'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_cycle'=>$request->payment_cycle,'invoicing_cycle_id' => $request->invoicing_cycle_id,'generation_date' => $generation_date]);
+                'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_cycle'=>$request->payment_cycle]);
 
         }else{
+            $generation_date = null;
+            if($request->invoicing_cycle_id == 2){
+                $generation_date = null;
+            }else{
+                $generation_date = $request->generation_date;
+            }
             UserBankInfo::where('user_id',$user_id)->update([
                     'bank_branch'=>$request->bank_branch,
                     'bank_name'=>$request->bank_name,

@@ -448,34 +448,39 @@
                                                                 </select>
                                                             </div>
                                                         </div>
-                                                    <div class="form-group">
-
-                                                        <label for="cycle_of_invoicing">Cycle Of Invoicing:
-                                                            <span class="danger">*</span>
-                                                        </label>
-                                                        <div>
-                                                            <select name="cycle_of_invoicing" id="cycle_of_invoicing" class="select2 form-control required">
-                                                                @foreach($invoicing_cycle as $cycle)
-                                                                    <option value="{{$cycle->id}}"  {{ old('cycle_of_invoicing') == $cycle->id ? 'selected' : '' }} >{{$cycle->name}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group d-none" id="generation_div">
-
-                                                        <label for="generation_date">Generation Date:
-                                                            <span class="danger">*</span>
-                                                        </label>
-                                                        <div>
-                                                            <select name="generation_date" id="generation_date" class="select2 form-control d-none"></select>
-                                                        </div>
-                                                    </div>
 
                                                 </div>
 
                                                 </div>
                                             <div id="billing_information_div" class="row d-none">
+                                                <div class="col-md-6">
 
+                                                <div class="form-group">
+
+                                                    <label for="cycle_of_invoicing">Cycle Of Invoicing:
+                                                        <span class="danger">*</span>
+                                                    </label>
+                                                    <div>
+                                                        <select name="cycle_of_invoicing" id="cycle_of_invoicing" class="select2 form-control required">
+                                                            @foreach($invoicing_cycle as $cycle)
+                                                                <option value="{{$cycle->id}}"  {{ old('cycle_of_invoicing') == $cycle->id ? 'selected' : '' }} >{{$cycle->name}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                </div>
+                                                <div class="col-md-6">
+
+                                                <div class="form-group d-none" id="generation_div">
+
+                                                    <label for="generation_date">Generation Date:
+                                                        <span class="danger">*</span>
+                                                    </label>
+                                                    <div>
+                                                        <select name="generation_date" id="generation_date" class="select2 form-control d-none"></select>
+                                                    </div>
+                                                </div>
+                                                </div>
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="bank_branch">
