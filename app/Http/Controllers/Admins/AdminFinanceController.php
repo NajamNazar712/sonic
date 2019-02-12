@@ -899,9 +899,9 @@ class AdminFinanceController extends Controller
 
             $shipment->save();
 
-            $payment_mode = $shipment->user->bank->payment_mode;
+            $account_type_id = $shipment->user->account_type_id;
 
-            if ($payment_mode == 'IBFT') {
+            if ($account_type_id == 1) {
                 $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
 
                 if ($pending_payment_shipment->exists()) {
@@ -1023,9 +1023,9 @@ class AdminFinanceController extends Controller
 
             $shipment->save();
 
-            $payment_mode = $shipment->user->bank->payment_mode;
+            $account_type_id = $shipment->user->account_type_id;
 
-            if ($payment_mode == 'IBFT') {
+            if ($account_type_id == 1) {
                 $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $request->id);
 
                 if ($pending_payment_shipment->exists()) {
@@ -1122,9 +1122,9 @@ class AdminFinanceController extends Controller
                     $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id);
 
                     if (!$done_payment_shipment->exists()) {
-                        $payment_mode = $shipment->user->bank->payment_mode;
+                        $account_type_id = $shipment->user->account_type_id;
 
-                        if ($payment_mode != 'IBFT') {
+                        if ($account_type_id == 2) {
                             $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
 
                             if ($pending_invoice_shipment->exists()) {
@@ -1219,9 +1219,9 @@ class AdminFinanceController extends Controller
                     $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id);
 
                     if (!$done_payment_shipment->exists()) {
-                        $payment_mode = $shipment->user->bank->payment_mode;
+                        $account_type_id = $shipment->user->account_type_id;
 
-                        if ($payment_mode != 'IBFT') {
+                        if ($account_type_id == 2) {
                             $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
 
                             if ($pending_invoice_shipment->exists()) {
@@ -1360,9 +1360,9 @@ class AdminFinanceController extends Controller
             $payment_type = 0;
         }
         else {
-            $payment_mode = $shipment->user->bank->payment_mode;
+            $account_type_id = $shipment->user->account_type_id;
 
-            if ($payment_mode == 'IBFT') {
+            if ($account_type_id == 1) {
                 $payment_type = 0;
             }
             else {
@@ -1428,9 +1428,9 @@ class AdminFinanceController extends Controller
 
         $shipment->save();
 
-        $payment_mode = $shipment->user->bank->payment_mode;
+        $account_type_id = $shipment->user->account_type_id;
 
-        if ($payment_mode == 'IBFT') {
+        if ($account_type_id == 1) {
             $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
 
             if ($pending_payment_shipment->exists()) {
@@ -1563,11 +1563,11 @@ class AdminFinanceController extends Controller
             $pending_payment->save();
         }
 
-        $payment_mode = $shipment->user->bank->payment_mode;
+        $account_type_id = $shipment->user->account_type_id;
 
         $pending_payment_shipment = new PendingPaymentShipment();
 
-        if ($payment_mode == 'IBFT') {
+        if ($account_type_id == 1) {
             $pending_payment_shipment->pending_payment_id = $pending_payment->id;
             $pending_payment_shipment->shipment_id = $shipment_id;
             $pending_payment_shipment->type = $type;
@@ -2651,7 +2651,7 @@ class AdminFinanceController extends Controller
 
         $shipper_bank = $shipper->bank;
 
-        $payment_mode = $shipper_bank->payment_mode;
+        $account_type_id = $shipment->user->account_type_id;
 
         $html = '
                 <!doctype html>
@@ -2796,15 +2796,15 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($payment_mode == 'IBFT' && $done_payment_shipment->type != 2) ? number_format($shipment->weight_charges) : '0') . '</td>
-                              <td>' . (($payment_mode == 'IBFT' && $done_payment_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2) ? number_format($shipment->weight_charges) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable) : '0') . '</td>
                             </tr>
             ';
 
             $serial_number++;
 
-            if ($payment_mode == 'IBFT') {
+            if ($account_type_id == 1) {
                 if ($done_payment_shipment->type != 2) {
                     if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
