@@ -11,7 +11,6 @@ use App\Http\Models\Rider;
 use App\Http\Models\CargoConsignment;
 
 use Auth;
-use BlakeGardner\MacAddress;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
@@ -120,6 +119,7 @@ class AdminTrackingController extends Controller
     				$journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
     				$journey_details['user'] = ($journey->admin_id) ? $journey->admin->name : $journey->user->name;
                     $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
+                    $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
 
     				$details['tracking_history'][] = $journey_details;
     			}
@@ -228,8 +228,6 @@ class AdminTrackingController extends Controller
     }
 
     public function quick_tracking_index(){
-        var_dump(MacAddress::getCurrentMacAddress('eth2'));
-        var_dump(MacAddress::generateMacAddress());
         return view('admin.tracking.quick_tracking');
     }
 

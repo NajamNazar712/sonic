@@ -6,7 +6,6 @@
     "type": "project",
     "require": {
         "php": "^7.1.3",
-        "blake-gardner/mac-address": "^2.1",
         "buzz/laravel-google-captcha": "2.*",
         "doctrine/dbal": "^2.7",
         "fideloper/proxy": "^4.0",
@@ -16,6 +15,7 @@
         "laravel/tinker": "^1.0",
         "phpoffice/phpspreadsheet": "^1.3",
         "picqer/php-barcode-generator": "^0.2.2",
+        "vectorface/whip": "^0.3.2",
         "yajra/laravel-datatables-oracle": "~6.0"
     },
     "require-dev": {
