@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\ChargesModes;
 use App\Http\Models\Rider;
+use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -1367,6 +1368,7 @@ class AdminFinanceController extends Controller
     public function add_shipment_adjustment_store(Request $request) {
         $shipment_id = $request->input('shipment_id');
         $payable = str_replace(',', '', $request->input('payable'));
+        $payable_remarks = $request->input('payable_remarks');
 
         $shipment = Shipment::find($shipment_id);
 
@@ -1434,6 +1436,12 @@ class AdminFinanceController extends Controller
 
             $pending_invoice_shipment->save();
         }
+        $shipment_payment_journey = ShipmentsPaymentJourney::create([
+            'shipment_id' => $shipment_id,
+            'status_id' => 4,
+            'admin_id' => Auth::id(),
+            'payable_remarks' => $payable_remarks
+        ]);
 
         return redirect()->route('admin.finance.add_shipment_adjustment.index')->with('success', 'Shipment\'s adjustment has been added');
     }
