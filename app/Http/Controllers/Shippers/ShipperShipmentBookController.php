@@ -44,7 +44,7 @@ class ShipperShipmentBookController extends Controller
         session(['service_type_name' => $service_type->booking_type]);
     }
 
-    static public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id) {
+    static public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id, $default) {
         $user_shipping_info = new UserShippingInfo();
 
         $user_shipping_info->user_id = $user_id;
@@ -53,6 +53,7 @@ class ShipperShipmentBookController extends Controller
         $user_shipping_info->phone = $phone_number;
         $user_shipping_info->email = $email_address;
         $user_shipping_info->city_id = $city_id;
+        $user_shipping_info->default_address = $default;
 
         $user_shipping_info->save();
 
@@ -196,8 +197,14 @@ class ShipperShipmentBookController extends Controller
 
                     if ($request->input('pickup_address') == 0) {
                         $pickup_city_id = $request->input('new_pickup_city');
-
-                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id);
+                        if($request->input('make_default_address') == 1){
+                            $default = 1;
+                        }
+                        else{
+                            $default = 1;
+                        }
+                        UserShippingInfo::where('user_id', $user_id)->update(['default_address' => 0]);
+                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, $default);
                     }
                     else {
                         $pickup_address_id = $request->input('pickup_address');
