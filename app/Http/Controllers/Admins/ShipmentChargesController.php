@@ -65,6 +65,13 @@ class ShipmentChargesController extends Controller
 
                         $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
 
+                        if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
+                            $zone_class_city = $zone_class_city->where('zone_classification_id', 2);
+                        }
+                        else {
+                            $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
+                        }
+
                         if ($zone_class_city) {
                             $zone_class_city = $zone_class_city->first();
 
@@ -503,6 +510,13 @@ class ShipmentChargesController extends Controller
                         $type_of_charges = 1;
 
                         $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
+
+                        if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
+                            $zone_class_city = $zone_class_city->where('zone_classification_id', 2);
+                        }
+                        else {
+                            $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
+                        }
 
                         if ($zone_class_city) {
                             $zone_class_city = $zone_class_city->first();
