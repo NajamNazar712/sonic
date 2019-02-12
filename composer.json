@@ -6,6 +6,7 @@
     "type": "project",
     "require": {
         "php": "^7.1.3",
+        "blake-gardner/mac-address": "^2.1",
         "buzz/laravel-google-captcha": "2.*",
         "doctrine/dbal": "^2.7",
         "fideloper/proxy": "^4.0",

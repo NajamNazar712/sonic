@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
-
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -12,7 +11,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\CargoConsignment;
 
 use Auth;
-
+use BlakeGardner\MacAddress;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
@@ -229,6 +228,8 @@ class AdminTrackingController extends Controller
     }
 
     public function quick_tracking_index(){
+        var_dump(MacAddress::getCurrentMacAddress('eth2'));
+        var_dump(MacAddress::generateMacAddress());
         return view('admin.tracking.quick_tracking');
     }
 

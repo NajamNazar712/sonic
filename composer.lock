@@ -1,11 +1,57 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "b038fa84962d3f49f7df5e32fa7b258f",
+    "content-hash": "9c5506237dd381ec17bb40f508632134",
     "packages": [
+        {
+            "name": "blake-gardner/mac-address",
+            "version": "2.1.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/BlakeGardner/php-mac-address.git",
+                "reference": "b1a4f00769e604913f95585f2fd887066aa127bb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/BlakeGardner/php-mac-address/zipball/b1a4f00769e604913f95585f2fd887066aa127bb",
+                "reference": "b1a4f00769e604913f95585f2fd887066aa127bb",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.2"
+            },
+            "require-dev": {
+                "squizlabs/php_codesniffer": "dev-phpcs-fixer"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "BlakeGardner\\MacAddress": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Blake Gardner",
+                    "email": "blakegardner@cox.net"
+                }
+            ],
+            "description": "Get, validate and generate MAC addresses.",
+            "keywords": [
+                "DHCP",
+                "IP",
+                "MAC",
+                "address",
+                "ifconfig"
+            ],
+            "time": "2018-08-21T20:03:45+00:00"
+        },
         {
             "name": "buzz/laravel-google-captcha",
             "version": "v2.1.10",
