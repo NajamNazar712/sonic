@@ -249,7 +249,7 @@ class ShipperFinanceController extends Controller
 
       $shipper_bank = $shipper->bank;
 
-      $payment_mode = $shipper_bank->payment_mode;
+      $account_type_id = $shipment->user->account_type_id;
 
       $html = '
                 <!doctype html>
@@ -394,15 +394,15 @@ class ShipperFinanceController extends Controller
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($payment_mode == 'IBFT' && $done_payment_shipment->type != 2) ? number_format($shipment->weight_charges) : '0') . '</td>
-                              <td>' . (($payment_mode == 'IBFT' && $done_payment_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2) ? number_format($shipment->weight_charges) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable) : '0') . '</td>
                             </tr>
             ';
 
             $serial_number++;
 
-            if ($payment_mode == 'IBFT') {
+            if ($account_type_id == 1) {
               if ($done_payment_shipment->type != 2) {
                   if ($done_payment_shipment->type == 0) {
                       $total_collection_amount += $done_payment_shipment->amount;
