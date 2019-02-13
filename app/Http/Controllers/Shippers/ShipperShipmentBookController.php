@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\ChargesModes;
+use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
 use Illuminate\Http\Request;
@@ -1299,9 +1300,10 @@ class ShipperShipmentBookController extends Controller
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
         $charges_modes = ChargesModes::where('id', '!=', 1)->get();
         $check = NonServiceArea::pluck('name')->toArray();
+        $min_chargeable_weight = CorporateMinChargeableWeight::where('user_id',session('user_id'))->pluck()->toArray();
 
 
-        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes]);
+        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'min_chargeable_weight' => $min_chargeable_weight]);
     }
 
     public function corporate_store(Request $request) {

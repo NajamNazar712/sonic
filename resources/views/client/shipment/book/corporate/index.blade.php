@@ -887,6 +887,39 @@
                             form.submit();
                         });
                     }
+                    console.log(min_chargeable_weight);
+                    for(k=0; k<strngArray.length;k++) {
+                        if ($('#shipping_mode').val() == $min_chargeable) {
+                        var min_chargable = JSON.parse()
+                    }
+                    }
+                    if(present.length > 0){
+                        swal({
+                            title: 'Warning',
+                            text: 'Dear Customer, this shipment will be charged to a minimum of ' + present + ' kg, based on your mode of shipping and delivery type',
+                            icon: 'info',
+                            buttons:{
+                                confirm: {
+                                    text: 'Ok',
+                                    value: false,
+                                    visible: true,
+                                    closeModal: true
+                                }},
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        }).then(function() {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Your shipment is being booked!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+
+                            form.submit();
+                        });
+                    }
                     else {
                         swal({
                             title: 'Please Wait!',
