@@ -1429,14 +1429,6 @@ class NotificationsController extends Controller
               $body = str_replace('[account_city]', $shipper->bank->city->name, $body);
             }
 
-            if (strpos($subject, '[payment_mode]') !== FALSE) {
-              $subject = str_replace('[payment_mode]', $shipper->bank->payment_mode, $subject);
-            }
-
-            if (strpos($body, '[payment_mode]') !== FALSE) {
-              $body = str_replace('[payment_mode]', $shipper->bank->payment_mode, $body);
-            }
-
             if (strpos($subject, '[payment_cycle]') !== FALSE) {
               $subject = str_replace('[payment_cycle]', $shipper->bank->payment_cycle, $subject);
             }
