@@ -95,16 +95,16 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style type="text/css">
         .custom-col-width{
-            min-width: 150px;
+            min-width: 100px;
         }
         th.expense_amount, th.reference_no{
             width: 80px;
         }
         .custom-hub-col-width{
-            min-width: 100px;
+            min-width: 80px;
         }
         .date-col-width{
-            min-width: 200px;
+            min-width: 190px;
         }
         td .picker__day {
             padding: 1px;
