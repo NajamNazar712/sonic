@@ -166,7 +166,7 @@ class AdminPettyCashController extends Controller
                 return Carbon::parse($petty_details->date)->toDateString();
             })
             ->editColumn('expense_details', function ($petty_details){
-                $expense = '<input class="form-control" disabled value="' .$petty_details->expense_details. '" name="expense['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Expense Detail is required">';
+                $expense = '<textarea class="form-control" disabled name="expense['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Expense Detail is required">'.$petty_details->expense_details.'</textarea>';
                 return $expense;
             })
             ->editColumn('amount', function ($petty_details){
@@ -178,7 +178,7 @@ class AdminPettyCashController extends Controller
                 return $reference;
             })
             ->editColumn('remarks', function ($petty_details){
-                $remarks = '<input class="form-control" disabled value="' .$petty_details->remarks. '" name="remarks['.$petty_details->statement_detail_id.']">';
+                $remarks = '<textarea class="form-control" disabled name="remarks['.$petty_details->statement_detail_id.']">'.$petty_details->remarks.'</textarea>';
                 return $remarks;
             })
             ->editColumn('status', function ($petty_details){
