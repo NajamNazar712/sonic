@@ -417,6 +417,9 @@ class Permission
             'shipment.book.order_id' => 1,
             'shipment.book.excel_index' => 1,
             'shipment.book.excel_store' => 1,
+            'shipment.book.errors' => 1,
+            'shipment.book.corporate_excel_index' => 1,
+            'shipment.book.corporate_excel_store' => 1,
 
             'orders.cancel' => 2,
 

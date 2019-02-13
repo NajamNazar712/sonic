@@ -9,11 +9,12 @@
                     <ul class="menu-content">
                         @if (session('user_type') == 1 || in_array(1, session('permissions')))
                             @if (session('account_type') == 1 && (session('user_type') == 1 || in_array(1, session('permissions'))))
-                            <li><a class="menu-item" href="{{ route('cod.shipment.book.index') }}">Book by Order Form</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.shipment.book.index') }}">Book by Order Form</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.shipment.book.excel_index') }}">Book by Excel Sheet</a></li>
                             @else
-                            <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Book by Order Form</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Book by Order Form</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Book by Excel Sheet</a></li>
                             @endif
-                            <li><a class="menu-item" href="{{ route('cod.shipment.book.excel_index') }}">Book by Excel Sheet</a></li>
                         @endif
 
                         @if (session('user_type') == 1 || in_array(3, session('permissions')))

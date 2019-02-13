@@ -61,6 +61,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
                 Route::post('', 'Shippers\ShipperShipmentBookController@excel_store')->name('store');
             });
+            Route::prefix('corporate_excel')->name('corporate_excel_')->group(function () {
+                Route::get('', 'Shippers\ShipperShipmentBookController@corporate_excel_index')->name('index');
+                Route::post('', 'Shippers\ShipperShipmentBookController@corporate_excel_store')->name('store');
+            });
         });
 
         Route::resource('book', 'Shippers\ShipperShipmentBookController');
