@@ -176,6 +176,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('changepickupstatus','Shippers\ShipperDashboardController@pickupStatusChange')->name('change.pickup.status');
     Route::post('addpickup','Shippers\ShipperDashboardController@addPickup')->name('add.pickup');
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
+    Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
