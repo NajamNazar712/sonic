@@ -46,10 +46,11 @@ class ShipperPackagingMaterialController extends Controller
     }
     public function packaging_request_submit(Request $request){
         $total_charges = 0;
+        $boxFlyers = 0;
         $smallFlyers = ($request->sm_flyer != null)? $request->sm_flyer:0;
         $mediumFlyers =($request->md_flyer != null)? $request->md_flyer:0;
         $largeFlyers =($request->lg_flyer != null)? $request->lg_flyer:0;
-        $boxFlyers =($request->boxes != null)? $request->boxes:0;
+//        $boxFlyers =($request->boxes != null)? $request->boxes:0;
         $charges = PackagingCharge::where('user_id',session('user_id'))->latest()->first();
         $total_charges += $smallFlyers * $charges->sm_flyer;
         $total_charges += $mediumFlyers * $charges->md_flyer;
