@@ -30,6 +30,7 @@
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Action</th>
@@ -137,6 +138,7 @@
                             head.push('Service Type');
                             head.push('Status');
                             head.push('Reason');
+                            head.push('Remarks');
                             head.push('Arrival Date');
                             head.push('Status Date');
 
@@ -158,6 +160,7 @@
                                 row.push(values.service_type);
                                 row.push(values.status);
                                 row.push(values.reason);
+                                row.push(values.remarks);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
 
@@ -170,6 +173,7 @@
                     return {body: body, header: head};
                 }
             } );
+            var shipment_remarks = {};
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -209,6 +213,8 @@
                                             var row = table.row(index);
                                             if ($(row.node()).hasClass('selected')) {
                                                 var id = parseInt(row.id());
+                                                var remarks = $(row.node()).find('td.shipment_remarks input').val();
+                                                shipment_remarks[id] = remarks;
                                             }
                                         });
 
@@ -218,11 +224,81 @@
                                             data:{
                                                 'shipment_ids':selected_rows,
                                                 '_token':'{{ csrf_token() }}',
+                                                'remark': shipment_remarks
+
                                             }
                                         }).done(function (data) {
                                             table.rows().deselect();
                                             selected_rows = [];
+                                            shipment_remarks = {};
                                             table.button('.confirm').disable();
+                                            table.draw('false');
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+
+                                        });
+                                    }
+                                });
+
+
+                            }else{
+                                var error = "Not selected any shipments!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        }
+                    },
+                    {
+                        text: 'Re-Attempt Request',
+                        className: 'btn btn-primary reattempt',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows !== ''){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to request shipment for Re-Attempt!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+
+                                        table.rows().nodes().each(function(index) {
+                                            var row = table.row(index);
+                                            if ($(row.node()).hasClass('selected')) {
+                                                var id = parseInt(row.id());
+                                                var remarks = $(row.node()).find('td.shipment_remarks input').val();
+                                                shipment_remarks[id] = remarks;
+                                            }
+                                        });
+
+                                        $.ajax({
+                                            url:"{{route('cod.return.pending.reattempt.status')}}",
+                                            method:'POST',
+                                            data:{
+                                                'shipment_ids':selected_rows,
+                                                '_token':'{{ csrf_token() }}',
+                                                'remark': shipment_remarks
+                                            }
+                                        }).done(function (data) {
+                                            table.rows().deselect();
+                                            selected_rows = [];
+                                            shipment_remarks = {};
+                                            table.button('.reattempt').disable();
                                             table.draw('false');
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
@@ -346,6 +422,7 @@
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
+                    {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipment_remarks', orderable: false, searchable: false},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -460,9 +537,11 @@
 
                     if (selected_rows.length > 0) {
                         table.button('.confirm').enable();
+                        table.button('.reattempt').enable();
                     }
                     else {
                         table.button('.confirm').disable();
+                        table.button('.reattempt').disable();
                     }
                 }else{
                     if(hub_ids[0] == hub_id){
@@ -477,9 +556,11 @@
 
                         if (selected_rows.length > 0) {
                             table.button('.confirm').enable();
+                            table.button('.reattempt').enable();
                         }
                         else {
                             table.button('.confirm').disable();
+                            table.button('.reattempt').disable();
                         }
                     }else{
                         var error = "Selected hubs should be the same!";
@@ -490,8 +571,10 @@
                 }
 
             });
+
             $('body').on('click','.returnMarkStatus',function () {
                 var row_id = $(this).parents('tr').attr('id');
+                var remark = $(this).parents('tr').find('td.shipment_remarks input').val();
 
 
                 if(row_id != ''){
@@ -524,6 +607,61 @@
                                 data:{
                                     'shipment_id':row_id,
                                     '_token':'{{ csrf_token() }}',
+                                    'remark':remark
+                                }
+                            }).done(function (data) {
+                                if(data.status == 1){
+                                    table.draw('false');
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                }else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                }
+
+                            });
+                        }
+                    });
+
+
+                }
+            });
+
+            $('body').on('click','.returnReattemptStatus',function () {
+                var row_id = $(this).parents('tr').attr('id');
+                var remark = $(this).parents('tr').find('td.shipment_remarks input').val();
+
+                if(row_id != ''){
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to request shipment for Re-Attempt!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url:"{{route('cod.return.pending.reattempt.status.single')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_id':row_id,
+                                    '_token':'{{ csrf_token() }}',
+                                    'remark':remark
                                 }
                             }).done(function (data) {
                                 if(data.status == 1){

@@ -67,7 +67,7 @@ class ReturnController extends Controller
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
             ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'))
-            ->where('shipments.shipper_status_id', 12)
+            ->whereIn('shipments.shipper_status_id', [12,52])
             ->groupBy('shipments.id');
 
         //DB::raw('count(*) from shipments_journey where ')
@@ -263,7 +263,7 @@ class ReturnController extends Controller
         }
     }
     public function return_marked_single_status(Request $request){
-        $admin = Auth::id();
+
         $remark = $request->remark;
         if($request->action == 'confirm'){
             $parcel = Shipment::find($request->shipment_id);
