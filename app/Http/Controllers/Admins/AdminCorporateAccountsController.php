@@ -3710,7 +3710,7 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->first()) {
+                if($min_charge = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->first()) {
                     HistoryCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
@@ -3718,7 +3718,7 @@ class AdminCorporateAccountsController extends Controller
                         'min_chargeable_weight' => $request->on_door_mcw_charges
                     ]);
                 }
-                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 2, 'delivery_type_id' => 1])->first()) {
+                if($min_charge = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 2, 'delivery_type_id' => 1])->first()) {
                     HistoryCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
@@ -3726,7 +3726,7 @@ class AdminCorporateAccountsController extends Controller
                         'min_chargeable_weight' => $request->on_door_mcw_charges
                     ]);
                 }
-                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 3, 'delivery_type_id' => 1])->first()) {
+                if($min_charge = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 3, 'delivery_type_id' => 1])->first()) {
                     HistoryCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
@@ -3734,7 +3734,7 @@ class AdminCorporateAccountsController extends Controller
                         'min_chargeable_weight' => $request->on_door_mcw_charges
                     ]);
                 }
-                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 4, 'delivery_type_id' => 1])->first()) {
+                if($min_charge = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 4, 'delivery_type_id' => 1])->first()) {
                     HistoryCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 4,
@@ -3742,7 +3742,7 @@ class AdminCorporateAccountsController extends Controller
                         'min_chargeable_weight' => $request->on_door_mcw_charges
                     ]);
                 }
-                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->first()) {
+                if($min_charge = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->first()) {
                     HistoryCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
@@ -3750,7 +3750,7 @@ class AdminCorporateAccountsController extends Controller
                         'min_chargeable_weight' => $request->on_door_mcw_charges
                     ]);
                 }
-                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->first()) {
+                if($min_charge = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->first()) {
                     HistoryCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
@@ -3758,7 +3758,7 @@ class AdminCorporateAccountsController extends Controller
                         'min_chargeable_weight' => $request->on_door_mcw_charges
                     ]);
                 }
-                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->first()) {
+                if($min_charge = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->first()) {
                     HistoryCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
@@ -3766,7 +3766,7 @@ class AdminCorporateAccountsController extends Controller
                         'min_chargeable_weight' => $request->on_door_mcw_charges
                     ]);
                 }
-                if($switches = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->first()) {
+                if($min_charge = CorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->first()) {
                     HistoryCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 4,
@@ -4147,6 +4147,7 @@ class AdminCorporateAccountsController extends Controller
                 CorporateReturnCharges::where('user_id', $id)->delete();
                 CorporateFuelSurcharge::where('user_id', $id)->delete();
                 CorporateDiscountCharge::where('user_id', $id)->delete();
+                CorporateMinChargeableWeight::where('user_id', $id)->delete();
 
                 if($pendingswitchs = PendingCorporateRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
                     CorporateRateStatus::create([
@@ -4190,6 +4191,71 @@ class AdminCorporateAccountsController extends Controller
                         'insurance_charges' => $pendingswitchs['insurance_charges'],
                         'return_charges' => $pendingswitchs['return_charges'],
                         'fuel_charges' => $pendingswitchs['fuel_charges']
+                    ]);
+                }
+
+                if($pendingmin_charge = PendingCorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->first()) {
+                    CorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'delivery_type_id' => 1,
+                        'min_chargeable_weight' => $pendingmin_charge['min_chargeable_weight']
+                    ]);
+                }
+                if($pendingmin_charge = PendingCorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 2, 'delivery_type_id' => 1])->first()) {
+                    CorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'delivery_type_id' => 1,
+                        'min_chargeable_weight' => $pendingmin_charge['min_chargeable_weight']
+                    ]);
+                }
+                if($pendingmin_charge = PendingCorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 3, 'delivery_type_id' => 1])->first()) {
+                    CorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'delivery_type_id' => 1,
+                        'min_chargeable_weight' => $pendingmin_charge['min_chargeable_weight']
+                    ]);
+                }
+                if($pendingmin_charge = PendingCorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 4, 'delivery_type_id' => 1])->first()) {
+                    CorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'delivery_type_id' => 1,
+                        'min_chargeable_weight' => $pendingmin_charge['min_chargeable_weight']
+                    ]);
+                }
+                if($pendingmin_charge = PendingCorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->first()) {
+                    CorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'delivery_type_id' => 2,
+                        'min_chargeable_weight' => $pendingmin_charge['min_chargeable_weight']
+                    ]);
+                }
+                if($pendingmin_charge = PendingCorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->first()) {
+                    CorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'delivery_type_id' => 2,
+                        'min_chargeable_weight' => $pendingmin_charge['min_chargeable_weight']
+                    ]);
+                }
+                if($pendingmin_charge = PendingCorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->first()) {
+                    CorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'delivery_type_id' => 2,
+                        'min_chargeable_weight' => $pendingmin_charge['min_chargeable_weight']
+                    ]);
+                }
+                if($pendingmin_charge = PendingCorporateMinChargeableWeight::where(['user_id' => $id , 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->first()) {
+                    CorporateMinChargeableWeight::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'delivery_type_id' => 2,
+                        'min_chargeable_weight' => $pendingmin_charge['min_chargeable_weight']
                     ]);
                 }
                 if($pendingweights = PendingCorporateWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->get()) {
@@ -4555,6 +4621,7 @@ class AdminCorporateAccountsController extends Controller
                 PendingCorporateReturnCharges::where('user_id', $id)->delete();
                 PendingCorporateFuelSurcharge::where('user_id', $id)->delete();
                 PendingCorporateDiscountCharge::where('user_id', $id)->delete();
+                PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
                 User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id()]);
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
             }
