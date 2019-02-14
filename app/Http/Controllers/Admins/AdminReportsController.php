@@ -4326,7 +4326,7 @@ class AdminReportsController extends Controller
         $cargo_returns_Shipment = Shipment::leftjoin('cargo_consignment_shipments as ccs', 'ccs.shipment_id', '=', 'shipments.id')
             ->leftjoin('shipments_journey as s', function ($join) {
                 $join->on('s.shipment_id', '=', 'shipments.id')
-                    ->where('s.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id'));
+                    ->where('s.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (20,21)'));
                     })
             ->leftjoin('users as u', 'u.id', '=', 'shipments.user_id')
             ->leftjoin('cities as cou', 'cou.id', '=', 'u.city_id')
