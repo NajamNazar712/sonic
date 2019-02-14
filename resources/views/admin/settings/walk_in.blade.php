@@ -21,7 +21,7 @@
                                 <div class="col-12 col-sm-12 col-md-12 col-lg-12">
                                     <form id="settings_form" class="form-horizontal" method="POST" action="{{ route('admin.settings.walk_in.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
-                                            <h4 class="input-group form-section mb-2 justify-content-center"><b>OverLand</b></h4>
+                                            <h4 class="input-group form-section mb-2 justify-content-center"><b>Overnight</b></h4>
                                                 <div style="width: 450px; float: left; margin-left: 20px;">
                                                     <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>
                                                     <div class="row">
@@ -104,7 +104,7 @@
                                                 </div>
                                             </div>
                                             </div>
-                                            <h4 class="input-group form-section mb-2 justify-content-center"><b>OverNight</b></h4>
+                                            <h4 class="input-group form-section mb-2 justify-content-center"><b>Overland</b></h4>
                                         <div style="width: 450px; float: left; margin-left: 20px;">
                                             <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>
                                             <div class="row">
