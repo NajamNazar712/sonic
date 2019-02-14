@@ -545,10 +545,10 @@ class APIController extends Controller
         foreach ($shipment->items as $item) {
           $item_details = array();
 
+          $item_details['order_id'] = $shipment->order_id;
           $item_details['product_type'] = $item->product->product_name;
           $item_details['description'] = $item->description;
           $item_details['quantity'] = $item->quantity;
-          $item_details['order_id'] = $shipment->order_id;
 
           $details['order_information']['items'][] = $item_details;
         }
