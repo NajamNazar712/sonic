@@ -1300,10 +1300,9 @@ class ShipperShipmentBookController extends Controller
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
         $charges_modes = ChargesModes::where('id', '!=', 1)->get();
         $check = NonServiceArea::pluck('name')->toArray();
-        $min_chargeable_weight = CorporateMinChargeableWeight::where('user_id',session('user_id'))->pluck()->toArray();
 
 
-        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'min_chargeable_weight' => $min_chargeable_weight]);
+        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes]);
     }
 
     public function corporate_store(Request $request) {
@@ -1934,6 +1933,49 @@ class ShipperShipmentBookController extends Controller
         return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes]);
     }
 
+    public function corporate_min_chargeable_weight(Request $request){
+        $min_chargeable_weight = CorporateMinChargeableWeight::where(['user_id' => session('user_id'), 'shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
+        if($request->estimated_weight < $min_chargeable_weight['min_chargeable_weight']){
+            return ['status' => 1, 'min' => $min_chargeable_weight['min_chargeable_weight']];
+        }
+        else{
+            return ['status' => 0];
+        }
+
+    }
+
+    public function corporate_shipping_modes(Request $request) {
+        $shipper_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1);
+
+        if ($shipper_shipping_modes->exists()) {
+            $shipper_shipping_modes = $shipper_shipping_modes->pluck('shipping_mode_id')->toArray();
+
+            $city_shipping_modes = CityDelivery::where('city_id', $request->consignee_city_id)->where('booking_type_id', $request->service_type_id)->whereIn('shipping_mode_id', $shipper_shipping_modes);
+
+            if ($city_shipping_modes->exists()) {
+                $city_shipping_modes = $city_shipping_modes->pluck('shipping_mode_id')->toArray();
+
+                if ($request->pickup_city_id != $request->consignee_city_id) {
+                    $city_shipping_modes = array_diff($city_shipping_modes, [4]);
+                }
+
+                if (!empty($city_shipping_modes)) {
+                    $shipping_modes = ShippingMode::whereIn('id', $city_shipping_modes)->get();
+
+                    return ['status' => 0, 'success' => 'Shipping Modes Updated', 'shipping_modes' => $shipping_modes];
+                }
+                else {
+                    return ['status' => 1, 'error' => 'No Shipping Modes Enabled for Selected Service Type, Pickup City and Consignee City'];
+                }
+            }
+            else {
+                return ['status' => 1, 'error' => 'No Shipping Modes Enabled for Selected Service Type and Consignee City'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipping Modes has been Enabled for you'];
+        }
+    }
     public function corporate_excel_store(Request $request) {
         $user_id = session('user_id');
 //        dd($request->all('form'));
