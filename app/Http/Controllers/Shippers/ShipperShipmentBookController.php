@@ -1916,6 +1916,7 @@ class ShipperShipmentBookController extends Controller
         $products = Product::all();
         $delivery_types = DeliveryType::all();
         $charges_modes = ChargesModes::where('id' ,'!=', 1)->get();
+        $min_chargeable_weights = CorporateMinChargeableWeight::where('user_id', session('user_id'))->get();
 
         $user_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
 
@@ -1930,7 +1931,7 @@ class ShipperShipmentBookController extends Controller
 
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
 
-        return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes]);
+        return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights]);
     }
 
     public function corporate_min_chargeable_weight(Request $request){
