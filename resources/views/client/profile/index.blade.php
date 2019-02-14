@@ -184,12 +184,12 @@
                                             <div class="col text-right">
                                                 @if(count($emails) > 0)
                                                     <button type="button" class="btn btn-primary round btn-min-width mr-1 mt-2 editEmail">
-                                                        <i class="la la-star-o"></i>
+                                                        <i class="la la-edit"></i>
                                                         Edit</button>
 
                                                 @else
                                                 <button type="button" class="btn btn-primary round btn-min-width mr-1 mt-2 addEmail">
-                                                    <i class="la la-star-o"></i>
+                                                    <i class="la la-plus"></i>
                                                     Add</button>
 
                                                 @endif
@@ -198,9 +198,13 @@
                                         </div>
 
                                         <ul class="list-group">
-                                            @foreach($emails as $email)
-                                                <li class="list-group-item">{{$email->email}}</li>
-                                            @endforeach
+                                            @if(count($emails) > 0)
+                                                @foreach($emails as $email)
+                                                    <li class="list-group-item">{{$email->email}}</li>
+                                                @endforeach
+                                            @else
+                                                <li class="list-group-item">No Emails Found</li>
+                                            @endif
 
                                         </ul>
 
@@ -331,7 +335,7 @@
     </div>
     {{--Add Stock Modal--}}
 
-    {{--Add Email Modal--}}
+    {{--Edit Email Modal--}}
     <div class="modal fade text-left" id="EditEmailsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditEmails"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -350,7 +354,7 @@
 
                             <div class="row mb-2 justify-content-center">
                                 <div class="col-12 form-group">
-                                    <input name="email_address" id="email_address" class="email_address" data-tags-input-name="email_address" data-rule-required="true" data-msg-required="Email Address is required">
+                                    <input name="email_address" id="email_address" class="email_address" data-tags-input-name="email_address" data-rule-required="true" data-msg-required="Email Address is required" value="{{$email_ids}}">
 
                                 </div>
                             </div>
@@ -358,6 +362,42 @@
                             <div class="row justify-content-center">
                                 <div class="col-3">
                                     <button id="editEmails" type="submit" class="btn btn-primary btn-block">Update</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{--Edit Email Modal--}}
+    {{--Add Email Modal--}}
+    <div class="modal fade text-left" id="AddEmailsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddEmails"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Notification Emails</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="add_notification_emails" action="{{route('cod.add.emails')}}" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-12 form-group">
+                                    <input name="email_address" id="email_address" class="email_address" data-tags-input-name="email_address" data-rule-required="true" data-msg-required="Email Address is required" value="">
+
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="addEmails" type="submit" class="btn btn-primary btn-block">Add</button>
                                 </div>
                             </div>
                         </div>
@@ -707,18 +747,18 @@
 
                 }
             });
-            var emails_array = '@json($emails)';
-            $('body').on('click','button.editEmail', function () {
-                $('#EditEmailsModal').modal('show');
+
+            $('body').on('click','button.addEmail', function () {
+                $('#AddEmailsModal').modal('show');
                 var REGEX_EMAIL = '([a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@' +
                     '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)';
-                var select = $('#email_address').selectize({
+                var select = $('#add_notification_emails #email_address').selectize({
                     placeholder: 'Email Addresses*',
                     delimiter: ',',
                     createOnBlur: true,
+                    preload: true,
                     persist: false,
                     plugins: ['remove_button'],
-                    // options: emails_array,
                     onDropdownOpen: function(dropdown) {
                         dropdown.remove();
                     },
@@ -730,17 +770,70 @@
                                 text: input
                             }
                         }
+                        var error = "Invalid Email Address!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
-                        alert('Invalid email address.');
                         return false;
                     }
 
                 });
-                var selectize = $select[0].selectize;
-                var yourDefaultIds = [1,2];
-                selectize.setValue(defaultValueIds);
-                select.setValue(emails_array)
             });
+
+
+            $('body').on('click','button.editEmail', function () {
+                $('#EditEmailsModal').modal('show');
+                var REGEX_EMAIL = '([a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@' +
+                    '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)';
+                var select = $('#edit_notification_emails #email_address').selectize({
+                    placeholder: 'Email Addresses*',
+                    delimiter: ',',
+                    createOnBlur: true,
+                    preload: true,
+                    persist: false,
+                    plugins: ['remove_button'],
+                    onDropdownOpen: function(dropdown) {
+                        dropdown.remove();
+                    },
+
+                    create: function(input) {
+                        if ((new RegExp('^' + REGEX_EMAIL + '$', 'i')).test(input)) {
+                            return {
+                                value: input,
+                                text: input
+                            }
+                        }
+                        var error = "Invalid Email Address!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        return false;
+                    }
+
+                });
+            });
+
+
+                $('#addEmails').on('click', function (e) {
+                     e.preventDefault();
+                     var emails = $('#AddEmailsModal #email_address').val();
+                     if(emails != ''){
+                         $('form#add_notification_emails').submit();
+                     }else{
+                         var error = "No Email Address selected, Please select at-least one email address!";
+                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                     }
+                });
+
+                $('#editEmails').on('click', function (e) {
+                     e.preventDefault();
+                     var emails = $('#EditEmailsModal #email_address').val();
+                     if(emails != ''){
+                         $('form#edit_notification_emails').submit();
+                     }else{
+                         var error = "No Email Address selected, Please select at-least one email address!";
+                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                     }
+                });
+
 
         });
     </script>

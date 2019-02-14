@@ -177,6 +177,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('addpickup','Shippers\ShipperDashboardController@addPickup')->name('add.pickup');
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
+    Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
 
 });
 //Admin Routes Start
@@ -219,7 +220,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/updateprofile','Admins\AdminDashboardController@updateProfile')->name('update.profile');
         Route::get('getpickups','Admins\AdminDashboardController@getPickups')->name('get.pickups');
         Route::post('/updatebankinfo','Admins\AdminDashboardController@updateBankInfo')->name('update.bank');
-
+        Route::post('edit/emails','Admins\AdminDashboardController@edit_notification_emails')->name('edit.emails');
+        Route::post('add/emails','Admins\AdminDashboardController@add_notification_emails')->name('add.emails');
     });
 
     //Datatables data using ajax calls
