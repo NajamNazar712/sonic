@@ -21,14 +21,97 @@
                                 <div class="col-12 col-sm-12 col-md-12 col-lg-12">
                                     <form id="settings_form" class="form-horizontal" method="POST" action="{{ route('admin.settings.walk_in.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
-                                            <h4 class="input-group form-section mb-2 justify-content-center"><b>Overnight</b></h4>
+                                        <h4 class="input-group form-section mb-2 justify-content-center"><b>Overnight</b></h4>
+                                        <div style="width: 450px; float: left; margin-left: 20px;">
+                                            <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>
+                                            <div class="row">
+                                                <div class="col p-0">
+                                                    <div class="input-group form-group">
+                                                        <label class="form-control">Actual Weight</label>
+                                                        <input type="text" name="walk_in_hub_on_a" class="form-control numeric" placeholder="" data-rule-range="[2,1000]" data-msg-range="Weight needs to be from 2 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_on->actual_weight }}">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">KG</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col p-0">
+                                                    <div class="input-group form-group">
+                                                        <label class="form-control" style="margin-left: 10px">Charges Per Kg</label>
+                                                        <input type="text" name="walk_in_hub_on_c" class="form-control numeric" placeholder="" data-rule-min="60" data-msg-min="Charges must be minimum 60" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_hub_on->chargeable_weight }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <label class="text-bold-600">Return Charges</label>
+                                            <div class="row">
+                                                <div class="col p-0">
+                                                    <div class="input-group form-group">
+                                                        <label class="form-control">Local</label>
+                                                        <input type="text" name="walk_in_hub_on_a_local" class="form-control local" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_hub_on->local }}">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col p-0">
+                                                    <div class="input-group form-group">
+                                                        <label class="form-control" style="margin-left: 10px">National</label>
+                                                        <input type="text" name="walk_in_hub_on_c_national" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_hub_on->national }}">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="width: 450px; float: right; margin-left: 20px;">
+                                            <h4 class="form-section mb-2 text-center" style="text-align: right">Doorstep</h4>
+                                            <div class="row">
+                                                <div class="col p-0">
+                                                    <div class="input-group form-group">
+                                                        <label class="form-control">Actual Weight</label>
+                                                        <input type="text" name="walk_in_door_on_a" class="form-control numeric" placeholder="" data-rule-range="[2,1000]" data-msg-range="Weight needs to be from 2 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_on->actual_weight }}">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">KG</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col p-0">
+                                                    <div class="input-group form-group">
+                                                        <label class="form-control" style="margin-left: 10px">Charges Per Kg</label>
+                                                        <input type="text" name="walk_in_door_on_c" class="form-control numeric" placeholder="" data-rule-min="70" data-msg-min="Charges must be minimum 70" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_door_on->chargeable_weight }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <label class="text-bold-600">Return Charges</label>
+                                            <div class="row">
+                                                <div class="col p-0">
+                                                    <div class="input-group form-group">
+                                                        <label class="form-control">Local</label>
+                                                        <input type="text" name="walk_in_door_on_a_local" class="form-control local" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_on->local }}">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col p-0">
+                                                    <div class="input-group form-group">
+                                                        <label class="form-control"  style="margin-left: 10px">National</label>
+                                                        <input type="text" name="walk_in_door_on_c_national" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_door_on->national }}">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                            <h4 class="input-group form-section mb-2 justify-content-center"><b>Overland</b></h4>
                                                 <div style="width: 450px; float: left; margin-left: 20px;">
                                                     <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>
                                                     <div class="row">
                                                         <div class="col p-0">
                                                             <div class="input-group form-group">
                                                                 <label class="form-control">Actual Weight</label>
-                                                                <input type="text" name="walk_in_hub_ol_a" class="form-control numeric" placeholder="" data-rule-range="[2,1000]" data-msg-range="Weight needs to be from 2 to 1000" data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_ol->actual_weight }}">
+                                                                <input type="text" name="walk_in_hub_ol_a" class="form-control numeric" placeholder="" data-rule-range="[10,1000]" data-msg-range="Weight needs to be from 10 to 1000" data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_ol->actual_weight }}">
                                                                 <div class="input-group-append">
                                                                     <span class="input-group-text">KG</span>
                                                                 </div>
@@ -37,7 +120,7 @@
                                                         <div class="col p-0">
                                                             <div class="input-group form-group">
                                                                 <label class="form-control" style="margin-left: 10px">Charges Per Kg</label>
-                                                                <input type="text" name="walk_in_hub_ol_c" class="form-control numeric" placeholder="" data-rule-min="60" data-msg-min="Charges must be minimum 60" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_hub_ol->chargeable_weight }}">
+                                                                <input type="text" name="walk_in_hub_ol_c" class="form-control numeric" placeholder="" data-rule-min="30" data-msg-min="Charges must be minimum 30" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_hub_ol->chargeable_weight }}">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -69,7 +152,7 @@
                                                 <div class="col p-0">
                                                     <div class="input-group form-group">
                                                             <label class="form-control">Actual Weight</label>
-                                                            <input type="text" name="walk_in_door_ol_a" class="form-control numeric" placeholder="" data-rule-range="[2,1000]" data-msg-range="Weight needs to be from 2 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_ol->actual_weight }}">
+                                                            <input type="text" name="walk_in_door_ol_a" class="form-control numeric" placeholder="" data-rule-range="[10,1000]" data-msg-range="Weight needs to be from 10 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_ol->actual_weight }}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">KG</span>
                                                         </div>
@@ -78,7 +161,7 @@
                                                 <div class="col p-0">
                                                     <div class="input-group form-group">
                                                         <label class="form-control" style="margin-left: 10px">Charges Per Kg</label>
-                                                                <input type="text" name="walk_in_door_ol_c" class="form-control numeric" placeholder="" data-rule-min="70" data-msg-min="Charges must be minimum 70" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_door_ol->chargeable_weight }}">
+                                                                <input type="text" name="walk_in_door_ol_c" class="form-control numeric" placeholder="" data-rule-min="40" data-msg-min="Charges must be minimum 40" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_door_ol->chargeable_weight }}">
                                                             </div>
                                                 </div>
                                             </div>
@@ -104,89 +187,6 @@
                                                 </div>
                                             </div>
                                             </div>
-                                            <h4 class="input-group form-section mb-2 justify-content-center"><b>Overland</b></h4>
-                                        <div style="width: 450px; float: left; margin-left: 20px;">
-                                            <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>
-                                            <div class="row">
-                                                <div class="col p-0">
-                                                    <div class="input-group form-group">
-                                                    <label class="form-control">Actual Weight</label>
-                                                    <input type="text" name="walk_in_hub_on_a" class="form-control numeric" placeholder="" data-rule-range="[5,1000]" data-msg-range="Weight needs to be from 5 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_on->actual_weight }}">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text">KG</span>
-                                                    </div>
-                                                </div>
-                                                </div>
-                                                <div class="col p-0">
-                                                    <div class="input-group form-group">
-                                                    <label class="form-control" style="margin-left: 10px">Charges Per Kg</label>
-                                                    <input type="text" name="walk_in_hub_on_c" class="form-control numeric" placeholder="" data-rule-min="20" data-msg-min="Charges must be minimum 20" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_hub_on->chargeable_weight }}">
-                                                    </div>
-                                                    </div>
-                                                </div>
-                                                <label class="text-bold-600">Return Charges</label>
-                                            <div class="row">
-                                                <div class="col p-0">
-                                                    <div class="input-group form-group">
-                                                    <label class="form-control">Local</label>
-                                                    <input type="text" name="walk_in_hub_on_a_local" class="form-control local" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_hub_on->local }}">
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">%</span>
-                                                        </div>
-                                                </div>
-                                                </div>
-                                                <div class="col p-0">
-                                            <div class="input-group form-group">
-                                                    <label class="form-control" style="margin-left: 10px">National</label>
-                                                    <input type="text" name="walk_in_hub_on_c_national" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_hub_on->national }}">
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text">%</span>
-                                                </div>
-                                                </div>
-                                            </div>
-                                            </div>
-                                        </div>
-                                        <div style="width: 450px; float: right; margin-left: 20px;">
-                                            <h4 class="form-section mb-2 text-center" style="text-align: right">Doorstep</h4>
-                                            <div class="row">
-                                                <div class="col p-0">
-                                                    <div class="input-group form-group">
-                                                    <label class="form-control">Actual Weight</label>
-                                                    <input type="text" name="walk_in_door_on_a" class="form-control numeric" placeholder="" data-rule-range="[5,1000]" data-msg-range="Weight needs to be from 5 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_on->actual_weight }}">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text">KG</span>
-                                                    </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col p-0">
-                                                    <div class="input-group form-group">
-                                                    <label class="form-control" style="margin-left: 10px">Charges Per Kg</label>
-                                                    <input type="text" name="walk_in_door_on_c" class="form-control numeric" placeholder="" data-rule-min="30" data-msg-min="Charges must be minimum 30" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_door_on->chargeable_weight }}">
-                                                    </div>
-                                                </div>
-                                                </div>
-                                                <label class="text-bold-600">Return Charges</label>
-                                            <div class="row">
-                                                <div class="col p-0">
-                                                    <div class="input-group form-group">
-                                                    <label class="form-control">Local</label>
-                                                    <input type="text" name="walk_in_door_on_a_local" class="form-control local" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_on->local }}">
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">%</span>
-                                                        </div>
-                                                </div>
-                                                </div>
-                                                <div class="col p-0">
-                                            <div class="input-group form-group">
-                                                    <label class="form-control"  style="margin-left: 10px">National</label>
-                                                    <input type="text" name="walk_in_door_on_c_national" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_door_on->national }}">
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text">%</span>
-                                                </div>
-                                                </div>
-                                            </div>
-                                            </div>
-                                        </div>
 
                                             <h4 class="input-group form-section mb-2 justify-content-center"><b>Detain</b></h4>
                                             <div style="width: 450px; float: left; margin-left: 20px;">
@@ -195,7 +195,7 @@
                                                     <div class="col p-0">
                                                         <div class="input-group form-group">
                                                     <label class="form-control">Actual Weight</label>
-                                                    <input type="text" name="walk_in_hub_dn_a" class="form-control numeric" placeholder="" data-rule-range="[10,1000]" data-msg-range="Weight needs to be from 10 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_dn->actual_weight }}">
+                                                    <input type="text" name="walk_in_hub_dn_a" class="form-control numeric" placeholder="" data-rule-range="[5,1000]" data-msg-range="Weight needs to be from 5 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_dn->actual_weight }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">KG</span>
                                                     </div>
@@ -204,7 +204,7 @@
                                                     <div class="col p-0">
                                                         <div class="input-group form-group">
                                                             <label class="form-control" style="margin-left: 10px">Charges Per Kg</label>
-                                                            <input type="text" name="walk_in_hub_dn_c" class="form-control numeric" placeholder="" data-rule-min="30" data-msg-min="Charges must be minimum 30" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_hub_dn->chargeable_weight }}">
+                                                            <input type="text" name="walk_in_hub_dn_c" class="form-control numeric" placeholder="" data-rule-min="20" data-msg-min="Charges must be minimum 20" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_hub_dn->chargeable_weight }}">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -236,7 +236,7 @@
                                                     <div class="col p-0">
                                                         <div class="input-group form-group">
                                                     <label class="form-control">Actual Weight</label>
-                                                    <input type="text" name="walk_in_door_dn_a" class="form-control numeric" placeholder="" data-rule-range="[10,1000]" data-msg-range="Weight needs to be from 10 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_dn->actual_weight }}">
+                                                    <input type="text" name="walk_in_door_dn_a" class="form-control numeric" placeholder="" data-rule-range="[5,1000]" data-msg-range="Weight needs to be from 5 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_dn->actual_weight }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">KG</span>
                                                     </div>
@@ -245,7 +245,7 @@
                                                         <div class="col p-0">
                                                             <div class="input-group form-group">
                                                         <label class="form-control" style="margin-left: 10px">Charges Per Kg</label>
-                                                        <input type="text" name="walk_in_door_dn_c" class="form-control numeric" placeholder="" data-rule-min="40" data-msg-min="Charges must be minimum 40" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_door_dn->chargeable_weight }}">
+                                                        <input type="text" name="walk_in_door_dn_c" class="form-control numeric" placeholder="" data-rule-min="30" data-msg-min="Charges must be minimum 30" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_door_dn->chargeable_weight }}">
                                                     </div>
                                                             </div>
                                                 </div>

@@ -446,13 +446,13 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.walk_in')->with(['walk_in_hub_ol' => $walk_in_hub_ol, 'walk_in_hub_on' => $walk_in_hub_on, 'walk_in_hub_dn' => $walk_in_hub_dn, 'walk_in_door_ol' => $walk_in_door_ol, 'walk_in_door_on' => $walk_in_door_on, 'walk_in_door_dn' => $walk_in_door_dn]);
     }
     public function walk_in_store(Request $request){
-        WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->update([
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->update([
             'actual_weight' => $request->walk_in_hub_ol_a,
             'chargeable_weight' => $request->walk_in_hub_ol_c,
             'local' => $request->walk_in_hub_ol_a_local,
             'national' => $request->walk_in_hub_ol_c_national
         ]);
-        WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->update([
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->update([
             'actual_weight' => $request->walk_in_hub_on_a,
             'chargeable_weight' => $request->walk_in_hub_on_c,
             'local' => $request->walk_in_hub_on_a_local,
@@ -464,13 +464,13 @@ class GlobalSettingsController extends Controller
             'local' => $request->walk_in_hub_dn_a_local,
             'national' => $request->walk_in_hub_dn_c_national
         ]);
-        WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 1])->update([
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->update([
             'actual_weight' => $request->walk_in_door_ol_a,
             'chargeable_weight' => $request->walk_in_door_ol_c,
             'local' => $request->walk_in_door_ol_a_local,
             'national' => $request->walk_in_door_ol_c_national
         ]);
-        WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->update([
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 1])->update([
             'actual_weight' => $request->walk_in_door_on_a,
             'chargeable_weight' => $request->walk_in_door_on_c,
             'local' => $request->walk_in_door_on_a_local,
