@@ -295,12 +295,12 @@ class NotificationsController extends Controller
                 $body = str_replace('[arrival_at]', $pickup_note->created_at, $body);
               }
 
-//              $to = $shipper->email;
-                if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
-                    $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
-                }else{
-                    $to = $shipper->email;
-                }
+              $to = $shipper->email;
+//                if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+//                    $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+//                }else{
+//                    $to = $shipper->email;
+//                }
               $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
 
               $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
