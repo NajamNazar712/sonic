@@ -303,7 +303,7 @@
                     },
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'status', name: 'ss.id', class: 'align-middle status'},
-                    {data: 'return_confirm_date', name: 'shipments_journey.created_at', class: 'align-middle return_confirm_date'},
+                    {data: 'return_confirm_date', name: 's.created_at', class: 'align-middle return_confirm_date'},
                     {data: 'cargo_no', name: 'cc.id', class: 'align-middle cargo_no'},
                     {data: 'cargo_creation_date', name: 'cc.created_at', class: 'align-middle cargo_creation_date'},
                     {data: 'dispatching_aging', name: 'dispatching_aging', class: 'align-middle dispatching_aging'},
