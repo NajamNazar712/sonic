@@ -13,33 +13,36 @@ class CorporateAccountRatesTableSeeder extends Seeder
     {
         DB::table('corporate_standard_min_chargeable_weights')->truncate();
         DB::table('corporate_standard_min_chargeable_weights')->insert(array(
-            array('shipping_mode_id'=>1, 'delivery_type_id' => 1, 'min_chargeable_weight'=>0.5),
-            array('shipping_mode_id'=>1, 'delivery_type_id' => 2, 'min_chargeable_weight'=>0.5),
-            array('shipping_mode_id'=>2, 'delivery_type_id' => 1, 'min_chargeable_weight'=>0.5),
-            array('shipping_mode_id'=>2, 'delivery_type_id' => 2, 'min_chargeable_weight'=>0.5),
-            array('shipping_mode_id'=>3, 'delivery_type_id' => 1, 'min_chargeable_weight'=>0.5),
-            array('shipping_mode_id'=>3, 'delivery_type_id' => 2, 'min_chargeable_weight'=>0.5),
-            array('shipping_mode_id'=>4, 'delivery_type_id' => 1, 'min_chargeable_weight'=>0.5),
-            array('shipping_mode_id'=>4, 'delivery_type_id' => 2, 'min_chargeable_weight'=>0.5),
+            array('shipping_mode_id'=>1, 'delivery_type_id' => 1, 'min_chargeable_weight'=>10),
+            array('shipping_mode_id'=>1, 'delivery_type_id' => 2, 'min_chargeable_weight'=>10),
+            array('shipping_mode_id'=>2, 'delivery_type_id' => 1, 'min_chargeable_weight'=>10),
+            array('shipping_mode_id'=>2, 'delivery_type_id' => 2, 'min_chargeable_weight'=>10),
+            array('shipping_mode_id'=>3, 'delivery_type_id' => 1, 'min_chargeable_weight'=>10),
+            array('shipping_mode_id'=>3, 'delivery_type_id' => 2, 'min_chargeable_weight'=>10),
+            array('shipping_mode_id'=>4, 'delivery_type_id' => 1, 'min_chargeable_weight'=>10),
+            array('shipping_mode_id'=>4, 'delivery_type_id' => 2, 'min_chargeable_weight'=>10),
 
         ));
         DB::table('corporate_standard_weight_charges')->truncate();
         DB::table('corporate_standard_weight_charges')->insert(array(
-            array('shipping_mode_id'=>1,'delivery_type_id' => 1,'range_up'=>0.01,'range_down'=>0.5,'local_or_6hr'=>165,'national_charges_class_0'=>180,'national_charges_class_1'=>180,'national_charges_class_2'=>180,'national_charges_class_3'=>180),
-            array('shipping_mode_id'=>1,'delivery_type_id' => 1,'range_up'=>0.51,'range_down'=>1,'local_or_6hr'=>180,'national_charges_class_0'=>180,'national_charges_class_1'=>180,'national_charges_class_2'=>180,'national_charges_class_3'=>180),
-            array('shipping_mode_id'=>1,'delivery_type_id' => 2,'range_up'=>0.01,'range_down'=>0.5,'local_or_6hr'=>165,'national_charges_class_0'=>180,'national_charges_class_1'=>180,'national_charges_class_2'=>180,'national_charges_class_3'=>180),
-            array('shipping_mode_id'=>1,'delivery_type_id' => 2,'range_up'=>0.51,'range_down'=>1,'local_or_6hr'=>180,'national_charges_class_0'=>180,'national_charges_class_1'=>180,'national_charges_class_2'=>180,'national_charges_class_3'=>180),
-            array('shipping_mode_id'=>2,'delivery_type_id' => 1,'range_up'=>0,'range_down'=>10,'local_or_6hr'=>500,'national_charges_class_0'=>180,'national_charges_class_1'=>180,'national_charges_class_2'=>180,'national_charges_class_3'=>180),
-            array('shipping_mode_id'=>2,'delivery_type_id' => 1,'range_up'=>10.01,'range_down'=>15,'local_or_6hr'=>500,'national_charges_class_0'=>180,'national_charges_class_1'=>180,'national_charges_class_2'=>180,'national_charges_class_3'=>180),
-            array('shipping_mode_id'=>2,'delivery_type_id' => 2,'range_up'=>0,'range_down'=>10,'local_or_6hr'=>500,'national_charges_class_0'=>180,'national_charges_class_1'=>180,'national_charges_class_2'=>180,'national_charges_class_3'=>180),
-            array('shipping_mode_id'=>2,'delivery_type_id' => 2,'range_up'=>10.01,'range_down'=>15,'local_or_6hr'=>500,'national_charges_class_0'=>180,'national_charges_class_1'=>180,'national_charges_class_2'=>180,'national_charges_class_3'=>180),
-            array('shipping_mode_id'=>3,'delivery_type_id' => 1,'range_up'=>0,'range_down'=>10,'local_or_6hr'=>450,'national_charges_class_0'=>180,'national_charges_class_1'=>180,'national_charges_class_2'=>180,'national_charges_class_3'=>180),
-            array('shipping_mode_id'=>3,'delivery_type_id' => 1,'range_up'=>10.01,'range_down'=>15,'local_or_6hr'=>450,'national_charges_class_0'=>180,'national_charges_class_1'=>180,'national_charges_class_2'=>180,'national_charges_class_3'=>180),
-            array('shipping_mode_id'=>3,'delivery_type_id' => 2,'range_up'=>0,'range_down'=>10,'local_or_6hr'=>450,'national_charges_class_0'=>180,'national_charges_class_1'=>180,'national_charges_class_2'=>180,'national_charges_class_3'=>180),
-            array('shipping_mode_id'=>3,'delivery_type_id' => 2,'range_up'=>10.01,'range_down'=>15,'local_or_6hr'=>450,'national_charges_class_0'=>180,'national_charges_class_1'=>180,'national_charges_class_2'=>180,'national_charges_class_3'=>180),
-            array('shipping_mode_id'=>4,'delivery_type_id' => 1,'range_up'=>0.01,'range_down'=>0.25,'local_or_6hr'=>250,'national_charges_class_0'=>0,'national_charges_class_1'=>0,'national_charges_class_2'=>0,'national_charges_class_3'=>0),
-            array('shipping_mode_id'=>4,'delivery_type_id' => 1,'range_up'=>0.251,'range_down'=>0.5,'local_or_6hr'=>275,'national_charges_class_0'=>0,'national_charges_class_1'=>0,'national_charges_class_2'=>0,'national_charges_class_3'=>0),
-            array('shipping_mode_id'=>4,'delivery_type_id' => 1,'range_up'=>0.51,'range_down'=>1,'local_or_6hr'=>300,'national_charges_class_0'=>0,'national_charges_class_1'=>0,'national_charges_class_2'=>0,'national_charges_class_3'=>0),
+            array('shipping_mode_id'=>1,'delivery_type_id' => 1,'range_up'=>0.01,'range_down'=>10,'local_or_6hr'=>50,'national_charges_class_0'=>50,'national_charges_class_1'=>50,'national_charges_class_2'=>50,'national_charges_class_3'=>50),
+            array('shipping_mode_id'=>1,'delivery_type_id' => 1,'range_up'=>10.01,'range_down'=>1000,'local_or_6hr'=>50,'national_charges_class_0'=>50,'national_charges_class_1'=>50,'national_charges_class_2'=>50,'national_charges_class_3'=>50),
+            array('shipping_mode_id'=>1,'delivery_type_id' => 2,'range_up'=>0.01,'range_down'=>10,'local_or_6hr'=>20,'national_charges_class_0'=>20,'national_charges_class_1'=>20,'national_charges_class_2'=>20,'national_charges_class_3'=>20),
+            array('shipping_mode_id'=>1,'delivery_type_id' => 2,'range_up'=>10.01,'range_down'=>1000,'local_or_6hr'=>20,'national_charges_class_0'=>20,'national_charges_class_1'=>20,'national_charges_class_2'=>20,'national_charges_class_3'=>20),
+            array('shipping_mode_id'=>2,'delivery_type_id' => 1,'range_up'=>0.01,'range_down'=>10,'local_or_6hr'=>50,'national_charges_class_0'=>50,'national_charges_class_1'=>50,'national_charges_class_2'=>50,'national_charges_class_3'=>50),
+            array('shipping_mode_id'=>2,'delivery_type_id' => 1,'range_up'=>10.01,'range_down'=>1000,'local_or_6hr'=>50,'national_charges_class_0'=>50,'national_charges_class_1'=>50,'national_charges_class_2'=>50,'national_charges_class_3'=>50),
+            array('shipping_mode_id'=>2,'delivery_type_id' => 2,'range_up'=>0.01,'range_down'=>10,'local_or_6hr'=>20,'national_charges_class_0'=>20,'national_charges_class_1'=>20,'national_charges_class_2'=>20,'national_charges_class_3'=>20),
+            array('shipping_mode_id'=>2,'delivery_type_id' => 2,'range_up'=>10.01,'range_down'=>1000,'local_or_6hr'=>20,'national_charges_class_0'=>20,'national_charges_class_1'=>20,'national_charges_class_2'=>20,'national_charges_class_3'=>20),
+            array('shipping_mode_id'=>3,'delivery_type_id' => 1,'range_up'=>0.01,'range_down'=>10,'local_or_6hr'=>50,'national_charges_class_0'=>50,'national_charges_class_1'=>50,'national_charges_class_2'=>50,'national_charges_class_3'=>50),
+            array('shipping_mode_id'=>3,'delivery_type_id' => 1,'range_up'=>10.01,'range_down'=>1000,'local_or_6hr'=>50,'national_charges_class_0'=>50,'national_charges_class_1'=>50,'national_charges_class_2'=>50,'national_charges_class_3'=>50),
+            array('shipping_mode_id'=>3,'delivery_type_id' => 2,'range_up'=>0.01,'range_down'=>10,'local_or_6hr'=>20,'national_charges_class_0'=>20,'national_charges_class_1'=>20,'national_charges_class_2'=>20,'national_charges_class_3'=>20),
+            array('shipping_mode_id'=>3,'delivery_type_id' => 2,'range_up'=>10.01,'range_down'=>1000,'local_or_6hr'=>20,'national_charges_class_0'=>20,'national_charges_class_1'=>20,'national_charges_class_2'=>20,'national_charges_class_3'=>20),
+            array('shipping_mode_id'=>4,'delivery_type_id' => 1,'range_up'=>0.01,'range_down'=>10,'local_or_6hr'=>50,'national_charges_class_0'=>50,'national_charges_class_1'=>0,'national_charges_class_2'=>0,'national_charges_class_3'=>0),
+            array('shipping_mode_id'=>4,'delivery_type_id' => 1,'range_up'=>10.01,'range_down'=>1000,'local_or_6hr'=>50,'national_charges_class_0'=>50,'national_charges_class_1'=>0,'national_charges_class_2'=>0,'national_charges_class_3'=>0),
+            array('shipping_mode_id'=>4,'delivery_type_id' => 2,'range_up'=>0.01,'range_down'=>10,'local_or_6hr'=>20,'national_charges_class_0'=>20,'national_charges_class_1'=>0,'national_charges_class_2'=>0,'national_charges_class_3'=>0),
+            array('shipping_mode_id'=>4,'delivery_type_id' => 2,'range_up'=>10.01,'range_down'=>1000,'local_or_6hr'=>20,'national_charges_class_0'=>20,'national_charges_class_1'=>0,'national_charges_class_2'=>0,'national_charges_class_3'=>0),
+
+
         ));
 
         DB::table('corporate_standard_booking_type_charges')->truncate();
@@ -93,18 +96,18 @@ class CorporateAccountRatesTableSeeder extends Seeder
 
         DB::table('corporate_standard_return_charges')->truncate();
         DB::table('corporate_standard_return_charges')->insert(array(
-            array('shipping_mode_id'=>1,'local'=>50,'national'=>100),
-            array('shipping_mode_id'=>2,'local'=>50,'national'=>100),
-            array('shipping_mode_id'=>3,'local'=>50,'national'=>100),
-            array('shipping_mode_id'=>4,'local'=>50,'national'=>100),
+            array('shipping_mode_id'=>1,'local'=>100,'national'=>100),
+            array('shipping_mode_id'=>2,'local'=>100,'national'=>100),
+            array('shipping_mode_id'=>3,'local'=>100,'national'=>100),
+            array('shipping_mode_id'=>4,'local'=>100,'national'=>100),
 
         ));
         DB::table('corporate_standard_fuel_surcharges')->truncate();
         DB::table('corporate_standard_fuel_surcharges')->insert(array(
-            array('shipping_mode_id'=>1,'fuel_surcharge'=>3),
-            array('shipping_mode_id'=>2,'fuel_surcharge'=>3),
-            array('shipping_mode_id'=>3,'fuel_surcharge'=>3),
-            array('shipping_mode_id'=>4,'fuel_surcharge'=>3),
+            array('shipping_mode_id'=>1,'fuel_surcharge'=>10),
+            array('shipping_mode_id'=>2,'fuel_surcharge'=>10),
+            array('shipping_mode_id'=>3,'fuel_surcharge'=>10),
+            array('shipping_mode_id'=>4,'fuel_surcharge'=>10),
         ));
 
 
