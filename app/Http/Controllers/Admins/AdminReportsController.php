@@ -4323,46 +4323,43 @@ class AdminReportsController extends Controller
         return view('admin.reports.cargo_returns_shipment_report')->with('cities', $cities);
     }
     public function cargo_returns_shipment_list(Request $request){
-        $cargo_returns_Shipment = Shipment::leftjoin('cargo_consignment_shipments as ccs', 'ccs.shipment_id', '=', 'shipments.id')
-            ->leftjoin('shipments_journey as s', function ($join) {
-                $join->on('s.shipment_id', '=', 'shipments.id')
-                    ->where('s.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (20,21)'));
-                    })
-            ->leftjoin('users as u', 'u.id', '=', 'shipments.user_id')
+        $cargo_returns_Shipment = ShipmentsJourney::leftjoin('cargo_consignment_shipments as ccs', 'ccs.shipment_id', '=', 'shipments_journey.shipment_id')
+            ->leftjoin('shipments as s','s.id', '=', 'shipments_journey.shipment_id')
+            ->leftjoin('users as u', 'u.id', '=', 's.user_id')
             ->leftjoin('cities as cou', 'cou.id', '=', 'u.city_id')
-            ->leftjoin('cities as cds', 'cds.id', '=', 'shipments.consignee_city_id')
+            ->leftjoin('cities as cds', 'cds.id', '=', 's.consignee_city_id')
             ->leftjoin('cargo_consignments as cc', function($join) {
                 $join->on('cc.id', '=', 'ccs.cargo_consignment_id')
                     ->where('cc.id', '=', DB::raw('(select id from cargo_consignments where cargo_consignments.id = ccs.cargo_consignment_id and cargo_consignments.type = 2)'));
-                    })
+            })
             ->leftjoin('cities as co', 'co.id', '=', 'cc.origin_hub_id')
             ->leftjoin('cities as cd', 'cd.id', '=', 'cc.destination_hub_id')
-            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->select('shipments.tracking_number as tracking_number', 'ss.name as status', DB::raw('(select created_at from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20) as return_confirm_date'), DB::raw('(select created_at from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 23) as dispatch_from'), DB::raw('(select created_at from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 25) as dispatch_to'), 'cc.id as cargo_no', 'cc.created_at as cargo_creation_date', 'co.name as origin_hub', 'cd.name as destination_hub', 'cou.name as origin_city', 'cds.name as destination_city')->whereIn('shipments.shipper_status_id', [20,21]);
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
+            ->select('s.tracking_number as tracking_number', 'ss.name as status', DB::raw('(select created_at from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 20) as return_confirm_date'), DB::raw('(select created_at from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 23) as dispatch_from'), DB::raw('(select created_at from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 25) as dispatch_to'), 'cc.id as cargo_no', 'cc.created_at as cargo_creation_date', 'co.name as origin_hub', 'cd.name as destination_hub', 'cou.name as origin_city', 'cds.name as destination_city')->where('cc.type',2)->whereIn('shipments_journey.shipper_status_id', [20,21])->where('shipments_journey.id' ,'=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id in (20,21))'));
         $cargo_returns_Shipment = Datatables::of($cargo_returns_Shipment)
-        ->editColumn('dispatching_aging', function($shipments){
-            $from = Carbon::parse($shipments->dispatch_from);
-            $to = Carbon::parse($shipments->dispatch_to);
-            $days = $to->diffInDays($from);
-            if($days == 0){
-                return "-";
-            }else{
-                return $days;
-            }
-        })
+            ->editColumn('dispatching_aging', function($shipments){
+                $from = Carbon::parse($shipments->dispatch_from);
+                $to = Carbon::parse($shipments->dispatch_to);
+                $days = $to->diffInDays($from);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            })
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('return_confirm_aging', function($shipments){
-            $from = Carbon::parse($shipments->return_confirm_date);
-            $days = Carbon::now()->diffInDays($from);
-            if($days == 0){
-                return "-";
-            }else{
-                return $days;
-            }
-        });
+                $from = Carbon::parse($shipments->return_confirm_date);
+                $days = Carbon::now()->diffInDays($from);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            });
         if($origin = $request->get('search_origin')){
             $cargo_returns_Shipment->where('co.id', '=', $origin);
         }
@@ -4375,9 +4372,9 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $cargo_returns_Shipment->whereBetween('s.created_at', [$from,$to]);
+            $cargo_returns_Shipment->whereBetween('shipments_journey.created_at', [$from,$to]);
         }
-            return $cargo_returns_Shipment->make(true);
+        return $cargo_returns_Shipment->make(true);
     }
 }
 
