@@ -722,7 +722,7 @@ class DeliveryController extends Controller
                     ';
                 }
 
-                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id','!=',5)->where('reference_1_id','!=',$delivery_note_id)->select('remarks');
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id','!=',5)->select('remarks');
 
                 if ($shipment_journey->exists()) {
                     $shipment_journey = $shipment_journey->latest()->first();
