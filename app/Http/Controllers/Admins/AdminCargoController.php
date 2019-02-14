@@ -278,7 +278,7 @@ class AdminCargoController extends Controller
                   $details['order_id'] = $shipment->order_id;
                   $details['service_type'] = $shipment->booking_type->booking_type;
                   $details['destination'] = $destination->name;
-                  $details['amount'] = $shipment->amount;
+                  $details['amount'] = number_format($shipment->amount);
 
                   $hub = $destination->hub_city;
 
@@ -883,7 +883,7 @@ class AdminCargoController extends Controller
                               <td>' . $shipment->consignee_name . '</td>
                               <td>' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
                               <td>' . $shipment->consignee_city->name . '</td>
-                              <td>' . $shipment->amount . '</td>
+                              <td>' . number_format($shipment->amount) . '</td>
                             </tr>
         ';
 
@@ -998,9 +998,9 @@ class AdminCargoController extends Controller
       $details['cargo_consignment']['seal_number'] = $cargo_consignment->seal_number;
       $details['cargo_consignment']['builty_number'] = $cargo_consignment->builty_number;
       $details['cargo_consignment']['vendor_weight'] = $cargo_consignment->vendor_weight;
-      $details['cargo_consignment']['weight_charges_per_kg'] = $cargo_consignment->weight_charges_per_kg;
-      $details['cargo_consignment']['extra_charges'] = $cargo_consignment->extra_charges;
-      $details['cargo_consignment']['total_weight_charges'] = $cargo_consignment->total_weight_charges;
+      $details['cargo_consignment']['weight_charges_per_kg'] = number_format($cargo_consignment->weight_charges_per_kg);
+      $details['cargo_consignment']['extra_charges'] = number_format($cargo_consignment->extra_charges);
+      $details['cargo_consignment']['total_weight_charges'] = number_format($cargo_consignment->total_weight_charges);
       $details['cargo_consignment']['sender_name'] = Admin::find($cargo_consignment->sender_id)->name;
 
       if ($request->add) {
@@ -1167,7 +1167,7 @@ class AdminCargoController extends Controller
               $details['destination'] = $consignee_city->name;
               $details['hub'] = $consignee_city->hub_city->name;
               $details['consignee'] = $shipment->consignee_name;
-              $details['amount'] = $shipment->amount;
+              $details['amount'] = number_format($shipment->amount);
               $details['shipping_mode'] = $shipment->shipping_mode->mode;
               $details['service_type'] = $shipment->booking_type->booking_type;
 
@@ -1625,7 +1625,7 @@ class AdminCargoController extends Controller
                               <td>' . $shipment->consignee_name . '</td>
                               <td>' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
                               <td>' . $shipment->consignee_city->name . '</td>
-                              <td>' . $shipment->amount . '</td>
+                              <td>' . number_format($shipment->amount) . '</td>
                             </tr>
         ';
 

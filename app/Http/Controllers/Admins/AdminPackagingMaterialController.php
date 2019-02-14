@@ -42,6 +42,15 @@ class AdminPackagingMaterialController extends Controller
             ->join('admins as ad','ad.id','=','packaging_stock_histories.admin_id')
             ->select(['packaging_stock_histories.id as psh_id','packaging_stock_histories.reference_number','packaging_stock_histories.entry_type','packaging_stock_histories.created_at','packaging_stock_histories.small_flyers','packaging_stock_histories.medium_flyers','packaging_stock_histories.large_flyers','packaging_stock_histories.boxes','ad.name as admin','cities.name as hub']);
         return Datatables::of($packaging)
+            ->editColumn('small_flyers', function($packaging){
+                return number_format($packaging->small_flyers);
+            })
+            ->editColumn('medium_flyers', function($packaging){
+                return number_format($packaging->medium_flyers);
+            })
+            ->editColumn('large_flyers', function($packaging){
+                return number_format($packaging->large_flyers);
+            })
             ->editColumn('entry_type',function($packaging){
                 if($packaging->entry_type == 0){
                     return "Inbound";
@@ -265,6 +274,15 @@ class AdminPackagingMaterialController extends Controller
             ->editColumn('tracking_number_link',function ($shipments){
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('small_flyers', function($packaging){
+                return number_format($packaging->small_flyers);
+            })
+            ->editColumn('medium_flyers', function($packaging){
+                return number_format($packaging->medium_flyers);
+            })
+            ->editColumn('large_flyers', function($packaging){
+                return number_format($packaging->large_flyers);
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);

@@ -324,7 +324,7 @@ class AdminFinanceController extends Controller
                             
                           </tr>
             ';
-                $total_cod_amount += $shipment->received_amount;
+                $total_cod_amount += number_format($shipment->received_amount);
                 $shipment_details .= $shipment_details_row_start;
             }
             $shipment_details .= '
@@ -555,7 +555,7 @@ class AdminFinanceController extends Controller
                 $row[] = $delivery_note->route->code . ' (' . $delivery_note->route->start . ' to ' . $delivery_note->route->end . ')';
                 $row[] = $delivery_note->shipments_count;
                 $row[] = $delivery_note->delivered_shipments;
-                $row[] = $delivery_note->received_cod_amount;
+                $row[] = number_format($delivery_note->received_cod_amount);
 
                 $details[] = $row;
 
@@ -1171,7 +1171,7 @@ class AdminFinanceController extends Controller
                         $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
 
                         $details['payment_mode'] = $shipment->payment_mode->mode;
-                        $details['amount'] = $shipment->amount;
+                        $details['amount'] = number_format($shipment->amount);
 
                         $details['shipper']['name'] = $shipper->name;
                         $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
@@ -1342,7 +1342,7 @@ class AdminFinanceController extends Controller
             $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
 
             $details['payment_mode'] = $shipment->payment_mode->mode;
-            $details['amount'] = $shipment->amount;
+            $details['amount'] = number_format($shipment->amount);
 
             $details['shipper']['name'] = $shipper->name;
             $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
@@ -2825,7 +2825,7 @@ class AdminFinanceController extends Controller
             if ($payment_mode == 'IBFT') {
                 if ($done_payment_shipment->type != 2) {
                     if ($done_payment_shipment->type == 0) {
-                        $total_collection_amount += $done_payment_shipment->amount;
+                        $total_collection_amount += number_format($done_payment_shipment->amount);
                         $total_cash_handling_charges += $shipment->cash_handling_charges;
                         $total_replacement_charges += $shipment->replacement_charges;
                         // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
@@ -2853,13 +2853,13 @@ class AdminFinanceController extends Controller
             }
             else {
                 if ($done_payment_shipment->type == 0) {
-                    $total_collection_amount += $done_payment_shipment->amount;
+                    $total_collection_amount += number_format($done_payment_shipment->amount);
                 }
                 else if ($done_payment_shipment->type == 2) {
-                    $total_adjustments += $done_payment_shipment->payable;
+                    $total_adjustments += number_format($done_payment_shipment->payable);
                 }
 
-                $total_payable += $done_payment_shipment->payable;
+                $total_payable += number_format($done_payment_shipment->payable);
             }
       }
 
@@ -3038,7 +3038,7 @@ class AdminFinanceController extends Controller
             $row[] = $shipment->consignee_city->name;
             $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->actual_weight;
-            $row[] = $done_payment_shipment->amount;
+            $row[] = number_format($done_payment_shipment->amount);
             $row[] = (($done_payment_shipment->type != 2) ? $shipment->weight_charges : 0);
             $row[] = (($done_payment_shipment->type == 0) ? $shipment->cash_handling_charges : 0);
             $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
@@ -3470,7 +3470,7 @@ class AdminFinanceController extends Controller
             $total_adjustment_charges += $invoice_shipment->adjustment_charges;
             $total_charges += $invoice_shipment->charges;
             $total_gst += $invoice_shipment->gst;
-            $total_invoice_amount += $invoice_shipment->invoice_amount;
+            $total_invoice_amount += number_format($invoice_shipment->invoice_amount);
         }
 
         $html .= '

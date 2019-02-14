@@ -244,7 +244,7 @@ class DeliveryController extends Controller
                                         $status = ' - ';
                                     }
                                 }
-                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks]);
+                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks]);
 
                             } else {
                                 return ['status' => 1, 'error' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id];
@@ -268,7 +268,7 @@ class DeliveryController extends Controller
                                 }
                             }
 
-                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks]);
+                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks]);
                         }
                     } else {
                         return ['status' => 1, 'error' => 'This Shipment is already in an unverified delivery note!'];
@@ -306,7 +306,7 @@ class DeliveryController extends Controller
                     $shipments_count++;
 
                     if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
-                        $total_cod_amount += $shipment_details->amount;
+                        $total_cod_amount += number_format($shipment_details->amount);
                     }
                 }
             }
@@ -571,10 +571,10 @@ class DeliveryController extends Controller
                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
                 $delivery = $delivery->first();
                 $count = $delivery->shipments_count;
-                $cod = $delivery->total_cod_amount;
+                $cod = number_format($delivery->total_cod_amount);
                 $count = $count - 1;
                 if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
-                    $cod = $cod - $parcel->amount;
+                    $cod = number_format($cod - $parcel->amount);
                 }
                 if ($count == 0) {
                     DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod, 'status' => 4]);
@@ -1266,7 +1266,7 @@ class DeliveryController extends Controller
                 $product[] = ['pid' => $item->id, 'type' => $item->product->product_name, 'description' => ($item->description == '') ? ' - ' : $item->description, 'price' => $item->price];
 //
             }
-            return ['status' => 0, 'data' => $product, 'total_cod' => $amount->amount];
+            return ['status' => 0, 'data' => $product, 'total_cod' => number_format($amount->amount)];
         } else {
             return ['status' => 1, 'error' => 'No Shipment found'];
         }
@@ -1831,7 +1831,7 @@ class DeliveryController extends Controller
                             <td>Rs ' . number_format($shipment->received_amount) . '</td>
                     ';
 
-                    $total_cod_amount += $shipment->received_amount;
+                    $total_cod_amount += number_format($shipment->received_amount);
                 }
                 else {
                     $shipment_details_row_start .= '
@@ -2113,7 +2113,7 @@ class DeliveryController extends Controller
                             <td>Rs ' . number_format($shipment->received_amount) . '</td>
                         ';
 
-                        $total_cod_amount += $shipment->received_amount;
+                        $total_cod_amount += number_format($shipment->received_amount);
                     }
                     else {
                         $shipment_details_row_start .= '
@@ -3173,7 +3173,7 @@ class DeliveryController extends Controller
                             
                           </tr>
             ';
-                $total_cod_amount += $shipment->received_amount;
+                $total_cod_amount += number_format($shipment->received_amount);
                 $shipment_details .= $shipment_details_row_start;
             }
             $shipment_details .= '
@@ -3686,7 +3686,7 @@ class DeliveryController extends Controller
                 $row[] = $shipment_details->consignee_city->name;
                 $row[] = $shipment_details->consignee_name;
                 $row[] = $shipment_details->consignee_address;
-                $row[] = $shipment_details->received_cod_amount;
+                $row[] = $shipment_details->number_format(received_cod_amount);
 
                 $details[] = $row;
 
