@@ -224,6 +224,28 @@
                                     <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">
+                                            <th colspan="3" class="border-primary border-darken-1">Minimum Chargeable Weight</th>
+                                        </tr>
+                                        <tr role="row" class="bg-primary bg-lighten-1 white">
+                                            <th class="text-center border-primary border-lighten-2">Shipping Mode ID</th>
+                                            <th class="text-center border-primary border-lighten-2">Delivery Type ID</th>
+                                            <th class="border-primary border-lighten-2">Weight</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @foreach ($min_chargeable_weights as $min_chargeable_weight)
+                                            <tr role="row">
+                                                <td class="text-center">{{ $min_chargeable_weight->shipping_mode_id }}</td>
+                                                <td class="text-center">{{ $min_chargeable_weight->delivery_type_id }}</td>
+                                                <td>{{ $min_chargeable_weight->min_chargeable_weight }}</td>
+                                            </tr>
+                                        @endforeach
+                                        </tbody>
+                                    </table>
+
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr role="row" class="bg-primary white text-center">
                                             <th colspan="2" class="border-primary border-darken-1">Character Limits</th>
                                         </tr>
                                         <tr role="row" class="bg-primary bg-lighten-1 white">
