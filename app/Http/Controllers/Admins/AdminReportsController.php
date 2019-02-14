@@ -4430,5 +4430,108 @@ class AdminReportsController extends Controller
         }
         return $cargo_returns_Shipment->make(true);
     }
+
+    public function return_reattempt_ratio_index(){
+        $shipments = ShipmentsJourney::leftJoin('shipments_journey as rcj', function ($join) {
+            $join->on('rcj.shipment_id', '=', 'shipments_journey.shipment_id')
+                ->where('rcj.id', '=',
+                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments_journey.shipment_id and shipments_journey.shipper_status_id = 13)'));
+        })->
+        where('rcj.shipper_status_id',13)->select('shipments_journey.shipment_id')->get();
+        return $shipments;
+        $cities = City::where('status', 1)->get();
+        return view('admin.reports.return_reattempt_ratio')->with(['cities' => $cities]);
+    }
+
+    public function return_reattempt_ratio_list(Request $request){
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftJoin('shipments_journey as journey', function ($join) {
+                $join->on('journey.shipment_id', '=', 'shipments.id')
+                    ->where('journey.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipments_journey as rcj', function ($join) {
+                $join->on('rcj.shipment_id', '=', 'shipments.id')
+                    ->where('rcj.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20)'));
+            })
+//            ->leftJoin('shipments_journey as raj', function ($join) {
+//                $join->on('raj.shipment_id', '=', 'rcj.id')
+//                    ->where('raj.id', '=',
+//                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = rcj.id and shipments_journey.shipper_status_id = 13)'));
+//            })
+            ->select(['shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name', 'shipments.booking_type_id', 'rcj.created_at as return_confirm_date'])
+            ->where('rcj.shipper_status_id',20);
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->filterColumn('u.name', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('shipments.booking_type_id', '!=', 4)
+                        ->where('u.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.booking_type_id', '=', 4)
+                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+                    });
+            })
+            ->addColumn('aging',function ($shipments){
+
+                $days = Carbon::now()->diffInDays($shipments->arrival);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            })
+            ->addColumn('aging_last_status',function ($shipments){
+
+                $days = Carbon::now()->diffInDays($shipments->last_status_date);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            });
+        if ($city = $request->get('search_city')) {
+            $datatable->where('oc.id', '=', $city);
+        }
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatable->whereBetween('sj.created_at', [$from,$to]);
+        }
+
+        return $datatable->make(true);
+    }
 }
 

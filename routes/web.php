@@ -864,6 +864,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReportsController@cargo_returns_shipment_list')->name('list');
 
         });
+        Route::prefix('return_reattempt_ratio')->name('return_reattempt_ratio.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@return_reattempt_ratio_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@return_reattempt_ratio_list')->name('list');
+
+        });
     });
 
     //Reports end
