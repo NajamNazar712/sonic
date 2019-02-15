@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\ShipperNotificationEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\Controller;
@@ -91,7 +92,12 @@ class NotificationsController extends Controller
 
             $shipper = User::find($reference_1_id);
 
-            $to = $shipper->email;
+//            $to = $shipper->email;
+              if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                  $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+              }else{
+                  $to = $shipper->email;
+              }
 
             foreach ($fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
@@ -218,9 +224,9 @@ class NotificationsController extends Controller
             self::sms($body, $to);
           }
           else if ($id == 4) {
-            $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number'];
+            $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity'];
 
-            $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number'];
+            $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity'];
 
             $present_fields = array();
 
@@ -264,6 +270,21 @@ class NotificationsController extends Controller
               $details['weight'] = $shipment->actual_weight;
               $details['tracking_number'] = $shipment->tracking_number;
 
+              if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
+                foreach ($shipment->items as $item) {
+                  if ($item->type == 0) {
+                    $details['item_product_type'] = $item->product->product_name;
+                    $details['item_description'] = $item->description;
+                    $details['item_quantity'] = $item->quantity;
+                  }
+                }
+              }
+              else {
+                $details['item_product_type'] = '';
+                $details['item_description'] = '';
+                $details['item_quantity'] = '';
+              }
+
               $user_wise_shipments[$shipment->user_id][] = $details;
             }
 
@@ -289,8 +310,12 @@ class NotificationsController extends Controller
                 $body = str_replace('[arrival_at]', $pickup_note->created_at, $body);
               }
 
-              $to = $shipper->email;
-
+//              $to = $shipper->email;
+                if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                    $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+                }else{
+                    $to = $shipper->email;
+                }
               $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
 
               $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
@@ -371,8 +396,12 @@ class NotificationsController extends Controller
 
             $shipper = $shipment->user;
 
-            $to = $shipper->email;
-
+//            $to = $shipper->email;
+              if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                  $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+              }else{
+                  $to = $shipper->email;
+              }
             foreach ($cargo_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
                 if ($key == 'cargo_number') {
@@ -454,8 +483,12 @@ class NotificationsController extends Controller
 
             $shipper = $shipment->user;
 
-            $to = $shipper->email;
-
+//            $to = $shipper->email;
+              if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                  $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+              }else{
+                  $to = $shipper->email;
+              }
             foreach ($cargo_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
                 if ($key == 'cargo_number') {
@@ -636,8 +669,12 @@ class NotificationsController extends Controller
 
             $shipper = $shipment->user;
 
-            $to = $shipper->email;
-
+//            $to = $shipper->email;
+              if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                  $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+              }else{
+                  $to = $shipper->email;
+              }
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
                 if ($key == 'delivery_note_number') {
@@ -821,8 +858,12 @@ class NotificationsController extends Controller
               if ($shipment->shipper_status_id != 12) {
                 $shipper = $shipment->user;
 
-                $to = $shipper->email;
-
+//                $to = $shipper->email;
+                  if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                      $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+                  }else{
+                      $to = $shipper->email;
+                  }
                 foreach ($shipment_fields as $key => $field) {
                   if (strpos($subject, '[' . $key . ']') !== FALSE) {
                     $subject = str_replace('[' . $key . ']', $shipment[$field], $subject);
@@ -952,8 +993,12 @@ class NotificationsController extends Controller
 
                 $shipper = $shipment->user;
 
-                $to = $shipper->email;
-
+//                $to = $shipper->email;
+                  if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                      $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+                  }else{
+                      $to = $shipper->email;
+                  }
                 foreach ($shipment_fields as $key => $field) {
                   if (strpos($subject, '[' . $key . ']') !== FALSE) {
                     $subject = str_replace('[' . $key . ']', $shipment[$field], $subject);
@@ -995,8 +1040,12 @@ class NotificationsController extends Controller
 
               $shipper = $shipment->user;
 
-              $to = $shipper->email;
-
+//              $to = $shipper->email;
+                if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                    $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+                }else{
+                    $to = $shipper->email;
+                }
               foreach ($remove_fields as $field) {
                 if (strpos($subject, '[' . $field . ']') !== FALSE) {
                   $subject = str_replace('[' . $field . ']', '-', $subject);
@@ -1130,8 +1179,12 @@ class NotificationsController extends Controller
 
             $shipper = $shipment->user;
 
-            $to = $shipper->email;
-
+//            $to = $shipper->email;
+              if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                  $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+              }else{
+                  $to = $shipper->email;
+              }
             foreach ($fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
                 $subject = str_replace('[' . $key . ']', $shipment[$field], $subject);
@@ -1478,8 +1531,12 @@ class NotificationsController extends Controller
               $body = str_replace('[adjusted_shipments]', $done_payment->adjusted_shipments, $body);
             }
 
-            $to = $shipper->email;
-
+//            $to = $shipper->email;
+              if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                  $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+              }else{
+                  $to = $shipper->email;
+              }
             $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
 
             $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
@@ -1750,8 +1807,12 @@ class NotificationsController extends Controller
               $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
             }
 
-            $to = [$shipper->email];
-
+//            $to = [$shipper->email];
+              if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                  $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+              }else{
+                  $to = [$shipper->email];
+              }
             $general_admins = Admin::whereIn('role_id', [2, 4])->where('status', 1);
 
             if ($general_admins->exists()) {
@@ -1930,8 +1991,12 @@ class NotificationsController extends Controller
                     $body = str_replace('[company_name]', $shipper->name, $body);
                   }
 
-                  $to = $shipper->email;
-
+//                  $to = $shipper->email;
+                    if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                        $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+                    }else{
+                        $to = $shipper->email;
+                    }
                   $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
 
                   $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';

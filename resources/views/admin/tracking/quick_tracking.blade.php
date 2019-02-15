@@ -184,14 +184,19 @@
             font-size: 18px;
             font-weight: bold;
         }
+
+        .goldClass{
+            background-color: gold;
+        }
         .yellowClass{
             background-color: #86cd7c;
         }
         .greenClass{
-            background-color: green;
+            background-color: springgreen;
         }
         .redClass{
-            background-color: orangered;
+            background-color: red;
+            color:#fff;
         }
 
     </style>
@@ -240,10 +245,6 @@
                         className: 'btn btn-primary mb-1',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
-                    // scrollX: true,
-                    // lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                    // pageLength: 50,
-                    // pagingType: 'full_numbers',
                     paging:false,
                     ordering:[0, 'desc'],
                     columns: [
@@ -260,8 +261,8 @@
                         var status = parseInt($(row).attr('id'));
                         if(status === 13){
                             $(row).addClass('greenClass');
-                        }else if(status === 12){
-                            $(row).addClass('yellowClass');
+                        }else if(status === 12 || status === 52){
+                            $(row).addClass('goldClass');
                         }else if(status === 20){
                             $(row).addClass('redClass');
                         }
@@ -358,10 +359,10 @@
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }else{
                                 $('#single_div').removeClass('d-none');
-                                if($('#status_card').hasClass('greenClass') || $('#status_card').hasClass('redClass') || $('#status_card').hasClass('yellowClass')){
+                                if($('#status_card').hasClass('greenClass') || $('#status_card').hasClass('redClass') || $('#status_card').hasClass('goldClass')){
                                     $('#status_card').removeClass('greenClass');
                                     $('#status_card').removeClass('redClass');
-                                    $('#status_card').removeClass('yellowClass');
+                                    $('#status_card').removeClass('goldClass');
                                 }
 
 
@@ -382,8 +383,8 @@
                                 $('#single_div p.date').text(data.details.current_status_date);
                                 if(data.details.status_id == 13){
                                     $('#status_card').addClass('greenClass');
-                                }else if(data.details.status_id == 12){
-                                    $('#status_card').addClass('yellowClass');
+                                }else if(data.details.status_id == 12 || data.details.status_id == 52){
+                                    $('#status_card').addClass('goldClass');
                                 }else if(data.details.status_id == 20){
                                     $('#status_card').addClass('redClass');
                                 }

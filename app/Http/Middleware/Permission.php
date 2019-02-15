@@ -248,6 +248,7 @@ class Permission
             'admin.petty_cash.make.index' => 145,
             'admin.petty_cash.statements.index' => 146,
             'admin.petty_cash.approved.index' => 147,
+            'admin.petty_cash.statements.approve' => 173,
 
             'admin.month_closing.index' => 141,
             'admin.month_closing.list' => 141,
@@ -306,6 +307,10 @@ class Permission
             'reports.debriefing.index' => 170,
             'reports.debriefing.list' => 170,
             'reports.debriefing.export' => 170,
+            'reports.cargo_returns_shipment.index' => 172,
+            'reports.cargo_returns_shipment.list' => 172,
+            'reports.return_reattempt_ratio.index' => 174,
+            'reports.return_reattempt_ratio.list' => 174,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

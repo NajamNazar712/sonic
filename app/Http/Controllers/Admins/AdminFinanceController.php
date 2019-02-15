@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\ChargesModes;
 use App\Http\Models\Rider;
+use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -111,6 +112,9 @@ class AdminFinanceController extends Controller
                 return 0;
             }
         })
+            ->editColumn('sdn_amount', function($shipment){
+                return number_format($shipment->sdn_amount);
+            })
         ->editColumn('delivered_shipments_link', function($station_deposit_note) {
             if ($station_deposit_note->sdn_delivered_shipments != 0) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $station_deposit_note->sdn_delivered_shipments . '</button>';
@@ -321,7 +325,7 @@ class AdminFinanceController extends Controller
                             
                           </tr>
             ';
-                $total_cod_amount += $shipment->received_amount;
+                $total_cod_amount += number_format($shipment->received_amount);
                 $shipment_details .= $shipment_details_row_start;
             }
             $shipment_details .= '
@@ -490,6 +494,9 @@ class AdminFinanceController extends Controller
         ->filterColumn('dn.id', function ($query, $keyword) {
             return $query->where('dn.id', '=', $keyword);
         })
+            ->editColumn('dncc_amount', function($shipment){
+                return number_format($shipment->dncc_amount);
+            })
         ->addColumn('action', function($delivery_notes) {
             return '<div class="btn-group">
                   <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -549,7 +556,7 @@ class AdminFinanceController extends Controller
                 $row[] = $delivery_note->route->code . ' (' . $delivery_note->route->start . ' to ' . $delivery_note->route->end . ')';
                 $row[] = $delivery_note->shipments_count;
                 $row[] = $delivery_note->delivered_shipments;
-                $row[] = $delivery_note->received_cod_amount;
+                $row[] = number_format($delivery_note->received_cod_amount);
 
                 $details[] = $row;
 
@@ -636,6 +643,9 @@ class AdminFinanceController extends Controller
                         $sub_query->where('s.booking_type_id', '=', 4)
                             ->where('usi.poc', 'like', '%' . $keyword . '%');
                     });
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
         ->editColumn('tracking_number',function ($shipments){
@@ -793,6 +803,15 @@ class AdminFinanceController extends Controller
                     return 'Pending Return Charges Collection';
                 }
             })
+            ->editColumn('charges', function($shipment){
+                return number_format($shipment->charges);
+            })
+            ->editColumn('return_charges', function($shipment){
+                return number_format($shipment->return_charges);
+            })
+            ->editColumn('weight_charges', function($shipment){
+                return number_format($shipment->weight_charges);
+            })
             ->addColumn('aging', function($shipment) {
                 $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
 
@@ -811,7 +830,7 @@ class AdminFinanceController extends Controller
             ->addColumn('action', function($shipment) {
                 $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
 
-                if ((($shipment->charges_mode_id == 1) || ($shipment->charges_mode_id == 2 && ($shipment->shipper_status_id == 14 || $shipment->shipper_status_id == 25))) && ($shipment->walk_in_status != 1) && (session('role_id') == 1 || count(array_intersect([168]), session('permissions') !== 0))) {
+                if ((($shipment->charges_mode_id == 1) || ($shipment->charges_mode_id == 2 && ($shipment->shipper_status_id == 14 || $shipment->shipper_status_id == 25))) && ($shipment->walk_in_status != 1) && (session('role_id') == 1 || count(array_intersect([168], session('permissions'))) !== 0)) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -1153,7 +1172,7 @@ class AdminFinanceController extends Controller
                         $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
 
                         $details['payment_mode'] = $shipment->payment_mode->mode;
-                        $details['amount'] = $shipment->amount;
+                        $details['amount'] = number_format($shipment->amount);
 
                         $details['shipper']['name'] = $shipper->name;
                         $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
@@ -1250,7 +1269,7 @@ class AdminFinanceController extends Controller
                         $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
 
                         $details['payment_mode'] = $shipment->payment_mode->mode;
-                        $details['amount'] = $shipment->amount;
+                        $details['amount'] = number_format($shipment->amount);
 
                         $details['shipper']['name'] = $shipper->name;
                         $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
@@ -1324,7 +1343,7 @@ class AdminFinanceController extends Controller
             $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
 
             $details['payment_mode'] = $shipment->payment_mode->mode;
-            $details['amount'] = $shipment->amount;
+            $details['amount'] = number_format($shipment->amount);
 
             $details['shipper']['name'] = $shipper->name;
             $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
@@ -1349,6 +1368,7 @@ class AdminFinanceController extends Controller
     public function add_shipment_adjustment_store(Request $request) {
         $shipment_id = $request->input('shipment_id');
         $payable = str_replace(',', '', $request->input('payable'));
+        $payable_remarks = $request->input('payable_remarks');
 
         $shipment = Shipment::find($shipment_id);
 
@@ -1416,6 +1436,12 @@ class AdminFinanceController extends Controller
 
             $pending_invoice_shipment->save();
         }
+        $shipment_payment_journey = ShipmentsPaymentJourney::create([
+            'shipment_id' => $shipment_id,
+            'status_id' => 4,
+            'admin_id' => Auth::id(),
+            'payable_remarks' => $payable_remarks
+        ]);
 
         return redirect()->route('admin.finance.add_shipment_adjustment.index')->with('success', 'Shipment\'s adjustment has been added');
     }
@@ -1754,8 +1780,9 @@ class AdminFinanceController extends Controller
         ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
         ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
         ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
+        ->leftjoin('shipments as ss', 'ss.user_id', '=', 'u.id')
         ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-        ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle', 's.booking_type_id', 'usi.poc')
+        ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle', 's.booking_type_id', 'usi.poc',DB::raw('(select count(id) from shipments where shipments.user_id = u.id and shipments.shipper_status_id in (2,3,5,21,23,24,18,49,8,9,10,12,7,11,15,51)) as total_pending_shipments'))
         ->groupBy('pending_payments.id');
 
         if (session('role_id') != 1) {
@@ -2807,7 +2834,7 @@ class AdminFinanceController extends Controller
             if ($payment_mode == 'IBFT') {
                 if ($done_payment_shipment->type != 2) {
                     if ($done_payment_shipment->type == 0) {
-                        $total_collection_amount += $done_payment_shipment->amount;
+                        $total_collection_amount += number_format($done_payment_shipment->amount);
                         $total_cash_handling_charges += $shipment->cash_handling_charges;
                         $total_replacement_charges += $shipment->replacement_charges;
                         // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
@@ -2835,13 +2862,13 @@ class AdminFinanceController extends Controller
             }
             else {
                 if ($done_payment_shipment->type == 0) {
-                    $total_collection_amount += $done_payment_shipment->amount;
+                    $total_collection_amount += number_format($done_payment_shipment->amount);
                 }
                 else if ($done_payment_shipment->type == 2) {
-                    $total_adjustments += $done_payment_shipment->payable;
+                    $total_adjustments += number_format($done_payment_shipment->payable);
                 }
 
-                $total_payable += $done_payment_shipment->payable;
+                $total_payable += number_format($done_payment_shipment->payable);
             }
       }
 
@@ -3020,7 +3047,7 @@ class AdminFinanceController extends Controller
             $row[] = $shipment->consignee_city->name;
             $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->actual_weight;
-            $row[] = $done_payment_shipment->amount;
+            $row[] = number_format($done_payment_shipment->amount);
             $row[] = (($done_payment_shipment->type != 2) ? $shipment->weight_charges : 0);
             $row[] = (($done_payment_shipment->type == 0) ? $shipment->cash_handling_charges : 0);
             $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
@@ -3452,7 +3479,7 @@ class AdminFinanceController extends Controller
             $total_adjustment_charges += $invoice_shipment->adjustment_charges;
             $total_charges += $invoice_shipment->charges;
             $total_gst += $invoice_shipment->gst;
-            $total_invoice_amount += $invoice_shipment->invoice_amount;
+            $total_invoice_amount += number_format($invoice_shipment->invoice_amount);
         }
 
         $html .= '

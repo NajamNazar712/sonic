@@ -34,6 +34,7 @@
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">Created Datetime</th>
 										<th class="border-primary border-darken-1">Total Shipments</th>
+										<th class="border-primary border-darken-1">Total Pending Shipments</th>
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
 										<th class="border-primary border-darken-1">Returned Shipments</th>
 										<th class="border-primary border-darken-1">Adjusted Shipments</th>
@@ -267,6 +268,7 @@
                             head.push('Phone No(s).');
                             head.push('Address');
                             head.push('Total Shipments');
+                            head.push('Total Pending Shipments');
                             head.push('Delivered Shipments');
                             head.push('Returned Shipments');
                             head.push('Adjusted Shipments');
@@ -298,6 +300,7 @@
                                 row.push(values.phone_numbers);
                                 row.push(values.address);
                                 row.push(values.total_shipments);
+                                row.push(values.total_pending_shipments);
                                 row.push(values.delivered_shipments_count);
                                 row.push(values.returned_shipments_count);
                                 row.push(values.adjusted_shipments_count);
@@ -449,6 +452,7 @@
 					{data:'address', name: 'u.address', class: 'align-middle text-center address'},
 					{data:'created_at', name: 'pending_payments.created_at', class: 'align-middle text-center created_at'},
 					{data:'total_shipments', name: 'pending_payments.total_shipments', class: 'align-middle text-center total_shipments'},
+					{data:'total_pending_shipments', name: 'total_pending_shipments', class: 'align-middle text-center total_pending_shipments', orderable: false},
 					{data:'delivered_shipments', name: 'pending_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'pending_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'pending_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
@@ -500,7 +504,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_pending_shipments')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))
@@ -518,6 +522,7 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
+
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();

@@ -12,6 +12,7 @@ use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\PettyCashStatementDetail;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\CargoConsignment;
@@ -94,6 +95,9 @@ class AdminReportsController extends Controller
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -1131,7 +1135,7 @@ class AdminReportsController extends Controller
             })            ->leftjoin('cargo_consignments as ccss','ccss.id', '=', 'cccc.cargo_consignment_id')
             ->leftjoin('cargo_consignments as ccssr','ccssr.id', '=', 'ccrc.cargo_consignment_id')
             ->leftjoin('shipment_status as lssv','lssv.id','=','lsjv.shipper_status_id')
-            ->select('fatstatus.created_at as first_attempt','ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as first_delivery_note_id','dnss.delivery_note_id as last_delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','lstatus.created_at as last_status_date','fs.name as first_status','ls.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc', 'ccss.id as cargo_number', 'ccss.created_at as cargo_date_time', 'ccss.type as return_type', 'ccss.id as return_cargo_number', 'ccss.created_at as return_cargo_date_time')
+            ->select('fatstatus.created_at as first_attempt','ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as first_delivery_note_id','dnss.delivery_note_id as last_delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','lstatus.created_at as last_status_date','fs.name as first_status','ls.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc', 'ccss.id as cargo_number', 'ccss.created_at as cargo_date_time', 'ccssr.type as return_type', 'ccssr.id as return_cargo_number', 'ccssr.created_at as return_cargo_date_time')
             ->groupBy('shipments.id');
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -1438,6 +1442,9 @@ class AdminReportsController extends Controller
                     return $shipments->sdn;
                 },
             ])
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->editColumn('dncc', function ($shipments) {
                 if ($shipments->dncc) {
                     return str_pad($shipments->dncc, 6, '0', STR_PAD_LEFT);
@@ -1993,18 +2000,46 @@ class AdminReportsController extends Controller
 //         }
 
     }
+    function array_sort($array, $on, $order=SORT_DESC){
 
+        $new_array = array();
+        $sortable_array = array();
+
+        if (count($array) > 0) {
+            foreach ($array as $k => $v) {
+                if (is_array($v)) {
+                    foreach ($v as $k2 => $v2) {
+                        if ($k2 == $on) {
+                            $sortable_array[$k] = $v2;
+                        }
+                    }
+                } else {
+                    $sortable_array[$k] = $v;
+                }
+            }
+
+            switch ($order) {
+                case SORT_ASC:
+                    asort($sortable_array);
+                    break;
+                case SORT_DESC:
+                    arsort($sortable_array);
+                    break;
+            }
+
+            foreach ($sortable_array as $k => $v) {
+                $new_array[$k] = $array[$k];
+            }
+        }
+
+        return $new_array;
+    }
     static public function daily_pickup_sales_report_create($search_city = NULL, $date,$sales_person = NULL,$sales_tagging = FALSE){
 
         $date_from = Carbon::createFromFormat("Y-m-d H:i:s",$date)->format('Y-m-d 08:00A');
         $next_day = Carbon::parse($date)->addDay(1);
         $date_to = Carbon::createFromFormat("Y-m-d H:i:s",$next_day)->format('Y-m-d 07:59A');
         $only_date = Carbon::parse($date)->toDateString();
-//        $pickup_request_shippers = Shipment::whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
-//            $query->whereBetween('created_at',[$date_from,$date_to])
-//                ->where('shipments_journey.shipper_status_id', 2);
-//        })->pluck('id')->toArray();
-//        return $pickup_request_shippers;
         $hubs = array();
         $city = array();
         if($sales_tagging == TRUE) {
@@ -2039,11 +2074,21 @@ class AdminReportsController extends Controller
             $hubs = City::where('pickup', 1)->select('id', 'name')->get();
         }
         $details = array();
+        $sorted_details_array = array();
+        $sorted_shipper_array = array();
         $details_shipper = array();
         $shippers = array();
-        $details[] = ['S. No.','Origin '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
-
-
+        $details['header'] = ['S. No.','Origin '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
+        $sort_support_array = array();
+        $total_booked = 0;
+        $total_received = 0;
+        $total_cod_collection = 0;
+        $total_actual_weight = 0;
+        $total_chargeable_weight = 0;
+        $total_revenue_wo_gst = 0;
+        $total_avg_revenue = 0;
+        $total_avg_cash_collection = 0;
+        $total_rev_on_cash_collection = 0;
         $serial_number_hubs = 1;
         $booked = 0; $received = 0; $revenue_wo_gst = 0; $cod_collection = 0;$actual_weight = 0; $chargeable_weight = 0;
         foreach ($hubs as $hub) {
@@ -2052,147 +2097,147 @@ class AdminReportsController extends Controller
                 if (session('department_id') != 7){
                     $booked = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('id', '=', $hub->id);
-                    })->whereBetween('created_at',[$date_from,$date_to])->count();
+                    })->whereBetween('created_at',[$date_from,$date_to])->where('shipments.packaging_material_request', 0)->count();
                     $received = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('id', '=', $hub->id);
                     })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                         $query->whereBetween('created_at',[$date_from,$date_to])
                             ->where('shipper_status_id', 2);
-                    })->count();
+                    })->where('shipments.packaging_material_request', 0)->count();
                     $cod_collection = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('id', '=', $hub->id);
                     })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                         $query->whereBetween('created_at',[$date_from,$date_to])
                             ->where('shipper_status_id', 2);
-                    })->sum('amount');
+                    })->where('shipments.packaging_material_request', 0)->sum('amount');
                     $actual_weight = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('id', '=', $hub->id);
                     })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                         $query->whereBetween('created_at',[$date_from,$date_to])
                             ->where('shipper_status_id', 2);
-                    })->sum('actual_weight');
+                    })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
                     $chargeable_weight = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('id', '=', $hub->id);
                     })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                         $query->whereBetween('created_at',[$date_from,$date_to])
                             ->where('shipper_status_id', 2);
-                    })->sum('chargeable_weight');
+                    })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
                     $revenue_wo_gst = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('id', '=', $hub->id);
                     })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                         $query->whereBetween('created_at',[$date_from,$date_to])
                             ->where('shipper_status_id', 2);
-                    })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                    })->where('shipments.packaging_material_request', 0)->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                 }else{
                     if(session('role_id') != 4){
                         $booked = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                             $query->where('id', '=', $hub->id);
-                        })->whereBetween('created_at',[$date_from,$date_to])->whereIn('shipments.user_id', session('tagged_shippers'))->count();
+                        })->where('shipments.packaging_material_request', 0)->whereBetween('created_at',[$date_from,$date_to])->whereIn('shipments.user_id', session('tagged_shippers'))->count();
                         $received = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                             $query->where('id', '=', $hub->id);
                         })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                             $query->whereBetween('created_at',[$date_from,$date_to])
                                 ->where('shipper_status_id', 2);
-                        })->whereIn('shipments.user_id', session('tagged_shippers'))->count();
+                        })->where('shipments.packaging_material_request', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->count();
                         $cod_collection = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                             $query->where('id', '=', $hub->id);
                         })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                             $query->whereBetween('created_at',[$date_from,$date_to])
                                 ->where('shipper_status_id', 2);
-                        })->whereIn('shipments.user_id', session('tagged_shippers'))->sum('amount');
+                        })->where('shipments.packaging_material_request', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('amount');
                         $actual_weight = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                             $query->where('id', '=', $hub->id);
                         })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                             $query->whereBetween('created_at',[$date_from,$date_to])
                                 ->where('shipper_status_id', 2);
-                        })->whereIn('shipments.user_id', session('tagged_shippers'))->sum('actual_weight');
+                        })->where('shipments.packaging_material_request', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('actual_weight');
                         $chargeable_weight = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                             $query->where('id', '=', $hub->id);
                         })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                             $query->whereBetween('created_at',[$date_from,$date_to])
                                 ->where('shipper_status_id', 2);
-                        })->whereIn('shipments.user_id', session('tagged_shippers'))->sum('chargeable_weight');
+                        })->where('shipments.packaging_material_request', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('chargeable_weight');
                         $revenue_wo_gst = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                             $query->where('id', '=', $hub->id);
                         })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                             $query->whereBetween('created_at',[$date_from,$date_to])
                                 ->where('shipper_status_id', 2);
-                        })->whereIn('shipments.user_id', session('tagged_shippers'))->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                        })->where('shipments.packaging_material_request', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                     }else{
                         if($sales_person != null){
                             $tagged_shippers = SalePersonTag::where('admin_id', $sales_person)->select('user_id')->get();
 
                             $booked = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                                 $query->where('id', '=', $hub->id);
-                            })->whereBetween('created_at',[$date_from,$date_to])->whereIn('user_id', $tagged_shippers)->count();
+                            })->where('shipments.packaging_material_request', 0)->whereBetween('created_at',[$date_from,$date_to])->whereIn('user_id', $tagged_shippers)->count();
 
                             $received = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                                 $query->where('id', '=', $hub->id);
                             })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at',[$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->whereIn('user_id', $tagged_shippers)->count();
+                            })->where('shipments.packaging_material_request', 0)->whereIn('user_id', $tagged_shippers)->count();
                             $cod_collection = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                                 $query->where('id', '=', $hub->id);
                             })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at',[$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->whereIn('user_id', $tagged_shippers)->sum('amount');
+                            })->where('shipments.packaging_material_request', 0)->whereIn('user_id', $tagged_shippers)->sum('amount');
                             $actual_weight = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                                 $query->where('id', '=', $hub->id);
                             })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at',[$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->whereIn('user_id', $tagged_shippers)->sum('actual_weight');
+                            })->where('shipments.packaging_material_request', 0)->whereIn('user_id', $tagged_shippers)->sum('actual_weight');
                             $chargeable_weight = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                                 $query->where('id', '=', $hub->id);
                             })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at',[$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->whereIn('user_id', $tagged_shippers)->sum('chargeable_weight');
+                            })->where('shipments.packaging_material_request', 0)->whereIn('user_id', $tagged_shippers)->sum('chargeable_weight');
                             $revenue_wo_gst = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                                 $query->where('id', '=', $hub->id);
                             })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at',[$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->whereIn('user_id', $tagged_shippers)->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                            })->where('shipments.packaging_material_request', 0)->whereIn('user_id', $tagged_shippers)->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                         }else{
 
                             $booked = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                                 $query->where('id', '=', $hub->id);
-                            })->whereBetween('created_at',[$date_from,$date_to])->count();
+                            })->where('shipments.packaging_material_request', 0)->whereBetween('created_at',[$date_from,$date_to])->count();
                             $received = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                                 $query->where('id', '=', $hub->id);
                             })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at',[$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->count();
+                            })->where('shipments.packaging_material_request', 0)->count();
                             $cod_collection = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                                 $query->where('id', '=', $hub->id);
                             })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at',[$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->sum('amount');
+                            })->where('shipments.packaging_material_request', 0)->sum('amount');
                             $actual_weight = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                                 $query->where('id', '=', $hub->id);
                             })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at',[$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->sum('actual_weight');
+                            })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
                             $chargeable_weight = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                                 $query->where('id', '=', $hub->id);
                             })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at',[$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->sum('chargeable_weight');
+                            })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
                             $revenue_wo_gst = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                                 $query->where('id', '=', $hub->id);
                             })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at',[$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                            })->where('shipments.packaging_material_request', 0)->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                         }
                     }
@@ -2201,37 +2246,37 @@ class AdminReportsController extends Controller
             }else{
                 $booked = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                     $query->where('id', '=', $hub->id);
-                })->whereBetween('created_at',[$date_from,$date_to])->count();
+                })->where('shipments.packaging_material_request', 0)->whereBetween('created_at',[$date_from,$date_to])->count();
                 $received = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                     $query->where('id', '=', $hub->id);
                 })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                     $query->whereBetween('created_at',[$date_from,$date_to])
                         ->where('shipper_status_id', 2);
-                })->count();
+                })->where('shipments.packaging_material_request', 0)->count();
                 $cod_collection = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                     $query->where('id', '=', $hub->id);
                 })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                     $query->whereBetween('created_at',[$date_from,$date_to])
                         ->where('shipper_status_id', 2);
-                })->sum('amount');
+                })->where('shipments.packaging_material_request', 0)->sum('amount');
                 $actual_weight = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                     $query->where('id', '=', $hub->id);
                 })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                     $query->whereBetween('created_at',[$date_from,$date_to])
                         ->where('shipper_status_id', 2);
-                })->sum('actual_weight');
+                })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
                 $chargeable_weight = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                     $query->where('id', '=', $hub->id);
                 })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                     $query->whereBetween('created_at',[$date_from,$date_to])
                         ->where('shipper_status_id', 2);
-                })->sum('chargeable_weight');
+                })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
                 $revenue_wo_gst = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                     $query->where('id', '=', $hub->id);
                 })->whereHas('shipment_journey', function($query) use ($date_from, $date_to) {
                     $query->whereBetween('created_at',[$date_from,$date_to])
                         ->where('shipper_status_id', 2);
-                })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                })->where('shipments.packaging_material_request', 0)->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
             }
             if($booked > 0 || $received > 0){
 
@@ -2239,27 +2284,44 @@ class AdminReportsController extends Controller
                 $avg_revenue = ($received != 0)? $revenue_wo_gst/$received:0;
                 $avg_cash_collection = ($received != 0)? $cod_collection/$received:0;
                 $rev_on_cash_collection = (($avg_cash_collection != 0)? $avg_revenue/$avg_cash_collection:0)*100;
-                $row[] = $serial_number_hubs;
-                $row[] = $hub->name;
-                $row[] = $booked;
-                $row[] = $received;
-                $row[] = $revenue_wo_gst;
-                $row[] = $cod_collection;
-                $row[] = $actual_weight;
-                $row[] = $chargeable_weight;
-                $row[] = $avg_revenue;
-                $row[] = $avg_cash_collection;
-                $row[] =   $rev_on_cash_collection;
-                $details[] = $row;
+                $row['serials'] = $serial_number_hubs;
+                $row['hub'] = $hub->name;
+                $row['booked'] = number_format($booked);
+                $row['received'] = number_format($received);
+                $row['revenue_mo_gst'] = number_format($revenue_wo_gst);
+                $row['cod_collection'] = number_format($cod_collection);
+                $row['actual_weight'] = round($actual_weight);
+                $row['chargeable_weight'] = round($chargeable_weight);
+                $avg_rev = round($avg_revenue);
+                $row['average_revenue'] = number_format($avg_rev);
+                $avg_cc = round($avg_cash_collection);
+                $row['average_cash_collection'] = number_format($avg_cc);
+                $rev_occ =   round($rev_on_cash_collection);
+                $row['revenue_cash_collection'] = number_format($rev_occ);
+                $sort_support_array[] = $booked;
 
+                $sorted_details_array[] = $row;
+                $total_booked += $booked;
+                $total_received += $received;
+                $total_revenue_wo_gst += $revenue_wo_gst;
+                $total_cod_collection += $cod_collection;
+                $total_actual_weight += $actual_weight;
+                $total_chargeable_weight += $chargeable_weight;
+                $total_avg_revenue += $avg_rev;
+                $total_avg_cash_collection += $avg_cc;
+                $total_rev_on_cash_collection += $rev_occ;
                 $serial_number_hubs++;
             }
 
         }
+        array_multisort($sort_support_array, SORT_DESC, $sorted_details_array);
+        foreach ($sorted_details_array as $item) {
+            $details[] = $item;
+        }
+        $details[] = ['Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst), number_format($total_cod_collection),number_format($total_actual_weight),number_format($total_chargeable_weight),number_format($total_avg_revenue),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection)];
 
 
-
-        $details_shipper[] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
+        $details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
         $serial_number_shippers = 1;
 
         if($sales_tagging == TRUE){
@@ -2352,6 +2414,16 @@ class AdminReportsController extends Controller
 //                }
             }
         }
+        $shipper_sort_support_array = array();
+        $total_shipper_booked = 0;
+        $total_shipper_received = 0;
+        $total_shipper_cod_collection = 0;
+        $total_shipper_actual_weight = 0;
+        $total_shipper_chargeable_weight = 0;
+        $total_shipper_revenue_wo_gst = 0;
+        $total_shipper_avg_revenue = 0;
+        $total_shipper_avg_cash_collection = 0;
+        $total_shipper_rev_on_cash_collection = 0;
 
         $shipper_booked = 0;
         $shipper_received = 0;
@@ -2368,7 +2440,7 @@ class AdminReportsController extends Controller
                         $shipper_booked = Shipment::where('user_id', $shipper->id)
                             ->whereHas('pickup_address.city', function ($query) use ($hubs) {
                                 $query->where('id', '=', $hubs[0]->id);
-                            })->whereBetween('created_at', [$date_from,$date_to])->count();
+                            })->where('shipments.packaging_material_request', 0)->whereBetween('created_at', [$date_from,$date_to])->count();
                         $shipper_received = Shipment::where('user_id', $shipper->id)
                             ->whereHas('pickup_address.city', function ($query) use ($hubs) {
                                 $query->where('id', '=', $hubs[0]->id);
@@ -2376,7 +2448,7 @@ class AdminReportsController extends Controller
                             ->whereHas('shipment_journey', function ($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at', [$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->count();
+                            })->where('shipments.packaging_material_request', 0)->count();
                         $shipper_rev_wo_gst = Shipment::where('user_id', $shipper->id)
                             ->whereHas('pickup_address.city', function ($query) use ($hubs) {
                                 $query->where('id', '=', $hubs[0]->id);
@@ -2384,7 +2456,7 @@ class AdminReportsController extends Controller
                             ->whereHas('shipment_journey', function ($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at', [$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                            })->where('shipments.packaging_material_request', 0)->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                         $shipper_cod = Shipment::where('user_id', $shipper->id)
                             ->whereHas('pickup_address.city', function ($query) use ($hubs) {
                                 $query->where('id', '=', $hubs[0]->id);
@@ -2392,7 +2464,7 @@ class AdminReportsController extends Controller
                             ->whereHas('shipment_journey', function ($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at', [$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->sum('amount');
+                            })->where('shipments.packaging_material_request', 0)->sum('amount');
                         $shipper_actual_weight = Shipment::where('user_id', $shipper->id)
                             ->whereHas('pickup_address.city', function ($query) use ($hubs) {
                                 $query->where('id', '=', $hubs[0]->id);
@@ -2400,7 +2472,7 @@ class AdminReportsController extends Controller
                             ->whereHas('shipment_journey', function ($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at', [$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->sum('actual_weight');
+                            })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
                         $shipper_chargeable_weight = Shipment::where('user_id', $shipper->id)
                             ->whereHas('pickup_address.city', function ($query) use ($hubs) {
                                 $query->where('id', '=', $hubs[0]->id);
@@ -2408,56 +2480,56 @@ class AdminReportsController extends Controller
                             ->whereHas('shipment_journey', function ($query) use ($date_from, $date_to) {
                                 $query->whereBetween('created_at', [$date_from,$date_to])
                                     ->where('shipper_status_id', 2);
-                            })->sum('chargeable_weight');
+                            })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
 
                     } else {
-                        $shipper_booked = Shipment::where('user_id', $shipper->id)->whereBetween('created_at', [$date_from,$date_to])->count();
+                        $shipper_booked = Shipment::where('user_id', $shipper->id)->whereBetween('created_at', [$date_from,$date_to])->where('shipments.packaging_material_request', 0)->count();
                         $shipper_received = Shipment::where('user_id', $shipper->id)->whereHas('shipment_journey', function ($query) use ($date_from,$date_to) {
                             $query->whereBetween('created_at', [$date_from,$date_to])
                                 ->where('shipper_status_id', 2);
-                        })->count();
+                        })->where('shipments.packaging_material_request', 0)->count();
                         $shipper_rev_wo_gst = Shipment::where('user_id', $shipper->id)->whereHas('shipment_journey', function ($query) use ($date_from,$date_to) {
                             $query->whereBetween('created_at', [$date_from,$date_to])
                                 ->where('shipper_status_id', 2);
-                        })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                        })->where('shipments.packaging_material_request', 0)->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                         $shipper_cod = Shipment::where('user_id', $shipper->id)->whereHas('shipment_journey', function ($query) use ($date_from,$date_to) {
                             $query->whereBetween('created_at', [$date_from,$date_to])
                                 ->where('shipper_status_id', 2);
-                        })->sum('amount');
+                        })->where('shipments.packaging_material_request', 0)->sum('amount');
                         $shipper_actual_weight = Shipment::where('user_id', $shipper->id)->whereHas('shipment_journey', function ($query) use ($date_from,$date_to) {
                             $query->whereBetween('created_at', [$date_from,$date_to])
                                 ->where('shipper_status_id', 2);
-                        })->sum('actual_weight');
+                        })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
                         $shipper_chargeable_weight = Shipment::where('user_id', $shipper->id)->whereHas('shipment_journey', function ($query) use ($date_from,$date_to) {
                             $query->whereBetween('created_at', [$date_from,$date_to])
                                 ->where('shipper_status_id', 2);
-                        })->sum('chargeable_weight');
+                        })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
 
                     }
 
                 }
                 else{
-                    $shipper_booked = Shipment::where('user_id', $shipper->id)->whereBetween('created_at', [$date_from,$date_to])->count();
+                    $shipper_booked = Shipment::where('user_id', $shipper->id)->whereBetween('created_at', [$date_from,$date_to])->where('shipments.packaging_material_request', 0)->count();
                     $shipper_received = Shipment::where('user_id', $shipper->id)->whereHas('shipment_journey', function ($query) use ($date_from,$date_to) {
                         $query->whereBetween('created_at', [$date_from,$date_to])
                             ->where('shipper_status_id', 2);
-                    })->count();
+                    })->where('shipments.packaging_material_request', 0)->count();
                     $shipper_rev_wo_gst = Shipment::where('user_id', $shipper->id)->whereHas('shipment_journey', function ($query) use ($date_from,$date_to) {
                         $query->whereBetween('created_at', [$date_from,$date_to])
                             ->where('shipper_status_id', 2);
-                    })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                    })->where('shipments.packaging_material_request', 0)->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                     $shipper_cod = Shipment::where('user_id', $shipper->id)->whereHas('shipment_journey', function ($query) use ($date_from,$date_to) {
                         $query->whereBetween('created_at', [$date_from,$date_to])
                             ->where('shipper_status_id', 2);
-                    })->sum('amount');
+                    })->where('shipments.packaging_material_request', 0)->sum('amount');
                     $shipper_actual_weight = Shipment::where('user_id', $shipper->id)->whereHas('shipment_journey', function ($query) use ($date_from,$date_to) {
                         $query->whereBetween('created_at', [$date_from,$date_to])
                             ->where('shipper_status_id', 2);
-                    })->sum('actual_weight');
+                    })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
                     $shipper_chargeable_weight = Shipment::where('user_id', $shipper->id)->whereHas('shipment_journey', function ($query) use ($date_from,$date_to) {
                         $query->whereBetween('created_at', [$date_from,$date_to])
                             ->where('shipper_status_id', 2);
-                    })->sum('chargeable_weight');
+                    })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
                 }
 
                 $shipper_avg_revenue = ($shipper_received != 0) ? $shipper_rev_wo_gst / $shipper_received : 0;
@@ -2465,22 +2537,43 @@ class AdminReportsController extends Controller
                 $shipper_rev_on_cash_collection = (($shipper_avg_cash_collection != 0) ? $shipper_avg_revenue / $shipper_avg_cash_collection : 0) * 100;
 
                 $shipper_row = array();
-                $shipper_row[] = $serial_number_shippers;
-                $shipper_row[] = $shipper->name;
-                $shipper_row[] = $shipper_booked;
-                $shipper_row[] = $shipper_received;
-                $shipper_row[] = $shipper_rev_wo_gst;
-                $shipper_row[] = $shipper_cod;
-                $shipper_row[] = $shipper_actual_weight;
-                $shipper_row[] = $shipper_chargeable_weight;
-                $shipper_row[] = $shipper_avg_revenue;
-                $shipper_row[] = $shipper_avg_cash_collection;
-                $shipper_row[] = $shipper_rev_on_cash_collection;
+                $shipper_row['shipper_serial'] = $serial_number_shippers;
+                $shipper_row['name'] = $shipper->name;
+                $shipper_row['shipper_booked'] = number_format($shipper_booked);
+                $shipper_row['shipper_received'] = number_format($shipper_received);
+                $shipper_row['shipper_rev_wo_gst'] = number_format($shipper_rev_wo_gst);
+                $shipper_row['shipper_cod'] = number_format($shipper_cod);
+                $shipper_row['shipper_actual_weight'] = $shipper_actual_weight;
+                $shipper_row['shipper_chargeable_weight'] = $shipper_chargeable_weight;
+                $avg_revenue = round($shipper_avg_revenue);
+                $shipper_row['shipper_avg_revenue'] = number_format($avg_revenue);
+                $avg_cash_coll = round($shipper_avg_cash_collection);
+                $shipper_row['shipper_avg_cc'] = number_format($avg_cash_coll);
+                $avg_rev_cc = round($shipper_rev_on_cash_collection);
+                $shipper_row['shipper_rcc'] = number_format($avg_rev_cc);
+//                $details_shipper[] = $shipper_row;
+                $sorted_shipper_array[] = $shipper_row;
+                $shipper_sort_support_array[] = $shipper_booked;
+                $total_shipper_booked += $shipper_booked;
+                $total_shipper_received += $shipper_received;
+                $total_shipper_cod_collection += $shipper_cod;
+                $total_shipper_revenue_wo_gst += $shipper_rev_wo_gst;
+                $total_shipper_actual_weight += $shipper_actual_weight;
+                $total_shipper_chargeable_weight += $shipper_chargeable_weight;
+                $total_shipper_avg_revenue += $avg_revenue;
+                $total_shipper_avg_cash_collection += $avg_cash_coll;
+                $total_shipper_rev_on_cash_collection += $avg_rev_cc;
 
-                $details_shipper[] = $shipper_row;
+
                 $serial_number_shippers++;
             }
         }
+        array_multisort($shipper_sort_support_array, SORT_DESC, $sorted_shipper_array);
+        foreach ($sorted_shipper_array as $shipper) {
+            $details_shipper[] = $shipper;
+        }
+        $details_shipper[] = ['Total','DSR '.$only_date, number_format($total_shipper_booked), number_format($total_shipper_received), number_format($total_shipper_revenue_wo_gst), number_format($total_shipper_cod_collection),number_format($total_shipper_actual_weight),number_format($total_shipper_chargeable_weight),number_format($total_shipper_avg_revenue),number_format($total_shipper_avg_cash_collection),number_format($total_shipper_rev_on_cash_collection)];
+
         $spreadsheet = new Spreadsheet();
         $cell_st =[
             'font' =>['bold' => true],
@@ -2662,11 +2755,11 @@ class AdminReportsController extends Controller
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
                         })->sum('actual_weight');
-                        $details['amount'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                        $details['amount'][$s->id][$month] = number_format(Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
                             $query->whereMonth('created_at', $thisMonth)
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
-                        })->sum('amount');
+                        })->sum('amount'));
                         $details['revenue'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
                             $query->whereMonth('created_at', $thisMonth)
                                 ->whereYear('created_at', $thisYear)
@@ -2796,6 +2889,9 @@ class AdminReportsController extends Controller
         $datatable = Datatables::of($deliveries)
             ->addColumn('aging_create_update',function ($deliveries){
                 return ($deliveries->created_at && $deliveries->updated_at)? Carbon::parse($deliveries->updated_at)->diffInDays($deliveries->created_at) :'-';
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->addColumn('aging_update_verified',function ($deliveries){
                 return ($deliveries->updated_at && $deliveries->verified_time)? Carbon::parse($deliveries->verified_time)->diffInDays($deliveries->updated_at) :'-';
@@ -3412,9 +3508,45 @@ class AdminReportsController extends Controller
         }
 
         $datatable = Datatables::of($sales)
+            ->editColumn('insurance_charges', function($shipment){
+                return number_format($shipment->insurance_charges);
+            })
+            ->editColumn('return_charges', function($shipment){
+                return number_format($shipment->return_charges);
+            })
+            ->editColumn('replacement_charges', function($shipment){
+                return number_format($shipment->replacement_charges);
+            })
+            ->editColumn('try_and_buy_charges', function($shipment){
+                return number_format($shipment->try_and_buy_charges);
+            })
+            ->editColumn('packaging_material_charges', function($shipment){
+                return number_format($shipment->packaging_material_charges);
+            })
+            ->editColumn('p_total_charges', function($shipment){
+                return number_format($shipment->p_total_charges);
+            })
+            ->editColumn('d_total_charges', function($shipment){
+                return number_format($shipment->d_total_charges);
+            })
+            ->editColumn('p_net_payable', function($shipment){
+                return number_format($shipment->p_net_payable);
+            })
+            ->editColumn('d_net_payable', function($shipment){
+                return number_format($shipment->d_net_payable);
+            })
+            ->editColumn('d_gst', function($shipment){
+                return number_format($shipment->d_gst);
+            })
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('s_collection_amount', function($shipment){
+                return number_format($shipment->s_collection_amount);
+            })
+            ->editColumn('d_collection_amount', function($shipment){
+                return number_format($shipment->d_collection_amount);
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -3433,7 +3565,7 @@ class AdminReportsController extends Controller
                 }else{
                     $amount = $sale->s_collection_amount;
                 }
-                return $amount;
+                return number_format($amount);
             })
             ->editColumn('p_gst',function($sale){
                 $gst = '';
@@ -3442,7 +3574,7 @@ class AdminReportsController extends Controller
                 }else if($sale->d_gst != null){
                     $gst = $sale->d_gst;
                 }
-                return $gst;
+                return number_format((float)$gst);
             })
             ->editColumn('p_total_charges',function($sale){
                 $total = '';
@@ -3451,12 +3583,12 @@ class AdminReportsController extends Controller
                 }else if($sale->d_total_charges != null){
                     $total = $sale->d_total_charges;
                 }
-                return $total;
+                return number_format((float)$total);
             })
             ->addColumn('estimated_charges',function($sale){
                 $estimated = '';
                 $estimated = (($sale->weight_charges != null)? $sale->weight_charges:0) + (($sale->cash_handling_charges != null)? $sale->cash_handling_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->return_charges != null)? $sale->return_charges:0) + (($sale->replacement_charges != null)? $sale->replacement_charges:0) + (($sale->fuel_surcharge != null)? $sale->fuel_surcharge:0) + (($sale->try_and_buy_charges != null)? $sale->try_and_buy_charges:0) + (($sale->packaging_material_charges != null)? $sale->packaging_material_charges:0);
-                return $estimated;
+                return number_format((float)$estimated);
             })
             ->editColumn('p_net_payable',function($sale){
                 $payable = '';
@@ -3465,7 +3597,7 @@ class AdminReportsController extends Controller
                 }else if($sale->d_net_payable != null){
                     $payable = $sale->d_net_payable;
                 }
-                return $payable;
+                return number_format((float)$payable);
             })
             ->addColumn('class',function($sale){
                 $class = '';
@@ -3741,6 +3873,15 @@ class AdminReportsController extends Controller
             ->select('u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges','pending_payment_shipments.payable as payable')
             ->where('payable','<',0);
         $datatable = Datatables::of($negative)
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->editColumn('charges', function($shipment){
+                return number_format($shipment->charges);
+            })
+            ->editColumn('payable', function($shipment){
+                return number_format($shipment->payable);
+            })
             ->addColumn('account_no', function ($user) {
                 return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);
             });
@@ -3812,6 +3953,9 @@ class AdminReportsController extends Controller
             })
             ->addColumn('entry_date',function($petty){
                 return Carbon::parse($petty->entry_date)->toDateString();
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->editColumn('status',function ($petty){
                 $status = '';
@@ -3979,9 +4123,10 @@ class AdminReportsController extends Controller
                     $rows = City::join('shipments as s', 'cities.id', '=', 's.consignee_city_id');
 
                     if ($type == 'pending') {
-                        $rows = $rows->join('user_shipping_infos as usi', 'usi.user_id', '=', 's.pickup_address_id')
+                        $rows = $rows->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+                        ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
                         ->join('zone_class_cities as zcc', function($join) {
-                            $join->on('cities.zone_id', '=', 'zcc.zone_id')
+                            $join->on('pc.zone_id', '=', 'zcc.zone_id')
                             ->on('s.consignee_city_id', '=', 'zcc.city_id');
                         })
                         ->leftjoin('delivery_note_shipments as dns', function($join) {
@@ -4069,9 +4214,10 @@ class AdminReportsController extends Controller
                         ->join('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id');
                     }
                     else if ($type == 'delivery_tomorrow') {
-                        $rows = $rows->join('user_shipping_infos as usi', 'usi.user_id', '=', 's.pickup_address_id')
+                        $rows = $rows->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+                        ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
                         ->join('zone_class_cities as zcc', function($join) {
-                            $join->on('cities.zone_id', '=', 'zcc.zone_id')
+                            $join->on('pc.zone_id', '=', 'zcc.zone_id')
                             ->on('s.consignee_city_id', '=', 'zcc.city_id');
                         })
                         ->leftjoin('delivery_note_shipments as dns', function($join) {
@@ -4081,7 +4227,7 @@ class AdminReportsController extends Controller
                         ->leftjoin('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id')
                         ->join('shipments_journey as sj', function($join) {
                             $join->on('s.id', '=', 'sj.shipment_id')
-                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 4 and hour(shipments_journey.created_at) >= 13 and zcc.class in (2, 3) and (dns.delivery_note_id is null or date(dn.created_at) > date(shipments_journey.created_at)))'));
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 4 and (hour(shipments_journey.created_at) >= 13 or zcc.class in (2, 3)) and (dns.delivery_note_id is null or date(dn.created_at) > date(shipments_journey.created_at)))'));
                         });
                     }
                     else if ($type == 'delivery_note_pending') {
@@ -4143,6 +4289,9 @@ class AdminReportsController extends Controller
                         if (!$export) {
                             $counts[$hub]['total_ratio'] .= '%';
                         }
+                        else {
+                            $counts[$hub]['total_ratio'] = ($counts[$hub]['total_ratio'] / 100);
+                        }
                     }
                     else {
                         $counts[$hub]['total'] = 0;
@@ -4160,6 +4309,9 @@ class AdminReportsController extends Controller
 
                         if (!$export) {
                             $counts[$hub]['grand_total_ratio'] .= '%';
+                        }
+                        else {
+                            $counts[$hub]['grand_total_ratio'] = ($counts[$hub]['grand_total_ratio'] / 100);
                         }
                     }
                     else {
@@ -4216,14 +4368,14 @@ class AdminReportsController extends Controller
 
         $details = array();
 
-        $details[] = ['Hubs', 'Shipment - Pending', 'Shipment - Delivered', 'Shipment - Delivery Unsuccessful', 'Shipment - Not Attempted', 'Shipment - On Hold', 'Shipment - Non Service Area', 'Shipment - Misrouted', 'Shipment - On Hold for Self Collection', 'Return - Confirmation Pending', 'Shipment - Lost', 'Return - Confirm', 'Correct Status', 'Fake Status', 'Total', 'Ratio', 'Delivery Tomorrow', 'Deivery Note Pending Shipment', 'Grand Total', 'Ratio'];
+        $details[] = ['Hubs', 'Pending', 'Delivered', 'Delivery Unsuccessful', 'Not Attempted', 'On Hold', 'Non Service Area', 'Misrouted', 'On Hold for Self Collection', 'Confirmation Pending', 'Lost', 'Confirm', 'Correct Status', 'Fake Status', 'Total', 'Ratio', 'Delivery Tomorrow', 'Delivery Note Pending', 'Grand Total', 'Ratio'];
 
         $result = $this->debriefing_data($date, $hub, $zone, TRUE);
 
         if ($result['status'] == 0) {
             $types = ['pending', 'delivered', 'delivery_unsucessful', 'not_attempted', 'on_hold', 'non_service_area', 'misrouted', 'on_hold_for_self_collection', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total', 'total_ratio', 'delivery_tomorrow', 'delivery_note_pending', 'grand_total', 'grand_total_ratio'];
 
-            $type_names = ['pending' => 'Shipment - Pending', 'delivered' => 'Shipment - Delivered', 'delivery_unsucessful' => 'Shipment - Delivery Unsuccessful', 'not_attempted' => 'Shipment - Not Attempted', 'on_hold' => 'Shipment - On Hold', 'non_service_area' => 'Shipment - Non Service Area', 'misrouted' => 'Shipment - Misrouted', 'on_hold_for_self_collection' => 'Shipment - On Hold for Self Collection', 'confirmation_pending' => 'Return - Confirmation Pending', 'lost' => 'Shipment - Lost', 'confirm' => 'Return - Confirm', 'correct_status' => 'Correct Status', 'fake_status' => 'Fake Status', 'total' => 'Total', 'total_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'delivery_note_pending' => 'Deivery Note Pending Shipment', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
+            $type_names = ['pending' => 'Pending', 'delivered' => 'Delivered', 'delivery_unsucessful' => 'Delivery Unsuccessful', 'not_attempted' => 'Not Attempted', 'on_hold' => 'On Hold', 'non_service_area' => 'Non Service Area', 'misrouted' => 'Misrouted', 'on_hold_for_self_collection' => 'On Hold for Self Collection', 'confirmation_pending' => 'Confirmation Pending', 'lost' => 'Lost', 'confirm' => 'Confirm', 'correct_status' => 'Correct Status', 'fake_status' => 'Fake Status', 'total' => 'Total', 'total_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'delivery_note_pending' => 'Delivery Note Pending', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
 
             foreach ($result['counts'] as $hub => $count) {
                 $row = array();
@@ -4266,31 +4418,28 @@ class AdminReportsController extends Controller
 
             $spreadsheet->getActiveSheet()->setTitle('Overall')->fromArray($details, NULL);
 
-            $row_index = 0;
-            $column_index = 0;
-
             foreach ($result['shipments'] as $type => $hubs) {
                 $details = array();
 
                 foreach ($hubs as $hub => $tracking_numbers) {
-                    $details[$column_index][$row_index] = $hub;
+                    $detail = array();
 
-                    $column_index++;
+                    $detail[] = $hub;
 
                     foreach ($tracking_numbers as $tracking_number) {
-                        $details[$column_index][$row_index] = $tracking_number;
-
-                        $column_index++;
+                        $detail[] = $tracking_number;
                     }
 
-                    $row_index++;
+                    $details[] = $detail;
                 }
+
+                $details = array_map(null, ...$details);
 
                 $spreadsheet->createSheet()->setTitle($type_names[$type]);
 
                 $spreadsheet->setActiveSheetIndexByName($type_names[$type]);
 
-                for ($counter = 1; $counter <= $column_index; $counter++) {
+                for ($counter = 1; $counter <= count($hubs); $counter++) {
                     $column_name = Coordinate::stringFromColumnIndex($counter);
 
                     $spreadsheet->getActiveSheet()->getStyle($column_name)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
@@ -4317,6 +4466,209 @@ class AdminReportsController extends Controller
         header('Cache-Control: max-age=0');
 
         $writer->save('php://output');
+    }
+    public function cargo_returns_shipment_index(){
+
+        $cities = City::select('id','name')->where('hub',1)->get();
+        return view('admin.reports.cargo_returns_shipment_report')->with('cities', $cities);
+    }
+    public function cargo_returns_shipment_list(Request $request){
+        $cargo_returns_Shipment = Shipment::join('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id' , '=', 'shipments.id')
+                    ->where('sj.id' , '=', DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and shipments_journey.shipper_status_id in (20))'));
+            })
+            ->leftjoin('shipments_journey as sjc', function ($join) {
+                $join->on('sjc.shipment_id' , '=', 'shipments.id')
+                    ->where('sjc.id' , '=', DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and shipments_journey.shipper_status_id in (21))'));
+            })
+            ->leftjoin('cargo_consignments as cc', 'cc.id', '=', 'sjc.reference_1_id')
+            ->leftjoin('cargo_consignment_shipments as ccs', function ($join) {
+                $join->on('ccs.shipment_id', '=', 'shipments.id')
+                ->where('ccs.cargo_consignment_id', '=', 'cc.id');
+            })
+            ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+//            ->join('user_shipping_infos as usi', function ($join) {
+//                $join->on('usi.id', '=', 'shipments.pickup_address_id')
+//                    ->where('usi.uhb', '!=', 'shipments.consignee_city_id');
+//            })
+            ->join('cities as shipment_origin_city', 'shipment_origin_city.id', '=', 'usi.city_id')
+            ->join('cities as shipment_origin_hub', 'shipment_origin_hub.id', '=', 'shipment_origin_city.hub_id')
+//            ->join('cities as shipment_destination_city', 'shipment_destination_city.id', '=', 'shipments.consignee_city_id')
+            ->join('cities as shipment_destination_city', function($join) {
+                $join->on('shipments.consignee_city_id', '=', 'shipment_destination_city.id')
+                    ->on('shipment_origin_city.hub_id', '!=', 'shipment_destination_city.hub_id');
+            })
+            ->join('cities as shipment_destination_hub', 'shipment_destination_hub.id', '=', 'shipment_destination_city.hub_id')
+            ->leftjoin('cities as cargo_origin_hub', 'cargo_origin_hub.id', '=', 'cc.origin_hub_id')
+            ->leftjoin('cities as cargo_destination_hub', 'cargo_destination_hub.id', '=', 'cc.destination_hub_id')
+            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->select('shipments.tracking_number as tracking_number', 'ss.name as status','ss.id as status_id', 'sj.created_at as return_confirm_date', 'sjc.created_at as dispatching_aging', 'cc.id as cargo_no', 'cc.created_at as cargo_creation_date', 'shipment_origin_city.name as shipment_origin_city_name', 'shipment_origin_hub.name as shipment_origin_hub_name', 'shipment_destination_city.name as shipment_destination_city_name', 'shipment_destination_hub.name as shipment_destination_hub_name', 'cargo_origin_hub.name as cargo_origin_hub_name', 'cargo_destination_hub.name as cargo_destination_hub_name')
+            ->whereIn('shipments.shipper_status_id', [20,21]);
+        $cargo_returns_Shipment = Datatables::of($cargo_returns_Shipment)
+            ->editColumn('dispatching_aging', function($shipments){
+                $from = Carbon::parse($shipments->dispatching_aging);
+                $days = Carbon::now()->diffInDays($from);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            })
+            ->addColumn('cargo_id_padded_link', function ($shipments) {
+                if($shipments->cargo_no != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->cargo_no, 6, '0', STR_PAD_LEFT) . '</span></button>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->addColumn('origin_hub', function ($shipments) {
+                if($shipments->status_id == 20) {
+                    return $shipments->shipment_origin_hub_name;
+                }
+                else{
+                    return $shipments->cargo_destination_hub_name;
+                }
+            })
+            ->orderColumn('origin_hub', DB::raw('IF (ss.id = 20, shipment_origin_hub.name, cargo_destination_hub.name)') . ' $1')
+            ->addColumn('destination_hub', function ($shipments) {
+                if($shipments->status_id == 20){
+                    return $shipments->shipment_destination_hub_name;
+                }
+                else{
+                    return $shipments->cargo_origin_hub_name;
+                }
+            })
+            ->orderColumn('destination_hub', DB::raw('IF (ss.id = 20, shipment_destination_hub.name, cargo_origin_hub.name)') . ' $1')
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('return_confirm_aging', function($shipments){
+                $from = Carbon::parse($shipments->return_confirm_date);
+                $days = Carbon::now()->diffInDays($from);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            });
+
+        if ($origin = $request->get('search_origin')) {
+            $cargo_returns_Shipment->where(function ($query) use ($origin) {
+                $query->where(function ($sub_query) use ($origin) {
+                    $sub_query->where('shipments.shipper_status_id', '=', 21)
+                        ->where('cargo_origin_hub.id', '=', $origin);
+                })
+                ->orWhere(function ($sub_query) use ($origin) {
+                    $sub_query->where('shipments.shipper_status_id', '=', 20)
+                        ->where('shipment_destination_hub.id', '=', $origin);
+                });
+            });
+        }
+
+
+        if ($destination = $request->get('search_destination')) {
+            $cargo_returns_Shipment->where(function ($query) use ($destination) {
+                $query->where(function ($sub_query) use ($destination) {
+                    $sub_query->where('shipments.shipper_status_id', '=', 21)
+                        ->where('cargo_destination_hub.id', '=', $destination);
+                })
+                ->orWhere(function ($sub_query) use ($destination) {
+                    $sub_query->where('shipments.shipper_status_id', '=', 20)
+                        ->where('shipment_origin_hub.id', '=', $destination);
+                });
+            });
+        }
+
+        if($status = $request->get('search_status')){
+            $cargo_returns_Shipment->where('ss.id', '=', $status);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+
+            $cargo_returns_Shipment->whereBetween('sj.created_at', [$from, $to]);
+        }
+        return $cargo_returns_Shipment->make(true);
+    }
+
+
+    public function return_reattempt_ratio_index(){
+        $cities = City::where('status', 1)->get();
+        return view('admin.reports.return_reattempt_ratio')->with(['cities' => $cities]);
+    }
+
+    public function return_reattempt_ratio_list(Request $request){
+        $shipments = ReturnReattemptRatio::join('shipments','shipments.id','=','return_reattempt_ratios.shipment_id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftJoin('shipments_journey as journey', function ($join) {
+                $join->on('journey.shipment_id', '=', 'shipments.id')
+                    ->where('journey.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->select(['shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as current_status_date', 'shipments.booking_type_id', 'return_reattempt_ratios.return_confirm_date','return_reattempt_ratios.created_at as reattempt_date']);
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->addColumn('reversion_aging',function ($shipments){
+
+                $days = Carbon::parse($shipments->return_confirm_date)->diffInDays($shipments->reattempt_date);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            })
+            ->addColumn('aging_current_status',function ($shipments){
+
+                $days = Carbon::parse($shipments->reattempt_date)->diffInDays($shipments->current_status_date);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            });
+        if ($city = $request->get('search_city')) {
+            $datatable->where('dc.id', '=', $city);
+        }
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatable->whereBetween('return_confirm_date', [$from,$to]);
+        }
+
+        return $datatable->make(true);
     }
 }
 
