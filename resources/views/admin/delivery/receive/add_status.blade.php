@@ -419,7 +419,7 @@
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
                 processing: true,
-                serverSide: false,
+                serverSide: true,
                 paging: false,
                 ajax: '{{ route('admin.delivery.receive.add.list',['id'=>$delivery_note_id]) }}',
                 rowId: 'shId',
@@ -431,7 +431,7 @@
                     {data:'shipment_id_padded',name: 'shipments.id', class: 'align-middle shipment_id'},
                     {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data:'consignee_name',name: 'consignee_name', class: 'align-middle consignee_name'},
-                    {data:'amount',name: 'amount', class: 'align-middle amount'},
+                    {data:'amount',name: 'shipments.amount', class: 'align-middle amount'},
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
