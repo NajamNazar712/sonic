@@ -309,6 +309,8 @@ class Permission
             'reports.debriefing.export' => 170,
             'reports.cargo_returns_shipment_index.index' => 172,
             'reports.cargo_returns_shipment_list.list' => 172,
+            'reports.return_reattempt_ratio.index' => 174,
+            'reports.return_reattempt_ratio.list' => 174,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

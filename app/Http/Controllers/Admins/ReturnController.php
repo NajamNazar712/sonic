@@ -9,6 +9,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\Rider;
@@ -1411,6 +1412,15 @@ class ReturnController extends Controller
             $shipment->consignee_status_id = 13;
 
             $shipment->save();
+
+            $journey = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id', 20)->latest()->first();
+            if($journey){
+                $return_reattempt = new ReturnReattemptRatio();
+                $return_reattempt->shipment_id = $shipment->id;
+                $return_reattempt->return_confirm_date = $journey->created_at;
+                $return_reattempt->save();
+            }
+
 
             ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
 

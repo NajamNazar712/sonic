@@ -62,7 +62,12 @@
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Service</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
-                        <th class="border-primary border-darken-1">Return Confirm Date</th>
+                        <th class="border-primary border-darken-1">Return Confirm Date/Time</th>
+                        <th class="border-primary border-darken-1">Reattempt Date/Time</th>
+                        <th class="border-primary border-darken-1">Current Status</th>
+                        <th class="border-primary border-darken-1">Current Status Date/Time</th>
+                        <th class="border-primary border-darken-1">Status Reversion Aging</th>
+                        <th class="border-primary border-darken-1">Current Aging</th>
                     </tr>
                     </thead>
                 </table>
@@ -181,13 +186,10 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.qsr.list') }}',
+                        url: '{{ route('admin.reports.return_reattempt_ratio.list') }}',
                         data: {
                             'page': 'all',
-                            'search_shipper': $('#search_shipper').val(),
-                            'search_origin': $('#search_origin').val(),
-                            'search_destination': $('#search_destination').val(),
-                            'search_hub': $('#search_hub').val(),
+                            'search_city': $('#search_city').val(),
                             'search_from': $('input[name="from_date_formatted"]').val(),
                             'search_to': $('input[name="to_date_formatted"]').val()
                         },
@@ -197,19 +199,18 @@
                             head.push('S.No');
                             head.push('Tracking .No');
                             head.push('Shipper');
-                            head.push('Consignee Name');
-                            head.push('History Status');
-                            head.push('Service Type');
-                            head.push('Arrival');
-                            head.push('Last Status Date');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
-                            head.push('Product Type');
-                            head.push('Product Description');
-                            head.push('Amount');
-                            head.push('Aging (Arrival)');
-                            head.push('Aging (Last Status)');
+                            head.push('Collection Amount');
+                            head.push('Service Type');
+                            head.push('Arrival');
+                            head.push('Return Confirm Date/Time');
+                            head.push('Re-Attempt Date/Time');
+                            head.push('Current Status');
+                            head.push('Current Status Date/Time');
+                            head.push('Status Reversion Aging');
+                            head.push('Current Aging');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -217,19 +218,18 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.shipper);
-                                row.push(values.name);
-                                row.push(values.history_status);
-                                row.push(values.service_type);
-                                row.push(values.arrival);
-                                row.push(values.last_status_date);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
-                                row.push(values.product_type);
-                                row.push(values.description);
                                 row.push(values.amount);
-                                row.push(values.aging);
-                                row.push(values.aging_last_status);
+                                row.push(values.service_type);
+                                row.push(values.arrival);
+                                row.push(values.return_confirm_date);
+                                row.push(values.reattempt_date);
+                                row.push(values.current_status);
+                                row.push(values.current_status_date);
+                                row.push(values.reversion_aging);
+                                row.push(values.aging_current_status);
 
                                 body.push(row);
                             });
@@ -248,7 +248,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'QSR Report',
+                        title: 'Return Reattempt Report',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -278,13 +278,12 @@
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
-                    {data: 'return_confirm_date', name: 'rcj.created_at', class: 'align-middle return_confirm_date'},
-                    // {data: 'last_status_date', name: 'journey.created_at', class: 'align-middle last_status_date'},
-                    // {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
-                    // {data: 'description', name: 'si.description', class: 'align-middle description'},
-                    // {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false},
-                    // {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false}
-
+                    {data: 'return_confirm_date', name: 'return_reattempt_ratios.return_confirm_date', class: 'align-middle return_confirm_date'},
+                    {data: 'reattempt_date', name: 'return_reattempt_ratios.created_at', class: 'align-middle reattempt_date'},
+                    {data: 'current_status', name: 'ss.name', class: 'align-middle current_status'},
+                    {data: 'current_status_date', name: 'journey.created_at', class: 'align-middle current_status_date'},
+                    {data: 'reversion_aging', name: 'reversion_aging', class: 'align-middle reversion_aging'},
+                    {data: 'aging_current_status', name: 'aging_current_status', class: 'align-middle aging_current_status'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
