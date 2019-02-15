@@ -119,7 +119,7 @@
 				scrollX: true,
 				paging:false,
 				columns: [
-					{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+					{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
 					{name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
 					{name: 'receiving_sheet_no', class: 'align-middle receiving_sheet_no', orderable: false, searchable: false},
 					{name: 'order_id', class: 'align-middle order_id', orderable: false, searchable: false},
