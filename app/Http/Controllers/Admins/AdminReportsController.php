@@ -12,6 +12,7 @@ use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\PettyCashStatementDetail;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\CargoConsignment;
@@ -4474,6 +4475,82 @@ class AdminReportsController extends Controller
             $cargo_returns_Shipment->whereBetween('sj.created_at', [$from, $to]);
         }
         return $cargo_returns_Shipment->make(true);
+    }
+
+    public function return_reattempt_ratio_index(){
+        $cities = City::where('status', 1)->get();
+        return view('admin.reports.return_reattempt_ratio')->with(['cities' => $cities]);
+    }
+
+    public function return_reattempt_ratio_list(Request $request){
+        $shipments = ReturnReattemptRatio::join('shipments','shipments.id','=','return_reattempt_ratios.shipment_id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftJoin('shipments_journey as journey', function ($join) {
+                $join->on('journey.shipment_id', '=', 'shipments.id')
+                    ->where('journey.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->select(['shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as current_status_date', 'shipments.booking_type_id', 'return_reattempt_ratios.return_confirm_date','return_reattempt_ratios.created_at as reattempt_date']);
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->addColumn('reversion_aging',function ($shipments){
+
+                $days = Carbon::parse($shipments->return_confirm_date)->diffInDays($shipments->reattempt_date);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            })
+            ->addColumn('aging_current_status',function ($shipments){
+
+                $days = Carbon::parse($shipments->reattempt_date)->diffInDays($shipments->current_status_date);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            });
+        if ($city = $request->get('search_city')) {
+            $datatable->where('dc.id', '=', $city);
+        }
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatable->whereBetween('return_confirm_date', [$from,$to]);
+        }
+
+        return $datatable->make(true);
     }
 }
 
