@@ -60,7 +60,7 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
-                        <th class="border-primary border-darken-1">Service</th>
+                        <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Return Confirm Date/Time</th>
                         <th class="border-primary border-darken-1">Reattempt Date/Time</th>
@@ -204,7 +204,7 @@
                             head.push('Hub');
                             head.push('Collection Amount');
                             head.push('Service Type');
-                            head.push('Arrival');
+                            head.push('Arrival Date');
                             head.push('Return Confirm Date/Time');
                             head.push('Re-Attempt Date/Time');
                             head.push('Current Status');
