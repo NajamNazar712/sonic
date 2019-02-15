@@ -67,14 +67,14 @@
                         <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Return Confirm Date</th>
+                        <th class="border-primary border-darken-1">Return Confirm Aging</th>
                         <th class="border-primary border-darken-1">Cargo No.</th>
                         <th class="border-primary border-darken-1">Cargo Creation Date</th>
                         <th class="border-primary border-darken-1">Dispatching Aging</th>
                         <th class="border-primary border-darken-1">Origin City</th>
-                        <th class="border-primary border-darken-1">Origin Hub</th>
                         <th class="border-primary border-darken-1">Destination City</th>
+                        <th class="border-primary border-darken-1">Origin Hub</th>
                         <th class="border-primary border-darken-1">Destination Hub</th>
-                        <th class="border-primary border-darken-1">Return Confirm Aging</th>
                     </tr>
                     </thead>
                 </table>
@@ -230,14 +230,14 @@
                             head.push('Tracking Number');
                             head.push('Status');
                             head.push('Return Confirm Date');
+                            head.push('Return Confirm Aging');
                             head.push('Cargo No.');
                             head.push('Cargo Creation Date');
                             head.push('Dispatching Aging');
                             head.push('Origin City');
-                            head.push('Origin Hub');
                             head.push('Destination City');
+                            head.push('Origin Hub');
                             head.push('Destination Hub');
-                            head.push('Return Confirm Aging');
                             $.each(result.data, function (index, values) {
                                 row = [];
 
@@ -245,14 +245,14 @@
                                 row.push(values.tracking_number);
                                 row.push(values.status);
                                 row.push(values.return_confirm_date);
+                                row.push(values.return_confirm_aging);
                                 row.push(values.cargo_no);
                                 row.push(values.cargo_creation_date);
                                 row.push(values.dispatching_aging);
                                 row.push(values.origin_city);
-                                row.push(values.origin_hub);
                                 row.push(values.destination_city);
+                                row.push(values.origin_hub);
                                 row.push(values.destination_hub);
-                                row.push(values.return_confirm_aging);
 
                                 body.push(row);
                             });
@@ -303,15 +303,15 @@
                     },
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'status', name: 'ss.id', class: 'align-middle status'},
-                    {data: 'return_confirm_date', name: 's.created_at', class: 'align-middle return_confirm_date'},
+                    {data: 'return_confirm_date', name: 'sj.created_at', class: 'align-middle return_confirm_date'},
+                    {data: 'return_confirm_aging', name: 'sj.created_at', class: 'align-middle return_confirm_aging'},
                     {data: 'cargo_no', name: 'cc.id', class: 'align-middle cargo_no'},
                     {data: 'cargo_creation_date', name: 'cc.created_at', class: 'align-middle cargo_creation_date'},
-                    {data: 'dispatching_aging', name: 'dispatching_aging', class: 'align-middle dispatching_aging'},
-                    {data: 'origin_city', name: 'cou.name', class: 'align-middle origin_city'},
+                    {data: 'dispatching_aging', name: 'sjc.created_at', class: 'align-middle dispatching_aging'},
+                    {data: 'origin_city', name: 'cori.name', class: 'align-middle origin_city'},
+                    {data: 'destination_city', name: 'cdri.name', class: 'align-middle destination_city'},
                     {data: 'origin_hub', name: 'co.name', class: 'align-middle origin_hub'},
-                    {data: 'destination_city', name: 'cds.name', class: 'align-middle destination_city'},
                     {data: 'destination_hub', name: 'cd.name', class: 'align-middle destination_hub'},
-                    {data: 'return_confirm_aging', name: 'return_confirm_aging', class: 'align-middle return_confirm_aging'}
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
