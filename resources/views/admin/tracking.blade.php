@@ -283,6 +283,7 @@
 							shipment += '<th><strong>Remarks</strong></th>';
 							shipment += '<th><strong>User</strong></th>';
 							shipment += '<th><strong>City</strong></th>';
+							shipment += '<th><strong>IP Address</strong></th>';
 							shipment += '</tr>';
 							shipment += '</thead>';
 							shipment += '<tbody>';
@@ -295,6 +296,7 @@
 								shipment += '<td>' + history.remarks + '</td>';
 								shipment += '<td>' + history.user + '</td>';
 								shipment += '<td>' + history.city + '</td>';
+								shipment += '<td>' + history.ip + '</td>';
 								shipment += '</tr>';
 							});
 
@@ -315,6 +317,7 @@
 								shipment += '<th><strong>Date / Time</strong></th>';
 								shipment += '<th><strong>Status</strong></th>';
 								shipment += '<th><strong>User</strong></th>';
+								shipment += '<th><strong>Remarks</strong></th>';
 								shipment += '</tr>';
 								shipment += '</thead>';
 								shipment += '<tbody>';
@@ -324,6 +327,7 @@
 									shipment += '<td>' + history.date_time + '</td>';
 									shipment += '<td>' + history.status + '</td>';
 									shipment += '<td>' + history.user + '</td>';
+									shipment += '<td>' + history.payable_remarks + '</td>';
 									shipment += '</tr>';
 								});
 
@@ -383,7 +387,8 @@
 								{name: 'reason', class: 'align-middle reason'},
 								{name: 'remarks', class: 'align-middle remarks'},
 								{name: 'user', class: 'align-middle user'},
-								{name: 'city', class: 'align-middle city'}
+								{name: 'city', class: 'align-middle city'},
+								{name: 'ip', class: 'align-middle ip'}
 							]
 						});
 

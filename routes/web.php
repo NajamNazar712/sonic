@@ -118,6 +118,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('list','Shippers\ShipperReturnController@confirmation_pending_list')->name('list');
             Route::post('marked/status','Shippers\ShipperReturnController@return_marked_status')->name('marked.status');
             Route::post('marked/status/single','Shippers\ShipperReturnController@return_marked_single_status')->name('marked.status.single');
+            Route::post('reattempt/status','Shippers\ShipperReturnController@return_reattempt_status')->name('reattempt.status');
+            Route::post('reattempt/status/single','Shippers\ShipperReturnController@return_reattempt_single_status')->name('reattempt.status.single');
         });
     });
 
@@ -176,6 +178,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('changepickupstatus','Shippers\ShipperDashboardController@pickupStatusChange')->name('change.pickup.status');
     Route::post('addpickup','Shippers\ShipperDashboardController@addPickup')->name('add.pickup');
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
+    Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
+    Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -217,7 +222,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/updateprofile','Admins\AdminDashboardController@updateProfile')->name('update.profile');
         Route::get('getpickups','Admins\AdminDashboardController@getPickups')->name('get.pickups');
         Route::post('/updatebankinfo','Admins\AdminDashboardController@updateBankInfo')->name('update.bank');
-
+        Route::post('edit/emails','Admins\AdminDashboardController@edit_notification_emails')->name('edit.emails');
+        Route::post('add/emails','Admins\AdminDashboardController@add_notification_emails')->name('add.emails');
     });
 
     //Datatables data using ajax calls
@@ -856,6 +862,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@debriefing_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@debriefing_list')->name('list');
             Route::get('export', 'Admins\AdminReportsController@debriefing_export')->name('export');
+        });
+        Route::prefix('cargo_returns_shipment')->name('cargo_returns_shipment.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@cargo_returns_shipment_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@cargo_returns_shipment_list')->name('list');
+
+        });
+        Route::prefix('return_reattempt_ratio')->name('return_reattempt_ratio.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@return_reattempt_ratio_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@return_reattempt_ratio_list')->name('list');
+
         });
     });
 

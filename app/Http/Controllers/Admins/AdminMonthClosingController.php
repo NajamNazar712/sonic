@@ -69,6 +69,9 @@ class AdminMonthClosingController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->editColumn('consignee_phone',function ($shipper){
                 return "$shipper->consignee_phone_number_1 | $shipper->consignee_phone_number_2";
             })

@@ -90,6 +90,9 @@ class DeliveryController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
                     return $shipment->shipper .' (' . $shipment->poc . ')';
@@ -241,7 +244,7 @@ class DeliveryController extends Controller
                                         $status = ' - ';
                                     }
                                 }
-                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks]);
+                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks]);
 
                             } else {
                                 return ['status' => 1, 'error' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id];
@@ -265,7 +268,7 @@ class DeliveryController extends Controller
                                 }
                             }
 
-                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks]);
+                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks]);
                         }
                     } else {
                         return ['status' => 1, 'error' => 'This Shipment is already in an unverified delivery note!'];
@@ -387,6 +390,9 @@ class DeliveryController extends Controller
         $datatables = Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
@@ -537,6 +543,9 @@ class DeliveryController extends Controller
                 return "<a href='javascript:void(0);' class='deliverynoterow'>Remove</a>";
 
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->filterColumn('service_type', function ($query, $keyword) {
 
                 if ($keyword != '') {
@@ -562,7 +571,7 @@ class DeliveryController extends Controller
                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
                 $delivery = $delivery->first();
                 $count = $delivery->shipments_count;
-                $cod = $delivery->total_cod_amount;
+                $cod = number_format($delivery->total_cod_amount);
                 $count = $count - 1;
                 if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                     $cod = $cod - $parcel->amount;
@@ -852,7 +861,7 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc'])
             ->where('delivery_notes.id', $id);
 
         if (session('role_id') != 1) {
@@ -878,6 +887,9 @@ class DeliveryController extends Controller
                     }
                 },
             ])
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
                     return $shipment->shipper .' (' . $shipment->poc . ')';
@@ -1254,7 +1266,7 @@ class DeliveryController extends Controller
                 $product[] = ['pid' => $item->id, 'type' => $item->product->product_name, 'description' => ($item->description == '') ? ' - ' : $item->description, 'price' => $item->price];
 //
             }
-            return ['status' => 0, 'data' => $product, 'total_cod' => $amount->amount];
+            return ['status' => 0, 'data' => $product, 'total_cod' => number_format($amount->amount)];
         } else {
             return ['status' => 1, 'error' => 'No Shipment found'];
         }
@@ -1322,6 +1334,9 @@ class DeliveryController extends Controller
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number_link' class='tracking' target='_blank'>$shipments->tracking_number_link</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->addColumn('shipment_id_padded', function ($deliveries) {
                 return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
@@ -1816,7 +1831,7 @@ class DeliveryController extends Controller
                             <td>Rs ' . number_format($shipment->received_amount) . '</td>
                     ';
 
-                    $total_cod_amount += $shipment->received_amount;
+                    $total_cod_amount += number_format($shipment->received_amount);
                 }
                 else {
                     $shipment_details_row_start .= '
@@ -2098,7 +2113,7 @@ class DeliveryController extends Controller
                             <td>Rs ' . number_format($shipment->received_amount) . '</td>
                         ';
 
-                        $total_cod_amount += $shipment->received_amount;
+                        $total_cod_amount += number_format($shipment->received_amount);
                     }
                     else {
                         $shipment_details_row_start .= '
@@ -2269,6 +2284,9 @@ class DeliveryController extends Controller
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
@@ -2395,6 +2413,9 @@ class DeliveryController extends Controller
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
@@ -2477,6 +2498,9 @@ class DeliveryController extends Controller
         return Datatables::of($deliveries)
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('received_cod_amount', function($shipment){
+                return number_format($shipment->received_cod_amount);
             })
             ->filterColumn('delivery_notes.id', function ($query, $keyword) {
                 return $query->where('delivery_notes.id', '=', $keyword);
@@ -2564,6 +2588,12 @@ class DeliveryController extends Controller
         $datatable = Datatables::of($sdn)
             ->editColumn('sdn', function ($sdn) {
                 return "<a href='javascript:void(0);' class='printSDN'><u>" . str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT) . "</u></a>";
+            })
+            ->editColumn('sdn_amount', function($shipment){
+                return number_format($shipment->sdn_amount);
+            })
+            ->editColumn('sdn_net_amount', function($shipment){
+                return number_format($shipment->sdn_net_amount);
             })
             ->addColumn('sdn_id_padded', function ($sdn) {
                 return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
@@ -2677,6 +2707,9 @@ class DeliveryController extends Controller
             })
             ->editColumn('route', function ($rider) {
                 return $rider->route . ' (' . $rider->start . ' to ' . $rider->end . ')';
+            })
+            ->editColumn('received_cod_amount', function($shipment){
+                return number_format($shipment->received_cod_amount);
             })
             ->filterColumn('route', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
@@ -2943,6 +2976,9 @@ class DeliveryController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
                     return $shipment->shipper .' (' . $shipment->poc . ')';
@@ -3137,7 +3173,7 @@ class DeliveryController extends Controller
                             
                           </tr>
             ';
-                $total_cod_amount += $shipment->received_amount;
+                $total_cod_amount += number_format($shipment->received_amount);
                 $shipment_details .= $shipment_details_row_start;
             }
             $shipment_details .= '
@@ -3400,6 +3436,9 @@ class DeliveryController extends Controller
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
@@ -3532,7 +3571,7 @@ class DeliveryController extends Controller
                 $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
                 $data['consignee_phone2'] = ($shipment->consignee_phone_number_2 != '')? $shipment->consignee_phone_number_2:'';
                 $data['consignee_email'] = ($shipment->consignee_email != '')? $shipment->consignee_email:'';
-                $data['amount'] = $shipment->amount;
+                $data['amount'] = number_format($shipment->amount);
 
                 return response()->json(['status' => 1, 'details' => $data]);
 
@@ -3647,7 +3686,7 @@ class DeliveryController extends Controller
                 $row[] = $shipment_details->consignee_city->name;
                 $row[] = $shipment_details->consignee_name;
                 $row[] = $shipment_details->consignee_address;
-                $row[] = $shipment_details->received_cod_amount;
+                $row[] = $shipment_details->amount;
 
                 $details[] = $row;
 

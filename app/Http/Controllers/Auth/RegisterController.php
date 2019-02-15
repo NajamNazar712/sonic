@@ -77,7 +77,7 @@ class RegisterController extends Controller
 //            'shipper_phone2'=>'string|max:255',
             'cnic'=>'required|string|max:255',
 //            'ntn_no'=>'string|max:255',
-//            'url'=>'string|max:255',
+            'url'=>'required|string|max:255',
             'shipper_city'=>'required|string|max:255',
             'shipper_product_type'=>'required|string|max:255',
             'shipping_city.*'=>'required|string|max:255',

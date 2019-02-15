@@ -10,7 +10,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\ReturnNote;
-
+use Vectorface\Whip\Whip;
 use Auth;
 
 class ShipmentsJourneyController extends Controller
@@ -80,7 +80,11 @@ class ShipmentsJourneyController extends Controller
           $shipment_journey->city_id = $shipment->consignee_city_id;
         }
       }
-
+        $whip = new Whip();
+        $clientAddress = $whip->getValidIpAddress();
+        if($clientAddress != ''){
+            $shipment_journey->ip_address = $clientAddress;
+        }
       $shipment_journey->save();
     }
 }

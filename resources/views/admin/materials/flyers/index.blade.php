@@ -13,10 +13,10 @@
                 @include('admin.inc.messages')
                 <div class="container justify-content-center pb-2 text-center">
                     <div class="row">
-                        <div class="col-3"><h4>Small Flyers: <u id="sm_flyers_title">{{$packaging->small_flyers}}</u></h4></div>
-                        <div class="col-3"><h4>Medium Flyers: <u id="md_flyers_title">{{$packaging->medium_flyers}}</u></h4></div>
-                        <div class="col-3"><h4>Large Flyers: <u id="lg_flyers_title">{{$packaging->large_flyers}}</u></h4></div>
-                        <div class="col-3"><h4>Boxes: <u id="box_title">{{$packaging->boxes}}</u></h4></div>
+                        <div class="col-3"><h4>Small Flyers: <u id="sm_flyers_title">{{number_format($packaging->small_flyers)}}</u></h4></div>
+                        <div class="col-3"><h4>Medium Flyers: <u id="md_flyers_title">{{number_format($packaging->medium_flyers)}}</u></h4></div>
+                        <div class="col-3"><h4>Large Flyers: <u id="lg_flyers_title">{{number_format($packaging->large_flyers)}}</u></h4></div>
+                        <div class="col-3"><h4>Boxes: <u id="box_title">{{number_format($packaging->boxes)}}</u></h4></div>
                     </div>
                 </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">

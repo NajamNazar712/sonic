@@ -10,7 +10,7 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div class="row mb-2 justify-content-center">
+                <div class="row mb-2 justify-content-center" id="search_form">
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
@@ -19,6 +19,31 @@
                                 @endforeach
                             </select>
                         </fieldset>
+                    </div>
+
+                    <div class="col-4 ">
+
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                        </div>
+                    </div>
+                    <div class="col-4 ">
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                        </div>
+
                     </div>
                     <div class="col-4">
                         <div class="form-group input-group ">
@@ -102,6 +127,32 @@
                     $('#creation_date_root').css('top','40px');
                 }
             });
+            $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
@@ -113,6 +164,9 @@
                         url: '{{ route('admin.petty_cash.statements.list') }}',
                         data: {
                             'page': 'all',
+                            'search_creation_date': $('input[name="creation_date_formatted"]').val(),
+                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
+                            'search_date_to': $('input[name="search_date_to_formatted"]').val(),
                         },
                         success: function (result) {
                             head = [];
@@ -179,6 +233,8 @@
                     data: function (d) {
                         d.search_hub = $('#search_hub').val();
                         d.search_creation_date = $('input[name="creation_date_formatted"]').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 rowId: 'statement_id',

@@ -26,6 +26,7 @@ use App\Http\Models\Rates\RateHistory;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\WalkInCities;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -154,13 +155,13 @@ class AdminDashboardController extends Controller
             });
         }
 
-        $stats['total'] = $stats['total']->count();
-        $stats['booked'] = $stats['booked']->count();
-        $stats['canceled'] = $stats['canceled']->count();
-        $stats['received'] = $stats['received']->count();
-        $stats['delivered'] = $stats['delivered']->count();
-        $stats['return'] = $stats['return']->count();
-        $stats['pending'] = $stats['pending']->count();
+        $stats['total'] = number_format($stats['total']->count());
+        $stats['booked'] = number_format($stats['booked']->count());
+        $stats['canceled'] = number_format($stats['canceled']->count());
+        $stats['received'] = number_format($stats['received']->count());
+        $stats['delivered'] = number_format($stats['delivered']->count());
+        $stats['return'] = number_format($stats['return']->count());
+        $stats['pending'] = number_format($stats['pending']->count());
 
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
@@ -225,12 +226,12 @@ class AdminDashboardController extends Controller
                 });
             }
 
-            $graph['booked'][] = $booked->count();
-            $graph['received'][] = $received->count();
-            $graph['cancelled'][] = $cancelled->count();
-            $graph['delivered'][] = $delivered->count();
-            $graph['pending'][] = $pending->count();
-            $graph['return'][] = $return->count();
+            $graph['booked'][] = number_format($booked->count());
+            $graph['received'][] = number_format($received->count());
+            $graph['cancelled'][] = number_format($cancelled->count());
+            $graph['delivered'][] = number_format($delivered->count());
+            $graph['pending'][] = number_format($pending->count());
+            $graph['return'][] = number_format($return->count());
         }
         $shippers = User::where('status',3)->where('blacklist',0)->select('id','name')->get();
         $cities = City::where('status',1)->select('id','name')->get();
@@ -593,6 +594,9 @@ class AdminDashboardController extends Controller
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
             ->filterColumn('u.id', function ($query, $keyword) {
                 return $query->where('u.id', '=', $keyword);
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->editColumn('phone',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
@@ -5837,7 +5841,10 @@ class AdminDashboardController extends Controller
         $products = Product::all();
         $banks = BanksList::all();
         $city_list = City::where('status',1)->get();
-        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products]);
+        $emails = ShipperNotificationEmail::where('user_id',$user->id)->select('email')->get();
+        $email_ids = ShipperNotificationEmail::where('user_id',$user->id)->pluck('email')->toArray();
+        $email_ids = implode(',', $email_ids);
+        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products, 'emails' => $emails, 'email_ids' => $email_ids]);
     }
 
     public function updateProfile(Request $request)
@@ -6524,5 +6531,48 @@ class AdminDashboardController extends Controller
 
     }
 
+    public function add_notification_emails(Request $request){
+        $emails = $request->email_address;
+        if($emails != ''){
+            $email_address = explode(',', $emails);
+            $user = $request->add_shipper_id;
+            ShipperNotificationEmail::where('user_id',$user)->delete();
+            foreach ($email_address as $email){
+
+                $shipper_notification_email = new ShipperNotificationEmail();
+                $shipper_notification_email->user_id = $user;
+                $shipper_notification_email->email = $email;
+                $shipper_notification_email->save();
+
+            }
+            return redirect()->back()->with('success', 'Email Address Added.');
+
+        }
+        else{
+            return back()->with('danger', 'There is no email selected!');
+        }
+    }
+    public function edit_notification_emails(Request $request){
+
+        $emails = $request->email_address;
+        if($emails != ''){
+            $email_address = explode(',', $emails);
+            $user = $request->edit_shipper_id;
+            foreach ($email_address as $email){
+                if(!ShipperNotificationEmail::where('user_id',$user)->where('email','=',$email)->exists()){
+                    $shipper_notification_email = new ShipperNotificationEmail();
+                    $shipper_notification_email->user_id = $user;
+                    $shipper_notification_email->email = $email;
+                    $shipper_notification_email->save();
+                }
+            }
+            ShipperNotificationEmail::where('user_id',$user)->whereNotIn('email',$email_address)->delete();
+            return redirect()->back()->with('success', 'Email Address updated.');
+
+        }
+        else{
+            return back()->with('danger', 'There is no email selected!');
+        }
+    }
 }
 

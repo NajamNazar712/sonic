@@ -41,6 +41,10 @@
 									</div>
 
 									<div class="form-group ml-1">
+										<input type="text" name="payable_remarks" class="form-control" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
+									</div>
+
+									<div class="form-group ml-1">
 										<button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
 									</div>
 								</form>
