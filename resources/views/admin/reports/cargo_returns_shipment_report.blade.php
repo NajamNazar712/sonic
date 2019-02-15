@@ -148,7 +148,7 @@
         $(document).ready(function () {
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.cargo_returns_shipment.print') !!}',
+                    url: '{!! route('admin.cargo.history.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,

@@ -4503,9 +4503,6 @@ class AdminReportsController extends Controller
         return $cargo_returns_Shipment->make(true);
     }
 
-    public function returns_cargo_print(Request $request) {
-        //REMOVE
-    }
 
     public function return_reattempt_ratio_index(){
         $cities = City::where('status', 1)->get();
