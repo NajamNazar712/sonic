@@ -148,17 +148,17 @@
         $(document).ready(function () {
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.cargo_received.print') !!}',
+                    url: '{!! route('admin.reports.cargo_returns_shipment.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function (data) {
+                    .done(function(data) {
                         var tab = window.open('', '_blank');
 
-                        if (!tab) {
+                        if(!tab) {
                             swal({
                                 title: 'Popup Blocker Enabled!',
                                 text: 'Please add this site to your exception list.',
@@ -166,7 +166,8 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-                        } else {
+                        }
+                        else {
                             tab.document.write(data);
                             tab.document.close();
                             tab.focus();
@@ -179,14 +180,15 @@
                 width: '100%',
                 allowClear: true
             });
+
             $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Search Destination',
                 width: '100%',
                 allowClear: true
             });
+
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
-                clear: '',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -199,7 +201,6 @@
             });
             $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
-                clear: '',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -305,7 +306,7 @@
                     {data: 'status', name: 'ss.id', class: 'align-middle status'},
                     {data: 'return_confirm_date', name: 'sj.created_at', class: 'align-middle return_confirm_date'},
                     {data: 'return_confirm_aging', name: 'sj.created_at', class: 'align-middle return_confirm_aging'},
-                    {data: 'cargo_no', name: 'cc.id', class: 'align-middle cargo_no'},
+                    {data: 'cargo_id_padded_link', name: 'cc.id', class: 'align-middle cargo_number'},
                     {data: 'cargo_creation_date', name: 'cc.created_at', class: 'align-middle cargo_creation_date'},
                     {data: 'dispatching_aging', name: 'sjc.created_at', class: 'align-middle dispatching_aging'},
                     {data: 'origin_city', name: 'cori.name', class: 'align-middle origin_city'},
@@ -326,12 +327,12 @@
                 table.draw();
             });
 
-            // $('#datatable tbody').on('click', 'tr td a.cargo_print', function () {
-            //     var id = parseInt($(this).parents('tr').attr('id'));
-            //     if (id) {
-            //         print(id);
-            //     }
-            // });
+            $('#datatable tbody').on('click','tr td.cargo_number button.print',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                console.log(id);
+                print(id);
+
+            });
         });
 
     </script>

@@ -866,6 +866,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('cargo_returns_shipment')->name('cargo_returns_shipment.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@cargo_returns_shipment_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@cargo_returns_shipment_list')->name('list');
+            Route::post('print', 'Admins\AdminReportsController@returns_cargo_print')->name('print');
 
         });
         Route::prefix('return_reattempt_ratio')->name('return_reattempt_ratio.')->group(function (){
