@@ -4396,32 +4396,17 @@ class AdminReportsController extends Controller
                 $join->on('ccs.shipment_id', '=', 'shipments.id')
                 ->where('ccs.cargo_consignment_id', '=', 'cc.id');
             })
-//            ->leftjoin('shipments_journey as rcd', function ($join){
-//                $join->on('rcd.shipment_id' , '=', 'shipments.id')
-//                    ->where('rcd.id','=',DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20)'));
-//            })
-//            ->leftjoin('shipments_journey as df', function ($join){
-//                $join->on('df.shipment_id' , '=', 'shipments.id')
-//                    ->where('df.id','=',DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 23)'));
-//            })
-//            ->leftjoin('shipments_journey as dt', function ($join){
-//                $join->on('dt.shipment_id' , '=', 'shipments.id')
-//                    ->where('dt.id','=',DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 25)'));
-//            })
             ->leftjoin('users as u', 'u.id', '=', 'shipments.user_id')
-//            ->leftjoin('cities as crc', 'crc.id', '=', 'sj.city_id')
             ->leftjoin('cities as cori', 'cori.id', '=', 'u.city_id')
             ->leftjoin('cities as cdri', 'cdri.id', '=', 'shipments.consignee_city_id')
-//            ->leftjoin('cargo_consignments as cc', function($join) {
-//                $join->on('cc.id', '=', 'ccs.cargo_consignment_id')
-//                    ->where('cc.id', '=', DB::raw('(select id from cargo_consignments where cargo_consignments.id = ccs.cargo_consignment_id and cargo_consignments.type = 2)'));
-//            })
             ->leftjoin('cities as co', 'co.id', '=', 'cc.origin_hub_id')
             ->leftjoin('cities as cd', 'cd.id', '=', 'cc.destination_hub_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->leftjoin('user_shipping_infos as usi','usi.id', '=', 'shipments.pickup_address_id')
+            ->leftjoin('user_shipping_infos as usi', function ($join) {
+                $join->on('usi.id', '=', 'shipments.pickup_address_id')
+                ->where('usi.city_id', '!=', 'shipments.consignee_city_id');
+            })
             ->leftjoin('cities as corc', 'corc.id', '=', 'usi.city_id')
-//            ->select('shipments.tracking_number as tracking_number', 'ss.name as status', 'rcd.created_at as return_confirm_date', 'df.created_at as dispatch_from', 'dt.created_at as dispatch_to', 'cc.id as cargo_no', 'cc.created_at as cargo_creation_date', 'co.name as origin_hub', 'cd.name as destination_hub', 'cou.name as origin_city', 'cds.name as destination_city')
             ->select('shipments.tracking_number as tracking_number', 'ss.name as status','ss.id as status_id', 'sj.created_at as return_confirm_date', 'sjc.created_at as dispatching_aging', 'cc.id as cargo_no', 'cc.created_at as cargo_creation_date', 'cori.name as origin_city_name_ri', 'corc.name as origin_city_name_rc', 'cdri.name as destination_city', 'shipments.consignee_city_id', 'co.name as origin_hub', 'cd.name as destination_hub')
             ->whereIn('shipments.shipper_status_id', [20,21]);
         $cargo_returns_Shipment = Datatables::of($cargo_returns_Shipment)
@@ -4435,22 +4420,16 @@ class AdminReportsController extends Controller
                 }
             })
             ->editColumn('origin_city', function ($shipments) {
+                    return $shipments->destination_city;
+            })
+            ->editColumn('destination_city', function ($shipments) {
                 if($shipments->status_id == 21){
                     return $shipments->origin_city_name_ri;
                 }
                 else{
-
                     return $shipments->origin_city_name_rc;
                 }
             })
-//            ->editColumn('destination_city', function ($shipments) {
-//                if($shipments->status_id == 21){
-//                    return $shipments->destination_city_name_ri;
-//                }
-//                else{
-//                    return '-';
-//                }
-//            })
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";

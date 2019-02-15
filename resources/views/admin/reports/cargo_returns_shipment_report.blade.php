@@ -230,14 +230,14 @@
                             head.push('Tracking Number');
                             head.push('Status');
                             head.push('Return Confirm Date');
+                            head.push('Return Confirm Aging');
                             head.push('Cargo No.');
                             head.push('Cargo Creation Date');
                             head.push('Dispatching Aging');
                             head.push('Origin City');
-                            head.push('Origin Hub');
                             head.push('Destination City');
+                            head.push('Origin Hub');
                             head.push('Destination Hub');
-                            head.push('Return Confirm Aging');
                             $.each(result.data, function (index, values) {
                                 row = [];
 
@@ -245,14 +245,14 @@
                                 row.push(values.tracking_number);
                                 row.push(values.status);
                                 row.push(values.return_confirm_date);
+                                row.push(values.return_confirm_aging);
                                 row.push(values.cargo_no);
                                 row.push(values.cargo_creation_date);
                                 row.push(values.dispatching_aging);
                                 row.push(values.origin_city);
-                                row.push(values.origin_hub);
                                 row.push(values.destination_city);
+                                row.push(values.origin_hub);
                                 row.push(values.destination_hub);
-                                row.push(values.return_confirm_aging);
 
                                 body.push(row);
                             });
@@ -289,7 +289,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                // order: [[3, 'desc']],
+                order: [[3, 'desc']],
                 columns: [
                     {
                         orderable: false,
