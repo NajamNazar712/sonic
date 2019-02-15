@@ -419,7 +419,7 @@
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
                 processing: true,
-                serverSide: true,
+                serverSide: false,
                 paging: false,
                 ajax: '{{ route('admin.delivery.receive.add.list',['id'=>$delivery_note_id]) }}',
                 rowId: 'shId',
@@ -430,13 +430,13 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'shipment_id_padded',name: 'shipments.id', class: 'align-middle shipment_id'},
                     {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data:'consignee_name',name: 'consignee_name', class: 'align-middle consignee_name'},
+                    {data:'consignee_name',name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data:'amount',name: 'shipments.amount', class: 'align-middle amount'},
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
-                    {data:'address',name: 'address', class: 'align-middle address'},
-                    {data:'destination',name: 'destination', class: 'align-middle destination'},
+                    {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
+                    {data:'destination',name: 'oc.name', class: 'align-middle destination'},
                     {data:'shipper',name: 'shipper', class: 'align-middle shipper'},
                     {data:'current_status',name: 'current_status', class: 'align-middle current_status'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
@@ -469,6 +469,9 @@
                         if(shipment_reason.length !== 0){
                             $('select[name="reason_drop['+value.shId+']"]').val(shipment_reason[value.shId]).trigger('change');
                         }
+                        if(shipment_remarks.length !== 0){
+                            $('input[name="remarks['+value.shId+']"]').val(shipment_remarks[value.shId]);
+                        }
                     });
                 },
                 initComplete: function() {
@@ -488,9 +491,13 @@
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change keypress', function() {
-                                column.search($(this).val(), false, false, true).draw();
+                                if ($(header).is('.amount')){
+                                    var value = $(this).val();
+                                    var nvalue = value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                    column.search($(this).val(nvalue), false, false, true).draw();
+                                }
+                                    column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
-
                             if (column.search()) {
                                 current.val(column.search());
                             }
