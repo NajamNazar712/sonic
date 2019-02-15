@@ -291,6 +291,7 @@
                     }
                 },
                 order: [[3, 'desc']],
+                rowId: 'cargo_no',
                 columns: [
                     {
                         orderable: false,
