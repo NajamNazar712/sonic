@@ -218,9 +218,15 @@
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change keypress', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
+                                if ($(header).is('.amount')){
+                                    var value = $(this).val().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
+                                    column.search(value, false, false, true).draw();
+                                }
+                                else {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }
+                            }).wrap(td).after(icon);
                             if (column.search()) {
                                 current.val(column.search());
                             }

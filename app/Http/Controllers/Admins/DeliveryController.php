@@ -306,7 +306,7 @@ class DeliveryController extends Controller
                     $shipments_count++;
 
                     if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
-                        $total_cod_amount += number_format($shipment_details->amount);
+                        $total_cod_amount += $shipment_details->amount;
                     }
                 }
             }
