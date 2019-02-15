@@ -307,8 +307,8 @@ class Permission
             'reports.debriefing.index' => 170,
             'reports.debriefing.list' => 170,
             'reports.debriefing.export' => 170,
-            'reports.cargo_returns_shipment_index.index' => 172,
-            'reports.cargo_returns_shipment_list.list' => 172,
+            'reports.cargo_returns_shipment.index' => 172,
+            'reports.cargo_returns_shipment.list' => 172,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
