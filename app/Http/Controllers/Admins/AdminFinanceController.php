@@ -1269,7 +1269,7 @@ class AdminFinanceController extends Controller
                         $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
 
                         $details['payment_mode'] = $shipment->payment_mode->mode;
-                        $details['amount'] = $shipment->amount;
+                        $details['amount'] = number_format($shipment->amount);
 
                         $details['shipper']['name'] = $shipper->name;
                         $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
