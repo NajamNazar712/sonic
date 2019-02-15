@@ -1860,29 +1860,29 @@ class AdminFinanceController extends Controller
         ->removeColumn('phone')
         ->removeColumn('phone2')
         ->addColumn('return_shipments_average_aging', function($pending_payment) {
-//            if ($pending_payment->returned_shipments != 0) {
-//                $shipments = 0;
-//                $days = 0;
-//
-//                $now = Carbon::now()->startOfDay();
-//
-//                $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->where('type', 1)->get();
-//
-//                foreach ($pending_payment_shipments as $pending_payment_shipment) {
-//                    $created_at = Carbon::parse($pending_payment_shipment->created_at)->startOfDay();
-//
-//                    $days += $created_at->diffInDays($now);
-//
-//                    $shipments++;
-//                }
-//
-//                $aging = round(($days / $shipments), 2) . 'd';
-//
-//                return $aging;
-//            }
-//            else {
+            if ($pending_payment->returned_shipments != 0) {
+                $shipments = 0;
+                $days = 0;
+
+                $now = Carbon::now()->startOfDay();
+
+                $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->where('type', 1)->get();
+
+                foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                    $created_at = Carbon::parse($pending_payment_shipment->created_at)->startOfDay();
+
+                    $days += $created_at->diffInDays($now);
+
+                    $shipments++;
+                }
+
+                $aging = round(($days / $shipments), 2) . 'd';
+
+                return $aging;
+            }
+            else {
                 return '-';
-//            }
+            }
         })
         ->addColumn('action', function($pending_payment) {
             $view_details_button = '<button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
