@@ -1167,8 +1167,15 @@ class AdminCargoController extends Controller
 
                         $details = array();
 
-              $details['amount'] = number_format($shipment->amount);
-              $details['service_type'] = $shipment->booking_type->booking_type;
+                        $details['id'] = $shipment->id;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['origin'] = $shipment->pickup_address->city->name;
+                        $details['destination'] = $consignee_city->name;
+                        $details['hub'] = $consignee_city->hub_city->name;
+                        $details['consignee'] = $shipment->consignee_name;
+                        $details['shipping_mode'] = $shipment->shipping_mode->mode;
+                        $details['amount'] = number_format($shipment->amount);
+                        $details['service_type'] = $shipment->booking_type->booking_type;
                         return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                     }
                     else {
