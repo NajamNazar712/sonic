@@ -4395,20 +4395,23 @@ class AdminReportsController extends Controller
                 $join->on('ccs.shipment_id', '=', 'shipments.id')
                 ->where('ccs.cargo_consignment_id', '=', 'cc.id');
             })
-            ->leftjoin('users as u', 'u.id', '=', 'shipments.user_id')
-            ->leftjoin('cities as cori', 'cori.id', '=', 'u.city_id')
-            ->leftjoin('cities as cdri', 'cdri.id', '=', 'shipments.consignee_city_id')
-            ->leftjoin('cities as co', 'co.id', '=', 'cc.origin_hub_id')
-            ->leftjoin('cities as cd', 'cd.id', '=', 'cc.destination_hub_id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->leftjoin('user_shipping_infos as usi', function ($join) {
-                $join->on('usi.id', '=', 'shipments.pickup_address_id')
-                ->where('usi.city_id', '!=', 'shipments.consignee_city_id');
+            ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+//            ->join('user_shipping_infos as usi', function ($join) {
+//                $join->on('usi.id', '=', 'shipments.pickup_address_id')
+//                    ->where('usi.uhb', '!=', 'shipments.consignee_city_id');
+//            })
+            ->join('cities as shipment_origin_city', 'shipment_origin_city.id', '=', 'usi.city_id')
+            ->join('cities as shipment_origin_hub', 'shipment_origin_hub.id', '=', 'shipment_origin_city.hub_id')
+//            ->join('cities as shipment_destination_city', 'shipment_destination_city.id', '=', 'shipments.consignee_city_id')
+            ->join('cities as shipment_destination_city', function($join) {
+                $join->on('shipments.consignee_city_id', '=', 'shipment_destination_city.id')
+                    ->on('shipment_origin_city.hub_id', '!=', 'shipment_destination_city.hub_id');
             })
-            ->leftjoin('cities as corc', 'corc.id', '=', 'usi.city_id')
-            ->leftjoin('cities as cdh', 'cdh.id', '=', 'corc.hub_id')
-            ->leftjoin('cities as coh', 'coh.id', '=', 'cdri.hub_id')
-            ->select('shipments.tracking_number as tracking_number', 'ss.name as status','ss.id as status_id', 'sj.created_at as return_confirm_date', 'sjc.created_at as dispatching_aging', 'cc.id as cargo_no', 'cc.created_at as cargo_creation_date', 'cori.name as origin_city_name_ri', 'corc.name as origin_city_name_rc', 'cdri.name as destination_city', 'shipments.consignee_city_id', 'co.name as origin_hub_name', 'cd.name as destination_hub_name', 'coh.name as origin_hub_rc', 'cdh.name as destination_hub_rc')
+            ->join('cities as shipment_destination_hub', 'shipment_destination_hub.id', '=', 'shipment_destination_city.hub_id')
+            ->leftjoin('cities as cargo_origin_hub', 'cargo_origin_hub.id', '=', 'cc.origin_hub_id')
+            ->leftjoin('cities as cargo_destination_hub', 'cargo_destination_hub.id', '=', 'cc.destination_hub_id')
+            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->select('shipments.tracking_number as tracking_number', 'ss.name as status','ss.id as status_id', 'sj.created_at as return_confirm_date', 'sjc.created_at as dispatching_aging', 'cc.id as cargo_no', 'cc.created_at as cargo_creation_date', 'shipment_origin_city.name as shipment_origin_city_name', 'shipment_origin_hub.name as shipment_origin_hub_name', 'shipment_destination_city.name as shipment_destination_city_name', 'shipment_destination_hub.name as shipment_destination_hub_name', 'cargo_origin_hub.name as cargo_origin_hub_name', 'cargo_destination_hub.name as cargo_destination_hub_name')
             ->whereIn('shipments.shipper_status_id', [20,21]);
         $cargo_returns_Shipment = Datatables::of($cargo_returns_Shipment)
             ->editColumn('dispatching_aging', function($shipments){
@@ -4428,33 +4431,24 @@ class AdminReportsController extends Controller
                     return '-';
                 }
             })
-            ->editColumn('origin_city', function ($shipments) {
-                    return $shipments->destination_city;
-            })
-            ->editColumn('destination_city', function ($shipments) {
-                if($shipments->status_id == 21){
-                    return $shipments->origin_city_name_ri;
+            ->addColumn('origin_hub', function ($shipments) {
+                if($shipments->status_id == 20) {
+                    return $shipments->shipment_origin_hub_name;
                 }
                 else{
-                    return $shipments->origin_city_name_rc;
+                    return $shipments->cargo_destination_hub_name;
                 }
             })
-            ->editColumn('origin_hub', function ($shipments) {
+            ->orderColumn('origin_hub', DB::raw('IF (ss.id = 20, shipment_origin_hub.name, cargo_destination_hub.name)') . ' $1')
+            ->addColumn('destination_hub', function ($shipments) {
                 if($shipments->status_id == 20){
-                    return $shipments->origin_hub_rc;
+                    return $shipments->shipment_destination_hub_name;
                 }
                 else{
-                    return $shipments->origin_hub_name;
+                    return $shipments->cargo_origin_hub_name;
                 }
             })
-            ->editColumn('destination_hub', function ($shipments) {
-                if($shipments->status_id == 20){
-                    return $shipments->destination_hub_rc;
-                }
-                else{
-                    return $shipments->destination_hub_name;
-                }
-            })
+            ->orderColumn('destination_hub', DB::raw('IF (ss.id = 20, shipment_destination_hub.name, cargo_origin_hub.name)') . ' $1')
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -4473,11 +4467,11 @@ class AdminReportsController extends Controller
             $cargo_returns_Shipment->where(function ($query) use ($origin) {
                 $query->where(function ($sub_query) use ($origin) {
                     $sub_query->where('shipments.shipper_status_id', '=', 21)
-                        ->where('co.id', '=', $origin);
+                        ->where('cargo_origin_hub.id', '=', $origin);
                 })
                 ->orWhere(function ($sub_query) use ($origin) {
                     $sub_query->where('shipments.shipper_status_id', '=', 20)
-                        ->where('coh.id', '=', $origin);
+                        ->where('shipment_destination_hub.id', '=', $origin);
                 });
             });
         }
@@ -4487,11 +4481,11 @@ class AdminReportsController extends Controller
             $cargo_returns_Shipment->where(function ($query) use ($destination) {
                 $query->where(function ($sub_query) use ($destination) {
                     $sub_query->where('shipments.shipper_status_id', '=', 21)
-                        ->where('cd.id', '=', $destination);
+                        ->where('cargo_destination_hub.id', '=', $destination);
                 })
                 ->orWhere(function ($sub_query) use ($destination) {
                     $sub_query->where('shipments.shipper_status_id', '=', 20)
-                        ->where('cdh.id', '=', $destination);
+                        ->where('shipment_origin_hub.id', '=', $destination);
                 });
             });
         }
@@ -4510,239 +4504,7 @@ class AdminReportsController extends Controller
     }
 
     public function returns_cargo_print(Request $request) {
-        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-
-        $cargo_consignment = CargoConsignment::find($request->id);
-
-        $sender = $cargo_consignment->sender;
-        $receiver = ($cargo_consignment->receiver_id) ? $cargo_consignment->receiver : NULL;
-
-        $html = '
-                <!doctype html>
-                <html lang="en">
-                  <head>
-                    <meta charset="utf-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
-
-                    <title>Cargo Slip & Checklist</title>
-
-                    <style>
-                      @page {
-                        size: A4 portrait;
-                      }
-
-                      * {
-                        -webkit-print-color-adjust: exact !important;
-                        color-adjust: exact !important;
-                      }
-
-                      body {
-                        background: none !important;
-                        color: #09262e !important;
-                        font-size: 0.9rem !important;
-                      }
-
-                      hr {
-                        border-top: 1px dashed #000000;
-                      }
-
-                      table.table-bordered {
-                        page-break-inside: avoid;
-                      }
-
-                      table.table-bordered tbody tr td {
-                        border: 1px solid #09262e !important;
-                      }
-
-                      .color.primary {
-                        background: #c8c8c8 !important;
-                      }
-
-                      .color.secondary {
-                        background: #ebebeb !important;
-                      }
-
-                      .border {
-                        border: 1px solid #09262e !important;
-                      }
-
-                      .cargo_checklist {
-                        page-break-before: always;
-                      }
-                    </style>
-                  </head>
-                  <body>
-                    <div>
-                      <div class="cargo_slip">
-                        <table class="table table-sm table-bordered border">
-                          <tbody>
-                            <tr>
-                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
-                              <td class="text-center align-middle color primary"><strong>Cargo Slip</strong></td>
-                              <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
-                              </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Destination Hub</strong></td>
-                              <td>' . $cargo_consignment->destination_hub->name . '</td>
-                              <td rowspan="8" class="text-center align-middle">
-                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                                <span><strong>' . str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Transit Date</strong></td>
-                              <td>' . $cargo_consignment->created_at . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Shipping Mode</strong></td>
-                              <td>' . $cargo_consignment->shipping_mode->mode . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Transport Mode</strong></td>
-                              <td>' . $cargo_consignment->transport_mode->name . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Vendor</strong></td>
-                              <td>' . $cargo_consignment->transport_mode_vendor->name . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Builty Number</strong></td>
-                              <td>' . $cargo_consignment->builty_number . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Expected Arrival Date</strong></td>
-                              <td>' . (($cargo_consignment->expected_arrival_date) ? Carbon::parse($cargo_consignment->expected_arrival_date)->format('d/m/Y') : '') . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>No. of Parcels</strong></td>
-                              <td>' . $cargo_consignment->shipments . '</td>
-                            </tr>
-                          </tbody>
-                        </table>
-
-                        <table class="table table-sm table-bordered border">
-                          <tbody>
-                            <tr>
-                              <td colspan="2" class="color primary"><strong>Sender Information</strong></td>
-                              <td colspan="2" class="color primary"><strong>Receiver Information</strong></td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Name</strong></td>
-                              <td>' . $sender['name'] . '</td>
-                              <td class="color secondary"><strong>Name</strong></td>
-                              <td>' . (($receiver) ? $receiver['name'] : '') . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Role</strong></td>
-                              <td>' . $sender->role->name  . ' - ' . $sender->role->department->name . '</td>
-                              <td class="color secondary"><strong>Role</strong></td>
-                              <td>' . (($receiver) ? $receiver->role->department->name : '') . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Phone No.</strong></td>
-                              <td>' . $sender['phone_number'] . '</td>
-                              <td class="color secondary"><strong>Phone No.</strong></td>
-                              <td>' . (($receiver) ? $receiver['phone_number'] : '') . '</td>
-                            </tr>
-                          </tbody>
-                        </table>
-
-                        <table class="table table-sm table-bordered border">
-                          <tbody>
-                            <tr>
-                              <td class="color primary"><strong>Route Information</strong></td>
-                            </tr>
-                            <tr>
-                              <td>' . $cargo_consignment->origin_hub->name . ' - ' . $cargo_consignment->junction_hub_1->name . ' - ' . (($cargo_consignment->junction_hub_2_id) ? ($cargo_consignment->junction_hub_2->name . ' - ') : '') . $cargo_consignment->destination_hub->name . '</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-
-                      <div class="cargo_checklist">
-                        <table class="table table-sm table-bordered border">
-                          <tbody>
-                            <tr>
-                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
-                              <td class="text-center align-middle color primary"><strong>Cargo Checklist</strong></td>
-                              <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now() . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Origin Hub</strong></td>
-                              <td>' . $cargo_consignment->origin_hub->name . '</td>
-                              <td rowspan="5" class="text-center align-middle">
-                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                                <span><strong>' . str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Destination Hub</strong></td>
-                              <td>' . $cargo_consignment->destination_hub->name . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Transit Date</strong></td>
-                              <td>' . $cargo_consignment->created_at . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Expected Arrival Date</strong></td>
-                              <td>' . (($cargo_consignment->expected_arrival_date) ? Carbon::parse($cargo_consignment->expected_arrival_date)->format('d/m/Y') : '') . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>No. of Parcels</strong></td>
-                              <td>' . $cargo_consignment->shipments . '</td>
-                            </tr>
-                          </tbody>
-                        </table>
-
-                        <table class="table table-sm table-bordered border">
-                          <tbody>
-                            <tr>
-                              <td class="color primary"><strong>S. No.</strong></td>
-                              <td class="color primary"><strong>Tracking No.</strong></td>
-                              <td class="color primary"><strong>Consignee Name</strong></td>
-                              <td class="color primary"><strong>Consignee Phone</strong></td>
-                              <td class="color primary"><strong>Consignee City</strong></td>
-                              <td class="color primary"><strong>Amount</strong></td>
-      ';
-
-        $serial_number = 1;
-
-        foreach ($cargo_consignment->cargo_consignment_shipments as $cargo_consignment_shipment) {
-            $shipment = $cargo_consignment_shipment->shipment;
-
-
-            $html .= '
-                            <tr>
-                              <td>' . $serial_number . '</td>
-                              <td>' . $shipment->tracking_number . '</td>
-                              <td>' . $shipment->consignee_name . '</td>
-                              <td>' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                              <td>' . $shipment->consignee_city->name . '</td>
-                              <td>' . number_format($shipment->amount) . '</td>
-                            </tr>
-        ';
-
-            $serial_number++;
-        }
-
-        $html .= '
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    <script>
-                      window.onload = function() {
-                        window.print();
-                      }
-                    </script>
-                  </body>
-                </html>
-      ';
-
-        return $html;
+        //REMOVE
     }
 
     public function return_reattempt_ratio_index(){

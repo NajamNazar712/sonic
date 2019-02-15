@@ -310,10 +310,10 @@
                     {data: 'cargo_id_padded_link', name: 'cc.id', class: 'align-middle cargo_number'},
                     {data: 'cargo_creation_date', name: 'cc.created_at', class: 'align-middle cargo_creation_date'},
                     {data: 'dispatching_aging', name: 'sjc.created_at', class: 'align-middle dispatching_aging'},
-                    {data: 'origin_city', name: 'cori.name', class: 'align-middle origin_city'},
-                    {data: 'destination_city', name: 'cdri.name', class: 'align-middle destination_city'},
-                    {data: 'origin_hub', name: 'co.name', class: 'align-middle origin_hub'},
-                    {data: 'destination_hub', name: 'cd.name', class: 'align-middle destination_hub'},
+                    {data: 'shipment_destination_city_name', name: 'shipment_destination_city.name', class: 'align-middle origin_city'},
+                    {data: 'shipment_origin_city_name', name: 'shipment_origin_city.name', class: 'align-middle destination_city'},
+                    {data: 'destination_hub', name: 'destination_hub', class: 'align-middle origin_hub'},
+                    {data: 'origin_hub', name: 'origin_hub', class: 'align-middle destination_hub'},
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
