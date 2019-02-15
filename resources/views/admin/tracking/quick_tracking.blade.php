@@ -184,14 +184,19 @@
             font-size: 18px;
             font-weight: bold;
         }
+
+        .goldClass{
+            background-color: gold;
+        }
         .yellowClass{
             background-color: #86cd7c;
         }
         .greenClass{
-            background-color: green;
+            background-color: springgreen;
         }
         .redClass{
-            background-color: orangered;
+            background-color: red;
+            color:#fff;
         }
 
     </style>
@@ -257,7 +262,7 @@
                         if(status === 13){
                             $(row).addClass('greenClass');
                         }else if(status === 12 || status === 52){
-                            $(row).addClass('yellowClass');
+                            $(row).addClass('goldClass');
                         }else if(status === 20){
                             $(row).addClass('redClass');
                         }
@@ -354,10 +359,10 @@
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }else{
                                 $('#single_div').removeClass('d-none');
-                                if($('#status_card').hasClass('greenClass') || $('#status_card').hasClass('redClass') || $('#status_card').hasClass('yellowClass')){
+                                if($('#status_card').hasClass('greenClass') || $('#status_card').hasClass('redClass') || $('#status_card').hasClass('goldClass')){
                                     $('#status_card').removeClass('greenClass');
                                     $('#status_card').removeClass('redClass');
-                                    $('#status_card').removeClass('yellowClass');
+                                    $('#status_card').removeClass('goldClass');
                                 }
 
 
@@ -379,7 +384,7 @@
                                 if(data.details.status_id == 13){
                                     $('#status_card').addClass('greenClass');
                                 }else if(data.details.status_id == 12 || data.details.status_id == 52){
-                                    $('#status_card').addClass('yellowClass');
+                                    $('#status_card').addClass('goldClass');
                                 }else if(data.details.status_id == 20){
                                     $('#status_card').addClass('redClass');
                                 }

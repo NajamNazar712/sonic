@@ -230,7 +230,7 @@
                 }
             } );
             var selected_rows = [];
-            var shipment_remarks = [];
+            var shipment_remarks = {};
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0)
@@ -288,7 +288,7 @@
                                             }).done(function (data) {
                                                 table.rows().deselect();
                                                 selected_rows = [];
-                                                shipment_remarks = [];
+                                                shipment_remarks = {};
                                                 table.button('.confirm').disable();
                                                 table.button('.re-attempt').disable();
                                                 table.draw('false');
@@ -358,7 +358,7 @@
                                                 }
                                             }).done(function (data) {
                                                 selected_rows = [];
-                                                shipment_remarks = [];
+                                                shipment_remarks = {};
                                                 table.button('.confirm').disable();
                                                 table.button('.re-attempt').disable();
                                                 table.draw('false');

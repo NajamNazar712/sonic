@@ -38,7 +38,7 @@
 
                 <hr>
 
-                    <div class="row">
+                    <div class="row mt-3">
                         <div class="col">
                             <div class="form form-horizontal">
                                 <h3 class="form-section"><i class="la la-clipboard"></i>Deposit Details</h3>
@@ -160,6 +160,9 @@
             width: auto !important;
             text-align: left;
         }
+        td.route{
+            max-width:500px;
+        }
     </style>
 @endsection
 
@@ -178,24 +181,23 @@
             var dncc_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
-                scrollX: true, scrollY: '350px',
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
+                scrollX: true,
+                paging:false,
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.completed.dncc.list') }}',
                 rowId: 'delivery_note_id',
-                order: [[1, 'desc']],
+
+                // order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note_id_padded' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
-                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
-                    { data:'route' ,name: 'route', class: 'align-middle route'},
-                    { data:'shipments_count' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count'},
-                    { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments'},
-                    { data:'received_cod_amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle received_cod_amount'},
+                    { data:'delivery_note_id_padded' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note',orderable: false, searchable: false},
+                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub',orderable: false, searchable: false},
+                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider',orderable: false, searchable: false},
+                    { data:'route' ,name: 'route', class: 'align-middle route',orderable: false, searchable: false},
+                    { data:'shipments_count' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count',orderable: false, searchable: false},
+                    { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments',orderable: false, searchable: false},
+                    { data:'received_cod_amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle received_cod_amount',orderable: false, searchable: false},
                     // { data:'expense' ,name: 'expense', class: 'align-middle expense'},
                     // { data:'net_amount' ,name: 'net_amount', class: 'align-middle net_amount'},
                     { data:'remarks' ,name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
@@ -264,27 +266,31 @@
                         $('#sdn_hub_id').val($(first_hub_id).data('hub'));
                     }
 
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-                        if ($(header).is('.expense') || $(header).is('.serial_number') || $(header).is('.remarks')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
+                    // this.api().columns().every(function(column_id) {
+                    //     var column = this;
+                    //     var header = column.header();
+                    //
+                    //     if ($(header).is('.expense') || $(header).is('.serial_number') || $(header).is('.remarks')) {
+                    //         $(td).appendTo($(search));
+                    //     }
+                    //     else {
+                    //         var current = $(input).appendTo($(search)).on('change', function() {
+                    //             column.search($(this).val(), false, false, true).draw();
+                    //         }).wrap(td).after(icon);
+                    //
+                    //         if (column.search()) {
+                    //             current.val(column.search());
+                    //         }
+                    //     }
+                    // });
                     this.api().table().columns.adjust();
                 }
             });
-
+            $('#sdn_form').on('keypress',function (e) {
+                if(e.which == 13) {
+                    e.preventDefault();
+                }
+            });
 
             var sum = 0;
             var total_net_amount = 0;
