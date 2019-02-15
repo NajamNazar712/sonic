@@ -102,26 +102,26 @@
                 scrollX: true,
                 autoWidth: false,
                 paging:false,
-				columns: [
-					{name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
-					{name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
-					{name: 'origin', class: 'align-middle origin', orderable: false, searchable: false},
-					{name: 'destination', class: 'align-middle destination', orderable: false, searchable: false},
-					{name: 'hub', class: 'align-middle hub', orderable: false, searchable: false},
-					{name: 'consignee', class: 'align-middle consignee', orderable: false, searchable: false},
-					{name: 'amount', class: 'align-middle amount', orderable: false, searchable: false},
-					{name: 'shipping_mode', class: 'align-middle shipping_mode', orderable: false, searchable: false},
-					{name: 'service_type', class: 'align-middle service_type', orderable: false, searchable: false}
-				],
-				rowCallback: function(row, data, index) {
-					// var info = table.page.info();
+                columns: [
+                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
+                    {name: 'origin', class: 'align-middle origin', orderable: false, searchable: false},
+                    {name: 'destination', class: 'align-middle destination', orderable: false, searchable: false},
+                    {name: 'hub', class: 'align-middle hub', orderable: false, searchable: false},
+                    {name: 'consignee', class: 'align-middle consignee', orderable: false, searchable: false},
+                    {name: 'amount', class: 'align-middle amount', orderable: false, searchable: false},
+                    {name: 'shipping_mode', class: 'align-middle shipping_mode', orderable: false, searchable: false},
+                    {name: 'service_type', class: 'align-middle service_type', orderable: false, searchable: false}
+                ],
+                rowCallback: function(row, data, index) {
+                    // var info = table.page.info();
                     //
-					// $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-				},
-				initComplete: function() {
-					this.api().table().columns.adjust();
-				}
-			});
+                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
 
             $('#add_shipment_form input.tracking_number').inputmask({
                 'alias': 'integer',
@@ -158,11 +158,11 @@
 
                                     var index = $.inArray(id, shipment_ids);
 
-									
-                                    var rowNo = table.rows().count();
-									table.row.add([rowNo + 1, data.details.tracking_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]);
-									table.draw(false);
-                                    table.order([0, 'desc']).draw();
+                                    if (index === -1) {
+                                        var rowNo = table.rows().count();
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]);
+                                        table.draw(false);
+                                        table.order([0, 'desc']).draw();
                                         shipment_ids.push(data.details.id);
 
                                         $('#information .scanned').html(shipment_ids.length);
