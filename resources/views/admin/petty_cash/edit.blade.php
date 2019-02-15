@@ -79,7 +79,7 @@
                     </table>
                     <div class="row justify-content-center">
                         <div class="">
-                            <button id="statement_submit" type="submit"  class="btn btn-primary btn-block">Update Details</button>
+                            <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" disabled>Update Details</button>
                         </div>
                     </div>
                 </form>
@@ -98,7 +98,16 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style type="text/css">
         .custom-col-width{
-            min-width: 150px;
+            min-width: 100px;
+        }
+        th.expense_amount, th.reference_no{
+            width: 80px;
+        }
+        .custom-hub-col-width{
+            min-width: 80px;
+        }
+        .date-col-width{
+            min-width: 190px;
         }
         .date-col-width{
             min-width: 200px;
@@ -171,7 +180,7 @@
             var selected_rows = [];
             var rows_count = 0;
             var table = $('#datatable').DataTable({
-                @if(($petty_statement_details->status == 0 && (session('role_id') == 9) || session('role_id') == 10) || ($petty_statement_details->status == 1 && (session('role_id') == 3) || session('role_id') == 8 || session('role_id') == 20))
+                @if(($petty_statement_details->status == 0 && session('department_id') == 6) || ($petty_statement_details->status == 1 && session('department_id') == 6))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     title: 'Edit Details',
@@ -179,6 +188,7 @@
                     text: '<i class="la la-plus"></i> Edit Details',
                     action:function (e) {
                         edit_ops();
+                        $('#statement_submit').attr('disabled', false);
                     }
                 }],
                 @elseif(session('role_id') == 1 || ($petty_statement_details->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
@@ -189,12 +199,14 @@
                     text: '<i class="la la-plus"></i> Edit Details',
                     action:function (e) {
                         edit_finance();
+                        $('#statement_submit').attr('disabled', false);
+
                     }
                 }],
                 @else
                 dom: 'ltipr',
                 @endif
-                "autoWidth": false,
+                autoWidth: false,
                 scrollX: true, scrollY:'200px',
                 ajax: '{{ route('admin.petty_cash.statements.edit.list',['id'=>$petty_statement_details->id]) }}',
                 processing: true,
@@ -503,10 +515,10 @@
                     var row = table.row(index);
                     var id = parseInt(row.id());
                     if($(row.node()).attr('status') == 0 || $(row.node()).attr('status') == 2){
-                        $(row.node()).find('td.details_of_expense input').attr('disabled',false);
+                        $(row.node()).find('td.details_of_expense textarea').attr('disabled',false);
                         $(row.node()).find('td.expense_amount input').attr('disabled',false);
                         $(row.node()).find('td.reference_no input').attr('disabled',false);
-                        $(row.node()).find('td.remarks input').attr('disabled',false);
+                        $(row.node()).find('td.remarks textarea').attr('disabled',false);
                         selected_rows.push(id);
                     }
 
@@ -523,10 +535,10 @@
                         $(row.node()).find('td.hub_name select').attr('disabled',false);
                         // if($(row.node()).find('td.account_head select').val() == 1){
                         // }
-                        $(row.node()).find('td.details_of_expense input').attr('disabled',false);
+                        $(row.node()).find('td.details_of_expense textarea').attr('disabled',false);
                         $(row.node()).find('td.expense_amount input').attr('disabled',false);
                         $(row.node()).find('td.reference_no input').attr('disabled',false);
-                        $(row.node()).find('td.remarks input').attr('disabled',false);
+                        $(row.node()).find('td.remarks textarea').attr('disabled',false);
                         selected_rows.push(id);
                     }
 
