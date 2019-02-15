@@ -574,7 +574,7 @@ class DeliveryController extends Controller
                 $cod = number_format($delivery->total_cod_amount);
                 $count = $count - 1;
                 if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
-                    $cod = number_format($cod - $parcel->amount);
+                    $cod = $cod - $parcel->amount;
                 }
                 if ($count == 0) {
                     DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod, 'status' => 4]);
@@ -3686,7 +3686,7 @@ class DeliveryController extends Controller
                 $row[] = $shipment_details->consignee_city->name;
                 $row[] = $shipment_details->consignee_name;
                 $row[] = $shipment_details->consignee_address;
-                $row[] = $shipment_details->number_format(received_cod_amount);
+                $row[] = number_format($shipment_details->received_cod_amount);
 
                 $details[] = $row;
 

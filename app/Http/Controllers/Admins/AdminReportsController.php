@@ -2668,7 +2668,7 @@ class AdminReportsController extends Controller
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
                         })->sum('actual_weight');
-                        $details['amount'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                        $details[number_format('amount')][$s->id][$month] = Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
                             $query->whereMonth('created_at', $thisMonth)
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
@@ -3487,7 +3487,7 @@ class AdminReportsController extends Controller
                 }else if($sale->d_gst != null){
                     $gst = $sale->d_gst;
                 }
-                return number_format($gst);
+                return number_format((float)$gst);
             })
             ->editColumn('p_total_charges',function($sale){
                 $total = '';
@@ -3496,12 +3496,12 @@ class AdminReportsController extends Controller
                 }else if($sale->d_total_charges != null){
                     $total = $sale->d_total_charges;
                 }
-                return number_format($total);
+                return number_format((float)$total);
             })
             ->addColumn('estimated_charges',function($sale){
                 $estimated = '';
                 $estimated = (($sale->weight_charges != null)? $sale->weight_charges:0) + (($sale->cash_handling_charges != null)? $sale->cash_handling_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->return_charges != null)? $sale->return_charges:0) + (($sale->replacement_charges != null)? $sale->replacement_charges:0) + (($sale->fuel_surcharge != null)? $sale->fuel_surcharge:0) + (($sale->try_and_buy_charges != null)? $sale->try_and_buy_charges:0) + (($sale->packaging_material_charges != null)? $sale->packaging_material_charges:0);
-                return $estimated;
+                return number_format((float)$estimated);
             })
             ->editColumn('p_net_payable',function($sale){
                 $payable = '';
@@ -3510,7 +3510,7 @@ class AdminReportsController extends Controller
                 }else if($sale->d_net_payable != null){
                     $payable = $sale->d_net_payable;
                 }
-                return number_format($payable);
+                return number_format((float)$payable);
             })
             ->addColumn('class',function($sale){
                 $class = '';
@@ -3791,6 +3791,9 @@ class AdminReportsController extends Controller
             })
             ->editColumn('charges', function($shipment){
                 return number_format($shipment->charges);
+            })
+            ->editColumn('payable', function($shipment){
+                return number_format($shipment->payable);
             })
             ->addColumn('account_no', function ($user) {
                 return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);
