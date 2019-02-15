@@ -72,14 +72,14 @@ class AdminTrackingController extends Controller
                 $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
 
                 if ($shipment->booking_type_id != 4) {
-                    $details['order_information']['amount'] = $shipment->amount;
+                    $details['order_information']['amount'] =  number_format($shipment->amount);
                 }
                 else {
                     if ($shipment->charges_mode_id == 1) {
                         $details['order_information']['amount'] = 0;
                     }
                     else {
-                        $details['order_information']['amount'] = $shipment->amount;
+                        $details['order_information']['amount'] = number_format($shipment->amount);
                     }
 
                     $details['order_information']['charges_mode'] = $shipment->charges_mode->charges_mode;
@@ -218,9 +218,9 @@ class AdminTrackingController extends Controller
         $details['shipments_weight'] = $cargo_consignment->shipments_weight;
         $details['actual_weight'] = $cargo_consignment->actual_weight;
         $details['vendor_weight'] = $cargo_consignment->vendor_weight;
-        $details['weight_charges_per_kg'] = $cargo_consignment->weight_charges_per_kg;
-        $details['extra_charges'] = $cargo_consignment->extra_charges;
-        $details['total_weight_charges'] = $cargo_consignment->total_weight_charges;
+        $details['weight_charges_per_kg'] = number_format($cargo_consignment->weight_charges_per_kg);
+        $details['extra_charges'] = number_format($cargo_consignment->extra_charges);
+        $details['total_weight_charges'] = number_format($cargo_consignment->total_weight_charges);
         $details['sender_name'] = Admin::find($cargo_consignment->sender_id)->name;
         $details['receiver_name'] = ($cargo_consignment->receiver_id) ? Admin::find($cargo_consignment->receiver_id)->name : '';
 
