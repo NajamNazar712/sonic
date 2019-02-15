@@ -3686,7 +3686,7 @@ class DeliveryController extends Controller
                 $row[] = $shipment_details->consignee_city->name;
                 $row[] = $shipment_details->consignee_name;
                 $row[] = $shipment_details->consignee_address;
-                $row[] = $shipment_details->received_cod_amount;
+                $row[] = $shipment_details->amount;
 
                 $details[] = $row;
 
