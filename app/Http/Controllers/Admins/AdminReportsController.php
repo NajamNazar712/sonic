@@ -2669,11 +2669,11 @@ class AdminReportsController extends Controller
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
                         })->sum('actual_weight');
-                        $details['amount'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                        $details['amount'][$s->id][$month] = number_format(Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
                             $query->whereMonth('created_at', $thisMonth)
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
-                        })->sum('amount');
+                        })->sum('amount'));
                         $details['revenue'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
                             $query->whereMonth('created_at', $thisMonth)
                                 ->whereYear('created_at', $thisYear)
@@ -3488,7 +3488,7 @@ class AdminReportsController extends Controller
                 }else if($sale->d_gst != null){
                     $gst = $sale->d_gst;
                 }
-                return number_format($gst);
+                return number_format((float)$gst);
             })
             ->editColumn('p_total_charges',function($sale){
                 $total = '';
@@ -3497,12 +3497,12 @@ class AdminReportsController extends Controller
                 }else if($sale->d_total_charges != null){
                     $total = $sale->d_total_charges;
                 }
-                return number_format($total);
+                return number_format((float)$total);
             })
             ->addColumn('estimated_charges',function($sale){
                 $estimated = '';
                 $estimated = (($sale->weight_charges != null)? $sale->weight_charges:0) + (($sale->cash_handling_charges != null)? $sale->cash_handling_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->return_charges != null)? $sale->return_charges:0) + (($sale->replacement_charges != null)? $sale->replacement_charges:0) + (($sale->fuel_surcharge != null)? $sale->fuel_surcharge:0) + (($sale->try_and_buy_charges != null)? $sale->try_and_buy_charges:0) + (($sale->packaging_material_charges != null)? $sale->packaging_material_charges:0);
-                return $estimated;
+                return number_format((float)$estimated);
             })
             ->editColumn('p_net_payable',function($sale){
                 $payable = '';
@@ -3511,7 +3511,7 @@ class AdminReportsController extends Controller
                 }else if($sale->d_net_payable != null){
                     $payable = $sale->d_net_payable;
                 }
-                return number_format($payable);
+                return number_format((float)$payable);
             })
             ->addColumn('class',function($sale){
                 $class = '';
@@ -3792,6 +3792,9 @@ class AdminReportsController extends Controller
             })
             ->editColumn('charges', function($shipment){
                 return number_format($shipment->charges);
+            })
+            ->editColumn('payable', function($shipment){
+                return number_format($shipment->payable);
             })
             ->addColumn('account_no', function ($user) {
                 return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);
@@ -4379,11 +4382,6 @@ class AdminReportsController extends Controller
         return view('admin.reports.cargo_returns_shipment_report')->with('cities', $cities);
     }
     public function cargo_returns_shipment_list(Request $request){
-//        $cargo_returns_Shipment = Shipment::leftjoin('cargo_consignment_shipments as ccs', 'ccs.shipment_id', '=', 'shipments.id')
-//            ->leftjoin('shipments_journey as sj', function ($join){
-//                $join->on('sj.shipment_id' , '=', 'shipments.id')
-//                    ->where('sj.id','=',DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (20,21))'));
-//            })
         $cargo_returns_Shipment = Shipment::join('shipments_journey as sj', function ($join) {
             $join->on('sj.shipment_id' , '=', 'shipments.id')
                     ->where('sj.id' , '=', DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and shipments_journey.shipper_status_id in (20))'));
@@ -4397,18 +4395,23 @@ class AdminReportsController extends Controller
                 $join->on('ccs.shipment_id', '=', 'shipments.id')
                 ->where('ccs.cargo_consignment_id', '=', 'cc.id');
             })
-            ->leftjoin('users as u', 'u.id', '=', 'shipments.user_id')
-            ->leftjoin('cities as cori', 'cori.id', '=', 'u.city_id')
-            ->leftjoin('cities as cdri', 'cdri.id', '=', 'shipments.consignee_city_id')
-            ->leftjoin('cities as co', 'co.id', '=', 'cc.origin_hub_id')
-            ->leftjoin('cities as cd', 'cd.id', '=', 'cc.destination_hub_id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->leftjoin('user_shipping_infos as usi', function ($join) {
-                $join->on('usi.id', '=', 'shipments.pickup_address_id')
-                ->where('usi.city_id', '!=', 'shipments.consignee_city_id');
+            ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+//            ->join('user_shipping_infos as usi', function ($join) {
+//                $join->on('usi.id', '=', 'shipments.pickup_address_id')
+//                    ->where('usi.uhb', '!=', 'shipments.consignee_city_id');
+//            })
+            ->join('cities as shipment_origin_city', 'shipment_origin_city.id', '=', 'usi.city_id')
+            ->join('cities as shipment_origin_hub', 'shipment_origin_hub.id', '=', 'shipment_origin_city.hub_id')
+//            ->join('cities as shipment_destination_city', 'shipment_destination_city.id', '=', 'shipments.consignee_city_id')
+            ->join('cities as shipment_destination_city', function($join) {
+                $join->on('shipments.consignee_city_id', '=', 'shipment_destination_city.id')
+                    ->on('shipment_origin_city.hub_id', '!=', 'shipment_destination_city.hub_id');
             })
-            ->leftjoin('cities as corc', 'corc.id', '=', 'usi.city_id')
-            ->select('shipments.tracking_number as tracking_number', 'ss.name as status','ss.id as status_id', 'sj.created_at as return_confirm_date', 'sjc.created_at as dispatching_aging', 'cc.id as cargo_no', 'cc.created_at as cargo_creation_date', 'cori.name as origin_city_name_ri', 'corc.name as origin_city_name_rc', 'cdri.name as destination_city', 'shipments.consignee_city_id', 'co.name as origin_hub', 'cd.name as destination_hub')
+            ->join('cities as shipment_destination_hub', 'shipment_destination_hub.id', '=', 'shipment_destination_city.hub_id')
+            ->leftjoin('cities as cargo_origin_hub', 'cargo_origin_hub.id', '=', 'cc.origin_hub_id')
+            ->leftjoin('cities as cargo_destination_hub', 'cargo_destination_hub.id', '=', 'cc.destination_hub_id')
+            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->select('shipments.tracking_number as tracking_number', 'ss.name as status','ss.id as status_id', 'sj.created_at as return_confirm_date', 'sjc.created_at as dispatching_aging', 'cc.id as cargo_no', 'cc.created_at as cargo_creation_date', 'shipment_origin_city.name as shipment_origin_city_name', 'shipment_origin_hub.name as shipment_origin_hub_name', 'shipment_destination_city.name as shipment_destination_city_name', 'shipment_destination_hub.name as shipment_destination_hub_name', 'cargo_origin_hub.name as cargo_origin_hub_name', 'cargo_destination_hub.name as cargo_destination_hub_name')
             ->whereIn('shipments.shipper_status_id', [20,21]);
         $cargo_returns_Shipment = Datatables::of($cargo_returns_Shipment)
             ->editColumn('dispatching_aging', function($shipments){
@@ -4420,17 +4423,32 @@ class AdminReportsController extends Controller
                     return $days;
                 }
             })
-            ->editColumn('origin_city', function ($shipments) {
-                    return $shipments->destination_city;
-            })
-            ->editColumn('destination_city', function ($shipments) {
-                if($shipments->status_id == 21){
-                    return $shipments->origin_city_name_ri;
+            ->addColumn('cargo_id_padded_link', function ($shipments) {
+                if($shipments->cargo_no != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->cargo_no, 6, '0', STR_PAD_LEFT) . '</span></button>';
                 }
                 else{
-                    return $shipments->origin_city_name_rc;
+                    return '-';
                 }
             })
+            ->addColumn('origin_hub', function ($shipments) {
+                if($shipments->status_id == 20) {
+                    return $shipments->shipment_origin_hub_name;
+                }
+                else{
+                    return $shipments->cargo_destination_hub_name;
+                }
+            })
+            ->orderColumn('origin_hub', DB::raw('IF (ss.id = 20, shipment_origin_hub.name, cargo_destination_hub.name)') . ' $1')
+            ->addColumn('destination_hub', function ($shipments) {
+                if($shipments->status_id == 20){
+                    return $shipments->shipment_destination_hub_name;
+                }
+                else{
+                    return $shipments->cargo_origin_hub_name;
+                }
+            })
+            ->orderColumn('destination_hub', DB::raw('IF (ss.id = 20, shipment_destination_hub.name, cargo_origin_hub.name)') . ' $1')
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -4444,22 +4462,47 @@ class AdminReportsController extends Controller
                     return $days;
                 }
             });
-        if($origin = $request->get('search_origin')){
-            $cargo_returns_Shipment->where('co.id', '=', $origin);
+
+        if ($origin = $request->get('search_origin')) {
+            $cargo_returns_Shipment->where(function ($query) use ($origin) {
+                $query->where(function ($sub_query) use ($origin) {
+                    $sub_query->where('shipments.shipper_status_id', '=', 21)
+                        ->where('cargo_origin_hub.id', '=', $origin);
+                })
+                ->orWhere(function ($sub_query) use ($origin) {
+                    $sub_query->where('shipments.shipper_status_id', '=', 20)
+                        ->where('shipment_destination_hub.id', '=', $origin);
+                });
+            });
         }
-        if($destination = $request->get('search_destination')){
-            $cargo_returns_Shipment->where('cd.id', '=', $destination);
+
+
+        if ($destination = $request->get('search_destination')) {
+            $cargo_returns_Shipment->where(function ($query) use ($destination) {
+                $query->where(function ($sub_query) use ($destination) {
+                    $sub_query->where('shipments.shipper_status_id', '=', 21)
+                        ->where('cargo_destination_hub.id', '=', $destination);
+                })
+                ->orWhere(function ($sub_query) use ($destination) {
+                    $sub_query->where('shipments.shipper_status_id', '=', 20)
+                        ->where('shipment_origin_hub.id', '=', $destination);
+                });
+            });
         }
+
         if($status = $request->get('search_status')){
             $cargo_returns_Shipment->where('ss.id', '=', $status);
         }
+
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
+
             $cargo_returns_Shipment->whereBetween('sj.created_at', [$from, $to]);
         }
         return $cargo_returns_Shipment->make(true);
     }
+
 
     public function return_reattempt_ratio_index(){
         $cities = City::where('status', 1)->get();

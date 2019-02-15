@@ -1125,7 +1125,7 @@ class AdminPickupsController extends Controller
             $details['receiving_sheet_no'] = ($shipment->receiving_sheet_shipment) ? str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT) : '';
             $details['order_id'] = $shipment->order_id;
             $details['destination'] = $shipment->consignee_city->name;
-            $details['cod_amount'] = $shipment->amount;
+            $details['cod_amount'] = number_format($shipment->amount);
             $details['estimated_weight'] = floatval($shipment->estimated_weight);
             $details['actual_weight'] = floatval($shipment->actual_weight);
 
