@@ -325,7 +325,7 @@ class AdminFinanceController extends Controller
                             
                           </tr>
             ';
-                $total_cod_amount += number_format($shipment->received_amount);
+                $total_cod_amount += $shipment->received_amount;
                 $shipment_details .= $shipment_details_row_start;
             }
             $shipment_details .= '
@@ -3479,7 +3479,7 @@ class AdminFinanceController extends Controller
             $total_adjustment_charges += $invoice_shipment->adjustment_charges;
             $total_charges += $invoice_shipment->charges;
             $total_gst += $invoice_shipment->gst;
-            $total_invoice_amount += number_format($invoice_shipment->invoice_amount);
+            $total_invoice_amount += $invoice_shipment->invoice_amount;
         }
 
         $html .= '
@@ -3549,7 +3549,7 @@ class AdminFinanceController extends Controller
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . $this->amount_to_words($total_invoice_amount) . ' Only</td>
+                          <td class="color secondary">' . $total_invoice_amount . ' Only</td>
                         </tr>
                       </tbody>
                     </table>

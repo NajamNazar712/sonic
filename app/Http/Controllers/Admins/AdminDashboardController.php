@@ -226,12 +226,12 @@ class AdminDashboardController extends Controller
                 });
             }
 
-            $graph['booked'][] = number_format($booked->count());
-            $graph['received'][] = number_format($received->count());
-            $graph['cancelled'][] = number_format($cancelled->count());
-            $graph['delivered'][] = number_format($delivered->count());
-            $graph['pending'][] = number_format($pending->count());
-            $graph['return'][] = number_format($return->count());
+            $graph['booked'][] = $booked->count();
+            $graph['received'][] = $received->count();
+            $graph['cancelled'][] = $cancelled->count();
+            $graph['delivered'][] = $delivered->count();
+            $graph['pending'][] = $pending->count();
+            $graph['return'][] = $return->count();
         }
         $shippers = User::where('status',3)->where('blacklist',0)->select('id','name')->get();
         $cities = City::where('status',1)->select('id','name')->get();
