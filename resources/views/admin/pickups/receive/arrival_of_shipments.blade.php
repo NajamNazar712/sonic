@@ -110,6 +110,12 @@
 
 	<script>
 		$(document).ready(function() {
+		    @if(session('errors'))
+				scan_sound(2);
+			@endif
+			@if(session('success'))
+				scan_sound(1);
+			@endif
 			var shipment_ids = [];
 
 			$('#add_shipment_form input.tracking_number').focus();

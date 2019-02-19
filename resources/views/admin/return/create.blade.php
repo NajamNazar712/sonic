@@ -255,7 +255,7 @@
                         }).done(function (data) {
 
                             if (data.status == 1) {
-
+                                scan_sound(2);
                                 toastr.error(data.error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
@@ -265,6 +265,7 @@
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
                                 table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
                                 table.draw(false);
+                                scan_sound(1);
                                 shipment_ids.push(data.shId);
                                 $('#hub_id').val(data.hub);
                             }
@@ -287,7 +288,7 @@
                             }).done(function (data) {
 
                                 if (data.status == 1) {
-
+                                    scan_sound(2);
                                     toastr.error(data.error, 'Error!', {
                                         positionClass: 'toast-top-center',
                                         containerId: 'toast-top-center'
@@ -297,6 +298,7 @@
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
                                     table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
                                     table.draw(false);
+                                    scan_sound(1);
                                     shipment_ids.push(data.shId);
                                     table.order([0, 'desc']).draw();
                                 }
@@ -306,6 +308,7 @@
                                 scan.focus();
                             });
                         } else {
+                            scan_sound(2);
                             var error = 'Tracking Number already scanned!';
                             toastr.error(error, 'Error!', {
                                 positionClass: 'toast-bottom-center',

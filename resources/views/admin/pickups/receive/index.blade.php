@@ -118,6 +118,12 @@
 
 	<script>
 		$(document).ready(function() {
+			@if(session('errors'))
+            	scan_sound(2);
+			@endif
+			@if(session('success'))
+            	scan_sound(1);
+			@endif
 			function print(id) {
 				$.ajax({
 					url: '{!! route('admin.pickups.assigned.print') !!}',
