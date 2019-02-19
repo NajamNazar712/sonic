@@ -72,7 +72,8 @@
                         <th class="border-primary border-darken-1">Recovery Status</th>
                         <th class="border-primary border-darken-1">Current Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
-                        <th class="border-primary border-darken-1">Status Updated Datetime</th>
+                        <th class="border-primary border-darken-1">Operation Status Date/Time</th>
+                        <th class="border-primary border-darken-1">Verification Status Date/Time</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">DNCC</th>
@@ -236,7 +237,8 @@
                             head.push('Recovery Status');
                             head.push('Current Status');
 							head.push('Payment Status');
-                            head.push('Status Updated at');
+                            head.push('Operation Status Date/Time');
+                            head.push('Verification Status Date/Time');
                             head.push('Rider Name');
                             head.push('Remarks');
                             head.push('DNCC');
@@ -257,7 +259,8 @@
                                 row.push(values.recovery_status);
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
-                                row.push(values.status_updated_at);
+                                row.push(values.operation_status_date);
+                                row.push(values.verification_status_date);
                                 row.push(values.rider_name);
                                 row.push(values.remarks);
                                 row.push(values.dncc);
@@ -315,7 +318,8 @@
                     {data:'recovery_status', name: 'ss.name as status', class: 'align-middle text-center recovery_status', orderable: false, searchable: false},
                     {data:'current_status', name: 'ss.name', class: 'align-middle text-center current_status'},
                     {data:'payment_status', name: 'sps.name', class: 'align-middle text-center payment_status'},
-                    {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
+                    {data:'operation_status_date', name: 'sod.created_at', class: 'align-middle text-center operation_status_date'},
+                    {data:'verification_status_date', name: 'svd.created_at', class: 'align-middle text-center verification_status_date'},
                     {data:'rider_name', name: 'rider.name', class: 'align-middle text-center rider_name'},
                     {data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
                     {data:'dncc_link', name: 'delivery_note_shipments.delivery_note_id', class: 'align-middle text-center dncc_link'},
