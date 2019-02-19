@@ -161,24 +161,22 @@
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 scrollX: true,
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
+                paging:false,
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {name: 'tracking_number', class: 'align-middle tracking_number'},
-                    {name: 'order_id', class: 'align-middle order_id'},
-                    {name: 'service_type', class: 'align-middle service_type'},
-                    {name: 'origin', class: 'align-middle origin'},
-                    {name: 'pickup_address', class: 'align-middle pickup_address'},
-                    {name: 'product_type', class: 'align-middle product_type'},
-                    {name: 'item_description', class: 'align-middle item_description'},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
+                    {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false},
+                    {name: 'order_id', class: 'align-middle order_id', orderable: false},
+                    {name: 'service_type', class: 'align-middle service_type', orderable: false},
+                    {name: 'origin', class: 'align-middle origin', orderable: false},
+                    {name: 'pickup_address', class: 'align-middle pickup_address', orderable: false},
+                    {name: 'product_type', class: 'align-middle product_type', orderable: false},
+                    {name: 'item_description', class: 'align-middle item_description', orderable: false},
                     {name: 'action', class: 'align-middle action',orderable: false,searchable:false}
                 ],
                 rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    // var info = table.page.info();
+                    //
+                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -246,9 +244,11 @@
                                 }else{
                                     var rowNo = table.rows().count();
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deleterow"><i class="la la-close"></i></a>';
-                                    table.row.add([rowNo+1,data.tracking_number,data.order_id,data.service_type,data.address,data.origin,data.destination,data.booking,remove]).node().id = data.shId;
+                                    table.row.add([rowNo + 1,data.tracking_number,data.order_id,data.service_type,data.address,data.origin,data.destination,data.booking,remove]).node().id = data.shId;
                                     table.draw(false);
                                     shipment_ids.push(data.shId);
+                                    table.order([0, 'desc']).draw();
+
                                 }
 
                                 scan.val('');

@@ -245,10 +245,6 @@
                         className: 'btn btn-primary mb-1',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
-                    // scrollX: true,
-                    // lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                    // pageLength: 50,
-                    // pagingType: 'full_numbers',
                     paging:false,
                     ordering:[0, 'desc'],
                     columns: [
@@ -265,7 +261,7 @@
                         var status = parseInt($(row).attr('id'));
                         if(status === 13){
                             $(row).addClass('greenClass');
-                        }else if(status === 12){
+                        }else if(status === 12 || status === 52){
                             $(row).addClass('goldClass');
                         }else if(status === 20){
                             $(row).addClass('redClass');
@@ -387,7 +383,7 @@
                                 $('#single_div p.date').text(data.details.current_status_date);
                                 if(data.details.status_id == 13){
                                     $('#status_card').addClass('greenClass');
-                                }else if(data.details.status_id == 12){
+                                }else if(data.details.status_id == 12 || data.details.status_id == 52){
                                     $('#status_card').addClass('goldClass');
                                 }else if(data.details.status_id == 20){
                                     $('#status_card').addClass('redClass');

@@ -90,6 +90,9 @@ class AdminShipmentCancelController extends Controller
         ->addColumn('tracking_number_hyperlink', function ($shipment) {
             return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $shipment->tracking_number . ' class="tracking" target="_blank">' . $shipment->tracking_number . '</a></u>';
         })
+            ->editColumn('collection_amount', function($shipment){
+                return number_format($shipment->collection_amount);
+            })
         ->addColumn('consignee_contact', function ($shipment) {
             $consignee_contact = $shipment->consignee_phone_number_1;
 

@@ -6,6 +6,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\Product;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShipperNotificationEmail;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -81,6 +82,9 @@ class ShipperDashboardController extends Controller
             })
             ->editColumn('phone',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->editColumn('cancellation_remarks',function ($shipments){
                 if($shipments->cancellation_remarks != null && $shipments->status_id == 17){
@@ -269,8 +273,11 @@ class ShipperDashboardController extends Controller
         $user = User::find(session('user_id'));
         $product = Product::find($user->product_id);
         $banks = BanksList::all();
+        $emails = ShipperNotificationEmail::where('user_id',$user->id)->select('email')->get();
+        $email_ids = ShipperNotificationEmail::where('user_id',$user->id)->pluck('email')->toArray();
+        $email_ids = implode(',', $email_ids);
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
-        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list]);
+        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids]);
     }
 
     public function getPickups(Request $request) {
@@ -411,6 +418,50 @@ class ShipperDashboardController extends Controller
         return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
     }
 
+
+    public function add_notification_emails(Request $request){
+        $emails = $request->email_address;
+        if($emails != ''){
+            $email_address = explode(',', $emails);
+            $user = session('user_id');
+            ShipperNotificationEmail::where('user_id',$user)->delete();
+            foreach ($email_address as $email){
+
+                    $shipper_notification_email = new ShipperNotificationEmail();
+                    $shipper_notification_email->user_id = $user;
+                    $shipper_notification_email->email = $email;
+                    $shipper_notification_email->save();
+
+            }
+            return redirect()->back()->with('success', 'Email Address Added.');
+
+        }
+        else{
+            return back()->with('danger', 'There is no email selected!');
+        }
+    }
+    public function edit_notification_emails(Request $request){
+
+        $emails = $request->email_address;
+        if($emails != ''){
+            $email_address = explode(',', $emails);
+            $user = session('user_id');
+            foreach ($email_address as $email){
+                if(!ShipperNotificationEmail::where('user_id',$user)->where('email','=',$email)->exists()){
+                    $shipper_notification_email = new ShipperNotificationEmail();
+                    $shipper_notification_email->user_id = $user;
+                    $shipper_notification_email->email = $email;
+                    $shipper_notification_email->save();
+                }
+            }
+            ShipperNotificationEmail::where('user_id',$user)->whereNotIn('email',$email_address)->delete();
+            return redirect()->back()->with('success', 'Email Address updated.');
+
+        }
+        else{
+            return back()->with('danger', 'There is no email selected!');
+        }
+    }
 
 //    public function statistics_search(Request $request){
 //        $graph = array();
