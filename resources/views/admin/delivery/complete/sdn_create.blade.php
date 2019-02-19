@@ -237,8 +237,8 @@
                         var sum = this
                             .data()
                             .reduce(function(a, b) {
-                                var x = parseFloat(a) || 0;
-                                var y = parseFloat(b) || 0;
+                                var x = parseFloat(a.toString().replace(/,/g, '')) || 0;
+                                var y = parseFloat(b.toString().replace(/,/g, '')) || 0;
                                 return x + y;
                             }, 0);
 
