@@ -2834,7 +2834,7 @@ class AdminFinanceController extends Controller
             if ($payment_mode == 'IBFT') {
                 if ($done_payment_shipment->type != 2) {
                     if ($done_payment_shipment->type == 0) {
-                        $total_collection_amount += number_format($done_payment_shipment->amount);
+                        $total_collection_amount += $done_payment_shipment->amount;
                         $total_cash_handling_charges += $shipment->cash_handling_charges;
                         $total_replacement_charges += $shipment->replacement_charges;
                         // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
