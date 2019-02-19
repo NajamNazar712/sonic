@@ -2862,13 +2862,13 @@ class AdminFinanceController extends Controller
             }
             else {
                 if ($done_payment_shipment->type == 0) {
-                    $total_collection_amount += number_format($done_payment_shipment->amount);
+                    $total_collection_amount += $done_payment_shipment->amount;
                 }
                 else if ($done_payment_shipment->type == 2) {
-                    $total_adjustments += number_format($done_payment_shipment->payable);
+                    $total_adjustments += $done_payment_shipment->payable;
                 }
 
-                $total_payable += number_format($done_payment_shipment->payable);
+                $total_payable += $done_payment_shipment->payable;
             }
       }
 
