@@ -574,7 +574,7 @@ class DeliveryController extends Controller
                 $cod = number_format($delivery->total_cod_amount);
                 $count = $count - 1;
                 if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
-                    $cod = $cod - $parcel->amount;
+                    $cod = $cod - str_replace(',', '', $parcel->amount);
                 }
                 if ($count == 0) {
                     DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod, 'status' => 4]);
