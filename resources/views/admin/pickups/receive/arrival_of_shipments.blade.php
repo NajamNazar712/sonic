@@ -259,7 +259,7 @@
                                     table.row.add([rowNo + 1, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight, remove_button]).node().id = data.details.id;
 									table.draw(false);
                                     table.order([0, 'desc']).draw();
-
+                                    scan_sound(1);
 									shipment_ids.push(data.details.id);
 
 									$('#add_shipment_form button.add').prop('disabled', false);
@@ -271,7 +271,7 @@
 							}
 							else {
 								$('#add_shipment_form button.add').prop('disabled', false);
-
+                                scan_sound(2);
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 							}
 						});

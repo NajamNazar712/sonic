@@ -72,3 +72,4 @@ Quagga.onDetected(function(result) {
         }
     }
 });
+
