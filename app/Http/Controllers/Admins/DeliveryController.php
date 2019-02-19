@@ -571,7 +571,7 @@ class DeliveryController extends Controller
                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
                 $delivery = $delivery->first();
                 $count = $delivery->shipments_count;
-                $cod = number_format($delivery->total_cod_amount);
+                $cod = str_replace(',', '', $delivery->total_cod_amount);
                 $count = $count - 1;
                 if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                     $cod = $cod - str_replace(',', '', $parcel->amount);
