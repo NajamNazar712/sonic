@@ -549,7 +549,7 @@
                 row = table.row('#' + id);
                 if(row.length >0) {
                     row.select();
-
+                    scan_sound(1);
                     if (hub_ids.length == 0) {
                         hub_ids.push(row.data().hub_id);
                     }
@@ -571,6 +571,7 @@
                         hub_ids.splice(index, 1);
                     }
                 }else{
+                    scan_sound(2);
                     var error = "Delivery Note not found!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
