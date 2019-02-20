@@ -156,7 +156,7 @@
                                         table.row.add([rowNo + 1, data.details.tracking_number, city, name, address, phone1, phone2, email, data.details.amount,action]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
-
+                                        scan_sound(1);
                                         shipment_ids.push(data.details.id);
 
                                         $('#misroute_shipment_form button.add').prop('disabled', false);
@@ -176,14 +176,14 @@
                                 }
                                 else {
                                     $('#misroute_shipment_form button.add').prop('disabled', false);
-
+                                    scan_sound(2);
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             });
                     }
                     else {
                         $('#misroute_shipment_form button.add').prop('disabled', false);
-
+                        scan_sound(2);
                         toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 
