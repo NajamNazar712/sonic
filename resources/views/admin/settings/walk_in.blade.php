@@ -111,7 +111,7 @@
                                                         <div class="col p-0">
                                                             <div class="input-group form-group">
                                                                 <label class="form-control">Actual Weight</label>
-                                                                <input type="text" name="walk_in_hub_ol_a" class="form-control numeric" placeholder="" data-rule-range="[1,1000]" data-msg-range="Weight needs to be from 10 to 1000" data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_ol->actual_weight }}">
+                                                                <input type="text" name="walk_in_hub_ol_a" class="form-control numeric" placeholder="" data-rule-range="[10,1000]" data-msg-range="Weight needs to be from 10 to 1000" data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_ol->actual_weight }}">
                                                                 <div class="input-group-append">
                                                                     <span class="input-group-text">KG</span>
                                                                 </div>
@@ -152,7 +152,7 @@
                                                 <div class="col p-0">
                                                     <div class="input-group form-group">
                                                             <label class="form-control">Actual Weight</label>
-                                                            <input type="text" name="walk_in_door_ol_a" class="form-control numeric" placeholder="" data-rule-range="[1,1000]" data-msg-range="Weight needs to be from 10 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_ol->actual_weight }}">
+                                                            <input type="text" name="walk_in_door_ol_a" class="form-control numeric" placeholder="" data-rule-range="[10,1000]" data-msg-range="Weight needs to be from 10 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_ol->actual_weight }}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">KG</span>
                                                         </div>
@@ -195,7 +195,7 @@
                                                     <div class="col p-0">
                                                         <div class="input-group form-group">
                                                     <label class="form-control">Actual Weight</label>
-                                                    <input type="text" name="walk_in_hub_dn_a" class="form-control numeric" placeholder="" data-rule-range="[1,1000]" data-msg-range="Weight needs to be from 5 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_dn->actual_weight }}">
+                                                    <input type="text" name="walk_in_hub_dn_a" class="form-control numeric" placeholder="" data-rule-range="[5,1000]" data-msg-range="Weight needs to be from 5 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_dn->actual_weight }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">KG</span>
                                                     </div>
@@ -236,7 +236,7 @@
                                                     <div class="col p-0">
                                                         <div class="input-group form-group">
                                                     <label class="form-control">Actual Weight</label>
-                                                    <input type="text" name="walk_in_door_dn_a" class="form-control numeric" placeholder="" data-rule-range="[1,1000]" data-msg-range="Weight needs to be from 5 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_dn->actual_weight }}">
+                                                    <input type="text" name="walk_in_door_dn_a" class="form-control numeric" placeholder="" data-rule-range="[5,1000]" data-msg-range="Weight needs to be from 5 to 1000" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_dn->actual_weight }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">KG</span>
                                                     </div>
