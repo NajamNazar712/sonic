@@ -4218,14 +4218,20 @@ class AdminReportsController extends Controller
                             $join->on('s.id', '=', 'dns.shipment_id')
                             ->where('dns.delivery_note_id', '=', DB::raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id and fake_status = 0)'));
                         })
-                        ->join('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id');
+                        ->join('delivery_notes as dn', function($join) {
+                            $join->on('dns.delivery_note_id', '=', 'dn.id')
+                            ->where('dn.status', '=', 1);
+                        });
                     }
                     else if ($type == 'fake_status') {
                         $rows = $rows->join('delivery_note_shipments as dns', function($join) {
                             $join->on('s.id', '=', 'dns.shipment_id')
                             ->where('dns.delivery_note_id', '=', DB::raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id and fake_status = 1)'));
                         })
-                        ->join('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id');
+                        ->join('delivery_notes as dn', function($join) {
+                            $join->on('dns.delivery_note_id', '=', 'dn.id')
+                            ->where('dn.status', '=', 1);
+                        });
                     }
                     else if ($type == 'delivery_tomorrow') {
                         $rows = $rows->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
