@@ -195,6 +195,7 @@
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remarks');
+                            head.push('Shipper Remarks');
                             head.push('Arrival Date');
                             head.push('Status Date');
                             head.push('Re-Attempt Count');
