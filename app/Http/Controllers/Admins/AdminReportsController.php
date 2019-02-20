@@ -1428,7 +1428,7 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('shipments_journey as svd', function($join) {
                 $join->on('svd.shipment_id', '=', 's.id')
-                    ->where('svd.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.reference_1_id = delivery_note.id)'));
+                    ->where('svd.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.reference_1_id = delivery_note.id and shipments_journey.shipper_status_id != 5)'));
             })
             ->leftjoin('shipments_journey as sjd', function($join) {
                 $join->on('sjd.shipment_id', '=', 's.id')
