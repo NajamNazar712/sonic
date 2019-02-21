@@ -245,7 +245,7 @@
             $.validator.addMethod("reference_no",
                 function(value, element) {
                     result = false;
-                    if(value.length > 3) {
+                    // if(value.length > 3) {
                         $.ajax({
                             type: "POST",
                             async: false,
@@ -263,7 +263,7 @@
                         });
 
                        return result;
-                    }
+                    // }
                 },
                 "Statement Reference Number already exists."
             );
