@@ -206,10 +206,10 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var small_flyer = parseInt($('#sm_flyers_title').text());
-            var medium_flyer = parseInt($('#md_flyers_title').text());
-            var large_flyer = parseInt($('#lg_flyers_title').text());
-            var box_flyer = parseInt($('#box_title').text());
+            var small_flyer = parseInt(@json($packaging->small_flyers));
+            var medium_flyer = parseInt(@json($packaging->medium_flyers));
+            var large_flyer = parseInt(@json($packaging->large_flyers));
+            var box_flyer = parseInt(@json($packaging->boxes));
             if(small_flyer == 0 && medium_flyer == 0 && large_flyer == 0 && box_flyer == 0){
                 $('#SendNewStock').prop("disabled",true);
             }
