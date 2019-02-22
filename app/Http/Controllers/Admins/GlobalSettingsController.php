@@ -491,4 +491,36 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+    public function debriefing_report_cut_off_time_index() {
+        $settings = GlobalSettings::where('type', 'debriefing_report_cut_off_time')->first();
+
+        if ($settings) {
+            $cut_off_time = $settings->setting_value;
+        }
+        else {
+            $cut_off_time = 12;
+        }
+
+        return view('admin.settings.debriefing_report_cut_off_time')->with('cut_off_time', $cut_off_time);
+    }
+
+    public function debriefing_report_cut_off_time_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'debriefing_report_cut_off_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        }
+        else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'debriefing_report_cut_off_time';
+        }
+
+        $settings->setting_value = $request->debriefing_report_cut_off_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }
