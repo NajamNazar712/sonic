@@ -25,5 +25,15 @@
 @include('admin.components.modals')
 @include('admin.layout.footer')
 
+<audio id="audio_success" autostart="false">
+    <source src="{{asset('file/success_sound.mp3')}}" type="audio/ogg">
+    <source src="{{asset('file/success_sound.mp3')}}" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+<audio id="audio_error" autostart="false">
+    <source src="{{asset('file/error.mp3')}}" type="audio/ogg">
+    <source src="{{asset('file/error.mp3')}}" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
 </body>
 </html>

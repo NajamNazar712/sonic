@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Daily Pickup & Sales Cron Time')
+@section('title', 'Debriefing Report Cut-Off Time')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Daily Pickup & Sales Cron Time
+                    Debriefing Report Cut-Off Time
                 </h1>
 
                 <div class="card">
@@ -19,15 +19,15 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-5 col-sm-4 col-md-3 col-lg-2">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.daily_pickup_sales_cron.store') }}" novalidate="novalidate">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.debriefing_report_cut_off_time.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
 
                                         <div class="form-group">
                                             <div class="input-group">
-                                            <input type="text" name="daily_pickup_sales_cron_time" class="form-control daily_pickup_sales_cron_time" placeholder="Daily Pickup Sales Cron Time*" data-rule-required="true" data-msg-required="Daily Pickup Sales Cron Time is required" value="{{ $settings->setting_value }}" data-rule-min="0" data-msg-min="Daily Pickup Sales Cron Time can not be less than 0" data-rule-max="23" data-msg-min="Daily Pickup Sales Cron Time can not be more than 23">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text">hrs</span>
-                                            </div>
+                                                <input type="text" name="debriefing_report_cut_off_time" class="form-control debriefing_report_cut_off_time" placeholder="Debriefing Report Cut-Off Time*" data-rule-required="true" data-msg-required="Debriefing Report Cut-Off Time is required" value="{{ $cut_off_time }}" data-rule-min="1" data-msg-min="Debriefing Report Cut-Off Time can not be less than 1" data-rule-max="23" data-msg-min="Debriefing Report Cut-Off Time can not be more than 23">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text">hours</span>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -44,7 +44,6 @@
 @endsection
 
 @section('css')
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 
 @section('js')
@@ -53,7 +52,7 @@
 
     <script>
         $(document).ready(function() {
-            $('#settings_form input.daily_pickup_sales_cron_time').inputmask({
+            $('#settings_form input.debriefing_report_cut_off_time').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false

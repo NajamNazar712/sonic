@@ -945,6 +945,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
               Route::post('inactive', 'Admins\GlobalSettingsController@petty_cash_titles_inactive')->name('inactive');
            });
         });
+
+        Route::prefix('debriefing_report_cut_off_time')->name('debriefing_report_cut_off_time.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_store')->name('store');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {

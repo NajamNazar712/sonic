@@ -31,6 +31,7 @@
                     </div>
                 </div>
                 </form>
+
                 <div class="row mb-2 justify-content-center">
 
                     <div class="col-3">
@@ -97,6 +98,7 @@
             </div>
         </div>
     </div>
+
 
 
 @endsection
@@ -243,7 +245,6 @@
                                         notification_ids[index] = 0;
                                     }
                                 }
-                                console.log(notification_ids)
 
                             });
                             table.button('.select_all_notifications').enable();
@@ -370,6 +371,7 @@
                         }).done(function (data) {
                             if(data.status === 1){
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                scan_sound(2);
                             }else{
                                 rowsCount += 1;
                                 var rowNo = rowsCount;
@@ -378,11 +380,13 @@
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
                                 table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
+                                scan_sound(1);
                                 shipment_ids.push(data.shId);
                                 tracking_ids.push(data.tracking_number);
                                 notification_ids.push(1);
                                 rider_info_ids.push(1);
                                 $('#hub_id').val(data.hub);
+
                             }
                             scan.val('');
                             scan.attr('disabled', false);
@@ -391,6 +395,7 @@
                             table.button('.select_none_notifications').enable();
                             table.button('.select_all_rider_informations').enable();
                             table.button('.select_none_rider_informations').enable();
+
                         });
                     } else {
                         var is_indexed = $.inArray(tracking, tracking_ids);
@@ -408,6 +413,7 @@
                                 if(data.status === 1){
 
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    scan_sound(2);
                                 }else{
                                     // rowsCount += 1;
                                     // var rowNo = rowsCount;
@@ -422,6 +428,7 @@
                                     notification_ids.push(1);
                                     rider_info_ids.push(1);
                                     table.order([0, 'desc']).draw();
+                                    scan_sound(1);
                                 }
                                 scan.val('');
                                 scan.attr('disabled', false);
@@ -431,7 +438,7 @@
                         }else{
                             var error = 'Tracking Number already scanned!';
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
+                            scan_sound(2);
                             scan.val('');
                             scan.attr('disabled', false);
                             scan.focus();
@@ -569,6 +576,7 @@
                     camera_scanning_stop();
                 }
             });
+
         });
 
         function camera_scan_detected(tracking_number) {

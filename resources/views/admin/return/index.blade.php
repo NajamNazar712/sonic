@@ -43,6 +43,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">Shipper Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Re-Attempt Count</th>
@@ -150,6 +151,9 @@
         .selectize-control {
             width: 300px !important;
         }
+        .goldClass{
+            background-color: gold;
+        }
     </style>
 @endsection
 
@@ -191,6 +195,7 @@
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remarks');
+                            head.push('Shipper Remarks');
                             head.push('Arrival Date');
                             head.push('Status Date');
                             head.push('Re-Attempt Count');
@@ -216,6 +221,7 @@
                                 row.push(values.status);
                                 row.push(values.reason);
                                 row.push(values.remarks);
+                                row.push(values.shipper_remarks);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
                                 row.push(values.reattempts);
@@ -486,7 +492,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[19, 'asc'], [18, 'asc']],
+                order: [[20, 'asc'], [19, 'asc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -505,7 +511,8 @@
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipment_remarks'},
+                    {data: 'shipment_remarks', name: 'admin_journey.remarks', class: 'align-middle shipment_remarks'},
+                    {data: 'shipper_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipper_remarks'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
@@ -520,6 +527,7 @@
                         table.row(row).select();
                     }
                 },
+
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 

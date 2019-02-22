@@ -340,6 +340,12 @@
 
 	<script>
 		$(document).ready(function() {
+			@if(session('errors'))
+            scan_sound(2);
+			@endif
+			@if(session('success'))
+            scan_sound(1);
+			@endif
 			function print(id) {
 				$.ajax({
 					url: '{!! route('admin.cargo.in_transit.print') !!}',
@@ -712,6 +718,10 @@
 				successClass: 'success',
 				errorPlacement: function(error, element) {
 					error.addClass('w-100').appendTo(element.parents('form'));
+				},
+                submitHandler: function(form) {
+				    scan_sound(1);
+				    form.submit();
 				}
 			});
 			@endif

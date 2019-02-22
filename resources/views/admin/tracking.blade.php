@@ -140,7 +140,7 @@
 
 					if (data.invalid !== undefined) {
 						var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
-
+						scan_sound(2);
 						toastr.error(message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 					}
 
@@ -376,6 +376,7 @@
 
 							$('#tracking').append(shipment);
 						});
+						scan_sound(1);
 
 						$('#tracking table.datatable.tracking_history').DataTable({
 							dom: 't',
