@@ -42,7 +42,7 @@
                             </span>
                                 </div>
 
-                                <input type="text" name="select_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date (To) is required">
+                                <input type="text" name="select_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date (To) is required" disabled>
                             </div>
                         </div>
                         <div class="col">
@@ -153,9 +153,11 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
+                        $('#make_statement_form #select_date_to').attr('disabled', false);
                         var current_date = $('input[name="select_date_from_formatted"]').val();
+                        // $('#make_statement_form #select_date_to').pickadate('picker').set({'min': current_date},{muted: true});
                         var future = future_date(current_date);
-                        $('#make_statement_form #select_date_to').pickadate('picker').set({'select': future},{muted: true});
+                        $('#make_statement_form #select_date_to').pickadate('picker').set({'select': future,'min': current_date, 'max':future},{muted: true});
                     }
                 }
             });
@@ -174,13 +176,15 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        var current_date = $('input[name="select_date_to_formatted"]').val();
-                        var past = past_date(current_date);
-                        $('#make_statement_form #select_date_from').pickadate('picker').set({'select': past},{muted: true});
-                    }
-                }
+                // onSet: function(context) {
+                //     if (context.select) {
+                //         var from_date_selected = $('input[name="select_date_from_formatted"]').val();
+                //         if(from_date_selected == ''){
+                //             var past = past_date(from_date_selected);
+                //             $('#make_statement_form #select_date_from').pickadate('picker').set({'select': past},{muted: true});
+                //         }
+                //     }
+                // }
             });
             function past_date(to_date) {
                 var today = new Date(to_date);
@@ -245,7 +249,7 @@
             $.validator.addMethod("reference_no",
                 function(value, element) {
                     result = false;
-                    if(value.length > 3) {
+                    // if(value.length > 3) {
                         $.ajax({
                             type: "POST",
                             async: false,
@@ -263,7 +267,7 @@
                         });
 
                        return result;
-                    }
+                    // }
                 },
                 "Statement Reference Number already exists."
             );

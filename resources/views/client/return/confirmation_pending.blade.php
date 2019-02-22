@@ -355,6 +355,7 @@
                                         }
 
                                         table.button('.confirm').enable();
+                                        table.button('.reattempt').enable();
                                     }
                                 }
                             });
@@ -382,6 +383,7 @@
 
                                     if (selected_rows.length == 0) {
                                         table.button('.confirm').disable();
+                                        table.button('.reattempt').disable();
 
                                         hub_ids.splice(index, 1);
                                     }
@@ -405,7 +407,7 @@
                 serverSide: true,
                 ajax: '{{ route('cod.return.pending.list') }}',
                 rowId: 'shId',
-                order: [[16, 'asc'], [15, 'asc']],
+                order: [[16, 'asc'], [17, 'asc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
