@@ -152,7 +152,8 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="url">URL:</label>
-                                                        <input type="text" class="form-control" value="{{ old('url') }}" name="url" placeholder="Webiste / Facebook Page">
+                                                        <span class="danger">*</span></label>
+                                                        <input type="text" class="form-control required" value="{{ old('url') }}" name="url" placeholder="Webiste / Facebook Page">
                                                     </div>
                                             </div>
                                         </div>

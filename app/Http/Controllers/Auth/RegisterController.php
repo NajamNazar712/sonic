@@ -71,7 +71,7 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         if($data['nature_of_account'] == 1){
-            return Validator::make($data, [
+        	return Validator::make($data, [
                 'name' => 'required|string|max:255|unique:users',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:6',
@@ -80,6 +80,7 @@ class RegisterController extends Controller
                 'shipper_phone'=>'required|string|max:255',
                 'nature_of_account' => 'required',
                 'cnic'=>'required|string|max:255',
+				'url'=>'required|string|max:255',
                 'shipper_city'=>'required|string|max:255',
                 'shipper_product_type'=>'required|string|max:255',
                 'shipping_city.*'=>'required|string|max:255',
@@ -96,8 +97,6 @@ class RegisterController extends Controller
                 'iban_no'=>'required|string|max:255',
                 'cycle_of_payment'=>'required|string|max:255',
                 'g-recaptcha-response' => 'required|captcha'
-
-            ]);
         }else{
             return Validator::make($data, [
                 'name' => 'required|string|max:255|unique:users',
@@ -108,6 +107,7 @@ class RegisterController extends Controller
                 'shipper_phone'=>'required|string|max:255',
                 'nature_of_account' => 'required',
                 'cnic'=>'required|string|max:255',
+				'url'=>'required|string|max:255',
                 'shipper_city'=>'required|string|max:255',
                 'shipper_product_type'=>'required|string|max:255',
                 'shipping_city.*'=>'required|string|max:255',
@@ -131,6 +131,7 @@ class RegisterController extends Controller
                 'billing_address' => 'required|string|max:255',
                 'g-recaptcha-response' => 'required|captcha'
 
+        ]);
             ]);
         }
 

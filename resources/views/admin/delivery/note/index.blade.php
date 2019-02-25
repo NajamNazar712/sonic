@@ -31,6 +31,7 @@
                     </div>
                 </div>
                 </form>
+
                 <div class="row mb-2 justify-content-center">
 
                     <div class="col-3">
@@ -97,6 +98,7 @@
             </div>
         </div>
     </div>
+
 
 
 @endsection
@@ -243,7 +245,6 @@
                                         notification_ids[index] = 0;
                                     }
                                 }
-                                console.log(notification_ids)
 
                             });
                             table.button('.select_all_notifications').enable();
@@ -300,25 +301,25 @@
                 scrollX: true,
                 paging:false,
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {name: 'tracking_number', class: 'align-middle tracking_number'},
-                    {name: 'destination', class: 'align-middle destination'},
-                    {name: 'consignee_name', class: 'align-middle consignee_name'},
-                    {name: 'phone', class: 'align-middle phone'},
-                    {name: 'notification', class: 'align-middle notification'},
-                    {name: 'rider_information', class: 'align-middle rider_information'},
-                    {name: 'address', class: 'align-middle address'},
-                    {name: 'amount', class: 'align-middle amount'},
-                    {name: 'service_type', class: 'align-middle service_type'},
-                    {name: 'status', class: 'align-middle status'},
-                    {name: 'rider_name', class: 'align-middle rider_name'},
-                    {name: 'remarks', class: 'align-middle remarks'},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
+                    {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false},
+                    {name: 'destination', class: 'align-middle destination', orderable: false},
+                    {name: 'consignee_name', class: 'align-middle consignee_name', orderable: false},
+                    {name: 'phone', class: 'align-middle phone', orderable: false},
+                    {name: 'notification', class: 'align-middle notification', orderable: false},
+                    {name: 'rider_information', class: 'align-middle rider_information', orderable: false},
+                    {name: 'address', class: 'align-middle address', orderable: false},
+                    {name: 'amount', class: 'align-middle amount', orderable: false},
+                    {name: 'service_type', class: 'align-middle service_type', orderable: false},
+                    {name: 'status', class: 'align-middle status', orderable: false},
+                    {name: 'rider_name', class: 'align-middle rider_name', orderable: false},
+                    {name: 'remarks', class: 'align-middle remarks', orderable: false},
                     {name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    // var info = table.page.info();
+                    //
+                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -370,19 +371,22 @@
                         }).done(function (data) {
                             if(data.status === 1){
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                scan_sound(2);
                             }else{
                                 rowsCount += 1;
                                 var rowNo = rowsCount;
                                 var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                 var rider_information = '<input type="checkbox" class="form-control select select-checkbox rider_information" name="rider_information[]" checked>';
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
+                                table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
+                                scan_sound(1);
                                 shipment_ids.push(data.shId);
                                 tracking_ids.push(data.tracking_number);
                                 notification_ids.push(1);
                                 rider_info_ids.push(1);
                                 $('#hub_id').val(data.hub);
+
                             }
                             scan.val('');
                             scan.attr('disabled', false);
@@ -391,6 +395,7 @@
                             table.button('.select_none_notifications').enable();
                             table.button('.select_all_rider_informations').enable();
                             table.button('.select_none_rider_informations').enable();
+
                         });
                     } else {
                         var is_indexed = $.inArray(tracking, tracking_ids);
@@ -408,9 +413,11 @@
                                 if(data.status === 1){
 
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    scan_sound(2);
                                 }else{
-                                    rowsCount += 1;
-                                    var rowNo = rowsCount;
+                                    // rowsCount += 1;
+                                    // var rowNo = rowsCount;
+                                    var rowNo = table.rows().count();
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                     var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
@@ -420,7 +427,8 @@
                                     tracking_ids.push(data.tracking_number);
                                     notification_ids.push(1);
                                     rider_info_ids.push(1);
-
+                                    table.order([0, 'desc']).draw();
+                                    scan_sound(1);
                                 }
                                 scan.val('');
                                 scan.attr('disabled', false);
@@ -430,7 +438,7 @@
                         }else{
                             var error = 'Tracking Number already scanned!';
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
+                            scan_sound(2);
                             scan.val('');
                             scan.attr('disabled', false);
                             scan.focus();
@@ -568,6 +576,7 @@
                     camera_scanning_stop();
                 }
             });
+
         });
 
         function camera_scan_detected(tracking_number) {

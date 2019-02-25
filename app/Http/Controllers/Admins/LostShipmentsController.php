@@ -77,6 +77,9 @@ class LostShipmentsController extends Controller
                         return " - ";
                     }
                 })
+                ->editColumn('amount', function($shipment){
+                    return number_format($shipment->amount);
+                })
                 ->editColumn('shipper', function ($shipment) {
                     if ($shipment->booking_type_id == 4) {
                         return $shipment->shipper .' (' . $shipment->poc . ')';
@@ -181,7 +184,7 @@ class LostShipmentsController extends Controller
                         $data['origin'] = $shipment->consignee_city->name;
                         $data['destination'] = $shipment->pickup_address->city->name;
                         $data['hub'] = $shipment->pickup_address->city->hub_city->name;
-                        $data['amount'] = $shipment->amount;
+                        $data['amount'] = number_format($shipment->amount);
                         $data['mode'] = $shipment->shipping_mode->mode;
                         $data['service_type'] = $shipment->booking_type->booking_type;
 

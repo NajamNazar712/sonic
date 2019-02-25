@@ -211,6 +211,7 @@
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 
 
+
     <script type="text/javascript">
         $(document).ready(function () {
             var table;
@@ -245,10 +246,6 @@
                         className: 'btn btn-primary mb-1',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
-                    // scrollX: true,
-                    // lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                    // pageLength: 50,
-                    // pagingType: 'full_numbers',
                     paging:false,
                     ordering:[0, 'desc'],
                     columns: [
@@ -265,7 +262,7 @@
                         var status = parseInt($(row).attr('id'));
                         if(status === 13){
                             $(row).addClass('greenClass');
-                        }else if(status === 12){
+                        }else if(status === 12 || status === 52){
                             $(row).addClass('goldClass');
                         }else if(status === 20){
                             $(row).addClass('redClass');
@@ -303,11 +300,13 @@
 
                                 if(data.status == 0){
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    scan_sound(2);
                                 }else{
                                     var rowNo = table.rows().count();
 
                                     table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination]).node().id = data.details.status_id;
                                     table.draw(false);
+                                    scan_sound(1);
                                 }
 
                                 scan.val('');
@@ -326,12 +325,14 @@
                                 }).done(function (data) {
                                     if(data.status == 0){
                                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        scan_sound(2);
                                     }else{
                                         var rowNo = table.rows().count();
 
                                         table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination]).node().id = data.details.status_id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
+                                        scan_sound(1);
                                     }
 
                                     scan.val('');
@@ -341,7 +342,7 @@
                             }else{
                                 var error = 'Tracking Number already scanned!';
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
+                                scan_sound(2);
                                 scan.val('');
                                 scan.attr('disabled', false);
                                 scan.focus();
@@ -361,6 +362,7 @@
                             if(data.status == 0){
                                 $('#single_div').addClass('d-none');
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                scan_sound(2);
                             }else{
                                 $('#single_div').removeClass('d-none');
                                 if($('#status_card').hasClass('greenClass') || $('#status_card').hasClass('redClass') || $('#status_card').hasClass('goldClass')){
@@ -369,7 +371,7 @@
                                     $('#status_card').removeClass('goldClass');
                                 }
 
-
+                                scan_sound(1);
                                 $('#single_div p.track').text(data.details.tracking_number);
                                 $('#single_div p.status').text(data.details.status);
                                 $('#single_div p.origin').text(data.details.origin);
@@ -387,7 +389,7 @@
                                 $('#single_div p.date').text(data.details.current_status_date);
                                 if(data.details.status_id == 13){
                                     $('#status_card').addClass('greenClass');
-                                }else if(data.details.status_id == 12){
+                                }else if(data.details.status_id == 12 || data.details.status_id == 52){
                                     $('#status_card').addClass('goldClass');
                                 }else if(data.details.status_id == 20){
                                     $('#status_card').addClass('redClass');

@@ -242,6 +242,18 @@
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
+                drawCallback: function (settings) {
+                    var api = new $.fn.dataTable.Api( settings );
+                    var data = api.rows( {page:'current'} ).data();
+
+                    if($('#scan_delivery_note').val() != ''){
+                        if(data.length > 0){
+                            scan_sound(1);
+                        }else{
+                            scan_sound(2);
+                        }
+                    }
+                },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
@@ -433,7 +445,14 @@
                     });
 
             });
-
+            // $('#scan_delivery_note').on('change', function () {
+            //     var count = table.rows().count();
+            //     if(count > 0){
+            //         scan_sound(1);
+            //     }else{
+            //         scan_sound(2);
+            //     }
+            // });
             {{--$('#scan_tracking').on('change',function () {--}}
                 {{--var scan = $(this);--}}
                 {{--var tracking = $(this).val();--}}

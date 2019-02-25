@@ -246,6 +246,7 @@ class Permission
             'admin.petty_cash.make.index' => 145,
             'admin.petty_cash.statements.index' => 146,
             'admin.petty_cash.approved.index' => 147,
+            'admin.petty_cash.statements.approve' => 173,
 
             'admin.month_closing.index' => 141,
             'admin.month_closing.list' => 141,
@@ -304,8 +305,10 @@ class Permission
             'reports.debriefing.index' => 170,
             'reports.debriefing.list' => 170,
             'reports.debriefing.export' => 170,
-            'reports.cargo_returns_shipment_index.index' => 172,
-            'reports.cargo_returns_shipment_list.list' => 172,
+            'reports.cargo_returns_shipment.index' => 172,
+            'reports.cargo_returns_shipment.list' => 172,
+            'reports.return_reattempt_ratio.index' => 174,
+            'reports.return_reattempt_ratio.list' => 174,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -382,10 +385,8 @@ class Permission
             'settings.ticker.index' => 152,
             'settings.ticker.store' => 152,
 
-			'settings.walk_in.index' => 154,
             'settings.walk_in.store' => 154,
-            'settings.petty_cash.heads.index' => 157,
-            'settings.petty_cash.heads.list' => 157,
+			'settings.petty_cash.heads.index' => 157,            'settings.petty_cash.heads.list' => 157,
             'settings.petty_cash.heads.add' => 159,
             'settings.petty_cash.heads.edit' => 160,
             'settings.petty_cash.heads.active' => 161,
@@ -397,10 +398,10 @@ class Permission
             'settings.petty_cash.titles.edit' => 164,
             'settings.petty_cash.titles.active' => 165,
             'settings.petty_cash.titles.inactive' => 166,
-
-            'settings.auto_invoice_generation_and_due_date.index' => 171,
+			'settings.auto_invoice_generation_and_due_date.index' => 171,
             'settings.auto_invoice_generation_and_due_date.store' => 171,
-
+			'settings.debriefing_report_cut_off_time.index' => 175,
+            'settings.debriefing_report_cut_off_time.store' => 175,
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118,

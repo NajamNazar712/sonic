@@ -16,7 +16,7 @@
 
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search delivery Note Number">
+                            <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search Delivery Note Number">
                         </fieldset>
                     </div>
                     <div class="col-4">

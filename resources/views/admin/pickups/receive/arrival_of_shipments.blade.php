@@ -110,6 +110,12 @@
 
 	<script>
 		$(document).ready(function() {
+		    @if(session('errors'))
+				scan_sound(2);
+			@endif
+			@if(session('success'))
+				scan_sound(1);
+			@endif
 			var shipment_ids = [];
 
 			$('#add_shipment_form input.tracking_number').focus();
@@ -119,20 +125,20 @@
 				scrollX: true,
 				paging:false,
 				columns: [
-					{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-					{name: 'tracking_number', class: 'align-middle tracking_number'},
-					{name: 'receiving_sheet_no', class: 'align-middle receiving_sheet_no'},
-					{name: 'order_id', class: 'align-middle order_id'},
-					{name: 'destination', class: 'align-middle destination'},
-					{name: 'cod_amount', class: 'align-middle cod_amount'},
-					{name: 'estimated_weight', class: 'align-middle estimated_weight'},
-					{name: 'actual_weight', class: 'align-middle actual_weight'},
-					{name: 'remove', class: 'align-middle remove', sortable: false}
+					{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
+					{name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
+					{name: 'receiving_sheet_no', class: 'align-middle receiving_sheet_no', orderable: false, searchable: false},
+					{name: 'order_id', class: 'align-middle order_id', orderable: false, searchable: false},
+					{name: 'destination', class: 'align-middle destination', orderable: false, searchable: false},
+					{name: 'cod_amount', class: 'align-middle cod_amount', orderable: false, searchable: false},
+					{name: 'estimated_weight', class: 'align-middle estimated_weight', orderable: false, searchable: false},
+					{name: 'actual_weight', class: 'align-middle actual_weight', orderable: false, searchable: false},
+					{name: 'remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
-					var info = table.page.info();
-
-					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+					// var info = table.page.info();
+                    //
+					// $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -145,18 +151,18 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.remove')) {
-							$(td).appendTo($(search));
-						}
-						else {
-							var current = $(input).appendTo($(search)).on('change', function() {
-								column.search($(this).val(), false, false, true).draw();
-							}).wrap(td).after(icon);
-
-							if (column.search()) {
-								current.val(column.search());
-							}
-						}
+						// if ($(header).is('.serial_number') || $(header).is('.remove')) {
+						// 	$(td).appendTo($(search));
+						// }
+						// else {
+						// 	var current = $(input).appendTo($(search)).on('change', function() {
+						// 		column.search($(this).val(), false, false, true).draw();
+						// 	}).wrap(td).after(icon);
+						//
+						// 	if (column.search()) {
+						// 		current.val(column.search());
+						// 	}
+						// }
 					});
 
 					this.api().table().columns.adjust();
@@ -255,9 +261,11 @@
 								var index = $.inArray(id, shipment_ids);
 
 								if (index === -1) {
-									table.row.add([0, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight, remove_button]).node().id = data.details.id;
+                                    var rowNo = table.rows().count();
+                                    table.row.add([rowNo + 1, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight, remove_button]).node().id = data.details.id;
 									table.draw(false);
-
+                                    table.order([0, 'desc']).draw();
+                                    scan_sound(1);
 									shipment_ids.push(data.details.id);
 
 									$('#add_shipment_form button.add').prop('disabled', false);
@@ -269,7 +277,7 @@
 							}
 							else {
 								$('#add_shipment_form button.add').prop('disabled', false);
-
+                                scan_sound(2);
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 							}
 						});
