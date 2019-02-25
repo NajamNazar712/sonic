@@ -223,7 +223,7 @@
 				serverSide: true,
 				ajax: '{{ route('admin.finance.invoices.list') }}',
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[7, 'asc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'invoice_number_button', name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
