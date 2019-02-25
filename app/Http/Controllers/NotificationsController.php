@@ -6,6 +6,7 @@ use App\Http\Models\Admin\DeliveryNoteShipment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admins\AdminFinanceController;
 
 use App\Http\Models\Notification;
 use App\Http\Models\Shipper\User;
@@ -19,10 +20,13 @@ use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Dispute;
 use App\Http\Models\DonePayment;
 use App\Http\Models\City;
+use App\Http\Models\Invoice;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
+
+use Carbon\Carbon;
 
 use App\Mail\Notifications;
 
@@ -2340,6 +2344,156 @@ class NotificationsController extends Controller
               }
 
               self::email($subject, $body, $to);
+          }
+          else if ($id == 27) {
+            $shipper_fields = ['account_id' => 'id', 'company_name' => 'name'];
+
+            $invoice_fields = ['invoice_number' => 'invoice_number', 'billing_period_from_date' => 'billing_period_from_date', 'billing_period_to_date' => 'billing_period_to_date', 'due_date' => 'due_date'];
+
+            $invoice = Invoice::find($reference_1_id);
+
+            $to = array();
+
+            $shipper = $invoice->shipper;
+
+            $to[] = $shipper->email;
+
+            $to[] = $shipper->bank->billing_person_email;
+
+            foreach ($shipper_fields as $key => $field) {
+              if (strpos($subject, '[' . $key . ']') !== FALSE) {
+                if ($key == 'account_id') {
+                  $subject = str_replace('[' . $key . ']', str_pad($shipper[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $shipper[$field], $subject);
+                }
+              }
+
+              if (strpos($body, '[' . $key . ']') !== FALSE) {
+                if ($key == 'account_id') {
+                  $body = str_replace('[' . $key . ']', str_pad($shipper[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $shipper[$field], $body);
+                }
+              }
+            }
+
+            foreach ($invoice_fields as $key => $field) {
+              if (strpos($subject, '[' . $key . ']') !== FALSE) {
+                if ($key == 'billing_period_from_date' || $key == 'billing_period_to_date' || $key == 'due_date') {
+                  $subject = str_replace('[' . $key . ']', Carbon::parse($invoice[$field])->format('d/m/Y'), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $invoice[$field], $subject);
+                }
+              }
+
+              if (strpos($body, '[' . $key . ']') !== FALSE) {
+                if ($key == 'billing_period_from_date' || $key == 'billing_period_to_date' || $key == 'due_date') {
+                  $body = str_replace('[' . $key . ']', Carbon::parse($invoice[$field])->format('d/m/Y'), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $invoice[$field], $body);
+                }
+              }
+            }
+
+            if (strpos($subject, '[invoice]') !== FALSE) {
+              $subject = str_replace('[invoice]', '', $subject);
+            }
+
+            if (strpos($body, '[invoice]') !== FALSE) {
+              $invoice = AdminFinanceController::generate_invoice_print($reference_1_id, TRUE);
+
+              $body = str_replace('[invoice]', preg_replace('/\r|\n/', '', $invoice), $body);
+            }
+
+            $cc = array();
+
+            $general_admins = Admin::where('role_id', 2)->where('status', 1);
+
+            if ($general_admins->exists()) {
+              $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
+            }
+
+            self::email($subject, $body, $to, $cc);
+          }
+          else if ($id == 28) {
+            $shipper_fields = ['account_id' => 'id', 'company_name' => 'name'];
+
+            $invoice_fields = ['invoice_number' => 'invoice_number', 'billing_period_from_date' => 'billing_period_from_date', 'billing_period_to_date' => 'billing_period_to_date', 'due_date' => 'due_date'];
+
+            $invoice = Invoice::find($reference_1_id);
+
+            $to = array();
+
+            $shipper = $invoice->shipper;
+
+            $to[] = $shipper->email;
+
+            $to[] = $shipper->bank->billing_person_email;
+
+            foreach ($shipper_fields as $key => $field) {
+              if (strpos($subject, '[' . $key . ']') !== FALSE) {
+                if ($key == 'account_id') {
+                  $subject = str_replace('[' . $key . ']', str_pad($shipper[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $shipper[$field], $subject);
+                }
+              }
+
+              if (strpos($body, '[' . $key . ']') !== FALSE) {
+                if ($key == 'account_id') {
+                  $body = str_replace('[' . $key . ']', str_pad($shipper[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $shipper[$field], $body);
+                }
+              }
+            }
+
+            foreach ($invoice_fields as $key => $field) {
+              if (strpos($subject, '[' . $key . ']') !== FALSE) {
+                if ($key == 'billing_period_from_date' || $key == 'billing_period_to_date' || $key == 'due_date') {
+                  $subject = str_replace('[' . $key . ']', Carbon::parse($invoice[$field])->format('d/m/Y'), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $invoice[$field], $subject);
+                }
+              }
+
+              if (strpos($body, '[' . $key . ']') !== FALSE) {
+                if ($key == 'billing_period_from_date' || $key == 'billing_period_to_date' || $key == 'due_date') {
+                  $body = str_replace('[' . $key . ']', Carbon::parse($invoice[$field])->format('d/m/Y'), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $invoice[$field], $body);
+                }
+              }
+            }
+
+            if (strpos($subject, '[invoice]') !== FALSE) {
+              $subject = str_replace('[invoice]', '', $subject);
+            }
+
+            if (strpos($body, '[invoice]') !== FALSE) {
+              $invoice = AdminFinanceController::generate_invoice_print($reference_1_id, TRUE);
+
+              $body = str_replace('[invoice]', preg_replace('/\r|\n/', '', $invoice), $body);
+            }
+
+            $cc = array();
+
+            $general_admins = Admin::where('role_id', 2)->where('status', 1);
+
+            if ($general_admins->exists()) {
+              $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
+            }
+
+            self::email($subject, $body, $to, $cc);
           }
         }
       }
