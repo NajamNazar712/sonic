@@ -18,7 +18,8 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\ReturnConfirmEmail',
         '\App\Console\Commands\ShipmentReAttemptEmail',
         '\App\Console\Commands\AutoDisableShipperAccount',
-        '\App\Console\Commands\DailyPickupSalesEmail'
+        '\App\Console\Commands\DailyPickupSalesEmail',
+        '\App\Console\Commands\GenerateInvoice'
     ];
 
     /**
@@ -43,6 +44,16 @@ class Kernel extends ConsoleKernel
             $time = $settings->setting_value . ':00';
 
             $schedule->command('email:dailypickupsalesreport')->dailyAt($time)->runInBackground();
+        }
+
+        $settings = GlobalSettings::where('type', 'auto_invoice_generation_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $time = $settings->setting_value . ':00';
+
+            $schedule->command('invoice:generate')->dailyAt($time)->runInBackground();
         }
     }
 

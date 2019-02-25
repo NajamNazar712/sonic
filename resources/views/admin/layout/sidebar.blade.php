@@ -234,18 +234,8 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([120, 121, 122], session('permissions'))) !== 0)
-                            <li class=" nav-item"><a href="#"><span class="menu-title">Invoices</span></a>
-                                <ul class="menu-content">
-                                    @if (session('role_id') == 1 || in_array(120, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.finance.generate_invoices.index') }}">Generate</a></li>
-                                    @endif
-
-                                    @if (session('role_id') == 1 || in_array(122, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.finance.invoices_history.index') }}">History</a></li>
-                                    @endif
-                                </ul>
-                            </li>
+                        @if (session('role_id') == 1 || in_array(120, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Invoices</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || count(array_intersect([145, 146, 147], session('permissions'))) !== 0)
