@@ -680,6 +680,9 @@
                                                 </div>
                                                 <div class="col-1"></div>
                                             </div>
+                                            @php
+                                                $index_row = 0;
+                                            @endphp
                                             @foreach($weight[2] as $index => $olweight)
                                                 @if($olweight->delivery_type_id == 2)
                                                 <div class="row ol_hub_weight_row">

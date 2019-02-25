@@ -79,7 +79,7 @@ class AdminZonalManagementController extends Controller
             $zone_class_city->zone_id = $zone->id;
             $zone_class_city->city_id = $city_id;
             $zone_class_city->class = $class;
-            $zone_class_city->account_type_id = 1;
+            $zone_class_city->zone_classification_id = 1;
 
             $zone_class_city->save();
         }
@@ -90,7 +90,7 @@ class AdminZonalManagementController extends Controller
             $zone_class_city_cor->zone_id = $zone->id;
             $zone_class_city_cor->city_id = $city_id_cor;
             $zone_class_city_cor->class = $class_cor;
-            $zone_class_city_cor->account_type_id = 2;
+            $zone_class_city_cor->zone_classification_id = 2;
 
             $zone_class_city_cor->save();
         }
@@ -101,8 +101,8 @@ class AdminZonalManagementController extends Controller
     public function update_index($id) {
         $cities = City::where('status', 1)->get();
         $zone = Zone::find($id);
-        $zone_class_cities = ZoneClassCity::where(['zone_id' => $id, 'account_type_id' => 1])->pluck('class', 'city_id');
-        $zone_class_cities_cor = ZoneClassCity::where(['zone_id' => $id, 'account_type_id' => 2])->pluck('class', 'city_id');
+        $zone_class_cities = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 1])->pluck('class', 'city_id');
+        $zone_class_cities_cor = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 2])->pluck('class', 'city_id');
 
         return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities, 'zone_class_cities_cor' => $zone_class_cities_cor]);
     }
@@ -116,8 +116,8 @@ class AdminZonalManagementController extends Controller
         $zone->save();
 
         foreach ($request->city_class as $city_id => $class) {
-            $zone_class_city = ZoneClassCity::where(['zone_id' => $zone->id, 'city_id' => $city_id, 'account_type_id' => 1]);
-            if ($zone_class_city->account_type_id = 1) {
+            $zone_class_city = ZoneClassCity::where(['zone_id' => $zone->id, 'city_id' => $city_id, 'zone_classification_id' => 1]);
+            if ($zone_class_city->zone_classification_id = 1) {
                 if ($zone_class_city->exists()) {
                     $zone_class_city = $zone_class_city->first();
                 } else {
@@ -134,9 +134,9 @@ class AdminZonalManagementController extends Controller
         }
 
         foreach ($request->city_class_cor as $city_id_cor => $class_cor) {
-            $zone_class_city_cor = ZoneClassCity::where(['zone_id' => $zone->id, 'city_id' => $city_id_cor, 'account_type_id' => 2]);
+            $zone_class_city_cor = ZoneClassCity::where(['zone_id' => $zone->id, 'city_id' => $city_id_cor, 'zone_classification_id' => 2]);
 
-            if($zone_class_city_cor->account_type_id = 2){
+            if($zone_class_city_cor->zone_classification_id = 2){
                 if ($zone_class_city_cor->exists()) {
                     $zone_class_city_cor = $zone_class_city_cor->first();
                 }

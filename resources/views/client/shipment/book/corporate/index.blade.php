@@ -10,6 +10,7 @@
             <div class="content-body">
                 <h1 class="mb-1">
                     Book a Shipment (Corporate)
+{{--                    @php(dd($min_chargeable_weight[0]['id']))--}}
                     <span id="selected_service_type_name">{{ (Session::has('service_type_name')) ? ('(' . Session::get('service_type_name') . ')') : '' }}</span>
                     <button type="button" class="btn btn-primary d-block mt-1 ml-auto d-sm-block mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
                 </h1>
@@ -270,7 +271,7 @@
                                         <h4 class="form-section mb-2 text-center">Shipping Information</h4>
 
                                         <div class="form-group input-group mb-0">
-                                            <input type="text" name="estimated_weight" class="form-control weight" placeholder="Estimated Weight*" data-rule-required="true" data-msg-required="Estimated Weight is required">
+                                            <input type="text" name="estimated_weight" id="estimated_weight" class="form-control weight" placeholder="Estimated Weight*" data-rule-required="true" data-msg-required="Estimated Weight is required">
 
                                             <div class="input-group-append">
                                                 <span class="input-group-text">kg</span>
@@ -475,7 +476,7 @@
 
                 if (consignee_city_id) {
                     $.ajax({
-                        url: '{!! route('cod.shipment.book.shipping_modes') !!}',
+                        url: '{!! route('cod.shipment.book.corporate_shipping_modes') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
@@ -860,45 +861,113 @@
                     }
                     // console.log(present.length);
                     // console.log(present);
-                    if(present.length > 0){
-                        swal({
-                            title: 'Warning',
-                            text: 'Potential Non Service Area: ' + present,
-                            icon: 'info',
-                            buttons:{
-                                confirm: {
-                                    text: 'Ok',
-                                    value: false,
-                                    visible: true,
-                                    closeModal: true
-                                }},
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        }).then(function() {
+                    $.ajax({
+                        url: '{!! route('cod.shipment.book.corporate_min_chargeable_weight') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'shipping_mode': $('#shipping_mode').val(),
+                            'delivery_type': $('#delivery_type').val(),
+                            'estimated_weight': $('#estimated_weight').val()
+                        }
+                    }).done(function(data) {
+                        if(data.status == 1){
                             swal({
-                                title: 'Please Wait!',
-                                text: 'Your shipment is being booked!',
+                                title: 'Warning',
+                                text: 'Dear Customer, this shipment will be charged to a minimum of ' + data.min + ' kg, based on your mode of shipping and delivery type',
                                 icon: 'info',
-                                buttons: false,
+                                buttons:{
+                                    confirm: {
+                                        text: 'Ok',
+                                        value: false,
+                                        visible: true,
+                                        closeModal: true
+                                    }},
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
+                            }).then(function() {
+                                if(present.length > 0){
+                                    swal({
+                                        title: 'Warning',
+                                        text: 'Potential Non Service Area: ' + present,
+                                        icon: 'info',
+                                        buttons:{
+                                            confirm: {
+                                                text: 'Ok',
+                                                value: false,
+                                                visible: true,
+                                                closeModal: true
+                                            }},
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    }).then(function() {
+                                        swal({
+                                            title: 'Please Wait!',
+                                            text: 'Your shipment is being booked!',
+                                            icon: 'info',
+                                            buttons: false,
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false
+                                        });
+                                        form.submit();
+                                    });
+                                }
+                                else {
+                                    swal({
+                                        title: 'Please Wait!',
+                                        text: 'Your shipment is being booked!',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+
+                                    form.submit();
+                                }
                             });
+                        }
+                        else {
+                            if(present.length > 0){
+                                swal({
+                                    title: 'Warning',
+                                    text: 'Potential Non Service Area: ' + present,
+                                    icon: 'info',
+                                    buttons:{
+                                        confirm: {
+                                            text: 'Ok',
+                                            value: false,
+                                            visible: true,
+                                            closeModal: true
+                                        }},
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                }).then(function() {
+                                    swal({
+                                        title: 'Please Wait!',
+                                        text: 'Your shipment is being booked!',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+                                    form.submit();
+                                });
+                            }
+                            else {
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Your shipment is being booked!',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
 
-                            form.submit();
-                        });
-                    }
-                    else {
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Your shipment is being booked!',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
+                                form.submit();
+                            }
+                        }
+                    });
 
-                        form.submit();
-                    }
                 }
             });
 

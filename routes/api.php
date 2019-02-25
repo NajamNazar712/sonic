@@ -19,6 +19,7 @@ Route::middleware('APIToken')->name('api.')->group(function () {
 
 	Route::prefix('shipment')->name('shipment.')->group(function() {
 		Route::post('book', 'APIController@shipment_book')->name('book');
+        Route::post('corporate_book', 'APIController@corporate_shipment_book')->name('corporate_book');
 		Route::get('status', 'APIController@shipment_status')->name('status');
 		Route::get('track', 'APIController@shipment_track')->name('track');
 		Route::get('charges', 'APIController@shipment_charges')->name('charges');
