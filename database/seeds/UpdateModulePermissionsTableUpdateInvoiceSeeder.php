@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Models\Admin\ModulePermission;
+
 use Illuminate\Database\Seeder;
 
 class UpdateModulePermissionsTableUpdateInvoiceSeeder extends Seeder

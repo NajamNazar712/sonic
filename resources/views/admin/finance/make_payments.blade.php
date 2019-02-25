@@ -374,6 +374,38 @@
 							$('#make_payments').modal('show');
 						}
 					},
+					{
+						text: 'Switch to Invoices',
+						className: 'btn btn-primary switch_to_invoices',
+						enabled: false,
+						action: function (e, dt, node, config) {
+							$.ajax({
+								url: '{!! route('admin.finance.make_payments.switch_to_invoice') !!}',
+								method: 'POST',
+								data: {
+									'_token': '{{ csrf_token() }}',
+									'ids': selected_rows
+								}
+							})
+							.done(function(data) {
+								if (data.status == 0) {
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
+
+								table.rows().deselect();
+
+								selected_rows = [];
+
+								table.button('.make_payment').disable();
+								table.button('.switch_to_invoices').disable();
+
+								table.draw('false');
+							});
+						}
+					},
                     {
                         extend: 'excel',
                         title: 'Make Payments',
@@ -401,6 +433,7 @@
 	                                }
 
 	                                table.button('.make_payment').enable();
+	                                table.button('.switch_to_invoices').enable();
 	                            }
 	                        });
 	                    }
@@ -427,6 +460,7 @@
 
 	                            if (selected_rows.length == 0) {
 	                                table.button('.make_payment').disable();
+	                                table.button('.switch_to_invoices').disable();
 	                            }
 	                          }
 	                        });
@@ -755,9 +789,11 @@
 
 				if (selected_rows.length > 0) {
 					table.button('.make_payment').enable();
+					table.button('.switch_to_invoices').enable();
 				}
 				else {
 					table.button('.make_payment').disable();
+					table.button('.switch_to_invoices').disable();
 				}
 			});
 
@@ -887,6 +923,7 @@
 					table.rows().deselect();
 
 					table.button('.make_payment').disable();
+					table.button('.switch_to_invoices').disable();
 
 					selected_rows.push(id);
 

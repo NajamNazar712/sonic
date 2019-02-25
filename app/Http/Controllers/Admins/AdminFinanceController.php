@@ -2327,6 +2327,178 @@ class AdminFinanceController extends Controller
         return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
     }
 
+    public function make_payments_switch_to_invoice(Request $request) {
+        $pending_payment_ids = $request->pending_payment_ids;
+
+        if ($pending_payment_ids) {
+            $settings = GlobalSettings::where('type', 'due_date_days');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+
+                $due_date_days = $settings->setting_value;
+            }
+            else {
+                $due_date_days = 7;
+            }
+
+            $current_date = Carbon::now();
+
+            foreach ($pending_payment_ids as $pending_payment_id) {
+                $pending_payment = PendingPayment::find($pending_payment_id);
+
+                $invoice = new Invoice();
+
+                $invoice->user_id = $pending_payment->user_id;
+                $invoice->billing_period_from_date = $current_date->subDays(7)->startOfDay()->toDateString();
+                $invoice->billing_period_to_date = $current_date->startOfDay()->toDateString();
+                $invoice->due_date = $current_date->addDays($due_date_days)->startOfDay()->toDateString();
+                $invoice->status_id = 1;
+
+                $invoice->save();
+
+                $invoice_id = $invoice->id;
+
+                $invoice_number = $pending_payment->user_id . str_pad($invoice_id, 6, '0', STR_PAD_LEFT);
+
+                $total_shipments = 0;
+                $total_delivered_shipments = 0;
+                $total_returned_shipments = 0;
+                $total_adjusted_shipments = 0;
+                $total_charges = 0;
+                $total_gst = 0;
+                $total_invoice_amount = 0;
+
+                foreach ($pending_payment->pending_payment_shipments as $pending_payment_shipment) {
+                    if ($pending_payment_shipment->type != 2 && ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0)) {
+                        $invoice_shipment = new InvoiceShipment();
+
+                        $invoice_shipment->invoice_id = $invoice_id;
+                        $invoice_shipment->shipment_id = $pending_payment_shipment->shipment_id;
+                        $invoice_shipment->type = $pending_payment_shipment->type;
+                        $invoice_shipment->charges = $pending_payment_shipment->charges;
+                        $invoice_shipment->gst = $pending_payment_shipment->gst;
+
+                        if ($pending_payment_shipment->type == 0) {
+                            $invoice_shipment->invoice_amount = $pending_payment_shipment->charges + $pending_payment_shipment->gst;
+
+                            $invoice_shipment->save();
+
+                            if ($pending_payment_shipment->amount == 0) {
+                                $pending_payment_shipment->delete();
+
+                                $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
+                                $pending_payment->delivered_shipments = $pending_payment->delivered_shipments - 1;
+
+                                $pending_payment->save();
+                            }
+                            else {
+                                $pending_payment_shipment->charges = 0;
+                                $pending_payment_shipment->gst = 0;
+                                $pending_payment_shipment->payable = $pending_payment_shipment->payable + $pending_payment_shipment->charges + $pending_payment_shipment->gst;
+
+                                $pending_payment_shipment->save();
+                            }
+                        }
+                        else if ($pending_payment_shipment->type == 1) {
+                            $invoice_shipment->invoice_amount = $pending_payment_shipment->charges + $pending_payment_shipment->gst;
+
+                            $invoice_shipment->save();
+
+                            $pending_payment_shipment->delete();
+
+                            $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
+                                $pending_payment->returned_shipments = $pending_payment->returned_shipments - 1;
+
+                            $pending_payment->save();
+                        }
+                        else {
+                            $invoice_shipment->invoice_amount = $pending_payment_shipment->payable;
+
+                            $invoice_shipment->save();
+
+                            $pending_payment_shipment->delete();
+
+                            $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
+                                $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments - 1;
+
+                            $pending_payment->save();
+                        }
+
+                        $invoice_shipment->save();
+
+                        if ($pending_payment_shipment->type == 0) {
+                            if ($pending_payment_shipment->amount == 0) {
+                                $pending_payment_shipment->delete();
+
+                                $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
+                                $pending_payment->delivered_shipments = $pending_payment->delivered_shipments - 1;
+
+                                $pending_payment->save();
+                            }
+                            else {
+                                $pending_payment_shipment->charges = 0;
+                                $pending_payment_shipment->gst = 0;
+                                $pending_payment_shipment->payable = $pending_payment_shipment->payable + $pending_payment_shipment->charges + $pending_payment_shipment->gst;
+
+                                $pending_payment_shipment->save();
+                            }
+                        }
+                        else if ($pending_payment_shipment->type == 1) {
+                            $pending_payment_shipment->delete();
+
+                            $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
+                                $pending_payment->returned_shipments = $pending_payment->returned_shipments - 1;
+
+                            $pending_payment->save();
+                        }
+                        else {
+                            if ($pending_payment_shipment->payable >= 0) {
+                                $pending_payment_shipment->charges = 0;
+                                $pending_payment_shipment->gst = 0;
+
+                                $pending_payment_shipment->save();
+                            }
+                            else {}
+                        }
+
+                        $total_shipments++;
+
+                        if ($pending_payment_shipment->type == 0) {
+                            $total_delivered_shipments++;
+                        }
+                        else if ($pending_payment_shipment->type == 1) {
+                            $total_returned_shipments++;
+                        }
+                        else {
+                            $total_adjusted_shipments++;
+                        }
+
+                        $total_charges = $total_charges + $pending_payment_shipment->charges;
+                        $total_gst = $total_gst + $pending_payment_shipment->gst;
+                        $total_invoice_amount = $total_invoice_amount + $$pending_payment_shipment->charges + $pending_payment_shipment->gst;
+                    }
+                }
+
+                $invoice->invoice_number = $invoice_number;
+                $invoice->total_shipments = $total_shipments;
+                $invoice->total_delivered_shipments = $total_delivered_shipments;
+                $invoice->total_returned_shipments = $total_returned_shipments;
+                $invoice->total_adjusted_shipments = $total_adjusted_shipments;
+                $invoice->total_charges = $total_charges;
+                $invoice->total_gst = $total_gst;
+                $invoice->total_invoice_amount = $total_invoice_amount;
+
+                $invoice->save();
+            }
+
+            return ['status' => 0, 'success' => 'Pending Payment(s) has been swithced to Invoice(s)'];
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Pending Payment Selected'];
+        }
+    }
+
     static public function done_payment($shipment_id, $type) {
         $shipment = Shipment::find($shipment_id);
 
