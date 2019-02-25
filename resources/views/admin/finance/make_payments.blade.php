@@ -17,11 +17,22 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<form id="tracking_number_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-								<div class="form-group">
-									<input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
-								</div>
-							</form>
+							<div class="text-center">
+								<form id="tracking_number_search_form" class="d-inline-block form-inline mb-1 justify-content-center" novalidate="novalidate">
+									<div class="form-group">
+										<input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
+									</div>
+								</form>
+
+								<form id="positive_negative_filter_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate">
+									<div class="form-group">
+										<select name="positive_negative_filter" class="select2 positive_negative_filter">
+											<option value="1">Positive</option>
+											<option value="2">Negative</option>
+										</select>
+									</div>
+								</form>
+							</div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
@@ -248,6 +259,15 @@
 			var selected_rows_shipments = [];
 
 			var initial_total_hold = 0;
+
+			$('#positive_negative_filter_form select.positive_negative_filter').prepend('<option value="" selected></option>').select2({
+                placeholder: 'Select Positive/Negative Filter',
+                width:'100%',
+                allowClear: true
+            }).bind('change', function() {
+				table.draw(false);
+			});
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -256,7 +276,8 @@
                         url: '{{ route('admin.finance.make_payments.list') }}',
                         data: {
                             'page': 'all',
-                            'tracking_number': $('#tracking_number_search_form #tracking_number').val()
+                            'tracking_number': $('#tracking_number_search_form #tracking_number').val(),
+                            'positive_negative_filter': $('#positive_negative_filter_form select.positive_negative_filter').val()
                         },
                         success: function (result) {
                             head = [];
@@ -436,6 +457,7 @@
 					url: '{{ route('admin.finance.make_payments.list') }}',
 					data: function (d) {
 						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
+						d.positive_negative_filter = $('#positive_negative_filter_form select.positive_negative_filter').val();
 					}
 				},
 				rowId: 'id',
