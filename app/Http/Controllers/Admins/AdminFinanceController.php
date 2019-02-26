@@ -3596,15 +3596,15 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="text-left">Replacement Charges</td>
-                          <td class="text-right">' . number_format($total_return_charges) . '</td>
+                          <td class="text-right">' . number_format($total_replacement_charges) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">Return Charges</td>
-                          <td class="text-right">' . number_format($total_fuel_surcharge) . '</td>
+                          <td class="text-right">' . number_format($total_return_charges) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">Fuel Surcharge</td>
-                          <td class="text-right">' . number_format($total_replacement_charges) . '</td>
+                          <td class="text-right">' . number_format($total_fuel_surcharge) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">Packaging Charges</td>
