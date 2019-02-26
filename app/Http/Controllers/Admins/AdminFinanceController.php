@@ -3535,7 +3535,7 @@ class AdminFinanceController extends Controller
                           <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->insurance_charges) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->replacement_charges) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->return_charges) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type == 1) ? number_format($shipment->return_charges) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge) : '0') . '</td>
                           <td>' . (($shipment->packaging_material_request == 1 && $invoice_shipment->type == 0) ? number_format($shipment->packaging_material_charges) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->adjustment_charges) : '0') . '</td>
