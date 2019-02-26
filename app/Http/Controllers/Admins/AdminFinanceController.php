@@ -3312,7 +3312,7 @@ class AdminFinanceController extends Controller
             }
 
             if ($generate) {
-                $pending_invoice_shipments = PendingInvoiceShipment::whereHas('shipment', function ($query) {
+                $pending_invoice_shipments = PendingInvoiceShipment::whereHas('shipment', function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
                 });
 
