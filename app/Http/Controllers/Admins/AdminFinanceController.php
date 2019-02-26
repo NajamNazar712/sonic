@@ -3339,7 +3339,7 @@ class AdminFinanceController extends Controller
                     $total_gst = 0;
                     $total_invoice_amount = 0;
 
-                    foreach ($pending_invoice_shipments as $pending_invoice_shipment) {
+                    foreach ($pending_invoice_shipments->get() as $pending_invoice_shipment) {
                         $invoice_shipment = new InvoiceShipment();
 
                         $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
