@@ -79,23 +79,23 @@
                 scrollX: true,
                 "autoWidth": false,
                 paging:false,
-                ordering:false,
+
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {name: 'tracking_number', class: 'align-middle tracking_number'},
-                    {name: 'shipper_name', class: 'align-middle shipper_name form-group'},
-                    {name: 'origin', class: 'align-middle origin form-group'},
-                    {name: 'destination', class: 'align-middle destination form-group'},
-                    {name: 'hub', class: 'align-middle hub form-group'},
-                    {name: 'amount', class: 'align-middle amount'},
-                    {name: 'mode', class: 'align-middle mode'},
-                    {name: 'service_type', class: 'align-middle service_type'},
-                    {name: 'action', class: 'align-middle action'},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
+                    {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false},
+                    {name: 'shipper_name', class: 'align-middle shipper_name form-group', orderable: false},
+                    {name: 'origin', class: 'align-middle origin form-group', orderable: false},
+                    {name: 'destination', class: 'align-middle destination form-group', orderable: false},
+                    {name: 'hub', class: 'align-middle hub form-group', orderable: false},
+                    {name: 'amount', class: 'align-middle amount', orderable: false},
+                    {name: 'mode', class: 'align-middle mode', orderable: false},
+                    {name: 'service_type', class: 'align-middle service_type', orderable: false},
+                    {name: 'action', class: 'align-middle action', orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    // var info = table.page.info();
+                    //
+                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
 
@@ -139,10 +139,13 @@
                                     var index = $.inArray(id, shipment_ids);
 
                                     if (index === -1) {
+                                        var rowNo = table.rows().count();
 
                                         var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
-                                        table.row.add([0, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount,data.details.mode,data.details.service_type, action]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount,data.details.mode,data.details.service_type, action]).node().id = data.details.id;
                                         table.draw(false);
+                                        scan_sound(1);
+                                        table.order([0, 'desc']).draw();
 
                                         shipment_ids.push(data.details.id);
 
@@ -155,14 +158,14 @@
                                 }
                                 else {
                                     $('#lost_shipment_form button.add').prop('disabled', false);
-
+                                    scan_sound(2);
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             });
                     }
                     else {
                         $('#lost_shipment_form button.add').prop('disabled', false);
-
+                        scan_sound(2);
                         toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 

@@ -192,25 +192,25 @@
             var shipment_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
-                "autoWidth": false,
+                autoWidth : false,
                 scrollX: true,
                 paging:false,
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {name: 'tracking_number', class: 'align-middle tracking_number'},
-                    {name: 'destination', class: 'align-middle destination'},
-                    {name: 'consignee_name', class: 'align-middle consignee_name'},
-                    {name: 'phone', class: 'align-middle phone'},
-                    {name: 'address', class: 'align-middle address'},
-                    {name: 'amount', class: 'align-middle amount'},
-                    {name: 'service_type', class: 'align-middle service_type'},
-                    {name: 'status', class: 'align-middle status'},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
+                    {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false},
+                    {name: 'destination', class: 'align-middle destination', orderable: false},
+                    {name: 'consignee_name', class: 'align-middle consignee_name', orderable: false},
+                    {name: 'phone', class: 'align-middle phone', orderable: false},
+                    {name: 'address', class: 'align-middle address', orderable: false},
+                    {name: 'amount', class: 'align-middle amount', orderable: false},
+                    {name: 'service_type', class: 'align-middle service_type', orderable: false},
+                    {name: 'status', class: 'align-middle status', orderable: false},
                     {name: 'action', class: 'align-middle action',orderable: false,searchable:false}
                 ],
                 rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    // var info = table.page.info();
+                    //
+                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -255,7 +255,7 @@
                         }).done(function (data) {
 
                             if (data.status == 1) {
-
+                                scan_sound(2);
                                 toastr.error(data.error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
@@ -265,6 +265,7 @@
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
                                 table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
                                 table.draw(false);
+                                scan_sound(1);
                                 shipment_ids.push(data.shId);
                                 $('#hub_id').val(data.hub);
                             }
@@ -287,7 +288,7 @@
                             }).done(function (data) {
 
                                 if (data.status == 1) {
-
+                                    scan_sound(2);
                                     toastr.error(data.error, 'Error!', {
                                         positionClass: 'toast-top-center',
                                         containerId: 'toast-top-center'
@@ -297,7 +298,9 @@
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
                                     table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
                                     table.draw(false);
+                                    scan_sound(1);
                                     shipment_ids.push(data.shId);
+                                    table.order([0, 'desc']).draw();
                                 }
 
                                 scan.val('');
@@ -305,6 +308,7 @@
                                 scan.focus();
                             });
                         } else {
+                            scan_sound(2);
                             var error = 'Tracking Number already scanned!';
                             toastr.error(error, 'Error!', {
                                 positionClass: 'toast-bottom-center',

@@ -9,6 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
+					{{--					@php(dd($user->shipping[0]['id']))--}}
 					Book a Shipment
 					<span id="selected_service_type_name">{{ (Session::has('service_type_name')) ? ('(' . Session::get('service_type_name') . ')') : '' }}</span>
 					<button type="button" class="btn btn-primary d-block mt-1 ml-auto d-sm-block mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
@@ -38,7 +39,6 @@
 
 										<div class="form-group">
 											<select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
-												<option value="0">New</option>
 
 												@php ($default_pickup_address = FALSE)
 
@@ -47,18 +47,20 @@
 														@if ($shipping_information['default_address'] == 1)
 															@php ($default_pickup_address = TRUE)
 
-															<option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+															<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" selected >{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
 														@else
 															<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
 														@endif
 													@endif
 												@endforeach
+												<option value="0">New</option>
 											</select>
 										</div>
 
 										<div id="new_pickup_address" class="d-none">
 											<div class="form-group">
 												<textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
+												<input type="checkbox" name="make_default_address" value="1">Make default address<br>
 											</div>
 
 											<div class="form-group">
@@ -104,7 +106,7 @@
 										</div>
 
 										<div class="form-group">
-											<textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
+											<textarea id="consignee_address" name="consignee_address" class="form-control" rows="6" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
 										</div>
 
 										<div class="form-group">
@@ -385,33 +387,33 @@
 		$(document).ready(function() {
 
 			@if (session('print'))
-				$.ajax({
-					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
-					method: 'POST',
-					data: {
-						'_token': '{{ csrf_token() }}',
-						'ids[]': '{{ session('print') }}',
-						'twice': true
-					}
-				})
-				.done(function(data) {
-					var tab = window.open('', '_blank');
+			$.ajax({
+				url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+				method: 'POST',
+				data: {
+					'_token': '{{ csrf_token() }}',
+					'ids[]': '{{ session('print') }}',
+					'twice': true
+				}
+			})
+					.done(function(data) {
+						var tab = window.open('', '_blank');
 
-					if(!tab) {
-						swal({
-							title: 'Popup Blocker Enabled!',
-							text: 'Please add this site to your exception list.',
-							icon: 'error',
-							closeOnClickOutside: false,
-							closeOnEsc: false
-						});
-					}
-					else {
-						tab.document.write(data);
-						tab.document.close();
-						tab.focus();
-					}
-				});
+						if(!tab) {
+							swal({
+								title: 'Popup Blocker Enabled!',
+								text: 'Please add this site to your exception list.',
+								icon: 'error',
+								closeOnClickOutside: false,
+								closeOnEsc: false
+							});
+						}
+						else {
+							tab.document.write(data);
+							tab.document.close();
+							tab.focus();
+						}
+					});
 			@endif
 
 			function shipping_mode_same_day(pickup_city, consignee_city) {
@@ -498,45 +500,45 @@
 							'consignee_city_id': consignee_city_id
 						}
 					})
-					.done(function(data) {
-						$('#shipping_mode').html('').select2('destroy');
+							.done(function(data) {
+								$('#shipping_mode').html('').select2('destroy');
 
-						if (data.status == 0) {
-							$.each(data.shipping_modes, function (index, shipping_mode) {
-								$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '">' + shipping_mode['mode'] + '</option>');
+								if (data.status == 0) {
+									$.each(data.shipping_modes, function (index, shipping_mode) {
+										$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '">' + shipping_mode['mode'] + '</option>');
+									});
+
+									present = true;
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+									present = false;
+								}
+
+								$('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+									width: '100%',
+									placeholder: 'Mode of Shipping*'
+								}).bind('change', function() {
+									if ($(this).hasClass('danger')) {
+										$(this).valid();
+									}
+
+									if (this.value == 4) {
+										$('#shipping_same-day').removeClass('d-none');
+									}
+									else {
+										$('#shipping_same-day').addClass('d-none');
+									}
+								});
+
+								if (present) {
+									$('#shipping_mode').prop('disabled', false);
+								}
+								else {
+									$('#shipping_mode').prop('disabled', true);
+								}
 							});
-
-							present = true;
-						}
-						else {
-							toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-							present = false;
-						}
-
-						$('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-							width: '100%',
-							placeholder: 'Mode of Shipping*'
-						}).bind('change', function() {
-							if ($(this).hasClass('danger')) {
-								$(this).valid();
-							}
-
-							if (this.value == 4) {
-								$('#shipping_same-day').removeClass('d-none');
-							}
-							else {
-								$('#shipping_same-day').addClass('d-none');
-							}
-						});
-
-						if (present) {
-							$('#shipping_mode').prop('disabled', false);
-						}
-						else {
-							$('#shipping_mode').prop('disabled', true);
-						}
-					});
 				}
 			}
 
@@ -554,19 +556,19 @@
 			var service_type = '';
 
 			@if (!Session::has('service_type_id'))
-				$('#select_service_type').modal('show');
+			$('#select_service_type').modal('show');
 			@else
-				service_type = '{{ Session::get('service_type_id') }}';
+					service_type = '{{ Session::get('service_type_id') }}';
 
-				if (service_type == 2) {
-					$('#replacement').removeClass('d-none');
-				}
-				if (service_type == 3) {
-					$('#regular').addClass('d-none');
-					$('#try_and_buy').removeClass('d-none');
-				}
+			if (service_type == 2) {
+				$('#replacement').removeClass('d-none');
+			}
+			if (service_type == 3) {
+				$('#regular').addClass('d-none');
+				$('#try_and_buy').removeClass('d-none');
+			}
 
-				$('#select_service_type form #service_type').val(service_type).trigger('change');
+			$('#select_service_type form #service_type').val(service_type).trigger('change');
 			@endif
 
 			$('#select_service_type form').bind('submit', function(e) {
@@ -608,10 +610,11 @@
 				}
 			});
 
+			{{--console.log(@json($user->shipping[0]['id']));--}}
 
-			@if (!$default_pickup_address)
-				$('#pickup_address').prepend('<option value="" selected="selected"></option>');
-			@endif
+			{{--@if (!$default_pickup_address)--}}
+			{{--$('#pickup_address').prepend('<option value="" selected="selected"></option>');--}}
+			{{--@endif--}}
 
 			$('#pickup_address').select2({
 				width: '100%',
@@ -841,7 +844,7 @@
 				$(this).valid();
 			});
 
-			$('#payment_mode').prepend('<option value="" selected="selected"></option>').select2({
+			$('#payment_mode').select2({
 				width: '100%',
 				placeholder: 'Mode of Payment*'
 			}).bind('change', function() {
@@ -878,26 +881,26 @@
 							text: 'Potential Non Service Area: ' + present,
 							icon: 'info',
 							buttons:{
-							confirm: {
+								confirm: {
 									text: 'Ok',
 									value: false,
 									visible: true,
 									closeModal: true
-						}},
+								}},
 							closeOnClickOutside: false,
 							closeOnEsc: false
 						}).then(function() {
-										swal({
-											title: 'Please Wait!',
-											text: 'Your shipment is being booked!',
-											icon: 'info',
-											buttons: false,
-											closeOnClickOutside: false,
-											closeOnEsc: false
-										});
+							swal({
+								title: 'Please Wait!',
+								text: 'Your shipment is being booked!',
+								icon: 'info',
+								buttons: false,
+								closeOnClickOutside: false,
+								closeOnEsc: false
+							});
 
-										form.submit();
-								});
+							form.submit();
+						});
 					}
 					else {
 						swal({

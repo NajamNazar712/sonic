@@ -7,6 +7,7 @@
 <!-- BEGIN VENDOR JS-->
 <script src="{{asset('app-assets/vendors/js/vendors.min.js')}}" type="text/javascript"></script>
 <!-- BEGIN VENDOR JS-->
+<script src="{{asset('js/main.js')}}" type="text/javascript"></script>
 {{--This needs to be moved--}}
 <script src="{{asset('app-assets/vendors/js/pickers/dateTime/moment-with-locales.min.js')}}" type="text/javascript"></script>
 {{--This needs to be moved--}}

@@ -67,14 +67,14 @@
                         <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Return Confirm Date</th>
+                        <th class="border-primary border-darken-1">Return Confirm Aging</th>
                         <th class="border-primary border-darken-1">Cargo No.</th>
                         <th class="border-primary border-darken-1">Cargo Creation Date</th>
                         <th class="border-primary border-darken-1">Dispatching Aging</th>
                         <th class="border-primary border-darken-1">Origin City</th>
-                        <th class="border-primary border-darken-1">Origin Hub</th>
                         <th class="border-primary border-darken-1">Destination City</th>
+                        <th class="border-primary border-darken-1">Origin Hub</th>
                         <th class="border-primary border-darken-1">Destination Hub</th>
-                        <th class="border-primary border-darken-1">Return Confirm Aging</th>
                     </tr>
                     </thead>
                 </table>
@@ -148,17 +148,17 @@
         $(document).ready(function () {
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.cargo_received.print') !!}',
+                    url: '{!! route('admin.cargo.history.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function (data) {
+                    .done(function(data) {
                         var tab = window.open('', '_blank');
 
-                        if (!tab) {
+                        if(!tab) {
                             swal({
                                 title: 'Popup Blocker Enabled!',
                                 text: 'Please add this site to your exception list.',
@@ -166,7 +166,8 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-                        } else {
+                        }
+                        else {
                             tab.document.write(data);
                             tab.document.close();
                             tab.focus();
@@ -179,14 +180,15 @@
                 width: '100%',
                 allowClear: true
             });
+
             $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Search Destination',
                 width: '100%',
                 allowClear: true
             });
+
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
-                clear: '',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -199,7 +201,6 @@
             });
             $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
-                clear: '',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -230,14 +231,14 @@
                             head.push('Tracking Number');
                             head.push('Status');
                             head.push('Return Confirm Date');
+                            head.push('Return Confirm Aging');
                             head.push('Cargo No.');
                             head.push('Cargo Creation Date');
                             head.push('Dispatching Aging');
                             head.push('Origin City');
-                            head.push('Origin Hub');
                             head.push('Destination City');
+                            head.push('Origin Hub');
                             head.push('Destination Hub');
-                            head.push('Return Confirm Aging');
                             $.each(result.data, function (index, values) {
                                 row = [];
 
@@ -245,14 +246,14 @@
                                 row.push(values.tracking_number);
                                 row.push(values.status);
                                 row.push(values.return_confirm_date);
+                                row.push(values.return_confirm_aging);
                                 row.push(values.cargo_no);
                                 row.push(values.cargo_creation_date);
                                 row.push(values.dispatching_aging);
                                 row.push(values.origin_city);
-                                row.push(values.origin_hub);
                                 row.push(values.destination_city);
+                                row.push(values.origin_hub);
                                 row.push(values.destination_hub);
-                                row.push(values.return_confirm_aging);
 
                                 body.push(row);
                             });
@@ -290,6 +291,7 @@
                     }
                 },
                 order: [[3, 'desc']],
+                rowId: 'cargo_no',
                 columns: [
                     {
                         orderable: false,
@@ -303,15 +305,15 @@
                     },
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'status', name: 'ss.id', class: 'align-middle status'},
-                    {data: 'return_confirm_date', name: 'shipments_journey.created_at', class: 'align-middle return_confirm_date'},
-                    {data: 'cargo_no', name: 'cc.id', class: 'align-middle cargo_no'},
+                    {data: 'return_confirm_date', name: 'sj.created_at', class: 'align-middle return_confirm_date'},
+                    {data: 'return_confirm_aging', name: 'sj.created_at', class: 'align-middle return_confirm_aging'},
+                    {data: 'cargo_id_padded_link', name: 'cc.id', class: 'align-middle cargo_number'},
                     {data: 'cargo_creation_date', name: 'cc.created_at', class: 'align-middle cargo_creation_date'},
-                    {data: 'dispatching_aging', name: 'dispatching_aging', class: 'align-middle dispatching_aging'},
-                    {data: 'origin_city', name: 'cou.name', class: 'align-middle origin_city'},
-                    {data: 'origin_hub', name: 'co.name', class: 'align-middle origin_hub'},
-                    {data: 'destination_city', name: 'cds.name', class: 'align-middle destination_city'},
-                    {data: 'destination_hub', name: 'cd.name', class: 'align-middle destination_hub'},
-                    {data: 'return_confirm_aging', name: 'return_confirm_aging', class: 'align-middle return_confirm_aging'}
+                    {data: 'dispatching_aging', name: 'sjc.created_at', class: 'align-middle dispatching_aging'},
+                    {data: 'shipment_destination_city_name', name: 'shipment_destination_city.name', class: 'align-middle origin_city'},
+                    {data: 'shipment_origin_city_name', name: 'shipment_origin_city.name', class: 'align-middle destination_city'},
+                    {data: 'destination_hub', name: 'destination_hub', class: 'align-middle origin_hub'},
+                    {data: 'origin_hub', name: 'origin_hub', class: 'align-middle destination_hub'},
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
@@ -326,12 +328,12 @@
                 table.draw();
             });
 
-            // $('#datatable tbody').on('click', 'tr td a.cargo_print', function () {
-            //     var id = parseInt($(this).parents('tr').attr('id'));
-            //     if (id) {
-            //         print(id);
-            //     }
-            // });
+            $('#datatable tbody').on('click','tr td.cargo_number button.print',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                console.log(id);
+                print(id);
+
+            });
         });
 
     </script>

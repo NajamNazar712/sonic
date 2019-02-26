@@ -214,6 +214,12 @@ class AdminNotificationsController extends Controller
         else if ($id == 26) {
             $details['fields'] = ['date', 'link'];
         }
+        else if ($id == 27) {
+             $details['fields'] = ['account_id', 'company_name', 'invoice_number', 'billing_period_from_date', 'billing_period_to_date', 'due_date', 'invoice'];
+        }
+        else if ($id == 28) {
+             $details['fields'] = ['account_id', 'company_name', 'invoice_number', 'billing_period_from_date', 'billing_period_to_date', 'due_date', 'invoice'];
+        }
 
         return $details;
     }

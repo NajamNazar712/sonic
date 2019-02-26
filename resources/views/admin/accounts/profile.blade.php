@@ -25,6 +25,9 @@
                     <li class="nav-item">
                         <a class="nav-link" id="linkOpt-tab" data-toggle="tab" href="#linkOpt" aria-controls="linkOpt">Bank Information</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="linkEmail-tab" data-toggle="tab" href="#linkEmail" aria-controls="linkEmail">Notification Emails</a>
+                    </li>
                 </ul>
                 <div class="tab-content px-1 pt-1">
                     <div role="tabpanel" class="tab-pane active" id="active" aria-labelledby="active-tab" aria-expanded="true">
@@ -210,6 +213,41 @@
                             </div>
                         </div>
                         @endif
+                    </div>
+                    <div class="tab-pane" id="linkEmail" role="tabpanel" aria-labelledby="linkEmail-tab" aria-expanded="false">
+                        <div class="mt-2">
+                            <div class="row">
+                                <div class="col">
+                                    <p class="font-large-2">Emails List</p>
+                                </div>
+                                <div class="col text-right">
+                                    @if(count($emails) > 0)
+                                        <button type="button" class="btn btn-primary round btn-min-width mr-1 mt-2 editEmail">
+                                            <i class="la la-edit"></i>
+                                            Edit</button>
+
+                                    @else
+                                        <button type="button" class="btn btn-primary round btn-min-width mr-1 mt-2 addEmail">
+                                            <i class="la la-plus"></i>
+                                            Add</button>
+
+                                    @endif
+
+                                </div>
+                            </div>
+
+                            <ul class="list-group">
+                                @if(count($emails) > 0)
+                                @foreach($emails as $email)
+                                    <li class="list-group-item">{{$email->email}}</li>
+                                @endforeach
+                                    @else
+                                    <li class="list-group-item">No Emails Found</li>
+                                @endif
+
+                            </ul>
+
+                        </div>
                     </div>
                 </div>
                 {{--<div class="row justify-content-center">--}}
@@ -515,12 +553,99 @@
         </div>
     </div>
 
+    {{--Edit Email Modal--}}
+    <div class="modal fade text-left" id="EditEmailsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditEmails"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Edit Notification Emails</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit_notification_emails" action="{{route('admin.accounts.edit.emails')}}" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+                            <input type="hidden" value="{{$user->id}}" name="edit_shipper_id">
+
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-12 form-group">
+                                    <input name="email_address" id="edit_email_address" class="email_address" data-tags-input-name="email_address" data-rule-required="true" data-msg-required="Email Address is required" value="{{$email_ids}}">
+
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="editEmails" type="submit" class="btn btn-primary btn-block">Update</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{--Edit Email Modal--}}
+    {{--Add Email Modal--}}
+    <div class="modal fade text-left" id="AddEmailsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddEmails"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Notification Emails</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="add_notification_emails" action="{{route('admin.accounts.add.emails')}}" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+                            <input type="hidden" value="{{$user->id}}" name="add_shipper_id">
+
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-12 form-group">
+                                    <input name="email_address" id="add_email_address" class="email_address" data-tags-input-name="email_address" data-rule-required="true" data-msg-required="Email Address is required" value="">
+
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="addEmails" type="submit" class="btn btn-primary btn-block">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{--Add Email Modal--}}
+
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/forms/selectize/selectize.css')}}">
+
+    <style>
+        .selectize-control .selectize-input {
+            vertical-align: middle;
+        }
+
+        .selectize-control .selectize-input .item {
+            word-break: break-all;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -528,7 +653,8 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
@@ -738,7 +864,91 @@
                 }
             });
 
+            $('body').on('click','button.addEmail', function () {
+                $('#AddEmailsModal').modal('show');
+                var REGEX_EMAIL = '([a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@' +
+                    '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)';
+                var add_select = $('#add_notification_emails #add_email_address').selectize({
+                    placeholder: 'Email Addresses*',
+                    delimiter: ',',
+                    createOnBlur: true,
+                    preload: true,
+                    persist: false,
+                    plugins: ['remove_button'],
+                    onDropdownOpen: function(dropdown) {
+                        dropdown.remove();
+                    },
 
+                    create: function(input) {
+                        if ((new RegExp('^' + REGEX_EMAIL + '$', 'i')).test(input)) {
+                            return {
+                                value: input,
+                                text: input
+                            }
+                        }
+                        var error = "Invalid Email Address!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        return false;
+                    }
+
+                });
+            });
+
+
+            $('body').on('click','button.editEmail', function () {
+                $('#EditEmailsModal').modal('show');
+                var REGEX_EMAIL = '([a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@' +
+                    '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)';
+                var select = $('#edit_notification_emails #edit_email_address').selectize({
+                    placeholder: 'Email Addresses*',
+                    delimiter: ',',
+                    createOnBlur: true,
+                    preload: true,
+                    persist: false,
+                    plugins: ['remove_button'],
+                    onDropdownOpen: function(dropdown) {
+                        dropdown.remove();
+                    },
+
+                    create: function(input) {
+                        if ((new RegExp('^' + REGEX_EMAIL + '$', 'i')).test(input)) {
+                            return {
+                                value: input,
+                                text: input
+                            }
+                        }
+                        var error = "Invalid Email Address!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        return false;
+                    }
+
+                });
+            });
+
+
+            $('#addEmails').on('click', function (e) {
+                e.preventDefault();
+                var emails = $('#AddEmailsModal #add_email_address').val();
+                if(emails != ''){
+                    $('form#add_notification_emails').submit();
+                }else{
+                    var error = "No Email Address selected, Please select at-least one email address!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            });
+
+            $('#editEmails').on('click', function (e) {
+                e.preventDefault();
+                var emails = $('#EditEmailsModal #edit_email_address').val();
+                if(emails != ''){
+                    $('form#edit_notification_emails').submit();
+                }else{
+                    var error = "No Email Address selected, Please select at-least one email address!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            });
 
         });
     </script>

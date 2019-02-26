@@ -127,6 +127,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('list','Shippers\ShipperReturnController@confirmation_pending_list')->name('list');
             Route::post('marked/status','Shippers\ShipperReturnController@return_marked_status')->name('marked.status');
             Route::post('marked/status/single','Shippers\ShipperReturnController@return_marked_single_status')->name('marked.status.single');
+            Route::post('reattempt/status','Shippers\ShipperReturnController@return_reattempt_status')->name('reattempt.status');
+            Route::post('reattempt/status/single','Shippers\ShipperReturnController@return_reattempt_single_status')->name('reattempt.status.single');
         });
     });
 
@@ -185,6 +187,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('changepickupstatus','Shippers\ShipperDashboardController@pickupStatusChange')->name('change.pickup.status');
     Route::post('addpickup','Shippers\ShipperDashboardController@addPickup')->name('add.pickup');
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
+    Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
+    Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -226,7 +231,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/updateprofile','Admins\AdminDashboardController@updateProfile')->name('update.profile');
         Route::get('getpickups','Admins\AdminDashboardController@getPickups')->name('get.pickups');
         Route::post('/updatebankinfo','Admins\AdminDashboardController@updateBankInfo')->name('update.bank');
-
+        Route::post('edit/emails','Admins\AdminDashboardController@edit_notification_emails')->name('edit.emails');
+        Route::post('add/emails','Admins\AdminDashboardController@add_notification_emails')->name('add.emails');
     });
 
     //Datatables data using ajax calls
@@ -680,6 +686,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('verify', 'Admins\AdminFinanceController@make_payments_verify')->name('verify');
             Route::get('export_bank_order', 'Admins\AdminFinanceController@make_payments_export_bank_order')->name('export_bank_order');
             Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
+            Route::post('switch_to_invoice', 'Admins\AdminFinanceController@make_payments_switch_to_invoice')->name('switch_to_invoice');
         });
 
         Route::prefix('done_payments')->name('done_payments.')->group(function () {
@@ -696,19 +703,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('export_to_excel', 'Admins\AdminFinanceController@done_payments_export_to_excel')->name('export_to_excel');
         });
 
-        Route::prefix('generate_invoices')->name('generate_invoices.')->group(function () {
-            Route::get('', 'Admins\AdminFinanceController@generate_invoices_index')->name('index');
-            Route::get('list', 'Admins\AdminFinanceController@generate_invoices_list')->name('list');
-            Route::post('', 'Admins\AdminFinanceController@generate_invoices_store')->name('store');
-            Route::get('print', 'Admins\AdminFinanceController@generate_invoices_print')->name('print');
-        });
-
-        Route::prefix('invoices_history')->name('invoices_history.')->group(function () {
-            Route::get('', 'Admins\AdminFinanceController@invoices_history_index')->name('index');
-            Route::get('list', 'Admins\AdminFinanceController@invoices_history_list')->name('list');
-            Route::post('delivered_shipments', 'Admins\AdminFinanceController@invoices_history_delivered_shipments')->name('delivered_shipments');
-            Route::post('returned_shipments', 'Admins\AdminFinanceController@invoices_history_returned_shipments')->name('returned_shipments');
-            Route::post('adjusted_shipments', 'Admins\AdminFinanceController@invoices_history_adjusted_shipments')->name('adjusted_shipments');
+        Route::prefix('invoices')->name('invoices.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@invoices_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@invoices_list')->name('list');
+            Route::post('print', 'Admins\AdminFinanceController@invoices_print')->name('print');
+            Route::get('export_to_excel', 'Admins\AdminFinanceController@invoices_export_to_excel')->name('export_to_excel');
+            Route::put('email_reminder', 'Admins\AdminFinanceController@invoices_email_reminder')->name('email_reminder');
+            Route::post('mark_as_received', 'Admins\AdminFinanceController@invoices_mark_as_received')->name('mark_as_received');
         });
     });
 
@@ -878,6 +879,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReportsController@cargo_returns_shipment_list')->name('list');
 
         });
+        Route::prefix('return_reattempt_ratio')->name('return_reattempt_ratio.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@return_reattempt_ratio_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@return_reattempt_ratio_list')->name('list');
+
+        });
     });
 
     //Reports end
@@ -953,6 +959,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
               Route::post('active', 'Admins\GlobalSettingsController@petty_cash_titles_active')->name('active');
               Route::post('inactive', 'Admins\GlobalSettingsController@petty_cash_titles_inactive')->name('inactive');
            });
+        });
+
+        Route::prefix('debriefing_report_cut_off_time')->name('debriefing_report_cut_off_time.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_store')->name('store');
         });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {

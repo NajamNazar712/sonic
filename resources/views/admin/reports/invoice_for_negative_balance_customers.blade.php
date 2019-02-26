@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Negative Balance Customers
+        Negative Balance Customers Report
     </h1>
 
     <div class="card">

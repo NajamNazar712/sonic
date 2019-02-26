@@ -58,28 +58,29 @@
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
-									<tr role="row" class="bg-primary white">
-										<th class="border-primary border-darken-1">S. No.</th>
-										<th class="border-primary border-darken-1">Cargo No.</th>
-										<th class="border-primary border-darken-1">Origin</th>
-										<th class="border-primary border-darken-1">Destination</th>
-										<th class="border-primary border-darken-1">Shipment(s)</th>
-										<th class="border-primary border-darken-1">Shipping Mode</th>
-										<th class="border-primary border-darken-1">Junction 1</th>
-										<th class="border-primary border-darken-1">Junction 2</th>
-										<th class="border-primary border-darken-1">Transport Mode</th>
-										<th class="border-primary border-darken-1">Vendor</th>
-										<th class="border-primary border-darken-1">Builty No.</th>
-										<th class="border-primary border-darken-1">Shipments Weight</th>
-										<th class="border-primary border-darken-1">Chargeable Weight</th>
-										<th class="border-primary border-darken-1">Actual Weight</th>
-										<th class="border-primary border-darken-1">Vendor Weight</th>
-										<th class="border-primary border-darken-1">Transit Datetime</th>
-										<th class="border-primary border-darken-1">Transitted By</th>
-										<th class="border-primary border-darken-1">Aging</th>
-										<th class="border-primary border-darken-1">Status</th>
-										<th class="border-primary border-darken-1"></th>
-									</tr>
+								<tr role="row" class="bg-primary white">
+									<th class="border-primary border-darken-1">S. No.</th>
+									<th class="border-primary border-darken-1">Cargo No.</th>
+									<th class="border-primary border-darken-1">Cargo Type</th>
+									<th class="border-primary border-darken-1">Origin</th>
+									<th class="border-primary border-darken-1">Destination</th>
+									<th class="border-primary border-darken-1">Shipment(s)</th>
+									<th class="border-primary border-darken-1">Shipping Mode</th>
+									<th class="border-primary border-darken-1">Junction 1</th>
+									<th class="border-primary border-darken-1">Junction 2</th>
+									<th class="border-primary border-darken-1">Transport Mode</th>
+									<th class="border-primary border-darken-1">Vendor</th>
+									<th class="border-primary border-darken-1">Builty No.</th>
+									<th class="border-primary border-darken-1">Shipments Weight</th>
+									<th class="border-primary border-darken-1">Chargeable Weight</th>
+									<th class="border-primary border-darken-1">Actual Weight</th>
+									<th class="border-primary border-darken-1">Vendor Weight</th>
+									<th class="border-primary border-darken-1">Transit Datetime</th>
+									<th class="border-primary border-darken-1">Transitted By</th>
+									<th class="border-primary border-darken-1">Aging</th>
+									<th class="border-primary border-darken-1">Status</th>
+									<th class="border-primary border-darken-1"></th>
+								</tr>
 								</thead>
 							</table>
 
@@ -107,13 +108,13 @@
 
 												<table class="table table-bordered datatable" id="receive_at_link_datatable" style="z-index: 3;">
 													<thead>
-														<tr role="row" class="bg-primary white">
-															<th class="border-primary border-darken-1">S. No.</th>
-															<th class="border-primary border-darken-1">Cargo No.</th>
-															<th class="border-primary border-darken-1">Origin</th>
-															<th class="border-primary border-darken-1">Destination</th>
-															<th class="border-primary border-darken-1">Seal No.</th>
-														</tr>
+													<tr role="row" class="bg-primary white">
+														<th class="border-primary border-darken-1">S. No.</th>
+														<th class="border-primary border-darken-1">Cargo No.</th>
+														<th class="border-primary border-darken-1">Origin</th>
+														<th class="border-primary border-darken-1">Destination</th>
+														<th class="border-primary border-darken-1">Seal No.</th>
+													</tr>
 													</thead>
 												</table>
 
@@ -339,6 +340,12 @@
 
 	<script>
 		$(document).ready(function() {
+			@if(session('errors'))
+            scan_sound(2);
+			@endif
+			@if(session('success'))
+            scan_sound(1);
+			@endif
 			function print(id) {
 				$.ajax({
 					url: '{!! route('admin.cargo.in_transit.print') !!}',
@@ -348,135 +355,137 @@
 						'_token': '{{ csrf_token() }}'
 					}
 				})
-				.done(function(data) {
-					var tab = window.open('', '_blank');
+						.done(function(data) {
+							var tab = window.open('', '_blank');
 
-					if(!tab) {
-						swal({
-							title: 'Popup Blocker Enabled!',
-							text: 'Please add this site to your exception list.',
-							icon: 'error',
-							closeOnClickOutside: false,
-							closeOnEsc: false
+							if(!tab) {
+								swal({
+									title: 'Popup Blocker Enabled!',
+									text: 'Please add this site to your exception list.',
+									icon: 'error',
+									closeOnClickOutside: false,
+									closeOnEsc: false
+								});
+							}
+							else {
+								tab.document.write(data);
+								tab.document.close();
+								tab.focus();
+							}
 						});
-					}
-					else {
-						tab.document.write(data);
-						tab.document.close();
-						tab.focus();
-					}
-				});
 			}
 
 			@if (session('print'))
-				print('{{ session('print') }}');
+			print('{{ session('print') }}');
 			@endif
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    body = [];
+			jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+				if ( this.context.length ) {
+					body = [];
 
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.cargo.in_transit.list') }}',
-                        data: {
-                            'page': 'all',
-                            'cargo_type': $('#cargo_type_search_form #cargo_type').val(),
-                    		'tracking_number': $('#tracking_number_search_form #tracking_number').val(),
-                    		'seal_number': $('#seal_number_search_form #seal_number').val(),
-                        },
-                        success: function (result) {
-                            head = [];
-                            head.push('S.No');
-                            head.push('Cargo No.');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Shipment(s)');
-                            head.push('Shipping Mode');
-                            head.push('Junction 1');
-                            head.push('Junction 2');
-                            head.push('Transport Mode');
-                            head.push('Vendor');
-                            head.push('Builty No.');
-                            head.push('Shipments Weight');
-                            head.push('Chargeable Weight');
-                            head.push('Actual Weight');
-                            head.push('Vendor Weight');
-                            head.push('Transit Datetime');
-                            head.push('Transitted By');
-                            head.push('Aging');
-                            head.push('Status');
+					var jsonResult = $.ajax({
+						url: '{{ route('admin.cargo.in_transit.list') }}',
+						data: {
+							'page': 'all',
+							'cargo_type': $('#cargo_type_search_form #cargo_type').val(),
+							'tracking_number': $('#tracking_number_search_form #tracking_number').val(),
+							'seal_number': $('#seal_number_search_form #seal_number').val(),
+						},
+						success: function (result) {
+							head = [];
+							head.push('S.No');
+							head.push('Cargo No.');
+							head.push('Cargo Type');
+							head.push('Origin');
+							head.push('Destination');
+							head.push('Shipment(s)');
+							head.push('Shipping Mode');
+							head.push('Junction 1');
+							head.push('Junction 2');
+							head.push('Transport Mode');
+							head.push('Vendor');
+							head.push('Builty No.');
+							head.push('Shipments Weight');
+							head.push('Chargeable Weight');
+							head.push('Actual Weight');
+							head.push('Vendor Weight');
+							head.push('Transit Datetime');
+							head.push('Transitted By');
+							head.push('Aging');
+							head.push('Status');
 
 
-                            $.each(result.data, function(index, values) {
-                                row = [];
+							$.each(result.data, function(index, values) {
+								row = [];
 
-                                row.push(index + 1);
-                                row.push(values.id_padded);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.shipments_count);
-                                row.push(values.shipping_mode);
-                                row.push(values.junction_1);
-                                row.push(values.junction_2);
-                                row.push(values.transport_mode);
-                                row.push(values.vendor);
-                                row.push(values.builty_number);
-                                row.push(values.shipments_weight);
-                                row.push(values.chargeable_weight);
-                                row.push(values.actual_weight);
-                                row.push(values.vendor_weight);
-                                row.push(values.transit_at);
-                                row.push(values.transitted_by);
-                                row.push(values.aging);
-                                row.push(values.status);
+								row.push(index + 1);
+								row.push(values.id_padded);
+								row.push(values.cargo_type);
+								row.push(values.origin);
+								row.push(values.destination);
+								row.push(values.shipments_count);
+								row.push(values.shipping_mode);
+								row.push(values.junction_1);
+								row.push(values.junction_2);
+								row.push(values.transport_mode);
+								row.push(values.vendor);
+								row.push(values.builty_number);
+								row.push(values.shipments_weight);
+								row.push(values.chargeable_weight);
+								row.push(values.actual_weight);
+								row.push(values.vendor_weight);
+								row.push(values.transit_at);
+								row.push(values.transitted_by);
+								row.push(values.aging);
+								row.push(values.status);
 
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
+								body.push(row);
+							});
+						},
+						async: false
+					});
 
-                    return {body: body, header: head};
-                }
-            } );
+					return {body: body, header: head};
+				}
+			} );
 			var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+				dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				@if (session('role_id') == 1 || in_array(30, session('permissions')))
 
-					buttons: [{
-						text: 'Update at Link',
-						className: 'btn btn-primary receive_at_link',
-						action: function (e, dt, node, config) {
-							$('#receive_at_link #scan_seal_number_form .seal_number').val('');
+				buttons: [{
+					text: 'Update at Link',
+					className: 'btn btn-primary receive_at_link',
+					action: function (e, dt, node, config) {
+						$('#receive_at_link #scan_seal_number_form .seal_number').val('');
 
-							receive_at_link_table.clear().draw();
+						receive_at_link_table.clear().draw();
 
-							cargo_consignment_ids = [];
+						cargo_consignment_ids = [];
 
-							$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', true);
+						$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', true);
 
-							if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
-								$('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
-							}
-
-							$('#receive_at_link #receive_at_link_form .junction').hide();
-
-
-							$('#receive_at_link').modal('show');
+						if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
+							$('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
 						}
-					},
-                        {
-                            extend: 'excel',
-                            title: 'Cargo In-transit',
-                            className: 'btn btn-primary',
-                            text: '<i class="la la-file-excel-o"></i> Excel',
-                        }],
+
+						$('#receive_at_link #receive_at_link_form .junction').hide();
+
+
+						$('#receive_at_link').modal('show');
+					}
+				},
+					{
+						extend: 'excel',
+						title: 'Cargo In-transit',
+						className: 'btn btn-primary',
+						text: '<i class="la la-file-excel-o"></i> Excel',
+					}],
 				@else
-                	buttons:[{
-                    extend: 'excel',
-                    title: 'Cargo In-transit',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                	}],
+				buttons:[{
+					extend: 'excel',
+					title: 'Cargo In-transit',
+					className: 'btn btn-primary',
+					text: '<i class="la la-file-excel-o"></i> Excel',
+				}],
 				@endif
 				scrollX: true, scrollY: '350px',
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -493,10 +502,11 @@
 					}
 				},
 				rowId: 'id',
-				order: [[15, 'desc']],
+				order: [[16, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'id_padded_link', name: 'cargo_consignments.id', class: 'align-middle cargo_number'},
+					{data: 'cargo_type', name: 'cargo_consignments.type', class: 'align-middle cargo_type'},
 					{data: 'origin', name: 'oh.name', class: 'align-middle origin'},
 					{data: 'destination', name: 'dh.name', class: 'align-middle destination'},
 					{data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle text-center shipments'},
@@ -527,10 +537,14 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
-                    var transport_select = '<select name="transport_select" id="transport_select" class="select2 form-control"></select>';
-                    var vendor_select = '<select name="vendor_select" id="vendor_select" class="select2 form-control"></select>';
+					var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+					var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
+					var transport_select = '<select name="transport_select" id="transport_select" class="select2 form-control"></select>';
+					var vendor_select = '<select name="vendor_select" id="vendor_select" class="select2 form-control"></select>';
+					var cargo_type_select = '<select name="cargo_type_select" id="cargo_type_select" class="select2 form-control">' +
+							'<option value="1">Normal</option>' +
+							'<option value="2">Return</option>' +
+							'</select>';
 
 					this.api().columns().every(function(column_id) {
 						var column = this;
@@ -539,26 +553,32 @@
 						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.shipping_mode')){
-                            $(mode_drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.status')){
-                            $(status_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.transport_mode')){
-                            $(transport_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.vendor')){
-                            $(vendor_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
+							$(mode_drop_select).appendTo($(search))
+									.on( 'change', function () {
+										column.search($(this).val(), false, false, true).draw();
+									} ).wrap(td);
+						}else if($(header).is('.status')){
+							$(status_select).appendTo($(search))
+									.on( 'change', function () {
+										column.search($(this).val(), false, false, true).draw();
+									} ).wrap(td);
+						}else if($(header).is('.transport_mode')){
+							$(transport_select).appendTo($(search))
+									.on( 'change', function () {
+										column.search($(this).val(), false, false, true).draw();
+									} ).wrap(td);
+						}else if($(header).is('.vendor')){
+							$(vendor_select).appendTo($(search))
+									.on( 'change', function () {
+										column.search($(this).val(), false, false, true).draw();
+									} ).wrap(td);
+						}
+						else if($(header).is('.cargo_type')){
+							$(cargo_type_select).appendTo($(search))
+									.on( 'change', function () {
+										column.search($(this).val(), false, false, true).draw();
+									} ).wrap(td);
+						}
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -569,63 +589,69 @@
 							}
 						}
 					});
-                    var data1 = $.map({!! $shipping_mode !!}, function (obj) {
-                        obj.id = obj.id;
-                        obj.text = obj.mode;
-                        return obj;
-                    });
+					var data1 = $.map({!! $shipping_mode !!}, function (obj) {
+						obj.id = obj.id;
+						obj.text = obj.mode;
+						return obj;
+					});
 
-                    $("#mode_select").prepend('<option value="" selected></option>').select2({
-                        data:data1,
-                        placeholder: "Select Mode",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    var data2 = $.map({!! $cargo_status !!}, function (obj) {
-                        obj.id = obj.id;
-                        obj.text = obj.name;
-                        return obj;
-                    });
+					$("#mode_select").prepend('<option value="" selected></option>').select2({
+						data:data1,
+						placeholder: "Select Mode",
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});
+					$("#cargo_type_select").prepend('<option value="" selected></option>').select2({
+						placeholder: "Select Type",
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});
+					var data2 = $.map({!! $cargo_status !!}, function (obj) {
+						obj.id = obj.id;
+						obj.text = obj.name;
+						return obj;
+					});
 
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        data:data2,
-                        placeholder: "Select Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    var data3 = $.map({!! $transport_mode !!}, function (obj) {
-                        obj.id = obj.id;
-                        obj.text = obj.name;
-                        return obj;
-                    });
+					$("#status_select").prepend('<option value="" selected></option>').select2({
+						data:data2,
+						placeholder: "Select Status",
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});
+					var data3 = $.map({!! $transport_mode !!}, function (obj) {
+						obj.id = obj.id;
+						obj.text = obj.name;
+						return obj;
+					});
 
-                    $("#transport_select").prepend('<option value="" selected></option>').select2({
-                        data:data3,
-                        placeholder: "Select Transport",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    var data4 = $.map({!! $transport_vendor !!}, function (obj) {
-                        obj.id = obj.id;
-                        obj.text = obj.name;
-                        return obj;
-                    });
+					$("#transport_select").prepend('<option value="" selected></option>').select2({
+						data:data3,
+						placeholder: "Select Transport",
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});
+					var data4 = $.map({!! $transport_vendor !!}, function (obj) {
+						obj.id = obj.id;
+						obj.text = obj.name;
+						return obj;
+					});
 
 
-                    $("#vendor_select").prepend('<option value="" selected></option>').select2({
-                        data:data4,
-                        placeholder: "Select Transport",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+					$("#vendor_select").prepend('<option value="" selected></option>').select2({
+						data:data4,
+						placeholder: "Select Transport",
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});
 					this.api().table().columns.adjust();
 				}
 			});
-            var route = '{!! route('admin.tracking.index') !!}';
+			var route = '{!! route('admin.tracking.index') !!}';
 
 			$('#datatable tbody').on('click', 'tr td.shipments button', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
@@ -640,60 +666,64 @@
 						'id': id
 					}
 				})
-				.done(function(data) {
-					if (data) {
-						var tracking_numbers = '';
+						.done(function(data) {
+							if (data) {
+								var tracking_numbers = '';
 
-						$.each(data, function(index, tracking_number) {
-							tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+								$.each(data, function(index, tracking_number) {
+									tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+								});
+
+								$('#shipments .modal-body').html(tracking_numbers);
+
+								$('#shipments').modal('show');
+							}
 						});
-
-						$('#shipments .modal-body').html(tracking_numbers);
-
-						$('#shipments').modal('show');
-					}
-				});
 			});
 
 			var cargo_consignment_ids = [];
 
-			@if (session('role_id') == 1 || in_array(30, session('permissions')))
-				var receive_at_link_table = $('#receive_at_link_datatable').DataTable({
-					dom: 'tr',
-                    "autoWidth": false,
-                    paging: false,
-					columns: [
-						{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-						{name: 'cargo_number', class: 'align-middle cargo_number'},
-						{name: 'origin', class: 'align-middle origin'},
-						{name: 'destination', class: 'align-middle destination'},
-						{name: 'seal_number', class: 'align-middle seal_number'}
-					],
-					rowCallback: function(row, data, index) {
-						var info = receive_at_link_table.page.info();
+					@if (session('role_id') == 1 || in_array(30, session('permissions')))
+			var receive_at_link_table = $('#receive_at_link_datatable').DataTable({
+						dom: 'tr',
+						"autoWidth": false,
+						paging: false,
+						columns: [
+							{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+							{name: 'cargo_number', class: 'align-middle cargo_number'},
+							{name: 'origin', class: 'align-middle origin'},
+							{name: 'destination', class: 'align-middle destination'},
+							{name: 'seal_number', class: 'align-middle seal_number'}
+						],
+						rowCallback: function(row, data, index) {
+							var info = receive_at_link_table.page.info();
 
-						$('td:eq(0)', row).html(index + 1 + info.page * info.length);
-					},
-					initComplete: function() {
-						this.api().table().columns.adjust();
-					}
-				});
+							$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+						},
+						initComplete: function() {
+							this.api().table().columns.adjust();
+						}
+					});
 			@endif
 
 			@if (session('role_id') == 1 || in_array(31, session('permissions')))
-				$('#receive_form .cargo_number').inputmask({
-					'alias': 'integer',
-					'allowMinus': false,
-					'allowPlus': false
-				});
+			$('#receive_form .cargo_number').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
 
-				$('#receive_form').validate({
-					errorClass: 'danger',
-					successClass: 'success',
-					errorPlacement: function(error, element) {
-						error.addClass('w-100').appendTo(element.parents('form'));
-					}
-				});
+			$('#receive_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parents('form'));
+				},
+                submitHandler: function(form) {
+				    scan_sound(1);
+				    form.submit();
+				}
+			});
 			@endif
 
 			$('#cargo_type_search_form #cargo_type').select2({
@@ -738,318 +768,318 @@
 			});
 
 			@if (session('role_id') == 1 || in_array(30, session('permissions')))
-				$('#receive_at_link #scan_seal_number_form .seal_number').inputmask({
-					'alias': 'integer',
-					'allowMinus': false,
-					'allowPlus': false
-				});
+			$('#receive_at_link #scan_seal_number_form .seal_number').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
 			@endif
 
 			@if (session('role_id') == 1 || in_array(28, session('permissions')))
-				$('#add_forwarding_details form .seal_number').inputmask({
-					'alias': 'integer',
-					'allowMinus': false,
-					'allowPlus': false
-				});
+			$('#add_forwarding_details form .seal_number').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
 
-				$('#add_forwarding_details form .vendor_weight').inputmask({
-					'alias': 'decimal',
-					'allowMinus': false,
-					'allowPlus': false,
-					'digits': 2,
-					'min': 0.1,
-					'max': 10000
-				});
+			$('#add_forwarding_details form .vendor_weight').inputmask({
+				'alias': 'decimal',
+				'allowMinus': false,
+				'allowPlus': false,
+				'digits': 2,
+				'min': 0.1,
+				'max': 10000
+			});
 
-				$('#add_forwarding_details form .weight_charges_per_kg').inputmask({
-					'alias': 'decimal',
-					'allowMinus': false,
-					'allowPlus': false,
-					'digits': 2,
-					'min': 0.1,
-					'max': 1000
-				});
+			$('#add_forwarding_details form .weight_charges_per_kg').inputmask({
+				'alias': 'decimal',
+				'allowMinus': false,
+				'allowPlus': false,
+				'digits': 2,
+				'min': 0.1,
+				'max': 1000
+			});
 
-				$('#add_forwarding_details form .extra_charges').inputmask({
-					'alias': 'decimal',
-					'allowMinus': false,
-					'allowPlus': false,
-					'digits': 2,
-					'min': 0.1,
-					'max': 10000
-				});
+			$('#add_forwarding_details form .extra_charges').inputmask({
+				'alias': 'decimal',
+				'allowMinus': false,
+				'allowPlus': false,
+				'digits': 2,
+				'min': 0.1,
+				'max': 10000
+			});
 
-				$('#add_forwarding_details form .total_weight_charges').inputmask({
-					'alias': 'decimal',
-					'allowMinus': false,
-					'allowPlus': false,
-					'digits': 2,
-					'min': 0.1,
-					'max': 1000000
-				});
+			$('#add_forwarding_details form .total_weight_charges').inputmask({
+				'alias': 'decimal',
+				'allowMinus': false,
+				'allowPlus': false,
+				'digits': 2,
+				'min': 0.1,
+				'max': 1000000
+			});
 			@endif
 
 			@if (session('role_id') == 1 || in_array(30, session('permissions')))
-				$('#receive_at_link #scan_seal_number_form').validate({
-					errorClass: 'danger',
-					successClass: 'success',
-					errorPlacement: function(error, element) {
-						error.addClass('w-100').appendTo(element.parents('form'));
-					},
-					submitHandler: function(form) {
-						var seal_number = $(form).find('.seal_number').val();
+			$('#receive_at_link #scan_seal_number_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parents('form'));
+				},
+				submitHandler: function(form) {
+					var seal_number = $(form).find('.seal_number').val();
 
-						if (receive_at_link_table.columns('.seal_number').data().eq(0).indexOf(parseInt(seal_number)) === -1) {
-							$.ajax({
-								url: '{!! route('admin.cargo.in_transit.details') !!}',
-								method: 'POST',
-								data: {
-									'seal_number': seal_number,
-									'_token': '{{ csrf_token() }}'
-								}
-							})
+					if (receive_at_link_table.columns('.seal_number').data().eq(0).indexOf(parseInt(seal_number)) === -1) {
+						$.ajax({
+							url: '{!! route('admin.cargo.in_transit.details') !!}',
+							method: 'POST',
+							data: {
+								'seal_number': seal_number,
+								'_token': '{{ csrf_token() }}'
+							}
+						})
+								.done(function(data) {
+									$('#receive_at_link #scan_seal_number_form .seal_number').val('');
+
+									if (data.status == 0) {
+										receive_at_link_table.row.add([0, data.details.cargo_number, data.details.origin, data.details.destination, data.details.seal_number]).node().id = data.details.cargo_number;
+										receive_at_link_table.draw(false);
+
+										cargo_consignment_ids.push(data.details.cargo_number);
+
+										$.ajax({
+											url: '{!! route('admin.cargo.in_transit.junctions') !!}',
+											method: 'POST',
+											data: {
+												'_token': '{{ csrf_token() }}',
+												'ids': cargo_consignment_ids
+											}
+										})
+												.done(function(data) {
+													if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
+														$('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
+													}
+
+													$('#receive_at_link #receive_at_link_form .junction').show();
+
+													$.each(data, function(index, junction) {
+														$('#receive_at_link #receive_at_link_form .junction').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+													});
+
+													$('#receive_at_link #receive_at_link_form .junction').prepend('<option value="" selected="selected"></option>').select2({
+														width: '150px',
+														placeholder: 'Junction*'
+													}).bind('change', function() {
+														$(this).valid();
+													});
+												});
+
+										$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', false);
+
+										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+									}
+									else {
+										toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+									}
+								});
+					}
+					else {
+						toastr.error('Cargo has been scanned already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					}
+
+					return false;
+				}
+			});
+
+			$('#receive_at_link #receive_at_link_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').insertAfter(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					var junction = $(form).find('.junction').val();
+
+					$.ajax({
+						url: '{!! route('admin.cargo.in_transit.receive_at_link') !!}',
+						method: 'POST',
+						data: {
+							'cargo_consignment_ids': cargo_consignment_ids,
+							'junction': junction,
+							'_token': '{{ csrf_token() }}'
+						}
+					})
 							.done(function(data) {
-								$('#receive_at_link #scan_seal_number_form .seal_number').val('');
-
 								if (data.status == 0) {
-									receive_at_link_table.row.add([0, data.details.cargo_number, data.details.origin, data.details.destination, data.details.seal_number]).node().id = data.details.cargo_number;
-									receive_at_link_table.draw(false);
-
-									cargo_consignment_ids.push(data.details.cargo_number);
-
-									$.ajax({
-										url: '{!! route('admin.cargo.in_transit.junctions') !!}',
-										method: 'POST',
-										data: {
-											'_token': '{{ csrf_token() }}',
-											'ids': cargo_consignment_ids
-										}
-									})
-									.done(function(data) {
-										if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
-											$('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
-										}
-
-										$('#receive_at_link #receive_at_link_form .junction').show();
-
-										$.each(data, function(index, junction) {
-											$('#receive_at_link #receive_at_link_form .junction').append('<option value="' + junction.id + '">' + junction.name + '</option>');
-										});
-
-										$('#receive_at_link #receive_at_link_form .junction').prepend('<option value="" selected="selected"></option>').select2({
-											width: '150px',
-											placeholder: 'Junction*'
-										}).bind('change', function() {
-											$(this).valid();
-										});
-									});
-
-									$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', false);
+									$('#receive_at_link').modal('hide');
 
 									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
 								else {
 									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 								}
+
+								table.draw();
 							});
-						}
-						else {
-							toastr.error('Cargo has been scanned already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-						}
 
-						return false;
-					}
-				});
-
-				$('#receive_at_link #receive_at_link_form').validate({
-					errorClass: 'danger',
-					successClass: 'success',
-					errorPlacement: function(error, element) {
-						error.addClass('w-100').insertAfter(element.parent('.form-group'));
-					},
-					submitHandler: function(form) {
-						var junction = $(form).find('.junction').val();
-
-						$.ajax({
-							url: '{!! route('admin.cargo.in_transit.receive_at_link') !!}',
-							method: 'POST',
-							data: {
-								'cargo_consignment_ids': cargo_consignment_ids,
-								'junction': junction,
-								'_token': '{{ csrf_token() }}'
-							}
-						})
-						.done(function(data) {
-							if (data.status == 0) {
-								$('#receive_at_link').modal('hide');
-
-								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-							}
-							else {
-								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-							}
-
-							table.draw();
-						});
-
-						return false;
-					}
-				});
+					return false;
+				}
+			});
 			@endif
 
 			@if (session('role_id') == 1 || in_array(29, session('permissions')))
-	            $('body').on('click','.launch_dispute',function(){
-	                var cargo_id = parseInt($(this).parents('tr').attr('id'));
+			$('body').on('click','.launch_dispute',function(){
+				var cargo_id = parseInt($(this).parents('tr').attr('id'));
 
-	                $('#UniversalDisputeModal').modal('show');
-	                $('#universal_dispute_id').val(cargo_id);
-	            });
-	            var select;
-	            $('#UniversalDisputeModal').on('shown.bs.modal',function () {
-	                var id = $('#universal_dispute_id').val();
+				$('#UniversalDisputeModal').modal('show');
+				$('#universal_dispute_id').val(cargo_id);
+			});
+			var select;
+			$('#UniversalDisputeModal').on('shown.bs.modal',function () {
+				var id = $('#universal_dispute_id').val();
 
-	                if(id){
-	                    $.ajax({
-	                        url: '{!! route('admin.dispute.data') !!}',
-	                        method: 'POST',
-	                        data:{
-	                            '_token': '{{ csrf_token() }}',
-								'intransit':'intransit',
-	                            'cargo_id':id
-	                        }
-	                    }).done(function (data) {
-	                        if(data.success === 1){
-	                            $('#universal_city_select').prepend('<option value="" selected="selected"></option>').select2({
-	                                placeholder:'Select a city',
-	                                dropdownParent:$('#universal_dispute_form')
-	                            });
-	                            $.each(data.cities,function(key,value){
-	                                var newOption = new Option(value.name, value.id, false, false);
-	                                $('#universal_city_select').append(newOption).trigger('select');
-	                            });
-	                            $('#universal_dispute_type_select').prepend('<option value="" selected="selected"></option>').select2({
-	                                placeholder:'Select a Dispute type',
-	                                dropdownParent:$('#universal_dispute_form')
-	                            });
-	                            $.each(data.dispute_types,function(key,value) {
-	                                var dispute = new Option(value.type, value.id, false, false);
-	                                $('#universal_dispute_type_select').append(dispute).trigger('select');
-	                            });
+				if(id){
+					$.ajax({
+						url: '{!! route('admin.dispute.data') !!}',
+						method: 'POST',
+						data:{
+							'_token': '{{ csrf_token() }}',
+							'intransit':'intransit',
+							'cargo_id':id
+						}
+					}).done(function (data) {
+						if(data.success === 1){
+							$('#universal_city_select').prepend('<option value="" selected="selected"></option>').select2({
+								placeholder:'Select a city',
+								dropdownParent:$('#universal_dispute_form')
+							});
+							$.each(data.cities,function(key,value){
+								var newOption = new Option(value.name, value.id, false, false);
+								$('#universal_city_select').append(newOption).trigger('select');
+							});
+							$('#universal_dispute_type_select').prepend('<option value="" selected="selected"></option>').select2({
+								placeholder:'Select a Dispute type',
+								dropdownParent:$('#universal_dispute_form')
+							});
+							$.each(data.dispute_types,function(key,value) {
+								var dispute = new Option(value.type, value.id, false, false);
+								$('#universal_dispute_type_select').append(dispute).trigger('select');
+							});
 
-								$('#universal_tracking_number').val(data.cargo_shipments);
-	                            select = $('#universal_tracking_number').selectize({
-	                                placeholder: 'Tracking Number(s)*',
-	                                delimiter: ',',
-	                                createOnBlur: true,
-	                                persist: false,
-	                                plugins: ['remove_button'],
-	                                onDropdownOpen: function(dropdown) {
-	                                    dropdown.remove();
-	                                },
-	                                onType: function(str) {
-	                                    var regex = /^[0-9,]+$/;
+							$('#universal_tracking_number').val(data.cargo_shipments);
+							select = $('#universal_tracking_number').selectize({
+								placeholder: 'Tracking Number(s)*',
+								delimiter: ',',
+								createOnBlur: true,
+								persist: false,
+								plugins: ['remove_button'],
+								onDropdownOpen: function(dropdown) {
+									dropdown.remove();
+								},
+								onType: function(str) {
+									var regex = /^[0-9,]+$/;
 
-	                                    if (!regex.test(str)) {
-	                                        select[0].selectize.setTextboxValue('');
-	                                    }
-	                                },
-	                                create: function(input) {
-	                                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
-	                                        return {
-	                                            value: input,
-	                                            text: input
-	                                        }
-	                                    }
-	                                    else {
-	                                        return false;
-	                                    }
-	                                }
-	                            });
+									if (!regex.test(str)) {
+										select[0].selectize.setTextboxValue('');
+									}
+								},
+								create: function(input) {
+									if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+										return {
+											value: input,
+											text: input
+										}
+									}
+									else {
+										return false;
+									}
+								}
+							});
 
-	                        }
-	                    });
-	                }
-	            });
+						}
+					});
+				}
+			});
 
-				var max_char = 190;
-				$('#universal_description').on('keypress copy paste',function (e) {
+			var max_char = 190;
+			$('#universal_description').on('keypress copy paste',function (e) {
 
-	                if ($(this).val().length == max_char) {
-	                    e.preventDefault();
-	                } else if ($(this).val().length > max_char) {
-	                    // Maximum exceeded
-	                    this.value = this.value.substring(0, max_char);
-	                }
-	            });
+				if ($(this).val().length == max_char) {
+					e.preventDefault();
+				} else if ($(this).val().length > max_char) {
+					// Maximum exceeded
+					this.value = this.value.substring(0, max_char);
+				}
+			});
 
-	            $('#universal_dispute_form').validate({
-	                ignore: [],
-	                errorClass:"danger",
-	                errorPlacement: function(error, element) {
-	                    error.addClass('w-100').appendTo(element.parents('.form-group'));
-	                },
-	                submitHandler: function(form) {
+			$('#universal_dispute_form').validate({
+				ignore: [],
+				errorClass:"danger",
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parents('.form-group'));
+				},
+				submitHandler: function(form) {
 
-	                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+					$(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-	                    var city_select = $('#universal_city_select').val();
-	                    var dispute_type_select = $('#universal_dispute_type_select').val();
-	                    var tracking_number = $('#universal_tracking_number').val();
-	                    var description = $('#universal_description').val();
-	                    var cargo_id = $('#universal_dispute_id').val();
-	                    $.ajax({
-	                        url: '{!! route('admin.dispute.create.universal') !!}',
-	                        method: 'POST',
-	                        data: {
-	                            '_token': '{{ csrf_token() }}',
-	                            'city_select': city_select,
-								'cargo_id': cargo_id,
-	                            'dispute_type_select':dispute_type_select,
-	                            'tracking_number':tracking_number,
-	                            'description':description
-	                        }
-	                    }).done(function(data){
-	                        $('#UniversalDisputeModal').modal('hide');
-	                        if (data.invalid !== undefined) {
+					var city_select = $('#universal_city_select').val();
+					var dispute_type_select = $('#universal_dispute_type_select').val();
+					var tracking_number = $('#universal_tracking_number').val();
+					var description = $('#universal_description').val();
+					var cargo_id = $('#universal_dispute_id').val();
+					$.ajax({
+						url: '{!! route('admin.dispute.create.universal') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'city_select': city_select,
+							'cargo_id': cargo_id,
+							'dispute_type_select':dispute_type_select,
+							'tracking_number':tracking_number,
+							'description':description
+						}
+					}).done(function(data){
+						$('#UniversalDisputeModal').modal('hide');
+						if (data.invalid !== undefined) {
 
-	                            var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
+							var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
 
-	                            toastr.error(message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-	                        }
+							toastr.error(message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+						}
 
-	                        if(data.success != undefined){
-	                            // table.ajax.reload();
-	                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-	                            var redirect = '{!! route('admin.dispute.index') !!}';
+						if(data.success != undefined){
+							// table.ajax.reload();
+							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							var redirect = '{!! route('admin.dispute.index') !!}';
 							window.location = redirect;
-	                        }
-	                    });
+						}
+					});
 
-	                }
+				}
 
 
-	            });
-	            $('#UniversalDisputeModal').on('hidden.bs.modal',function () {
-	                $('#universal_dispute_form')[0].reset();
-	                $('#UniversalDisputeCreate').removeAttr('disabled');
-	                select[0].selectize.destroy();
-	                $('#universal_city_select').empty().trigger('change');
-	                $('#universal_dispute_type_select').empty().trigger('change');
-	            });
-            @endif
+			});
+			$('#UniversalDisputeModal').on('hidden.bs.modal',function () {
+				$('#universal_dispute_form')[0].reset();
+				$('#UniversalDisputeCreate').removeAttr('disabled');
+				select[0].selectize.destroy();
+				$('#universal_city_select').empty().trigger('change');
+				$('#universal_dispute_type_select').empty().trigger('change');
+			});
+			@endif
 
 			@if (session('role_id') == 1 || in_array(28, session('permissions')))
-				$('#add_forwarding_details form').validate({
-					errorClass: 'danger',
-					successClass: 'success',
-					normalizer: function(value) {
-						return $.trim(value);
-					},
-					errorPlacement: function(error, element) {
-						error.addClass('w-100').appendTo(element.parent('.form-group'));
-					}
-				});
-			@endif
+			$('#add_forwarding_details form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				normalizer: function(value) {
+					return $.trim(value);
+				},
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				}
+			});
+					@endif
 
 			var picker = null;
 
@@ -1059,165 +1089,165 @@
 				if ($(this).hasClass('print')) {
 					print(cargo_consignment_id);
 				}
-				@if (session('role_id') == 1 || in_array(28, session('permissions')))
-					else if ($(this).hasClass('add_forwarding_details')) {
-						var link = $('#add_forwarding_details form .seal_number').attr('data-rule-remote');
+						@if (session('role_id') == 1 || in_array(28, session('permissions')))
+				else if ($(this).hasClass('add_forwarding_details')) {
+					var link = $('#add_forwarding_details form .seal_number').attr('data-rule-remote');
 
-						link = link.substring(0, link.indexOf('=')) + '=' + cargo_consignment_id;
+					link = link.substring(0, link.indexOf('=')) + '=' + cargo_consignment_id;
 
-						$('#add_forwarding_details form .seal_number').attr('data-rule-remote', link);
+					$('#add_forwarding_details form .seal_number').attr('data-rule-remote', link);
 
-						$.ajax({
-							url: '{!! route('admin.cargo.in_transit.forwarding_details') !!}',
-							method: 'POST',
-							data: {
-								'add': 1,
-								'cargo_consignment_id': cargo_consignment_id,
-								'_token': '{{ csrf_token() }}'
-							}
-						})
-						.done(function(data) {
-							$('#add_forwarding_details form .cargo_consignment_id').val(cargo_consignment_id);
+					$.ajax({
+						url: '{!! route('admin.cargo.in_transit.forwarding_details') !!}',
+						method: 'POST',
+						data: {
+							'add': 1,
+							'cargo_consignment_id': cargo_consignment_id,
+							'_token': '{{ csrf_token() }}'
+						}
+					})
+							.done(function(data) {
+								$('#add_forwarding_details form .cargo_consignment_id').val(cargo_consignment_id);
 
-							if ($('#add_forwarding_details form .junction_1').hasClass('select2-hidden-accessible') || $('#add_forwarding_details form .junction_2').hasClass('select2-hidden-accessible')) {
-								$('#add_forwarding_details form .junction_1').html('').select2('destroy');
-								$('#add_forwarding_details form .junction_2').html('').select2('destroy');
-							}
-
-							$.each(data.junctions, function(index, junction) {
-								$('#add_forwarding_details form .junction_1').append('<option value="' + junction.id + '">' + junction.name + '</option>');
-								$('#add_forwarding_details form .junction_2').append('<option value="' + junction.id + '">' + junction.name + '</option>');
-							});
-
-							$('#add_forwarding_details form .junction_1').prepend('<option value="" selected="selected"></option>').select2({
-								width: '100%',
-								placeholder: 'Junction 1*'
-							}).bind('change', function() {
-								$(this).valid();
-							});
-
-							$('#add_forwarding_details form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
-								width: '100%',
-								placeholder: 'Junction 2',
-								allowClear: true
-							});
-
-							if (picker) {
-								picker.pickadate('picker').clear();
-							}
-							else {
-								picker = $('#add_forwarding_details form .expected_arrival_date').pickadate({
-									firstDay: 1,
-									clear: '',
-									min: '{{ Carbon\Carbon::now() }}',
-									selectYears: true,
-									selectMonths: true,
-									formatSubmit: 'yyyy-mm-dd 00:00:00',
-									hiddenSuffix: '_formatted',
-									onSet: function(context) {
-										$('#add_forwarding_details form .expected_arrival_date').valid();
-									}
-								});
-							}
-
-							if ($('#add_forwarding_details form .shipping_mode').hasClass('select2-hidden-accessible')) {
-								$('#add_forwarding_details form .shipping_mode').html('').select2('destroy');
-							}
-
-							$.each(data.shipping_modes, function(index, shipping_mode) {
-								$('#add_forwarding_details form .shipping_mode').append('<option value="' + shipping_mode.id + '">' + shipping_mode.mode + '</option>');
-							});
-
-							$('#add_forwarding_details form .shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-								width: '100%',
-								placeholder: 'Shipment Mode*'
-							}).bind('change', function() {
-								$(this).valid();
-							});
-
-							if ($('#add_forwarding_details form .transport_mode').hasClass('select2-hidden-accessible')) {
-								$('#add_forwarding_details form .transport_mode').html('').select2('destroy');
-								$('#add_forwarding_details form .transport_mode_vendor').html('').select2('destroy');
-							}
-
-							$.each(data.transport_modes, function(index, transport_mode) {
-								$('#add_forwarding_details form .transport_mode').append('<option value="' + transport_mode.id + '">' + transport_mode.name + '</option>');
-							});
-
-							$('#add_forwarding_details form .transport_mode').prepend('<option value="" selected="selected"></option>').select2({
-								width: '100%',
-								placeholder: 'Transport Mode*'
-							}).bind('change', function() {
-								$(this).valid();
-
-								$('#add_forwarding_details form .transport_mode_vendor').html('');
-
-								$.each(transport_mode_vendors[this.value], function(index, vendor) {
-									var option = new Option(vendor.name, vendor.id, false, false);
-									$('#add_forwarding_details form .transport_mode_vendor').append(option);
-								});
-
-								var option = new Option('Others', 0, false, false);
-								$('#add_forwarding_details form .transport_mode_vendor').append(option);
-
-								$('#add_forwarding_details form .transport_mode_vendor').val(null).trigger('change');
-							});
-
-							transport_mode_vendors = data.transport_mode_vendors;
-
-							$('#add_forwarding_details form .transport_mode_vendor').prepend('<option value="" selected="selected"></option>').select2({
-								width: '100%',
-								placeholder: 'Vendor*'
-							}).bind('change', function() {
-								if (this.value) {
-									$(this).valid();
+								if ($('#add_forwarding_details form .junction_1').hasClass('select2-hidden-accessible') || $('#add_forwarding_details form .junction_2').hasClass('select2-hidden-accessible')) {
+									$('#add_forwarding_details form .junction_1').html('').select2('destroy');
+									$('#add_forwarding_details form .junction_2').html('').select2('destroy');
 								}
 
-								if (this.value && this.value == 0) {
-									$('#add_forwarding_details #new_vendor').removeClass('d-none');
+								$.each(data.junctions, function(index, junction) {
+									$('#add_forwarding_details form .junction_1').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+									$('#add_forwarding_details form .junction_2').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+								});
+
+								$('#add_forwarding_details form .junction_1').prepend('<option value="" selected="selected"></option>').select2({
+									width: '100%',
+									placeholder: 'Junction 1*'
+								}).bind('change', function() {
+									$(this).valid();
+								});
+
+								$('#add_forwarding_details form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
+									width: '100%',
+									placeholder: 'Junction 2',
+									allowClear: true
+								});
+
+								if (picker) {
+									picker.pickadate('picker').clear();
 								}
 								else {
-									$('#add_forwarding_details #new_vendor').addClass('d-none');
-
-									$('#add_forwarding_details #vendor_name-error').remove();
+									picker = $('#add_forwarding_details form .expected_arrival_date').pickadate({
+										firstDay: 1,
+										clear: '',
+										min: '{{ Carbon\Carbon::now() }}',
+										selectYears: true,
+										selectMonths: true,
+										formatSubmit: 'yyyy-mm-dd 00:00:00',
+										hiddenSuffix: '_formatted',
+										onSet: function(context) {
+											$('#add_forwarding_details form .expected_arrival_date').valid();
+										}
+									});
 								}
+
+								if ($('#add_forwarding_details form .shipping_mode').hasClass('select2-hidden-accessible')) {
+									$('#add_forwarding_details form .shipping_mode').html('').select2('destroy');
+								}
+
+								$.each(data.shipping_modes, function(index, shipping_mode) {
+									$('#add_forwarding_details form .shipping_mode').append('<option value="' + shipping_mode.id + '">' + shipping_mode.mode + '</option>');
+								});
+
+								$('#add_forwarding_details form .shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+									width: '100%',
+									placeholder: 'Shipment Mode*'
+								}).bind('change', function() {
+									$(this).valid();
+								});
+
+								if ($('#add_forwarding_details form .transport_mode').hasClass('select2-hidden-accessible')) {
+									$('#add_forwarding_details form .transport_mode').html('').select2('destroy');
+									$('#add_forwarding_details form .transport_mode_vendor').html('').select2('destroy');
+								}
+
+								$.each(data.transport_modes, function(index, transport_mode) {
+									$('#add_forwarding_details form .transport_mode').append('<option value="' + transport_mode.id + '">' + transport_mode.name + '</option>');
+								});
+
+								$('#add_forwarding_details form .transport_mode').prepend('<option value="" selected="selected"></option>').select2({
+									width: '100%',
+									placeholder: 'Transport Mode*'
+								}).bind('change', function() {
+									$(this).valid();
+
+									$('#add_forwarding_details form .transport_mode_vendor').html('');
+
+									$.each(transport_mode_vendors[this.value], function(index, vendor) {
+										var option = new Option(vendor.name, vendor.id, false, false);
+										$('#add_forwarding_details form .transport_mode_vendor').append(option);
+									});
+
+									var option = new Option('Others', 0, false, false);
+									$('#add_forwarding_details form .transport_mode_vendor').append(option);
+
+									$('#add_forwarding_details form .transport_mode_vendor').val(null).trigger('change');
+								});
+
+								transport_mode_vendors = data.transport_mode_vendors;
+
+								$('#add_forwarding_details form .transport_mode_vendor').prepend('<option value="" selected="selected"></option>').select2({
+									width: '100%',
+									placeholder: 'Vendor*'
+								}).bind('change', function() {
+									if (this.value) {
+										$(this).valid();
+									}
+
+									if (this.value && this.value == 0) {
+										$('#add_forwarding_details #new_vendor').removeClass('d-none');
+									}
+									else {
+										$('#add_forwarding_details #new_vendor').addClass('d-none');
+
+										$('#add_forwarding_details #vendor_name-error').remove();
+									}
+								});
+
+								if ($('#add_forwarding_details form .receiver_id').hasClass('select2-hidden-accessible')) {
+									$('#add_forwarding_details form .receiver_id').html('').select2('destroy');
+								}
+
+								$.each(data.receivers, function(index, receiver) {
+									$('#add_forwarding_details form .receiver_id').append('<option value="' + receiver.id + '">' + receiver.name + '</option>');
+								});
+
+								$('#add_forwarding_details form .receiver_id').prepend('<option value="" selected="selected"></option>').select2({
+									width: '100%',
+									placeholder: 'Receiver Name',
+									allowClear: true
+								}).bind('change', function() {
+									$(this).valid();
+								});
+
+								$('#add_forwarding_details form .junction_1').val(data.cargo_consignment.junction_hub_1_id).trigger('change');
+								$('#add_forwarding_details form .junction_2').val(data.cargo_consignment.junction_hub_2_id).trigger('change');
+								picker.pickadate('picker').set('select', data.cargo_consignment.expected_arrival_date);
+								$('#add_forwarding_details form .shipping_mode').val(data.cargo_consignment.shipping_mode_id).trigger('change');
+								$('#add_forwarding_details form .transport_mode').val(data.cargo_consignment.transport_mode_id).trigger('change');
+								$('#add_forwarding_details form .transport_mode_vendor').val(data.cargo_consignment.transport_mode_vendor_id).trigger('change');
+								$('#add_forwarding_details form .seal_number').val(data.cargo_consignment.seal_number);
+								$('#add_forwarding_details form .builty_number').val(data.cargo_consignment.builty_number);
+								$('#add_forwarding_details form .vendor_weight').val(data.cargo_consignment.vendor_weight);
+								$('#add_forwarding_details form .sender_name').html(data.cargo_consignment.sender_name);
+								$('#add_forwarding_details form .receiver_id').val(data.cargo_consignment.receiver_id).trigger('change');
+								$('#add_forwarding_details form .weight_charges_per_kg').val(data.cargo_consignment.weight_charges_per_kg);
+								$('#add_forwarding_details form .extra_charges').val(data.cargo_consignment.extra_charges);
+								$('#add_forwarding_details form .total_weight_charges').val(data.cargo_consignment.total_weight_charges);
+
+								$('#add_forwarding_details').modal('show');
 							});
-
-							if ($('#add_forwarding_details form .receiver_id').hasClass('select2-hidden-accessible')) {
-								$('#add_forwarding_details form .receiver_id').html('').select2('destroy');
-							}
-
-							$.each(data.receivers, function(index, receiver) {
-								$('#add_forwarding_details form .receiver_id').append('<option value="' + receiver.id + '">' + receiver.name + '</option>');
-							});
-
-							$('#add_forwarding_details form .receiver_id').prepend('<option value="" selected="selected"></option>').select2({
-								width: '100%',
-								placeholder: 'Receiver Name',
-								allowClear: true
-							}).bind('change', function() {
-								$(this).valid();
-							});
-
-							$('#add_forwarding_details form .junction_1').val(data.cargo_consignment.junction_hub_1_id).trigger('change');
-							$('#add_forwarding_details form .junction_2').val(data.cargo_consignment.junction_hub_2_id).trigger('change');
-							picker.pickadate('picker').set('select', data.cargo_consignment.expected_arrival_date);
-							$('#add_forwarding_details form .shipping_mode').val(data.cargo_consignment.shipping_mode_id).trigger('change');
-							$('#add_forwarding_details form .transport_mode').val(data.cargo_consignment.transport_mode_id).trigger('change');
-							$('#add_forwarding_details form .transport_mode_vendor').val(data.cargo_consignment.transport_mode_vendor_id).trigger('change');
-							$('#add_forwarding_details form .seal_number').val(data.cargo_consignment.seal_number);
-							$('#add_forwarding_details form .builty_number').val(data.cargo_consignment.builty_number);
-							$('#add_forwarding_details form .vendor_weight').val(data.cargo_consignment.vendor_weight);
-							$('#add_forwarding_details form .sender_name').html(data.cargo_consignment.sender_name);
-							$('#add_forwarding_details form .receiver_id').val(data.cargo_consignment.receiver_id).trigger('change');
-							$('#add_forwarding_details form .weight_charges_per_kg').val(data.cargo_consignment.weight_charges_per_kg);
-							$('#add_forwarding_details form .extra_charges').val(data.cargo_consignment.extra_charges);
-							$('#add_forwarding_details form .total_weight_charges').val(data.cargo_consignment.total_weight_charges);
-
-							$('#add_forwarding_details').modal('show');
-						});
-					}
-				@endif
+				}
+						@endif
 				else if ($(this).hasClass('view_forwarding_details')) {
 					$('#view_forwarding_details .modal-body').html('');
 
@@ -1230,49 +1260,49 @@
 							'_token': '{{ csrf_token() }}'
 						}
 					})
-					.done(function(data) {
-						var cargo_consignment = data.cargo_consignment;
+							.done(function(data) {
+								var cargo_consignment = data.cargo_consignment;
 
-						var details = '<table class="table table-sm table-bordered"><tbody>';
+								var details = '<table class="table table-sm table-bordered"><tbody>';
 
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 1</strong></td><td class="align-middle text-center">' + cargo_consignment.junction_hub_1 + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 2</strong></td><td class="align-middle text-center">' + ((cargo_consignment.junction_hub_2) ? cargo_consignment.junction_hub_2 : '') + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Expected Arrival Date</strong></td><td class="align-middle text-center">' + cargo_consignment.expected_arrival_date + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipping Mode</strong></td><td class="align-middle text-center">' + cargo_consignment.shipping_mode + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode Vendor</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode_vendor + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Seal Number</strong></td><td class="align-middle text-center">' + cargo_consignment.seal_number + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Builty Number</strong></td><td class="align-middle text-center">' + ((cargo_consignment.builty_number) ? cargo_consignment.builty_number : '') + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipments Weight</strong></td><td class="align-middle text-center">' + cargo_consignment.shipments_weight + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td><td class="align-middle text-center">' + cargo_consignment.actual_weight + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Vendor Weight</strong></td><td class="align-middle text-center">' + ((cargo_consignment.vendor_weight) ? cargo_consignment.vendor_weight : '') + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Weight Charges / kg</strong></td><td class="align-middle text-center">' + ((cargo_consignment.weight_charges_per_kg) ? cargo_consignment.weight_charges_per_kg : '') + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Extra Charges</strong></td><td class="align-middle text-center">' + ((cargo_consignment.extra_charges) ? cargo_consignment.extra_charges : '') + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Total Weight Charges</strong></td><td class="align-middle text-center">' + ((cargo_consignment.total_weight_charges) ? cargo_consignment.total_weight_charges : '') + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Sender Name</strong></td><td class="align-middle text-center">' + cargo_consignment.sender_name + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Receiver Name</strong></td><td class="align-middle text-center">' + cargo_consignment.receiver_name + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 1</strong></td><td class="align-middle text-center">' + cargo_consignment.junction_hub_1 + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 2</strong></td><td class="align-middle text-center">' + ((cargo_consignment.junction_hub_2) ? cargo_consignment.junction_hub_2 : '') + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Expected Arrival Date</strong></td><td class="align-middle text-center">' + cargo_consignment.expected_arrival_date + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipping Mode</strong></td><td class="align-middle text-center">' + cargo_consignment.shipping_mode + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode Vendor</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode_vendor + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Seal Number</strong></td><td class="align-middle text-center">' + cargo_consignment.seal_number + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Builty Number</strong></td><td class="align-middle text-center">' + ((cargo_consignment.builty_number) ? cargo_consignment.builty_number : '') + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipments Weight</strong></td><td class="align-middle text-center">' + cargo_consignment.shipments_weight + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td><td class="align-middle text-center">' + cargo_consignment.actual_weight + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Vendor Weight</strong></td><td class="align-middle text-center">' + ((cargo_consignment.vendor_weight) ? cargo_consignment.vendor_weight : '') + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Weight Charges / kg</strong></td><td class="align-middle text-center">' + ((cargo_consignment.weight_charges_per_kg) ? cargo_consignment.weight_charges_per_kg : '') + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Extra Charges</strong></td><td class="align-middle text-center">' + ((cargo_consignment.extra_charges) ? cargo_consignment.extra_charges : '') + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Total Weight Charges</strong></td><td class="align-middle text-center">' + ((cargo_consignment.total_weight_charges) ? cargo_consignment.total_weight_charges : '') + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Sender Name</strong></td><td class="align-middle text-center">' + cargo_consignment.sender_name + '</td></tr>';
+								details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Receiver Name</strong></td><td class="align-middle text-center">' + cargo_consignment.receiver_name + '</td></tr>';
 
-						details += '</tbody></table>';
+								details += '</tbody></table>';
 
-						$('#view_forwarding_details .modal-body').html(details);
+								$('#view_forwarding_details .modal-body').html(details);
 
-						$('#view_forwarding_details').modal('show');
-					});
+								$('#view_forwarding_details').modal('show');
+							});
 				}
-				@if (session('role_id') == 1 || in_array(31, session('permissions')))
-					else if ($(this).hasClass('receive')) {
-						$('#receive_form .cargo_number').val(cargo_consignment_id);
+						@if (session('role_id') == 1 || in_array(31, session('permissions')))
+				else if ($(this).hasClass('receive')) {
+					$('#receive_form .cargo_number').val(cargo_consignment_id);
 
-						$('#receive_form').submit();
-					}
+					$('#receive_form').submit();
+				}
 				@endif
 			});
 
-            $('#datatable tbody').on('click','tr td.cargo_number button.print',function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
+			$('#datatable tbody').on('click','tr td.cargo_number button.print',function () {
+				var id = parseInt($(this).parents('tr').attr('id'));
 				print(id);
 
-            });
+			});
 		});
 	</script>
 @endsection

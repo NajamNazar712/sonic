@@ -40,6 +40,9 @@ class ShipperReportsController extends Controller
             ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47])
         ->where('shipments.user_id',Auth::id());
         $datatable = Datatables::of($shipments)
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->addColumn('aging',function ($shipments){
                 $now = Carbon::now();
                 $days = Carbon::now()->diffInDays($shipments->arrival);
@@ -107,6 +110,19 @@ class ShipperReportsController extends Controller
                 ->where('u.id', session('user_id'));
 
             $datatable = Datatables::of($sales)
+                ->editColumn('s_collection_amount', function($shipment){
+                    return number_format($shipment->s_collection_amount);
+                })
+
+                ->editColumn('d_collection_amount', function($shipment){
+                    return number_format($shipment->d_collection_amount);
+                })
+                ->editColumn('weight_charges', function($shipment){
+                    return number_format($shipment->weight_charges);
+                })
+                ->editColumn('cash_handling_charges', function($shipment){
+                    return number_format($shipment->cash_handling_charges);
+                })
             ->editColumn('p_collection_amount',function($sale){
                 $amount = '';
                 if($sale->p_collection_amount != null){
@@ -116,7 +132,7 @@ class ShipperReportsController extends Controller
                 }else{
                     $amount = $sale->s_collection_amount;
                 }
-                return $amount;
+                return number_format($amount);
             });
 
             if($tracking = $request->get('search_tracking')){

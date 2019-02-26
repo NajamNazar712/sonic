@@ -207,21 +207,21 @@
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
 				scrollX: true,
-                "autoWidth": false,
+                autoWidth : false,
                 paging:false,
                 columns: [
-					{name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{name: 'tracking_number', class: 'align-middle tracking_number'},
-					{name: 'order_id', class: 'align-middle order_id'},
-					{name: 'service_type', class: 'align-middle service_type'},
-					{name: 'destination', class: 'align-middle destination'},
-					{name: 'amount', class: 'align-middle amount'},
+					{name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
+					{name: 'tracking_number', class: 'align-middle tracking_number', orderable: false},
+					{name: 'order_id', class: 'align-middle order_id', orderable: false},
+					{name: 'service_type', class: 'align-middle service_type', orderable: false},
+					{name: 'destination', class: 'align-middle destination', orderable: false},
+					{name: 'amount', class: 'align-middle amount', orderable: false},
 					{name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
-					var info = table.page.info();
-
-					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+					// var info = table.page.info();
+                    //
+					// $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 				},
 				initComplete: function() {
 					this.api().table().columns.adjust();
@@ -267,12 +267,12 @@
 
 								if (index === -1) {
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger cargo_remove"><i class="la la-close"></i></a>';
-
-                                    table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount,remove]).node().id = data.details.id;
+                                    var rowNo = table.rows().count();
+                                    table.row.add([rowNo+1, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount,remove]).node().id = data.details.id;
 									table.draw(false);
-
-									shipment_ids.push(data.details.id);
-
+                                    table.order([0, 'desc']).draw();
+                                    shipment_ids.push(data.details.id);
+                                    scan_sound(1);
 									$('#information .scanned').html(shipment_ids.length);
 
 									if (hub_id == 0) {
@@ -303,14 +303,14 @@
 							}
 							else {
 								$('#add_shipment_form button.add').prop('disabled', false);
-
+                                scan_sound(2);
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 							}
 						});
 					}
 					else {
 						$('#add_shipment_form button.add').prop('disabled', false);
-
+                        scan_sound(2);
 						toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 					}
 
