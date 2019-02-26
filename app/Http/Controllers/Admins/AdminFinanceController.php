@@ -1556,92 +1556,105 @@ class AdminFinanceController extends Controller
             $payable = $amount - ($charges + $gst);
         }
 
-        $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
-
-        if ($pending_payment->exists()) {
-            $pending_payment = $pending_payment->first();
-
-            $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
-
-            if ($type == 0) {
-                $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
-            }
-            else {
-                $pending_payment->returned_shipments = $pending_payment->returned_shipments + 1;
-            }
-
-            $pending_payment->save();
-        }
-        else {
-            $pending_payment = new PendingPayment();
-
-            $pending_payment->user_id = $shipment->user_id;
-            $pending_payment->total_shipments = 1;
-
-            if ($type == 0) {
-                $pending_payment->delivered_shipments = 1;
-                $pending_payment->returned_shipments = 0;
-                $pending_payment->adjusted_shipments = 0;
-            }
-            else {
-                $pending_payment->delivered_shipments = 0;
-                $pending_payment->returned_shipments = 1;
-                $pending_payment->adjusted_shipments = 0;
-            }
-
-            $pending_payment->save();
-        }
-
         $account_type_id = $shipment->user->account_type_id;
 
-        $pending_payment_shipment = new PendingPaymentShipment();
+        if ($account_type_id == 1 || ($account_type_id == 2 && !$shipment->packaging_material_request && $amount != 0) {
+            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
-        if ($account_type_id == 1) {
-            $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-            $pending_payment_shipment->shipment_id = $shipment_id;
-            $pending_payment_shipment->type = $type;
-            $pending_payment_shipment->amount = $amount;
-            $pending_payment_shipment->charges = $charges;
-            $pending_payment_shipment->gst = $gst;
-            $pending_payment_shipment->payable = $payable;
+            if ($pending_payment->exists()) {
+                $pending_payment = $pending_payment->first();
 
-            $pending_payment_shipment->save();
-        }
-        else {
-            if (!$shipment->packaging_material_request) {
-                if ($amount != 0) {
-                    $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-                    $pending_payment_shipment->shipment_id = $shipment_id;
-                    $pending_payment_shipment->type = $type;
-                    $pending_payment_shipment->amount = $amount;
-                    $pending_payment_shipment->charges = 0;
-                    $pending_payment_shipment->gst = 0;
-                    $pending_payment_shipment->payable = $amount;
+                $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
 
-                    $pending_payment_shipment->save();
+                if ($type == 0) {
+                    $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
+                }
+                else {
+                    $pending_payment->returned_shipments = $pending_payment->returned_shipments + 1;
                 }
 
-                $pending_invoice_shipment = new PendingInvoiceShipment();
-
-                $pending_invoice_shipment->shipment_id = $shipment_id;
-                $pending_invoice_shipment->type = $type;
-                $pending_invoice_shipment->charges = $charges;
-                $pending_invoice_shipment->gst = $gst;
-                $pending_invoice_shipment->invoice_amount = $charges + $gst;
-
-                $pending_invoice_shipment->save();
+                $pending_payment->save();
             }
             else {
-                $pending_invoice_shipment = new PendingInvoiceShipment();
+                $pending_payment = new PendingPayment();
 
-                $pending_invoice_shipment->shipment_id = $shipment_id;
-                $pending_invoice_shipment->type = $type;
-                $pending_invoice_shipment->charges = $charges;
-                $pending_invoice_shipment->gst = $gst;
-                $pending_invoice_shipment->invoice_amount = $charges + $gst;
+                $pending_payment->user_id = $shipment->user_id;
+                $pending_payment->total_shipments = 1;
 
-                $pending_invoice_shipment->save();
+                if ($type == 0) {
+                    $pending_payment->delivered_shipments = 1;
+                    $pending_payment->returned_shipments = 0;
+                    $pending_payment->adjusted_shipments = 0;
+                }
+                else {
+                    $pending_payment->delivered_shipments = 0;
+                    $pending_payment->returned_shipments = 1;
+                    $pending_payment->adjusted_shipments = 0;
+                }
+
+                $pending_payment->save();
             }
+
+            $pending_payment_shipment = new PendingPaymentShipment();
+
+            if ($account_type_id == 1) {
+                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                $pending_payment_shipment->shipment_id = $shipment_id;
+                $pending_payment_shipment->type = $type;
+                $pending_payment_shipment->amount = $amount;
+                $pending_payment_shipment->charges = $charges;
+                $pending_payment_shipment->gst = $gst;
+                $pending_payment_shipment->payable = $payable;
+
+                $pending_payment_shipment->save();
+            }
+            else {
+                if (!$shipment->packaging_material_request) {
+                    if ($amount != 0) {
+                        $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                        $pending_payment_shipment->shipment_id = $shipment_id;
+                        $pending_payment_shipment->type = $type;
+                        $pending_payment_shipment->amount = $amount;
+                        $pending_payment_shipment->charges = 0;
+                        $pending_payment_shipment->gst = 0;
+                        $pending_payment_shipment->payable = $amount;
+
+                        $pending_payment_shipment->save();
+                    }
+
+                    $pending_invoice_shipment = new PendingInvoiceShipment();
+
+                    $pending_invoice_shipment->shipment_id = $shipment_id;
+                    $pending_invoice_shipment->type = $type;
+                    $pending_invoice_shipment->charges = $charges;
+                    $pending_invoice_shipment->gst = $gst;
+                    $pending_invoice_shipment->invoice_amount = $charges + $gst;
+
+                    $pending_invoice_shipment->save();
+                }
+                else {
+                    $pending_invoice_shipment = new PendingInvoiceShipment();
+
+                    $pending_invoice_shipment->shipment_id = $shipment_id;
+                    $pending_invoice_shipment->type = $type;
+                    $pending_invoice_shipment->charges = $charges;
+                    $pending_invoice_shipment->gst = $gst;
+                    $pending_invoice_shipment->invoice_amount = $charges + $gst;
+
+                    $pending_invoice_shipment->save();
+                }
+            }
+        }
+        else {
+            $pending_invoice_shipment = new PendingInvoiceShipment();
+
+            $pending_invoice_shipment->shipment_id = $shipment_id;
+            $pending_invoice_shipment->type = $type;
+            $pending_invoice_shipment->charges = $charges;
+            $pending_invoice_shipment->gst = $gst;
+            $pending_invoice_shipment->invoice_amount = $charges + $gst;
+
+            $pending_invoice_shipment->save();
         }
     }
 
