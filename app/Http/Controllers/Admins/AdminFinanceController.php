@@ -1558,7 +1558,7 @@ class AdminFinanceController extends Controller
 
         $account_type_id = $shipment->user->account_type_id;
 
-        if ($account_type_id == 1 || ($account_type_id == 2 && !$shipment->packaging_material_request && $amount != 0) {
+        if ($account_type_id == 1 || ($account_type_id == 2 && !$shipment->packaging_material_request && $amount != 0)) {
             $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
             if ($pending_payment->exists()) {
