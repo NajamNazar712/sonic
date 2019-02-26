@@ -3284,7 +3284,7 @@ class AdminFinanceController extends Controller
             $due_date_days = 7;
         }
 
-        $users = Users::where('account_type_id', 2)->get();
+        $users = User::where('account_type_id', 2)->get();
 
         foreach ($users as $user) {
             $generate = FALSE;
