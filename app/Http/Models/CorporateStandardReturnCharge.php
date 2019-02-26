@@ -4,7 +4,7 @@ namespace App\Http\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CorporateStandardInsuranceCharges extends Model
+class CorporateStandardReturnCharge extends Model
 {
     //
 }

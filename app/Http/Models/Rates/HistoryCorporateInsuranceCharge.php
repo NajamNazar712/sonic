@@ -4,7 +4,7 @@ namespace App\Http\Models\Rates;
 
 use Illuminate\Database\Eloquent\Model;
 
-class HistoryCorporateInsuranceCharges extends Model
+class HistoryCorporateInsuranceCharge extends Model
 {
     //
     protected $fillable = [
