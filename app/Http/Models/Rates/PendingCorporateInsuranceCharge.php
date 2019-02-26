@@ -4,10 +4,10 @@ namespace App\Http\Models\Rates;
 
 use Illuminate\Database\Eloquent\Model;
 
-class HistoryCorporateReturnCharges extends Model
+class PendingCorporateInsuranceCharge extends Model
 {
     //
     protected $fillable = [
-        'user_id','shipping_mode_id','local','national'
+        'user_id','shipping_mode_id','range_up','range_down','charges'
     ];
 }

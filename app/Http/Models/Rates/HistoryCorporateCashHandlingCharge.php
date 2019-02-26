@@ -4,7 +4,7 @@ namespace App\Http\Models\Rates;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PendingCorporateCashHandlingCharges extends Model
+class HistoryCorporateCashHandlingCharge extends Model
 {
     //
     protected $fillable = [

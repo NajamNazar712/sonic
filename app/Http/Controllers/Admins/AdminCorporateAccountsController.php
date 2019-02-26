@@ -10,37 +10,37 @@ use App\Http\Models\Admin\StandardPackagingCharge;
 use App\Http\Models\Admin\StandardReturnCharge;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\CorporateBookingTypeCharge;
-use App\Http\Models\CorporateCashHandlingCharges;
+use App\Http\Models\CorporateCashHandlingCharge;
 use App\Http\Models\CorporateDiscountCharge;
 use App\Http\Models\CorporateFuelSurcharge;
-use App\Http\Models\CorporateInsuranceCharges;
+use App\Http\Models\CorporateInsuranceCharge;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\CorporateReturnCharges;
+use App\Http\Models\CorporateReturnCharge;
 use App\Http\Models\CorporateStandardBookingTypeCharge;
-use App\Http\Models\CorporateStandardCashHandlingCharges;
+use App\Http\Models\CorporateStandardCashHandlingCharge;
 use App\Http\Models\CorporateStandardFuelSurcharge;
-use App\Http\Models\CorporateStandardInsuranceCharges;
+use App\Http\Models\CorporateStandardInsuranceCharge;
 use App\Http\Models\CorporateStandardMinChargeableWeight;
-use App\Http\Models\CorporateStandardReturnCharges;
+use App\Http\Models\CorporateStandardReturnCharge;
 use App\Http\Models\CorporateStandardWeightCharge;
 use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\Rates\CorporateRateHistory;
 use App\Http\Models\Rates\HistoryCorporateMinChargeableWeight;
-use App\Http\Models\Rates\PendingCorporateCashHandlingCharges;
+use App\Http\Models\Rates\PendingCorporateCashHandlingCharge;
 use App\Http\Models\Rates\PendingCorporateDiscountCharge;
 use App\Http\Models\Rates\PendingCorporateFuelSurcharge;
-use App\Http\Models\Rates\PendingCorporateInsuranceCharges;
+use App\Http\Models\Rates\PendingCorporateInsuranceCharge;
 use App\Http\Models\Rates\PendingCorporateMinChargeableWeight;
 use App\Http\Models\Rates\PendingCorporateRateStatus;
-use App\Http\Models\Rates\PendingCorporateReturnCharges;
+use App\Http\Models\Rates\PendingCorporateReturnCharge;
 use App\Http\Models\Rates\PendingCorporateWeightCharge;
-use App\Http\Models\Rates\HistoryCorporateCashHandlingCharges;
+use App\Http\Models\Rates\HistoryCorporateCashHandlingCharge;
 use App\Http\Models\Rates\HistoryCorporateDiscountCharge;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
-use App\Http\Models\Rates\HistoryCorporateInsuranceCharges;
+use App\Http\Models\Rates\HistoryCorporateInsuranceCharge;
 use App\Http\Models\Rates\HistoryCorporateRateStatus;
-use App\Http\Models\Rates\HistoryCorporateReturnCharges;
+use App\Http\Models\Rates\HistoryCorporateReturnCharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Shipper\User;
 use Carbon\Carbon;
@@ -66,9 +66,9 @@ class AdminCorporateAccountsController extends Controller
             $min_weight = CorporateStandardMinChargeableWeight::all()->groupBy('shipping_mode_id');
             $weight = CorporateStandardWeightCharge::all()->groupBy('shipping_mode_id');
             $bookingType = CorporateStandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
-            $cash = CorporateStandardCashHandlingCharges::all()->groupBy('shipping_mode_id');
-            $insurance = CorporateStandardInsuranceCharges::all()->groupBy('shipping_mode_id');
-            $return = CorporateStandardReturnCharges::all()->groupBy('shipping_mode_id');
+            $cash = CorporateStandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
+            $insurance = CorporateStandardInsuranceCharge::all()->groupBy('shipping_mode_id');
+            $return = CorporateStandardReturnCharge::all()->groupBy('shipping_mode_id');
             $fuel = CorporateStandardFuelSurcharge::all()->groupBy('shipping_mode_id');
             return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight,'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight]);
         }
@@ -532,7 +532,7 @@ class AdminCorporateAccountsController extends Controller
                 //Cash handling Charges
                 if($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on'){
                     foreach ($request->on_cash_range_up as $ind => $on_cash_range_up){
-                        CorporateCashHandlingCharges::create([
+                        CorporateCashHandlingCharge::create([
                             'user_id'=>$id,
                             'shipping_mode_id'=>1,
                             'range_up'=> $request->on_cash_range_up[$ind],
@@ -544,7 +544,7 @@ class AdminCorporateAccountsController extends Controller
                 //insurance charges
                 if($request->has('on_insurance_charges_switch') && $request->on_insurance_charges_switch == 'on'){
                     foreach ($request->on_ins_range_up as $insurance => $on_ins_range_up){
-                        CorporateInsuranceCharges::create([
+                        CorporateInsuranceCharge::create([
                             'user_id'=>$id,
                             'shipping_mode_id'=>1,
                             'range_up'=> $request->on_ins_range_up[$insurance],
@@ -555,7 +555,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 //Return Charges
                 if($request->has('on_return_switch') && $request->on_return_switch == 'on'){
-                    CorporateReturnCharges::create([
+                    CorporateReturnCharge::create([
                         'user_id'=>$id,
                         'shipping_mode_id'=>1,
                         'local'=> $request->on_return_local_charges,
@@ -684,7 +684,7 @@ class AdminCorporateAccountsController extends Controller
                 //Cash handling Charges
                 if($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on'){
                     foreach ($request->ol_cash_range_up as $ind => $ol_cash_range_up){
-                        CorporateCashHandlingCharges::create([
+                        CorporateCashHandlingCharge::create([
                             'user_id'=>$id,
                             'shipping_mode_id'=>2,
                             'range_up'=> $request->ol_cash_range_up[$ind],
@@ -696,7 +696,7 @@ class AdminCorporateAccountsController extends Controller
                 //insurance charges
                 if($request->has('ol_insurance_charges_switch') && $request->ol_insurance_charges_switch == 'on'){
                     foreach ($request->ol_ins_range_up as $insurance => $ol_ins_range_up){
-                        CorporateInsuranceCharges::create([
+                        CorporateInsuranceCharge::create([
                             'user_id'=>$id,
                             'shipping_mode_id'=>2,
                             'range_up'=> $request->ol_ins_range_up[$insurance],
@@ -707,7 +707,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 //Return Charges
                 if($request->has('ol_return_switch') && $request->ol_return_switch == 'on'){
-                    CorporateReturnCharges::create([
+                    CorporateReturnCharge::create([
                         'user_id'=>$id,
                         'shipping_mode_id'=>2,
                         'local'=> $request->ol_return_local_charges,
@@ -836,7 +836,7 @@ class AdminCorporateAccountsController extends Controller
                 //Cash handling Charges
                 if ($request->has('detain_cash_handling_switch') && $request->detain_cash_handling_switch == 'on') {
                     foreach ($request->detain_cash_range_up as $ind => $detain_cash_range_up) {
-                        CorporateCashHandlingCharges::create([
+                        CorporateCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'range_up' => $request->detain_cash_range_up[$ind],
@@ -848,7 +848,7 @@ class AdminCorporateAccountsController extends Controller
                 //insurance charges
                 if ($request->has('detain_insurance_charges_switch') && $request->detain_insurance_charges_switch == 'on') {
                     foreach ($request->detain_ins_range_up as $insurance => $detain_ins_range_up) {
-                        CorporateInsuranceCharges::create([
+                        CorporateInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'range_up' => $request->detain_ins_range_up[$insurance],
@@ -859,7 +859,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 //Return Charges
                 if ($request->has('detain_return_switch') && $request->detain_return_switch == 'on') {
-                    CorporateReturnCharges::create([
+                    CorporateReturnCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
                         'local' => $request->detain_return_local_charges,
@@ -988,7 +988,7 @@ class AdminCorporateAccountsController extends Controller
                 //Cash handling Charges
                 if($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on'){
                     foreach ($request->sameday_cash_range_up as $ind => $sameday_cash_range_up){
-                        CorporateCashHandlingCharges::create([
+                        CorporateCashHandlingCharge::create([
                             'user_id'=>$id,
                             'shipping_mode_id'=>4,
                             'range_up'=> $request->sameday_cash_range_up[$ind],
@@ -1000,7 +1000,7 @@ class AdminCorporateAccountsController extends Controller
                 //insurance charges
                 if($request->has('sameday_insurance_charges_switch') && $request->sameday_insurance_charges_switch == 'on'){
                     foreach ($request->sameday_ins_range_up as $insurance => $sameday_ins_range_up){
-                        CorporateInsuranceCharges::create([
+                        CorporateInsuranceCharge::create([
                             'user_id'=>$id,
                             'shipping_mode_id'=>4,
                             'range_up'=> $request->sameday_ins_range_up[$insurance],
@@ -1011,7 +1011,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 //Return Charges
                 if($request->has('sameday_return_switch') && $request->sameday_return_switch == 'on'){
-                    CorporateReturnCharges::create([
+                    CorporateReturnCharge::create([
                         'user_id'=>$id,
                         'shipping_mode_id'=>4,
                         'local'=> $request->sameday_return_local_charges,
@@ -1084,9 +1084,9 @@ class AdminCorporateAccountsController extends Controller
             $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $cash = CorporateCashHandlingCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $insurance = CorporateInsuranceCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $return = CorporateReturnCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $cash = CorporateCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $insurance = CorporateInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $return = CorporateReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $fuel = CorporateFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $discount = CorporateDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
@@ -1098,9 +1098,9 @@ class AdminCorporateAccountsController extends Controller
             $min_weight = PendingCorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $weight = PendingCorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $cash = PendingCorporateCashHandlingCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $insurance = PendingCorporateInsuranceCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $return = PendingCorporateReturnCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $cash = PendingCorporateCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $insurance = PendingCorporateInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $return = PendingCorporateReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $fuel = PendingCorporateFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $discount = PendingCorporateDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
@@ -1716,11 +1716,11 @@ class AdminCorporateAccountsController extends Controller
                     }
                     //Cash handling Charges
                     if ($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on') {
-                        CorporateCashHandlingCharges::where(['user_id' => $id, 'shipping_mode_id' => 1])->whereNotIn('id', $request->on_cash_record)->delete();
+                        CorporateCashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->whereNotIn('id', $request->on_cash_record)->delete();
 
                         foreach ($request->on_cash_record as $index => $on_cash_record) {
                             if ($request->on_cash_record[$index] != null) {
-                                CorporateCashHandlingCharges::where(['id' => $request->on_cash_record[$index]])->update([
+                                CorporateCashHandlingCharge::where(['id' => $request->on_cash_record[$index]])->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 1,
                                     'range_up' => $request->on_cash_range_up[$index],
@@ -1729,7 +1729,7 @@ class AdminCorporateAccountsController extends Controller
                                 ]);
                             }
                             if ($request->on_cash_record[$index] == null) {
-                                CorporateCashHandlingCharges::create([
+                                CorporateCashHandlingCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 1,
                                     'range_up' => $request->on_cash_range_up[$index],
@@ -1741,10 +1741,10 @@ class AdminCorporateAccountsController extends Controller
                     }
                     //insurance charges
                     if ($request->has('on_insurance_charges_switch') && $request->on_insurance_charges_switch == 'on') {
-                        CorporateInsuranceCharges::where(['user_id' => $id, 'shipping_mode_id' => 1])->whereNotIn('id', $request->on_insurance_record)->delete();
+                        CorporateInsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->whereNotIn('id', $request->on_insurance_record)->delete();
                         foreach ($request->on_insurance_record as $insurance => $on_insurance_record) {
                             if ($request->on_insurance_record[$insurance] != null) {
-                                CorporateInsuranceCharges::where(['id' => $request->on_insurance_record[$insurance]])->update([
+                                CorporateInsuranceCharge::where(['id' => $request->on_insurance_record[$insurance]])->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 1,
                                     'range_up' => $request->on_ins_range_up[$insurance],
@@ -1753,7 +1753,7 @@ class AdminCorporateAccountsController extends Controller
                                 ]);
                             }
                             if ($request->on_insurance_record[$insurance] == null) {
-                                CorporateInsuranceCharges::create([
+                                CorporateInsuranceCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 1,
                                     'range_up' => $request->on_ins_range_up[$insurance],
@@ -1766,14 +1766,14 @@ class AdminCorporateAccountsController extends Controller
                     //Return Charges
                     if ($request->has('on_return_switch') && $request->on_return_switch == 'on') {
                         if ($request->on_return_record != null) {
-                            CorporateReturnCharges::where(['id' => $request->on_return_record])->update([
+                            CorporateReturnCharge::where(['id' => $request->on_return_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'local' => $request->on_return_local_charges,
                                 'national' => $request->on_return_national_charges
                             ]);
                         } elseif ($request->on_return_record == null) {
-                            CorporateReturnCharges::create([
+                            CorporateReturnCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'local' => $request->on_return_local_charges,
@@ -1987,11 +1987,11 @@ class AdminCorporateAccountsController extends Controller
 
                     //Cash handling Charges
                     if ($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on') {
-                        CorporateCashHandlingCharges::where(['user_id' => $id, 'shipping_mode_id' => 2])->whereNotIn('id', $request->ol_cash_record)->delete();
+                        CorporateCashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->whereNotIn('id', $request->ol_cash_record)->delete();
 
                         foreach ($request->ol_cash_record as $index => $ol_cash_record) {
                             if ($request->ol_cash_record[$index] != null) {
-                                CorporateCashHandlingCharges::where(['id' => $request->ol_cash_record[$index]])->update([
+                                CorporateCashHandlingCharge::where(['id' => $request->ol_cash_record[$index]])->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 2,
                                     'range_up' => $request->ol_cash_range_up[$index],
@@ -2000,7 +2000,7 @@ class AdminCorporateAccountsController extends Controller
                                 ]);
                             }
                             if ($request->ol_cash_record[$index] == null) {
-                                CorporateCashHandlingCharges::create([
+                                CorporateCashHandlingCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 2,
                                     'range_up' => $request->ol_cash_range_up[$index],
@@ -2012,10 +2012,10 @@ class AdminCorporateAccountsController extends Controller
                     }
                     //insurance charges
                     if ($request->has('ol_insurance_charges_switch') && $request->ol_insurance_charges_switch == 'on') {
-                        CorporateInsuranceCharges::where(['user_id' => $id, 'shipping_mode_id' => 2])->whereNotIn('id', $request->ol_insurance_record)->delete();
+                        CorporateInsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->whereNotIn('id', $request->ol_insurance_record)->delete();
                         foreach ($request->ol_insurance_record as $insurance => $ol_insurance_record) {
                             if ($request->ol_insurance_record[$insurance] != null) {
-                                CorporateInsuranceCharges::where(['id' => $request->ol_insurance_record[$insurance]])->update([
+                                CorporateInsuranceCharge::where(['id' => $request->ol_insurance_record[$insurance]])->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 2,
                                     'range_up' => $request->ol_ins_range_up[$insurance],
@@ -2024,7 +2024,7 @@ class AdminCorporateAccountsController extends Controller
                                 ]);
                             }
                             if ($request->ol_insurance_record[$insurance] == null) {
-                                CorporateInsuranceCharges::create([
+                                CorporateInsuranceCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 2,
                                     'range_up' => $request->ol_ins_range_up[$insurance],
@@ -2037,14 +2037,14 @@ class AdminCorporateAccountsController extends Controller
                     //Return Charges
                     if ($request->has('ol_return_switch') && $request->ol_return_switch == 'on') {
                         if ($request->ol_return_record != null) {
-                            CorporateReturnCharges::where(['id' => $request->ol_return_record])->update([
+                            CorporateReturnCharge::where(['id' => $request->ol_return_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'local' => $request->ol_return_local_charges,
                                 'national' => $request->ol_return_national_charges
                             ]);
                         } elseif ($request->ol_return_record == null) {
-                            CorporateReturnCharges::create([
+                            CorporateReturnCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'local' => $request->ol_return_local_charges,
@@ -2262,11 +2262,11 @@ class AdminCorporateAccountsController extends Controller
 
                     //Cash handling Charges
                     if ($request->has('detain_cash_handling_switch') && $request->detain_cash_handling_switch == 'on') {
-                        CorporateCashHandlingCharges::where(['user_id' => $id, 'shipping_mode_id' => 3])->whereNotIn('id', $request->detain_cash_record)->delete();
+                        CorporateCashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->whereNotIn('id', $request->detain_cash_record)->delete();
 
                         foreach ($request->detain_cash_record as $index => $detain_cash_record) {
                             if ($request->detain_cash_record[$index] != null) {
-                                CorporateCashHandlingCharges::where(['id' => $request->detain_cash_record[$index]])->update([
+                                CorporateCashHandlingCharge::where(['id' => $request->detain_cash_record[$index]])->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 3,
                                     'range_up' => $request->detain_cash_range_up[$index],
@@ -2275,7 +2275,7 @@ class AdminCorporateAccountsController extends Controller
                                 ]);
                             }
                             if ($request->detain_cash_record[$index] == null) {
-                                CorporateCashHandlingCharges::create([
+                                CorporateCashHandlingCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 3,
                                     'range_up' => $request->detain_cash_range_up[$index],
@@ -2287,10 +2287,10 @@ class AdminCorporateAccountsController extends Controller
                     }
                     //insurance charges
                     if ($request->has('detain_insurance_charges_switch') && $request->detain_insurance_charges_switch == 'on') {
-                        CorporateInsuranceCharges::where(['user_id' => $id, 'shipping_mode_id' => 3])->whereNotIn('id', $request->detain_insurance_record)->delete();
+                        CorporateInsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->whereNotIn('id', $request->detain_insurance_record)->delete();
                         foreach ($request->detain_insurance_record as $insurance => $detain_insurance_record) {
                             if ($request->detain_insurance_record[$insurance] != null) {
-                                CorporateInsuranceCharges::where(['id' => $request->detain_insurance_record[$insurance]])->update([
+                                CorporateInsuranceCharge::where(['id' => $request->detain_insurance_record[$insurance]])->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 3,
                                     'range_up' => $request->detain_ins_range_up[$insurance],
@@ -2299,7 +2299,7 @@ class AdminCorporateAccountsController extends Controller
                                 ]);
                             }
                             if ($request->detain_insurance_record[$insurance] == null) {
-                                CorporateInsuranceCharges::create([
+                                CorporateInsuranceCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 3,
                                     'range_up' => $request->detain_ins_range_up[$insurance],
@@ -2312,14 +2312,14 @@ class AdminCorporateAccountsController extends Controller
                     //Return Charges
                     if ($request->has('detain_return_switch') && $request->detain_return_switch == 'on') {
                         if ($request->detain_return_record != null) {
-                            CorporateReturnCharges::where(['id' => $request->detain_return_record])->update([
+                            CorporateReturnCharge::where(['id' => $request->detain_return_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'local' => $request->detain_return_local_charges,
                                 'national' => $request->detain_return_national_charges
                             ]);
                         } elseif ($request->detain_return_record == null) {
-                            CorporateReturnCharges::create([
+                            CorporateReturnCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'local' => $request->detain_return_local_charges,
@@ -2537,11 +2537,11 @@ class AdminCorporateAccountsController extends Controller
                     }
                     //Cash handling Charges
                     if ($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on') {
-                        CorporateCashHandlingCharges::where(['user_id' => $id, 'shipping_mode_id' => 4])->whereNotIn('id', $request->sameday_cash_record)->delete();
+                        CorporateCashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->whereNotIn('id', $request->sameday_cash_record)->delete();
 
                         foreach ($request->sameday_cash_record as $index => $sameday_cash_record) {
                             if ($request->sameday_cash_record[$index] != null) {
-                                CorporateCashHandlingCharges::where(['id' => $request->sameday_cash_record[$index]])->update([
+                                CorporateCashHandlingCharge::where(['id' => $request->sameday_cash_record[$index]])->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 4,
                                     'range_up' => $request->sameday_cash_range_up[$index],
@@ -2550,7 +2550,7 @@ class AdminCorporateAccountsController extends Controller
                                 ]);
                             }
                             if ($request->sameday_cash_record[$index] == null) {
-                                CorporateCashHandlingCharges::create([
+                                CorporateCashHandlingCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 4,
                                     'range_up' => $request->sameday_cash_range_up[$index],
@@ -2562,10 +2562,10 @@ class AdminCorporateAccountsController extends Controller
                     }
                     //insurance charges
                     if ($request->has('sameday_insurance_charges_switch') && $request->sameday_insurance_charges_switch == 'on') {
-                        CorporateInsuranceCharges::where(['user_id' => $id, 'shipping_mode_id' => 4])->whereNotIn('id', $request->sameday_insurance_record)->delete();
+                        CorporateInsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->whereNotIn('id', $request->sameday_insurance_record)->delete();
                         foreach ($request->sameday_insurance_record as $insurance => $sameday_insurance_record) {
                             if ($request->sameday_insurance_record[$insurance] != null) {
-                                CorporateInsuranceCharges::where(['id' => $request->sameday_insurance_record[$insurance]])->update([
+                                CorporateInsuranceCharge::where(['id' => $request->sameday_insurance_record[$insurance]])->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 4,
                                     'range_up' => $request->sameday_ins_range_up[$insurance],
@@ -2574,7 +2574,7 @@ class AdminCorporateAccountsController extends Controller
                                 ]);
                             }
                             if ($request->sameday_insurance_record[$insurance] == null) {
-                                CorporateInsuranceCharges::create([
+                                CorporateInsuranceCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 4,
                                     'range_up' => $request->sameday_ins_range_up[$insurance],
@@ -2587,14 +2587,14 @@ class AdminCorporateAccountsController extends Controller
                     //Return Charges
                     if ($request->has('sameday_return_switch') && $request->sameday_return_switch == 'on') {
                         if ($request->sameday_return_record != null) {
-                            CorporateReturnCharges::where(['id' => $request->sameday_return_record])->update([
+                            CorporateReturnCharge::where(['id' => $request->sameday_return_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'local' => $request->sameday_return_local_charges,
                                 'national' => $request->sameday_return_national_charges
                             ]);
                         } elseif ($request->sameday_return_record == null) {
-                            CorporateReturnCharges::create([
+                            CorporateReturnCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'local' => $request->sameday_return_local_charges,
@@ -3058,9 +3058,9 @@ class AdminCorporateAccountsController extends Controller
             }
             PendingCorporateRateStatus::where('user_id', $id)->delete();
             PendingCorporateWeightCharge::where('user_id', $id)->delete();
-            PendingCorporateCashHandlingCharges::where('user_id', $id)->delete();
-            PendingCorporateInsuranceCharges::where('user_id', $id)->delete();
-            PendingCorporateReturnCharges::where('user_id', $id)->delete();
+            PendingCorporateCashHandlingCharge::where('user_id', $id)->delete();
+            PendingCorporateInsuranceCharge::where('user_id', $id)->delete();
+            PendingCorporateReturnCharge::where('user_id', $id)->delete();
             PendingCorporateFuelSurcharge::where('user_id', $id)->delete();
             PendingCorporateDiscountCharge::where('user_id', $id)->delete();
             PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
@@ -3129,7 +3129,7 @@ class AdminCorporateAccountsController extends Controller
                     //Cash handling Charges
                     if ($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on') {
                         foreach ($request->on_cash_range_up as $ind => $on_cash_range_up) {
-                            PendingCorporateCashHandlingCharges::create([
+                            PendingCorporateCashHandlingCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'range_up' => $request->on_cash_range_up[$ind],
@@ -3141,7 +3141,7 @@ class AdminCorporateAccountsController extends Controller
                     //insurance charges
                     if ($request->has('on_insurance_charges_switch') && $request->on_insurance_charges_switch == 'on') {
                         foreach ($request->on_ins_range_up as $insurance => $on_ins_range_up) {
-                            PendingCorporateInsuranceCharges::create([
+                            PendingCorporateInsuranceCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'range_up' => $request->on_ins_range_up[$insurance],
@@ -3152,7 +3152,7 @@ class AdminCorporateAccountsController extends Controller
                     }
                     //Return Charges
                     if ($request->has('on_return_switch') && $request->on_return_switch == 'on') {
-                        PendingCorporateReturnCharges::create([
+                        PendingCorporateReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'local' => $request->on_return_local_charges,
@@ -3279,7 +3279,7 @@ class AdminCorporateAccountsController extends Controller
                     //Cash handling Charges
                     if ($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on') {
                         foreach ($request->ol_cash_range_up as $ind => $ol_cash_range_up) {
-                            PendingCorporateCashHandlingCharges::create([
+                            PendingCorporateCashHandlingCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'range_up' => $request->ol_cash_range_up[$ind],
@@ -3291,7 +3291,7 @@ class AdminCorporateAccountsController extends Controller
                     //insurance charges
                     if ($request->has('ol_insurance_charges_switch') && $request->ol_insurance_charges_switch == 'on') {
                         foreach ($request->ol_ins_range_up as $insurance => $ol_ins_range_up) {
-                            PendingCorporateInsuranceCharges::create([
+                            PendingCorporateInsuranceCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'range_up' => $request->ol_ins_range_up[$insurance],
@@ -3302,7 +3302,7 @@ class AdminCorporateAccountsController extends Controller
                     }
                     //Return Charges
                     if ($request->has('ol_return_switch') && $request->ol_return_switch == 'on') {
-                        PendingCorporateReturnCharges::create([
+                        PendingCorporateReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'local' => $request->ol_return_local_charges,
@@ -3429,7 +3429,7 @@ class AdminCorporateAccountsController extends Controller
                     //Cash handling Charges
                     if ($request->has('detain_cash_handling_switch') && $request->detain_cash_handling_switch == 'on') {
                         foreach ($request->detain_cash_range_up as $ind => $detain_cash_range_up) {
-                            PendingCorporateCashHandlingCharges::create([
+                            PendingCorporateCashHandlingCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'range_up' => $request->detain_cash_range_up[$ind],
@@ -3441,7 +3441,7 @@ class AdminCorporateAccountsController extends Controller
                     //insurance charges
                     if ($request->has('detain_insurance_charges_switch') && $request->detain_insurance_charges_switch == 'on') {
                         foreach ($request->detain_ins_range_up as $insurance => $detain_ins_range_up) {
-                            PendingCorporateInsuranceCharges::create([
+                            PendingCorporateInsuranceCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'range_up' => $request->detain_ins_range_up[$insurance],
@@ -3452,7 +3452,7 @@ class AdminCorporateAccountsController extends Controller
                     }
                     //Return Charges
                     if ($request->has('detain_return_switch') && $request->detain_return_switch == 'on') {
-                        PendingCorporateReturnCharges::create([
+                        PendingCorporateReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'local' => $request->detain_return_local_charges,
@@ -3578,7 +3578,7 @@ class AdminCorporateAccountsController extends Controller
                     //Cash handling Charges
                     if ($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on') {
                         foreach ($request->sameday_cash_range_up as $ind => $sameday_cash_range_up) {
-                            PendingCorporateCashHandlingCharges::create([
+                            PendingCorporateCashHandlingCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'range_up' => $request->sameday_cash_range_up[$ind],
@@ -3590,7 +3590,7 @@ class AdminCorporateAccountsController extends Controller
                     //insurance charges
                     if ($request->has('sameday_insurance_charges_switch') && $request->sameday_insurance_charges_switch == 'on') {
                         foreach ($request->sameday_ins_range_up as $insurance => $sameday_ins_range_up) {
-                            PendingCorporateInsuranceCharges::create([
+                            PendingCorporateInsuranceCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'range_up' => $request->sameday_ins_range_up[$insurance],
@@ -3601,7 +3601,7 @@ class AdminCorporateAccountsController extends Controller
                     }
                     //Return Charges
                     if ($request->has('sameday_return_switch') && $request->sameday_return_switch == 'on') {
-                        PendingCorporateReturnCharges::create([
+                        PendingCorporateReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'local' => $request->sameday_return_local_charges,
@@ -3903,9 +3903,9 @@ class AdminCorporateAccountsController extends Controller
                     }
                 }
 
-                if($cashs = CorporateCashHandlingCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($cashs = CorporateCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($cashs as $cash) {
-                        HistoryCorporateCashHandlingCharges::create([
+                        HistoryCorporateCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'range_up' => $cash['range_up'],
@@ -3914,9 +3914,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($cashs = CorporateCashHandlingCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($cashs = CorporateCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($cashs as $cash) {
-                        HistoryCorporateCashHandlingCharges::create([
+                        HistoryCorporateCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'range_up' => $cash['range_up'],
@@ -3925,9 +3925,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($cashs = CorporateCashHandlingCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($cashs = CorporateCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($cashs as $cash) {
-                        HistoryCorporateCashHandlingCharges::create([
+                        HistoryCorporateCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'range_up' => $cash['range_up'],
@@ -3936,9 +3936,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($cashs = CorporateCashHandlingCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($cashs = CorporateCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($cashs as $cash) {
-                        HistoryCorporateCashHandlingCharges::create([
+                        HistoryCorporateCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'range_up' => $cash['range_up'],
@@ -3947,9 +3947,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($insurances = CorporateInsuranceCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($insurances = CorporateInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($insurances as $insurance) {
-                        HistoryCorporateInsuranceCharges::create([
+                        HistoryCorporateInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'range_up' => $insurance['range_up'],
@@ -3958,9 +3958,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($insurances = CorporateInsuranceCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($insurances = CorporateInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($insurances as $insurance) {
-                        HistoryCorporateInsuranceCharges::create([
+                        HistoryCorporateInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'range_up' => $insurance['range_up'],
@@ -3969,9 +3969,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($insurances = CorporateInsuranceCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($insurances = CorporateInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($insurances as $insurance) {
-                        HistoryCorporateInsuranceCharges::create([
+                        HistoryCorporateInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'range_up' => $insurance['range_up'],
@@ -3980,9 +3980,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($insurances = CorporateInsuranceCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($insurances = CorporateInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($insurances as $insurance) {
-                        HistoryCorporateInsuranceCharges::create([
+                        HistoryCorporateInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'range_up' => $insurance['range_up'],
@@ -3991,9 +3991,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($returns = CorporateReturnCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($returns = CorporateReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($returns as $return) {
-                        HistoryCorporateReturnCharges::create([
+                        HistoryCorporateReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'local' => $return['local'],
@@ -4001,9 +4001,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($returns = CorporateReturnCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($returns = CorporateReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($returns as $return) {
-                        HistoryCorporateReturnCharges::create([
+                        HistoryCorporateReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'local' => $return['local'],
@@ -4011,9 +4011,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($returns = CorporateReturnCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($returns = CorporateReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($returns as $return) {
-                        HistoryCorporateReturnCharges::create([
+                        HistoryCorporateReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'local' => $return['local'],
@@ -4021,9 +4021,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($returns = CorporateReturnCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($returns = CorporateReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($returns as $return) {
-                        HistoryCorporateReturnCharges::create([
+                        HistoryCorporateReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'local' => $return['local'],
@@ -4142,9 +4142,9 @@ class AdminCorporateAccountsController extends Controller
 
                 CorporateRateStatus::where('user_id', $id)->delete();
                 CorporateWeightCharge::where('user_id', $id)->delete();
-                CorporateCashHandlingCharges::where('user_id', $id)->delete();
-                CorporateInsuranceCharges::where('user_id', $id)->delete();
-                CorporateReturnCharges::where('user_id', $id)->delete();
+                CorporateCashHandlingCharge::where('user_id', $id)->delete();
+                CorporateInsuranceCharge::where('user_id', $id)->delete();
+                CorporateReturnCharge::where('user_id', $id)->delete();
                 CorporateFuelSurcharge::where('user_id', $id)->delete();
                 CorporateDiscountCharge::where('user_id', $id)->delete();
                 CorporateMinChargeableWeight::where('user_id', $id)->delete();
@@ -4386,9 +4386,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingcashs = PendingCorporateCashHandlingCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($pendingcashs = PendingCorporateCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingcashs as $pendingcash) {
-                        CorporateCashHandlingCharges::create([
+                        CorporateCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'range_up' => $pendingcash['range_up'],
@@ -4397,9 +4397,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingcashs = PendingCorporateCashHandlingCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($pendingcashs = PendingCorporateCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingcashs as $pendingcash) {
-                        CorporateCashHandlingCharges::create([
+                        CorporateCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'range_up' => $pendingcash['range_up'],
@@ -4408,9 +4408,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingcashs = PendingCorporateCashHandlingCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($pendingcashs = PendingCorporateCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingcashs as $pendingcash) {
-                        CorporateCashHandlingCharges::create([
+                        CorporateCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'range_up' => $pendingcash['range_up'],
@@ -4419,9 +4419,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingcashs = PendingCorporateCashHandlingCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($pendingcashs = PendingCorporateCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingcashs as $pendingcash) {
-                        CorporateCashHandlingCharges::create([
+                        CorporateCashHandlingCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'range_up' => $pendingcash['range_up'],
@@ -4430,9 +4430,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendinginsurances = PendingCorporateInsuranceCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($pendinginsurances = PendingCorporateInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendinginsurances as $pendinginsurance) {
-                        CorporateInsuranceCharges::create([
+                        CorporateInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'range_up' => $pendinginsurance['range_up'],
@@ -4441,9 +4441,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendinginsurances = PendingCorporateInsuranceCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($pendinginsurances = PendingCorporateInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendinginsurances as $pendinginsurance) {
-                        CorporateInsuranceCharges::create([
+                        CorporateInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'range_up' => $pendinginsurance['range_up'],
@@ -4452,9 +4452,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendinginsurance = PendingCorporateInsuranceCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($pendinginsurance = PendingCorporateInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendinginsurances as $pendinginsurance) {
-                        CorporateInsuranceCharges::create([
+                        CorporateInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'range_up' => $pendinginsurance['range_up'],
@@ -4463,9 +4463,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendinginsurances = PendingCorporateInsuranceCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($pendinginsurances = PendingCorporateInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendinginsurances as $pendinginsurance) {
-                        CorporateInsuranceCharges::create([
+                        CorporateInsuranceCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'range_up' => $pendinginsurance['range_up'],
@@ -4474,9 +4474,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingreturns = PendingCorporateReturnCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if($pendingreturns = PendingCorporateReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingreturns as $pendingreturn) {
-                        CorporateReturnCharges::create([
+                        CorporateReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'local' => $pendingreturn['local'],
@@ -4484,9 +4484,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingreturns = PendingCorporateReturnCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if($pendingreturns = PendingCorporateReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingreturns as $pendingreturn) {
-                        CorporateReturnCharges::create([
+                        CorporateReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'local' => $pendingreturn['local'],
@@ -4494,9 +4494,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingreturns = PendingCorporateReturnCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if($pendingreturns = PendingCorporateReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingreturns as $pendingreturn) {
-                        CorporateReturnCharges::create([
+                        CorporateReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'local' => $pendingreturn['local'],
@@ -4504,9 +4504,9 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingreturns = PendingCorporateReturnCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if($pendingreturns = PendingCorporateReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingreturns as $pendingreturn) {
-                        CorporateReturnCharges::create([
+                        CorporateReturnCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'local' => $pendingreturn['local'],
@@ -4616,9 +4616,9 @@ class AdminCorporateAccountsController extends Controller
                 }
                 PendingCorporateRateStatus::where('user_id', $id)->delete();
                 PendingCorporateWeightCharge::where('user_id', $id)->delete();
-                PendingCorporateCashHandlingCharges::where('user_id', $id)->delete();
-                PendingCorporateInsuranceCharges::where('user_id', $id)->delete();
-                PendingCorporateReturnCharges::where('user_id', $id)->delete();
+                PendingCorporateCashHandlingCharge::where('user_id', $id)->delete();
+                PendingCorporateInsuranceCharge::where('user_id', $id)->delete();
+                PendingCorporateReturnCharge::where('user_id', $id)->delete();
                 PendingCorporateFuelSurcharge::where('user_id', $id)->delete();
                 PendingCorporateDiscountCharge::where('user_id', $id)->delete();
                 PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
@@ -4635,9 +4635,9 @@ class AdminCorporateAccountsController extends Controller
         $switches = CorporateRateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
         $weight = CorporateWeightCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $cash = CorporateCashHandlingCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $insurance = CorporateInsuranceCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $return = CorporateReturnCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $cash = CorporateCashHandlingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $insurance = CorporateInsuranceCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $return = CorporateReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $fuel = CorporateFuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $discount = CorporateDiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
 

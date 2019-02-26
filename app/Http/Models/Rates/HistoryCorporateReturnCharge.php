@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Models;
+namespace App\Http\Models\Rates;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CorporateReturnCharges extends Model
+class HistoryCorporateReturnCharge extends Model
 {
-    protected $table = 'corporate_return_charges';
+    //
     protected $fillable = [
         'user_id','shipping_mode_id','local','national'
     ];
