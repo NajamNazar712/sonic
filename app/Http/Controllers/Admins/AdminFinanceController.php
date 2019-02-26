@@ -3567,7 +3567,7 @@ class AdminFinanceController extends Controller
                 $total_fuel_surcharge += $shipment->fuel_surcharge;
             }
             else {
-                $total_adjustments += $invoice_shipment->invoice_amount;
+                $total_adjustment_charges += $invoice_shipment->invoice_amount;
             }
 
             $total_charges += $invoice_shipment->charges;
