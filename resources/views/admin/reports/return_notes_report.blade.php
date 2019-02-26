@@ -367,7 +367,7 @@
             });
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.return_note.print') !!}',
+                    url: '{!! route('admin.return.receive.rn.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,

@@ -199,8 +199,8 @@ class AdminReportsController extends Controller
             $return->where('return_notes.id','=',$rn_no);
         }
         if($tracking = $request->get('search_tracking')){
-            $return->join('return_note_shipments as rns','rns.return_note_id','=','return_notes.id')
-                ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
+            $return->join('return_note_shipments as rnst','rnst.return_note_id','=','return_notes.id')
+                ->join('shipments as s', 'rnst.shipment_id', '=', 's.id')
                 ->where('s.tracking_number', '=', $tracking);
         }
         if($rider = $request->get('search_rider')){

@@ -51,6 +51,9 @@ class AdminPackagingMaterialController extends Controller
             ->editColumn('large_flyers', function($packaging){
                 return number_format($packaging->large_flyers);
             })
+            ->editColumn('boxes', function($packaging){
+                return number_format($packaging->boxes);
+            })
             ->editColumn('entry_type',function($packaging){
                 if($packaging->entry_type == 0){
                     return "Inbound";
@@ -283,6 +286,9 @@ class AdminPackagingMaterialController extends Controller
             })
             ->editColumn('large_flyers', function($packaging){
                 return number_format($packaging->large_flyers);
+            })
+            ->editColumn('boxes', function($packaging){
+                return number_format($packaging->boxes);
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
