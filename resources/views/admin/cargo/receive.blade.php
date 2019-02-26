@@ -93,6 +93,9 @@
 
     <script>
         $(document).ready(function() {
+            @if(session('errors'))
+                scan_sound(2);
+             @endif
             var cargo_consignment_id = {{ session('cargo_consignment_id') }};
 
             var shipment_ids = [];
@@ -163,6 +166,7 @@
                                         table.row.add([rowNo + 1, data.details.tracking_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]);
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
+                                        scan_sound(1);
                                         shipment_ids.push(data.details.id);
 
                                         $('#information .scanned').html(shipment_ids.length);
@@ -176,14 +180,14 @@
                                 }
                                 else {
                                     $('#add_shipment_form button.add').prop('disabled', false);
-
+                                    scan_sound(2);
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             });
                     }
                     else {
                         $('#add_shipment_form button.add').prop('disabled', false);
-
+                        scan_sound(2);
                         toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 

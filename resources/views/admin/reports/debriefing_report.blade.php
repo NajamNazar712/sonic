@@ -53,7 +53,7 @@
                     <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">Hubs</th>
-                            <th class="border-primary border-darken-1">Pending</th>
+                            <th class="border-red border-darken-1 bg-white">Status Not Updated</th>
                             <th class="border-primary border-darken-1">Delivered</th>
                             <th class="border-primary border-darken-1">Delivery Unsuccessful</th>
                             <th class="border-primary border-darken-1">Not Attempted</th>
@@ -65,7 +65,7 @@
                             <th class="border-primary border-darken-1">Lost</th>
                             <th class="border-primary border-darken-1">Confirm</th>
                             <th class="border-primary border-darken-1">Correct Status</th>
-                            <th class="border-primary border-darken-1">Fake Status</th>
+                            <th class="border-red border-darken-1 bg-white">Fake Status</th>
                             <th class="border-primary border-darken-1">Total</th>
                             <th class="border-primary border-darken-1">Ratio</th>
                             <th class="border-primary border-darken-1">Delivery Tomorrow</th>
@@ -130,10 +130,13 @@
                 dom: 'tp',
                 scrollX: true,
                 paging: false,
-                ordering: false
+                ordering: false,
+                columnDefs: [
+                    {className: 'red', targets: [1, 13]}
+                ]
             });
 
-            var types = ['pending', 'delivered', 'delivery_unsucessful', 'not_attempted', 'on_hold', 'non_service_area', 'misrouted', 'on_hold_for_self_collection', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total', 'total_ratio', 'delivery_tomorrow', 'delivery_note_pending', 'grand_total', 'grand_total_ratio'];
+            var types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'not_attempted', 'on_hold', 'non_service_area', 'misrouted', 'on_hold_for_self_collection', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total', 'total_ratio', 'delivery_tomorrow', 'delivery_note_pending', 'grand_total', 'grand_total_ratio'];
 
             function list() {
                 $('#search_filter_btn').prop('disabled', true);

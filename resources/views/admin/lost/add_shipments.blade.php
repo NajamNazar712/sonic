@@ -144,6 +144,7 @@
                                         var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
                                         table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount,data.details.mode,data.details.service_type, action]).node().id = data.details.id;
                                         table.draw(false);
+                                        scan_sound(1);
                                         table.order([0, 'desc']).draw();
 
                                         shipment_ids.push(data.details.id);
@@ -157,14 +158,14 @@
                                 }
                                 else {
                                     $('#lost_shipment_form button.add').prop('disabled', false);
-
+                                    scan_sound(2);
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             });
                     }
                     else {
                         $('#lost_shipment_form button.add').prop('disabled', false);
-
+                        scan_sound(2);
                         toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 
