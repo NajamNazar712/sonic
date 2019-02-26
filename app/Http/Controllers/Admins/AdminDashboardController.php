@@ -980,6 +980,9 @@ class AdminDashboardController extends Controller
             $discount = PendingDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
         }
+        else {
+            return redirect(route('admin.accounts.pending.index'));
+        }
 //        return $discount;
         return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'rate_status'=>$rate_status]);
 
