@@ -223,7 +223,7 @@
 				serverSide: true,
 				ajax: '{{ route('admin.finance.invoices.list') }}',
 				rowId: 'id',
-				order: [[7, 'asc']],
+				order: [[7, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'invoice_number_button', name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
@@ -241,7 +241,7 @@
 					{data:'received_amount', name: 'invoices.received_amount', class: 'align-middle text-center received_amount'},
 					{data:'tax_amount', name: 'invoices.tax_amount', class: 'align-middle text-center tax_amount'},
 					{data:'deposit_date', name: 'invoices.deposit_date', class: 'align-middle text-center deposit_date'},
-					{data:'status', name: 'invoice.status_id', class: 'align-middle text-center status'},
+					{data:'status', name: 'invoices.status_id', class: 'align-middle text-center status'},
 					{data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -262,7 +262,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.action')) {
+						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}
 						else if ($(header).is('.company_bank')) {

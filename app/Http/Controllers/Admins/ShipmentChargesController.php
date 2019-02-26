@@ -21,7 +21,7 @@ use App\Http\Models\CorporateCashHandlingCharge;
 use App\Http\Models\CorporateInsuranceCharge;
 use App\Http\Models\CorporateReturnCharge;
 use App\Http\Models\CorporateFuelSurcharge;
-use App\Http\Models\CorporateBookingTypeCharges;
+use App\Http\Models\CorporateBookingTypeCharge;
 use App\Http\Models\CorporateDiscountCharge;
 
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
@@ -563,7 +563,7 @@ class ShipmentChargesController extends Controller
             $booking_type_charge = BookingTypeCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
         }
         else {
-            $booking_type_charge = CorporateBookingTypeCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+            $booking_type_charge = CorporateBookingTypeCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
         }
 
         if ($booking_type_charge->exists()) {
@@ -833,7 +833,7 @@ class ShipmentChargesController extends Controller
             $booking_type_charge = BookingTypeCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
         }
         else {
-            $booking_type_charge = CorporateBookingTypeCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+            $booking_type_charge = CorporateBookingTypeCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
         }
 
         if ($booking_type_charge->exists()) {
