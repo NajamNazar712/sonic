@@ -272,7 +272,7 @@
 									table.draw(false);
                                     table.order([0, 'desc']).draw();
                                     shipment_ids.push(data.details.id);
-
+                                    scan_sound(1);
 									$('#information .scanned').html(shipment_ids.length);
 
 									if (hub_id == 0) {
@@ -303,14 +303,14 @@
 							}
 							else {
 								$('#add_shipment_form button.add').prop('disabled', false);
-
+                                scan_sound(2);
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 							}
 						});
 					}
 					else {
 						$('#add_shipment_form button.add').prop('disabled', false);
-
+                        scan_sound(2);
 						toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 					}
 

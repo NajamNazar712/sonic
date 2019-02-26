@@ -291,7 +291,18 @@
                     var info = table.page.info();
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                drawCallback: function (settings) {
+                    var api = new $.fn.dataTable.Api( settings );
+                    var data = api.rows( {page:'current'} ).data();
 
+                    if($('#scan_dncc').val() != ''){
+                            if(data.length > 0){
+                                scan_sound(1);
+                            }else{
+                                scan_sound(2);
+                            }
+                    }
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
