@@ -2384,6 +2384,8 @@ class AdminFinanceController extends Controller
 
                 foreach ($pending_payment->pending_payment_shipments as $pending_payment_shipment) {
                     if ($pending_payment_shipment->type != 2 || ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0)) {
+                        $valid = TRUE;
+
                         $invoice_shipment = new InvoiceShipment();
 
                         $invoice_shipment->invoice_id = $invoice_id;
@@ -2408,7 +2410,7 @@ class AdminFinanceController extends Controller
                             else {
                                 $pending_payment_shipment->charges = 0;
                                 $pending_payment_shipment->gst = 0;
-                                $pending_payment_shipment->payable = $pending_payment_shipment->payable + $pending_payment_shipment->charges + $pending_payment_shipment->gst;
+                                $pending_payment_shipment->payable = $pending_payment_shipment->amount;
 
                                 $pending_payment_shipment->save();
                             }
@@ -2421,11 +2423,11 @@ class AdminFinanceController extends Controller
                             $pending_payment_shipment->delete();
 
                             $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
-                                $pending_payment->returned_shipments = $pending_payment->returned_shipments - 1;
+                            $pending_payment->returned_shipments = $pending_payment->returned_shipments - 1;
 
                             $pending_payment->save();
                         }
-                        else {
+                        else if ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0) {
                             $invoice_shipment->invoice_amount = $pending_payment_shipment->payable;
 
                             $invoice_shipment->save();
@@ -2433,63 +2435,31 @@ class AdminFinanceController extends Controller
                             $pending_payment_shipment->delete();
 
                             $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
-                                $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments - 1;
-
-                            $pending_payment->save();
-                        }
-
-                        $invoice_shipment->save();
-
-                        if ($pending_payment_shipment->type == 0) {
-                            if ($pending_payment_shipment->amount == 0) {
-                                $pending_payment_shipment->delete();
-
-                                $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
-                                $pending_payment->delivered_shipments = $pending_payment->delivered_shipments - 1;
-
-                                $pending_payment->save();
-                            }
-                            else {
-                                $pending_payment_shipment->charges = 0;
-                                $pending_payment_shipment->gst = 0;
-                                $pending_payment_shipment->payable = $pending_payment_shipment->payable + $pending_payment_shipment->charges + $pending_payment_shipment->gst;
-
-                                $pending_payment_shipment->save();
-                            }
-                        }
-                        else if ($pending_payment_shipment->type == 1) {
-                            $pending_payment_shipment->delete();
-
-                            $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
-                                $pending_payment->returned_shipments = $pending_payment->returned_shipments - 1;
+                            $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments - 1;
 
                             $pending_payment->save();
                         }
                         else {
-                            if ($pending_payment_shipment->payable >= 0) {
-                                $pending_payment_shipment->charges = 0;
-                                $pending_payment_shipment->gst = 0;
+                            $valid = FALSE;
+                        }
 
-                                $pending_payment_shipment->save();
+                        if ($valid) {
+                            $total_shipments++;
+
+                            if ($pending_payment_shipment->type == 0) {
+                                $total_delivered_shipments++;
                             }
-                            else {}
-                        }
+                            else if ($pending_payment_shipment->type == 1) {
+                                $total_returned_shipments++;
+                            }
+                            else if ($pending_payment_shipment->type == 2) {
+                                $total_adjusted_shipments++;
+                            }
 
-                        $total_shipments++;
-
-                        if ($pending_payment_shipment->type == 0) {
-                            $total_delivered_shipments++;
+                            $total_charges = $total_charges + $pending_payment_shipment->charges;
+                            $total_gst = $total_gst + $pending_payment_shipment->gst;
+                            $total_invoice_amount = $total_invoice_amount + $pending_payment_shipment->charges + $pending_payment_shipment->gst;
                         }
-                        else if ($pending_payment_shipment->type == 1) {
-                            $total_returned_shipments++;
-                        }
-                        else {
-                            $total_adjusted_shipments++;
-                        }
-
-                        $total_charges = $total_charges + $pending_payment_shipment->charges;
-                        $total_gst = $total_gst + $pending_payment_shipment->gst;
-                        $total_invoice_amount = $total_invoice_amount + $pending_payment_shipment->charges + $pending_payment_shipment->gst;
                     }
                 }
 
