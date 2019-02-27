@@ -2384,8 +2384,6 @@ class AdminFinanceController extends Controller
                         if ($pending_payment_shipment->type == 0) {
                             $invoice_amount = $pending_payment_shipment->charges + $pending_payment_shipment->gst;
 
-                            $invoice_shipment->save();
-
                             if ($pending_payment_shipment->amount == 0) {
                                 $pending_payment_shipment->delete();
 
@@ -2405,8 +2403,6 @@ class AdminFinanceController extends Controller
                         else if ($pending_payment_shipment->type == 1) {
                             $invoice_amount = $pending_payment_shipment->charges + $pending_payment_shipment->gst;
 
-                            $invoice_shipment->save();
-
                             $pending_payment_shipment->delete();
 
                             $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
@@ -2416,8 +2412,6 @@ class AdminFinanceController extends Controller
                         }
                         else if ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0) {
                             $invoice_amount = $pending_payment_shipment->payable;
-
-                            $invoice_shipment->save();
 
                             $pending_payment_shipment->delete();
 
