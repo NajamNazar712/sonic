@@ -2396,10 +2396,6 @@ class AdminFinanceController extends Controller
                                 $pending_payment->save();
                             }
                             else {
-                                $pending_payment_shipment->charges = 0;
-                                $pending_payment_shipment->gst = 0;
-                                $pending_payment_shipment->payable = $pending_payment_shipment->amount;
-
                                 $update = TRUE;
                             }
                         }
@@ -2468,6 +2464,10 @@ class AdminFinanceController extends Controller
                             $total_invoice_amount = $total_invoice_amount + $pending_payment_shipment->charges + $pending_payment_shipment->gst;
 
                             if ($update) {
+                                $pending_payment_shipment->charges = 0;
+                                $pending_payment_shipment->gst = 0;
+                                $pending_payment_shipment->payable = $pending_payment_shipment->amount;
+
                                 $pending_payment_shipment->save();
                             }
 
