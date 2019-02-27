@@ -2489,7 +2489,7 @@ class AdminFinanceController extends Controller
 
                         $total_charges = $total_charges + $pending_payment_shipment->charges;
                         $total_gst = $total_gst + $pending_payment_shipment->gst;
-                        $total_invoice_amount = $total_invoice_amount + $$pending_payment_shipment->charges + $pending_payment_shipment->gst;
+                        $total_invoice_amount = $total_invoice_amount + $pending_payment_shipment->charges + $pending_payment_shipment->gst;
                     }
                 }
 
