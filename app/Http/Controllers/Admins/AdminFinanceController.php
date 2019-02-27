@@ -2383,7 +2383,7 @@ class AdminFinanceController extends Controller
                 $total_invoice_amount = 0;
 
                 foreach ($pending_payment->pending_payment_shipments as $pending_payment_shipment) {
-                    if (($pending_payment_shipment->type != 2 && $pending_payment_shipment->charges) || ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0)) {
+                    if (($pending_payment_shipment->type != 2 && $pending_payment_shipment->charges != 0) || ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0)) {
                         $valid = TRUE;
 
                         $invoice_shipment = new InvoiceShipment();
@@ -2989,8 +2989,8 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2) ? number_format($shipment->weight_charges && $done_payment_shipment->charges) : '0') . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2) ? number_format($shipment->weight_charges && $done_payment_shipment->charges != 0) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable) : '0') . '</td>
                             </tr>
             ';
@@ -2999,7 +2999,7 @@ class AdminFinanceController extends Controller
 
             if ($account_type_id == 1) {
                 if ($done_payment_shipment->type != 2) {
-                    if ($done_payment_shipment->charges) {
+                    if ($done_payment_shipment->charges != 0) {
                         if ($done_payment_shipment->type == 0) {
                             $total_collection_amount += $done_payment_shipment->amount;
                             $total_cash_handling_charges += $shipment->cash_handling_charges;
