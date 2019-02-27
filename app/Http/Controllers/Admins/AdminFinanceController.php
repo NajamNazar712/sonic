@@ -2358,21 +2358,9 @@ class AdminFinanceController extends Controller
             $current_date = Carbon::now();
 
             foreach ($pending_payment_ids as $pending_payment_id) {
+                $first = TRUE;
+
                 $pending_payment = PendingPayment::find($pending_payment_id);
-
-                $invoice = new Invoice();
-
-                $invoice->user_id = $pending_payment->user_id;
-                $invoice->billing_period_from_date = $current_date->subDays(7)->startOfDay()->toDateString();
-                $invoice->billing_period_to_date = $current_date->startOfDay()->toDateString();
-                $invoice->due_date = $current_date->addDays($due_date_days)->startOfDay()->toDateString();
-                $invoice->status_id = 1;
-
-                $invoice->save();
-
-                $invoice_id = $invoice->id;
-
-                $invoice_number = $pending_payment->user_id . str_pad($invoice_id, 6, '0', STR_PAD_LEFT);
 
                 $total_shipments = 0;
                 $total_delivered_shipments = 0;
@@ -2388,14 +2376,13 @@ class AdminFinanceController extends Controller
 
                         $invoice_shipment = new InvoiceShipment();
 
-                        $invoice_shipment->invoice_id = $invoice_id;
                         $invoice_shipment->shipment_id = $pending_payment_shipment->shipment_id;
                         $invoice_shipment->type = $pending_payment_shipment->type;
                         $invoice_shipment->charges = $pending_payment_shipment->charges;
                         $invoice_shipment->gst = $pending_payment_shipment->gst;
 
                         if ($pending_payment_shipment->type == 0) {
-                            $invoice_shipment->invoice_amount = $pending_payment_shipment->charges + $pending_payment_shipment->gst;
+                            $invoice_amount = $pending_payment_shipment->charges + $pending_payment_shipment->gst;
 
                             $invoice_shipment->save();
 
@@ -2416,7 +2403,7 @@ class AdminFinanceController extends Controller
                             }
                         }
                         else if ($pending_payment_shipment->type == 1) {
-                            $invoice_shipment->invoice_amount = $pending_payment_shipment->charges + $pending_payment_shipment->gst;
+                            $invoice_amount = $pending_payment_shipment->charges + $pending_payment_shipment->gst;
 
                             $invoice_shipment->save();
 
@@ -2428,7 +2415,7 @@ class AdminFinanceController extends Controller
                             $pending_payment->save();
                         }
                         else if ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0) {
-                            $invoice_shipment->invoice_amount = $pending_payment_shipment->payable;
+                            $invoice_amount = $pending_payment_shipment->payable;
 
                             $invoice_shipment->save();
 
@@ -2444,6 +2431,29 @@ class AdminFinanceController extends Controller
                         }
 
                         if ($valid) {
+                            if ($first) {
+                                $invoice = new Invoice();
+
+                                $invoice->user_id = $pending_payment->user_id;
+                                $invoice->billing_period_from_date = $current_date->subDays(7)->startOfDay()->toDateString();
+                                $invoice->billing_period_to_date = $current_date->startOfDay()->toDateString();
+                                $invoice->due_date = $current_date->addDays($due_date_days)->startOfDay()->toDateString();
+                                $invoice->status_id = 1;
+
+                                $invoice->save();
+
+                                $invoice_id = $invoice->id;
+
+                                $invoice_number = $pending_payment->user_id . str_pad($invoice_id, 6, '0', STR_PAD_LEFT);
+
+                                $first = FALSE;
+                            }
+
+                            $invoice_shipment->invoice_id = $invoice_id;
+                            $invoice_shipment->invoice_amount = $invoice_amount;
+
+                            $invoice_shipment->save();
+
                             $total_shipments++;
 
                             if ($pending_payment_shipment->type == 0) {
@@ -2463,16 +2473,18 @@ class AdminFinanceController extends Controller
                     }
                 }
 
-                $invoice->invoice_number = $invoice_number;
-                $invoice->total_shipments = $total_shipments;
-                $invoice->total_delivered_shipments = $total_delivered_shipments;
-                $invoice->total_returned_shipments = $total_returned_shipments;
-                $invoice->total_adjusted_shipments = $total_adjusted_shipments;
-                $invoice->total_charges = $total_charges;
-                $invoice->total_gst = $total_gst;
-                $invoice->total_invoice_amount = $total_invoice_amount;
+                if (!$first) {
+                    $invoice->invoice_number = $invoice_number;
+                    $invoice->total_shipments = $total_shipments;
+                    $invoice->total_delivered_shipments = $total_delivered_shipments;
+                    $invoice->total_returned_shipments = $total_returned_shipments;
+                    $invoice->total_adjusted_shipments = $total_adjusted_shipments;
+                    $invoice->total_charges = $total_charges;
+                    $invoice->total_gst = $total_gst;
+                    $invoice->total_invoice_amount = $total_invoice_amount;
 
-                $invoice->save();
+                    $invoice->save();
+                }
             }
 
             return ['status' => 0, 'success' => 'Pending Payment(s) has been swithced to Invoice(s)'];
