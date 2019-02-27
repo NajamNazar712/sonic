@@ -157,7 +157,8 @@
                         var current_date = $('input[name="select_date_from_formatted"]').val();
                         // $('#make_statement_form #select_date_to').pickadate('picker').set({'min': current_date},{muted: true});
                         var future = future_date(current_date);
-                        $('#make_statement_form #select_date_to').pickadate('picker').set({'select': future,'min': current_date, 'max':future},{muted: true});
+                        var d = new Date(current_date);
+                        $('#make_statement_form #select_date_to').pickadate('picker').set({'select': future,'min': d, 'max':future},{muted: true});
                     }
                 }
             });
@@ -176,22 +177,10 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
-                // onSet: function(context) {
-                //     if (context.select) {
-                //         var from_date_selected = $('input[name="select_date_from_formatted"]').val();
-                //         if(from_date_selected == ''){
-                //             var past = past_date(from_date_selected);
-                //             $('#make_statement_form #select_date_from').pickadate('picker').set({'select': past},{muted: true});
-                //         }
-                //     }
-                // }
+                onSet: function(context) {
+
+                }
             });
-            function past_date(to_date) {
-                var today = new Date(to_date);
-                // var tomorrow = new Date();
-                today.setDate(today.getDate()-32);
-                return today;
-            }
             var selected_rows = [];
             var rows_count = 0;
             var table = $('#datatable').DataTable({
