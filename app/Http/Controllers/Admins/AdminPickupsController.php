@@ -1191,67 +1191,72 @@ class AdminPickupsController extends Controller
 
       $receiving_sheet_ids = array();
 
-      foreach ($shipment_ids as $shipment_id) {
+      foreach ($shipment_ids as $key => $shipment_id) {
         $shipment = Shipment::find($shipment_id);
 
-        if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
-          $receiving_sheet_shipment->status = 1;
-          $receiving_sheet_shipment->save();
+        if ($shipment->shipper_status_id == 1) {
+          if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
+            $receiving_sheet_shipment->status = 1;
+            $receiving_sheet_shipment->save();
 
-          $receiving_sheet_id = $receiving_sheet_shipment->receiving_sheet_id;
+            $receiving_sheet_id = $receiving_sheet_shipment->receiving_sheet_id;
 
-          $receiving_sheet = $receiving_sheet_shipment->receiving_sheet;
+            $receiving_sheet = $receiving_sheet_shipment->receiving_sheet;
 
-          $receiving_sheet->received = $receiving_sheet->received + 1;
+            $receiving_sheet->received = $receiving_sheet->received + 1;
 
-          if (!in_array($receiving_sheet_id, $receiving_sheet_ids)) {
-            $receiving_sheet->status = 1;
+            if (!in_array($receiving_sheet_id, $receiving_sheet_ids)) {
+              $receiving_sheet->status = 1;
 
-            $receiving_sheet_ids[] = $receiving_sheet_id;
+              $receiving_sheet_ids[] = $receiving_sheet_id;
+            }
+
+            $receiving_sheet->save();
+
+            if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+              $receiving_sheet_received = new ReceivingSheetReceived();
+
+              $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
+              $receiving_sheet_received->user_id = $shipment->user_id;
+              $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+              $receiving_sheet_received->shipment_id = $shipment_id;
+
+              $receiving_sheet_received->save();
+            }
+
+            $reference_2_id = $receiving_sheet_id;
+          }
+          else {
+            if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+              $receiving_sheet_received = new ReceivingSheetReceived();
+
+              $receiving_sheet_received->user_id = $shipment->user_id;
+              $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+              $receiving_sheet_received->shipment_id = $shipment_id;
+
+              $receiving_sheet_received->save();
+            }
+
+            $reference_2_id = NULL;
           }
 
-          $receiving_sheet->save();
+          $shipment->shipper_status_id = 2;
+          $shipment->consignee_status_id = 2;
 
-          if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
-            $receiving_sheet_received = new ReceivingSheetReceived();
+          $shipment->save();
 
-            $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
-            $receiving_sheet_received->user_id = $shipment->user_id;
-            $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
-            $receiving_sheet_received->shipment_id = $shipment_id;
+          ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
-            $receiving_sheet_received->save();
-          }
+          NotificationsController::send(3, $shipment_id);
 
-          $reference_2_id = $receiving_sheet_id;
+          ShipmentChargesController::weight($shipment_id);
+          ShipmentChargesController::cash_handling($shipment_id);
+          ShipmentChargesController::insurance($shipment_id);
+          ShipmentChargesController::fuel_surcharge($shipment_id);
         }
         else {
-          if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
-            $receiving_sheet_received = new ReceivingSheetReceived();
-
-            $receiving_sheet_received->user_id = $shipment->user_id;
-            $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
-            $receiving_sheet_received->shipment_id = $shipment_id;
-
-            $receiving_sheet_received->save();
-          }
-
-          $reference_2_id = NULL;
+          unset($shipment_ids[$key]);
         }
-
-        $shipment->shipper_status_id = 2;
-        $shipment->consignee_status_id = 2;
-
-        $shipment->save();
-
-        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
-
-        NotificationsController::send(3, $shipment_id);
-
-        ShipmentChargesController::weight($shipment_id);
-        ShipmentChargesController::cash_handling($shipment_id);
-        ShipmentChargesController::insurance($shipment_id);
-        ShipmentChargesController::fuel_surcharge($shipment_id);
       }
 
       $done_receiving_sheet_ids = array();

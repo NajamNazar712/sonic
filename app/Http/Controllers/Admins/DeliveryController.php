@@ -2485,6 +2485,10 @@ class DeliveryController extends Controller
         }
     }
 
+    public function create_sdn_view(Request $request) {
+        return redirect(route('admin.delivery.completed.index'))->with('error', 'Kindly reselect the Delivery Notes for Deposit!');
+    }
+
     public function get_sdn_list(Request $request)
     {
         $dncc_ids = session('dncc_ids');
