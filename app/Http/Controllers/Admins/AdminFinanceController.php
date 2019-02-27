@@ -2341,7 +2341,7 @@ class AdminFinanceController extends Controller
     }
 
     public function make_payments_switch_to_invoice(Request $request) {
-        $pending_payment_ids = $request->pending_payment_ids;
+        $pending_payment_ids = $request->ids;
 
         if ($pending_payment_ids) {
             $settings = GlobalSettings::where('type', 'due_date_days');
