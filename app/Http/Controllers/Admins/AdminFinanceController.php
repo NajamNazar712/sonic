@@ -2371,6 +2371,8 @@ class AdminFinanceController extends Controller
                 $total_invoice_amount = 0;
 
                 foreach ($pending_payment->pending_payment_shipments as $pending_payment_shipment) {
+                    $delete = FALSE;
+
                     if (($pending_payment_shipment->type != 2 && $pending_payment_shipment->charges != 0) || ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0)) {
                         $valid = TRUE;
 
@@ -2385,7 +2387,7 @@ class AdminFinanceController extends Controller
                             $invoice_amount = $pending_payment_shipment->charges + $pending_payment_shipment->gst;
 
                             if ($pending_payment_shipment->amount == 0) {
-                                $pending_payment_shipment->delete();
+                                $delete = TRUE;
 
                                 $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
                                 $pending_payment->delivered_shipments = $pending_payment->delivered_shipments - 1;
@@ -2403,7 +2405,7 @@ class AdminFinanceController extends Controller
                         else if ($pending_payment_shipment->type == 1) {
                             $invoice_amount = $pending_payment_shipment->charges + $pending_payment_shipment->gst;
 
-                            $pending_payment_shipment->delete();
+                            $delete = TRUE;
 
                             $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
                             $pending_payment->returned_shipments = $pending_payment->returned_shipments - 1;
@@ -2413,7 +2415,7 @@ class AdminFinanceController extends Controller
                         else if ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0) {
                             $invoice_amount = $pending_payment_shipment->payable;
 
-                            $pending_payment_shipment->delete();
+                            $delete = TRUE;
 
                             $pending_payment->total_shipments = $pending_payment->total_shipments - 1;
                             $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments - 1;
@@ -2463,6 +2465,10 @@ class AdminFinanceController extends Controller
                             $total_charges = $total_charges + $pending_payment_shipment->charges;
                             $total_gst = $total_gst + $pending_payment_shipment->gst;
                             $total_invoice_amount = $total_invoice_amount + $pending_payment_shipment->charges + $pending_payment_shipment->gst;
+
+                            if ($delete) {
+                                $pending_payment_shipment->delete();
+                            }
                         }
                     }
                 }
