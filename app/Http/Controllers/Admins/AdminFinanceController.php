@@ -2383,7 +2383,7 @@ class AdminFinanceController extends Controller
                 $total_invoice_amount = 0;
 
                 foreach ($pending_payment->pending_payment_shipments as $pending_payment_shipment) {
-                    if ($pending_payment_shipment->type != 2 || ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0)) {
+                    if (($pending_payment_shipment->type != 2 && $pending_payment_shipment->charges) || ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0)) {
                         $valid = TRUE;
 
                         $invoice_shipment = new InvoiceShipment();
@@ -2989,8 +2989,8 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2) ? number_format($shipment->weight_charges) : '0') . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2) ? number_format($shipment->weight_charges && $done_payment_shipment->charges) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable) : '0') . '</td>
                             </tr>
             ';
@@ -2999,24 +2999,29 @@ class AdminFinanceController extends Controller
 
             if ($account_type_id == 1) {
                 if ($done_payment_shipment->type != 2) {
-                    if ($done_payment_shipment->type == 0) {
+                    if ($done_payment_shipment->charges) {
+                        if ($done_payment_shipment->type == 0) {
+                            $total_collection_amount += $done_payment_shipment->amount;
+                            $total_cash_handling_charges += $shipment->cash_handling_charges;
+                            $total_replacement_charges += $shipment->replacement_charges;
+                            // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                        }
+                        else {
+                            $total_return_charges += $shipment->return_charges;
+                        }
+
+                        $total_weight_charges += $shipment->weight_charges;
+
+                        if ($shipment->packaging_material_request) {
+                            $total_packaging_material_charges += $shipment->packaging_material_charges;
+                        }
+
+                        $total_insurance_charges += $shipment->insurance_charges;
+                        $total_fuel_surcharge += $shipment->fuel_surcharge;
+                    }
+                    else if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
-                        $total_cash_handling_charges += $shipment->cash_handling_charges;
-                        $total_replacement_charges += $shipment->replacement_charges;
-                        // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
                     }
-                    else {
-                        $total_return_charges += $shipment->return_charges;
-                    }
-
-                    $total_weight_charges += $shipment->weight_charges;
-
-                    if ($shipment->packaging_material_request) {
-                        $total_packaging_material_charges += $shipment->packaging_material_charges;
-                    }
-
-                    $total_insurance_charges += $shipment->insurance_charges;
-                    $total_fuel_surcharge += $shipment->fuel_surcharge;
                 }
                 else {
                     $total_adjustments += $done_payment_shipment->payable;
@@ -3365,6 +3370,8 @@ class AdminFinanceController extends Controller
 
         $shipper_bank = $shipper->bank;
 
+        $account_type_id = $shipper_bank->account_type_id;
+
         $html = '';
 
         if (!$email) {
@@ -3424,15 +3431,15 @@ class AdminFinanceController extends Controller
                                 </tr>
                                 <tr>
                                     <td class="color secondary"><strong>Name</strong></td>
-                                    <td>' . $shipper_bank->billing_person_name . '</td>
+                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_name : $shipper->name) . '</td>
                                 </tr>
                                 <tr>
                                     <td class="color secondary"><strong>Address</strong></td>
-                                    <td>' . $shipper_bank->billing_address . '</td>
+                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_address : $shipper->address) . '</td>
                                 </tr>
                                 <tr>
                                     <td class="color secondary"><strong>Contact No.</strong></td>
-                                    <td>' . $shipper_bank->billing_person_phone . '</td>
+                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_phone : $shipper->phone)  . '</td>
                                 </tr>
                                 <tr>
                                   <td class="color secondary"><strong>NTN</strong></td>
