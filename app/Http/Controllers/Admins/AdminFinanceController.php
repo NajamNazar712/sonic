@@ -2383,7 +2383,7 @@ class AdminFinanceController extends Controller
                 $total_invoice_amount = 0;
 
                 foreach ($pending_payment->pending_payment_shipments as $pending_payment_shipment) {
-                    if ($pending_payment_shipment->type != 2 && ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0)) {
+                    if ($pending_payment_shipment->type != 2 || ($pending_payment_shipment->type == 2 && $pending_payment_shipment->payable >= 0)) {
                         $invoice_shipment = new InvoiceShipment();
 
                         $invoice_shipment->invoice_id = $invoice_id;
