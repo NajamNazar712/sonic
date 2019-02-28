@@ -571,10 +571,10 @@ class DeliveryController extends Controller
                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
                 $delivery = $delivery->first();
                 $count = $delivery->shipments_count;
-                $cod = str_replace(',', '', $delivery->total_cod_amount);
+                $cod = $delivery->total_cod_amount;
                 $count = $count - 1;
                 if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
-                    $cod = $cod - str_replace(',', '', $parcel->amount);
+                    $cod = $cod - $parcel->amount;
                 }
                 if ($count == 0) {
                     DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod, 'status' => 4]);
@@ -996,7 +996,14 @@ class DeliveryController extends Controller
 
                         } elseif ($shipment_details->booking_type_id == 4) {
                             ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0);
-                            Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
+
+                            if ($parcel->charges_mode_id == 1) {
+                                Shipment::where('id', $shipment)->update(['received_amount' => 0, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
+                            }
+                            else {
+                                Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
+                            }
+
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 7]);
                         } else {
                             ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0);
@@ -1152,7 +1159,14 @@ class DeliveryController extends Controller
 
                     } elseif ($parcel->booking_type_id == 4) {
                         ShipmentsJourneyController::add($shipment, 14, 14, NULL, $remarks, NULL, Auth::id(), $request->delivery_note_id, NULL, 0);
-                        Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
+
+                        if ($parcel->charges_mode_id == 1) {
+                            Shipment::where('id', $shipment)->update(['received_amount' => 0, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
+                        }
+                        else {
+                            Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
+                        }
+
                         DeliveryNoteShipment::where(['delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 7]);
                     } else {
                         ShipmentsJourneyController::add($shipment, 14, 14, NULL, $remarks, NULL, Auth::id(), $request->delivery_note_id, NULL, 0);
@@ -1567,7 +1581,13 @@ class DeliveryController extends Controller
                                         } elseif ($parcel->booking_type_id == 4) {
                                             ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
 
-                                            Shipment::where('id', $shipment)->update(['received_amount' => ROUND(($parcel->fuel_surcharge + $parcel->weight_charges + $parcel->gst), 0, PHP_ROUND_HALF_DOWN), 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
+                                            if ($parcel->charges_mode_id == 1) {
+                                                Shipment::where('id', $shipment)->update(['received_amount' => 0, 0, PHP_ROUND_HALF_DOWN), 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
+                                            }
+                                            else {
+                                                Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 0, PHP_ROUND_HALF_DOWN), 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
+                                            }
+
                                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 7]);
                                         } else {
                                             ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
