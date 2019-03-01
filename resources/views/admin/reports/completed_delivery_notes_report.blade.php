@@ -541,7 +541,7 @@
             });
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.completed_delivery_notes.print') !!}',
+                    url: '{!! route('admin.delivery.receive.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,

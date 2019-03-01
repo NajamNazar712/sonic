@@ -850,9 +850,6 @@
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
-                                                        @if($index>0)
-
-                                                        @endif
                                                     </div>
                                                 </div>{{--Row--}}
                                             @endforeach
@@ -1567,7 +1564,7 @@
                                                             <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_3}}" name="detain_wa_national_charges[{{$index}}]" disabled>
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col-1">
+                                                    <div class="col-1"></div>
 
                                                 </div>{{--Row--}}
                                             @endforeach
@@ -1623,7 +1620,7 @@
                                                             <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  disabled>
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col-1">
+                                                        <div class="col-1"></div>
 
                                                 </div>{{--Row--}}
                                                 @endif
