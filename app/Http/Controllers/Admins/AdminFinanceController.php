@@ -783,8 +783,8 @@ class AdminFinanceController extends Controller
                     ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id)'));
             })
             ->leftjoin('shipments_journey as an', function($join) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id and shipper_status_id = 1)'));
+                $join->on('an.shipment_id', '=', 'shipments.id')
+                    ->where('an.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id and shipper_status_id = 1)'));
             })
             ->leftjoin('admins as adn','adn.id','=','an.admin_id')
             ->leftjoin('charges_modes as cm', 'shipments.charges_mode_id', '=', 'cm.id')
