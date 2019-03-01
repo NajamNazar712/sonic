@@ -997,7 +997,7 @@ class DeliveryController extends Controller
                         } elseif ($shipment_details->booking_type_id == 4) {
                             ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0);
 
-                            if ($parcel->charges_mode_id == 1) {
+                            if ($shipment_details->charges_mode_id == 1) {
                                 Shipment::where('id', $shipment)->update(['received_amount' => 0, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
                             }
                             else {
