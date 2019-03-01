@@ -18,6 +18,7 @@ use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\PickupNote;
 use App\Http\Models\PickupRequest;
@@ -4706,6 +4707,40 @@ class AdminReportsController extends Controller
             $datatable->whereBetween('return_confirm_date', [$from,$to]);
         }
 
+        return $datatable->make(true);
+    }
+
+    public function multiple_payment_report_index(){
+        return view('admin.reports.multiple_payment_report');
+    }
+    public function multiple_payment_report_list(Request $request){
+        $payments = DonePaymentShipment::join('shipments as s','s.id', '=', 'done_payment_shipments.shipment_id')->select(['s.tracking_number as tracking_number', 's.actual_weight as actual_weight', 's.cash_handling_charges as cash_handling_charges','s.insurance_charges as insurance_charges','s.return_charges as return_charges','s.fuel_surcharge as fuel_surcharge','s.replacement_charges as replacement_charges','s.packaging_material_charges as packaging_material_charges', 'done_payment_shipments.done_payment_id as payment_id', 'done_payment_shipments.gst as gst', 'done_payment_shipments.amount as amount', 'done_payment_shipments.payable as total_payable', 'done_payment_shipments.type as status']);
+        $datatable = Datatables::of($payments)
+            ->addColumn('id_padded', function ($shipments) {
+                return str_pad($shipments->payment_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('payment_id_link', function($shipments) {
+                return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->payment_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('status', function($shipments){
+               if($shipments->status == 0){
+                   return 'Delivered';
+               }
+               elseif ($shipments->status == 1){
+                   return 'Returned';
+               }
+               else{
+                   return 'Adjusted';
+               }
+
+            });
+        if ($tracking_number = $request->get('tracking_number')) {
+            $datatable->where('s.tracking_number', '=', $tracking_number);
+        }
         return $datatable->make(true);
     }
 }

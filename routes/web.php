@@ -873,6 +873,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReportsController@return_reattempt_ratio_list')->name('list');
 
         });
+        Route::prefix('multiple_payment_report')->name('multiple_payment_report.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@multiple_payment_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@multiple_payment_report_list')->name('list');
+
+        });
     });
 
     //Reports end

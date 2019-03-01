@@ -1,8 +1,8 @@
-M<?php
+<?php
 
 use Illuminate\Database\Seeder;
 
-class UpdateModulePermissionTableSettingsShipmentCancellationCutOffDaysSeeder extends Seeder
+class UpdateModulePermissionTableMultiplePaymentReport extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,7 +12,7 @@ class UpdateModulePermissionTableSettingsShipmentCancellationCutOffDaysSeeder ex
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 116, 'name' => 'Shipment Cancellation Cut-Off Days', 'module_id' => 14)
+            array('id' => 176, 'name' => 'Multiple Payment', 'module_id' => 9)
         ));
     }
 }
