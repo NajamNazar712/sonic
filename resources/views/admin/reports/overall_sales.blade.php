@@ -117,6 +117,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Class</th>
+                        <th class="border-primary border-darken-1">Attempts</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Category</th>
                         <th class="border-primary border-darken-1">Description</th>
@@ -331,6 +332,7 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Class');
+                            head.push('Attempts');
                             head.push('Shipping Mode');
                             head.push('Category');
                             head.push('Description');
@@ -369,6 +371,7 @@
                                 row.push(values.hub);
                                 row.push(values.zone);
                                 row.push(values.class);
+                                row.push(values.attempts);
                                 row.push(values.shipping_mode);
                                 row.push(values.category);
                                 row.push(values.description);
@@ -448,6 +451,7 @@
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
                     { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
                     { data:'class' ,name: 'zcc.class', class: 'align-middle class'},
+                    { data:'attempts' ,name: 'attempts', class: 'align-middle attempts',sortable:false},
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
                     { data:'category' ,name: 'p.product_name', class: 'align-middle category'},
                     { data:'description' ,name: 'si.description', class: 'align-middle description'},
