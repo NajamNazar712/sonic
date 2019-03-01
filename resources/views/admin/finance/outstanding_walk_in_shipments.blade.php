@@ -167,7 +167,7 @@
                     {data:'fuel_surcharge', name: 'shipments.fuel_surcharge', class: 'align-middle text-center fuel_surcharge'},
                     {data:'return_charges', name: 'shipments.return_charges', class: 'align-middle text-center return_charges'},
                     {data:'gst', name: 'shipments.gst', class: 'align-middle text-center gst'},
-                    {data:'charges', name: 'shipments.amount', class: 'align-middle text-center charges'},
+                    {data:'charges', name: 'charges', class: 'align-middle text-center charges', orderable: false, searchable: false},
                     {data:'charges_modes', name: 'cm.id', class: 'align-middle text-center charges_modes'},
                     {data:'status', name: 'ss.id', class: 'align-middle text-center status'},
                     {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
@@ -196,7 +196,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.charges') || $(header).is('.aging') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))

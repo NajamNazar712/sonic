@@ -810,8 +810,16 @@ class AdminFinanceController extends Controller
                     return 'Pending Return Charges Collection';
                 }
             })
-            ->editColumn('charges', function($shipment){
-                return (($shipment->charges) ? number_format($shipment->charges) : '0');
+            ->addColumn('charges', function($shipment){
+                if ($shipment->charges_mode_id == 1) {
+                    return (($shipment->received_amount) ? number_format($shipment->received_amount) : '0');
+                }
+                else if ($shipment->charges_mode_id == 2) {
+                    return (($shipment->amount) ? number_format($shipment->amount) : '0');
+                }
+                else {
+                    return '0';
+                }
             })
             ->editColumn('return_charges', function($shipment){
                 return number_format($shipment->return_charges);

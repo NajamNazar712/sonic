@@ -106,12 +106,12 @@ class AdminWalkInBookShipmentController extends Controller
 
         $shipment_id = $shipment->id;
 
-        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
+        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, NULL, Auth::id());
 
-        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, $user_id, NULL);
+        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id());
 
         if ($self_collection) {
-            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, $user_id, NULL);
+            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
         }
 
         return $shipment_id;
@@ -148,7 +148,7 @@ class AdminWalkInBookShipmentController extends Controller
         $products = Product::orderBy('product_name')->get();
         $shipping_mode = ShippingMode::where('id','!=', 4)->get();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
-        $charges_modes = ChargesModes::get();
+        $charges_modes = ChargesModes::where('id','!=',3)->get();
         return view('admin.shipment.book.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user_shipping_infos' => $user_shipping_infos, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'consignee_cities' => $consignee_cities]);
     }
 
@@ -274,12 +274,14 @@ class AdminWalkInBookShipmentController extends Controller
                     if($request->charges_mode == 1) {
                         $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
 
-                        $amount = $receivable;
+                        $amount = 0;
 
-                        $r_amount = $amount;
+                        $r_amount = $receivable;
                     }
                     else{
-                        $amount = 0;
+                        $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                        $amount = $receivable;
 
                         $r_amount = NULL;
                     }
