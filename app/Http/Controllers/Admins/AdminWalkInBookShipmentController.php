@@ -106,12 +106,12 @@ class AdminWalkInBookShipmentController extends Controller
 
         $shipment_id = $shipment->id;
 
-        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, Auth::id(), NULL);
+        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, NULL, Auth::id());
 
-        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, Auth::id(), NULL);
+        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id());
 
         if ($self_collection) {
-            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, Auth::id(), NULL);
+            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
         }
 
         return $shipment_id;
