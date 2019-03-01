@@ -805,10 +805,10 @@ class AdminFinanceController extends Controller
             })
             ->addColumn('charges', function($shipment){
                 if ($shipment->charges_mode_id == 1) {
-                    return (($shipment->amount) ? number_format($shipment->amount) : '0');
+                    return (($shipment->received_amount) ? number_format($shipment->received_amount) : '0');
                 }
                 else if ($shipment->charges_mode_id == 2) {
-                    return (($shipment->received_amount) ? number_format($shipment->received_amount) : '0');
+                    return (($shipment->amount) ? number_format($shipment->amount) : '0');
                 }
                 else {
                     return '0';
