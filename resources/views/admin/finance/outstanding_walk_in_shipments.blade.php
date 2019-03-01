@@ -20,8 +20,10 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Tracking Number</th>
+                                    <th class="border-primary border-darken-1">Booked By</th>
                                     <th class="border-primary border-darken-1">Consignee</th>
                                     <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Weight Charges</th>
@@ -79,8 +81,10 @@
 
                             head.push('S.No');
                             head.push('Tracking Number');
+                            head.push('Booked By');
                             head.push('Consignee');
                             head.push('Address');
+                            head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Weight Charges');
@@ -105,6 +109,7 @@
                                 row.push(values.tracking_no);
                                 row.push(values.consignee);
                                 row.push(values.address);
+                                row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.weight_charges);
@@ -152,8 +157,10 @@
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'tracking_number', name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
+                    {data:'booked_by', name: 'adn.name', class: 'align-middle text-center booked_by'},
                     {data:'consignee', name: 'shipments.consignee_name', class: 'align-middle text-center consignee'},
                     {data:'address', name: 'shipments.consignee_address', class: 'align-middle text-center address'},
+                    {data:'origin', name: 'oc.name', class: 'align-middle text-center origin'},
                     {data:'destination', name: 'dc.name', class: 'align-middle text-center destination'},
                     {data:'hub', name: 'hc.name', class: 'align-middle text-center hub'},
                     {data:'weight_charges', name: 'shipments.weight_charges', class: 'align-middle text-center weight_charges'},
