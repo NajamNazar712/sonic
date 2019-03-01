@@ -53,3 +53,25 @@ function scan_sound(type) {
         sound.play();
     }
 }
+// Block page
+function blockPagePermanently() {
+
+    $.blockUI({
+        message: '<div class="ft-refresh-cw icon-spin font-medium-2"></div>',
+        timeout: 0, //unblock after 2 seconds
+        overlayCSS: {
+            backgroundColor: '#FFF',
+            opacity: 0.8,
+            cursor: 'wait'
+        },
+        css: {
+            border: 0,
+            padding: 0,
+            backgroundColor: 'transparent'
+        }
+    });
+}
+function UnblockPagePermanently() {
+
+    $.unblockUI({ fadeOut: 200 });
+}

@@ -248,6 +248,7 @@
 					form.reset();
 
 					if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
+					    blockPagePermanently();
 						$.ajax({
 							url: '{!! route('admin.cargo.create.shipment_details') !!}',
 							method: 'POST',
@@ -297,12 +298,13 @@
 
 									$('#cargo_consignment_confirm').prop('disabled', false);
                                     $('#add_draft_cargo').prop('disabled', false);
-
+                                    UnblockPagePermanently();
 									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
 							}
 							else {
 								$('#add_shipment_form button.add').prop('disabled', false);
+								UnblockPagePermanently();
                                 scan_sound(2);
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 							}
@@ -338,7 +340,7 @@
 				if ($('#cargo_consignment form .receiver_id').hasClass('select2-hidden-accessible')) {
 					$('#cargo_consignment form .receiver_id').html('').select2('destroy');
 				}
-
+                blockPagePermanently();
 				$.ajax({
 					url: '{!! route('admin.cargo.create.consignment_details') !!}',
 					method: 'POST',
@@ -349,6 +351,7 @@
 					}
 				})
 				.done(function(data) {
+
 					$('#cargo_consignment form .cargo_type').val(cargo_type);
 					$('#cargo_consignment form .shipping_mode_id').val(shipping_mode_id);
 					$('#cargo_consignment form .shipment_ids').val(shipment_ids);
@@ -454,7 +457,7 @@
 					}).bind('change', function() {
 						$(this).valid();
 					});
-
+                    UnblockPagePermanently();
 					$('#cargo_consignment form').validate({
 						errorClass: 'danger',
 						successClass: 'success',
@@ -466,7 +469,7 @@
 						},
 						submitHandler: function(form) {
 							$(form).find('button[type=submit]').attr('disabled', 'disabled');
-
+                            blockPagePermanently();
 							swal({
 								title: 'Please Wait!',
 								text: 'Your cargo is being created!',
@@ -484,7 +487,7 @@
             //Draft
             $('#add_draft_cargo').on('click', function () {
                 if(shipment_ids.length > 0){
-
+                    blockPagePermanently();
                     $.ajax({
                         url: '{!! route('admin.cargo.draft.add') !!}',
                         method: 'POST',
@@ -500,6 +503,7 @@
                             if(data.status){
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                             }else{
+                                UnblockPagePermanently();
                                 var error = "Something went wrong, Please try again";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 

@@ -612,6 +612,7 @@
                     dangerMode: true
                 }).then(function (confirm) {
                     if (confirm) {
+
                         var shipment = $('#shipment_ids');
                         event.preventDefault();
                         var id = '';
@@ -621,6 +622,7 @@
                             shipments.push(id);
                         }
                         shipment.val(shipments);
+                        blockPagePermanently();
                         this_form.submit();
                     }
                 });
@@ -890,6 +892,7 @@
             });
             //end replacement
             $('#trybuy_form').bind('submit',function (e) {
+                blockPagePermanently();
                 e.preventDefault();
                 var total = $('#cod').text();
                 total = parseInt(total);
@@ -902,8 +905,10 @@
                 $('#item_unchecked').val(uncheckbox_count);
                 $('#delivery_note_trybuy').val(deliverynote_id);
                 if(checkbox_count > 0){
+                    UnblockPagePermanently();
                     this.submit();
                 }else{
+                    UnblockPagePermanently();
                     var error = "Select at-least one item!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
@@ -915,7 +920,7 @@
                 var delivery_note = $('#delivery_note').val();
                 if(selected_rows.length > 0){
                     if(select_all_status != ''){
-
+                        blockPagePermanently();
                         table.rows().nodes().each(function(index) {
                             var row = table.row(index);
                             if ($(row.node()).hasClass('selected')) {
@@ -938,10 +943,11 @@
                             }
                         }).done(function (data) {
                             if(data.status === 1){
-
+                                UnblockPagePermanently();
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                             }else{
+                                UnblockPagePermanently();
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                             }

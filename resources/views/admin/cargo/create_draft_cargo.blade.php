@@ -274,6 +274,7 @@
                     form.reset();
 
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
+                        blockPagePermanently();
                         $.ajax({
                             url: '{!! route('admin.cargo.create.shipment_details') !!}',
                             method: 'POST',
@@ -334,11 +335,12 @@
                                             }
                                         });
 
-
+                                        UnblockPagePermanently();
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                 }
                                 else {
+                                    UnblockPagePermanently();
                                     $('#add_shipment_form button.add').prop('disabled', false);
                                     scan_sound(2);
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -375,7 +377,7 @@
                 if ($('#cargo_consignment form .receiver_id').hasClass('select2-hidden-accessible')) {
                     $('#cargo_consignment form .receiver_id').html('').select2('destroy');
                 }
-
+                blockPagePermanently();
                 $.ajax({
                     url: '{!! route('admin.cargo.create.consignment_details') !!}',
                     method: 'POST',
@@ -491,7 +493,7 @@
                         }).bind('change', function() {
                             $(this).valid();
                         });
-
+                        UnblockPagePermanently();
                         $('#cargo_consignment form').validate({
                             errorClass: 'danger',
                             successClass: 'success',
@@ -503,7 +505,7 @@
                             },
                             submitHandler: function(form) {
                                 $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
+                                blockPagePermanently();
                                 swal({
                                     title: 'Please Wait!',
                                     text: 'Your cargo is being created!',

@@ -146,6 +146,7 @@
                     form.reset();
 
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
+                        blockPagePermanently();
                         $.ajax({
                             url: '{!! route('admin.cargo.receive.shipment_details') !!}',
                             method: 'POST',
@@ -174,11 +175,12 @@
                                         $('#add_shipment_form button.add').prop('disabled', false);
 
                                         $('#receive_form .receive').prop('disabled', false);
-
+                                        UnblockPagePermanently();
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                 }
                                 else {
+                                    UnblockPagePermanently();
                                     $('#add_shipment_form button.add').prop('disabled', false);
                                     scan_sound(2);
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -186,6 +188,7 @@
                             });
                     }
                     else {
+                        UnblockPagePermanently();
                         $('#add_shipment_form button.add').prop('disabled', false);
                         scan_sound(2);
                         toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -201,7 +204,7 @@
                 var form = this;
 
                 $('#receive_form input.shipment_ids').val(shipment_ids);
-
+                blockPagePermanently();
                 $.ajax({
                     url: '{!! route('admin.cargo.receive.short_received') !!}',
                     method: 'POST',
@@ -213,6 +216,7 @@
                 })
                     .done(function(data) {
                         if (data.status == 0) {
+                            UnblockPagePermanently();
                             if (data.short_received) {
                                 var html = 'There are shipments that are short received from Cargo No#' + cargo_consignment_id + ':<br/>';
 
@@ -260,6 +264,7 @@
                             });
                         }
                         else {
+                            UnblockPagePermanently();
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                     });

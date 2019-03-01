@@ -272,7 +272,7 @@
                                         dangerMode: true
                                     }).then(function (confirm) {
                                         if (confirm) {
-
+                                            blockPagePermanently();
                                             table.rows().nodes().each(function(index) {
                                                 var row = table.row(index);
                                                 if ($(row.node()).hasClass('selected')) {
@@ -292,6 +292,7 @@
                                                     'remark': shipment_remarks
                                                 }
                                             }).done(function (data) {
+                                                UnblockPagePermanently();
                                                 table.rows().deselect();
                                                 selected_rows = [];
                                                 shipment_remarks = {};
@@ -343,6 +344,7 @@
                                         dangerMode: true
                                     }).then(function (confirm) {
                                         if (confirm) {
+                                            blockPagePermanently();
                                             table.rows().nodes().each(function(index) {
                                                 var row = table.row(index);
 
@@ -363,6 +365,7 @@
                                                     'remark': shipment_remarks
                                                 }
                                             }).done(function (data) {
+                                                UnblockPagePermanently();
                                                 selected_rows = [];
                                                 shipment_remarks = {};
                                                 table.button('.confirm').disable();
@@ -697,6 +700,7 @@
                         dangerMode: true
                     }).then(function (confirm) {
                         if (confirm) {
+                            blockPagePermanently();
                             $.ajax({
                                 url:"{{route('admin.return.marked.status.single')}}",
                                 method:'POST',
@@ -708,10 +712,12 @@
                                 }
                             }).done(function (data) {
                                 if(data.status == 1){
+                                    UnblockPagePermanently();
                                     table.draw('false');
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                                 }else{
+                                    UnblockPagePermanently();
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                                 }

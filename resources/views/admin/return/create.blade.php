@@ -245,6 +245,7 @@
                     scan.attr('disabled', true);
 
                     if(table.row().count() == 0) {
+                        blockPagePermanently();
                         $.ajax({
                             url: '{{route('admin.return.create.shipment_details')}}',
                             type: 'POST',
@@ -255,6 +256,7 @@
                         }).done(function (data) {
 
                             if (data.status == 1) {
+                                UnblockPagePermanently();
                                 scan_sound(2);
                                 toastr.error(data.error, 'Error!', {
                                     positionClass: 'toast-top-center',
@@ -266,6 +268,7 @@
                                 table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
                                 table.draw(false);
                                 scan_sound(1);
+                                UnblockPagePermanently();
                                 shipment_ids.push(data.shId);
                                 $('#hub_id').val(data.hub);
                             }
@@ -276,7 +279,7 @@
                         });
                     }else {
                         if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking)) === -1) {
-
+                            blockPagePermanently();
                             $.ajax({
                                 url: '{{route('admin.return.create.shipment_details')}}',
                                 type: 'POST',
@@ -288,6 +291,7 @@
                             }).done(function (data) {
 
                                 if (data.status == 1) {
+                                    UnblockPagePermanently();
                                     scan_sound(2);
                                     toastr.error(data.error, 'Error!', {
                                         positionClass: 'toast-top-center',
@@ -299,6 +303,7 @@
                                     table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
                                     table.draw(false);
                                     scan_sound(1);
+                                    UnblockPagePermanently();
                                     shipment_ids.push(data.shId);
                                     table.order([0, 'desc']).draw();
                                 }
@@ -384,6 +389,7 @@
                             dangerMode: true
                         }).then(function (confirm) {
                             if (confirm) {
+                                blockPagePermanently();
                                 $('#create_return_note_form input#shipment_ids').val(shipment_ids);
                                 $('#create_return_note_form input#selected_rider_id').val(rider);
                                 $('#create_return_note_form input#selected_route_id').val(route);

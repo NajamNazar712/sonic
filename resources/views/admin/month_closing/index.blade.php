@@ -233,6 +233,7 @@
                                     dangerMode: true
                                 }).then(function (confirm) {
                                     if (confirm) {
+                                        blockPagePermanently();
                                         $.ajax({
                                             url:"{{route('admin.month_closing.confirm')}}",
                                             method:'POST',
@@ -241,32 +242,12 @@
                                                 '_token':'{{ csrf_token() }}'
                                             }
                                         }).done(function (data) {
+                                            UnblockPagePermanently();
                                             selected_rows = [];
                                             table.button('.confirm').disable();
                                             table.button('.re-attempt').disable();
                                             table.draw(true);
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                            // if(data.untouched){
-                                            //     var comma = '';
-                                            //     var shipments = '';
-                                            //     $.each(data.untouched_shipments, function (index, value) {
-                                            //         if(data.untouched_shipments != index+1){
-                                            //             comma = ", ";
-                                            //         }else{
-                                            //             comma = '';
-                                            //         }
-                                            //         shipments += value+comma;
-                                            //
-                                            //     });
-                                            //
-                                            //     swal({
-                                            //         title: 'Shipments Not updated!',
-                                            //         text: shipments,
-                                            //         icon: 'error',
-                                            //         closeOnClickOutside: false,
-                                            //         closeOnEsc: false
-                                            //     });
-                                            // }
 
                                         });
                                     }
@@ -311,6 +292,7 @@
                                     dangerMode: true
                                 }).then(function (confirm) {
                                     if (confirm) {
+                                        blockPagePermanently();
                                         $.ajax({
                                             url:"{{route('admin.month_closing.reattempt')}}",
                                             method:'POST',
@@ -319,6 +301,7 @@
                                                 '_token':'{{ csrf_token() }}'
                                             }
                                         }).done(function (data) {
+                                            UnblockPagePermanently();
                                             selected_rows = [];
                                             table.button('.confirm').disable();
                                             table.button('.re-attempt').disable();
@@ -606,6 +589,7 @@
                         dangerMode: true
                     }).then(function (confirm) {
                         if(confirm){
+                            blockPagePermanently();
                             var tracking_number = $('#add_shipment_form input.tracking_number').val();
                             $('#add_shipment_form button[type="submit"]').attr('disabled', 'disabled');
                             $.ajax({
@@ -617,10 +601,12 @@
                                 }
                             }).done(function(data){
                                if(data.status){
+                                   UnblockPagePermanently();
                                    scan_sound(1);
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     table.draw(true);
                                }else{
+                                   UnblockPagePermanently();
                                    scan_sound(2);
                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                }
