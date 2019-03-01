@@ -274,12 +274,14 @@ class AdminWalkInBookShipmentController extends Controller
                     if($request->charges_mode == 1) {
                         $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
 
-                        $amount = $receivable;
+                        $amount = 0;
 
-                        $r_amount = $amount;
+                        $r_amount = $receivable;
                     }
                     else{
-                        $amount = 0;
+                        $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                        $amount = $receivable;
 
                         $r_amount = NULL;
                     }
