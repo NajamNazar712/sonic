@@ -3312,9 +3312,9 @@ class AdminFinanceController extends Controller
                     $invoice = new Invoice();
 
                     $invoice->user_id = $user_id;
-                    $invoice->billing_period_from_date = $current_date->subDays(7)->startOfDay()->toDateString();
-                    $invoice->billing_period_to_date = $current_date->startOfDay()->toDateString();
-                    $invoice->due_date = $current_date->addDays($due_date_days)->startOfDay()->toDateString();
+                    $invoice->billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
+                    $invoice->billing_period_to_date = Carbon::now()->startOfDay()->toDateString();
+                    $invoice->due_date = Carbon::now()->addDays($due_date_days)->startOfDay()->toDateString();
                     $invoice->status_id = 1;
 
                     $invoice->save();
