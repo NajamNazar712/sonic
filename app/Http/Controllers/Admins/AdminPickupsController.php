@@ -12,7 +12,6 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Controllers\Admins\AdminFinanceController;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
@@ -31,6 +30,7 @@ use App\Http\Models\PickupRequestShortReceivedShipment;
 use App\Http\Models\PickupNote;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\PickupNoteStatus;
+use App\Http\Models\Zone;
 
 use Auth;
 use Illuminate\Support\Facades\DB;
@@ -1262,7 +1262,9 @@ class AdminPickupsController extends Controller
 
             $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
 
-            $gst = ROUND(($charges * AdminFinanceController::gst($shipment->pickup_address->city->zone_id)), 0, PHP_ROUND_HALF_DOWN);
+            $gst = Zone::find($shipment->pickup_address->city->zone_id)->gst;
+
+            $gst = ROUND(($charges * $gst)), 0, PHP_ROUND_HALF_DOWN);
 
             $shipment->amount = $shipment->amount + $charges + $gst;
 
