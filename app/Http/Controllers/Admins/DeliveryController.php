@@ -2522,7 +2522,7 @@ class DeliveryController extends Controller
             ->whereIn('delivery_notes.id', $dncc_ids);
 
         if (session('role_id') != 1) {
-            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+            $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
         }
 
         return Datatables::of($deliveries)
