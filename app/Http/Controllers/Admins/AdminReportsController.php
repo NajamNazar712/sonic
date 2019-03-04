@@ -1494,11 +1494,8 @@ class AdminReportsController extends Controller
                     return '';
                 }
             })
-            ->editColumn('status_updated_at', function($shipment) {
-                return $shipment->status_updated_at;
-            })
             ->addColumn('aging', function($shipment) {
-                $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
+                $updated_at = Carbon::parse($shipment->operation_status_date)->startOfDay();
 
                 $now = Carbon::now()->startOfDay();
 
