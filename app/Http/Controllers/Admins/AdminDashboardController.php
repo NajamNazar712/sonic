@@ -5775,13 +5775,11 @@ class AdminDashboardController extends Controller
                     }else{
                         if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
                             if($result->status != 2) {
-                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.add.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
                             }
                         } else {
                             if (session('role_id') == 1 || in_array(6, session('permissions'))) {
-                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.add.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
-
-
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
                         }
                     }
