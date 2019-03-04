@@ -3527,12 +3527,15 @@ class AdminFinanceController extends Controller
                 $date = $shipment->created_at;
             }
 
+            $date = Carbon::parse($date)->format('d/m/Y');
+
             $shipment_details .= '
                         <tr>
                           <td>' . $serial_number . '</td>
                           <td>' . $shipment->tracking_number . '</td>
+                          <td>' . $type . '</td>
+                          <td>' . $shipment->pickup_address->city->name . '</td>
                           <td>' . $shipment->consignee_city->name . '</td>
-                          <td>' . $shipment->booking_type->booking_type . '</td>
                           <td>' . $date . '</td>
                           <td>' . $shipment->actual_weight . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges) : '0') . '</td>
@@ -3685,9 +3688,10 @@ class AdminFinanceController extends Controller
                         <tr>
                           <td class="color secondary"><strong>S. No.</strong></td>
                           <td class="color secondary"><strong>Tracking No.</strong></td>
+                          <td class="color secondary"><strong>Type</strong></td>
+                          <td class="color secondary"><strong>Origin</strong></td>
                           <td class="color secondary"><strong>Destination</strong></td>
-                          <td class="color secondary"><strong>Booking Type</strong></td>
-                          <td class="color secondary"><strong>Arrival Datetime</strong></td>
+                          <td class="color secondary"><strong>Arrival Date</strong></td>
                           <td class="color secondary"><strong>Weight (kg)</strong></td>
                           <td class="color secondary"><strong>Weight Charges (PKR)</strong></td>
                           <td class="color secondary"><strong>Cash Handling Charges (PKR)</strong></td>

@@ -149,7 +149,7 @@
 		$(document).ready(function() {
 			@if (session('print_shipment_ids'))
 				$.ajax({
-					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+					url: '{!! route('cod.shipment.book.corporate_invoice') !!}',
 					method: 'POST',
 					data: {
 						'ids': {!! json_encode(session('print_shipment_ids')) !!},
