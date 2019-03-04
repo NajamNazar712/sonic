@@ -131,9 +131,9 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function __construct() {
-        $this->middleware('auth:web,substitute_users')->except('print_air_waybill');
+        $this->middleware('auth:web,substitute_users')->except(['print_air_waybill', 'corporate_invoice']);
 
-        $this->middleware('auth:admin,web,substitute_users')->only('print_air_waybill');
+        $this->middleware('auth:admin,web,substitute_users')->only(['print_air_waybill', 'corporate_invoice']);
 
         $this->middleware('Permission');
     }

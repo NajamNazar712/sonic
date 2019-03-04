@@ -26,6 +26,7 @@ use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\DonePayment;
@@ -3517,13 +3518,25 @@ class AdminFinanceController extends Controller
                 $type = 'Adjusted';
             }
 
+            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
+
+            if ($shipment_journey->exists()) {
+                $date = $shipment_journey->first()->created_at;
+            }
+            else {
+                $date = $shipment->created_at;
+            }
+
+            $date = Carbon::parse($date)->format('d/m/Y');
+
             $shipment_details .= '
                         <tr>
                           <td>' . $serial_number . '</td>
                           <td>' . $shipment->tracking_number . '</td>
+                          <td>' . $type . '</td>
+                          <td>' . $shipment->pickup_address->city->name . '</td>
                           <td>' . $shipment->consignee_city->name . '</td>
-                          <td>' . $shipment->booking_type->booking_type . '</td>
-                          <td>' . $invoice_shipment->created_at . '</td>
+                          <td>' . $date . '</td>
                           <td>' . $shipment->actual_weight . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
@@ -3670,14 +3683,15 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <tbody>
                         <tr>
-                            <td class="color primary text-center" colspan="17"><strong>Shipment(s) Summary</strong></td>
+                            <td class="color primary text-center" colspan="18"><strong>Shipment(s) Summary</strong></td>
                         </tr>
                         <tr>
                           <td class="color secondary"><strong>S. No.</strong></td>
                           <td class="color secondary"><strong>Tracking No.</strong></td>
+                          <td class="color secondary"><strong>Type</strong></td>
+                          <td class="color secondary"><strong>Origin</strong></td>
                           <td class="color secondary"><strong>Destination</strong></td>
-                          <td class="color secondary"><strong>Booking Type</strong></td>
-                          <td class="color secondary"><strong>Datetime</strong></td>
+                          <td class="color secondary"><strong>Arrival Date</strong></td>
                           <td class="color secondary"><strong>Weight (kg)</strong></td>
                           <td class="color secondary"><strong>Weight Charges (PKR)</strong></td>
                           <td class="color secondary"><strong>Cash Handling Charges (PKR)</strong></td>
@@ -3851,7 +3865,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Destination', 'Booking Type', 'Datetime', 'Weight (kg)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'Insurance Charges (PKR)', 'Replacement Charges (PKR)', 'Return Charges (PKR)', 'Fuel Surcharge (PKR)', 'Packaging Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Type', 'Origin', 'Destination', 'Booking Type', 'Datetime', 'Weight (kg)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'Insurance Charges (PKR)', 'Replacement Charges (PKR)', 'Return Charges (PKR)', 'Fuel Surcharge (PKR)', 'Packaging Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
 
         $serial_number = 1;
 
@@ -3872,6 +3886,8 @@ class AdminFinanceController extends Controller
 
             $row[] = $serial_number;
             $row[] = $shipment->tracking_number;
+            $row[] = $type;
+            $row[] = $shipment->pickup_address->city->name;
             $row[] = $shipment->consignee_city->name;
             $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->created_at;
@@ -3896,8 +3912,6 @@ class AdminFinanceController extends Controller
         $spreadsheet = new Spreadsheet();
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('G')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');
@@ -3907,6 +3921,8 @@ class AdminFinanceController extends Controller
         $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('R')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode('#,##0');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
