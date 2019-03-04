@@ -51,6 +51,14 @@
                                     </thead>
                                     <tbody>
                                     @php
+                                        foreach ($shipping_modes as $shipping_mode){
+                                        if($shipping_mode == 4){
+                                            $check_sameday = 1;
+                                            }
+                                            else{
+                                                $check_sameday = 0;
+                                            }
+                                        }
                                         $no=1;
                                     @endphp
                                     @foreach($data as $ro)
@@ -61,7 +69,7 @@
                                                 <td>{!! $no=$no+1!!}</td>
                                             @endif
                                             @if(isset($errors[$no]['service_type_id']))
-                                                <td>{!! Form::select('form[' . $no . '][service_type_id]',$booking_types,null, ['class' => 'form-control is-invalid select2','id'=>'service_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['service_type_id']}}</font></td>
+                                                <td>{!! Form::select('form[' . $no . '][service_type_id]',$booking_types,null, ['class' => 'form-control is-invalid service_type_id select2','id'=>'service_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['service_type_id']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][service_type_id]', $ro['service_type_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
@@ -71,12 +79,12 @@
                                                 <td>{!! Form::text('form[' . $no . '][pickup_address_id]', $ro['pickup_address_id'], ['class' => 'form-control','style'=>'width:80px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
                                             @if(isset($errors[$no]['delivery_type_id']))
-                                                <td>{!! Form::select('form[' . $no . '][delivery_type_id]',$delivery_types,null, ['class' => 'form-control is-invalid select2','id'=>'delivery_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['delivery_type_id']}}</font></td>
+                                                <td>{!! Form::select('form[' . $no . '][delivery_type_id]',$delivery_types,null, ['class' => 'form-control is-invalid delivery_type_id select2','id'=>'delivery_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['delivery_type_id']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][delivery_type_id]', $ro['delivery_type_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
                                             @if(isset($errors[$no]['charges_mode_id']))
-                                                <td>{!! Form::select('form[' . $no . '][charges_mode_id]',$charges_modes,null, ['class' => 'form-control is-invalid select2','id'=>'charges_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['charges_mode_id']}}</font></td>
+                                                <td>{!! Form::select('form[' . $no . '][charges_mode_id]',$charges_modes,null, ['class' => 'form-control is-invalid charges_mode_id select2','id'=>'charges_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['charges_mode_id']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][charges_mode_id]', $ro['charges_mode_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
@@ -86,7 +94,7 @@
                                                 <td>{!! Form::text('form[' . $no . '][information_display]', $ro['information_display'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
                                             @if(isset($errors[$no]['consignee_city_name']))
-                                                <td>{!! Form::select('form[' . $no . '][consignee_city_name]',$cities ,null,['class' => 'form-control is-invalid select2','id'=>'consignee_city_name','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['consignee_city_name']}}</font></td>
+                                                <td>{!! Form::select('form[' . $no . '][consignee_city_name]',$cities ,null,['class' => 'form-control is-invalid consignee_city_name select2','id'=>'consignee_city_name','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['consignee_city_name']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][consignee_city_name]', $ro['consignee_city_name'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
@@ -121,7 +129,7 @@
                                                 <td>{!! Form::text('form[' . $no . '][order_id]', $ro['order_id'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                             @endif
                                             @if(isset($errors[$no]['item_product_type_id']))
-                                                <td>{!! Form::select('form[' . $no . '][item_product_type_id]',$products,null,['class' => 'form-control is-invalid select2','id'=>'item_product_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id']}}</font></td>
+                                                <td>{!! Form::select('form[' . $no . '][item_product_type_id]',$products,null,['class' => 'form-control is-invalid item_product_type_id select2','id'=>'item_product_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][item_product_type_id]', $ro['item_product_type_id'],['class' => 'form-control','style'=>'width:144px','readonly' => 'readonly']) !!}</td>
                                             @endif
@@ -136,7 +144,7 @@
                                                 <td>{!! Form::text('form[' . $no . '][item_quantity]', $ro['item_quantity'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                             @endif
                                             @if(isset($errors[$no]['item_insurance']))
-                                                <td>{!! Form::select('form[' . $no . '][item_insurance]',['no'=>'no','yes'=>'yes'],null,['class' => 'form-control is-invalid select2','id'=>'item_insurance','style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_insurance']}}</font></td>
+                                                <td>{!! Form::select('form[' . $no . '][item_insurance]',['no'=>'no','yes'=>'yes'],null,['class' => 'form-control is-invalid item_insurance select2','id'=>'item_insurance','style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_insurance']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][item_insurance]', $ro['item_insurance'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                             @endif
@@ -146,7 +154,7 @@
                                                 <td>{!! Form::text('form[' . $no . '][item_price]', $ro['item_price'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                             @endif
                                             @if(isset($errors[$no]['replacement_item_product_type_id']))
-                                                <td>{!! Form::select('form[' . $no . '][replacement_item_product_type_id]', $products,null,['class' => 'form-control is-invalid select2','id'=>'replacement_item_product_type_id','placeholder' => '']) !!}<font color="red">{{$errors[$no]['replacement_item_product_type_id']}}</font></td>
+                                                <td>{!! Form::select('form[' . $no . '][replacement_item_product_type_id]', $products,null,['class' => 'form-control is-invalid replacement_item_product_type_id select2','id'=>'replacement_item_product_type_id','placeholder' => '']) !!}<font color="red">{{$errors[$no]['replacement_item_product_type_id']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][replacement_item_product_type_id]', $ro['replacement_item_product_type_id'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                             @endif
@@ -176,14 +184,18 @@
                                                 <td>{!! Form::text('form[' . $no . '][estimated_weight]', $ro['estimated_weight'],['class' => 'form-control','style'=>'width:80px','readonly' => 'readonly']) !!}</td>
                                             @endif
                                             @if(isset($errors[$no]['shipping_mode_id']))
-                                                <td>{!! Form::select('form[' . $no . '][shipping_mode_id]',$shipping_modes,null,['class' => 'form-control is-invalid select2','id'=>'shipping_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['shipping_mode_id']}}</font></td>
+                                                <td>{!! Form::select('form[' . $no . '][shipping_mode_id]',$shipping_modes,null,['class' => 'form-control is-invalid shipping_mode_id select2','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['shipping_mode_id']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][shipping_mode_id]', $ro['shipping_mode_id'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                             @endif
-                                            @if(isset($errors[$no]['same_day_timing_id']))
-                                                <td>{!! Form::select('form[' . $no . '][same_day_timing_id]',$shipping_mode_same_day_timings,null,['class' => 'form-control is-invalid select2','id'=>'same_day_timing_id', 'style'=>'width:100px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['same_day_timing_id']}}</font></td>
+                                            @if(isset($errors[$no]['same_day_timing_id']) && ($check_sameday == 1))
+                                                <td>{!! Form::select('form[' . $no . '][same_day_timing_id]',$shipping_mode_same_day_timings,null,['class' => 'form-control is-invalid same_day_timing_id select2','id'=>'same_day_timing_id', 'style'=>'width:100px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['same_day_timing_id']}}</font></td>
                                             @else
-                                                <td>{!! Form::text('form[' . $no . '][same_day_timing_id]', $ro['same_day_timing_id'],['class' => 'form-control', 'style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                                @if($check_sameday == 1)
+                                                <td>{!! Form::text('form[' . $no . '][same_day_timing_id]', $ro['same_day_timing_id'] ,['class' => 'form-control', 'style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                                @else
+                                                    <td>{!! Form::text('form[' . $no . '][same_day_timing_id]', null,['class' => 'form-control', 'style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                                @endif
                                             @endif
                                             @if(isset($errors[$no]['amount']))
                                                 <td>{!! Form::text('form[' . $no . '][amount]', $ro['amount'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['amount']}}</font></td>
@@ -191,7 +203,7 @@
                                                 <td>{!! Form::text('form[' . $no . '][amount]', $ro['amount'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                             @endif
                                             @if(isset($errors[$no]['payment_mode_id']))
-                                                <td>{!! Form::select('form[' . $no . '][payment_mode_id]', $payment_modes,null,['class' => 'form-control is-invalid select2','id'=>'payment_mode_id', 'style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['payment_mode_id']}}</font></td>
+                                                <td>{!! Form::select('form[' . $no . '][payment_mode_id]', $payment_modes,null,['class' => 'form-control is-invalid payment_mode_id select2','id'=>'payment_mode_id', 'style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['payment_mode_id']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][payment_mode_id]', $ro['payment_mode_id'],['class' => 'form-control','style'=>'width:40px','readonly' => 'readonly']) !!}</td>
                                             @endif
@@ -236,47 +248,47 @@
                 closeOnSelect: false,
                 closeOnClear: false
             });
-            $('#service_type_id').select2({
+            $('.service_type_id').select2({
                 width: '100%',
                 placeholder: 'Service Type'
             });
-            $('#delivery_type_id').select2({
+            $('.delivery_type_id').select2({
                 width: '100%',
                 placeholder: 'Delivery Type'
             });
-            $('#charges_mode_id').select2({
+            $('.charges_mode_id').select2({
                 width: '100%',
                 placeholder: 'Charges Mode'
             });
-            $('#information_display').select2({
+            $('.information_display').select2({
                 width: '100%',
                 placeholder: 'Air Waybill'
             });
-            $('#consignee_city_name').select2({
+            $('.consignee_city_name').select2({
                 width: '100%',
                 placeholder: 'City Name'
             });
-            $('#item_product_type_id').select2({
+            $('.item_product_type_id').select2({
                 width: '100%',
                 placeholder: 'Product Type'
             });
-            $('#item_insurance').select2({
+            $('.item_insurance').select2({
                 width: '100%',
                 placeholder: 'Insurance'
             });
-            $('#replacement_item_product_type_id').select2({
+            $('.replacement_item_product_type_id').select2({
                 width: '100%',
                 placeholder: 'Product Type'
             });
-            $('#shipping_mode_id').select2({
+            $('.shipping_mode_id').select2({
                 width: '100%',
                 placeholder: 'Shipping Mode'
             });
-            $('#same_day_timing_id').select2({
+            $('.same_day_timing_id').select2({
                 width: '100%',
                 placeholder: 'Same Day Timing'
             });
-            $('#payment_mode_id').select2({
+            $('.payment_mode_id').select2({
                 width: '100%',
                 placeholder: 'Payment Mode'
             });

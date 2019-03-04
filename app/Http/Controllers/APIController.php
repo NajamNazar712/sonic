@@ -213,7 +213,9 @@ class APIController extends Controller
               'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
               'special_instructions' => ['nullable', 'filled', 'between:0,190'],
               'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
-              'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
+              'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                  $query->where('user_id', $user_id)->where('status', 1);
+              })],
               'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
               'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
               'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
@@ -261,7 +263,9 @@ class APIController extends Controller
               'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
               'special_instructions' => ['nullable', 'filled', 'between:0,190'],
               'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
-              'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
+              'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                  $query->where('user_id', $user_id)->where('status', 1);
+              })],
               'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
               'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
               'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
@@ -295,16 +299,6 @@ class APIController extends Controller
         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
       }
       else {
-          if($user_type['account_type_id'] == 1) {
-              if (!RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $request->input('shipping_mode_id'))->where('status', 1)->exists()) {
-                  return response()->json(['status' => 1, 'message' => 'Booking is not enabled for Shipping Mode ID #' . $request->input('shipping_mode_id') . ' on your Account']);
-              }
-          }
-          else {
-                if (!CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $request->input('shipping_mode_id'))->where('status', 1)->exists()) {
-                    return response()->json(['status' => 1, 'message' => 'Booking is not enabled for Shipping Mode ID #' . $request->input('shipping_mode_id') . ' on your Account']);
-                }
-          }
         $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
         if (!$user_shipping_info->status) {
