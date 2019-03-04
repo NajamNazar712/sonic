@@ -55,9 +55,6 @@
                                 <button id="printDNCC" type="button" class="btn btn-warning btn-block">Print DNCC</button>
                             </div>
                         @endif
-                            <div class="col-2">
-                                <button id="bloc" type="button" class="btn btn-warning btn-block">Block</button>
-                            </div>
                     </div>
                 </form>
             </div>
@@ -138,7 +135,6 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-{{--    <script src="{{asset('app-assets/js/scripts/extensions/block-ui.js')}}" type="text/javascript"></script>--}}
 
     <script type="text/javascript">
         $(document).ready(function () {
