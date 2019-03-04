@@ -1257,7 +1257,7 @@ class AdminPickupsController extends Controller
           ShipmentChargesController::insurance($shipment_id);
           ShipmentChargesController::fuel_surcharge($shipment_id);
 
-          if ($shipment->user->bank->account_type_id == 2 && $shipment->charges_mode_id == 2) {
+          if ($shipment->user->account_type_id == 2 && $shipment->charges_mode_id == 2) {
             $shipment = Shipment::find($shipment_id);
 
             $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
