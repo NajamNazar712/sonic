@@ -1264,7 +1264,7 @@ class AdminPickupsController extends Controller
 
             $gst = Zone::find($shipment->pickup_address->city->zone_id)->gst;
 
-            $gst = ROUND(($charges * $gst)), 0, PHP_ROUND_HALF_DOWN);
+            $gst = ROUND(($charges * $gst), 0, PHP_ROUND_HALF_DOWN);
 
             $shipment->amount = $shipment->amount + $charges + $gst;
 
