@@ -4242,7 +4242,7 @@ class AdminReportsController extends Controller
                 $date = Carbon::now()->toDateString();
             }
 
-            $types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'on_hold', 'misrouted', 'on_hold_for_self_collection', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'delivery_tomorrow', 'delivery_note_pending'];
+            $types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'on_hold', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'delivery_tomorrow', 'delivery_note_pending'];
 
             $counts = array();
 

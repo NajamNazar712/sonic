@@ -128,7 +128,7 @@
                 paging: false,
                 ordering: false,
                 columnDefs: [
-                    {className: 'red', targets: [1, 13]}
+                    {className: 'red', targets: [1, 9]}
                 ]
             });
 
