@@ -4635,12 +4635,13 @@ class AdminCorporateAccountsController extends Controller
         $switches = CorporateRateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
         $weight = CorporateWeightCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
         $cash = CorporateCashHandlingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $insurance = CorporateInsuranceCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $return = CorporateReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $fuel = CorporateFuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $discount = CorporateDiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
 
-        return view('admin.accounts.corporate.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'min_weight' => $min_weight]);
+        return view('admin.accounts.corporate.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'min_weight' => $min_weight]);
     }
 }
