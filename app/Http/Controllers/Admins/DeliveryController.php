@@ -3586,9 +3586,12 @@ class DeliveryController extends Controller
                 if(in_array($shipment->shipper_status_id, $passing_delivery_status_array)){
                     $delivery_note_shipments = DeliveryNoteShipment::where('shipment_id',$shipment->id)->max('delivery_note_id');
                     $delivery_note = DeliveryNote::find($delivery_note_shipments);
-                    if($delivery_note->status == 0){
-                        return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                    if($delivery_note){
+                        if($delivery_note->status == 0){
+                            return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                        }
                     }
+
                 }
 
 
