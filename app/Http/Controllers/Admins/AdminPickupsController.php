@@ -1546,7 +1546,7 @@ class AdminPickupsController extends Controller
           return view('admin.pickups.receive.summary');
         }
         else {
-          return view('admin.pickups.receive.summary')->with('print_shipment_ids', $print_shipment_ids);
+          return view('admin.pickups.receive.summary')->with('print_shipment_ids', session('print_shipment_ids'));
         }
       }
       else {
