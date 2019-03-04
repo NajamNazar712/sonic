@@ -152,7 +152,7 @@
 					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
 					method: 'POST',
 					data: {
-						'ids': session('print_shipment_ids'),
+						'ids': {{ session('print_shipment_ids') }},
 						'admin': true,
 						'_token': '{{ csrf_token() }}'
 					}
