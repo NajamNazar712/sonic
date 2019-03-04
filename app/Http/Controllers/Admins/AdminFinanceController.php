@@ -26,6 +26,7 @@ use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\DonePayment;
@@ -3517,13 +3518,22 @@ class AdminFinanceController extends Controller
                 $type = 'Adjusted';
             }
 
+            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
+
+            if ($shipment_journey->exists()) {
+                $date = $shipment_journey->first()->created_at;
+            }
+            else {
+                $date = $shipment->created_at;
+            }
+
             $shipment_details .= '
                         <tr>
                           <td>' . $serial_number . '</td>
                           <td>' . $shipment->tracking_number . '</td>
                           <td>' . $shipment->consignee_city->name . '</td>
                           <td>' . $shipment->booking_type->booking_type . '</td>
-                          <td>' . $invoice_shipment->created_at . '</td>
+                          <td>' . $date . '</td>
                           <td>' . $shipment->actual_weight . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
@@ -3677,7 +3687,7 @@ class AdminFinanceController extends Controller
                           <td class="color secondary"><strong>Tracking No.</strong></td>
                           <td class="color secondary"><strong>Destination</strong></td>
                           <td class="color secondary"><strong>Booking Type</strong></td>
-                          <td class="color secondary"><strong>Datetime</strong></td>
+                          <td class="color secondary"><strong>Arrival Datetime</strong></td>
                           <td class="color secondary"><strong>Weight (kg)</strong></td>
                           <td class="color secondary"><strong>Weight Charges (PKR)</strong></td>
                           <td class="color secondary"><strong>Cash Handling Charges (PKR)</strong></td>
