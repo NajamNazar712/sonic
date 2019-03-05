@@ -3313,7 +3313,7 @@ class AdminFinanceController extends Controller
                               <tbody>
                                 <tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
-                                    <td>' . Carbon::parse($invoice->from_date)->format('d/m/Y') . ' - ' . Carbon::parse($invoice->to_date)->format('d/m/Y') . '</td>
+                                    <td>' . Carbon::parse($invoice->from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->to_date)->format('Y-m-d') . '</td>
                                 </tr>
                                 <tr>
                                     <td class="color primary"><strong>Invoice No.</strong></td>
@@ -3321,7 +3321,7 @@ class AdminFinanceController extends Controller
                                 </tr>
                                 <tr>
                                     <td class="color primary"><strong>Due Date</strong></td>
-                                    <td>' . Carbon::parse($invoice->due_date)->format('d/m/Y') . '</td>
+                                    <td>' . Carbon::parse($invoice->due_date)->format('Y-m-d') . '</td>
                                 </tr>
                                </tbody>
                             </table>
@@ -3368,7 +3368,7 @@ class AdminFinanceController extends Controller
                 $date = $shipment->created_at;
             }
 
-            $date = Carbon::parse($date)->format('d/m/Y');
+            $date = Carbon::parse($date)->format('Y-m-d');
 
             $shipment_details .= '
                         <tr>
@@ -3706,7 +3706,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Type', 'Origin', 'Destination', 'Booking Type', 'Datetime', 'Weight (kg)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'Insurance Charges (PKR)', 'Replacement Charges (PKR)', 'Return Charges (PKR)', 'Fuel Surcharge (PKR)', 'Packaging Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Type', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'Insurance Charges (PKR)', 'Replacement Charges (PKR)', 'Return Charges (PKR)', 'Fuel Surcharge (PKR)', 'Packaging Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
 
         $serial_number = 1;
 
@@ -3723,6 +3723,17 @@ class AdminFinanceController extends Controller
                 $type = 'Adjusted';
             }
 
+            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
+
+            if ($shipment_journey->exists()) {
+                $date = $shipment_journey->first()->created_at;
+            }
+            else {
+                $date = $shipment->created_at;
+            }
+
+            $date = Carbon::parse($date)->format('Y-m-d');
+
             $row = array();
 
             $row[] = $serial_number;
@@ -3730,7 +3741,6 @@ class AdminFinanceController extends Controller
             $row[] = $type;
             $row[] = $shipment->pickup_address->city->name;
             $row[] = $shipment->consignee_city->name;
-            $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->created_at;
             $row[] = $shipment->actual_weight;
             $row[] = (($invoice_shipment->type != 2) ? $shipment->weight_charges : 0);
