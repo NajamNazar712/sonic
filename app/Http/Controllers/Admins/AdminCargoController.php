@@ -460,11 +460,16 @@ class AdminCargoController extends Controller
 
         $shipment_ids = explode(',', $request->input('shipment_ids'));
 
-        foreach ($shipment_ids as $shipment_id) {
+        foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
-            $shipments++;
-            $shipments_weight += $shipment->actual_weight;
+            if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37, 49])) {
+                $shipments++;
+                $shipments_weight += $shipment->actual_weight;
+            }
+            else {
+                unset($shipment_ids[$key]);
+            }
         }
 
         $cargo_consignment->shipments = $shipments;
@@ -1841,11 +1846,13 @@ class AdminCargoController extends Controller
 
             foreach ($drafts as $draft) {
                 $draft_details = DraftCargo::find($draft->draft_cargo_id);
-                $new_shipments_count = $draft_details->shipments_count - 1;
-                $draft_details->shipments_count = $new_shipments_count;
-                $draft_details->save();
-                if($draft_details->shipments_count == 0){
-                    $draft_details->delete();
+                if ($draft_details) {
+                    $new_shipments_count = $draft_details->shipments_count - 1;
+                    $draft_details->shipments_count = $new_shipments_count;
+                    $draft_details->save();
+                    if($draft_details->shipments_count == 0){
+                        $draft_details->delete();
+                    }
                 }
                 DraftCargoShipment::where('shipment_id', $shipment_id)->where('draft_cargo_id',$draft->draft_cargo_id)->delete();
             }
