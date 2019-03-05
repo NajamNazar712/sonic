@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class UpdateGlobalSettingsForDebriefingReportTableSeeder extends Seeder
@@ -14,7 +15,7 @@ class UpdateGlobalSettingsForDebriefingReportTableSeeder extends Seeder
         $timestamp = Carbon::now();
 
         DB::table('global_settings')->insert(array(
-            array('type' => '', 'setting_value' => 4, 'created_at' => $timestamp, 'updated_at' => $timestamp)
+            array('type' => 'debriefing_report_cut_off_time_start', 'setting_value' => 4, 'created_at' => $timestamp, 'updated_at' => $timestamp)
         ));
     }
 }

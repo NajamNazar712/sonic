@@ -494,6 +494,7 @@ class GlobalSettingsController extends Controller
 
     public function debriefing_report_cut_off_time_index() {
         $settings = GlobalSettings::where('type', 'debriefing_report_cut_off_time')->first();
+        $start = GlobalSettings::where('type', 'debriefing_report_cut_off_time_start')->first();
 
         if ($settings) {
             $cut_off_time = $settings->setting_value;
@@ -501,8 +502,14 @@ class GlobalSettingsController extends Controller
         else {
             $cut_off_time = 12;
         }
+        if ($start) {
+            $cut_off_time_start = $start->setting_value;
+        }
+        else {
+            $cut_off_time_start = 12;
+        }
 
-        return view('admin.settings.debriefing_report_cut_off_time')->with('cut_off_time', $cut_off_time);
+        return view('admin.settings.debriefing_report_cut_off_time')->with(['cut_off_time' => $cut_off_time, 'cut_off_time_start' => $cut_off_time_start]);
     }
 
     public function debriefing_report_cut_off_time_store(Request $request) {
@@ -520,6 +527,21 @@ class GlobalSettingsController extends Controller
         $settings->setting_value = $request->debriefing_report_cut_off_time;
 
         $settings->save();
+
+        $start = GlobalSettings::where('type', 'debriefing_report_cut_off_time_start');
+
+        if ($start->exists()) {
+            $start = $start->first();
+        }
+        else {
+            $start = new GlobalSettings();
+
+            $start->type = 'debriefing_report_cut_off_time_start';
+        }
+
+        $start->setting_value = $request->debriefing_report_cut_off_time_start;
+
+        $start->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
