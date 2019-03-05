@@ -686,7 +686,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('verify', 'Admins\AdminFinanceController@make_payments_verify')->name('verify');
             Route::get('export_bank_order', 'Admins\AdminFinanceController@make_payments_export_bank_order')->name('export_bank_order');
             Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
-            Route::post('switch_to_invoice', 'Admins\AdminFinanceController@make_payments_switch_to_invoice')->name('switch_to_invoice');
         });
 
         Route::prefix('done_payments')->name('done_payments.')->group(function () {
