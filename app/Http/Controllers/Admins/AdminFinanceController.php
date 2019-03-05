@@ -525,6 +525,16 @@ class AdminFinanceController extends Controller
                     $delivery_note_shipment->status = 7;
 
                     $delivery_note_shipment->save();
+                    $shipment = Shipment::where('id',$delivery_note_shipment->shipment_id)->where('booking_type_id', '=', 4);
+
+                    if ($shipment->exists()) {
+                        $shipment = $shipment->first();
+
+                        $shipment->walk_in_status = 1;
+
+                        $shipment->save();
+                    }
+
                 }
             }
         }
@@ -756,6 +766,15 @@ class AdminFinanceController extends Controller
             $delivery_note_shipment->status = 7;
 
             $delivery_note_shipment->save();
+            $shipment = Shipment::where('id',$delivery_note_shipment->shipment_id)->where('booking_type_id', '=', 4);
+
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+
+                $shipment->walk_in_status = 1;
+
+                $shipment->save();
+            }
 
             return ['status' => 0, 'success' => 'Shipment has been marked Resolved'];
         }
@@ -783,8 +802,8 @@ class AdminFinanceController extends Controller
                     ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id)'));
             })
             ->leftjoin('shipments_journey as an', function($join) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id and shipper_status_id = 1)'));
+                $join->on('an.shipment_id', '=', 'shipments.id')
+                    ->where('an.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id and shipper_status_id = 1)'));
             })
             ->leftjoin('admins as adn','adn.id','=','an.admin_id')
             ->leftjoin('charges_modes as cm', 'shipments.charges_mode_id', '=', 'cm.id')
@@ -810,8 +829,16 @@ class AdminFinanceController extends Controller
                     return 'Pending Return Charges Collection';
                 }
             })
-            ->editColumn('charges', function($shipment){
-                return (($shipment->charges) ? number_format($shipment->charges) : '0');
+            ->addColumn('charges', function($shipment){
+                if ($shipment->charges_mode_id == 1) {
+                    return (($shipment->received_amount) ? number_format($shipment->received_amount) : '0');
+                }
+                else if ($shipment->charges_mode_id == 2) {
+                    return (($shipment->amount) ? number_format($shipment->amount) : '0');
+                }
+                else {
+                    return '0';
+                }
             })
             ->editColumn('return_charges', function($shipment){
                 return number_format($shipment->return_charges);

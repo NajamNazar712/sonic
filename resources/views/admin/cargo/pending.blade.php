@@ -41,8 +41,9 @@
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Amount</th>
 										<th class="border-primary border-darken-1">Shipping Mode</th>
-										<th class="border-primary border-darken-1">Booked Datetime</th>
-										<th class="border-primary border-darken-1">Arrival Datetime</th>
+										<th class="border-primary border-darken-1">Booked Date/Time</th>
+										<th class="border-primary border-darken-1">Arrival Date/Time</th>
+										<th class="border-primary border-darken-1">Current Status Date/Time</th>
 									</tr>
 								</thead>
 							</table>
@@ -89,6 +90,7 @@
                             head.push('Shipping Mode');
                             head.push('Booked Datetime');
                             head.push('Arrival Datetime');
+                            head.push('Current Status Datetime');
 
 
                             $.each(result.data, function(index, values) {
@@ -106,6 +108,7 @@
                                 row.push(values.shipping_mode);
                                 row.push(values.booked_at);
                                 row.push(values.arrival_at);
+                                row.push(values.current_status);
 
 
                                 body.push(row);
@@ -153,7 +156,8 @@
 					{data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
 					{data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
 					{data: 'booked_at', name: 'shipments.created_at', class: 'align-middle booked_at'},
-					{data: 'arrival_at', name: 'shipments_journey.created_at', class: 'align-middle arrival_at'}
+					{data: 'arrival_at', name: 'shipments_journey.created_at', class: 'align-middle arrival_at'},
+					{data: 'current_status', name: 'csj.created_at', class: 'align-middle current_status'}
 				],
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
