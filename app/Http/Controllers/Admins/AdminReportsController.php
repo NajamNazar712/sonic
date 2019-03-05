@@ -4791,6 +4791,33 @@ class AdminReportsController extends Controller
             ->editColumn('payment_id_link', function($shipments) {
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->payment_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
             })
+            ->editColumn('cash_handling_charges', function ($shipments){
+                return number_format($shipments->cash_handling_charges);
+            })
+            ->editColumn('insurance_charges', function ($shipments){
+                return number_format($shipments->insurance_charges);
+            })
+            ->editColumn('return_charges', function ($shipments){
+                return number_format($shipments->return_charges);
+            })
+            ->editColumn('fuel_surcharge', function ($shipments){
+                return number_format($shipments->fuel_surcharge);
+            })
+            ->editColumn('replacement_charges', function ($shipments){
+                return number_format($shipments->replacement_charges);
+            })
+            ->editColumn('packaging_material_charges', function ($shipments){
+                return number_format($shipments->packaging_material_charges);
+            })
+            ->editColumn('gst', function ($shipments){
+                return number_format($shipments->gst);
+            })
+            ->editColumn('amount', function ($shipments){
+                return number_format($shipments->amount);
+            })
+            ->editColumn('total_payable', function ($shipments){
+                return number_format($shipments->total_payable);
+            })
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";

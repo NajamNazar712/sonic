@@ -193,6 +193,7 @@
                         d.tracking_number = $('#tracking_number_search_form #search_tracking_number').val();
                     }
                 },
+                order: [[2, 'desc']],
                 rowId: 'payment_id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
