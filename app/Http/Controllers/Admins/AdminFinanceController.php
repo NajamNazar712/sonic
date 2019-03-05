@@ -525,7 +525,7 @@ class AdminFinanceController extends Controller
                     $delivery_note_shipment->status = 7;
 
                     $delivery_note_shipment->save();
-                    $shipment = Shipment::where('id',$delivery_note_shipment->shipment_id)->where('walk_in_status', '!=', 1);
+                    $shipment = Shipment::where('id',$delivery_note_shipment->shipment_id)->where('booking_type_id', '=', 4);
 
                     if ($shipment->exists()) {
                         $shipment = $shipment->first();
@@ -766,6 +766,15 @@ class AdminFinanceController extends Controller
             $delivery_note_shipment->status = 7;
 
             $delivery_note_shipment->save();
+            $shipment = Shipment::where('id',$delivery_note_shipment->shipment_id)->where('booking_type_id', '=', 4);
+
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+
+                $shipment->walk_in_status = 1;
+
+                $shipment->save();
+            }
 
             return ['status' => 0, 'success' => 'Shipment has been marked Resolved'];
         }

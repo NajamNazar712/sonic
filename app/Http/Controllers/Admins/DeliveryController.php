@@ -1162,9 +1162,11 @@ class DeliveryController extends Controller
 
                         if ($parcel->charges_mode_id == 1) {
                             Shipment::where('id', $shipment)->update(['received_amount' => 0, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
+                            DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 7]);
                         }
                         else {
                             Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
+                            DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                         }
 
                         DeliveryNoteShipment::where(['delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
@@ -1583,12 +1585,14 @@ class DeliveryController extends Controller
 
                                             if ($parcel->charges_mode_id == 1) {
                                                 Shipment::where('id', $shipment)->update(['received_amount' => 0, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
+                                                DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 7]);
                                             }
                                             else {
                                                 Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
+                                                DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                                             }
 
-                                            DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
+
                                         } else {
                                             ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                             Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
