@@ -4806,5 +4806,13 @@ class AdminReportsController extends Controller
 
         return $datatable->make(true);
     }
+
+    public function revenue_index(){
+        $shippers = User::whereIn('status',[3,4])->select('id','name')->get();
+        $cities = City::all('id','name');
+        $hubs = City::where('hub',1)->select('id','name')->get();
+        $statuses = ShipmentStatus::whereNotIn('id',[1,17])->get();
+        return view('admin.reports.revenue')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses]);
+    }
 }
 
