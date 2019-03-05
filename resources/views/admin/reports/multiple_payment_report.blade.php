@@ -17,7 +17,7 @@
                             <input type="text" class="input-group form-control" name="search_tracking_number" id="search_tracking_number" placeholder="Tracking Number">
                         </div>
                         <div class="form-group ml-1">
-                            <button type="button" id="search_filter_btn" class="btn btn-primary"><i class="la la-search"></i> Search</button>
+                            <button type="button" id="search_filter_btn" class="btn btn-primary">Search</button>
                         </div>
                     </form>
 
@@ -193,8 +193,7 @@
                         d.tracking_number = $('#tracking_number_search_form #search_tracking_number').val();
                     }
                 },
-                order: [[3, 'asc']],
-                rowId: 'done_payment_id',
+                rowId: 'payment_id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
@@ -253,7 +252,6 @@
             }
             $('#datatable tbody').on('click', 'tr td.payment_id_link button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                console.log(id);
                 if (id) {
                     print(id);
                 } else {
