@@ -431,30 +431,6 @@ class AdminCargoController extends Controller
     }
 
     public function create_store(Request $request) {
-        $cargo_consignment = new CargoConsignment();
-
-        $cargo_consignment->origin_hub_id = $request->input('origin_hub_id');
-        $cargo_consignment->destination_hub_id = $request->input('destination_hub_id');
-        $cargo_consignment->junction_hub_1_id = $request->input('junction_1');
-        $cargo_consignment->junction_hub_2_id = $request->input('junction_2');
-        $cargo_consignment->seal_number = $request->input('seal_number');
-        $cargo_consignment->shipping_mode_id = $request->input('shipping_mode_id');
-        $cargo_consignment->transport_mode_id = $request->input('transport_mode');
-
-        if ($request->input('transport_mode_vendor') == 0) {
-            $transport_mode_vendor = new TransportModeVendor();
-
-            $transport_mode_vendor->transport_mode_id = $request->input('transport_mode');
-            $transport_mode_vendor->name = $request->input('vendor_name');
-
-            $transport_mode_vendor->save();
-
-            $cargo_consignment->transport_mode_vendor_id = $transport_mode_vendor->id;
-        }
-        else {
-            $cargo_consignment->transport_mode_vendor_id = $request->input('transport_mode_vendor');
-        }
-
         $shipments = 0;
         $shipments_weight = 0;
 
@@ -472,85 +448,114 @@ class AdminCargoController extends Controller
             }
         }
 
-        $cargo_consignment->shipments = $shipments;
-        $cargo_consignment->shipments_weight = $shipments_weight;
+        if (!empty($shipment_ids)) {
+            $cargo_consignment = new CargoConsignment();
 
-        $cargo_consignment->actual_weight = $request->input('actual_weight');
-        $cargo_consignment->sender_id = $request->input('sender_id');
+            $cargo_consignment->origin_hub_id = $request->input('origin_hub_id');
+            $cargo_consignment->destination_hub_id = $request->input('destination_hub_id');
+            $cargo_consignment->junction_hub_1_id = $request->input('junction_1');
+            $cargo_consignment->junction_hub_2_id = $request->input('junction_2');
+            $cargo_consignment->seal_number = $request->input('seal_number');
+            $cargo_consignment->shipping_mode_id = $request->input('shipping_mode_id');
+            $cargo_consignment->transport_mode_id = $request->input('transport_mode');
 
-        if ($request->filled('receiver_id')) {
-            $cargo_consignment->receiver_id = $request->input('receiver_id');
-        }
+            if ($request->input('transport_mode_vendor') == 0) {
+                $transport_mode_vendor = new TransportModeVendor();
 
-        $cargo_consignment->type = $request->input('cargo_type');
+                $transport_mode_vendor->transport_mode_id = $request->input('transport_mode');
+                $transport_mode_vendor->name = $request->input('vendor_name');
 
-        $cargo_consignment->status_id = 1;
+                $transport_mode_vendor->save();
 
-        $cargo_consignment->save();
-
-        $id = $cargo_consignment->id;
-
-        foreach ($shipment_ids as $shipment_id) {
-            $cargo_consignment_shipment = new CargoConsignmentShipment();
-
-            $cargo_consignment_shipment->cargo_consignment_id = $id;
-            $cargo_consignment_shipment->shipment_id = $shipment_id;
-
-            $cargo_consignment_shipment->save();
-
-            $shipment = Shipment::find($shipment_id);
-
-            $shipper_status_id = NULL;
-            $consignee_status_id = NULL;
-
-            if ($request->input('cargo_type') == 1) {
-                $shipper_status_id = 3;
-                $consignee_status_id = 3;
+                $cargo_consignment->transport_mode_vendor_id = $transport_mode_vendor->id;
             }
             else {
-                $shipper_status_id = 21;
-                $consignee_status_id = 21;
-
-                if ($shipment->shipper_status_id != 20) {
-                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
-                        $shipper_status_id = 21;
-                        $consignee_status_id = 21;
-                    }
-                    else if ($shipment->booking_type_id == 2) {
-                        $shipper_status_id = 26;
-                        $consignee_status_id = 26;
-                    }
-                    else {
-                        $shipper_status_id = 32;
-                        $consignee_status_id = 32;
-                    }
-                }
+                $cargo_consignment->transport_mode_vendor_id = $request->input('transport_mode_vendor');
             }
 
-            $shipment->shipper_status_id = $shipper_status_id;
-            $shipment->consignee_status_id = $consignee_status_id;
+            $cargo_consignment->shipments = $shipments;
+            $cargo_consignment->shipments_weight = $shipments_weight;
 
-            $shipment->save();
+            $cargo_consignment->actual_weight = $request->input('actual_weight');
+            $cargo_consignment->sender_id = $request->input('sender_id');
 
-            ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $cargo_consignment->id, $cargo_consignment->builty_number);
+            if ($request->filled('receiver_id')) {
+                $cargo_consignment->receiver_id = $request->input('receiver_id');
+            }
 
-            self::check_draft_shipments($shipment_id,null);
+            $cargo_consignment->type = $request->input('cargo_type');
 
-            NotificationsController::send(5, $id, $shipment_id);
+            $cargo_consignment->status_id = 1;
 
-            NotificationsController::send(6, $id, $shipment_id);
-        }
+            $cargo_consignment->save();
 
-        NotificationsController::send(9, $id);
+            $id = $cargo_consignment->id;
 
-        if ($request->filled('submit_and_print')) {
-            $print = $id;
+            foreach ($shipment_ids as $shipment_id) {
+                $cargo_consignment_shipment = new CargoConsignmentShipment();
+
+                $cargo_consignment_shipment->cargo_consignment_id = $id;
+                $cargo_consignment_shipment->shipment_id = $shipment_id;
+
+                $cargo_consignment_shipment->save();
+
+                $shipment = Shipment::find($shipment_id);
+
+                $shipper_status_id = NULL;
+                $consignee_status_id = NULL;
+
+                if ($request->input('cargo_type') == 1) {
+                    $shipper_status_id = 3;
+                    $consignee_status_id = 3;
+                }
+                else {
+                    $shipper_status_id = 21;
+                    $consignee_status_id = 21;
+
+                    if ($shipment->shipper_status_id != 20) {
+                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
+                            $shipper_status_id = 21;
+                            $consignee_status_id = 21;
+                        }
+                        else if ($shipment->booking_type_id == 2) {
+                            $shipper_status_id = 26;
+                            $consignee_status_id = 26;
+                        }
+                        else {
+                            $shipper_status_id = 32;
+                            $consignee_status_id = 32;
+                        }
+                    }
+                }
+
+                $shipment->shipper_status_id = $shipper_status_id;
+                $shipment->consignee_status_id = $consignee_status_id;
+
+                $shipment->save();
+
+                ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $cargo_consignment->id, $cargo_consignment->builty_number);
+
+                self::check_draft_shipments($shipment_id,null);
+
+                NotificationsController::send(5, $id, $shipment_id);
+
+                NotificationsController::send(6, $id, $shipment_id);
+            }
+
+            NotificationsController::send(9, $id);
+
+            if ($request->filled('submit_and_print')) {
+                $print = $id;
+            }
+            else {
+                $print = FALSE;
+            }
+
+            return redirect()->route('admin.cargo.in_transit.index')->with(['success' => 'Cargo Booked with Number: ' . $id, 'print' => $print]);
         }
         else {
-            $print = FALSE;
+            return back()->withErrors('All Shipments have already been added to another Cargo!');
         }
-
-        return redirect()->route('admin.cargo.in_transit.index')->with(['success' => 'Cargo Booked with Number: ' . $id, 'print' => $print]);
     }
 
     public function in_transit_index() {
