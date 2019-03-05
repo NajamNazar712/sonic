@@ -169,7 +169,7 @@
                                 </tr>
                                 <tr>
                                     <td><b>Payment Cycle</b></td>
-                                    <td>{{$user->bank->payment_cycle}}</td>
+                                    <td>{{ucfirst($user->bank->payment_cycle)}}</td>
                                 </tr>
 
 
@@ -703,7 +703,7 @@
                     $('#generation_date').removeClass('required');
                 }
             });
-
+            $('#invoicing_cycle').val(cycle).trigger('change');
             // $('#generation_date').select2({
             //     width: '100%',
             // });
