@@ -15,7 +15,7 @@
 
                     <div class="card-header">
                         <h2 class="font-large-1">{{$shipper->name}}
-                            <div class="badge badge-success pull-right">Corporate Invoicing Account</div>
+                            <div class="badge badge-success pull-right">Reimbursement Account</div>
                         </h2>
                         @include('admin.inc.messages')
                     </div>
