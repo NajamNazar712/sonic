@@ -49,8 +49,8 @@
                             </thead>
                             <tbody>
                             @php
-                                foreach ($shipping_modes as $shipping_mode){
-                                            if($shipping_mode == 4){
+                                foreach ($user_shipping_modes as $user_shipping_mode){
+                                            if($user_shipping_mode == 4){
                                                 $check_sameday = 1;
                                                 }
                                                 else{
@@ -171,6 +171,11 @@
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][estimated_weight]', $ro['estimated_weight'],['class' => 'form-control','style'=>'width:80px','readonly' => 'readonly']) !!}</td>
                                 @endif
+                                @if(isset($errors[$no]['shipping_mode_id']))
+                                    <td>{!! Form::select('form[' . $no . '][shipping_mode_id]',$shipping_modes,null,['class' => 'form-control is-invalid shipping_mode_id select2','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['shipping_mode_id']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][shipping_mode_id]', $ro['shipping_mode_id'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                @endif
                                 @if(isset($errors[$no]['same_day_timing_id']) && ($check_sameday == 1))
                                     <td>{!! Form::select('form[' . $no . '][same_day_timing_id]',$shipping_mode_same_day_timings,null,['class' => 'form-control is-invalid same_day_timing_id select2','id'=>'same_day_timing_id', 'style'=>'width:100px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['same_day_timing_id']}}</font></td>
                                 @else
@@ -179,11 +184,6 @@
                                     @else
                                         <td>{!! Form::text('form[' . $no . '][same_day_timing_id]', null,['class' => 'form-control', 'style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                     @endif
-                                @endif
-                                @if(isset($errors[$no]['same_day_timing_id']))
-                                    <td>{!! Form::select('form[' . $no . '][same_day_timing_id]',$shipping_mode_same_day_timings,null,['class' => 'form-control is-invalid same_day_timing_id select2','id'=>'same_day_timing_id', 'style'=>'width:100px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['same_day_timing_id']}}</font></td>
-                                @else
-                                    <td>{!! Form::text('form[' . $no . '][same_day_timing_id]', $ro['same_day_timing_id'],['class' => 'form-control', 'style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['amount']))
                                     <td>{!! Form::text('form[' . $no . '][amount]', $ro['amount'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['amount']}}</font></td>
