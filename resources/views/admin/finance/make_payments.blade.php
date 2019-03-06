@@ -997,31 +997,71 @@
 				})
 				.done(function(data) {
 					if (data.status == 0) {
-						swal({
-							text: 'Are you sure, you want to make the Payments?',
-							icon: 'warning',
-							buttons: {
-								cancel: {
-									text: 'No',
-									value: null,
-									visible: true,
-									closeModal: true,
+						if (data.duplicate_shipments) {
+							var html = 'The following Shipment(s) have Duplicate Same Type Payments:<br/>';
+
+							$.each(data.duplicate_shipments, function(index, duplicate_shipment) {
+								html += duplicate_shipment + '<br/>';
+							});
+
+							html += '<br/>Are you sure, you want to make the Payments?';
+
+							content = document.createElement('div');
+							content.innerHTML = html;
+
+							swal({
+								content: content,
+								icon: 'warning',
+								buttons: {
+									cancel: {
+										text: 'No',
+										value: null,
+										visible: true,
+										closeModal: true,
+									},
+									confirm: {
+										text: 'Yes',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
 								},
-								confirm: {
-									text: 'Yes',
-									value: true,
-									visible: true,
-									closeModal: true
+								closeOnClickOutside: false,
+								closeOnEsc: false,
+								dangerMode: true
+							}).then(function(confirm) {
+								if (confirm) {
+									form.submit();
 								}
-							},
-							closeOnClickOutside: false,
-							closeOnEsc: false,
-							dangerMode: true
-						}).then(function(confirm) {
-							if (confirm) {
-								form.submit();
-							}
-						});
+							});
+						}
+						else {
+							swal({
+								text: 'Are you sure, you want to make the Payments?',
+								icon: 'warning',
+								buttons: {
+									cancel: {
+										text: 'No',
+										value: null,
+										visible: true,
+										closeModal: true,
+									},
+									confirm: {
+										text: 'Yes',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
+								},
+								closeOnClickOutside: false,
+								closeOnEsc: false,
+								dangerMode: true
+							}).then(function(confirm) {
+								if (confirm) {
+									form.submit();
+								}
+							});
+						}
 					}
 					else {
 						var html = 'Cannot proceed since following Shipper(s) have Overall Negative Payment(s) Selected:<br/>';

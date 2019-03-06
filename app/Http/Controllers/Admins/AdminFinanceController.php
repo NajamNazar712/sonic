@@ -2144,6 +2144,10 @@ class AdminFinanceController extends Controller
 
         $pending_payment_payables = array();
 
+        $shipment_ids = array();
+        $duplicate_shipment_ids = array();
+        $duplicate_shipments = array();
+
         foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
 
@@ -2152,6 +2156,34 @@ class AdminFinanceController extends Controller
             }
             else {
                 $pending_payment_payables[$pending_payment_shipment->pending_payment_id] = $pending_payment_payables[$pending_payment_shipment->pending_payment_id] + $pending_payment_shipment->payable;
+            }
+
+            $shipment_id = $pending_payment_shipment->shipment_id;
+            $type = $pending_payment_shipment->type;
+
+            if (!isset($shipment_ids[$type]) || !in_array($shipment_id, $shipment_ids[$type])) {
+                $shipment_ids[$type][] = $shipment_id;
+            }
+            else {
+                if (!isset($duplicate_shipment_ids[$type]) || !in_array($shipment_id, $duplicate_shipment_ids[$type])) {
+                    $duplicate_shipment_ids[$type][] = $shipment_id;
+
+                    $shipment = Shipment::find($shipment_id);
+
+                    $duplicate_shipment = $shipment->tracking_number . ' - ';
+
+                    if ($type == 0) {
+                        $duplicate_shipment .= 'Delivered';
+                    }
+                    else if ($type == 1) {
+                        $duplicate_shipment .= 'Returned';
+                    }
+                    else {
+                        $duplicate_shipment .= 'Adjusted';
+                    }
+
+                    $duplicate_shipments[] = $duplicate_shipment;
+                }
             }
         }
 
@@ -2164,7 +2196,12 @@ class AdminFinanceController extends Controller
         }
 
         if (empty($negative_payments)) {
-            return ['status' => 0, 'negative_payments' => false];
+            if (empty($duplicate_shipments)) {
+                return ['status' => 0, 'negative_payments' => false, 'duplicate_shipments' => false];
+            }
+            else {
+                return ['status' => 0, 'negative_payments' => false, 'duplicate_shipments' => $duplicate_shipments];
+            }
         }
         else {
             return ['status' => 1, 'negative_payments' => $negative_payments];
