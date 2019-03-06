@@ -26,6 +26,8 @@
     {{--<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">--}}
     {{--<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">--}}
     <!-- END VENDOR CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <!-- BEGIN MODERN CSS-->
 
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/app.css')}}">
@@ -43,6 +45,9 @@
     <!-- END Custom CSS-->
 
     <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}">
+    <style type="text/css">
+        #generation_date_root .picker__holder { bottom: 0; margin-bottom: 42px;}
+    </style>
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded"
       data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">
@@ -178,6 +183,22 @@
                                                             <select name="shipper_product_type" id="shipper_product_type" class="select2 form-control required" style="width: 100%">
                                                                 @foreach($products as $product)
                                                                     <option value="{{$product->id}}" {{ old('shipper_product_type') == $product->id ? 'selected' : '' }} >{{$product->product_name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="form-group">
+                                                        <label for="nature_of_account">Nature Of Account:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="nature_of_account" id="nature_of_account" class="select2 form-control required">
+                                                                @foreach($account_types as $type)
+                                                                    <option value="{{$type->id}}" {{ old('nature_of_account') == $type->id ? 'selected' : '' }}>{{$type->name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -382,15 +403,20 @@
                                                         <input type="text" class="form-control required" value="{{ old('account_no') }}" name="account_no" placeholder="Account Number*">
                                                     </div>
                                                     <div class="form-group">
-                                                        <label for="mode_of_payment">Mode of Payment:
+
+                                                        <label for="cycle_of_payment">Cycle of Payment:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
-                                                        <select name="mode_of_payment" id="mode_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="IBFT" {{ old('mode_of_payment') == 'IBFT' ? 'selected' : '' }}>IBFT Reimbursements</option>
-                                                        </select>
+                                                            <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
+                                                                <option value="Daily" {{ old('cycle_of_payment') == 'Daily' ? 'selected' : '' }}>Daily</option>
+                                                                <option value="Weekly" {{ old('cycle_of_payment') == 'Weekly' ? 'selected' : '' }}>Weekly</option>
+                                                                <option value="Fortnight" {{ old('cycle_of_payment') == 'Fortnight' ? 'selected' : '' }}>Fortnight</option>
+                                                                <option value="Monthly" {{ old('cycle_of_payment') == 'Monthly' ? 'selected' : '' }}>Monthly</option>
+                                                            </select>
                                                         </div>
                                                     </div>
+
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -423,23 +449,77 @@
                                                                 </select>
                                                             </div>
                                                         </div>
-                                                    <div class="form-group">
 
-                                                            <label for="cycle_of_payment">Cycle of Payment:
-                                                                <span class="danger">*</span>
-                                                            </label>
-                                                        <div>
-                                                        <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="Daily" {{ old('cycle_of_payment') == 'Daily' ? 'selected' : '' }}>Daily</option>
-                                                            <option value="Weekly" {{ old('cycle_of_payment') == 'Weekly' ? 'selected' : '' }}>Weekly</option>
-                                                            <option value="Fortnight" {{ old('cycle_of_payment') == 'Fortnight' ? 'selected' : '' }}>Fortnight</option>
-                                                            <option value="Monthly" {{ old('cycle_of_payment') == 'Monthly' ? 'selected' : '' }}>Monthly</option>
+                                                </div>
+
+                                                </div>
+                                            <div id="billing_information_div" class="row d-none">
+                                                <div class="col-md-6">
+
+                                                <div class="form-group">
+
+                                                    <label for="cycle_of_invoicing">Cycle Of Invoicing:
+                                                        <span class="danger">*</span>
+                                                    </label>
+                                                    <div>
+                                                        <select name="cycle_of_invoicing" id="cycle_of_invoicing" class="select2 form-control required">
+                                                            @foreach($invoicing_cycle as $cycle)
+                                                                <option value="{{$cycle->id}}"  {{ old('cycle_of_invoicing') == $cycle->id ? 'selected' : '' }} >{{$cycle->name}}</option>
+                                                            @endforeach
                                                         </select>
-                                                        </div>
                                                     </div>
                                                 </div>
-
                                                 </div>
+                                                <div class="col-md-6">
+
+                                                <div class="form-group d-none" id="generation_div">
+
+                                                    <label for="generation_date">Generation Date:
+                                                        <span class="danger">*</span>
+                                                    </label>
+                                                    <div>
+                                                        <select name="generation_date" id="generation_date" class="select2 form-control d-none"></select>
+                                                    </div>
+                                                </div>
+                                                </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="bank_branch">
+                                                                Billing Person Name:
+                                                                <span class="danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control required" value="{{ old('billing_person_name') }}" name="billing_person_name" placeholder="Billing Person Name*">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="bank_branch">
+                                                                Billing Person Phone:
+                                                                <span class="danger">*</span>
+                                                            </label>
+                                                            <input type="text" id="billing_phone" class="form-control required" value="{{ old('billing_person_phone') }}" name="billing_person_phone" placeholder="Billing Person Phone*">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="bank_branch">
+                                                                Billing Person Email:
+                                                                <span class="danger">*</span>
+                                                            </label>
+                                                            <input type="email" class="form-control required" value="{{ old('billing_person_email') }}" name="billing_person_email" placeholder="abc@mail.com*">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="bank_branch">
+                                                                Billing Address:
+                                                                <span class="danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control required" value="{{ old('billing_address') }}" name="billing_address" placeholder="Billing Address*">
+                                                        </div>
+                                                    </div>
+
+                                            </div>
 
                                         </fieldset>
                                         <!-- Step 4 -->
@@ -511,6 +591,9 @@
 <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" ></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 <!-- END PAGE VENDOR JS-->
 <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/js/scripts/forms/wizard-steps.js')}}" type="text/javascript"></script>
@@ -531,14 +614,67 @@
            placeholder:'Select City',
            dropdownParent:$('#registership')
        });
+        var weekly = [1, 2, 3, 4, 5, 6, 7];
+        var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+
+        $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
+            width:'100%',
+            placeholder:'Select Date',
+            dropdownParent:$('#registership')
+        });
+        $('#cycle_of_invoicing').prepend('<option value="" selected="selected"></option>').select2({
+           width:'100%',
+           placeholder:'Select Cycle Of Invoicing',
+           dropdownParent:$('#registership')
+       }).bind('change', function() {
+
+           if (this.value == 1) {
+               $('#generation_div').removeClass('d-none');
+               $('#generation_date').removeClass('d-none');
+               $('#generation_date').addClass('required');
+               $('#generation_date').empty().trigger('change');
+               $('#generation_date').select2({data:weekly,placeholder:'Select Date'});
+           }
+           else if(this.value == 3){
+               $('#generation_div').removeClass('d-none');
+               $('#generation_date').removeClass('d-none');
+               $('#generation_date').addClass('required');
+               $('#generation_date').empty().trigger('change');
+               $('#generation_date').select2({data:monthly,placeholder:'Select Date'});
+           }else if(this.value == 2){
+               $('#generation_div').addClass('d-none');
+               $('#generation_date').addClass('d-none');
+               $('#generation_date').removeClass('required');
+           }
+       });
+
        $('#bank_name').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank',
            dropdownParent:$('#registership')
        });
-       $('#mode_of_payment').prepend('<option value="" selected="selected"></option>').select2({
-           placeholder:'Select Mode of Payment',
+       $('#nature_of_account').prepend('<option value="" selected="selected"></option>').select2({
+           width:'100%',
+           placeholder:'Select Nature of Account',
            dropdownParent:$('#registership')
+       }).bind('change', function() {
+
+           if (this.value == 2) {
+               $('#billing_information_div').removeClass('d-none');
+           }
+           else {
+               $('#billing_information_div').addClass('d-none');
+           }
        });
+        {{--var generation_date = $('#generation_date').pickadate({--}}
+            {{--firstDay: 1,--}}
+            {{--clear: 'Clear',--}}
+            {{--max: '{{ Carbon\Carbon::now() }}',--}}
+            {{--format:'dd mmmm, yyyy',--}}
+            {{--selectYears: true,--}}
+            {{--selectMonths: true,--}}
+            {{--formatSubmit: 'yyyy-mm-dd 00:00:00',--}}
+            {{--hiddenSuffix: '_formatted'--}}
+        {{--});--}}
        $('#bank_city').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank City',
            dropdownParent:$('#registership')
@@ -562,7 +698,7 @@
         });
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
-        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='billing_person_phone'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
         $('#shipInfo').perfectScrollbar({
             suppressScrollX : true,

@@ -11,7 +11,9 @@
                 <div class="card">
 
                     <div class="card-header">
-                        <h2 class="font-large-1">{{$shipper->name}}</h2>
+                        <h2 class="font-large-1">{{$shipper->name}}
+                            <div class="badge badge-success pull-right">Reimbursement Account</div>
+                        </h2>
                         @include('admin.inc.messages')
                     </div>
 

@@ -17,11 +17,22 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<form id="tracking_number_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-								<div class="form-group">
-									<input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
-								</div>
-							</form>
+							<div class="text-center">
+								<form id="tracking_number_search_form" class="d-inline-block form-inline mb-1 justify-content-center" novalidate="novalidate">
+									<div class="form-group">
+										<input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
+									</div>
+								</form>
+
+								<form id="positive_negative_filter_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate">
+									<div class="form-group">
+										<select name="positive_negative_filter" class="select2 positive_negative_filter">
+											<option value="1">Positive</option>
+											<option value="2">Negative</option>
+										</select>
+									</div>
+								</form>
+							</div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
@@ -49,7 +60,6 @@
 										<th class="border-primary border-darken-1">Account Title</th>
 										<th class="border-primary border-darken-1">IBAN</th>
 										<th class="border-primary border-darken-1">Account City</th>
-										<th class="border-primary border-darken-1">Payment Mode</th>
 										<th class="border-primary border-darken-1">Payment Cycle</th>
 										<th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
 										<th class="border-primary border-darken-1"></th>
@@ -232,11 +242,13 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
@@ -249,6 +261,15 @@
 			var selected_rows_shipments = [];
 
 			var initial_total_hold = 0;
+
+			$('#positive_negative_filter_form select.positive_negative_filter').prepend('<option value="" selected></option>').select2({
+                placeholder: 'Select Positive/Negative Filter',
+                width:'100%',
+                allowClear: true
+            }).bind('change', function() {
+				table.draw(false);
+			});
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -257,7 +278,8 @@
                         url: '{{ route('admin.finance.make_payments.list') }}',
                         data: {
                             'page': 'all',
-                            'tracking_number': $('#tracking_number_search_form #tracking_number').val()
+                            'tracking_number': $('#tracking_number_search_form #tracking_number').val(),
+                            'positive_negative_filter': $('#positive_negative_filter_form select.positive_negative_filter').val()
                         },
                         success: function (result) {
                             head = [];
@@ -283,7 +305,6 @@
                             head.push('Account Title');
                             head.push('IBAN');
                             head.push('Account City');
-                            head.push('Payment Mode');
                             head.push('Payment Cycle');
                             head.push('Return Shipments Avg. Aging');
 
@@ -315,7 +336,6 @@
                                 row.push(values.account_title);
                                 row.push(values.iban);
                                 row.push(values.account_city);
-                                row.push(values.payment_mode);
                                 row.push(values.payment_cycle);
                                 row.push(values.return_shipments_average_aging);
 
@@ -439,6 +459,7 @@
 					url: '{{ route('admin.finance.make_payments.list') }}',
 					data: function (d) {
 						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
+						d.positive_negative_filter = $('#positive_negative_filter_form select.positive_negative_filter').val();
 					}
 				},
 				rowId: 'id',
@@ -467,7 +488,6 @@
 					{data:'account_title', name: 'ubi.account_title', class: 'align-middle text-center account_title'},
 					{data:'iban', name: 'ubi.iban', class: 'align-middle text-center iban'},
 					{data:'account_city', name: 'bc.name', class: 'align-middle text-center account_city'},
-					{data:'payment_mode', name: 'ubi.payment_mode', class: 'align-middle text-center payment_mode'},
 					{data:'payment_cycle', name: 'ubi.payment_cycle', class: 'align-middle text-center payment_cycle'},
 					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -490,10 +510,10 @@
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
-                    var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control">' +
-                        '<option value="ibft">IBFT</option>' +
-                        '<option value="invoices">Invoices</option>' +
-                        '</select>';
+                    // var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control">' +
+                    //     '<option value="ibft">IBFT</option>' +
+                    //     '<option value="invoices">Invoices</option>' +
+                    //     '</select>';
                     var payment_cycle_select = '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
                         '<option value="daily">Daily</option>' +
                         '<option value="weekly">Weekly</option>' +
@@ -511,11 +531,11 @@
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
-                        }else if($(header).is('.payment_mode')){
-                            $(payment_mode_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
+                        // }else if($(header).is('.payment_mode')){
+                        //     $(payment_mode_select).appendTo($(search))
+                        //         .on( 'change', function () {
+                        //             column.search($(this).val(), false, false, true).draw();
+                        //         } ).wrap(td);
                         }else if($(header).is('.payment_cycle')){
                             $(payment_cycle_select).appendTo($(search))
                                 .on( 'change', function () {
@@ -551,12 +571,12 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    $("#payment_mode_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Mode",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    // $("#payment_mode_select").prepend('<option value="" selected></option>').select2({
+                    //     placeholder: "Select Mode",
+                    //     width:'100%',
+                    //     containerCssClass: 'select-xs',
+                    //     dropdownCssClass: 'form-control-sm p-0'
+                    // });
                     $("#payment_cycle_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Cycle",
                         width:'100%',
@@ -893,6 +913,10 @@
 				}
 			});
 
+			$('#make_payments').on('hide.bs.modal', function () {
+				selected_rows = [];
+			})
+
 			function calculation(parent) {
 				var id = parseInt(parent.attr('id'));
 
@@ -973,31 +997,71 @@
 				})
 				.done(function(data) {
 					if (data.status == 0) {
-						swal({
-							text: 'Are you sure, you want to make the Payments?',
-							icon: 'warning',
-							buttons: {
-								cancel: {
-									text: 'No',
-									value: null,
-									visible: true,
-									closeModal: true,
+						if (data.duplicate_shipments) {
+							var html = 'The following Shipment(s) have Duplicate Same Type Payments:<br/>';
+
+							$.each(data.duplicate_shipments, function(index, duplicate_shipment) {
+								html += duplicate_shipment + '<br/>';
+							});
+
+							html += '<br/>Are you sure, you want to make the Payments?';
+
+							content = document.createElement('div');
+							content.innerHTML = html;
+
+							swal({
+								content: content,
+								icon: 'warning',
+								buttons: {
+									cancel: {
+										text: 'No',
+										value: null,
+										visible: true,
+										closeModal: true,
+									},
+									confirm: {
+										text: 'Yes',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
 								},
-								confirm: {
-									text: 'Yes',
-									value: true,
-									visible: true,
-									closeModal: true
+								closeOnClickOutside: false,
+								closeOnEsc: false,
+								dangerMode: true
+							}).then(function(confirm) {
+								if (confirm) {
+									form.submit();
 								}
-							},
-							closeOnClickOutside: false,
-							closeOnEsc: false,
-							dangerMode: true
-						}).then(function(confirm) {
-							if (confirm) {
-								form.submit();
-							}
-						});
+							});
+						}
+						else {
+							swal({
+								text: 'Are you sure, you want to make the Payments?',
+								icon: 'warning',
+								buttons: {
+									cancel: {
+										text: 'No',
+										value: null,
+										visible: true,
+										closeModal: true,
+									},
+									confirm: {
+										text: 'Yes',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
+								},
+								closeOnClickOutside: false,
+								closeOnEsc: false,
+								dangerMode: true
+							}).then(function(confirm) {
+								if (confirm) {
+									form.submit();
+								}
+							});
+						}
 					}
 					else {
 						var html = 'Cannot proceed since following Shipper(s) have Overall Negative Payment(s) Selected:<br/>';
