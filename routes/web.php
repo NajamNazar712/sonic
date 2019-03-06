@@ -875,7 +875,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('revenue')->name('revenue.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@revenue_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@revenue_list')->name('list');
+            Route::post('list', 'Admins\AdminReportsController@revenue_list')->name('list');
 
         });
     });

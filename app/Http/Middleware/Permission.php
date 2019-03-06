@@ -311,6 +311,8 @@ class Permission
             'reports.cargo_returns_shipment.list' => 172,
             'reports.return_reattempt_ratio.index' => 174,
             'reports.return_reattempt_ratio.list' => 174,
+            'reports.revenue.index' => 177,
+            'reports.revenue.list' => 177,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Overall Sales Report')
+@section('title', 'Revenue Report')
 
 @section('content')
     <h1 class="mb-1">
-        Overall Sales Report
+        Revenue Report
     </h1>
 
     <div class="card">
@@ -117,7 +117,6 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Class</th>
-                        <th class="border-primary border-darken-1">Attempts</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Category</th>
                         <th class="border-primary border-darken-1">Description</th>
@@ -297,7 +296,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.overall_sales.list') }}',
+                        url: '{{ route('admin.reports.revenue.list') }}',
                         method:'post',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -332,7 +331,6 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Class');
-                            head.push('Attempts');
                             head.push('Shipping Mode');
                             head.push('Category');
                             head.push('Description');
@@ -371,7 +369,6 @@
                                 row.push(values.hub);
                                 row.push(values.zone);
                                 row.push(values.class);
-                                row.push(values.attempts);
                                 row.push(values.shipping_mode);
                                 row.push(values.category);
                                 row.push(values.description);
@@ -407,7 +404,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Overall Sales Report',
+                        title: 'Revenue Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -417,7 +414,7 @@
                 processing: true,
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.reports.overall_sales.list') }}',
+                    url: '{{ route('admin.reports.revenue.list') }}',
                     method:'post',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -451,7 +448,6 @@
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
                     { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
                     { data:'class' ,name: 'zcc.class', class: 'align-middle class'},
-                    { data:'attempts' ,name: 'attempts', class: 'align-middle attempts',sortable:false},
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
                     { data:'category' ,name: 'p.product_name', class: 'align-middle category'},
                     { data:'description' ,name: 'si.description', class: 'align-middle description'},

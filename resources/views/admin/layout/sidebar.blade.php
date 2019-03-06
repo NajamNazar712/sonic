@@ -357,8 +357,8 @@
                         @if (session('role_id') == 1 || in_array(174, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.return_reattempt_ratio.index') }}">Return Confirm To Re-Attempt Ratio</a></li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(174, session('permissions')))
-                             <li><a class="menu-item" href="{{ route('admin.reports.return_reattempt_ratio.index') }}">Revenur Report</a></li>
+                        @if (session('role_id') == 1 || in_array(177, session('permissions')))
+                             <li><a class="menu-item" href="{{ route('admin.reports.revenue.index') }}">Revenue</a></li>
                         @endif
                     </ul>
                 </li>
