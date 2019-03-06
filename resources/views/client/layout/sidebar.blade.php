@@ -11,7 +11,7 @@
                             @if (session('account_type') == 1)
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.index') }}">Book by Order Form</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.excel_index') }}">Book by Excel Sheet</a></li>
-                            @else @if (session('account_type') == 2)
+                            @elseif (session('account_type') == 2)
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Book by Order Form</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Book by Excel Sheet</a></li>
                             @endif
