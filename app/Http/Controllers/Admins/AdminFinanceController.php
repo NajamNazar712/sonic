@@ -906,7 +906,7 @@ class AdminFinanceController extends Controller
             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
         }
     }
-    static public function replacement_collected_adjust_in_payment($shipment_id){
+    static public function replacement_or_try_and_buy_adjust_in_payment($shipment_id){
         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6]);
         if ($delivery_note_shipment->exists()) {
             $delivery_note_shipment = $delivery_note_shipment->first();

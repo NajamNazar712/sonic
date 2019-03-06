@@ -6,6 +6,8 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\ShipmentsJourney;
@@ -122,6 +124,10 @@ class AdminMonthClosingController extends Controller
         $status_not_allowed = array(1, 5, 6, 14, 17, 23, 25, 28, 31, 44, 45, 51);
         $intransit_status_array = array(3, 21, 26, 32);
 
+        $return_note_statuses = array(23,24,25,44,45,47,48);
+        $replacement_try_and_buy_statuses = array(26,27,28,29,30,31,32,33,34,35,36,37,38);
+
+
         if($shipment->exists()){
             $shipment_details = $shipment->first();
             if($shipment_details->shipper_status_id != 51){
@@ -130,7 +136,7 @@ class AdminMonthClosingController extends Controller
                         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_details->id);
                         if ($delivery_note_shipment->exists()) {
                             $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id');
-                            $delivery = DeliveryNote::where('id', $delivery_note_shipment)->where('status', 0)->exists();
+                            $delivery = DeliveryNote::where('id' , $delivery_note_shipment)->where('status', 0)->exists();
                             if($delivery){
                                 return response()->json(['status' => 0, 'error' => 'Shipment is in an Unverified Delivery Note']);
                             }
@@ -185,7 +191,31 @@ class AdminMonthClosingController extends Controller
                             AdminFinanceController::return_confirmed_revert($shipment_details->id);
                         }
                         if($shipment_details->shipper_status_id == 30){
-                            AdminFinanceController::replacement_collected_adjust_in_payment($shipment_details->id);
+                            AdminFinanceController::replacement_or_try_and_buy_adjust_in_payment($shipment_details->id);
+                        }
+
+                        if(in_array($shipment_details->shipper_status_id, $replacement_try_and_buy_statuses)){
+                            AdminFinanceController::return_confirmed_revert($shipment_details->id);
+                        }
+
+                        if(in_array($shipment_details->shipper_status_id,$return_note_statuses)){
+                           $return_note_shipments_details = ReturnNoteShipment::where('shipment_id', $shipment_details->id);
+                           if($return_note_shipments_details->exists()){
+                               $return_note_shipments_details = $return_note_shipments_details->get();
+                               foreach ($return_note_shipments_details as $return_note_shipments){
+                                   $return_note = ReturnNote::find('id', $return_note_shipments->return_note_id);
+                                   if($return_note->status == 0){
+                                       ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('shipment_id', $return_note_shipments->shipment_id)->delete();
+                                       $return_note->shipments_count = $return_note->shipments_count - 1;
+                                       if(ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('status', 0)->count() == 0){
+                                           $return_note->status = 1;
+                                       }
+                                       $return_note->save();
+
+                                   }
+                               }
+
+                           }
                         }
 
                         $shipment_details->shipper_status_id = 51;
