@@ -4214,15 +4214,22 @@ class AdminReportsController extends Controller
     }
 
     private function debriefing_data($date, $hub, $zone, $export = FALSE) {
-        $settings = GlobalSettings::where('type', 'debriefing_report_cut_off_time');
+        $settings = GlobalSettings::where('type', 'debriefing_report_arrival_cut_off_time')->first();
 
-        if ($settings->exists()) {
-            $settings = $settings->first();
-
-            $cut_off_time = $settings->setting_value;
+        if ($settings) {
+            $arrival_cut_off_time = $settings->setting_value;
         }
         else {
-            $cut_off_time = 12;
+            $arrival_cut_off_time = 12;
+        }
+
+        $settings = GlobalSettings::where('type', 'debriefing_report_day_cut_off_time')->first();
+
+        if ($settings) {
+            $day_cut_off_time = $settings->setting_value;
+        }
+        else {
+            $day_cut_off_time = 12;
         }
 
         $hubs = City::where('hub', 1)->select('id','name');
@@ -4266,9 +4273,9 @@ class AdminReportsController extends Controller
                             ->where('dns.delivery_note_id', '=', DB::raw('(select max(dns.delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
                         })
                         ->leftjoin('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id')
-                        ->join('shipments_journey as sj', function($join) use ($cut_off_time) {
+                        ->join('shipments_journey as sj', function($join) use ($arrival_cut_off_time) {
                             $join->on('s.id', '=', 'sj.shipment_id')
-                            ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and (usi.city_id = s.consignee_city_id or zcc.class in (0, 1)) and (dns.delivery_note_id is null or date(dn.created_at) > date(shipments_journey.created_at)) and (shipments_journey.shipper_status_id in (2, 4) and hour(shipments_journey.created_at) < ' . $cut_off_time . '))'));
+                            ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and (usi.city_id = s.consignee_city_id or zcc.class in (0, 1)) and (dns.delivery_note_id is null or date(dn.created_at) > date(shipments_journey.created_at)) and (shipments_journey.shipper_status_id in (2, 4) and hour(shipments_journey.created_at) < ' . $arrival_cut_off_time . '))'));
                         });
                     }
                     else if ($type == 'delivered') {
@@ -4363,9 +4370,9 @@ class AdminReportsController extends Controller
                             ->where('dns.delivery_note_id', '=', DB::raw('(select max(dns.delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
                         })
                         ->leftjoin('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id')
-                        ->join('shipments_journey as sj', function($join) use ($cut_off_time) {
+                        ->join('shipments_journey as sj', function($join) use ($arrival_cut_off_time) {
                             $join->on('s.id', '=', 'sj.shipment_id')
-                            ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id in (2, 4) and (hour(shipments_journey.created_at) >= ' . $cut_off_time . ' or zcc.class in (2, 3)) and (dns.delivery_note_id is null or date(dn.created_at) > date(shipments_journey.created_at)))'));
+                            ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id in (2, 4) and (hour(shipments_journey.created_at) >= ' . $arrival_cut_off_time . ' or zcc.class in (2, 3)) and (dns.delivery_note_id is null or date(dn.created_at) > date(shipments_journey.created_at)))'));
                         });
                     }
                     else if ($type == 'delivery_note_pending') {
@@ -4376,12 +4383,13 @@ class AdminReportsController extends Controller
                     }
 
                     $rows = $rows->select('s.tracking_number')->where('cities.hub_id', $hub->id);
-
+                    $from = Carbon::today()->addHour($day_cut_off_time);
+                    $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subMinute();
                     if ($type != 'correct_status' && $type != 'fake_status') {
-                        $rows = $rows->whereDate('sj.created_at', $date);
+                        $rows = $rows->whereBetween('sj.created_at', [$from,$to]);
                     }
                     else {
-                        $rows = $rows->whereDate('dn.created_at', $date);
+                        $rows = $rows->whereBetween('dn.created_at', [$from,$to]);
                     }
 
                     if ($rows->exists()) {

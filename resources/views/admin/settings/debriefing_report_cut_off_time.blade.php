@@ -24,7 +24,7 @@
 
                                         <div class="form-group">
                                             <div class="input-group">
-                                                <input type="text" name="debriefing_report_cut_off_time" class="form-control debriefing_report_cut_off_time" placeholder="Debriefing Report Cut-Off Time*" data-rule-required="true" data-msg-required="Debriefing Report Cut-Off Time is required" value="{{ $cut_off_time }}" data-rule-min="0" data-msg-min="Debriefing Report Cut-Off Time can not be less than 0" data-rule-max="23" data-msg-min="Debriefing Report Cut-Off Time can not be more than 23">
+                                                <input type="text" name="debriefing_report_arrival_cut_off_time" class="form-control debriefing_report_cut_off_time" placeholder="Debriefing Report Cut-Off Time*" data-rule-required="true" data-msg-required="Debriefing Report Cut-Off Time is required" value="{{ $arrival_cut_off_time }}" data-rule-min="0" data-msg-min="Debriefing Report Cut-Off Time can not be less than 0" data-rule-max="23" data-msg-min="Debriefing Report Cut-Off Time can not be more than 23">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">hours</span>
                                                 </div>
@@ -32,7 +32,7 @@
                                         </div>
                                         <div class="form-group">
                                             <div class="input-group">
-                                                <input type="text" name="debriefing_report_cut_off_time_start" class="form-control debriefing_report_cut_off_time_start" placeholder="Debriefing Report Cut-Off Time Start*" data-rule-required="true" data-msg-required="Debriefing Report Cut-Off Time Start is required" value="{{ $cut_off_time_start }}" data-rule-min="0" data-msg-min="Debriefing Report Cut-Off Time can not be less than 0" data-rule-max="23" data-msg-min="Debriefing Report Cut-Off Time can not be more than 23">
+                                                <input type="text" name="debriefing_report_day_cut_off_time" class="form-control debriefing_report_cut_off_time_start" placeholder="Debriefing Report Cut-Off Time Start*" data-rule-required="true" data-msg-required="Debriefing Report Cut-Off Time Start is required" value="{{ $day_cut_off_time }}" data-rule-min="0" data-msg-min="Debriefing Report Cut-Off Time can not be less than 0" data-rule-max="23" data-msg-min="Debriefing Report Cut-Off Time can not be more than 23">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">hours</span>
                                                 </div>

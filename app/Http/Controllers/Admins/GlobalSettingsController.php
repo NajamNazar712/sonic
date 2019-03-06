@@ -9,6 +9,7 @@ use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Yajra\Datatables\Datatables;
@@ -493,27 +494,29 @@ class GlobalSettingsController extends Controller
     }
 
     public function debriefing_report_cut_off_time_index() {
-        $settings = GlobalSettings::where('type', 'debriefing_report_cut_off_time')->first();
-        $start = GlobalSettings::where('type', 'debriefing_report_cut_off_time_start')->first();
+        $settings = GlobalSettings::where('type', 'debriefing_report_arrival_cut_off_time')->first();
 
         if ($settings) {
-            $cut_off_time = $settings->setting_value;
+            $arrival_cut_off_time = $settings->setting_value;
         }
         else {
-            $cut_off_time = 12;
-        }
-        if ($start) {
-            $cut_off_time_start = $start->setting_value;
-        }
-        else {
-            $cut_off_time_start = 12;
+            $arrival_cut_off_time = 12;
         }
 
-        return view('admin.settings.debriefing_report_cut_off_time')->with(['cut_off_time' => $cut_off_time, 'cut_off_time_start' => $cut_off_time_start]);
+        $settings = GlobalSettings::where('type', 'debriefing_report_day_cut_off_time')->first();
+
+        if ($settings) {
+            $day_cut_off_time = $settings->setting_value;
+        }
+        else {
+            $day_cut_off_time = 12;
+        }
+
+        return view('admin.settings.debriefing_report_cut_off_time')->with(['arrival_cut_off_time' => $arrival_cut_off_time, 'day_cut_off_time' => $day_cut_off_time]);
     }
 
     public function debriefing_report_cut_off_time_store(Request $request) {
-        $settings = GlobalSettings::where('type', 'debriefing_report_cut_off_time');
+        $settings = GlobalSettings::where('type', 'debriefing_report_arrival_cut_off_time');
 
         if ($settings->exists()) {
             $settings = $settings->first();
@@ -521,14 +524,14 @@ class GlobalSettingsController extends Controller
         else {
             $settings = new GlobalSettings();
 
-            $settings->type = 'debriefing_report_cut_off_time';
+            $settings->type = 'debriefing_report_arrival_cut_off_time';
         }
 
-        $settings->setting_value = $request->debriefing_report_cut_off_time;
+        $settings->setting_value = $request->debriefing_report_arrival_cut_off_time;
 
         $settings->save();
 
-        $start = GlobalSettings::where('type', 'debriefing_report_cut_off_time_start');
+        $start = GlobalSettings::where('type', 'debriefing_report_day_cut_off_time');
 
         if ($start->exists()) {
             $start = $start->first();
@@ -536,10 +539,10 @@ class GlobalSettingsController extends Controller
         else {
             $start = new GlobalSettings();
 
-            $start->type = 'debriefing_report_cut_off_time_start';
+            $start->type = 'debriefing_report_day_cut_off_time';
         }
 
-        $start->setting_value = $request->debriefing_report_cut_off_time_start;
+        $start->setting_value = $request->debriefing_report_day_cut_off_time;
 
         $start->save();
 
