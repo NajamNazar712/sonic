@@ -493,6 +493,14 @@ class Permission
             }
         }
         else if (Auth::guard('substitute_users')->check()) {
+            if (!$request->session()->has('account_type')) {
+                  Auth::guard('substitute_users')->logout();
+
+                  $request->session()->invalidate();
+
+                  return redirect()->route('cod.login');
+            }
+
             $action = str_replace('cod.', '', $request->route()->getName());
 
             if (session('user_type') == 1 || !isset($this->actions['shipper'][$action]) || in_array($this->actions['shipper'][$action], session('permissions'))) {
@@ -500,6 +508,15 @@ class Permission
             }
             else {
                 return redirect()->route('cod.access_denied');
+            }
+        }
+        else if (Auth::guard('web')->check()) {
+            if (!$request->session()->has('account_type')) {
+                  Auth::guard('web')->logout();
+
+                  $request->session()->invalidate();
+
+                  return redirect()->route('cod.login');
             }
         }
         else {
