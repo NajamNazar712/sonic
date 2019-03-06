@@ -4359,7 +4359,7 @@ class AdminReportsController extends Controller
 
                     $rows = $rows->select('s.tracking_number')->where('cities.hub_id', $hub->id);
                     $from = Carbon::today()->addHour($day_cut_off_time);
-                    $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subMinute();
+                    $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond();
                     if ($type != 'correct_status' && $type != 'fake_status') {
                         $rows = $rows->whereBetween('sj.created_at', [$from,$to]);
                     }
