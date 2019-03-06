@@ -1689,7 +1689,7 @@
                                                                     </div>
                                                                     <div class="col">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_1}}" name="detain_class_1_charges[{{$index_row}}]">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_1}}" name="detain_class_1_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col">
@@ -1840,7 +1840,7 @@
                                                                     </div>
                                                                     <div class="col">
                                                                         <fieldset class="form-group">
-                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_1}}" name="detain_hub_class_1_charges[{{$index_row}}]">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_1}}" name="detain_hub_class_1_charges[{{$index_row}}]" disabled>
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col">
