@@ -1496,11 +1496,8 @@ class AdminReportsController extends Controller
                     return '';
                 }
             })
-            ->editColumn('status_updated_at', function($shipment) {
-                return $shipment->status_updated_at;
-            })
             ->addColumn('aging', function($shipment) {
-                $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
+                $updated_at = Carbon::parse($shipment->operation_status_date)->startOfDay();
 
                 $now = Carbon::now()->startOfDay();
 
@@ -3572,7 +3569,9 @@ class AdminReportsController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->leftjoin('zone_class_cities as zcc', function($join){
-                $join->on('z.id', '=', 'zcc.zone_id')->on('dc.id', '=', 'zcc.city_id');
+                $join->on('z.id', '=', 'zcc.zone_id')
+                ->on('dc.id', '=', 'zcc.city_id')
+                ->on('zone_classification_id', '=', DB::raw('IF (shipments.shipping_mode_id IN (1, 4), 1, 2)'));
             })
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
