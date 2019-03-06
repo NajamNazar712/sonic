@@ -361,6 +361,7 @@
                     //countRows();
 
                     if(rowsCount === 0) {
+                        blockPagePermanently();
                         $.ajax({
                             url:'{{route('admin.delivery.note.shipment.info')}}',
                             type:'POST',
@@ -370,6 +371,7 @@
                             }
                         }).done(function (data) {
                             if(data.status === 1){
+                                UnblockPagePermanently();
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 scan_sound(2);
                             }else{
@@ -381,6 +383,7 @@
                                 table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 scan_sound(1);
+                                UnblockPagePermanently();
                                 shipment_ids.push(data.shId);
                                 tracking_ids.push(data.tracking_number);
                                 notification_ids.push(1);
@@ -400,6 +403,7 @@
                     } else {
                         var is_indexed = $.inArray(tracking, tracking_ids);
                         if(is_indexed === -1){
+                            blockPagePermanently();
                             // $('#hub_id').val('');
                             $.ajax({
                                 url:'{{route('admin.delivery.note.shipment.info')}}',
@@ -411,7 +415,7 @@
                                 }
                             }).done(function (data) {
                                 if(data.status === 1){
-
+                                    UnblockPagePermanently();
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                     scan_sound(2);
                                 }else{
@@ -423,12 +427,14 @@
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
                                     table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
                                     table.draw(false);
+                                    scan_sound(1);
+                                    UnblockPagePermanently();
                                     shipment_ids.push(data.shId);
                                     tracking_ids.push(data.tracking_number);
                                     notification_ids.push(1);
                                     rider_info_ids.push(1);
                                     table.order([0, 'desc']).draw();
-                                    scan_sound(1);
+
                                 }
                                 scan.val('');
                                 scan.attr('disabled', false);
@@ -541,6 +547,7 @@
                             dangerMode: true
                         }).then(function (confirm) {
                             if(confirm){
+                                blockPagePermanently();
                                 $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
                                 $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
                                 $('#create_delivery_note_form input#notification_ids').val(notification_ids);

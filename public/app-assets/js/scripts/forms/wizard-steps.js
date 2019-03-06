@@ -74,7 +74,7 @@ $(".steps-validation").steps({
             var cproduct = $('#shipper_product_type').val();
             var scity = $('#shipping_city').find('option[value="'+ccity+'"]').val();
             if(scity !== undefined){
-                console.log(cproduct)
+
                 $('#pickup_address').val(caddress);
                 $('#pickup_poc').val(cpoc);
                 $('#pickup_phone').val(cphone);
@@ -115,6 +115,9 @@ $(".steps-validation").steps({
         //     $('#perror').css('display','none');
         //
         // }
+        if($('#nature_of_account').val() == 1){
+            $('#billing_information_div').remove();
+        }
         return form.valid();
     },
     onFinished: function (event, currentIndex)

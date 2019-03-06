@@ -9,6 +9,7 @@ use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Yajra\Datatables\Datatables;
@@ -492,21 +493,32 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function debriefing_report_cut_off_time_index() {
-        $settings = GlobalSettings::where('type', 'debriefing_report_cut_off_time')->first();
+	
+
+	public function debriefing_report_cut_off_time_index() {
+        $settings = GlobalSettings::where('type', 'debriefing_report_arrival_cut_off_time')->first();
 
         if ($settings) {
-            $cut_off_time = $settings->setting_value;
+            $arrival_cut_off_time = $settings->setting_value;
         }
         else {
-            $cut_off_time = 12;
+            $arrival_cut_off_time = 12;
         }
 
-        return view('admin.settings.debriefing_report_cut_off_time')->with('cut_off_time', $cut_off_time);
+        $settings = GlobalSettings::where('type', 'debriefing_report_day_cut_off_time')->first();
+
+        if ($settings) {
+            $day_cut_off_time = $settings->setting_value;
+        }
+        else {
+            $day_cut_off_time = 12;
+        }
+
+        return view('admin.settings.debriefing_report_cut_off_time')->with(['arrival_cut_off_time' => $arrival_cut_off_time, 'day_cut_off_time' => $day_cut_off_time]);
     }
 
     public function debriefing_report_cut_off_time_store(Request $request) {
-        $settings = GlobalSettings::where('type', 'debriefing_report_cut_off_time');
+        $settings = GlobalSettings::where('type', 'debriefing_report_arrival_cut_off_time');
 
         if ($settings->exists()) {
             $settings = $settings->first();
@@ -514,12 +526,46 @@ class GlobalSettingsController extends Controller
         else {
             $settings = new GlobalSettings();
 
-            $settings->type = 'debriefing_report_cut_off_time';
+            $settings->type = 'debriefing_report_arrival_cut_off_time';
         }
 
-        $settings->setting_value = $request->debriefing_report_cut_off_time;
+        $settings->setting_value = $request->debriefing_report_arrival_cut_off_time;
 
         $settings->save();
+
+        $start = GlobalSettings::where('type', 'debriefing_report_day_cut_off_time');
+
+        if ($start->exists()) {
+            $start = $start->first();
+        }
+        else {
+            $start = new GlobalSettings();
+
+            $start->type = 'debriefing_report_day_cut_off_time';
+        }
+
+        $start->setting_value = $request->debriefing_report_day_cut_off_time;
+
+        $start->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+	public function auto_invoice_generation_and_due_date_index(){
+        $auto_invoice_generation = GlobalSettings::where('type', 'auto_invoice_generation_time')->first();
+        $due_date_days = GlobalSettings::where('type', 'due_date_days')->first();
+        return view('admin.settings.auto_invoice_generation_and_due_date_index')->with(['auto_invoice_generation_time' => $auto_invoice_generation,'due_date_days' => $due_date_days]);
+    }
+
+    public function auto_invoice_generation_and_due_date_store(Request $request){
+
+        $settings_invoice = GlobalSettings::where('type', 'auto_invoice_generation_time')->first();
+        $settings_due_date = GlobalSettings::where('type', 'due_date_days')->first();
+
+        $settings_invoice->setting_value = $request->auto_invoice_generation_hours;
+        $settings_due_date->setting_value = $request->due_date_days;
+
+        $settings_invoice->save();
+        $settings_due_date->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }

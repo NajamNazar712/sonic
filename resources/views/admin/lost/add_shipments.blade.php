@@ -124,6 +124,7 @@
                     form.reset();
 
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
+                        blockPagePermanently();
                         $.ajax({
                             url: '{!! route('admin.delivery.lost.add.shipment.info') !!}',
                             method: 'POST',
@@ -134,6 +135,7 @@
                         })
                             .done(function(data) {
                                 if (data.status == 1) {
+                                    UnblockPagePermanently();
                                     id = data.details.id;
 
                                     var index = $.inArray(id, shipment_ids);
@@ -157,6 +159,7 @@
                                     }
                                 }
                                 else {
+                                    UnblockPagePermanently();
                                     $('#lost_shipment_form button.add').prop('disabled', false);
                                     scan_sound(2);
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -212,6 +215,7 @@
                         dangerMode: true
                     }).then(function (confirm) {
                         if(confirm){
+                            blockPagePermanently();
                             $('#update_lost_form button[type="submit"]').attr('disabled', 'disabled');
                             $('#update_lost_form input#shipment_ids').val(shipment_ids);
                             form.submit();

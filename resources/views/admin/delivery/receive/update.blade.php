@@ -186,6 +186,7 @@
             $('body').on('click','a.deliverynoterow',function () {
                 var shipment_id = $(this).parents('tr').attr('id');
                 var delivery_note = $('#delivery_note').val();
+                blockPagePermanently();
                 $.ajax({
                     url:'{{route('admin.delivery.receive.update.remove')}}',
                     type:'POST',
@@ -196,8 +197,10 @@
                     }
                 }).done(function (data) {
                     if(data.status == 0){
+                        UnblockPagePermanently();
                         table.row( $(this).parents('tr') ).remove().draw();
                     }else{
+                        UnblockPagePermanently();
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 });

@@ -350,6 +350,7 @@
                                 shipment.val(shipments);
                                 $('#statusVerifySubmit').prop('disabled', true);
                                 $('#statusUpdateSubmit').prop('disabled', true);
+                                blockPagePermanently();
                                 verify_form.submit();
                             }
                         });
@@ -387,6 +388,7 @@
                                 shipment.val(shipments);
                                 $('#statusVerifySubmit').prop('disabled', true);
                                 $('#statusUpdateSubmit').prop('disabled', true);
+                                blockPagePermanently();
                                 verify_form.submit();
                             }
                         });

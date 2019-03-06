@@ -117,6 +117,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Class</th>
+                        <th class="border-primary border-darken-1">Attempts</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Category</th>
                         <th class="border-primary border-darken-1">Description</th>
@@ -331,6 +332,7 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Class');
+                            head.push('Attempts');
                             head.push('Shipping Mode');
                             head.push('Category');
                             head.push('Description');
@@ -369,6 +371,7 @@
                                 row.push(values.hub);
                                 row.push(values.zone);
                                 row.push(values.class);
+                                row.push(values.attempts);
                                 row.push(values.shipping_mode);
                                 row.push(values.category);
                                 row.push(values.description);
@@ -430,7 +433,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                order: [[10, 'asc']],
+                order: [[10, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
@@ -448,6 +451,7 @@
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
                     { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
                     { data:'class' ,name: 'zcc.class', class: 'align-middle class'},
+                    { data:'attempts' ,name: 'attempts', class: 'align-middle attempts',sortable:false},
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
                     { data:'category' ,name: 'p.product_name', class: 'align-middle category'},
                     { data:'description' ,name: 'si.description', class: 'align-middle description'},

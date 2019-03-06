@@ -156,7 +156,7 @@
                                 dangerMode: true
                             }).then(function (confirm) {
                                 if (confirm) {
-
+                                    blockPagePermanently();
                                     $.ajax({
                                         url:"{{route('admin.delivery.lost.confirm.status')}}",
                                         method:'POST',
@@ -165,6 +165,7 @@
                                             '_token':'{{ csrf_token() }}'
                                         }
                                     }).done(function (data) {
+                                        UnblockPagePermanently();
                                         table.rows().deselect();
                                         selected_rows = [];
                                         table.button('.confirm').disable();
@@ -215,7 +216,7 @@
                                 dangerMode: true
                             }).then(function (confirm) {
                                 if (confirm) {
-
+                                    blockPagePermanently();
                                     $.ajax({
                                         url:"{{route('admin.delivery.lost.reattempt.status')}}",
                                         method:'POST',
@@ -224,6 +225,7 @@
                                             '_token':'{{ csrf_token() }}'
                                         }
                                     }).done(function (data) {
+                                        UnblockPagePermanently();
                                         selected_rows = [];
                                         table.button('.confirm').disable();
                                         table.button('.re-attempt').disable();

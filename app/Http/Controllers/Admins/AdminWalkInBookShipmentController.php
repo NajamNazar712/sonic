@@ -106,12 +106,12 @@ class AdminWalkInBookShipmentController extends Controller
 
         $shipment_id = $shipment->id;
 
-        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
+        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, NULL, Auth::id());
 
-        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, $user_id, NULL);
+        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id());
 
         if ($self_collection) {
-            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, $user_id, NULL);
+            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
         }
 
         return $shipment_id;
@@ -148,7 +148,7 @@ class AdminWalkInBookShipmentController extends Controller
         $products = Product::orderBy('product_name')->get();
         $shipping_mode = ShippingMode::where('id','!=', 4)->get();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
-        $charges_modes = ChargesModes::get();
+        $charges_modes = ChargesModes::where('id','!=', 3)->get();
         return view('admin.shipment.book.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user_shipping_infos' => $user_shipping_infos, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'consignee_cities' => $consignee_cities]);
     }
 
@@ -274,12 +274,14 @@ class AdminWalkInBookShipmentController extends Controller
                     if($request->charges_mode == 1) {
                         $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
 
-                        $amount = $receivable;
+                        $amount = 0;
 
-                        $r_amount = $amount;
+                        $r_amount = $receivable;
                     }
                     else{
-                        $amount = 0;
+                        $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                        $amount = $receivable;
 
                         $r_amount = NULL;
                     }
@@ -472,6 +474,14 @@ class AdminWalkInBookShipmentController extends Controller
                             background: #c8c8c8;
                             border-radius: 25px;
                           }
+                          
+                          .invoice {
+                                page-break-before: always;
+                           }
+                           
+                           .invoice table.table-bordered tbody tr td {
+                            width: auto !important;
+                          }
                         </style>
                       </head>
                       <body>
@@ -607,6 +617,111 @@ class AdminWalkInBookShipmentController extends Controller
             if ($request->has('twice')) {
                 $html .= $shipment_details;
             }
+
+            $invoice = '<div class="invoice p-1">
+                    <table class="table table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="text-left align-middle">
+                            <img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mb-1">
+                            <div><strong>TRAX ONLINE PRIVATE LIMITED</strong></div>
+                            <div><strong>Address:</strong> Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi.</div>
+                            <div><strong>NTN:</strong> 7930679-5</div>
+                          </td>
+                          <td class="text-center align-middle color primary"><strong>INVOICE</strong></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row align-items-start justify-content-between summary">
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="2"><strong>Customer Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Name</strong></td>
+                                    <td>'. $shipment->pickup_address->poc .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Contact No.</strong></td>
+                                    <td>'. $shipment->pickup_address->phone .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-4">
+                            <table class="table table-sm table-bordered border invoice">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary"><strong>Tracking No.</strong></td>
+                                    <td>'. $shipment->tracking_number .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color primary"><strong>Due Date</strong></td>
+                                    <td>' . Carbon::parse($shipment->created_at)->format('d/m/Y') . '</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+            ';
+            $invoice_serial_number = 1;
+
+            $total_weight_charges = 0;
+            $total_weight_charges = $shipment->weight_charges;
+            $total_fuel_surcharge = $shipment->fuel_surcharge;
+            $total_charges = 0;
+            $total_charges = $total_weight_charges + $total_fuel_surcharge;
+            $total_gst = 0;
+            $total_gst = $shipment->gst;
+            $total_invoice_amount = 0;
+            $total_invoice_amount = $total_charges + $total_gst;
+            $invoice_details = '';
+            $invoice_details .= '
+            <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                            <td class="color primary text-left"><strong>Invoice Summary</strong></td>
+                            <td class="color primary text-right" style="width: 20% !important;"><strong>Amount (PKR)</strong></td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Weight Charges</td>
+                          <td class="text-right">' . number_format($total_weight_charges) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Fuel Surcharge</td>
+                          <td class="text-right">' . number_format($total_fuel_surcharge) . '</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div class="row justify-content-end">
+                        <div class="col-4">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                  <td class="color secondary text-left"><strong>Subtotal (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($total_charges) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($total_gst) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
+                                  <td class="color secondary text-right">' . number_format($total_invoice_amount) . '</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
+            ';
+            $invoice .= $invoice_details;
+            $html .= $invoice;
 
             $html .= '
                         </div>

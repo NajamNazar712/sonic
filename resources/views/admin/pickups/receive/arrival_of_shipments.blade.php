@@ -329,7 +329,7 @@
 							closeOnClickOutside: false,
 							closeOnEsc: false
 						});
-
+                        blockPagePermanently();
 						form.submit();
 					}
 				});
