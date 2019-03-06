@@ -118,8 +118,6 @@
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Class</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
-                        <th class="border-primary border-darken-1">Category</th>
-                        <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Chargeable Weight</th>
@@ -332,8 +330,6 @@
                             head.push('Zone');
                             head.push('Class');
                             head.push('Shipping Mode');
-                            head.push('Category');
-                            head.push('Description');
                             head.push('Collection Amount');
                             head.push('Actual Weight');
                             head.push('Chargeable Weight');
@@ -370,8 +366,6 @@
                                 row.push(values.zone);
                                 row.push(values.class);
                                 row.push(values.shipping_mode);
-                                row.push(values.category);
-                                row.push(values.description);
                                 row.push(values.p_collection_amount);
                                 row.push(values.actual_weight);
                                 row.push(values.chargeable_weight);
@@ -449,8 +443,6 @@
                     { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
                     { data:'class' ,name: 'zcc.class', class: 'align-middle class'},
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
-                    { data:'category' ,name: 'p.product_name', class: 'align-middle category'},
-                    { data:'description' ,name: 'si.description', class: 'align-middle description'},
                     { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
                     { data:'chargeable_weight' ,name: 'shipments.chargeable_weight', class: 'align-middle chargeable_weight'},
