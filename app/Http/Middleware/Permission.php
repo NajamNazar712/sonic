@@ -493,7 +493,7 @@ class Permission
             }
         }
         else if (Auth::guard('substitute_users')->check()) {
-            if (!$request->session()->has('account_type')) {
+            if (!session('account_type')) {
                   Auth::guard('substitute_users')->logout();
 
                   $request->session()->invalidate();
@@ -511,7 +511,7 @@ class Permission
             }
         }
         else if (Auth::guard('web')->check()) {
-            if (!$request->session()->has('account_type')) {
+            if (!session('account_type')) {
                   Auth::guard('web')->logout();
 
                   $request->session()->invalidate();
