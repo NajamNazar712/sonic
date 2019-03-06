@@ -90,6 +90,10 @@
                                     <td>{{$user->city->name}}</td>
                                 </tr>
                                 <tr>
+                                    <td><b>Nature Of Account</b></td>
+                                    <td>{{$user->account_type->name}}</td>
+                                </tr>
+                                <tr>
                                     <td><b>API Key</b></td>
                                     <td>{{$user->api_token}}</td>
                                 </tr>
@@ -106,33 +110,7 @@
                         @endif
                     </div>
                     <div class="tab-pane" id="link" role="tabpanel" aria-labelledby="link-tab" aria-expanded="false">
-                        {{--<div class="table-responsive">--}}
-                            {{--<table class="table" style="font-size: 14px">--}}
-                                {{--<thead>--}}
-                                {{--<tr>--}}
-                                    {{--<th>ID</th>--}}
-                                    {{--<th>Address</th>--}}
-                                    {{--<th>POC</th>--}}
-                                    {{--<th>Phone</th>--}}
-                                    {{--<th>Email</th>--}}
-                                    {{--<th>Status</th>--}}
-                                {{--</tr>--}}
-                                {{--</thead>--}}
-                                {{--<tbody>--}}
-                                {{--@foreach($user->shipping as $pickup)--}}
-                                    {{--<tr>--}}
-                                        {{--<td>{{$pickup->id}}</td>--}}
-                                        {{--<td>{{$pickup->pickup_address}}</td>--}}
-                                        {{--<td>{{$pickup->poc}}</td>--}}
-                                        {{--<td>{{$pickup->phone}}</td>--}}
-                                        {{--<td>{{$pickup->email}}</td>--}}
-                                        {{--<td>{{$pickup->default_address==1 ? "Default Address | " : ""}}--}}
-                                        {{--{{$pickup->status==1 ? "Enabled" : "Disabled"}}</td>--}}
-                                    {{--</tr>--}}
-                                {{--@endforeach--}}
-                                {{--</tbody>--}}
-                            {{--</table>--}}
-                        {{--</div>--}}
+
 
                         <div class="table-responsive">
                             <br>
@@ -190,13 +168,40 @@
                                     <td>{{$user->bank->iban}}</td>
                                 </tr>
                                 <tr>
-                                    <td><b>Payment Mode</b></td>
-                                    <td>{{$user->bank->payment_mode}}</td>
-                                </tr>
-                                <tr>
                                     <td><b>Payment Cycle</b></td>
-                                    <td>{{$user->bank->payment_cycle}}</td>
+                                    <td>{{ucfirst($user->bank->payment_cycle)}}</td>
                                 </tr>
+
+
+
+                                @if($user->account_type_id == 2)
+                                    <tr>
+                                        <td><b>Invoicing Cycle</b></td>
+                                        <td>{{$user->bank->invoicing->name}}</td>
+                                    </tr>
+                                    @if($user->bank->invoicing_cycle_id != 2)
+                                        <tr>
+                                            <td><b>Generation Date</b></td>
+                                            <td>{{$user->bank->generation_date}}</td>
+                                        </tr>
+                                    @endif
+                                    <tr>
+                                        <td><b>Billing Person Name</b></td>
+                                        <td>{{$user->bank->billing_person_name}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Billing Person Phone</b></td>
+                                        <td>{{$user->bank->billing_person_phone}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Billing Person Email</b></td>
+                                        <td>{{$user->bank->billing_person_email}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Billing Address</b></td>
+                                        <td>{{$user->bank->billing_address}}</td>
+                                    </tr>
+                                @endif
                                 </tbody>
                             </table>
                         </div>
@@ -473,17 +478,64 @@
                                         </select>
                                     </div>
                                 </div>
+                            </div>
+                                @if($user->account_type_id == 2)
+                                <div class="col-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label>Payment Mode</label>
+                                        <label>Invoicing Cycle</label>
                                         <span class="danger">*</span>
-                                        <select name="payment_mode" id="payment_mode" data-rule-required="true" data-msg-required="Payment Mode is required" class="select2 form-control required" style="width: 100%">
-                                            <option value="IBFT" {{ $user->bank->payment_mode == 'IBFT' ? 'selected' : '' }}>IBFT Reimbursements</option>
-                                            <option value="Invoices" {{ $user->bank->payment_mode == 'Invoices' ? 'selected' : '' }}>Invoices</option>
+                                        <select name="invoicing_cycle_id" id="invoicing_cycle" data-rule-required="true" data-msg-required="Invoicing Cycle is required" class="select2 form-control required">
+                                            @foreach($invoicing_cycle as $cycle)
+                                            <option value="{{$cycle->id}}" {{ ($user->bank->invoicing_cycle_id != null)? $user->bank->invoicing_cycle_id:'' == $cycle->id ? 'selected' : '' }}>{{$cycle->name}}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
-                            </div>
+                                <div id="generation_div" class="d-none"></div>
+                                </div>
+
+
+
+
+                                <div class="col-6">
+                                    <div class="form-group row">
+                                        <div class="form-group col-md-9">
+                                            <label>Billing Person Name</label>
+                                            <span class="danger">*</span>
+                                            <input type="text" id="billing_person_name" data-rule-maxlength="190" data-msg-maxlength="Billing Person Name can be maximum 190 characters" class="form-control border-primary" data-rule-required="true" data-msg-required="Billing Person Name is required" value="{{$user->bank->billing_person_name}}" name="billing_person_name" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group row">
+                                        <div class="form-group col-md-9">
+                                            <label>Billing Person Phone</label>
+                                            <span class="danger">*</span>
+                                            <input type="text" id="billing_person_phone" class="form-control border-primary" data-rule-required="true" data-msg-required="Billing Person Phone is required" value="{{$user->bank->billing_person_phone}}" name="billing_person_phone" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group row">
+                                        <div class="form-group col-md-9">
+                                            <label>Billing Person Email</label>
+                                            <span class="danger">*</span>
+                                            <input type="email" id="billing_person_email" class="form-control border-primary" data-rule-required="true" data-msg-required="Billing Person Name is required" value="{{$user->bank->billing_person_email}}" name="billing_person_email" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group row">
+                                        <div class="form-group col-md-9">
+                                            <label>Billing Address</label>
+                                            <span class="danger">*</span>
+                                            <input type="text" id="billing_address" data-rule-maxlength="190" data-msg-maxlength="Billing Address can be maximum 190 characters" class="form-control border-primary" data-rule-required="true" data-msg-required="Billing Address is required" value="{{$user->bank->billing_address}}" name="billing_address" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            @endif
                         </div>
                     </div>
                     <div class="form-actions right">
@@ -623,9 +675,62 @@
             $('#payment_cycle').select2({
                 width: '100%',
             });
-            $('#payment_mode').select2({
+
+            var weekly = [1, 2, 3, 4, 5, 6, 7];
+            var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+            var cycle = '{!! $user->bank->invoicing_cycle_id !!}';
+            cycle = parseInt(cycle);
+            $('#invoicing_cycle').select2({
                 width: '100%',
+            }).bind('change', function() {
+
+                if (this.value == 1) {
+                    $('#generation_div').removeClass('d-none');
+                    $('#generation_date').removeClass('d-none');
+                    $('#generation_date').addClass('required');
+                    $('#generation_date').empty().trigger('change');
+                    $('#generation_date').select2({data: weekly, placeholder: 'Select Date'});
+                }
+                else if (this.value == 3) {
+                    $('#generation_div').removeClass('d-none');
+                    $('#generation_date').removeClass('d-none');
+                    $('#generation_date').addClass('required');
+                    $('#generation_date').empty().trigger('change');
+                    $('#generation_date').select2({data: monthly, placeholder: 'Select Date'});
+                } else if (this.value == 2) {
+                    $('#generation_div').addClass('d-none');
+                    $('#generation_date').addClass('d-none');
+                    $('#generation_date').removeClass('required');
+                }
             });
+            $('#invoicing_cycle').val(cycle).trigger('change');
+            // $('#generation_date').select2({
+            //     width: '100%',
+            // });
+            function generation(id) {
+
+                var gdate = parseInt('{!! $user->bank->generation_date !!}');
+                html = '<div class="form-group row"><div class="form-group col-md-9"><label>Generation Date</label><span class="danger">*</span><select name="generation_date" id="generation_date" data-rule-required="true" data-msg-required="Payment Mode is required" class="select2 form-control required"><option value=""></option></select></div></div>';
+                $('#generation_div').html(html);
+                if(id === 1){
+                    $('#generation_div').removeClass('d-none');
+                    $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
+                        data:weekly,
+                        width:'100%',
+                        placeholder:'Select Date',
+                    });
+                }else if(id === 3){
+                    $('#generation_div').removeClass('d-none');
+                    $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
+                        data:monthly,
+                        width:'100%',
+                        placeholder:'Select Date',
+                    });
+                }else if(id === 2){
+                    $('#generation_div').addClass('d-none');
+                }
+                $('#generation_date').val(gdate).trigger('change');
+            }
             
             $('#edit-1').click(function () {
                 $("#profile-form").show();
@@ -634,6 +739,7 @@
             $('#edit-2').click(function () {
                 $("#bank-form").show();
                 $("#tabs").hide();
+                generation(cycle);
             });
             $('#cancel-button-profile').click(function () {
                 $("#profile-form").hide();
@@ -654,10 +760,12 @@
                 $("#bank_city").val("{{$bank_city->id}}").trigger('change');
                 $("#payment_mode").val("{{$user->bank->payment_mode}}").trigger('change');
                 $("#tabs").show();
+                generation(cycle)
             });
 
             $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
             $("input[name='phone'],input[name='phone2']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+            $("input[name='billing_person_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
 
             var table = $('#datatable').DataTable({

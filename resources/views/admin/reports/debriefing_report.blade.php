@@ -56,11 +56,7 @@
                             <th class="border-red border-darken-1 bg-white">Status Not Updated</th>
                             <th class="border-primary border-darken-1">Delivered</th>
                             <th class="border-primary border-darken-1">Delivery Unsuccessful</th>
-                            <th class="border-primary border-darken-1">Not Attempted</th>
                             <th class="border-primary border-darken-1">On Hold</th>
-                            <th class="border-primary border-darken-1">Non Service Area</th>
-                            <th class="border-primary border-darken-1">Misrouted</th>
-                            <th class="border-primary border-darken-1">On Hold for Self Collection</th>
                             <th class="border-primary border-darken-1">Confirmation Pending</th>
                             <th class="border-primary border-darken-1">Lost</th>
                             <th class="border-primary border-darken-1">Confirm</th>
@@ -132,11 +128,11 @@
                 paging: false,
                 ordering: false,
                 columnDefs: [
-                    {className: 'red', targets: [1, 13]}
+                    {className: 'red', targets: [1, 9]}
                 ]
             });
 
-            var types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'not_attempted', 'on_hold', 'non_service_area', 'misrouted', 'on_hold_for_self_collection', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total', 'total_ratio', 'delivery_tomorrow', 'delivery_note_pending', 'grand_total', 'grand_total_ratio'];
+            var types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'on_hold', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total', 'total_ratio', 'delivery_tomorrow', 'delivery_note_pending', 'grand_total', 'grand_total_ratio'];
 
             function list() {
                 $('#search_filter_btn').prop('disabled', true);

@@ -27,13 +27,40 @@
             <td class="align-middle text-center">{{$bank->city->name}}</td>
         </tr>
         <tr role="row">
-            <th class="border-primary border-darken-1 align-middle text-center">Payment Mode</th>
-            <td class="align-middle text-center">{{$bank->payment_mode}}</td>
-        </tr>
-        <tr role="row">
             <th class="border-primary border-darken-1 align-middle text-center">Payment Cycle</th>
             <td class="align-middle text-center">{{$bank->payment_cycle}}</td>
         </tr>
+        @if($user->account_type_id == 2)
+
+        <tr role="row">
+            <th class="border-primary border-darken-1 align-middle text-center">Invoicing Cycle </th>
+            <td class="align-middle text-center">{{$bank->invoicing->name}}</td>
+        </tr>
+            @if($bank->invoicing_cycle_id != 2)
+            <tr role="row">
+                <th class="border-primary border-darken-1 align-middle text-center">Generation Date</th>
+                <td class="align-middle text-center">{{$bank->generation_date}}</td>
+            </tr>
+            @endif
+
+
+        <tr role="row">
+            <th class="border-primary border-darken-1 align-middle text-center">Billing Person Name</th>
+            <td class="align-middle text-center">{{$bank->billing_person_name}}</td>
+        </tr>
+        <tr role="row">
+            <th class="border-primary border-darken-1 align-middle text-center">Billing Person Phone</th>
+            <td class="align-middle text-center">{{$bank->billing_person_phone}}</td>
+        </tr>
+        <tr role="row">
+            <th class="border-primary border-darken-1 align-middle text-center">Billing Person Email</th>
+            <td class="align-middle text-center">{{$bank->billing_person_email}}</td>
+        </tr>
+        <tr role="row">
+            <th class="border-primary border-darken-1 align-middle text-center">Billing Address</th>
+            <td class="align-middle text-center">{{$bank->billing_address}}</td>
+        </tr>
+        @endif
     </tbody>
 </table>
 
