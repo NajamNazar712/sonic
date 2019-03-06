@@ -1031,7 +1031,7 @@ class ReturnController extends Controller
         $return = ReturnNote::where('id',$id);
         if($return->exists()){
             $return = $return->first();
-            $shipment = Shipment::where('id',30)->first();
+
             return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count]);
         }else{
             return redirect()->route('admin.return.receive.index')->with(['error' => 'Return Note not found']);
