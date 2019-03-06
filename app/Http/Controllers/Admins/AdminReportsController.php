@@ -3477,7 +3477,7 @@ class AdminReportsController extends Controller
             ->leftjoin('zone_class_cities as zcc', function($join){
                 $join->on('z.id', '=', 'zcc.zone_id')
                 ->on('dc.id', '=', 'zcc.city_id')
-                ->on('zone_classification_id', '=', DB::raw('IF (shipments.shipping_mode_id IN (1, 2), 1, 2)'));
+                ->on('zone_classification_id', '=', DB::raw('IF (shipments.shipping_mode_id IN (1, 4), 1, 2)'));
             })
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
