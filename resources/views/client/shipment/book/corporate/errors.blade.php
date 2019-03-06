@@ -51,14 +51,14 @@
                                     </thead>
                                     <tbody>
                                     @php
-                                        foreach ($shipping_modes as $shipping_mode){
-                                        if($shipping_mode == 4){
-                                            $check_sameday = 1;
+                                        foreach ($user_shipping_modes as $user_shipping_mode){
+                                            if($user_shipping_mode == 4){
+                                                $check_sameday = 1;
+                                                }
+                                                else{
+                                                    $check_sameday = 0;
+                                                }
                                             }
-                                            else{
-                                                $check_sameday = 0;
-                                            }
-                                        }
                                         $no=1;
                                     @endphp
                                     @foreach($data as $ro)
