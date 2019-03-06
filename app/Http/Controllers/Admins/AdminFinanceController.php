@@ -787,7 +787,7 @@ class AdminFinanceController extends Controller
             ->leftjoin('charges_modes as cm', 'shipments.charges_mode_id', '=', 'cm.id')
             ->leftjoin('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('admins as a', 'sj.admin_id', '=', 'a.id')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.received_amount as charges', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.amount', 'shipments.received_amount', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status')
             ->where('shipments.booking_type_id',4);
 
 
@@ -807,8 +807,16 @@ class AdminFinanceController extends Controller
                     return 'Pending Return Charges Collection';
                 }
             })
-            ->editColumn('charges', function($shipment){
-                return (($shipment->charges) ? number_format($shipment->charges) : '0');
+            ->addColumn('charges', function($shipment){
+                if ($shipment->charges_mode_id == 1) {
+                    return (($shipment->received_amount) ? number_format($shipment->received_amount) : '0');
+                }
+                else if ($shipment->charges_mode_id == 2) {
+                    return (($shipment->amount) ? number_format($shipment->amount) : '0');
+                }
+                else {
+                    return '0';
+                }
             })
             ->editColumn('return_charges', function($shipment){
                 return number_format($shipment->return_charges);

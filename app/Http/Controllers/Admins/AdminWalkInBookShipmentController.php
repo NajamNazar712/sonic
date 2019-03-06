@@ -106,12 +106,12 @@ class AdminWalkInBookShipmentController extends Controller
 
         $shipment_id = $shipment->id;
 
-        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
+        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, NULL, Auth::id());
 
-        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, $user_id, NULL);
+        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id());
 
         if ($self_collection) {
-            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, $user_id, NULL);
+            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
         }
 
         return $shipment_id;
@@ -274,12 +274,14 @@ class AdminWalkInBookShipmentController extends Controller
                     if($request->charges_mode == 1) {
                         $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
 
-                        $amount = $receivable;
+                        $amount = 0;
 
-                        $r_amount = $amount;
+                        $r_amount = $receivable;
                     }
                     else{
-                        $amount = 0;
+                        $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                        $amount = $receivable;
 
                         $r_amount = NULL;
                     }
