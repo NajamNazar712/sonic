@@ -6,7 +6,7 @@
 
             <li class=" nav-item"><a href="{{ route('admin.quick_tracking.index') }}"><span class="menu-title">Quick Tracking</span></a></li>
 
-        @if (session('role_id') == 1 || in_array(1, session('permissions')))
+            @if (session('role_id') == 1 || in_array(1, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a>
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{ route('admin.dispute.index') }}">Log</a></li>
@@ -234,18 +234,8 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([120, 121, 122], session('permissions'))) !== 0)
-                            <li class=" nav-item"><a href="#"><span class="menu-title">Invoices</span></a>
-                                <ul class="menu-content">
-                                    @if (session('role_id') == 1 || in_array(120, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.finance.generate_invoices.index') }}">Generate</a></li>
-                                    @endif
-
-                                    @if (session('role_id') == 1 || in_array(122, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.finance.invoices_history.index') }}">History</a></li>
-                                    @endif
-                                </ul>
-                            </li>
+                        @if (session('role_id') == 1 || in_array(120, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Invoices</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || count(array_intersect([145, 146, 147], session('permissions'))) !== 0)
@@ -429,9 +419,8 @@
                 <li class=" nav-item"><a href="{{ route('admin.notifications.index') }}"><span class="menu-title">Notifications</span></a></li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([104, 116, 149, 150, 151, 152, 154, 157, 158, 175], session('permissions'))) !== 0)
-            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Settings</span></a>
-                <ul class="menu-content">
+            @if (session('role_id') == 1 || count(array_intersect([104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175], session('permissions'))) !== 0)
+            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Settings</span></a>                <ul class="menu-content">
                     @if (session('role_id') == 1 || in_array(104, session('permissions')))
                         <li><a class="menu-item" href="{{route('admin.settings.pickup.index')}}">Pickup Weight Threshold</a></li>
                     @endif
@@ -473,11 +462,14 @@
                         </li>
                     @endif
 
-                    @if (session('role_id') == 1 || in_array(175, session('permissions')))
+					@if (session('role_id') == 1 || in_array(171, session('permissions')))
+                        <li><a class="menu-item" href="{{route('admin.settings.auto_invoice_generation_and_due_date.index')}}">Auto-Invoice Generation & Due Date Length</a></li>
+                    @endif
+
+					@if (session('role_id') == 1 || in_array(175, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.settings.debriefing_report_cut_off_time.index')}}">Debriefing Report Cut-Off Time</a></li>
                     @endif
-                </ul>
-            </li>
+				</ul>            </li>
             @endif
         </ul>
     </div>

@@ -30,6 +30,7 @@ use App\Http\Models\PickupRequestShortReceivedShipment;
 use App\Http\Models\PickupNote;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\PickupNoteStatus;
+use App\Http\Models\Zone;
 
 use Auth;
 use Illuminate\Support\Facades\DB;
@@ -1191,6 +1192,8 @@ class AdminPickupsController extends Controller
 
       $receiving_sheet_ids = array();
 
+      $print_shipment_ids = array();
+
       foreach ($shipment_ids as $key => $shipment_id) {
         $shipment = Shipment::find($shipment_id);
 
@@ -1253,6 +1256,22 @@ class AdminPickupsController extends Controller
           ShipmentChargesController::cash_handling($shipment_id);
           ShipmentChargesController::insurance($shipment_id);
           ShipmentChargesController::fuel_surcharge($shipment_id);
+
+          if ($shipment->user->account_type_id == 2 && $shipment->charges_mode_id == 2) {
+            $shipment = Shipment::find($shipment_id);
+
+            $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
+
+            $gst = Zone::find($shipment->pickup_address->city->zone_id)->gst;
+
+            $gst = ROUND(($charges * $gst), 0, PHP_ROUND_HALF_DOWN);
+
+            $shipment->amount = $shipment->amount + $charges + $gst;
+
+            $shipment->save();
+
+            $print_shipment_ids[] = $shipment_id;
+          }
         }
         else {
           unset($shipment_ids[$key]);
@@ -1513,12 +1532,22 @@ class AdminPickupsController extends Controller
 
       NotificationsController::send(4, $request->pickup_receive_pickup_note_id, $shipment_ids);
 
-      return redirect()->route('admin.pickups.receive.summary.index')->with('pickup_receive_pickup_note_id', $request->pickup_receive_pickup_note_id);
+      if (empty($print_shipment_ids)) {
+        return redirect()->route('admin.pickups.receive.summary.index')->with('pickup_receive_pickup_note_id', $request->pickup_receive_pickup_note_id);
+      }
+      else {
+        return redirect()->route('admin.pickups.receive.summary.index')->with(['pickup_receive_pickup_note_id' => $request->pickup_receive_pickup_note_id, 'print_shipment_ids' => $print_shipment_ids]);
+      }
     }
 
     public function receive_summary_index() {
       if (session('pickup_receive_pickup_note_id')) {
-        return view('admin.pickups.receive.summary');
+        if (!session('print_shipment_ids')) {
+          return view('admin.pickups.receive.summary');
+        }
+        else {
+          return view('admin.pickups.receive.summary')->with('print_shipment_ids', session('print_shipment_ids'));
+        }
       }
       else {
         return redirect()->route('admin.pickups.receive.index')->withErrors('Kindly reselect a Pickup Note!');

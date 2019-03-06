@@ -27,7 +27,7 @@
         <div class="col-6">
             <fieldset class="form-group">
                 <select name="hubs" id="hub_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                    <option value="" selected>Select a hub</option>
+
                     @foreach($hubs as $hub)
                         <option value="{{$hub->hub_id}}">{{$hub->name}}</option>
                     @endforeach
@@ -165,13 +165,16 @@
             radioClass: 'iradio_flat-red',
             increaseArea: '20%' // optional
         });
-        $('.select2').select2({
+       
+        $('#hub_list').prepend('<option value="" selected></option>').select2({
+            placeholder: 'Select Hub',
             dropdownParent: $("#addCity")
         });
 
 
         $('#zone').prepend('<option value="" selected></option>').select2({
             placeholder: 'Zone',
+            dropdownParent: $("#addCity"),
             width:'100%'
         });
 

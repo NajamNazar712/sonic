@@ -255,13 +255,13 @@
                                 shipment += '<td>' + ((details.order_information.order_id) ? details.order_information.order_id : '-') + '</td>';
                                 shipment += '<td><strong>Instructions</strong></td>';
 
-                                if (details.order_information.booking_type_id != 4) {
-                                    shipment += '<td colspan="3">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
-                                }
-                                else {
+                                if (details.order_information.account_type_id == 2 || details.order_information.booking_type_id == 4) {
                                     shipment += '<td>' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
                                     shipment += '<td><strong>Charges Mode</strong></td>';
                                     shipment += '<td>' + details.order_information.charges_mode + '</td>';
+                                }
+                                else {
+                                    shipment += '<td colspan="3">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
                                 }
 
                                 shipment += '</tr>';

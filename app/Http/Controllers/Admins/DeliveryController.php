@@ -2525,7 +2525,7 @@ class DeliveryController extends Controller
             ->whereIn('delivery_notes.id', $dncc_ids);
 
         if (session('role_id') != 1) {
-            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+            $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
         }
 
         return Datatables::of($deliveries)
@@ -2615,7 +2615,7 @@ class DeliveryController extends Controller
             ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_expense', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank']);
 
         if (session('role_id') != 1) {
-            $sdn = $sdn->whereIn('station_deposit_notes.hub_id', session('hubs'));
+            $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
         }
 
         $datatable = Datatables::of($sdn)
@@ -3589,9 +3589,12 @@ class DeliveryController extends Controller
                 if(in_array($shipment->shipper_status_id, $passing_delivery_status_array)){
                     $delivery_note_shipments = DeliveryNoteShipment::where('shipment_id',$shipment->id)->max('delivery_note_id');
                     $delivery_note = DeliveryNote::find($delivery_note_shipments);
-                    if($delivery_note->status == 0){
-                        return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                    if($delivery_note){
+                        if($delivery_note->status == 0){
+                            return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                        }
                     }
+
                 }
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\CorporateRateStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
@@ -191,50 +192,104 @@ class APIController extends Controller
 
     public function shipment_book(Request $request) {
       $user_id = $request->user_id;
+      $user_type = User::where('id',$user_id)->first();
+      if($user_type['account_type_id'] == 1) {
+          $rules = [
+              'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
+              'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
+                  $query->where('user_id', $user_id)->where('hidden', 0);
+              })],
+              'information_display' => ['required', 'boolean'],
+              'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+              'consignee_name' => ['required', 'between:1,100'],
+              'consignee_address' => ['required', 'between:1,190'],
+              'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
+              'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
+              'consignee_email_address' => ['nullable', 'filled', 'email'],
+              'order_id' => ['nullable', 'filled', Rule::unique('shipments')->where(function ($query) use ($user_id) {
+                  $query->where('user_id', $user_id);
+              })],
+              'package_type' => ['required_if:service_type_id,3', 'boolean'],
+              'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
+              'special_instructions' => ['nullable', 'filled', 'between:0,190'],
+              'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
+              'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                  $query->where('user_id', $user_id)->where('status', 1);
+              })],
+              'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
+              'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
+              'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                  $query->whereNotIn('id', [2, 3]);
+              })],
 
-      $rules = [
-        'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
-        'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id)->where('hidden', 0);
-        })],
-        'information_display' => ['required', 'boolean'],
-        'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
-        'consignee_name' => ['required', 'between:1,100'],
-        'consignee_address' => ['required', 'between:1,190'],
-        'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
-        'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
-        'consignee_email_address' => ['nullable', 'filled', 'email'],
-        'order_id' => ['nullable', 'filled', Rule::unique('shipments')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
-        })],
-        'package_type' => ['required_if:service_type_id,3', 'boolean'],
-        'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
-        'special_instructions' => ['nullable', 'filled', 'between:0,190'],
-        'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
-        'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
-        'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-        'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
-        'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
-          $query->whereNotIn('id', [2, 3]);
-        })],
+              'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
+              'item_description' => ['required_if:service_type_id,1,2', 'between:0,250'],
+              'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
+              'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
+              'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
-        'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-        'item_description' => ['required_if:service_type_id,1,2', 'between:0,250'],
-        'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
-        'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
-        'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
+              'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
+              'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,250'],
+              'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
 
-        'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-        'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,250'],
-        'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
+              'items' => ['required_if:service_type_id,3', 'array'],
+              'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
+              'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,250'],
+              'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,1000'],
+              'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
+              'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000']
+          ];
+      }
+      else
+      {
+          $rules = [
+              'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
+              'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
+                  $query->where('user_id', $user_id)->where('hidden', 0);
+              })],
+              'delivery_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'],
+              'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:charges_modes,id'],
+              'information_display' => ['required', 'boolean'],
+              'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+              'consignee_name' => ['required', 'between:1,100'],
+              'consignee_address' => ['required', 'between:1,190'],
+              'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
+              'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
+              'consignee_email_address' => ['nullable', 'filled', 'email'],
+              'order_id' => ['nullable', 'filled', Rule::unique('shipments')->where(function($query) use($user_id) {
+                  $query->where('user_id', $user_id);
+              })],
+              'package_type' => ['required_if:service_type_id,3', 'boolean'],
+              'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
+              'special_instructions' => ['nullable', 'filled', 'between:0,190'],
+              'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
+              'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                  $query->where('user_id', $user_id)->where('status', 1);
+              })],
+              'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
+              'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
+              'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
+                  $query->whereNotIn('id', [2, 3]);
+              })],
 
-        'items' => ['required_if:service_type_id,3', 'array'],
-        'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
-        'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,250'],
-        'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,1000'],
-        'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
-        'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000']
-      ];
+              'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
+              'item_description' => ['required_if:service_type_id,1,2', 'between:0,250'],
+              'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
+              'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
+              'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
+              'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
+              'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,250'],
+              'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
+
+              'items' => ['required_if:service_type_id,3', 'array'],
+              'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
+              'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,250'],
+              'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,1000'],
+              'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
+              'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000']
+          ];
+      }
 
       $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -244,10 +299,6 @@ class APIController extends Controller
         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
       }
       else {
-        if (!RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $request->input('shipping_mode_id'))->where('status', 1)->exists()) {
-          return response()->json(['status' => 1, 'message' => 'Booking is not enabled for Shipping Mode ID #' . $request->input('shipping_mode_id') . ' on your Account']);
-        }
-
         $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
         if (!$user_shipping_info->status) {
@@ -290,8 +341,22 @@ class APIController extends Controller
         $pickup_address_id = $request->input('pickup_address_id');
         $information_display = $request->input('information_display');
         $consignee_city_id = $request->input('consignee_city_id');
+        if($user_type['account_type_id'] == 2) {
+            $charges_mode_id = $request->input('charges_mode_id');
+            $delivery_type_id = $request->input('delivery_type_id');
+            $consignee_city_name = City::where('id', $consignee_city_id)->first();
+            if($delivery_type_id == 2){
+                $consignee_address = 'TRAX Office ' . $consignee_city_name['name'];
+            }
+            else {
+                $consignee_address = $request->input('consignee_address');
+            }
+        }
+        else{
+            $consignee_address = $request->input('consignee_address');
+        }
+
         $consignee_name = $request->input('consignee_name');
-        $consignee_address = $request->input('consignee_address');
         $consignee_phone_number_1 = substr_replace($request->input('consignee_phone_number_1'), '-', 4, 0);
 
         if ($request->filled('consignee_phone_number_2')) {
@@ -343,9 +408,12 @@ class APIController extends Controller
 
         $amount = $request->input('amount');
         $payment_mode_id = $request->input('payment_mode_id');
-
-        $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id);
-
+          if($user_type['account_type_id'] == 1) {
+              $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id);
+          }
+          else {
+              $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id);
+          }
         $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
         if ($service_type_id == 1) {

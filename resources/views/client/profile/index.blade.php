@@ -94,6 +94,10 @@
                                                 <td>{{$user->city->name}}</td>
                                             </tr>
                                             <tr>
+                                                <td><b>Nature Of Account</b></td>
+                                                <td>{{$user->account_type->name}}</td>
+                                            </tr>
+                                            <tr>
                                                 <td><b>API Key</b></td>
                                                 <td>{{$user->api_token}}</td>
                                             </tr>
@@ -164,13 +168,38 @@
                                                 <td>{{$user->bank->iban}}</td>
                                             </tr>
                                             <tr>
-                                                <td><b>Payment Mode</b></td>
-                                                <td>{{$user->bank->payment_mode}}</td>
-                                            </tr>
-                                            <tr>
                                                 <td><b>Payment Cycle</b></td>
                                                 <td>{{$user->bank->payment_cycle}}</td>
                                             </tr>
+                                            @if($user->account_type_id == 2)
+                                            <tr>
+                                                <td><b>Invoicing Cycle</b></td>
+                                                <td>{{$user->bank->invoicing->name}}</td>
+                                            </tr>
+                                            @if($user->bank->invoicing_cycle_id != 2)
+                                            <tr>
+                                                <td><b>Generation Date</b></td>
+                                                <td>{{$user->bank->generation_date}}</td>
+                                            </tr>
+                                            @endif
+
+                                                <tr>
+                                                    <td><b>Billing Person Name</b></td>
+                                                    <td>{{$user->bank->billing_person_name}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Billing Person Phone</b></td>
+                                                    <td>{{$user->bank->billing_person_phone}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Billing Person Email</b></td>
+                                                    <td>{{$user->bank->billing_person_email}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Billing Address</b></td>
+                                                    <td>{{$user->bank->billing_address}}</td>
+                                                </tr>
+                                            @endif
                                             </tbody>
                                         </table>
                                     </div>
@@ -556,7 +585,9 @@
                     this.api().table().columns.adjust();
                 }
             });
-
+            $('#link-tab').on('click', function () {
+                table.columns.adjust().draw();
+            });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
