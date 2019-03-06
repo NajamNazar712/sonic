@@ -249,7 +249,7 @@ class ShipperFinanceController extends Controller
 
       $shipper_bank = $shipper->bank;
 
-      $account_type_id = $shipment->user->account_type_id;
+      $account_type_id = $shipper->account_type_id;
 
       $html = '
                 <!doctype html>
