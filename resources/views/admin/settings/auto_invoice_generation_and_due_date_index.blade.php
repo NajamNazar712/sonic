@@ -18,19 +18,23 @@
                             @include('admin.inc.messages')
 
                             <div class="row justify-content-center">
-                                <div class="col-5 col-sm-4 col-md-3 col-lg-2">
+                                <div class="col-4">
                                     <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.auto_invoice_generation_and_due_date.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
 
                                                 <div class="input-group form-group">
-                                                    <label class="form-control" style="width: 100px">Auto Invoice Generation</label>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text">Auto Invoice Generation*</span>
+                                                    </div>
                                                     <input type="text" name="auto_invoice_generation_hours" class="form-control auto_invoice_generation_hours" placeholder="" data-rule-required="true" data-msg-required="Auto Invoice Generation hours is required" value="{{ $auto_invoice_generation_time->setting_value }}" data-rule-min="1" data-msg-min="Auto Invoice Generation hours can not be less than 1" data-rule-max="24" data-msg-max="Auto Invoice Generation hours can not be greater than 24">
                                                     <div class="input-group-append" style="width: 14px">
                                                         <span class="input-group-text">Hours*</span>
                                                     </div>
                                                 </div>
                                                 <div class="input-group form-group">
-                                                    <label class="form-control">Due Date</label>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text">Due Date*</span>
+                                                    </div>
                                                     <input type="text" name="due_date_days" class="form-control due_date_days" placeholder="" data-rule-required="true" data-msg-required="Due Date Days is required" value="{{ $due_date_days->setting_value }}" data-rule-min="1" data-msg-min="Due Date Days can not be less than 1">
                                                     <div class="input-group-append" style="width: 5px">
                                                         <span class="input-group-text">Days*</span>
