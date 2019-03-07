@@ -12,6 +12,8 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\InvoicingCycle;
 use App\Http\Models\Rates\HistoryBookingTypeCharges;
 use App\Http\Models\Rates\HistoryCashHandlingCharge;
 use App\Http\Models\Rates\HistoryDiscountCharge;
@@ -5528,19 +5530,18 @@ class AdminDashboardController extends Controller
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
 
-    public function activeAccountListAjax(){
-        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->leftjoin('products as p','p.id','=','users.product_id')
-            ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
-            ->leftjoin('admins as rabna','rabna.id','=','users.rates_updated_by')
-            ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
-            ->leftjoin('admins as rabba','rabba.id','=','users.account_activated_by')
-            ->leftjoin('sale_person_tags as spt', function ($join) {
-                $join->on('spt.user_id', '=', 'users.id')
-                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
-                    ->where('spt.status','=',0);
-            })
-            ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
+    public function activeAccountListAjax(){		$users = User::join('cities', 'users.city_id', '=', 'cities.id')
+           ->leftjoin('products as p','p.id','=','users.product_id')
+           ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
+           ->leftjoin('admins as rabna','rabna.id','=','users.rates_updated_by')
+           ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
+           ->leftjoin('admins as rabba','rabba.id','=','users.account_activated_by')
+           ->leftjoin('sale_person_tags as spt', function ($join) {
+               $join->on('spt.user_id', '=', 'users.id')
+                   ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
+                   ->where('spt.status','=',0);
+           })
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -5621,11 +5622,21 @@ class AdminDashboardController extends Controller
                 {
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
                 }
-                if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
-                    $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id'=> $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+                if($result->account_type_id == 1){
+                    if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id'=> $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+                    }
+                    if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id'=> $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                    }
                 }
-                if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
-                    $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id'=> $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                else{
+                    if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.edit.rates', ['id'=> $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+                    }
+                    if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.view.rates', ['id'=> $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                    }
                 }
                 if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
                     $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
@@ -5670,7 +5681,7 @@ class AdminDashboardController extends Controller
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                     ->where('spt.status','=',0);
             })
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -5741,7 +5752,7 @@ class AdminDashboardController extends Controller
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
-                if($result->status == 0 && session('role_id') == 1 || session('role_id') == 4)
+                if(session('role_id') == 1 || ($result->status == 0 && session('role_id') == 4))
                 {
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
                 }
@@ -5750,19 +5761,41 @@ class AdminDashboardController extends Controller
 
                 }
                 if($sale_check != null && $result->status != 2) {
-                    if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
-                        if($result->status != 2) {
-                            $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+                    if($result->account_type_id == 1){
+                        if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
+                            if($result->status != 2) {
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+
+
+                            }
+                        } else {
+                            if (session('role_id') == 1 || in_array(6, session('permissions'))) {
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.add.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
+                            }
                         }
-                    } else {
-                        if (session('role_id') == 1 || in_array(6, session('permissions'))) {
-                            $dropdown .= '<button onclick="window.open(\'' . route('admin.add.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
+                    }else{
+                        if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
+                            if($result->status != 2) {
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+
+                            }
+                        } else {
+                            if (session('role_id') == 1 || in_array(6, session('permissions'))) {
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.add.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
+                            }
                         }
                     }
 
+
                 }
-                if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions')))) {
-                    $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                if($result->account_type_id == 1){
+                    if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions')))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                    }
+                }else{
+                    if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions')))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.view.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                    }
                 }
                 if($result->blacklist == 0 && (session('role_id') == 1 || in_array(10, session('permissions')))) {
                     $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
@@ -5843,12 +5876,14 @@ class AdminDashboardController extends Controller
         $product = Product::find($user->product_id);
         $products = Product::all();
         $banks = BanksList::all();
+        $invoicing_cycle = InvoicingCycle::all();
         $city_list = City::where('status',1)->get();
         $emails = ShipperNotificationEmail::where('user_id',$user->id)->select('email')->get();
         $email_ids = ShipperNotificationEmail::where('user_id',$user->id)->pluck('email')->toArray();
         $email_ids = implode(',', $email_ids);
-        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products, 'emails' => $emails, 'email_ids' => $email_ids]);
+        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids]);
     }
+
 
     public function updateProfile(Request $request)
     {
@@ -5892,7 +5927,7 @@ class AdminDashboardController extends Controller
     {
 
         $user_id = $request->user_id;
-
+        $user = User::find($user_id);
         //1 for Admin, 0 for User
 
         $request->validate([
@@ -5901,13 +5936,37 @@ class AdminDashboardController extends Controller
             'account_no'=>'required|string|max:255',
             'account_title'=>'required|string|max:255',
             'iban'=>'required|string|max:255',
-            'payment_mode'=>'required|string|max:255',
             'payment_cycle'=>'required|string|max:255'
         ]);
 
 
-        UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
-            'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_mode'=>$request->payment_mode,'payment_cycle'=>$request->payment_cycle]);
+        if($user->account_type_id == 1){
+            UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
+                'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_cycle'=>$request->payment_cycle]);
+
+        }else{
+            $generation_date = null;
+            if($request->invoicing_cycle_id == 2){
+                $generation_date = null;
+            }else{
+                $generation_date = $request->generation_date;
+            }
+            UserBankInfo::where('user_id',$user_id)->update([
+                    'bank_branch'=>$request->bank_branch,
+                    'bank_name'=>$request->bank_name,
+                    'account_no'=>$request->account_no,
+                    'account_title'=>$request->account_title,
+                    'iban'=>$request->iban,
+                    'city_id'=>$request->bank_city,
+                    'payment_cycle'=>$request->payment_cycle,
+                    'invoicing_cycle_id' => $request->invoicing_cycle_id,
+                    'generation_date' => $generation_date,
+                    'billing_person_name' => $request->billing_person_name,
+                    'billing_person_phone' => $request->billing_person_phone,
+                    'billing_person_email' => $request->billing_person_email,
+                    'billing_address' => $request->billing_address
+            ]);
+        }
         AdminLogs::create([
             'admin_id' => Auth::id(),
             'user_id' => $user_id
@@ -6163,7 +6222,7 @@ class AdminDashboardController extends Controller
                 'pickup'=>($request->has('walk_in_pickup'))? 1:0,
                 'delivery'=>($request->has('walk_in_delivery'))? 1:0,
             ]);
-            
+
             City::where('id',$city->id)->update(['hub_id'=>$city->id]);
 
             foreach ($request->delivery as $booking_type_id => $shipping_modes) {

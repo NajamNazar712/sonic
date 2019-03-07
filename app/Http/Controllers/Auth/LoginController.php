@@ -97,7 +97,7 @@ class LoginController extends Controller
             }
             else {
                 session(['user_id' => $user->id]);
-
+                session(['account_type' => $user->account_type_id]);
                 if (PackagingCharge::where('user_id', $user->id)->exists()) {
                     $packaging_charges_check = TRUE;
                 }
@@ -123,6 +123,7 @@ class LoginController extends Controller
 
                 session(['permissions' => $permissions]);
                 session(['user_id' => $user->user_id]);
+                session(['account_type' => $shipper->account_type_id]);
 
                 if (PackagingCharge::where('user_id', $user->user_id)->exists()) {
                     $packaging_charges_check = TRUE;

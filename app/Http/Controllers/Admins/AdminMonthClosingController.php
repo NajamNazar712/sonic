@@ -6,6 +6,8 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\ShipmentsJourney;
@@ -119,8 +121,12 @@ class AdminMonthClosingController extends Controller
     public function add_shipment(Request $request){
         $tracking_number = $request->tracking_number;
         $shipment = Shipment::where('tracking_number', $tracking_number);
-        $status_not_allowed = array(1, 5, 6, 14, 17, 23, 25, 28, 31, 44, 45, 51);
+        $status_not_allowed = array(1, 5, 6, 14, 17, 25, 31, 38, 44, 51, 53);
         $intransit_status_array = array(3, 21, 26, 32);
+        $return_revert_statuses = [20, 21, 22, 23, 24, 26, 27, 29, 44, 47, 48];
+        $return_note_statuses = array(23,24,44,45,47,48);
+        $replacement_try_and_buy_statuses = array(26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);
+
 
         if($shipment->exists()){
             $shipment_details = $shipment->first();
@@ -130,7 +136,7 @@ class AdminMonthClosingController extends Controller
                         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_details->id);
                         if ($delivery_note_shipment->exists()) {
                             $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id');
-                            $delivery = DeliveryNote::where('id', $delivery_note_shipment)->where('status', 0)->exists();
+                            $delivery = DeliveryNote::where('id' , $delivery_note_shipment)->where('status', 0)->exists();
                             if($delivery){
                                 return response()->json(['status' => 0, 'error' => 'Shipment is in an Unverified Delivery Note']);
                             }
@@ -179,21 +185,39 @@ class AdminMonthClosingController extends Controller
                             }
                         }
 
-                    } else {
-
-                        if(in_array($shipment_details->shipper_status_id, [20, 21, 22, 24, 26, 27, 29, 30, 47, 48])){
-                            AdminFinanceController::return_confirmed_revert($shipment_details->id);
-                        }
-                        if($shipment_details->shipper_status_id == 30){
-                            AdminFinanceController::replacement_collected_adjust_in_payment($shipment_details->id);
-                        }
-
-                        $shipment_details->shipper_status_id = 51;
-                        $shipment_details->consignee_status_id = 51;
-                        $shipment_details->save();
-                        ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
-                        return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
                     }
+
+                    if(in_array($shipment_details->shipper_status_id,$return_note_statuses)){
+                        $return_note_shipments_details = ReturnNoteShipment::where('shipment_id', $shipment_details->id);
+                        if($return_note_shipments_details->exists()){
+                            $return_note_shipments_details = $return_note_shipments_details->get();
+                            foreach ($return_note_shipments_details as $return_note_shipments){
+                                $return_note = ReturnNote::find('id', $return_note_shipments->return_note_id);
+                                if($return_note->status == 0){
+                                    ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('shipment_id', $return_note_shipments->shipment_id)->delete();
+                                    $return_note->shipments_count = $return_note->shipments_count - 1;
+                                    if(ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('status', 0)->count() == 0){
+                                        $return_note->status = 1;
+                                    }
+                                    $return_note->save();
+                                }
+                            }
+
+                        }
+                    }
+                    if(in_array($shipment_details->shipper_status_id, $return_revert_statuses)){
+                        AdminFinanceController::return_confirmed_revert($shipment_details->id);
+                    }
+
+                    if(in_array($shipment_details->shipper_status_id, $replacement_try_and_buy_statuses)){
+                        AdminFinanceController::replacement_or_try_and_buy_adjust_in_payment($shipment_details->id);
+                    }
+
+                    $shipment_details->shipper_status_id = 51;
+                    $shipment_details->consignee_status_id = 51;
+                    $shipment_details->save();
+                    ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
+                    return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
 
                 }
                 else{

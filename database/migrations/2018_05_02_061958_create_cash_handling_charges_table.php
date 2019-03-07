@@ -17,9 +17,9 @@ class CreateCashHandlingChargesTable extends Migration
             $table->increments('id');
             $table->integer('user_id');
             $table->integer('shipping_mode_id');
-            $table->decimal('range_up', 8, 2);
-            $table->decimal('range_down', 8, 2);
-            $table->decimal('charges');
+            $table->integer('range_up');
+            $table->integer('range_down');
+            $table->string('charges');
             $table->timestamps();
         });
     }
