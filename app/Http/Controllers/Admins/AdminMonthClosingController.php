@@ -121,11 +121,11 @@ class AdminMonthClosingController extends Controller
     public function add_shipment(Request $request){
         $tracking_number = $request->tracking_number;
         $shipment = Shipment::where('tracking_number', $tracking_number);
-        $status_not_allowed = array(1, 5, 6, 14, 17, 25, 31, 38, 44, 51, 53);
+        $status_not_allowed = array(1, 5, 6, 14, 17, 25, 31, 38, 51, 53);
         $intransit_status_array = array(3, 21, 26, 32);
-        $return_revert_statuses = [20, 21, 22, 23, 24, 26, 27, 29, 44, 47, 48];
-        $return_note_statuses = array(23,24,44,45,47,48);
-        $replacement_try_and_buy_statuses = array(26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);
+        $return_revert_statuses = array(20, 21, 22, 23, 24, 44, 47, 48);
+        $return_note_statuses = array(23, 24, 28, 29, 34, 35, 44, 45,46, 47, 48);
+        $replacement_try_and_buy_statuses = array(26,27,28,29,30,32,33,34,35,36,37,45,46);
 
 
         if($shipment->exists()){
