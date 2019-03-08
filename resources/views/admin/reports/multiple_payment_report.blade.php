@@ -17,7 +17,7 @@
                             <input type="text" class="input-group form-control" name="search_tracking_number" id="search_tracking_number" placeholder="Tracking Number">
                         </div>
                         <div class="form-group ml-1">
-                            <button type="button" id="search_filter_btn" class="btn btn-primary">Search</button>
+                            <button type="submit" id="search_filter_btn" class="btn btn-primary">Search</button>
                         </div>
                     </form>
 
@@ -220,9 +220,11 @@
                 }
             });
 
-            $('#search_filter_btn').on('click',function () {
+            $('#tracking_number_search_form').on('submit',function (e) {
+                e.preventDefault();
                 table.draw();
             });
+
             function print(id){
                 $.ajax({
                     url: '{!! route('admin.finance.done_payments.details_print') !!}',
@@ -261,6 +263,7 @@
 
                 }
             });
+
         });
 
 
