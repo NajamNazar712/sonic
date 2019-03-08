@@ -142,6 +142,13 @@ class AdminMonthClosingController extends Controller
                             }
                         }
                     }
+                    if(in_array($shipment_details->shipper_status_id, $return_revert_statuses)){
+                        AdminFinanceController::return_confirmed_revert($shipment_details->id);
+                    }
+
+                    if(in_array($shipment_details->shipper_status_id, $replacement_try_and_buy_statuses)){
+                        AdminFinanceController::replacement_or_try_and_buy_adjust_in_payment($shipment_details->id);
+                    }
                     if (in_array($shipment_details->shipper_status_id, $intransit_status_array )) {
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
                         if ($cargo_consignment_shipment->exists()) {
@@ -205,13 +212,7 @@ class AdminMonthClosingController extends Controller
 
                         }
                     }
-                    if(in_array($shipment_details->shipper_status_id, $return_revert_statuses)){
-                        AdminFinanceController::return_confirmed_revert($shipment_details->id);
-                    }
 
-                    if(in_array($shipment_details->shipper_status_id, $replacement_try_and_buy_statuses)){
-                        AdminFinanceController::replacement_or_try_and_buy_adjust_in_payment($shipment_details->id);
-                    }
 
                     $shipment_details->shipper_status_id = 51;
                     $shipment_details->consignee_status_id = 51;
