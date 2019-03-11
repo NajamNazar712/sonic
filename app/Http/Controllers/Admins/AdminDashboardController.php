@@ -103,7 +103,7 @@ class AdminDashboardController extends Controller
         $stats['pending'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49])->whereBetween('created_at',[$thirtyDays,$today]);
 
         if (session('role_id') != 1) {
-            $stats['total'] = Shipment::where(function($query) {
+            $stats['total'] = $stats['total']->where(function($query) {
                 $query->whereHas('pickup_address.city', function ($sub_query) {
                     $sub_query->whereIn('hub_id', session('hubs'));
                 })->orWhereHas('consignee_city', function ($sub_query) {
