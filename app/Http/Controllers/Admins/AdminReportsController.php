@@ -4244,7 +4244,7 @@ class AdminReportsController extends Controller
         if ($hubs->exists()) {
             $hubs = $hubs->get();
 
-            if (!$date) {
+            if ($date) {
                 $from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
                 $to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
             }
