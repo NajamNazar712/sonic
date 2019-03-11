@@ -4245,11 +4245,12 @@ class AdminReportsController extends Controller
             $hubs = $hubs->get();
 
             if (!$date) {
-                $from = Carbon::parse($date)->addHour($day_cut_off_time);
-                $to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond();
-            }else{
-                $from = Carbon::today()->addHour($day_cut_off_time);
-                $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond();
+                $from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
+                $to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
+            }
+            else {
+                $from = Carbon::today()->addHour($day_cut_off_time)->toDateTimeString();
+                $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
             }
 
             $types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'on_hold', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'delivery_tomorrow', 'delivery_note_pending'];
@@ -4364,10 +4365,10 @@ class AdminReportsController extends Controller
                     $rows = $rows->select('s.tracking_number')->where('cities.hub_id', $hub->id);
 
                     if ($type != 'correct_status' && $type != 'fake_status') {
-                        $rows = $rows->whereBetween('sj.created_at', [$from,$to]);
+                        $rows = $rows->whereBetween('sj.created_at', [$from, $to]);
                     }
                     else {
-                        $rows = $rows->whereBetween('dn.created_at', [$from,$to]);
+                        $rows = $rows->whereBetween('dn.created_at', [$from, $to]);
                     }
 
                     if ($rows->exists()) {
