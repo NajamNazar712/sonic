@@ -50,7 +50,7 @@
 
 <script src="{{asset('js/app.js')}}" type="text/javascript"></script>
 <!-- END PAGE LEVEL JS-->
-<script>
+<script type="text/javascript">
 	$(document).ready(function () {
         $('body #app_content').on('click', function () {
             if($('#sidebar_menu').hasClass('is-active')){
