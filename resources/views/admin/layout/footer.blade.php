@@ -50,5 +50,13 @@
 
 <script src="{{asset('js/app.js')}}" type="text/javascript"></script>
 <!-- END PAGE LEVEL JS-->
-
+<script>
+	$(document).ready(function () {
+        $('body #app_content').on('click', function () {
+            if($('#sidebar_menu').hasClass('is-active')){
+                $.app.menu.hide();
+            }
+        });
+    });
+</script>
   @yield('js')
