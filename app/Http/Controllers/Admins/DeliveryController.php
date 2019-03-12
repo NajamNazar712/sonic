@@ -1624,7 +1624,8 @@ class DeliveryController extends Controller
                                         $dispute_shipments[] = $shipment;
                                     } else if (($shipper_status_details->shipper_status_id == $request->status_drop[$shipment]) && ($journey->status_reason_id != ($request->has($reasonId) ? $request->reason_drop[$shipment] : null))) {
                                         if ($verification == 0) {
-                                            $journey->status_reason_id = $request->reason_drop[$shipment];
+
+                                            $journey->status_reason_id = $request->has($reasonId) ? $request->reason_drop[$shipment]: null;
                                             $journey->remarks = $request->remarks[$shipment];
                                             $journey->save();
                                         } else {
