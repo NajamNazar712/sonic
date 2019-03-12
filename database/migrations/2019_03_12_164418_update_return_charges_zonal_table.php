@@ -14,7 +14,10 @@ class UpdateReturnChargesZonalTable extends Migration
     public function up()
     {
         Schema::table('return_charges', function (Blueprint $table) {
-            //
+            $table->renameColumn('national','national_charges_class_0')->change();
+            $table->string('national_charges_class_1');
+            $table->string('national_charges_class_2');
+            $table->string('national_charges_class_3');
         });
     }
 
@@ -26,7 +29,10 @@ class UpdateReturnChargesZonalTable extends Migration
     public function down()
     {
         Schema::table('return_charges', function (Blueprint $table) {
-            //
+            $table->renameColumn('national_charges_class_0','national')->change();
+            $table->dropColumn('national_charges_class_1');
+            $table->dropColumn('national_charges_class_2');
+            $table->dropColumn('national_charges_class_3');
         });
     }
 }
