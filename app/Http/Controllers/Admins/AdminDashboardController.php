@@ -3010,7 +3010,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'local' => $request->on_return_local_charges,
-                            'national' => $request->on_return_national_charges
+                            'national_charges_class_0'=> $request->on_return_class_0_charges,
+                            'national_charges_class_1'=> $request->on_return_class_1_charges,
+                            'national_charges_class_2'=> $request->on_return_class_2_charges,
+                            'national_charges_class_3'=> $request->on_return_class_3_charges
                         ]);
                     }
                     //Return Charges
@@ -3173,7 +3176,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'local' => $request->ol_return_local_charges,
-                            'national' => $request->ol_return_national_charges
+                            'national_charges_class_0'=> $request->ol_return_class_0_charges,
+                            'national_charges_class_1'=> $request->ol_return_class_1_charges,
+                            'national_charges_class_2'=> $request->ol_return_class_2_charges,
+                            'national_charges_class_3'=> $request->ol_return_class_3_charges
                         ]);
                     }
                     if ($request->has('overland_fuel_switch') && $request->overland_fuel_switch == 'on') {
@@ -3335,7 +3341,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'local' => $request->detain_return_local_charges,
-                            'national' => $request->detain_return_national_charges
+                            'national_charges_class_0'=> $request->detain_return_class_0_charges,
+                            'national_charges_class_1'=> $request->detain_return_class_1_charges,
+                            'national_charges_class_2'=> $request->detain_return_class_2_charges,
+                            'national_charges_class_3'=> $request->detain_return_class_3_charges
                         ]);
                     }
                     if ($request->has('detain_fuel_switch') && $request->detain_fuel_switch == 'on') {
@@ -3496,7 +3505,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'local' => $request->sameday_return_local_charges,
-                            'national' => $request->sameday_return_national_charges
+                            'national_charges_class_0'=> $request->sameday_return_class_0_charges,
+                            'national_charges_class_1'=> $request->sameday_return_class_1_charges,
+                            'national_charges_class_2'=> $request->sameday_return_class_2_charges,
+                            'national_charges_class_3'=> $request->sameday_return_class_3_charges
                         ]);
                     }
                     if ($request->has('sameday_fuel_switch') && $request->sameday_fuel_switch == 'on') {
@@ -3824,7 +3836,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'local' => $return['local'],
-                            'national' => $return['national']
+                            'national_charges_class_0' => $return['national_charges_class_0'],
+                            'national_charges_class_1' => $return['national_charges_class_1'],
+                            'national_charges_class_2' => $return['national_charges_class_2'],
+                            'national_charges_class_3' => $return['national_charges_class_3']
                         ]);
                     }
                 }
@@ -3834,7 +3849,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'local' => $return['local'],
-                            'national' => $return['national']
+                            'national_charges_class_0' => $return['national_charges_class_0'],
+                            'national_charges_class_1' => $return['national_charges_class_1'],
+                            'national_charges_class_2' => $return['national_charges_class_2'],
+                            'national_charges_class_3' => $return['national_charges_class_3']
                         ]);
                     }
                 }
@@ -3844,7 +3862,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'local' => $return['local'],
-                            'national' => $return['national']
+                            'national_charges_class_0' => $return['national_charges_class_0'],
+                            'national_charges_class_1' => $return['national_charges_class_1'],
+                            'national_charges_class_2' => $return['national_charges_class_2'],
+                            'national_charges_class_3' => $return['national_charges_class_3']
                         ]);
                     }
                 }
@@ -3854,7 +3875,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'local' => $return['local'],
-                            'national' => $return['national']
+                            'national_charges_class_0' => $return['national_charges_class_0'],
+                            'national_charges_class_1' => $return['national_charges_class_1'],
+                            'national_charges_class_2' => $return['national_charges_class_2'],
+                            'national_charges_class_3' => $return['national_charges_class_3']
                         ]);
                     }
                 }
@@ -4279,7 +4303,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'local' => $pendingreturn['local'],
-                            'national' => $pendingreturn['national']
+                            'national_charges_class_0' => $pendingreturn['national_charges_class_0'],
+                            'national_charges_class_1' => $pendingreturn['national_charges_class_1'],
+                            'national_charges_class_2' => $pendingreturn['national_charges_class_2'],
+                            'national_charges_class_3' => $pendingreturn['national_charges_class_3']
                         ]);
                     }
                 }
@@ -4289,7 +4316,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'local' => $pendingreturn['local'],
-                            'national' => $pendingreturn['national']
+                            'national_charges_class_0' => $pendingreturn['national_charges_class_0'],
+                            'national_charges_class_1' => $pendingreturn['national_charges_class_1'],
+                            'national_charges_class_2' => $pendingreturn['national_charges_class_2'],
+                            'national_charges_class_3' => $pendingreturn['national_charges_class_3']
                         ]);
                     }
                 }
@@ -4299,7 +4329,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'local' => $pendingreturn['local'],
-                            'national' => $pendingreturn['national']
+                            'national_charges_class_0' => $pendingreturn['national_charges_class_0'],
+                            'national_charges_class_1' => $pendingreturn['national_charges_class_1'],
+                            'national_charges_class_2' => $pendingreturn['national_charges_class_2'],
+                            'national_charges_class_3' => $pendingreturn['national_charges_class_3']
                         ]);
                     }
                 }
@@ -4309,7 +4342,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'local' => $pendingreturn['local'],
-                            'national' => $pendingreturn['national']
+                            'national_charges_class_0' => $pendingreturn['national_charges_class_0'],
+                            'national_charges_class_1' => $pendingreturn['national_charges_class_1'],
+                            'national_charges_class_2' => $pendingreturn['national_charges_class_2'],
+                            'national_charges_class_3' => $pendingreturn['national_charges_class_3']
                         ]);
                     }
                 }
