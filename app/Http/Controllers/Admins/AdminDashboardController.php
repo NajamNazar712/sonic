@@ -4522,8 +4522,11 @@ class AdminDashboardController extends Controller
             //'on_ins_charges.*.string' => 'The overnight insurance charges field must be string.',
             'on_return_local_charges.required_if' => 'The overnight return local charges field is required.',
             'on_return_local_charges.numeric' => 'The overnight return local charges field must be numeric or percentage.',
-            'on_return_national_charges.required_if' => 'The overnight return national charges field is required.',
-            'on_return_national_charges.numeric' => 'The overnight return national charges field must be numeric or percentage.',
+            'on_return_class_0_charges.*.numeric' => 'The overnight class A return charges field must be numeric.',
+            'on_return_class_0_charges.*.required_if' => 'The overnight class A return charges field is required.',
+            'on_return_class_1_charges.*.required_if' => 'The overnight class B return charges field is required.',
+            'on_return_class_2_charges.*.required_if' => 'The overnight class C return charges field is required.',
+            'on_return_class_3_charges.*.required_if' => 'The overnight class D return charges field is required.',
             'overnight_fuel_surcharge.required_if' => 'The overnight return national charges field is required.',
             'overnight_fuel_surcharge.numeric' => 'The overnight return national charges field must be numeric or percentage.',
             'on_flyer_sm.required_if' => 'The overnight small flyer field is required',
@@ -4581,8 +4584,10 @@ class AdminDashboardController extends Controller
             //'ol_ins_charges.*.numeric' => 'The overland insurance charges field must be numeric or percentage.',
             'ol_return_local_charges.required_if' => 'The overland return local charges field is required.',
             'ol_return_local_charges.numeric' => 'The overland return local charges field must be numeric or percentage.',
-            'ol_return_national_charges.required_if' => 'The overland return national charges field is required.',
-            'ol_return_national_charges.numeric' => 'The overland return national charges field must be numeric or percentage.',
+            'ol_return_class_0_charges.*.required_if' => 'The overland class A return charges field is required.',
+            'ol_return_class_1_charges.*.required_if' => 'The overland class B return charges field is required.',
+            'ol_return_class_2_charges.*.required_if' => 'The overland class C return charges field is required.',
+            'ol_return_class_3_charges.*.required_if' => 'The overland class D return charges field is required.',
             'overland_fuel_surcharge.required_if' => 'The overland return national charges field is required.',
             'overland_fuel_surcharge.numeric' => 'The overland return national charges field must be numeric or percentage.',
             'ol_flyer_sm.required_if' => 'The overland small flyer field is required',
@@ -4640,8 +4645,10 @@ class AdminDashboardController extends Controller
             //'detain_ins_charges.*.numeric' => 'The detain insurance charges field must be numeric or percentage.',
             'detain_return_local_charges.required_if' => 'The detain return local charges field is required.',
             'detain_return_local_charges.numeric' => 'The detain return local charges field must be numeric or percentage.',
-            'detain_return_national_charges.required_if' => 'The detain return national charges field is required.',
-            'detain_return_national_charges.numeric' => 'The detain return national charges field must be numeric or percentage.',
+            'detain_return_class_0_charges.*.required_if' => 'The detain class A return charges field is required.',
+            'detain_return_class_1_charges.*.required_if' => 'The detain class B return charges field is required.',
+            'detain_return_class_2_charges.*.required_if' => 'The detain class C return charges field is required.',
+            'detain_return_class_3_charges.*.required_if' => 'The detain class D return charges field is required.',
             'detain_fuel_surcharge.required_if' => 'The detain return national charges field is required.',
             'detain_fuel_surcharge.numeric' => 'The detain return national charges field must be numeric or percentage.',
             'detain_flyer_sm.required_if' => 'The detain small flyer field is required',
@@ -4696,8 +4703,10 @@ class AdminDashboardController extends Controller
             //'sameday_ins_charges.*.numeric' => 'The sameday insurance charges field must be numeric or percentage.',
             'sameday_return_local_charges.required_if' => 'The sameday return local charges field is required.',
             'sameday_return_local_charges.numeric' => 'The sameday return local charges field must be numeric or percentage.',
-            'sameday_return_national_charges.required_if' => 'The sameday return national charges field is required.',
-            'sameday_return_national_charges.numeric' => 'The sameday return national charges field must be numeric or percentage.',
+            'sameday_return_class_0_charges.*.required_if' => 'The sameday class A return charges field is required.',
+            'sameday_return_class_1_charges.*.required_if' => 'The sameday class B return charges field is required.',
+            'sameday_return_class_2_charges.*.required_if' => 'The sameday class C return charges field is required.',
+            'sameday_return_class_3_charges.*.required_if' => 'The sameday class D return charges field is required.',
             'sameday_fuel_surcharge.required_if' => 'The sameday return national charges field is required.',
             'sameday_fuel_surcharge.numeric' => 'The sameday return national charges field must be numeric or percentage.',
             'sameday_flyer_sm.required_if' => 'The sameday small flyer field is required',
@@ -4750,7 +4759,10 @@ class AdminDashboardController extends Controller
                 'on_ins_range_down.*'=>'required_if:on_insurance_charges_switch,==,on|numeric',
                 'on_ins_charges.*'=>'required_if:on_insurance_charges_switch,==,on',
                 'on_return_local_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                'on_return_national_charges.*'=>'required_if:on_return_switch,==,on|numeric',
+                'on_return_class_0_charges.*'=>'required_if:on_return_switch,==,on|numeric',
+                'on_return_class_1_charges.*'=>'required_if:on_return_switch,==,on|numeric',
+                'on_return_class_2_charges.*'=>'required_if:on_return_switch,==,on|numeric',
+                'on_return_class_3_charges.*'=>'required_if:on_return_switch,==,on|numeric',
                 'overnight_fuel_surcharge'=>'required_if:overnight_fuel_switch,==,on|numeric',
                 'on_flyer_sm'=>'required_if:on_packaging_switch,==,on|numeric',
                 'on_flyer_md'=>'required_if:on_packaging_switch,==,on|numeric',
@@ -4785,7 +4797,10 @@ class AdminDashboardController extends Controller
                 'ol_ins_range_down.*'=>'required_if:ol_insurance_charges_switch,==,on|numeric',
                 'ol_ins_charges.*'=>'required_if:ol_insurance_charges_switch,==,on',
                 'ol_return_local_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                'ol_return_national_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
+                'ol_return_class_0_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
+                'ol_return_class_1_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
+                'ol_return_class_2_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
+                'ol_return_class_3_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
                 'overland_fuel_surcharge'=>'required_if:overland_fuel_switch,==,on|numeric',
                 'ol_flyer_sm'=>'required_if:ol_packaging_switch,==,on|numeric',
                 'ol_flyer_md'=>'required_if:ol_packaging_switch,==,on|numeric',
@@ -4820,7 +4835,10 @@ class AdminDashboardController extends Controller
                 'detain_ins_range_down.*'=>'required_if:detain_insurance_charges_switch,==,on|numeric',
                 'detain_ins_charges.*'=>'required_if:detain_insurance_charges_switch,==,on',
                 'detain_return_local_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                'detain_return_national_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
+                'detain_return_class_0_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
+                'detain_return_class_1_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
+                'detain_return_class_2_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
+                'detain_return_class_3_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
                 'detain_fuel_surcharge'=>'required_if:detain_fuel_switch,==,on|numeric',
                 'detain_flyer_sm'=>'required_if:detain_packaging_switch,==,on|numeric',
                 'detain_flyer_md'=>'required_if:detain_packaging_switch,==,on|numeric',
@@ -4852,7 +4870,10 @@ class AdminDashboardController extends Controller
                 'sameday_ins_range_down.*'=>'required_if:sameday_insurance_charges_switch,==,on|numeric',
                 'sameday_ins_charges.*'=>'required_if:sameday_insurance_charges_switch,==,on',
                 'sameday_return_local_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                'sameday_return_national_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
+                'sameday_return_class_0_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
+                'sameday_return_class_1_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
+                'sameday_return_class_2charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
+                'sameday_return_class_3_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
                 'sameday_fuel_surcharge'=>'required_if:sameday_fuel_switch,==,on|numeric',
                 'sameday_flyer_sm'=>'required_if:sameday_packaging_switch,==,on|numeric',
                 'sameday_flyer_md'=>'required_if:sameday_packaging_switch,==,on|numeric',
@@ -4967,7 +4988,10 @@ class AdminDashboardController extends Controller
                         'user_id'=>$id,
                         'shipping_mode_id'=>1,
                         'local'=> $request->on_return_local_charges,
-                        'national'=> $request->on_return_national_charges
+                        'national_charges_class_0'=> $request->on_return_class_0_charges,
+                        'national_charges_class_1'=> $request->on_return_class_1_charges,
+                        'national_charges_class_2'=> $request->on_return_class_2_charges,
+                        'national_charges_class_3'=> $request->on_return_class_3_charges
                     ]);
                 }
                 //Return Charges
@@ -5130,7 +5154,10 @@ class AdminDashboardController extends Controller
                         'user_id'=>$id,
                         'shipping_mode_id'=>2,
                         'local'=> $request->ol_return_local_charges,
-                        'national'=> $request->ol_return_national_charges
+                        'national_charges_class_0'=> $request->ol_return_class_0_charges,
+                        'national_charges_class_1'=> $request->ol_return_class_1_charges,
+                        'national_charges_class_2'=> $request->ol_return_class_2_charges,
+                        'national_charges_class_3'=> $request->ol_return_class_3_charges
                     ]);
                 }
                 if($request->has('overland_fuel_switch') && $request->overland_fuel_switch == 'on'){
@@ -5292,7 +5319,10 @@ class AdminDashboardController extends Controller
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
                         'local' => $request->detain_return_local_charges,
-                        'national' => $request->detain_return_national_charges
+                        'national_charges_class_0'=> $request->detain_return_class_0_charges,
+                        'national_charges_class_1'=> $request->detain_return_class_1_charges,
+                        'national_charges_class_2'=> $request->detain_return_class_2_charges,
+                        'national_charges_class_3'=> $request->detain_return_class_3_charges
                     ]);
                 }
                 if($request->has('detain_fuel_switch') && $request->detain_fuel_switch == 'on'){
@@ -5453,7 +5483,10 @@ class AdminDashboardController extends Controller
                         'user_id'=>$id,
                         'shipping_mode_id'=>4,
                         'local'=> $request->sameday_return_local_charges,
-                        'national'=> $request->sameday_return_national_charges
+                        'national_charges_class_0'=> $request->sameday_return_class_0_charges,
+                        'national_charges_class_1'=> $request->sameday_return_class_1_charges,
+                        'national_charges_class_2'=> $request->sameday_return_class_2_charges,
+                        'national_charges_class_3'=> $request->sameday_return_class_3_charges
                     ]);
                 }
                 if($request->has('sameday_fuel_switch') && $request->sameday_fuel_switch == 'on'){
