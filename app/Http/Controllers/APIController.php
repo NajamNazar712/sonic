@@ -663,6 +663,33 @@ class APIController extends Controller
       }
     }
 
+    public function shipment_air_waybill(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })]
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $tracking_number = $request->tracking_number;
+
+        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+
+        $air_waybill = '';
+
+        return response()->json(['status' => 0, 'message' => 'Air Waybill of Shipment #' . $tracking_number, 'air_waybill' => $air_waybill]);
+      }
+    }
+
     public function shipment_charges(Request $request) {
       $user_id = $request->user_id;
 
