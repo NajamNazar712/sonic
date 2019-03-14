@@ -124,6 +124,7 @@ class AdminZonalManagementController extends Controller
 
                 $zone_class_city->zone_id = $zone->id;
                 $zone_class_city->city_id = $city_id;
+                $zone_class_city->zone_classification_id = 1;
             }
 
             $zone_class_city->class = $class;
@@ -142,6 +143,7 @@ class AdminZonalManagementController extends Controller
 
                 $zone_class_city_cor->zone_id = $zone->id;
                 $zone_class_city_cor->city_id = $city_id_cor;
+                $zone_class_city->zone_classification_id = 2;
             }
 
             $zone_class_city_cor->class = $class_cor;
