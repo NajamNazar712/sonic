@@ -498,11 +498,71 @@ class ShipmentChargesController extends Controller
             if ($return_charge->exists()) {
                 $return_charge = $return_charge->first();
 
-                if ($shipment->pickup_address->city_id == $shipment->consignee_city_id) {
+                $class = 0;
+
+                if ($shipment->shipping_mode_id == 4) {
+                    if ($shipment->same_day_timing_id == 1) {
+                        $type_of_charges = 0;
+                    }
+                    else {
+                        $type_of_charges = 1;
+                    }
+                }
+                else {
+                    if ($shipment->pickup_address->city_id == $shipment->consignee_city_id) {
+                        $type_of_charges = 0;
+                    }
+                    else {
+                        $type_of_charges = 1;
+
+                        $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
+
+                        if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
+                            $zone_class_city = $zone_class_city->where('zone_classification_id', 2);
+                        }
+                        else {
+                            $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
+                        }
+
+                        if ($zone_class_city) {
+                            $zone_class_city = $zone_class_city->first();
+
+                            $class = $zone_class_city->class;
+                        }
+                    }
+                }
+
+                if ($type_of_charges == 0) {
                     $charges = $return_charge->local;
                 }
                 else {
-                    $charges = $return_charge->national;
+                    if ($class == 1) {
+                        if (strpos($return_charge->national_charges_class_1, '%') !== FALSE) {
+                            $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_1)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
+                        }
+                        else {
+                            $charges = intval($return_charge->national_charges_class_1);
+                        }
+                    }
+                    else if ($class == 2) {
+                        if (strpos($return_charge->national_charges_class_2, '%') !== FALSE) {
+                            $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_2)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
+                        }
+                        else {
+                            $charges = intval($return_charge->national_charges_class_2);
+                        }
+                    }
+                    else if ($class == 3) {
+                        if (strpos($return_charge->national_charges_class_3, '%') !== FALSE) {
+                            $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_3)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
+                        }
+                        else {
+                            $charges = intval($return_charge->national_charges_class_3);
+                        }
+                    }
+                    else {
+                        $charges = $return_charge->national_charges_class_0;
+                    }
                 }
 
                 if (strpos($discount, '%') !== FALSE) {
