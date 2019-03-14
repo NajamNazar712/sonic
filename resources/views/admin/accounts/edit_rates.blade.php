@@ -442,10 +442,28 @@
                                                     <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->local !== '')? $returnCharges[1][0]->local : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">National Charges</label>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_national_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national !== '')? $returnCharges[1][0]->national : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_class_0_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_0 !== '')? $returnCharges[1][0]->national_charges_class_0 : ''}}" {{$on_return_sw}}>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class B</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_1_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_1 !== '')? $returnCharges[1][0]->national_charges_class_1 : ''}}" {{$on_return_sw}}>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class C</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_2_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_2 !== '')? $returnCharges[1][0]->national_charges_class_2 : ''}}" {{$on_return_sw}}>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class D</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_3_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_3 !== '')? $returnCharges[1][0]->national_charges_class_3 : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1172,10 +1190,28 @@
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">National Charges</label>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="ol_return_national_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national != '')? $returnCharges[2][0]->national : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="ol_return_class_0_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_0 !== '')? $returnCharges[2][0]->national_charges_class_0 : ''}}" {{$ol_return_sw}}>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class B</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="ol_return_class_1_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_1 !== '')? $returnCharges[2][0]->national_charges_class_1 : ''}}" {{$ol_return_sw}}>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class C</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="ol_return_class_2_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_2 !== '')? $returnCharges[2][0]->national_charges_class_2 : ''}}" {{$ol_return_sw}}>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class D</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="ol_return_class_3_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_3 !== '')? $returnCharges[2][0]->national_charges_class_3 : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1906,10 +1942,28 @@
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col-md-2">
-                                                <label class="card-title">National Charges</label>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="detain_return_national_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national != '')? $returnCharges[3][0]->national : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="detain_return_class_0_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_0 !== '')? $returnCharges[3][0]->national_charges_class_0 : ''}}" {{$det_return_sw}}>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class B</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="detain_return_class_1_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_1 !== '')? $returnCharges[3][0]->national_charges_class_1 : ''}}" {{$det_return_sw}}>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class C</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="detain_return_class_2_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_2 !== '')? $returnCharges[3][0]->national_charges_class_2 : ''}}" {{$det_return_sw}}>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class D</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="detain_return_class_3_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_3 !== '')? $returnCharges[3][0]->national_charges_class_3 : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -2608,11 +2662,28 @@
                                                     <input type="text"  class="form-control amount" name="sameday_return_local_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->local !== '')? $returnCharges[4][0]->local : ''}}" {{$same_return_sw}}>
                                                 </fieldset>
                                             </div>
-
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">National Charges</label>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text"  class="form-control amount" name="sameday_return_national_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national != '')? $returnCharges[4][0]->national : ''}}" {{$same_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="sameday_return_class_0_charges"  value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national_charges_class_0 !== '')? $returnCharges[4][0]->national_charges_class_0 : ''}}" {{$same_return_sw}}>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class B</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="sameday_return_class_1_charges"  value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national_charges_class_1 !== '')? $returnCharges[4][0]->national_charges_class_1 : ''}}" {{$same_return_sw}}>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class C</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="sameday_return_class_2_charges"  value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national_charges_class_2 !== '')? $returnCharges[4][0]->national_charges_class_2 : ''}}" {{$same_return_sw}}>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class D</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="sameday_return_class_3_charges"  value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national_charges_class_3 !== '')? $returnCharges[4][0]->national_charges_class_3 : ''}}" {{$same_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>

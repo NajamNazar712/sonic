@@ -452,42 +452,60 @@ class GlobalSettingsController extends Controller
             'actual_weight' => $request->walk_in_door_on_a,
             'chargeable_weight' => $request->walk_in_door_on_c,
             'local' => $request->walk_in_door_on_a_local,
-            'national' => $request->walk_in_door_on_c_national
+            'national_charges_class_0'=> $request->walk_in_door_on_return_class_0_charges,
+            'national_charges_class_1'=> $request->walk_in_door_on_return_class_1_charges,
+            'national_charges_class_2'=> $request->walk_in_door_on_return_class_2_charges,
+            'national_charges_class_3'=> $request->walk_in_door_on_return_class_3_charges
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->update([
             'actual_weight' => $request->walk_in_hub_on_a,
             'chargeable_weight' => $request->walk_in_hub_on_c,
             'local' => $request->walk_in_hub_on_a_local,
-            'national' => $request->walk_in_hub_on_c_national
+            'national_charges_class_0'=> $request->walk_in_hub_on_return_class_0_charges,
+            'national_charges_class_1'=> $request->walk_in_hub_on_return_class_1_charges,
+            'national_charges_class_2'=> $request->walk_in_hub_on_return_class_2_charges,
+            'national_charges_class_3'=> $request->walk_in_hub_on_return_class_3_charges
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->update([
             'actual_weight' => $request->walk_in_door_ol_a,
             'chargeable_weight' => $request->walk_in_door_ol_c,
             'local' => $request->walk_in_door_ol_a_local,
-            'national' => $request->walk_in_door_ol_c_national
+            'national_charges_class_0'=> $request->walk_in_door_ol_return_class_0_charges,
+            'national_charges_class_1'=> $request->walk_in_door_ol_return_class_1_charges,
+            'national_charges_class_2'=> $request->walk_in_door_ol_return_class_2_charges,
+            'national_charges_class_3'=> $request->walk_in_door_ol_return_class_3_charges
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->update([
             'actual_weight' => $request->walk_in_hub_ol_a,
             'chargeable_weight' => $request->walk_in_hub_ol_c,
             'local' => $request->walk_in_hub_ol_a_local,
-            'national' => $request->walk_in_hub_ol_c_national
+            'national_charges_class_0'=> $request->walk_in_hub_ol_return_class_0_charges,
+            'national_charges_class_1'=> $request->walk_in_hub_ol_return_class_1_charges,
+            'national_charges_class_2'=> $request->walk_in_hub_ol_return_class_2_charges,
+            'national_charges_class_3'=> $request->walk_in_hub_ol_return_class_3_charges
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 1])->update([
             'actual_weight' => $request->walk_in_door_dn_a,
             'chargeable_weight' => $request->walk_in_door_dn_c,
             'local' => $request->walk_in_door_dn_a_local,
-            'national' => $request->walk_in_door_dn_c_national
+            'national_charges_class_0'=> $request->walk_in_door_dn_return_class_0_charges,
+            'national_charges_class_1'=> $request->walk_in_door_dn_return_class_1_charges,
+            'national_charges_class_2'=> $request->walk_in_door_dn_return_class_2_charges,
+            'national_charges_class_3'=> $request->walk_in_door_dn_return_class_3_charges
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 2])->update([
             'actual_weight' => $request->walk_in_hub_dn_a,
             'chargeable_weight' => $request->walk_in_hub_dn_c,
             'local' => $request->walk_in_hub_dn_a_local,
-            'national' => $request->walk_in_hub_dn_c_national
+            'national_charges_class_0'=> $request->walk_in_hub_dn_return_class_0_charges,
+            'national_charges_class_1'=> $request->walk_in_hub_dn_return_class_1_charges,
+            'national_charges_class_2'=> $request->walk_in_hub_dn_return_class_2_charges,
+            'national_charges_class_3'=> $request->walk_in_hub_dn_return_class_3_charges
         ]);
 
         return redirect()->back()->with('success', 'Settings Updated!');
