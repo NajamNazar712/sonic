@@ -990,11 +990,56 @@ class ShipmentChargesController extends Controller
 
         $settings = WalkInStandardWeightCharge::where(['shipping_mode_id' => $shipment->shipping_mode_id, 'delivery_type_id' => $shipment->walk_in_delivery_type_id])->first();
 
-        if ($shipment->pickup_address->city_id == $shipment->consignee_city_id) {
+        $class = 0;
+
+        if ($shipment->shipping_mode_id == 4) {
+            if ($shipment->same_day_timing_id == 1) {
+                $type_of_charges = 0;
+            }
+            else {
+                $type_of_charges = 1;
+            }
+        }
+        else {
+            if ($shipment->pickup_address->city_id == $shipment->consignee_city_id) {
+                $type_of_charges = 0;
+            }
+            else {
+                $type_of_charges = 1;
+
+                $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
+
+                if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
+                    $zone_class_city = $zone_class_city->where('zone_classification_id', 2);
+                }
+                else {
+                    $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
+                }
+
+                if ($zone_class_city) {
+                    $zone_class_city = $zone_class_city->first();
+
+                    $class = $zone_class_city->class;
+                }
+            }
+        }
+
+        if ($type_of_charges == 0) {
             $percentage = $settings['local'];
         }
         else {
-            $percentage = $settings['national'];
+            if ($class == 1) {
+                $percentage = $settings['national_charges_class_1'];
+            }
+            else if ($class == 2) {
+                $percentage = $settings['national_charges_class_2'];
+            }
+            else if ($class == 3) {
+                $percentage = $settings['national_charges_class_3'];
+            }
+            else {
+                $percentage = $settings['national_charges_class_0'];
+            }
         }
 
         $charges = ROUND(($shipment->weight_charges * ($percentage / 100)), 0, PHP_ROUND_HALF_DOWN);
