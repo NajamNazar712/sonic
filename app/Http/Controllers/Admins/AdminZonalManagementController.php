@@ -117,40 +117,38 @@ class AdminZonalManagementController extends Controller
 
         foreach ($request->city_class as $city_id => $class) {
             $zone_class_city = ZoneClassCity::where(['zone_id' => $zone->id, 'city_id' => $city_id, 'zone_classification_id' => 1]);
-            if ($zone_class_city->zone_classification_id = 1) {
-                if ($zone_class_city->exists()) {
-                    $zone_class_city = $zone_class_city->first();
-                } else {
-                    $zone_class_city = new ZoneClassCity();
+            if ($zone_class_city->exists()) {
+                $zone_class_city = $zone_class_city->first();
+            } else {
+                $zone_class_city = new ZoneClassCity();
 
-                    $zone_class_city->zone_id = $zone->id;
-                    $zone_class_city->city_id = $city_id;
-                }
-
-                $zone_class_city->class = $class;
-
-                $zone_class_city->save();
+                $zone_class_city->zone_id = $zone->id;
+                $zone_class_city->city_id = $city_id;
+                $zone_class_city->zone_classification_id = 1;
             }
+
+            $zone_class_city->class = $class;
+
+            $zone_class_city->save();
         }
 
         foreach ($request->city_class_cor as $city_id_cor => $class_cor) {
             $zone_class_city_cor = ZoneClassCity::where(['zone_id' => $zone->id, 'city_id' => $city_id_cor, 'zone_classification_id' => 2]);
 
-            if($zone_class_city_cor->zone_classification_id = 2){
-                if ($zone_class_city_cor->exists()) {
-                    $zone_class_city_cor = $zone_class_city_cor->first();
-                }
-                else {
-                    $zone_class_city_cor = new ZoneClassCity();
-
-                    $zone_class_city_cor->zone_id = $zone->id;
-                    $zone_class_city_cor->city_id = $city_id_cor;
-                }
-
-                $zone_class_city_cor->class = $class_cor;
-
-                $zone_class_city_cor->save();
+            if ($zone_class_city_cor->exists()) {
+                $zone_class_city_cor = $zone_class_city_cor->first();
             }
+            else {
+                $zone_class_city_cor = new ZoneClassCity();
+
+                $zone_class_city_cor->zone_id = $zone->id;
+                $zone_class_city_cor->city_id = $city_id_cor;
+                $zone_class_city_cor->zone_classification_id = 2;
+            }
+
+            $zone_class_city_cor->class = $class_cor;
+
+            $zone_class_city_cor->save();
         }
 
         return redirect()->route('admin.management.zonal.index')->with(['success' => 'Zone: ' . $request->name . ' has been updated!']);
