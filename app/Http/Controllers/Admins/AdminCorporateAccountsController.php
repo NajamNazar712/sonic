@@ -26,7 +26,9 @@ use App\Http\Models\CorporateStandardReturnCharge;
 use App\Http\Models\CorporateStandardWeightCharge;
 use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\Rates\CorporateRateHistory;
+use App\Http\Models\Rates\HistoryCorporateBookingTypeCharges;
 use App\Http\Models\Rates\HistoryCorporateMinChargeableWeight;
+use App\Http\Models\Rates\PendingCorporateBookingTypeCharges;
 use App\Http\Models\Rates\PendingCorporateCashHandlingCharge;
 use App\Http\Models\Rates\PendingCorporateDiscountCharge;
 use App\Http\Models\Rates\PendingCorporateFuelSurcharge;
@@ -1097,7 +1099,7 @@ class AdminCorporateAccountsController extends Controller
 //        var_dump(empty($switches));exit();
             $min_weight = PendingCorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $weight = PendingCorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $bookingType = PendingCorporateBookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $cash = PendingCorporateCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = PendingCorporateInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $return = PendingCorporateReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -3120,7 +3122,12 @@ class AdminCorporateAccountsController extends Controller
                         ]);
 
                     }
-
+                    PendingCorporateBookingTypeCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'replacement_charges' => $request->on_replacement_charges,
+                        'try_and_buy_charges' => $request->on_tnb_charges
+                    ]);
                     //Cash handling Charges
                     if ($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on') {
                         foreach ($request->on_cash_range_up as $ind => $on_cash_range_up) {
@@ -3236,7 +3243,7 @@ class AdminCorporateAccountsController extends Controller
                             'delivery_type_id' => 2,
                             'min_chargeable_weight' => $request->ol_hub_mcw_charges
                         ]);
-
+//                    dd($request->ol_replacement_charges);
                     foreach ($request->ol_door_weight_record as $index => $ol_door_weight_record) {
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
@@ -3250,7 +3257,6 @@ class AdminCorporateAccountsController extends Controller
                             'national_charges_class_2' => $request->ol_door_class_2_charges[$index],
                             'national_charges_class_3' => $request->ol_door_class_3_charges[$index]
                         ]);
-
                     }
                     foreach ($request->ol_hub_weight_record as $index => $ol_hub_weight_record) {
                         PendingCorporateWeightCharge::create([
@@ -3263,10 +3269,17 @@ class AdminCorporateAccountsController extends Controller
                             'national_charges_class_0' => $request->ol_hub_class_0_charges[$index],
                             'national_charges_class_1' => $request->ol_hub_class_1_charges[$index],
                             'national_charges_class_2' => $request->ol_hub_class_2_charges[$index],
-                            'national_charges_class_3' => $request->on_hub_class_3_charges[$index]
+                            'national_charges_class_3' => $request->ol_hub_class_3_charges[$index]
                         ]);
 
                     }
+
+                    PendingCorporateBookingTypeCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'replacement_charges' => $request->ol_replacement_charges,
+                        'try_and_buy_charges' => $request->ol_tnb_charges
+                    ]);
                     
                     //Cash handling Charges
                     if ($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on') {
@@ -3416,6 +3429,12 @@ class AdminCorporateAccountsController extends Controller
 
                     }
 
+                    PendingCorporateBookingTypeCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'replacement_charges' => $request->detain_replacement_charges,
+                        'try_and_buy_charges' => $request->detain_tnb_charges
+                    ]);
                     //Cash handling Charges
                     if ($request->has('detain_cash_handling_switch') && $request->detain_cash_handling_switch == 'on') {
                         foreach ($request->detain_cash_range_up as $ind => $detain_cash_range_up) {
@@ -3561,6 +3580,13 @@ class AdminCorporateAccountsController extends Controller
                         ]);
 
                     }
+
+                    PendingCorporateBookingTypeCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'replacement_charges' => $request->sameday_replacement_charges,
+                        'try_and_buy_charges' => $request->sameday_tnb_charges
+                    ]);
                     
                     //Cash handling Charges
                     if ($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on') {
@@ -3890,6 +3916,47 @@ class AdminCorporateAccountsController extends Controller
                     }
                 }
 
+                if($bookings = CorporateBookingTypeCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($bookings as $booking) {
+                        HistoryCorporateBookingTypeCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $booking['replacement_charges'],
+                            'try_and_buy_charges' => $booking['try_and_buy_charges']
+                        ]);
+                    }
+                }
+                if($bookings = CorporateBookingTypeCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($bookings as $booking) {
+                        HistoryCorporateBookingTypeCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $booking['replacement_charges'],
+                            'try_and_buy_charges' => $booking['try_and_buy_charges']
+                        ]);
+                    }
+                }
+                if($bookings = CorporateBookingTypeCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($bookings as $booking) {
+                        HistoryCorporateBookingTypeCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $booking['replacement_charges'],
+                            'try_and_buy_charges' => $booking['try_and_buy_charges']
+                        ]);
+                    }
+                }
+                if($bookings = CorporateBookingTypeCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($bookings as $booking) {
+                        HistoryCorporateBookingTypeCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $booking['replacement_charges'],
+                            'try_and_buy_charges' => $booking['try_and_buy_charges']
+                        ]);
+                    }
+                }
+
                 if($cashs = CorporateCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($cashs as $cash) {
                         HistoryCorporateCashHandlingCharge::create([
@@ -3934,6 +4001,7 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
+
                 if($insurances = CorporateInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($insurances as $insurance) {
                         HistoryCorporateInsuranceCharge::create([
@@ -4129,6 +4197,7 @@ class AdminCorporateAccountsController extends Controller
 
                 CorporateRateStatus::where('user_id', $id)->delete();
                 CorporateWeightCharge::where('user_id', $id)->delete();
+                CorporateBookingTypeCharge::where('user_id', $id)->delete();
                 CorporateCashHandlingCharge::where('user_id', $id)->delete();
                 CorporateInsuranceCharge::where('user_id', $id)->delete();
                 CorporateReturnCharge::where('user_id', $id)->delete();
@@ -4373,6 +4442,46 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
+                if($pendingbookings = PendingCorporateBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($pendingbookings as $pendingbooking) {
+                        CorporateBookingTypeCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $pendingbooking['replacement_charges'],
+                            'try_and_buy_charges' => $pendingbooking['try_and_buy_charges']
+                        ]);
+                    }
+                }
+                if($pendingbookings = PendingCorporateBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($pendingbookings as $pendingbooking) {
+                        CorporateBookingTypeCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $pendingbooking['replacement_charges'],
+                            'try_and_buy_charges' => $pendingbooking['try_and_buy_charges']
+                        ]);
+                    }
+                }
+                if($pendingbookings = PendingCorporateBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($pendingbookings as $pendingbooking) {
+                        CorporateBookingTypeCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $pendingbooking['replacement_charges'],
+                            'try_and_buy_charges' => $pendingbooking['try_and_buy_charges']
+                        ]);
+                    }
+                }
+                if($pendingbookings = PendingCorporateBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($pendingbookings as $pendingbooking) {
+                        CorporateBookingTypeCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $pendingbooking['replacement_charges'],
+                            'try_and_buy_charges' => $pendingbooking['try_and_buy_charges']
+                        ]);
+                    }
+                }
                 if($pendingcashs = PendingCorporateCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingcashs as $pendingcash) {
                         CorporateCashHandlingCharge::create([
@@ -4603,6 +4712,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 PendingCorporateRateStatus::where('user_id', $id)->delete();
                 PendingCorporateWeightCharge::where('user_id', $id)->delete();
+                PendingCorporateBookingTypeCharges::where('user_id', $id)->delete();
                 PendingCorporateCashHandlingCharge::where('user_id', $id)->delete();
                 PendingCorporateInsuranceCharge::where('user_id', $id)->delete();
                 PendingCorporateReturnCharge::where('user_id', $id)->delete();
