@@ -539,13 +539,18 @@ class APIController extends Controller
 
         $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
-        $air_waybill = ShipperShipmentBookController::air_waybill(4, $user_id, [$shipment->id]);
+        if ($shipment->shipper_status_id == 1) {
+          $air_waybill = ShipperShipmentBookController::air_waybill(4, $user_id, [$shipment->id]);
 
-        $image = SnappyImage::loadHTML($air_waybill);
+          $image = SnappyImage::loadHTML($air_waybill);
 
-        $filename = 'air_waybill_' . $tracking_number . '.jpg';
+          $filename = 'air_waybill_' . $tracking_number . '.jpg';
 
-        return $image->download($filename);
+          return $image->download($filename);
+        }
+        else {
+          return response()->json(['status' => 1, 'message' => 'Already Received']);
+        }
       }
     }
 
