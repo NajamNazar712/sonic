@@ -2215,10 +2215,10 @@
                                                     <label class="card-title">KG Range</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">Local Charges</label>
+                                                    <label class="card-title">6hr Charges</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">National Charges</label>
+                                                    <label class="card-title">Sameday Charges</label>
                                                 </div>
                                                 <div class="col"></div>
 
