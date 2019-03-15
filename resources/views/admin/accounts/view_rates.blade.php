@@ -402,38 +402,51 @@
                                             <div class="col-md-2">
                                                 <h3 class="card-title">Return Charges</h3>
                                             </div>
-                                            @php
-                                                $on_return_sw = '';
-                                                $on_return_switch = '';
-                                            if((isset($switches[1][0]) && $switches[1][0]->return_charges == 1)){
-                                            $on_return_sw = '';
-                                            $on_return_switch = 'checked';
-                                             }else{
-                                            $on_return_sw = 'disabled';
-                                            $on_return_switch = '';
-                                            }
-                                            @endphp
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="on_return_switch" class="switchery returnChargesOvernight" data-color="success" data-size="sm" {{$on_return_switch}}  disabled/>
+                                                    <input type="checkbox" name="on_return_switch" class="switchery returnChargesOvernight" data-color="success" data-size="sm" checked/>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div class="row return-charges-div-overnight">
-                                            <input type="hidden" name="on_return_record" value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->id != '')? $returnCharges[1][0]->id : ''}}">
-                                            <div class="col-md-2 text-center">
+                                        <div class="row return-charges-div-overnight justify-content-center">
+                                            @php
+                                                if (isset($returnCharges[1][0])){
+                                            @endphp
+                                            <div class="col text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->local !== '')? $returnCharges[1][0]->local : ''}}" {{$on_return_sw}} disabled>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{$returnCharges[1][0]->local}}" disabled>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">National Charges</label>
+
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_national_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national !== '')? $returnCharges[1][0]->national : ''}}" {{$on_return_sw}} disabled>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_class_0_charges"  value="{{$returnCharges[1][0]->national_charges_class_0}} " disabled>
                                                 </fieldset>
                                             </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class B</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_1_charges"  value="{{$returnCharges[1][0]->national_charges_class_1}}" disabled>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class C</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_2_charges"  value="{{$returnCharges[1][0]->national_charges_class_2}}" disabled>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class D</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_3_charges"  value="{{$returnCharges[1][0]->national_charges_class_3}}" disabled>
+                                                </fieldset>
+                                            </div>
+                                            @php
+                                                }
+                                            @endphp
                                         </div>
 
                                         <hr>
@@ -1117,40 +1130,51 @@
                                             <div class="col-md-2">
                                                 <h3 class="card-title">Return Charges</h3>
                                             </div>
-                                            @php
-                                                $ol_return_sw = '';
-                                                $ol_return_switch = '';
-                                            if((isset($switches[2][0]) && $switches[2][0]->return_charges == 1)){
-                                            $ol_return_sw = '';
-                                            $ol_return_switch = 'checked';
-                                             }else{
-                                            $ol_return_sw = 'disabled';
-                                            $ol_return_switch = '';
-                                            }
-                                            @endphp
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="ol_return_switch" class="switchery returnChargesOverland" data-color="success" data-size="sm" {{$ol_return_switch}} disabled/>
+                                                    <input type="checkbox" name="on_return_switch" class="switchery returnChargesOvernight" data-color="success" data-size="sm" checked/>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div class="row return-charges-div-overland">
-                                            <input type="hidden" name="ol_return_record" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->id != '')? $returnCharges[2][0]->id : ''}}">
-                                            
-                                            <div class="col-md-2 text-center">
+                                        <div class="row return-charges-div-overnight justify-content-center">
+                                            @php
+                                                if (isset($returnCharges[2][0])){
+                                            @endphp
+                                            <div class="col text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="ol_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->local !== '')? $returnCharges[2][0]->local : ''}}" {{$ol_return_sw}} disabled>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{$returnCharges[2][0]->local}}" disabled>
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">National Charges</label>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="ol_return_national_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national != '')? $returnCharges[2][0]->national : ''}}" {{$ol_return_sw}} disabled>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_class_0_charges"  value="{{$returnCharges[2][0]->national_charges_class_0}} " disabled>
                                                 </fieldset>
                                             </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class B</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_1_charges"  value="{{$returnCharges[2][0]->national_charges_class_1}}" disabled>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class C</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_2_charges"  value="{{$returnCharges[2][0]->national_charges_class_2}}" disabled>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class D</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_3_charges"  value="{{$returnCharges[2][0]->national_charges_class_3}}" disabled>
+                                                </fieldset>
+                                            </div>
+                                            @php
+                                                }
+                                            @endphp
                                         </div>
                                         <hr>
                                         <div class="row">
@@ -1832,80 +1856,51 @@
                                             <div class="col-md-2">
                                                 <h3 class="card-title">Return Charges</h3>
                                             </div>
-                                            @php
-                                                $det_return_sw = '';
-                                                $det_return_switch = '';
-                                            if((isset($switches[3][0]) && $switches[3][0]->return_charges == 1)){
-                                            $det_return_sw = '';
-                                            $det_return_switch = 'checked';
-                                             }else{
-                                            $det_return_sw = 'disabled';
-                                            $det_return_switch = '';
-                                            }
-                                            @endphp
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="detain_return_switch" class="switchery returnChargesDetain" data-color="success" data-size="sm" {{$det_return_switch}} disabled/>
+                                                    <input type="checkbox" name="on_return_switch" class="switchery returnChargesOvernight" data-color="success" data-size="sm" checked/>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div class="row return-charges-div-detain">
-                                        <input type="hidden" name="detain_return_record" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->id != '')? $returnCharges[3][0]->id : ''}}">
-
-                                            <div class="col-md-2 text-center">
+                                        <div class="row return-charges-div-overnight justify-content-center">
+                                            @php
+                                                if (isset($returnCharges[3][0])){
+                                            @endphp
+                                            <div class="col text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="detain_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->local !== '')? $returnCharges[3][0]->local : ''}}" {{$det_return_sw}} disabled>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{$returnCharges[3][0]->local}}" disabled>
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col-md-2">
-                                                <label class="card-title">National Charges</label>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="detain_return_national_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national != '')? $returnCharges[3][0]->national : ''}}" {{$det_return_sw}} disabled>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_class_0_charges"  value="{{$returnCharges[3][0]->national_charges_class_0}} " disabled>
                                                 </fieldset>
                                             </div>
-                                        </div>
-
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Fuel Surcharge</h3>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class B</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_1_charges"  value="{{$returnCharges[3][0]->national_charges_class_1}}" disabled>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class C</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_2_charges"  value="{{$returnCharges[3][0]->national_charges_class_2}}" disabled>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col text-center">
+                                                <label class="card-title">National Charges Class D</label>
+                                                <fieldset class="form-group">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_3_charges"  value="{{$returnCharges[3][0]->national_charges_class_3}}" disabled>
+                                                </fieldset>
                                             </div>
                                             @php
-                                                $det_fuel_sw = '';
-                                                $det_fuel_switch = '';
-                                            if((isset($switches[3][0]) && $switches[3][0]->fuel_charges == 1)){
-                                            $det_fuel_sw = '';
-                                            $det_fuel_switch = 'checked';
-                                             }else{
-                                            $det_fuel_sw = 'disabled';
-                                            $det_fuel_switch = '';
-                                            }
+                                                }
                                             @endphp
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="detain_fuel_switch" class="switchery fuelSurchargeDetain" data-color="success" data-size="sm" {{$det_fuel_switch}} disabled/>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row fuel-surcharge-div-detain">
-                                        <input type="hidden" name="detain_fuel_record" value="{{ (isset($fuelCharges[3][0]) && $fuelCharges[3][0]->id != '')? $fuelCharges[3][0]->id : ''}}">
-
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">Charges</label>
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <input type="text"  class="form-control " name="detain_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[3][0]) && $fuelCharges[3][0]->fuel_surcharge != '')? $fuelCharges[3][0]->fuel_surcharge : ''}}" {{$det_fuel_sw}} disabled>
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">%</span>
-                                                        </div>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-
                                         </div>
 
                                         <hr>
