@@ -3692,7 +3692,7 @@ class AdminCorporateAccountsController extends Controller
 
                     PendingCorporateBookingTypeCharges::create([
                         'user_id' => $id,
-                        'shipping_mode_id' => 3,
+                        'shipping_mode_id' => 4,
                         'replacement_charges' => $request->sameday_replacement_charges,
                         'try_and_buy_charges' => $request->sameday_tnb_charges
                     ]);
@@ -4032,7 +4032,7 @@ class AdminCorporateAccountsController extends Controller
                     foreach ($bookings as $booking) {
                         HistoryCorporateBookingTypeCharges::create([
                             'user_id' => $id,
-                            'shipping_mode_id' => 3,
+                            'shipping_mode_id' => 1,
                             'replacement_charges' => $booking['replacement_charges'],
                             'try_and_buy_charges' => $booking['try_and_buy_charges']
                         ]);
@@ -4042,7 +4042,7 @@ class AdminCorporateAccountsController extends Controller
                     foreach ($bookings as $booking) {
                         HistoryCorporateBookingTypeCharges::create([
                             'user_id' => $id,
-                            'shipping_mode_id' => 3,
+                            'shipping_mode_id' => 2,
                             'replacement_charges' => $booking['replacement_charges'],
                             'try_and_buy_charges' => $booking['try_and_buy_charges']
                         ]);
@@ -4062,7 +4062,7 @@ class AdminCorporateAccountsController extends Controller
                     foreach ($bookings as $booking) {
                         HistoryCorporateBookingTypeCharges::create([
                             'user_id' => $id,
-                            'shipping_mode_id' => 3,
+                            'shipping_mode_id' => 4,
                             'replacement_charges' => $booking['replacement_charges'],
                             'try_and_buy_charges' => $booking['try_and_buy_charges']
                         ]);
@@ -4570,7 +4570,7 @@ class AdminCorporateAccountsController extends Controller
                     foreach ($pendingbookings as $pendingbooking) {
                         CorporateBookingTypeCharge::create([
                             'user_id' => $id,
-                            'shipping_mode_id' => 3,
+                            'shipping_mode_id' => 1,
                             'replacement_charges' => $pendingbooking['replacement_charges'],
                             'try_and_buy_charges' => $pendingbooking['try_and_buy_charges']
                         ]);
@@ -4580,7 +4580,7 @@ class AdminCorporateAccountsController extends Controller
                     foreach ($pendingbookings as $pendingbooking) {
                         CorporateBookingTypeCharge::create([
                             'user_id' => $id,
-                            'shipping_mode_id' => 3,
+                            'shipping_mode_id' => 2,
                             'replacement_charges' => $pendingbooking['replacement_charges'],
                             'try_and_buy_charges' => $pendingbooking['try_and_buy_charges']
                         ]);
@@ -4600,7 +4600,7 @@ class AdminCorporateAccountsController extends Controller
                     foreach ($pendingbookings as $pendingbooking) {
                         CorporateBookingTypeCharge::create([
                             'user_id' => $id,
-                            'shipping_mode_id' => 3,
+                            'shipping_mode_id' => 4,
                             'replacement_charges' => $pendingbooking['replacement_charges'],
                             'try_and_buy_charges' => $pendingbooking['try_and_buy_charges']
                         ]);
