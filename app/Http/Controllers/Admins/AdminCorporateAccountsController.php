@@ -1048,9 +1048,9 @@ class AdminCorporateAccountsController extends Controller
                         'shipping_mode_id'=>4,
                         'local'=> $request->sameday_return_local_charges,
                         'national_charges_class_0'=> $request->sameday_return_class_0_charges,
-                        'national_charges_class_1'=> $request->sameday_return_class_1_charges,
-                        'national_charges_class_2'=> $request->sameday_return_class_2_charges,
-                        'national_charges_class_3'=> $request->sameday_return_class_3_charges
+                        'national_charges_class_1'=> 0,
+                        'national_charges_class_2'=> 0,
+                        'national_charges_class_3'=> 0
                     ]);
                 }
                 if($request->has('sameday_fuel_switch') && $request->sameday_fuel_switch == 'on'){
@@ -2667,9 +2667,9 @@ class AdminCorporateAccountsController extends Controller
                                 'shipping_mode_id' => 4,
                                 'local' => $request->sameday_return_local_charges,
                                 'national_charges_class_0'=> $request->sameday_return_class_0_charges,
-                                'national_charges_class_1'=> $request->sameday_return_class_1_charges,
-                                'national_charges_class_2'=> $request->sameday_return_class_2_charges,
-                                'national_charges_class_3'=> $request->sameday_return_class_3_charges
+                                'national_charges_class_1'=> 0,
+                                'national_charges_class_2'=> 0,
+                                'national_charges_class_3'=> 0
                             ]);
                         } elseif ($request->sameday_return_record == null) {
                             CorporateReturnCharge::create([
@@ -2677,9 +2677,9 @@ class AdminCorporateAccountsController extends Controller
                                 'shipping_mode_id' => 4,
                                 'local' => $request->sameday_return_local_charges,
                                 'national_charges_class_0'=> $request->sameday_return_class_0_charges,
-                                'national_charges_class_1'=> $request->sameday_return_class_1_charges,
-                                'national_charges_class_2'=> $request->sameday_return_class_2_charges,
-                                'national_charges_class_3'=> $request->sameday_return_class_3_charges
+                                'national_charges_class_1'=> 0,
+                                'national_charges_class_2'=> 0,
+                                'national_charges_class_3'=> 0
                             ]);
                         }
 
@@ -3728,9 +3728,9 @@ class AdminCorporateAccountsController extends Controller
                             'shipping_mode_id' => 4,
                             'local' => $request->sameday_return_local_charges,
                             'national_charges_class_0' => $request->sameday_return_class_0_charges,
-                            'national_charges_class_1' => $request->sameday_return_class_1_charges,
-                            'national_charges_class_2' => $request->sameday_return_class_2_charges,
-                            'national_charges_class_3' => $request->sameday_return_class_3_charges
+                            'national_charges_class_1' => 0,
+                            'national_charges_class_2' => 0,
+                            'national_charges_class_3' => 0
                         ]);
                     }
                     if ($request->has('sameday_fuel_switch') && $request->sameday_fuel_switch == 'on') {

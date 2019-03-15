@@ -1898,27 +1898,9 @@
                                             </div>
 
                                             <div class="col text-center">
-                                                <label class="card-title">National Charges Class A</label>
+                                                <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
                                                     <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="sameday_return_class_0_charges"  value="{{$returnCharges[4][0]->national_charges_class_0}}">
-                                                </fieldset>
-                                            </div>
-                                            <div class="col text-center">
-                                                <label class="card-title">National Charges Class B</label>
-                                                <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="sameday_return_class_1_charges"  value="{{$returnCharges[4][0]->national_charges_class_1}}">
-                                                </fieldset>
-                                            </div>
-                                            <div class="col text-center">
-                                                <label class="card-title">National Charges Class C</label>
-                                                <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="sameday_return_class_2_charges"  value="{{$returnCharges[4][0]->national_charges_class_2}}">
-                                                </fieldset>
-                                            </div>
-                                            <div class="col text-center">
-                                                <label class="card-title">National Charges Class D</label>
-                                                <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="sameday_return_class_3_charges"  value="{{$returnCharges[4][0]->national_charges_class_3}}">
                                                 </fieldset>
                                             </div>
                                         </div>

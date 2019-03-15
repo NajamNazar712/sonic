@@ -2256,7 +2256,7 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_or_sameday}}" name="sameday_wa_national_charges[{{$index}}]" disabled>
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_0}}" name="sameday_wa_national_charges[{{$index}}]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
@@ -2548,7 +2548,7 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text"  class="form-control amount" name="sameday_return_national_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national != '')? $returnCharges[4][0]->national : ''}}" {{$same_return_sw}} disabled>
+                                                    <input type="text"  class="form-control amount" name="sameday_return_national_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national_charges_class_0 != '')? $returnCharges[4][0]->national_charges_class_0 : ''}}" {{$same_return_sw}} disabled>
                                                 </fieldset>
                                             </div>
                                         </div>
