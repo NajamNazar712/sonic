@@ -3077,24 +3077,19 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
                     ]);
-
-                        if ($request->overnight_door_min_chargeable_weight != null) {
                             PendingCorporateMinChargeableWeight::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'delivery_type_id' => 1,
                                 'min_chargeable_weight' => $request->on_door_mcw_charges
                             ]);
-                                }
 
-                        if ($request->overnight_hub_min_chargeable_weight != null) {
                             PendingCorporateMinChargeableWeight::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'delivery_type_id' => 2,
                                 'min_chargeable_weight' => $request->on_hub_mcw_charges
                             ]);
-                        }
                     foreach ($request->on_door_weight_record as $index => $on_door_weight_record) {
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
@@ -3228,23 +3223,20 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
                     ]);
-                    if ($request->overland_door_min_chargeable_weight != null) {
                         PendingCorporateMinChargeableWeight::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'delivery_type_id' => 1,
                             'min_chargeable_weight' => $request->ol_door_mcw_charges
                         ]);
-                    }
 
-                    if ($request->overland_hub_min_chargeable_weight != null) {
                         PendingCorporateMinChargeableWeight::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'delivery_type_id' => 2,
                             'min_chargeable_weight' => $request->ol_hub_mcw_charges
                         ]);
-                    }
+
                     foreach ($request->ol_door_weight_record as $index => $ol_door_weight_record) {
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
@@ -3378,23 +3370,21 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
                     ]);
-                    if ($request->detain_door_min_chargeable_weight != null) {
+
                         PendingCorporateMinChargeableWeight::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'delivery_type_id' => 1,
                             'min_chargeable_weight' => $request->detain_door_mcw_charges
                         ]);
-                    }
 
-                    if ($request->detain_hub_min_chargeable_weight != null) {
                         PendingCorporateMinChargeableWeight::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'delivery_type_id' => 2,
                             'min_chargeable_weight' => $request->detain_hub_mcw_charges
                         ]);
-                    }
+
                     foreach ($request->detain_door_weight_record as $index => $detain_door_weight_record) {
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
@@ -3527,23 +3517,20 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
                     ]);
 
-                    if ($request->overland_door_min_chargeable_weight != null) {
                         PendingCorporateMinChargeableWeight::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'delivery_type_id' => 1,
                             'min_chargeable_weight' => $request->sameday_door_mcw_charges
                         ]);
-                    }
 
-                    if ($request->overland_hub_min_chargeable_weight != null) {
                         PendingCorporateMinChargeableWeight::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'delivery_type_id' => 2,
                             'min_chargeable_weight' => $request->sameday_hub_mcw_charges
                         ]);
-                    }
+
                     foreach ($request->sameday_door_weight_record as $index => $sameday_door_weight_record) {
                         PendingCorporateWeightCharge::create([
                             'user_id' => $id,
