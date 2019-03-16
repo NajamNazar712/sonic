@@ -388,7 +388,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="row return-charges-div-overnight">
+                                        <div class="row return-charges-div-overnight justify-content-center">
 
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
@@ -902,7 +902,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="row return-charges-div-overland">
+                                        <div class="row return-charges-div-overland justify-content-center">
 
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
@@ -1419,7 +1419,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="row return-charges-div-detain">
+                                        <div class="row return-charges-div-detain justify-content-center">
 
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
@@ -1897,7 +1897,7 @@
                                                 </fieldset>
                                             </div>
 
-                                            <div class="col text-center">
+                                            <div class="col-md-2 text-center">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
                                                     <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="sameday_return_class_0_charges"  value="{{$returnCharges[4][0]->national_charges_class_0}}">
