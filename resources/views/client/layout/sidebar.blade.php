@@ -60,6 +60,10 @@
                 </li>
             @endif
 
+            @if (session('user_type') == 1)
+                <li class=" nav-item"><a href="{{ route('cod.cancelled_shipments.index') }}"><span class="menu-title" data-i18n="nav.dash.main">Cancelled Shipments</span></a></li>
+            @endif
+
             <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title">Tracking</span></a></li>
         </ul>
     </div>

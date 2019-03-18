@@ -190,6 +190,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
     Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
 
+    Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
+        Route::get('','Shippers\ShipperShipmentCancelController@index')->name('index');
+        Route::get('list', 'Shippers\ShipperShipmentCancelController@list')->name('list');
+        Route::put('revert', 'Shippers\ShipperShipmentCancelController@revert')->name('revert');
+    });
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
