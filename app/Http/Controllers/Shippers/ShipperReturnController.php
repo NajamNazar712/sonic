@@ -227,13 +227,18 @@ class ShipperReturnController extends Controller
     public function return_reattempt_single_status(Request $request){
         $parcel = Shipment::find($request->shipment_id);
         if($parcel){
-            if(($parcel->shipper_status_id != 52) && ($parcel->shipper_status_id != 13)){
-                Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>52,'consignee_status_id'=>52]);
-                ShipmentsJourneyController::add($request->shipment_id, 52, 52, NULL, $request->remark, session('user_id'), NULL);
+            if($parcel->shipper_status_id != 52){
+                if($parcel->shipper_status_id != 13){
+                    Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>52,'consignee_status_id'=>52]);
+                    ShipmentsJourneyController::add($request->shipment_id, 52, 52, NULL, $request->remark, session('user_id'), NULL);
 
-                return response()->json(['status'=>1,'success'=>"Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
+                    return response()->json(['status'=>1,'success'=>"Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
+                }
+                else{
+                    return ['status'=>0,'error'=>"Shipment is already updated for Re-attempt!"];
+                }
             }
-            return ['status'=>0,'error'=>"Something went wrong, try again later!"];
+            return ['status'=>0,'error'=>"Shipment is already requested for Re-attempt!"];
 
         }
         return ['status'=>0,'error'=>"Something went wrong, try again later!"];
