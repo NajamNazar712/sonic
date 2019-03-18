@@ -209,7 +209,7 @@ class ShipperReturnController extends Controller
 
         foreach ($shipment_ids as $shipment){
             $parcel = Shipment::find($shipment);
-            if($parcel->shipper_status_id != 52){
+            if(($parcel->shipper_status_id != 52) && ($parcel->shipper_status_id != 13)){
 
                 $remark_inp = "remark.$shipment";
 
@@ -227,7 +227,7 @@ class ShipperReturnController extends Controller
     public function return_reattempt_single_status(Request $request){
         $parcel = Shipment::find($request->shipment_id);
         if($parcel){
-            if($parcel->shipper_status_id != 52){
+            if(($parcel->shipper_status_id != 52) && ($parcel->shipper_status_id != 13)){
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>52,'consignee_status_id'=>52]);
                 ShipmentsJourneyController::add($request->shipment_id, 52, 52, NULL, $request->remark, session('user_id'), NULL);
 
