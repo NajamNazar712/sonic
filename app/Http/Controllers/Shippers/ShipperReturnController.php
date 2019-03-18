@@ -209,13 +209,13 @@ class ShipperReturnController extends Controller
 
         foreach ($shipment_ids as $shipment){
             $parcel = Shipment::find($shipment);
-            if($parcel->shipper_status_id != 52){
+            if(($parcel->shipper_status_id != 52) && ($parcel->shipper_status_id != 13)){
 
                 $remark_inp = "remark.$shipment";
 
                 $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
 
-                Shipment::where('id',$shipment)->update(['shipper_status_id'=>52,'consignee_status_id'=>52]);
+                Shipment::where('id',$shipment)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
                 ShipmentsJourneyController::add($shipment, 52, 52, NULL, $remarks, session('user_id'), NULL);
             }
 
@@ -228,12 +228,17 @@ class ShipperReturnController extends Controller
         $parcel = Shipment::find($request->shipment_id);
         if($parcel){
             if($parcel->shipper_status_id != 52){
-                Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>52,'consignee_status_id'=>52]);
-                ShipmentsJourneyController::add($request->shipment_id, 52, 52, NULL, $request->remark, session('user_id'), NULL);
+                if($parcel->shipper_status_id != 13){
+                    Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
+                    ShipmentsJourneyController::add($request->shipment_id, 52, 52, NULL, $request->remark, session('user_id'), NULL);
 
-                return response()->json(['status'=>1,'success'=>"Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
+                    return response()->json(['status'=>1,'success'=>"Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
+                }
+                else{
+                    return ['status'=>0,'error'=>"Shipment is already updated for Re-attempt!"];
+                }
             }
-            return ['status'=>0,'error'=>"Something went wrong, try again later!"];
+            return ['status'=>0,'error'=>"Shipment is already requested for Re-attempt!"];
 
         }
         return ['status'=>0,'error'=>"Something went wrong, try again later!"];
