@@ -143,6 +143,10 @@ class ShipmentChargesController extends Controller
                         }
                     }
 
+                    if ($account_type_id == 2) {
+                        $charges = $charges * ROUND($shipment->actual_weight, 0);
+                    }
+
                     if ($charges < $discount) {
                         $shipment->weight_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                     }
@@ -667,6 +671,10 @@ class ShipmentChargesController extends Controller
                         else {
                             $charges = $weight_charge->national_charges_class_0;
                         }
+                    }
+
+                    if ($account_type_id == 2) {
+                        $charges = $charges * ROUND($shipment->actual_weight, 0);
                     }
 
                     $charges = ($charges * $replacement_multiplier);
