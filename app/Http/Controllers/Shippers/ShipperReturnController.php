@@ -215,7 +215,7 @@ class ShipperReturnController extends Controller
 
                 $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
 
-                Shipment::where('id',$shipment)->update(['shipper_status_id'=>52,'consignee_status_id'=>52]);
+                Shipment::where('id',$shipment)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
                 ShipmentsJourneyController::add($shipment, 52, 52, NULL, $remarks, session('user_id'), NULL);
             }
 
@@ -229,7 +229,7 @@ class ShipperReturnController extends Controller
         if($parcel){
             if($parcel->shipper_status_id != 52){
                 if($parcel->shipper_status_id != 13){
-                    Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>52,'consignee_status_id'=>52]);
+                    Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
                     ShipmentsJourneyController::add($request->shipment_id, 52, 52, NULL, $request->remark, session('user_id'), NULL);
 
                     return response()->json(['status'=>1,'success'=>"Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
