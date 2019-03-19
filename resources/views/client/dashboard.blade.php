@@ -20,6 +20,19 @@
                                 </div>
 
                                 <div class="form-group ml-1">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left la la-calendar-o"></span>
+                                    </div>
+                                    <input type="text" name="booking_from_date" class="form-control bg-primary border-primary white rounded-right" id="booking_from_date" placeholder="Booking Date From">
+                                </div>
+                                <div class="form-group ml-1">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left la la-calendar-o"></span>
+                                    </div>
+                                    <input type="text" name="booking_to_date" class="form-control bg-primary border-primary white rounded-right" id="booking_to_date"  placeholder="Booking Date To">
+                                </div>
+
+                                <div class="form-group ml-1">
                                     <button type="submit" class="btn btn-primary">Search</button>
                                 </div>
                             </form>
@@ -169,6 +182,39 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            var booking_from_date = $('#booking_from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #booking_to_date').pickadate('picker').set('min', $('#track_form #booking_from_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var booking_to_date = $('#booking_to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #booking_from_date').pickadate('picker').set('max', $('#track_form #booking_to_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             function print(selected_rows) {
                 $.ajax({
                     url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
@@ -314,6 +360,8 @@
                     url: '{{ route('cod.orders.list') }}',
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                        d.booking_from_date = $('input[name="booking_from_date_formatted"]').val();
+                        d.booking_to_date = $('input[name="booking_to_date_formatted"]').val();
                     }
                 },
                 rowId: 'shipment_id',
@@ -711,8 +759,10 @@
             $('#track_form').bind('submit',function (e) {
                 e.preventDefault();
                 var tracking_numbers = $('#track_form .tracking_numbers').val();
+                var booking_from_date = $('#track_form #booking_from_date').val();
+                var booking_to_date = $('#track_form #booking_to_date').val();
 
-                if (tracking_numbers != '') {
+                if (tracking_numbers != ''  || (booking_from_date != '' && booking_to_date != '')) {
                     table.draw();
                 }
 
