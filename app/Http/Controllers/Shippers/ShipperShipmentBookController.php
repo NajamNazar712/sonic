@@ -208,7 +208,7 @@ class ShipperShipmentBookController extends Controller
                             $default = 1;
                         }
                         else{
-                            $default = 1;
+                            $default = 0;
                         }
                         UserShippingInfo::where('user_id', $user_id)->update(['default_address' => 0]);
                         $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, $default);
@@ -1370,7 +1370,7 @@ class ShipperShipmentBookController extends Controller
                 if ($request->input('pickup_address') == 0) {
                     $pickup_city_id = $request->input('new_pickup_city');
 
-                    $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id);
+                    $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, 0);
                 }
                 else {
                     $pickup_address_id = $request->input('pickup_address');
