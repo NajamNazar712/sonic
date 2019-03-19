@@ -235,8 +235,8 @@
                                 row.push(values.statement_id);
                                 row.push(values.hub_name);
                                 row.push(values.statement_reference_no);
-                                row.push(values.created_by);
                                 row.push(values.created_at);
+                                row.push(values.created_by);
 
                                 body.push(row);
                             });
