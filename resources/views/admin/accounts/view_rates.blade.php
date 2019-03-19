@@ -3974,50 +3974,5 @@
         }
 
 
-
-        var overnightSwitch = document.querySelector('.switchery.on-main-switch');
-        var overlandSwitch = document.querySelector('.switchery.ol-main-switch');
-        var detainSwitch = document.querySelector('.switchery.detain-main-switch');
-        var samedaySwitch = document.querySelector('.switchery.sameday-main-switch');
-
-
-        $( "#ratesAdditionForm" ).validate({
-            errorClass:"danger",
-            errorPlacement: function(error, element) {
-                error.addClass('w-100').appendTo(element.parent('.form-group'));
-            },
-            submitHandler: function(form) {
-                if (overnightSwitch.checked == true || overlandSwitch.checked == true || detainSwitch.checked == true || samedaySwitch.checked == true) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    var msg = "";
-                    if($('#authorize').val() == 1){
-                        msg = "Rates are being authorized!"
-                    }else{
-                        msg = 'Rates are being added!';
-                    }
-
-
-                    swal({
-                        title: 'Please Wait!',
-                        text: msg,
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-                else {
-                    swal({
-                        title: 'No Shipping Mode Selected!',
-                        text: 'At-least one shipping mode is required!',
-                        icon: 'warning'
-                    });
-
-                }
-            }
-        });
-
     </script>
 @endsection
