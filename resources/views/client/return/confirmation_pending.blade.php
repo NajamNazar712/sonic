@@ -301,6 +301,33 @@
                                             table.button('.reattempt').disable();
                                             table.draw('false');
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            if(data.not_updated_shipments.length > 0){
+                                                var html = '';
+
+                                                $.each(data.not_updated_shipments, function(index, tracking_number) {
+                                                    html += tracking_number + '<br/>';
+                                                });
+                                                 html += '<br/>Following shipment(s) from are not updated or may already be updated to Return Confirm?';
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                                swal({
+                                                    title: 'Shipments Not Updated',
+                                                    content: content,
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'Close',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        }
+                                                    },
+                                                    closeOnClickOutside: true,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                });
+                                            }
+
 
                                         });
                                     }

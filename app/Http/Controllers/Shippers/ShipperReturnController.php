@@ -206,7 +206,7 @@ class ShipperReturnController extends Controller
 
     public function return_reattempt_status(Request $request){
         $shipment_ids = $request->shipment_ids;
-
+        $not_updated_shipments  = array();
         foreach ($shipment_ids as $shipment){
             $parcel = Shipment::find($shipment);
             if(($parcel->shipper_status_id != 52) && ($parcel->shipper_status_id == 12)){
@@ -217,11 +217,13 @@ class ShipperReturnController extends Controller
 
                 Shipment::where('id',$shipment)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
                 ShipmentsJourneyController::add($shipment, 52, 52, NULL, $remarks, session('user_id'), NULL);
+            }else{
+                $not_updated_shipments[] = $parcel->tracking_number;
             }
 
 
         }
-        return response()->json(['status'=>1,'success'=>"Shipments has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
+        return response()->json(['status'=>1,'not_updated_shipments' => $not_updated_shipments,'success'=>"Shipments has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
     }
 
     public function return_reattempt_single_status(Request $request){
