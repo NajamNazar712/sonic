@@ -174,7 +174,7 @@ class ShipperReportsController extends Controller
         $stats['return'] = number_format($stats['return']->count());
         $stats['in_process'] = number_format($stats['in_process']->count());
         $cities = City::all(['id','name']);
-        return view('client.reports.summary')->with(['stats' => $stats, 'cities' => $cities]);
+        return view('client.reports.summary')->with(['stats' => $stats, 'cities' => $cities, 'today' => $today, 'thirtyday' => $thirtyDays]);
     }
 
     public function summary_list(Request $request){
@@ -197,6 +197,8 @@ class ShipperReportsController extends Controller
             ->leftjoin('products as p','p.id','=','si.product_type_id')
             ->select(['shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','p.product_name','si.description','sj.created_at as arrival_date','oc.name as origin','dc.name as destination'])
             ->where('shipments.user_id', session('user_id'));
+//            ->whereBetween();
+
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
@@ -205,11 +207,33 @@ class ShipperReportsController extends Controller
             ->editColumn('collection_amount', function ($shipments){
                 return number_format($shipments->collection_amount);
             });
-            if($card = $request->get('cards_filter')){
-                switch ($card)
-
-                $datatable->where('ss.id', '=', $card);
-            }
+//            if($card = $request->get('cards_filter')){
+//                switch ($card) {
+//                    case 'total':
+//
+//                        break;
+//                    case 'booked':
+//                        $class = 'Class B';
+//                        break;
+//                    case 'received':
+//                        $class = 'Class C';
+//                        break;
+//                    case 'delivered':
+//                        $class = 'Class D';
+//                        break;
+//                    case 'returned':
+//                        $class = 'Class D';
+//                        break;
+//                    case 'in_process':
+//                        $class = 'Class D';
+//                        break;
+//                    case 'cancelled':
+//                        $class = 'Class D';
+//                        break;
+//                }
+//
+//                $datatable->where('ss.id', '=', $card);
+//            }
             return $datatable->make(true);
 
     }

@@ -11,6 +11,53 @@
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
+                <input type="hidden" id="cards_filter_input">
+                <div class="row mb-2 justify-content-center">
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_origin" id="search_origin" class="form-control select2">
+                                @foreach($cities as $city)
+                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_destination" id="search_destination" class="form-control select2">
+                                @foreach($cities as $city)
+                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-group input-group ml">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{$thirtyday}}">
+                        </div>
+                    </div>
+                    <div class="col-3 ">
+                        <div class="form-group input-group ml">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{$today}}">
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-3">
                         <div class="card pull-up">
@@ -134,27 +181,6 @@
                     </div>
                 </div>
                 {{--row end--}}
-                <input type="hidden" id="cards_filter_input">
-                <div class="row mb-2">
-                    <div class="col-3">
-                        <fieldset class="form-group">
-                            <select name="search_origin" id="search_origin" class="form-control select2">
-                                @foreach($cities as $city)
-                                    <option value="{{$city->id}}">{{$city->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-3">
-                        <fieldset class="form-group">
-                            <select name="search_destination" id="search_destination" class="form-control select2">
-                                @foreach($cities as $city)
-                                    <option value="{{$city->id}}">{{$city->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -277,6 +303,33 @@
                 placeholder:'Select Destination City',
                 width:'100%',
                 allowClear:true
+            });
+            $('#search_date_from').pickadate({
+                firstDay: 1,
+                clear: false,
+                min: '{{ $thirtyday }}',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    // if (context.select) {
+                    //     $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                    // }
+                }
+            });
+            $('#search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    // if (context.select) {
+                    //     $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                    // }
+                }
             });
             // $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
             //     placeholder:'Select Status',
