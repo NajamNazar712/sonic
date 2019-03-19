@@ -1523,12 +1523,14 @@ class DeliveryController extends Controller
                     $status_drop = "status_drop.$shipment";
                     $reasonId = "reason_drop.$shipment";
                     $verify_fake = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
-                    if ($request->has($fake)) {
-                        $verify_fake->fake_status = 1;
-                        $verify_fake->save();
-                    } else {
-                        $verify_fake->fake_status = 0;
-                        $verify_fake->save();
+                    if($verify_fake){
+                        if ($request->has($fake)) {
+                            $verify_fake->fake_status = 1;
+                            $verify_fake->save();
+                        } else {
+                            $verify_fake->fake_status = 0;
+                            $verify_fake->save();
+                        }
                     }
                     if (!$in_new_delivery_note) {
                         if (!in_array($shipper_status_details->shipper_status_id, $return_status_array)) {
