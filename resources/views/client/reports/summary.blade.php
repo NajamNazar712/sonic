@@ -61,7 +61,7 @@
                 <div class="row">
                     <div class="col-3">
                         <div class="card pull-up">
-                            <div class="card-content border rounded" id="total_booked">
+                            <div class="card-content border rounded" id="total_shipments">
                                 <div class="card-body">
                                     <div class="media d-flex">
                                         <div class="align-self-center">
@@ -304,23 +304,28 @@
                 width:'100%',
                 allowClear:true
             });
+
+            var thirtydays = '{{ $thirtyday }}';
+            var today = '{{ $today }}';
             $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: false,
-                min: '{{ $thirtyday }}',
+                min: new Date(thirtydays),
+                max : new Date(today),
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    // if (context.select) {
-                    //     $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
-                    // }
+                    if (context.select) {
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                    }
                 }
             });
             $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
+                max : new Date(today),
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -389,72 +394,68 @@
             //     }
             // });
 
-            {{--jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {--}}
-                {{--if ( this.context.length ) {--}}
-                    {{--body = [];--}}
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
-                    {{--var jsonResult = $.ajax({--}}
-                        {{--url: '{{ route('cod.reports.sales.list') }}',--}}
-                        {{--data: {--}}
-                            {{--'page': 'all',--}}
-                            {{--'search_tracking': $('#search_tracking_no').val(),--}}
-                            {{--'search_origin': $('#search_origin').val(),--}}
-                            {{--'search_destination': $('#search_destination').val(),--}}
-                            {{--'search_status': $('#search_status').val(),--}}
-                            {{--'search_date_from': $('input[name="search_date_from_formatted"]').val(),--}}
-                            {{--'search_date_to': $('input[name="search_date_to_formatted"]').val()--}}
-                        {{--},--}}
-                        {{--success: function (result) {--}}
-                            {{--head = [];--}}
+                    var jsonResult = $.ajax({
+                        url: '{{ route('cod.reports.summary.list') }}',
+                        data: {
+                            'page': 'all',
+                            'search_origin': $('#search_origin').val(),
+                            'search_destination': $('#search_destination').val(),
+                            'cards_filter': $('#cards_filter_input').val(),
+                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
+                            'search_date_to': $('input[name="search_date_to_formatted"]').val(),
 
-                            {{--head.push('S. No.');--}}
-                            {{--head.push('Tracking No.');--}}
-                            {{--head.push('Account No.');--}}
-                            {{--head.push('Shipper');--}}
-                            {{--head.push('Order ID');--}}
-                            {{--head.push('Status');--}}
-                            {{--head.push('Payment Status');--}}
-                            {{--head.push('Service Type');--}}
-                            {{--head.push('Product Category');--}}
-                            {{--head.push('Description');--}}
-                            {{--head.push('Arrival Date');--}}
-                            {{--head.push('Origin');--}}
-                            {{--head.push('Destination');--}}
-                            {{--head.push('Collection Amount');--}}
-                            {{--head.push('Actual Weight');--}}
-                            {{--head.push('Weight Charges');--}}
-                            {{--head.push('Cash Handling Charges');--}}
+                        },
+                        success: function (result) {
+                            head = [];
 
-                            {{--$.each(result.data, function(index, values) {--}}
-                                {{--row = [];--}}
+                            head.push('S. No.');
+                            head.push('Tracking No.');
+                            head.push('Order ID');
+                            head.push('Status');
+                            head.push('Payment Status');
+                            head.push('Service Type');
+                            head.push('Product Category');
+                            head.push('Description');
+                            head.push('Arrival Date');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Collection Amount');
+                            head.push('Actual Weight');
+                            head.push('Weight Charges');
+                            head.push('Cash Handling Charges');
 
-                                {{--row.push(index + 1);--}}
-                                {{--row.push(values.tracking_number);--}}
-                                {{--row.push(values.account_no);--}}
-                                {{--row.push(values.shipper);--}}
-                                {{--row.push(values.order_id);--}}
-                                {{--row.push(values.current_status);--}}
-                                {{--row.push(values.payment_status);--}}
-                                {{--row.push(values.service_type);--}}
-                                {{--row.push(values.product_name);--}}
-                                {{--row.push(values.description);--}}
-                                {{--row.push(values.arrival_date);--}}
-                                {{--row.push(values.origin);--}}
-                                {{--row.push(values.destination);--}}
-                                {{--row.push(values.p_collection_amount);--}}
-                                {{--row.push(values.actual_weight);--}}
-                                {{--row.push(values.weight_charges);--}}
-                                {{--row.push(values.cash_handling_charges);--}}
+                            $.each(result.data, function(index, values) {
+                                row = [];
 
-                                {{--body.push(row);--}}
-                            {{--});--}}
-                        {{--},--}}
-                        {{--async: false--}}
-                    {{--});--}}
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.order_id);
+                                row.push(values.current_status);
+                                row.push(values.payment_status);
+                                row.push(values.service_type);
+                                row.push(values.product_name);
+                                row.push(values.description);
+                                row.push(values.arrival_date);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.collection_amount);
+                                row.push(values.actual_weight);
+                                row.push(values.weight_charges);
+                                row.push(values.cash_handling_charges);
 
-                    {{--return {body: body, header:head};--}}
-                {{--}--}}
-            {{--} );--}}
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header:head};
+                }
+            } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '350px',
@@ -476,8 +477,8 @@
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.cards_filter = $('#cards_filter_input').val();
-                        // d.search_date_from = $('input[name="search_date_from_formatted"]').val();
-                        // d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 order: [[8, 'desc']],
@@ -506,11 +507,35 @@
                     this.api().table().columns.adjust();
                 }
             });
-            {{--$('#search_filter_btn').on('click',function () {--}}
-                {{--table.draw();--}}
-            {{--});--}}
-            $('#total_booked').on('click', function () {
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
+            $('#total_shipments').on('click', function () {
                 $('#cards_filter_input').val('total');
+                table.draw();
+            });
+            $('#total_pending').on('click', function () {
+                $('#cards_filter_input').val('booked');
+                table.draw();
+            });
+            $('#total_received').on('click', function () {
+                $('#cards_filter_input').val('received');
+                table.draw();
+            });
+            $('#total_delivered').on('click', function () {
+                $('#cards_filter_input').val('delivered');
+                table.draw();
+            });
+            $('#total_return').on('click', function () {
+                $('#cards_filter_input').val('returned');
+                table.draw();
+            });
+            $('#total_inprocess').on('click', function () {
+                $('#cards_filter_input').val('in_process');
+                table.draw();
+            });
+            $('#total_cancelled').on('click', function () {
+                $('#cards_filter_input').val('cancelled');
                 table.draw();
             });
         });

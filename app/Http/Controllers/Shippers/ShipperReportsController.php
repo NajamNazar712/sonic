@@ -197,7 +197,11 @@ class ShipperReportsController extends Controller
             ->leftjoin('products as p','p.id','=','si.product_type_id')
             ->select(['shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','p.product_name','si.description','sj.created_at as arrival_date','oc.name as origin','dc.name as destination'])
             ->where('shipments.user_id', session('user_id'));
-//            ->whereBetween();
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $shipments = $shipments->whereBetween('shipments.created_at', [$from,$to]);
+            }
 
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
@@ -207,33 +211,41 @@ class ShipperReportsController extends Controller
             ->editColumn('collection_amount', function ($shipments){
                 return number_format($shipments->collection_amount);
             });
-//            if($card = $request->get('cards_filter')){
-//                switch ($card) {
-//                    case 'total':
-//
-//                        break;
-//                    case 'booked':
-//                        $class = 'Class B';
-//                        break;
-//                    case 'received':
-//                        $class = 'Class C';
-//                        break;
-//                    case 'delivered':
-//                        $class = 'Class D';
-//                        break;
-//                    case 'returned':
-//                        $class = 'Class D';
-//                        break;
-//                    case 'in_process':
-//                        $class = 'Class D';
-//                        break;
-//                    case 'cancelled':
-//                        $class = 'Class D';
-//                        break;
-//                }
-//
-//                $datatable->where('ss.id', '=', $card);
-//            }
+            if($origin = $request->get('search_origin')){
+                $datatable->where('oc.id', '=', $origin);
+            }
+            if($destination = $request->get('search_destination')){
+                $datatable->where('dc.id', '=', $destination);
+            }
+            if($card = $request->get('cards_filter')){
+                switch ($card) {
+                    case 'total':
+                        $today = Carbon::now()->endOfDay();
+                        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
+                $datatable->whereBetween('shipments.created_at',[$thirtyDays,$today]);
+                        break;
+                    case 'booked':
+                        $datatable->where('shipments.shipper_status_id',1);
+                        break;
+                    case 'received':
+                        $datatable->whereIn('shipments.shipper_status_id',[2,3,4]);
+                        break;
+                    case 'delivered':
+                        $datatable->whereIn('shipments.shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
+                        break;
+                    case 'returned':
+                        $datatable->whereIn('shipments.shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50]);
+                        break;
+                    case 'in_process':
+                        $datatable->whereIn('shipments.shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52]);
+                        break;
+                    case 'cancelled':
+                        $datatable->where('shipments.shipper_status_id',17);
+                        break;
+                }
+
+
+            }
             return $datatable->make(true);
 
     }
