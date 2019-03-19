@@ -173,8 +173,45 @@ class ShipperReportsController extends Controller
         $stats['delivered'] = number_format($stats['delivered']->count());
         $stats['return'] = number_format($stats['return']->count());
         $stats['in_process'] = number_format($stats['in_process']->count());
-        return view('client.reports.summary')->with(['stats' => $stats]);
+        $cities = City::all(['id','name']);
+        return view('client.reports.summary')->with(['stats' => $stats, 'cities' => $cities]);
     }
 
+    public function summary_list(Request $request){
+        $shipments = Shipment::join('users as u','u.id','=','shipments.user_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftjoin('shipment_items as si', function ($join) {
+                $join->on('si.shipment_id', '=', 'shipments.id')
+                    ->where('si.type','=',0);
+            })
+            ->leftjoin('products as p','p.id','=','si.product_type_id')
+            ->select(['shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','p.product_name','si.description','sj.created_at as arrival_date','oc.name as origin','dc.name as destination'])
+            ->where('shipments.user_id', session('user_id'));
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number', function ($shipments) {
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('collection_amount', function ($shipments){
+                return number_format($shipments->collection_amount);
+            });
+            if($card = $request->get('cards_filter')){
+                switch ($card)
+
+                $datatable->where('ss.id', '=', $card);
+            }
+            return $datatable->make(true);
+
+    }
 }
 

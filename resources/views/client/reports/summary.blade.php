@@ -3,129 +3,185 @@
 @section('title', 'Report - Summary')
 
 @section('content')
-<div class="row">
-    <div class="col-3">
-        <div class="card pull-up">
-            <div class="card-content">
-                <div class="card-body">
-                    <div class="media d-flex">
-                        <div class="align-self-center">
-                            <i class="icon-grid font-large-2 float-left"></i>
-                        </div>
-                        <div class="media-body text-right">
-                            <h3 class="">{{$stats['total']}}</h3>
-                            <span>Total Booked Shipment(s)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-3">
-        <div class="card bg-gradient-directional-primary pull-up">
-            <div class="card-content">
-                <div class="card-body">
-                    <div class="media d-flex">
-                        <div class="align-self-center">
-                            <i class="icon-hourglass text-white font-large-2 float-left"></i>
-                        </div>
-                        <div class="media-body text-white text-right">
-                            <h3 class="text-white">{{$stats['booked']}}</h3>
-                            <span>Pending Shipment(s)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-3">
-        <div class="card bg-gradient-directional-info pull-up">
-            <div class="card-content">
-                <div class="card-body">
-                    <div class="media d-flex">
-                        <div class="align-self-center">
-                            <i class="icon-layers text-white font-large-2 float-left"></i>
-                        </div>
-                        <div class="media-body text-white text-right">
-                            <h3 class="text-white">{{$stats['received']}}</h3>
-                            <span>Received Shipment(s)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div><div class="col-3">
-        <div class="card bg-gradient-directional-success pull-up">
-            <div class="card-content">
-                <div class="card-body">
-                    <div class="media d-flex">
-                        <div class="align-self-center">
-                            <i class="icon-check text-white font-large-2 float-left"></i>
-                        </div>
-                        <div class="media-body text-white text-right">
-                            <h3 class="text-white">{{$stats['delivered']}}</h3>
-                            <span>Delivered Shipment(s)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row justify-content-center">
-    <div class="col-3">
-        <div class="card bg-gradient-directional-warning pull-up">
-            <div class="card-content">
-                <div class="card-body">
-                    <div class="media d-flex">
-                        <div class="align-self-center">
-                            <i class="icon-loop text-white font-large-2 float-left"></i>
-                        </div>
-                        <div class="media-body text-white text-right">
-                            <h3 class="text-white">{{$stats['return']}}</h3>
-                            <span>Returned Shipment(s)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-3">
-        <div class="card bg-gradient-directional-inprocess pull-up">
-            <div class="card-content">
-                <div class="card-body">
-                    <div class="media d-flex">
-                        <div class="align-self-center">
-                            <i class="icon-shuffle text-white font-large-2 float-left"></i>
-                        </div>
-                        <div class="media-body text-white text-right">
-                            <h3 class="text-white">{{$stats['in_process']}}</h3>
-                            <span>In Process Shipment(s)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-3">
-        <div class="card bg-gradient-directional-red pull-up">
-            <div class="card-content">
-                <div class="card-body">
-                    <div class="media d-flex">
-                        <div class="align-self-center">
-                            <i class="icon-close text-white font-large-2 float-left"></i>
-                        </div>
-                        <div class="media-body text-white text-right">
-                            <h3 class="text-white">{{$stats['canceled']}}</h3>
-                            <span>Cancelled Shipment(s)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
+    <h1 class="mb-1">
+        Summary Report
+    </h1>
+
+    <div class="card">
+        <div class="card-content" aria-expanded="true">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-3">
+                        <div class="card pull-up">
+                            <div class="card-content border rounded" id="total_booked">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-grid font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-right">
+                                            <h3 class="">{{$stats['total']}}</h3>
+                                            <span>Total Booked Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-primary pull-up">
+                            <div class="card-content" id="total_pending">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['booked']}}</h3>
+                                            <span>Pending Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-info pull-up">
+                            <div class="card-content" id="total_received">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-layers text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['received']}}</h3>
+                                            <span>Received Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div><div class="col-3">
+                        <div class="card bg-gradient-directional-success pull-up">
+                            <div class="card-content" id="total_delivered">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-check text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['delivered']}}</h3>
+                                            <span>Delivered Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-warning pull-up">
+                            <div class="card-content" id="total_return">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-loop text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['return']}}</h3>
+                                            <span>Returned Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-inprocess pull-up">
+                            <div class="card-content" id="total_inprocess">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-shuffle text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['in_process']}}</h3>
+                                            <span>In Process Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-red pull-up">
+                            <div class="card-content" id="total_cancelled">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-close text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$stats['canceled']}}</h3>
+                                            <span>Cancelled Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{--row end--}}
+                <input type="hidden" id="cards_filter_input">
+                <div class="row mb-2">
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_origin" id="search_origin" class="form-control select2">
+                                @foreach($cities as $city)
+                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_destination" id="search_destination" class="form-control select2">
+                                @foreach($cities as $city)
+                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                    <thead>
+                    <tr role="row" class="bg-primary white">
+
+                        <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Order ID</th>
+                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Payment Status</th>
+                        <th class="border-primary border-darken-1">Service Type</th>
+                        <th class="border-primary border-darken-1">Product Category</th>
+                        <th class="border-primary border-darken-1">Description</th>
+                        <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Collection Amount</th>
+                        <th class="border-primary border-darken-1">Actual Weight</th>
+                        <th class="border-primary border-darken-1">Weight Charges</th>
+                        <th class="border-primary border-darken-1">Cash Handling Charges</th>
+
+                    </tr>
+                    </thead>
+                </table>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -134,7 +190,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <style>
         table.dataTable {
@@ -212,16 +268,16 @@
             //     'allowMinus': false,
             //     'allowPlus': false
             // });
-            // $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
-            //     placeholder:'Select Origin City',
-            //     width:'100%',
-            //     allowClear:true
-            // });
-            // $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
-            //     placeholder:'Select Destination City',
-            //     width:'100%',
-            //     allowClear:true
-            // });
+            $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Origin City',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Destination City',
+                width:'100%',
+                allowClear:true
+            });
             // $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
             //     placeholder:'Select Status',
             //     width:'100%',
@@ -346,64 +402,64 @@
                     {{--return {body: body, header:head};--}}
                 {{--}--}}
             {{--} );--}}
-            {{--var table = $('#datatable').DataTable({--}}
-                {{--dom: '<"d-inline-block"l><"pull-right"B>tipr',--}}
-                {{--scrollX: true, scrollY: '350px',--}}
-                {{--buttons: [--}}
-                    {{--{--}}
-                        {{--extend: 'excelHtml5',--}}
-                        {{--title: 'Sales Report',--}}
-                        {{--text:'<i class="la la-file-excel-o"></i> Excel',--}}
-                    {{--},--}}
-                {{--],--}}
-                {{--lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],--}}
-                {{--pageLength: 50,--}}
-                {{--pagingType: 'full_numbers',--}}
-                {{--processing: true,--}}
-                {{--serverSide: true,--}}
-                {{--ajax:{--}}
-                    {{--url: '{{ route('cod.reports.sales.list') }}',--}}
-                    {{--data: function (d) {--}}
-                        {{--d.search_tracking = $('#search_tracking_no').val();--}}
-                        {{--d.search_origin = $('#search_origin').val();--}}
-                        {{--d.search_destination = $('#search_destination').val();--}}
-                        {{--d.search_status = $('#search_status').val();--}}
-                        {{--d.search_date_from = $('input[name="search_date_from_formatted"]').val();--}}
-                        {{--d.search_date_to = $('input[name="search_date_to_formatted"]').val();--}}
-                    {{--}--}}
-                {{--},--}}
-                {{--order: [[10, 'asc']],--}}
-                {{--columns: [--}}
-                    {{--{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},--}}
-                    {{--{ data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},--}}
-                    {{--{ data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},--}}
-                    {{--{ data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},--}}
-                    {{--{ data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},--}}
-                    {{--{ data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},--}}
-                    {{--{ data:'payment_status' ,name: 'ss.name', class: 'align-middle payment_status'},--}}
-                    {{--{ data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},--}}
-                    {{--{ data:'product_name', name: 'p.product_name', class: 'align-middle product_name'},--}}
-                    {{--{ data:'description', name: 'si.description', class: 'align-middle description'},--}}
-                    {{--{ data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},--}}
-                    {{--{ data:'origin' ,name: 'oc.name', class: 'align-middle origin'},--}}
-                    {{--{ data:'destination' ,name: 'dc.name', class: 'align-middle destination'},--}}
-                    {{--{ data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},--}}
-                    {{--{ data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},--}}
-                    {{--{ data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},--}}
-                    {{--{ data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'}--}}
-                {{--],--}}
-                {{--rowCallback: function(row, data, index) {--}}
-                    {{--var info = table.page.info();--}}
-                    {{--$('td:eq(0)', row).html(index + 1 + info.page * info.length);--}}
-                {{--},--}}
-                {{--initComplete: function() {--}}
-                    {{--this.api().table().columns.adjust();--}}
-                {{--}--}}
-            {{--});--}}
+            var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '350px',
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        title: 'Sales Report',
+                        text:'<i class="la la-file-excel-o"></i> Excel',
+                    },
+                ],
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                processing: true,
+                serverSide: true,
+                ajax:{
+                    url: '{{ route('cod.reports.summary.list') }}',
+                    data: function (d) {
+                        d.search_origin = $('#search_origin').val();
+                        d.search_destination = $('#search_destination').val();
+                        d.cards_filter = $('#cards_filter_input').val();
+                        // d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        // d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                    }
+                },
+                order: [[8, 'desc']],
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
+                    { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
+                    { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
+                    { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
+                    { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
+                    { data:'product_name', name: 'p.product_name', class: 'align-middle product_name'},
+                    { data:'description', name: 'si.description', class: 'align-middle description'},
+                    { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
+                    { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
+                    { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
+                    { data:'collection_amount' ,name: 'shipments.amount', class: 'align-middle collection_amount'},
+                    { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
+                    { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
+                    { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'}
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
             {{--$('#search_filter_btn').on('click',function () {--}}
                 {{--table.draw();--}}
             {{--});--}}
-
+            $('#total_booked').on('click', function () {
+                $('#cards_filter_input').val('total');
+                table.draw();
+            });
         });
     </script>
 
