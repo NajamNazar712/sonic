@@ -288,9 +288,8 @@
                     {data: 'statement_link', name: 'pcs.id', class: 'align-middle statement_link'},
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
                     {data: 'statement_reference_no', name: 'pcs.reference_no', class: 'align-middle statement_reference_no'},
-                    {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'pcs.created_at', class: 'align-middle created_at'},
-
+                    {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
