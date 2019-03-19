@@ -1,0 +1,410 @@
+@extends('client.layout.master')
+
+@section('title', 'Report - Summary')
+
+@section('content')
+<div class="row">
+    <div class="col-3">
+        <div class="card pull-up">
+            <div class="card-content">
+                <div class="card-body">
+                    <div class="media d-flex">
+                        <div class="align-self-center">
+                            <i class="icon-grid font-large-2 float-left"></i>
+                        </div>
+                        <div class="media-body text-right">
+                            <h3 class="">{{$stats['total']}}</h3>
+                            <span>Total Booked Shipment(s)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card bg-gradient-directional-primary pull-up">
+            <div class="card-content">
+                <div class="card-body">
+                    <div class="media d-flex">
+                        <div class="align-self-center">
+                            <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                        </div>
+                        <div class="media-body text-white text-right">
+                            <h3 class="text-white">{{$stats['booked']}}</h3>
+                            <span>Pending Shipment(s)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card bg-gradient-directional-info pull-up">
+            <div class="card-content">
+                <div class="card-body">
+                    <div class="media d-flex">
+                        <div class="align-self-center">
+                            <i class="icon-layers text-white font-large-2 float-left"></i>
+                        </div>
+                        <div class="media-body text-white text-right">
+                            <h3 class="text-white">{{$stats['received']}}</h3>
+                            <span>Received Shipment(s)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><div class="col-3">
+        <div class="card bg-gradient-directional-success pull-up">
+            <div class="card-content">
+                <div class="card-body">
+                    <div class="media d-flex">
+                        <div class="align-self-center">
+                            <i class="icon-check text-white font-large-2 float-left"></i>
+                        </div>
+                        <div class="media-body text-white text-right">
+                            <h3 class="text-white">{{$stats['delivered']}}</h3>
+                            <span>Delivered Shipment(s)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row justify-content-center">
+    <div class="col-3">
+        <div class="card bg-gradient-directional-warning pull-up">
+            <div class="card-content">
+                <div class="card-body">
+                    <div class="media d-flex">
+                        <div class="align-self-center">
+                            <i class="icon-loop text-white font-large-2 float-left"></i>
+                        </div>
+                        <div class="media-body text-white text-right">
+                            <h3 class="text-white">{{$stats['return']}}</h3>
+                            <span>Returned Shipment(s)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card bg-gradient-directional-inprocess pull-up">
+            <div class="card-content">
+                <div class="card-body">
+                    <div class="media d-flex">
+                        <div class="align-self-center">
+                            <i class="icon-shuffle text-white font-large-2 float-left"></i>
+                        </div>
+                        <div class="media-body text-white text-right">
+                            <h3 class="text-white">{{$stats['in_process']}}</h3>
+                            <span>In Process Shipment(s)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card bg-gradient-directional-red pull-up">
+            <div class="card-content">
+                <div class="card-body">
+                    <div class="media d-flex">
+                        <div class="align-self-center">
+                            <i class="icon-close text-white font-large-2 float-left"></i>
+                        </div>
+                        <div class="media-body text-white text-right">
+                            <h3 class="text-white">{{$stats['canceled']}}</h3>
+                            <span>Cancelled Shipment(s)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@endsection
+
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <style>
+        table.dataTable {
+            font-size: 12px;
+        }
+
+        table.dataTable thead tr th {
+            padding-left: 0.5em;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        table.dataTable thead tr th:before,
+        table.dataTable thead tr th:after {
+            height: 20px;
+            margin-bottom: -10px;
+            bottom: 50% !important;
+        }
+
+        table.dataTable tbody tr td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #64a0d2;
+        }
+
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
+
+        .btn-group .dropdown-menu .dropdown-item {
+            white-space: normal;
+        }
+        a.btn.btn-secondary {
+            border-radius: 20px;
+            background: #64a0d2;
+        }
+        .btn-group .dropdown-menu .dropdown-item {
+            white-space: normal;
+        }
+        #toast-bottom-center.toast-container {
+            text-align: center;
+        }
+
+        #toast-bottom-center.toast-container .toast {
+            display: table;
+            width: auto !important;
+            text-align: left;
+        }
+        .bg-gradient-directional-inprocess {
+            background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
+            background-repeat: repeat-x;
+        }
+    </style>
+@endsection
+
+@section('js')
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // $('#search_tracking_no').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false
+            // });
+            // $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
+            //     placeholder:'Select Origin City',
+            //     width:'100%',
+            //     allowClear:true
+            // });
+            // $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
+            //     placeholder:'Select Destination City',
+            //     width:'100%',
+            //     allowClear:true
+            // });
+            // $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
+            //     placeholder:'Select Status',
+            //     width:'100%',
+            //     allowClear:true
+            // });
+            //
+            //
+            // var from_date = $('#search_date_from').pickadate({
+            //     firstDay: 1,
+            //     clear: '',
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 00:00:00',
+            //     hiddenSuffix: '_formatted',
+            //     onSet: function(context) {
+            //         if (context.select) {
+            //             var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+            //             var currentDate = moment(old_date_formatted);
+            //
+            //             var to_date_formatted = $('input[name="search_date_to_formatted"]').val();
+            //             var toDate = moment(to_date_formatted);
+            //
+            //             if (currentDate.format('x') > toDate.format('x')) {
+            //                 to_date.pickadate('picker').clear();
+            //             }
+            //
+            //             var afterDate = currentDate.add(30, 'days');
+            //             to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
+            //
+            //
+            //         }
+            //     }
+            // });
+            // var to_date = $('#search_date_to').pickadate({
+            //     firstDay: 1,
+            //     clear: '',
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 23:59:59',
+            //     hiddenSuffix: '_formatted',
+            //     onSet: function(context) {
+            //         if (context.select) {
+            //             var current_date_formatted = $('input[name="search_date_to_formatted"]').val();
+            //             var currentDate = moment(current_date_formatted);
+            //
+            //             var from_date_formatted = $('input[name="search_date_from_formatted"]').val();
+            //             var fromDate = moment(from_date_formatted);
+            //
+            //             if (currentDate.format('x') < fromDate.format('x')) {
+            //                 from_date.pickadate('picker').clear();
+            //             }
+            //
+            //             var beforeDate = currentDate.subtract(30, 'days');
+            //             from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
+            //         }
+            //     }
+            // });
+
+            {{--jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {--}}
+                {{--if ( this.context.length ) {--}}
+                    {{--body = [];--}}
+
+                    {{--var jsonResult = $.ajax({--}}
+                        {{--url: '{{ route('cod.reports.sales.list') }}',--}}
+                        {{--data: {--}}
+                            {{--'page': 'all',--}}
+                            {{--'search_tracking': $('#search_tracking_no').val(),--}}
+                            {{--'search_origin': $('#search_origin').val(),--}}
+                            {{--'search_destination': $('#search_destination').val(),--}}
+                            {{--'search_status': $('#search_status').val(),--}}
+                            {{--'search_date_from': $('input[name="search_date_from_formatted"]').val(),--}}
+                            {{--'search_date_to': $('input[name="search_date_to_formatted"]').val()--}}
+                        {{--},--}}
+                        {{--success: function (result) {--}}
+                            {{--head = [];--}}
+
+                            {{--head.push('S. No.');--}}
+                            {{--head.push('Tracking No.');--}}
+                            {{--head.push('Account No.');--}}
+                            {{--head.push('Shipper');--}}
+                            {{--head.push('Order ID');--}}
+                            {{--head.push('Status');--}}
+                            {{--head.push('Payment Status');--}}
+                            {{--head.push('Service Type');--}}
+                            {{--head.push('Product Category');--}}
+                            {{--head.push('Description');--}}
+                            {{--head.push('Arrival Date');--}}
+                            {{--head.push('Origin');--}}
+                            {{--head.push('Destination');--}}
+                            {{--head.push('Collection Amount');--}}
+                            {{--head.push('Actual Weight');--}}
+                            {{--head.push('Weight Charges');--}}
+                            {{--head.push('Cash Handling Charges');--}}
+
+                            {{--$.each(result.data, function(index, values) {--}}
+                                {{--row = [];--}}
+
+                                {{--row.push(index + 1);--}}
+                                {{--row.push(values.tracking_number);--}}
+                                {{--row.push(values.account_no);--}}
+                                {{--row.push(values.shipper);--}}
+                                {{--row.push(values.order_id);--}}
+                                {{--row.push(values.current_status);--}}
+                                {{--row.push(values.payment_status);--}}
+                                {{--row.push(values.service_type);--}}
+                                {{--row.push(values.product_name);--}}
+                                {{--row.push(values.description);--}}
+                                {{--row.push(values.arrival_date);--}}
+                                {{--row.push(values.origin);--}}
+                                {{--row.push(values.destination);--}}
+                                {{--row.push(values.p_collection_amount);--}}
+                                {{--row.push(values.actual_weight);--}}
+                                {{--row.push(values.weight_charges);--}}
+                                {{--row.push(values.cash_handling_charges);--}}
+
+                                {{--body.push(row);--}}
+                            {{--});--}}
+                        {{--},--}}
+                        {{--async: false--}}
+                    {{--});--}}
+
+                    {{--return {body: body, header:head};--}}
+                {{--}--}}
+            {{--} );--}}
+            {{--var table = $('#datatable').DataTable({--}}
+                {{--dom: '<"d-inline-block"l><"pull-right"B>tipr',--}}
+                {{--scrollX: true, scrollY: '350px',--}}
+                {{--buttons: [--}}
+                    {{--{--}}
+                        {{--extend: 'excelHtml5',--}}
+                        {{--title: 'Sales Report',--}}
+                        {{--text:'<i class="la la-file-excel-o"></i> Excel',--}}
+                    {{--},--}}
+                {{--],--}}
+                {{--lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],--}}
+                {{--pageLength: 50,--}}
+                {{--pagingType: 'full_numbers',--}}
+                {{--processing: true,--}}
+                {{--serverSide: true,--}}
+                {{--ajax:{--}}
+                    {{--url: '{{ route('cod.reports.sales.list') }}',--}}
+                    {{--data: function (d) {--}}
+                        {{--d.search_tracking = $('#search_tracking_no').val();--}}
+                        {{--d.search_origin = $('#search_origin').val();--}}
+                        {{--d.search_destination = $('#search_destination').val();--}}
+                        {{--d.search_status = $('#search_status').val();--}}
+                        {{--d.search_date_from = $('input[name="search_date_from_formatted"]').val();--}}
+                        {{--d.search_date_to = $('input[name="search_date_to_formatted"]').val();--}}
+                    {{--}--}}
+                {{--},--}}
+                {{--order: [[10, 'asc']],--}}
+                {{--columns: [--}}
+                    {{--{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},--}}
+                    {{--{ data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},--}}
+                    {{--{ data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},--}}
+                    {{--{ data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},--}}
+                    {{--{ data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},--}}
+                    {{--{ data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},--}}
+                    {{--{ data:'payment_status' ,name: 'ss.name', class: 'align-middle payment_status'},--}}
+                    {{--{ data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},--}}
+                    {{--{ data:'product_name', name: 'p.product_name', class: 'align-middle product_name'},--}}
+                    {{--{ data:'description', name: 'si.description', class: 'align-middle description'},--}}
+                    {{--{ data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},--}}
+                    {{--{ data:'origin' ,name: 'oc.name', class: 'align-middle origin'},--}}
+                    {{--{ data:'destination' ,name: 'dc.name', class: 'align-middle destination'},--}}
+                    {{--{ data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},--}}
+                    {{--{ data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},--}}
+                    {{--{ data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},--}}
+                    {{--{ data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'}--}}
+                {{--],--}}
+                {{--rowCallback: function(row, data, index) {--}}
+                    {{--var info = table.page.info();--}}
+                    {{--$('td:eq(0)', row).html(index + 1 + info.page * info.length);--}}
+                {{--},--}}
+                {{--initComplete: function() {--}}
+                    {{--this.api().table().columns.adjust();--}}
+                {{--}--}}
+            {{--});--}}
+            {{--$('#search_filter_btn').on('click',function () {--}}
+                {{--table.draw();--}}
+            {{--});--}}
+
+        });
+    </script>
+
+@endsection

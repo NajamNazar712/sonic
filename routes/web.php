@@ -170,6 +170,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('','Shippers\ShipperReportsController@sales_index')->name('index');
             Route::get('list','Shippers\ShipperReportsController@sales_list')->name('list');
         });
+        Route::prefix('summary')->name('summary.')->group(function (){
+            Route::get('','Shippers\ShipperReportsController@summary_index')->name('index');
+            Route::get('list','Shippers\ShipperReportsController@summary_list')->name('list');
+        });
     });
 
     Route::get('/logout','Auth\LoginController@logout')->name('logout');

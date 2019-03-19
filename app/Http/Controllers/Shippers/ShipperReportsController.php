@@ -155,6 +155,26 @@ class ShipperReportsController extends Controller
             return $datatable->make(true);
     }
 
+    public function summary_index(){
+        $stats = array();
+        $today = Carbon::now()->endOfDay();
+        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
+        $stats['total'] = Shipment::whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['booked'] = Shipment::where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['canceled'] = Shipment::where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['received'] = Shipment::whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['in_process'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['total'] = number_format($stats['total']->count());
+        $stats['booked'] = number_format($stats['booked']->count());
+        $stats['canceled'] = number_format($stats['canceled']->count());
+        $stats['received'] = number_format($stats['received']->count());
+        $stats['delivered'] = number_format($stats['delivered']->count());
+        $stats['return'] = number_format($stats['return']->count());
+        $stats['in_process'] = number_format($stats['in_process']->count());
+        return view('client.reports.summary')->with(['stats' => $stats]);
+    }
 
 }
 
