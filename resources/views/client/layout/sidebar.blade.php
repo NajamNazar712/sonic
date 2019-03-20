@@ -56,6 +56,7 @@
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Reports</span></a>
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{ route('cod.reports.sales.index') }}">Overall Sales</a></li>
+                        <li><a class="menu-item" href="{{ route('cod.reports.summary.index') }}">Summary</a></li>
                     </ul>
                 </li>
             @endif
