@@ -193,8 +193,8 @@
                               <input type="text" name="booking_to_date" class="form-control bg-primary border-primary white rounded-right" id="booking_to_date"  placeholder="Booking Date To">
                           </div>
 
-                          <div class="form-group ml-1">
-                              <button type="submit" class="btn btn-primary">Search</button>
+                          <div class="form-group col-md-5 p-1 justify-content-center">
+                              <button type="submit" class="btn btn-primary"><i class="la la-search"></i> Search</button>
                           </div>
                       </form>
                   </div>
