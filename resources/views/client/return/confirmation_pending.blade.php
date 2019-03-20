@@ -308,13 +308,13 @@
                                                     $.each(data.updated_shipments, function(index, tracking_number) {
                                                         html += tracking_number + '<br/>';
                                                     });
-                                                    html += '<br/>These shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';
+                                                    html += '<br/>Shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';
 
                                                 }
                                                 $.each(data.not_updated_shipments, function(index, tracking_number) {
                                                     html += tracking_number + '<br/>';
                                                 });
-                                                 html += '<br/>These shipment(s) from are not updated?';
+                                                 html += '<br/>Shipment(s) are already updated';
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
                                                 swal({
