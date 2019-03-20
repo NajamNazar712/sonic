@@ -46,11 +46,11 @@
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Received/Refused By</th>
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Current Status</th>
-                            <th class="border-primary border-darken-1">Received/Refused By</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Attempts Count</th>
                             <th class="border-primary border-darken-1">Clear</th>
@@ -432,10 +432,11 @@
                     {data:'shipment_id_padded',name: 'shipments.id', class: 'align-middle shipment_id'},
                     {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data:'consignee_name',name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data:'amount',name: 'shipments.amount', class: 'align-middle amount'},
+                    {data:'collection_amount',name: 'shipments.amount', class: 'align-middle amount'},
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
+                    {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
                     {data:'destination',name: 'oc.name', class: 'align-middle destination'},
                     {data:'shipper',name: 'shipper', class: 'align-middle shipper'},
@@ -487,7 +488,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.received_or_refused_by')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -916,45 +917,107 @@
             });
 
             var shipment_remarks_obj = {};
+            var shipment_received_refused_obj = {};
+            var submit_all_status_flag = true;
             $('#submit_selected_status').on('click', function () {
                 var select_all_status = $('#select_all_status').val();
                 var delivery_note = $('#delivery_note').val();
                 if(selected_rows.length > 0){
                     if(select_all_status != ''){
-                        blockPagePermanently();
-                        table.rows().nodes().each(function(index) {
-                            var row = table.row(index);
-                            if ($(row.node()).hasClass('selected')) {
-                                var id = parseInt(row.id());
-                                var remarks = $(row.node()).find('td.remarks input').val();
-                                shipment_remarks_obj[id] = remarks;
+                        var not_updated_shipments = [];
+                        var shipment_remarks_obj = {};
+                        var shipment_received_refused_obj = {};
+                        // blockPagePermanently();
+                        submit_all_status_flag = true;
+                        if(select_all_status == 14){
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+                                if ($(row.node()).hasClass('selected')) {
+                                    var id = parseInt(row.id());
+                                    var amount = parseInt($(row.node()).attr('amount'));
+                                    var remarks = $(row.node()).find('td.remarks input').val();
+                                    shipment_remarks_obj[id] = remarks;
+                                    if(amount == 0){
+                                        var receiver_name =  $(row.node()).find('td.received_or_refused_by input').val();
+                                        if(receiver_name == ''){
+                                            not_updated_shipments.push($(row.node()).find('td.tracking_number').text()) ;
+                                            submit_all_status_flag = false;
+                                        }else{
+                                            shipment_received_refused_obj[id] = receiver_name;
+                                        }
+                                    }
 
+
+                                }
+                            });
+                            if(submit_all_status_flag == false){
+
+                                var html = '';
+                                $.each(not_updated_shipments, function(index, tracking_number) {
+                                    html += tracking_number + '<br/>';
+                                });
+
+                                html += '<br/>Update Received/Refused By for all shipments of 0 amount!';
+
+                                content = document.createElement('div');
+                                content.innerHTML = html;
+                                swal({
+                                    title: 'Names Not Updated',
+                                    content: content,
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'Close',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                });
                             }
-                        });
 
-                        $.ajax({
-                            url: '{!! route('admin.delivery.receive.add.status.all') !!}',
-                            method: 'POST',
-                            data: {
-                                'shipment_ids': selected_rows,
-                                'selected_status': select_all_status,
-                                'delivery_note_id': delivery_note,
-                                'remarks': shipment_remarks_obj,
-                                '_token': '{{ csrf_token() }}',
-                            }
-                        }).done(function (data) {
-                            if(data.status === 1){
-                                UnblockPagePermanently();
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }else{
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+                                if ($(row.node()).hasClass('selected')) {
+                                    var id = parseInt(row.id());
+                                    var remarks = $(row.node()).find('td.remarks input').val();
+                                    shipment_remarks_obj[id] = remarks;
 
-                            }else{
-                                UnblockPagePermanently();
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
+                        }
 
-                            }
-                            location.reload();
+                        if(submit_all_status_flag){
+                            $.ajax({
+                                url: '{!! route('admin.delivery.receive.add.status.all') !!}',
+                                method: 'POST',
+                                data: {
+                                    'shipment_ids': selected_rows,
+                                    'selected_status': select_all_status,
+                                    'delivery_note_id': delivery_note,
+                                    'remarks': shipment_remarks_obj,
+                                    'received_or_refused_by': shipment_received_refused_obj,
+                                    '_token': '{{ csrf_token() }}',
+                                }
+                            }).done(function (data) {
+                                if(data.status === 1){
+                                    UnblockPagePermanently();
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                        });
+                                }else{
+                                    UnblockPagePermanently();
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                }
+                                location.reload();
+
+                            });
+                        }
+
                     }
                     else{
                         var error = "Please Select A Status!";

@@ -861,7 +861,7 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id'])
             ->where('delivery_notes.id', $id);
 
         if (session('role_id') != 1) {
@@ -886,8 +886,11 @@ class DeliveryController extends Controller
                         return '';
                     }
                 },
+                'amount' => function ($deliveries){
+                    return $deliveries->amount;
+                }
             ])
-            ->editColumn('amount', function($shipment){
+            ->addColumn('collection_amount', function($shipment){
                 return number_format($shipment->amount);
             })
             ->editColumn('shipper', function ($shipment) {
@@ -911,6 +914,12 @@ class DeliveryController extends Controller
             ->orderColumn('users.name', 'users.name $1, usi.poc $1')
             ->addColumn('shipment_id_padded', function ($deliveries) {
                 return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('received_or_refused_by', function ($deliveries) {
+
+                     $received_refused_input = '<input class="form-control form-control-sm" name="received_refused_input[' . $deliveries->shId . ']" placeholder="Enter Name" >';
+                     return $received_refused_input;
+
             })
             ->addColumn('attempts', function ($deliveries){
                 $attempt_counts = ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 5, 'verification' => 1])->count();
@@ -979,23 +988,23 @@ class DeliveryController extends Controller
                     else if($selected_status == 14)
                     {
                         if ($shipment_details->booking_type_id == 2) {
-                            ShipmentsJourneyController::add($shipment, 30, 30, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                            ShipmentsJourneyController::add($shipment, 30, 30, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment]:null));
                             Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 30, 'consignee_status_id' => 30]);
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 2]);
                         } elseif ($shipment_details->booking_type_id == 3) {
                             if ($shipment_details->package_type == 0) {
-                                ShipmentsJourneyController::add($shipment, 37, 37, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                                ShipmentsJourneyController::add($shipment, 37, 37, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment]:null));
 
                                 Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 3]);
                             } else {
-                                ShipmentsJourneyController::add($shipment, 36, 36, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                                ShipmentsJourneyController::add($shipment, 36, 36, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment]:null));
                                 Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                             }
 
                         } elseif ($shipment_details->booking_type_id == 4) {
-                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment]:null));
 
                             if ($shipment_details->charges_mode_id == 1) {
                                 Shipment::where('id', $shipment)->update(['received_amount' => 0, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
@@ -1007,7 +1016,7 @@ class DeliveryController extends Controller
                             }
 
                         } else {
-                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment]:null));
                             Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                         }
@@ -1342,7 +1351,12 @@ class DeliveryController extends Controller
                     ->where('sj.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc'])
+            ->leftJoin('shipments_journey as rrb', function ($join) {
+                $join->on('rrb.shipment_id', '=', 'shipments.id')
+                    ->where('rrb.created_at', '=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','rrb.received_or_refused_by'])
             ->where('delivery_notes.id', $id);
 
         return Datatables::of($deliveries)
