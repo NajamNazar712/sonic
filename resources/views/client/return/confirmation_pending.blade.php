@@ -300,20 +300,27 @@
                                             shipment_remarks = {};
                                             table.button('.reattempt').disable();
                                             table.draw('false');
-                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                             if(data.not_updated_shipments.length > 0){
+                                                var alert_icon = 'warning';
                                                 var html = '';
+                                                if(data.updated_shipments.length > 0){
+                                                    alert_icon = 'success';
+                                                    $.each(data.updated_shipments, function(index, tracking_number) {
+                                                        html += tracking_number + '<br/>';
+                                                    });
+                                                    html += '<br/>These shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';
 
+                                                }
                                                 $.each(data.not_updated_shipments, function(index, tracking_number) {
                                                     html += tracking_number + '<br/>';
                                                 });
-                                                 html += '<br/>Following shipment(s) from are not updated or may already be updated to Return Confirm?';
+                                                 html += '<br/>These shipment(s) from are not updated?';
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
                                                 swal({
-                                                    title: 'Shipments Not Updated',
+                                                    title: 'Shipments Re-Attempt Requested',
                                                     content: content,
-                                                    icon: 'warning',
+                                                    icon: alert_icon,
                                                     buttons: {
                                                         cancel: {
                                                             text: 'Close',
@@ -326,6 +333,9 @@
                                                     closeOnEsc: false,
                                                     dangerMode: true
                                                 });
+                                            }else{
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
                                             }
 
 
