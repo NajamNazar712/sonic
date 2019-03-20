@@ -9,11 +9,11 @@
       </div>
       <div class="content-body">
           <div class="row">
-              <div class="card">
+            <div class="card">
                   <div class="card-content">
                     <div class="card-body">
-                        <h2>Order Details</h2>
-                        <div class="col">
+                        <h1>Order Details</h1>
+                        <div class="col mt-2">
                             <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                                 <div class="form-group">
                                     <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
@@ -40,8 +40,8 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group col-md-5 p-1 justify-content-center">
-                                    <button type="submit" class="btn btn-primary"><i class="la la-search"></i> Search</button>
+                                <div class="form-group col-md-5 mt-2 justify-content-center">
+                                    <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
                             </form>
                         </div>
@@ -164,7 +164,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style type="text/css">
         .small-calender-icon{
-            font-size: 1.2rem !important;
+            font-size: 17px !important;
         }
 
         .bg-gradient-directional-inprocess {
