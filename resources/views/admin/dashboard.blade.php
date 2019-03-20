@@ -180,17 +180,25 @@
                           <div class="form-group">
                               <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                           </div>
-                          <div class="form-group ml-1">
-                              <div class="input-group-prepend">
-                                  <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left la la-calendar-o"></span>
+                          <div class="col-4">
+                              <div class="form-group input-group">
+                                  <div class="input-group-prepend">
+                                      <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                      </span>
+                                  </div>
+                                  <input type="text" name="booking_from_date" class="form-control bg-primary border-primary white rounded-right" id="booking_from_date" placeholder="Booking Date From">
                               </div>
-                              <input type="text" name="booking_from_date" class="form-control bg-primary border-primary white rounded-right" id="booking_from_date" placeholder="Booking Date From">
                           </div>
-                          <div class="form-group ml-1">
-                              <div class="input-group-prepend">
-                                  <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left la la-calendar-o"></span>
+                          <div class="col-4">
+                              <div class="form-group input-group">
+                                  <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                                  </div>
+                                  <input type="text" name="booking_to_date" class="form-control bg-primary border-primary white rounded-right" id="booking_to_date" placeholder="Booking Date To">
                               </div>
-                              <input type="text" name="booking_to_date" class="form-control bg-primary border-primary white rounded-right" id="booking_to_date"  placeholder="Booking Date To">
                           </div>
 
                           <div class="form-group col-md-5 p-1 justify-content-center">
@@ -248,7 +256,9 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style type="text/css">
-
+        .small-calender-icon{
+            font-size: 1.2rem !important;
+        }
         .bg-gradient-directional-inprocess {
             background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
             background-repeat: repeat-x;
@@ -328,6 +338,9 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#booking_from_date_root').css('top','40px');
+                },
                 onSet: function(context) {
                     if (context.select) {
                         $('#track_form #booking_to_date').pickadate('picker').set('min', $('#track_form #booking_from_date').pickadate('picker').get('select'));
@@ -342,8 +355,11 @@
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#booking_to_date_root').css('top','40px');
+                },
                 onSet: function(context) {
                     if (context.select) {
                         $('#track_form #booking_from_date').pickadate('picker').set('max', $('#track_form #booking_to_date').pickadate('picker').get('select'));
