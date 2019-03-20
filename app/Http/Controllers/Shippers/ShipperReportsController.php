@@ -204,7 +204,7 @@ class ShipperReportsController extends Controller
             }
 
         $datatable = Datatables::of($shipments)
-            ->editColumn('tracking_number', function ($shipments) {
+            ->addColumn('tracking_number_link', function ($shipments) {
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })

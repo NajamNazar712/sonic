@@ -462,7 +462,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Sales Report',
+                        title: 'Summary Reportt',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -484,7 +484,7 @@
                 order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
+                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
