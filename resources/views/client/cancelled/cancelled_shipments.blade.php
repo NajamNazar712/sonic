@@ -24,8 +24,8 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Tracking No.</th>
                                     <th class="border-primary border-darken-1">Order ID</th>
-                                    <th class="border-primary border-darken-1">Account No.</th>
-                                    <th class="border-primary border-darken-1">Shipper</th>
+                                    {{--<th class="border-primary border-darken-1">Account No.</th>--}}
+                                    {{--<th class="border-primary border-darken-1">Shipper</th>--}}
                                     <th class="border-primary border-darken-1">Service Type</th>
                                     <th class="border-primary border-darken-1">Remarks</th>
                                     <th class="border-primary border-darken-1">Origin</th>
@@ -82,8 +82,8 @@
                             head.push('S No.');
                             head.push('Tracking No.');
                             head.push('Order ID');
-                            head.push('Account No.');
-                            head.push('Shipper');
+                            // head.push('Account No.');
+                            // head.push('Shipper');
                             head.push('Service Type');
                             head.push('Remarks');
                             head.push('Origin');
@@ -101,8 +101,8 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.order_id);
-                                row.push(values.account_number);
-                                row.push(values.shipper);
+                                // row.push(values.account_number);
+                                // row.push(values.shipper);
                                 row.push(values.service_type);
                                 row.push(values.remarks);
                                 row.push(values.origin);
@@ -257,20 +257,20 @@
                 serverSide: true,
                 ajax: '{{ route('cod.cancelled_shipments.list') }}',
                 rowId: 'id',
-                order: [[14, 'desc']],
+                order: [[12, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_hyperlink', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'account_number', name: 'u.id', class: 'align-middle account_number'},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    // {data: 'account_number', name: 'u.id', class: 'align-middle account_number'},
+                    // {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
-                    {data: 'remarks', name: 'sj.remarks', class: 'align-middle remarks'},
+                    {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'consignee_contact', name: 'consignee_contact', class: 'align-middle consignee_contact'},
+                    {data: 'consignee_contact', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_contact'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'collection_amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
