@@ -985,4 +985,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
         });
     });
+
+    //CMC Routes
+    Route::prefix('cms')->name('cms.')->group(function () {
+        
+    });
 });
