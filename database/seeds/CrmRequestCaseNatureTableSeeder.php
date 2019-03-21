@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class CmsCaseNatureTableSeeder extends Seeder
+class CrmRequestCaseNatureTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -11,9 +11,9 @@ class CmsCaseNatureTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('cms_case_nature')->truncate();
+        DB::table('crm_request_case_nature')->truncate();
 
-        DB::table('cms_case_nature')->insert(array(
+        DB::table('crm_request_case_nature')->insert(array(
             array('id' => 1, 'name' => 'Complaints'),
             array('id' => 2, 'name' => 'Service Request'),
             array('id' => 3, 'name' => 'Feedback')

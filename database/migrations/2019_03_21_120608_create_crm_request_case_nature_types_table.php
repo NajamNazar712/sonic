@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCmsCaseNatureTable extends Migration
+class CreateCrmRequestCaseNatureTypesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,10 @@ class CreateCmsCaseNatureTable extends Migration
      */
     public function up()
     {
-        Schema::create('cms_case_nature', function (Blueprint $table) {
+        Schema::create('crm_request_case_nature_types', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
+            $table->integer('nature_id');
+            $table->string('type');
         });
     }
 
@@ -26,6 +27,6 @@ class CreateCmsCaseNatureTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cms_case_nature');
+        Schema::dropIfExists('crm_request_case_nature_types');
     }
 }
