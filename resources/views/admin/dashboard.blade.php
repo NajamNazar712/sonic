@@ -469,13 +469,11 @@
                             var html_rows = '';
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    id = parseInt(row.id());
+                                if ($(row.node()).hasClass('selected')) {
                                     var tracking = $(row.node()).find('td.tracking_number').text();
-                                    html_rows += '<label class="label-success mr-1">'+ tracking +'</label>';
+                                    html_rows += '<label class="mr-1"><u>'+ tracking +'</u></label>';
                                 }
                             });
-
                             $('#requested_shipments').html(html_rows);
                         }
                     }
