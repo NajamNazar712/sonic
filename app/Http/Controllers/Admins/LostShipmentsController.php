@@ -56,8 +56,10 @@ class LostShipmentsController extends Controller
 //                ->whereRaw('IF (shipments.payment_status_id != NULL, (shipments.payment_status_id > 1), TRUE)')
                 ->where('shipments.shipper_status_id', 18)
                 ->where(function ($sub_query) {
-                    $sub_query->where('shipments.payment_status_id', '=', null)
-                        ->orWhere('shipments.payment_status_id', '>', 1);
+                    $sub_query->where('shipments.payment_status_id', '=', null);
+                })
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('shipments.payment_status_id', '>', 1);
                 });
 
             if (session('role_id') != 1) {
