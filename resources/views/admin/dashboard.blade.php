@@ -222,6 +222,52 @@
       </div>
     </div>
   </div>
+<div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white">Add Request</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <form id="add_stock_form" action="{{route('admin.cms.add.submit')}}" method="post">
+                    @method('POST')
+                    @csrf
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <div class="col-4 form-group">
+                                <input type="text" name="invoice_number" id="add_stock_invoice" class="form-control" placeholder="Invoice Number *" data-rule-required="true" data-msg-required="This field is required">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 form-group">
+                                <input type="text" name="add_stock_smflyer" id="add_stock_smflyer" class="form-control numeric flyer" placeholder="Small Flyers">
+                            </div>
+                            <div class="col-6 form-group">
+                                <input type="text" name="add_stock_mdflyer" id="add_stock_mdflyer" class="form-control numeric flyer" placeholder="Medium Flyers">
+                            </div>
+                            <div class="col-6 form-group">
+                                <input type="text" name="add_stock_lgflyer" id="add_stock_lgflyer" class="form-control numeric flyer" placeholder="Large Flyers">
+                            </div>
+                            <div class="col-6 form-group">
+                                <input type="text" name="add_stock_boxes" id="add_stock_boxes" class="form-control numeric flyer" placeholder="Boxes">
+                            </div>
+
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="AddNewStock" type="submit" class="btn btn-primary btn-block">Add Stock</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
   <!-- ////////////////////////////////////////////////////////////////////////////-->
 
   @endsection
@@ -410,6 +456,14 @@
                 },
                 @endif
                 {
+                    text: '<i class="la la-plus"></i> Lodge',
+                    className: 'btn btn-primary lodge',
+                    enabled: false,
+                    action: function (e, dt, node, config) {
+
+                    }
+                },
+                 {
                     text: '<i class="la la-print"></i> Print',
                     className: 'btn btn-primary print',
                     enabled: false,

@@ -988,6 +988,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     //CMC Routes
     Route::prefix('cms')->name('cms.')->group(function () {
-        
+        Route::prefix('ticket')->name('ticket.')->group(function(){
+            Route::get('add', 'CRM\CRMController@add_ticket')->name('add');
+        });
     });
 });
