@@ -243,7 +243,8 @@
 
                             </div>
                         </div>
-                        {{--<div class="row">--}}
+                        <hr>
+                        <div class="row">
                             {{--<div class="col-6 form-group">--}}
                                 {{--<input type="text" name="add_stock_smflyer" id="add_stock_smflyer" class="form-control numeric flyer" placeholder="Small Flyers">--}}
                             {{--</div>--}}
@@ -257,10 +258,10 @@
                                 {{--<input type="text" name="add_stock_boxes" id="add_stock_boxes" class="form-control numeric flyer" placeholder="Boxes">--}}
                             {{--</div>--}}
 
-                        {{--</div>--}}
+                        </div>
                         <div class="row justify-content-center">
                             <div class="col-3">
-                                <button id="AddNewStock" type="submit" class="btn btn-primary btn-block">Add Ticket</button>
+                                <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block">Add Request</button>
                             </div>
                         </div>
                     </div>
