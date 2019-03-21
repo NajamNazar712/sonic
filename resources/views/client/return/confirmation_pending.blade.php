@@ -276,70 +276,78 @@
                                     dangerMode: true
                                 }).then(function (confirm) {
                                     if (confirm) {
+                                        if(selected_rows.length > 0) {
 
-                                        table.rows().nodes().each(function(index) {
-                                            var row = table.row(index);
-                                            if ($(row.node()).hasClass('selected')) {
-                                                var id = parseInt(row.id());
-                                                var remarks = $(row.node()).find('td.shipment_remarks input').val();
-                                                shipment_remarks[id] = remarks;
-                                            }
-                                        });
+                                            table.rows().nodes().each(function (index) {
+                                                var row = table.row(index);
+                                                if ($(row.node()).hasClass('selected')) {
+                                                    var id = parseInt(row.id());
+                                                    var remarks = $(row.node()).find('td.shipment_remarks input').val();
+                                                    shipment_remarks[id] = remarks;
+                                                }
+                                            });
 
-                                        $.ajax({
-                                            url:"{{route('cod.return.pending.reattempt.status')}}",
-                                            method:'POST',
-                                            data:{
-                                                'shipment_ids':selected_rows,
-                                                '_token':'{{ csrf_token() }}',
-                                                'remark': shipment_remarks
-                                            }
-                                        }).done(function (data) {
-                                            table.rows().deselect();
-                                            selected_rows = [];
-                                            shipment_remarks = {};
-                                            table.button('.reattempt').disable();
-                                            table.draw('false');
-                                            if(data.not_updated_shipments.length > 0){
-                                                var alert_icon = 'warning';
-                                                var html = '';
-                                                if(data.updated_shipments.length > 0){
-                                                    alert_icon = 'success';
-                                                    $.each(data.updated_shipments, function(index, tracking_number) {
+                                            $.ajax({
+                                                url: "{{route('cod.return.pending.reattempt.status')}}",
+                                                method: 'POST',
+                                                data: {
+                                                    'shipment_ids': selected_rows,
+                                                    '_token': '{{ csrf_token() }}',
+                                                    'remark': shipment_remarks
+                                                }
+                                            }).done(function (data) {
+                                                table.rows().deselect();
+                                                selected_rows = [];
+                                                shipment_remarks = {};
+                                                table.button('.reattempt').disable();
+                                                table.draw('false');
+                                                if (data.not_updated_shipments.length > 0) {
+                                                    var alert_icon = 'warning';
+                                                    var html = '';
+                                                    if (data.updated_shipments.length > 0) {
+                                                        alert_icon = 'success';
+                                                        $.each(data.updated_shipments, function (index, tracking_number) {
+                                                            html += tracking_number + '<br/>';
+                                                        });
+                                                        html += '<br/>Shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';
+
+                                                    }
+                                                    $.each(data.not_updated_shipments, function (index, tracking_number) {
                                                         html += tracking_number + '<br/>';
                                                     });
-                                                    html += '<br/>Shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';
+                                                    html += '<br/>Shipment(s) are already updated';
+                                                    content = document.createElement('div');
+                                                    content.innerHTML = html;
+                                                    swal({
+                                                        title: 'Shipments Re-Attempt Requested',
+                                                        content: content,
+                                                        icon: alert_icon,
+                                                        buttons: {
+                                                            cancel: {
+                                                                text: 'Close',
+                                                                value: null,
+                                                                visible: true,
+                                                                closeModal: true,
+                                                            }
+                                                        },
+                                                        closeOnClickOutside: true,
+                                                        closeOnEsc: false,
+                                                        dangerMode: true
+                                                    });
+                                                } else {
+                                                    toastr.success(data.success, 'Success!', {
+                                                        positionClass: 'toast-bottom-center',
+                                                        containerId: 'toast-bottom-center'
+                                                    });
 
                                                 }
-                                                $.each(data.not_updated_shipments, function(index, tracking_number) {
-                                                    html += tracking_number + '<br/>';
-                                                });
-                                                 html += '<br/>Shipment(s) are already updated';
-                                                content = document.createElement('div');
-                                                content.innerHTML = html;
-                                                swal({
-                                                    title: 'Shipments Re-Attempt Requested',
-                                                    content: content,
-                                                    icon: alert_icon,
-                                                    buttons: {
-                                                        cancel: {
-                                                            text: 'Close',
-                                                            value: null,
-                                                            visible: true,
-                                                            closeModal: true,
-                                                        }
-                                                    },
-                                                    closeOnClickOutside: true,
-                                                    closeOnEsc: false,
-                                                    dangerMode: true
-                                                });
-                                            }else{
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                                            }
 
 
-                                        });
+                                            });
+                                        }else{
+                                            var error = "No shipments selected!";
+                                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }
                                     }
                                 });
 
