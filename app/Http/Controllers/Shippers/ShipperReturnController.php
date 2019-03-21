@@ -209,8 +209,6 @@ class ShipperReturnController extends Controller
         $not_updated_shipments  = array();
         $updated_shipments  = array();
         if(!empty($shipment_ids)) {
-
-
             foreach ($shipment_ids as $shipment) {
                 $parcel = Shipment::find($shipment);
                 if (($parcel->shipper_status_id != 52) && ($parcel->shipper_status_id == 12)) {
