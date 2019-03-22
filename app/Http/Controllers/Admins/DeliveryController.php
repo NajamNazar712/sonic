@@ -1699,7 +1699,7 @@ class DeliveryController extends Controller
 
                                     if ($shipment_journey) {
                                         $received_or_refused_by = $shipment_journey->received_or_refused_by;
-                                        ShipmentsJourneyController::add($shipment, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, Auth::id(), $delivery_note_id, NULL, $received_or_refused_by, $verification);
+                                        ShipmentsJourneyController::add($shipment, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification, $received_or_refused_by);
                                     } else {
                                         ShipmentsJourneyController::add($shipment, $shipper_status_details->shipper_status_id, $shipper_status_details->consignee_status_id, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                     }
