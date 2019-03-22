@@ -957,7 +957,7 @@
                                     html += tracking_number + '<br/>';
                                 });
 
-                                html += '<br/>Update Received/Refused By for all shipments of 0 amount!';
+                                html += '<br/>Update Received / Refused By for all shipments of 0 (zero) amount!';
 
                                 content = document.createElement('div');
                                 content.innerHTML = html;

@@ -215,7 +215,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.call_verification') || $(header).is('.fake_status')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.call_verification') || $(header).is('.fake_status') || $(header).is('.received_or_refused_by')) {
                             $(td).appendTo($(search));
                         }
                         else {

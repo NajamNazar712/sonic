@@ -99,6 +99,7 @@ class ShipperTrackingController extends Controller
                             $journey_details['date_time'] = $journey->created_at->toDateTimeString();
                             $journey_details['status'] = $journey->shipment_status_shipper->name;
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+                            $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
                             $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
 
                             $details['tracking_history'][] = $journey_details;
