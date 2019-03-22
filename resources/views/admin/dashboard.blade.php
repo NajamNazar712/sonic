@@ -233,33 +233,35 @@
                 </button>
             </div>
             <div class="modal-body text-center">
-                <form id="add_stock_form" action="{{route('admin.cms.add.submit')}}" method="post">
+                <form id="add_stock_form" action="{{route('admin.cms.ticket.add')}}" method="post">
                     @method('POST')
                     @csrf
                     <div class="container">
                         <div class="row justify-content-center">
-                            <div class="col-4 form-group">
-                                <input type="text" name="invoice_number" id="add_stock_invoice" class="form-control" placeholder="Invoice Number *" data-rule-required="true" data-msg-required="This field is required">
+                            <input type="hidden" id="requested_shipment_ids">
+                            <div class="col form-group" id="requested_shipments">
+
                             </div>
                         </div>
+                        <hr>
                         <div class="row">
-                            <div class="col-6 form-group">
-                                <input type="text" name="add_stock_smflyer" id="add_stock_smflyer" class="form-control numeric flyer" placeholder="Small Flyers">
-                            </div>
-                            <div class="col-6 form-group">
-                                <input type="text" name="add_stock_mdflyer" id="add_stock_mdflyer" class="form-control numeric flyer" placeholder="Medium Flyers">
-                            </div>
-                            <div class="col-6 form-group">
-                                <input type="text" name="add_stock_lgflyer" id="add_stock_lgflyer" class="form-control numeric flyer" placeholder="Large Flyers">
-                            </div>
-                            <div class="col-6 form-group">
-                                <input type="text" name="add_stock_boxes" id="add_stock_boxes" class="form-control numeric flyer" placeholder="Boxes">
-                            </div>
+                            {{--<div class="col-6 form-group">--}}
+                                {{--<input type="text" name="add_stock_smflyer" id="add_stock_smflyer" class="form-control numeric flyer" placeholder="Small Flyers">--}}
+                            {{--</div>--}}
+                            {{--<div class="col-6 form-group">--}}
+                                {{--<input type="text" name="add_stock_mdflyer" id="add_stock_mdflyer" class="form-control numeric flyer" placeholder="Medium Flyers">--}}
+                            {{--</div>--}}
+                            {{--<div class="col-6 form-group">--}}
+                                {{--<input type="text" name="add_stock_lgflyer" id="add_stock_lgflyer" class="form-control numeric flyer" placeholder="Large Flyers">--}}
+                            {{--</div>--}}
+                            {{--<div class="col-6 form-group">--}}
+                                {{--<input type="text" name="add_stock_boxes" id="add_stock_boxes" class="form-control numeric flyer" placeholder="Boxes">--}}
+                            {{--</div>--}}
 
                         </div>
                         <div class="row justify-content-center">
                             <div class="col-3">
-                                <button id="AddNewStock" type="submit" class="btn btn-primary btn-block">Add Stock</button>
+                                <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block">Add Request</button>
                             </div>
                         </div>
                     </div>
@@ -443,6 +445,7 @@
 
                             table.button('.shipper_recall').disable();
                             table.button('.print').disable();
+                            table.button('.request_add').disable();
 
                             selected_rows = [];
 
@@ -456,11 +459,23 @@
                 },
                 @endif
                 {
-                    text: '<i class="la la-plus"></i> Lodge',
-                    className: 'btn btn-primary lodge',
+                    text: '<i class="la la-plus"></i> Add Request',
+                    className: 'btn btn-primary request_add',
                     enabled: false,
                     action: function (e, dt, node, config) {
-
+                        if(selected_rows.length > 0){
+                            $('#AddRequestModal').modal('show');
+                            $('#requested_shipment_ids').val(selected_rows);
+                            var html_rows = '';
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+                                if ($(row.node()).hasClass('selected')) {
+                                    var tracking = $(row.node()).find('td.tracking_number').text();
+                                    html_rows += '<label class="mr-1"><u>'+ tracking +'</u></label>';
+                                }
+                            });
+                            $('#requested_shipments').html(html_rows);
+                        }
                     }
                 },
                  {
@@ -472,6 +487,7 @@
 
                       table.button('.shipper_recall').disable();
                       table.button('.print').disable();
+                      table.button('.request_add').disable();
 
                       selected_rows = [];
 
@@ -503,6 +519,8 @@
 
                         table.button('.shipper_recall').enable();
                         table.button('.print').enable();
+                        table.button('.request_add').enable();
+
                       }
                     });
                   }
@@ -530,6 +548,8 @@
                         if (selected_rows.length == 0) {
                           table.button('.shipper_recall').disable();
                           table.button('.print').disable();
+                          table.button('.request_add').disable();
+
                         }
                       }
                     });
@@ -731,10 +751,12 @@
                 if (selected_rows.length > 0) {
                     table.button('.shipper_recall').enable();
                     table.button('.print').enable();
+                    table.button('.request_add').enable();
                 }
                 else {
                     table.button('.shipper_recall').disable();
                     table.button('.print').disable();
+                    table.button('.request_add').disable();
                 }
             });
 
