@@ -233,31 +233,80 @@
                 </button>
             </div>
             <div class="modal-body text-center">
-                <form id="add_stock_form" action="{{route('admin.cms.ticket.add')}}" method="post">
+                <form id="add_request_form" action="{{route('admin.cms.request.add')}}" method="post">
                     @method('POST')
                     @csrf
                     <div class="container">
                         <div class="row justify-content-center">
                             <input type="hidden" id="requested_shipment_ids">
-                            <div class="col form-group" id="requested_shipments">
-
+                            <div class="col form-group vertical-scroll" id="requested_shipments" style="height: 100px;">
                             </div>
                         </div>
                         <hr>
-                        <div class="row">
-                            {{--<div class="col-6 form-group">--}}
-                                {{--<input type="text" name="add_stock_smflyer" id="add_stock_smflyer" class="form-control numeric flyer" placeholder="Small Flyers">--}}
-                            {{--</div>--}}
-                            {{--<div class="col-6 form-group">--}}
-                                {{--<input type="text" name="add_stock_mdflyer" id="add_stock_mdflyer" class="form-control numeric flyer" placeholder="Medium Flyers">--}}
-                            {{--</div>--}}
-                            {{--<div class="col-6 form-group">--}}
-                                {{--<input type="text" name="add_stock_lgflyer" id="add_stock_lgflyer" class="form-control numeric flyer" placeholder="Large Flyers">--}}
-                            {{--</div>--}}
-                            {{--<div class="col-6 form-group">--}}
-                                {{--<input type="text" name="add_stock_boxes" id="add_stock_boxes" class="form-control numeric flyer" placeholder="Boxes">--}}
-                            {{--</div>--}}
-
+                        <div class="row justify-content-center">
+                            <div class="col-8">
+                                <fieldset class="form-group">
+                                    <select name="case_nature_select" id="case_nature_select" class="form-control select2">
+                                        @foreach($case_nature as $nature)
+                                            <option value="{{$nature->id}}">{{$nature->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="complaints d-none" id="request_complaints">
+                            <div class="row justify-content-center">
+                                <div class="col-6">
+                                    <fieldset class="form-group">
+                                        <select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2">
+                                            @foreach($case_nature_complaints as $complaints)
+                                                <option value="{{$complaints->id}}">{{$complaints->type}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-6">
+                                    <fieldset class="form-group">
+                                        <select name="complaint_channel" id="complaint_channels" class="form-control select2">
+                                            @foreach($case_nature_channels as $channel1)
+                                                <option value="{{$channel1->id}}">{{$channel1->channel}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-6">
+                                    <fieldset class="form-group">
+                                        <textarea class="form-control info" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="service d-none" id="request_service">
+                            <div class="row justify-content-center">
+                                <div class="col-6">
+                                    <fieldset class="form-group">
+                                        <select name="case_nature_request" id="case_nature_requests" class="form-control select2">
+                                            @foreach($case_nature_service_requests as $service)
+                                                <option value="{{$service->id}}">{{$service->type}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-6">
+                                    <fieldset class="form-group">
+                                        <select name="request_channel" id="request_channels" class="form-control select2">
+                                            @foreach($case_nature_channels as $channel2)
+                                                <option value="{{$channel2->id}}">{{$channel2->channel}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-6">
+                                    <fieldset class="form-group">
+                                        <textarea class="form-control info" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                    </fieldset>
+                                </div>
+                            </div>
                         </div>
                         <div class="row justify-content-center">
                             <div class="col-3">
@@ -292,7 +341,9 @@
         .selectize-control {
              width: 300px !important;
         }
-
+        .align-bottom{
+            vertical-align: bottom;
+        }
 
     </style>
 @endsection
@@ -311,6 +362,8 @@
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/ui/scrollable.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -363,6 +416,50 @@
                 width:'100%',
                 placeholder:"Select a Shipper",
                 allowClear:true
+            });
+
+            $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Case Nature",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id === 1){
+                    $('#request_service').addClass('d-none');
+                    $('#request_complaints').removeClass('d-none');
+                }else if(id === 2){
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').removeClass('d-none');
+                }else{
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').addClass('d-none');
+
+                }
+            });
+            $('#case_nature_complaints').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Complaint Type",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            });
+            $('#complaint_channels').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Channel",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            });
+            $('#case_nature_requests').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Request Type",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            });
+            $('#request_channels').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Channel",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
             });
             function print(selected_rows) {
                 $.ajax({
@@ -467,11 +564,13 @@
                             $('#AddRequestModal').modal('show');
                             $('#requested_shipment_ids').val(selected_rows);
                             var html_rows = '';
+                            var count = 1;
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
                                 if ($(row.node()).hasClass('selected')) {
                                     var tracking = $(row.node()).find('td.tracking_number').text();
-                                    html_rows += '<label class="mr-1"><u>'+ tracking +'</u></label>';
+                                    html_rows += '<p class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking +'</b></p>';
+                                    count++;
                                 }
                             });
                             $('#requested_shipments').html(html_rows);
