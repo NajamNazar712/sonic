@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCrmRequestChannelTable extends Migration
+class CreateCrmRequestStatusesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,10 @@ class CreateCrmRequestChannelTable extends Migration
      */
     public function up()
     {
-        Schema::create('crm_request_channels', function (Blueprint $table) {
+        Schema::create('crm_request_statuses', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('channel');
+            $table->string('name');
+            $table->timestamps();
         });
     }
 
@@ -26,6 +27,6 @@ class CreateCrmRequestChannelTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('crm_request_channels');
+        Schema::dropIfExists('crm_request_statuses');
     }
 }

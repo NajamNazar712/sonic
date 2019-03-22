@@ -11,14 +11,15 @@ class CrmRequestChannelTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('crm_request_channel')->truncate();
+        DB::table('crm_request_channels')->truncate();
 
-        DB::table('crm_request_channel')->insert(array(
-            array('id' => 1, 'channel' => 'Call'),
-            array('id' => 2, 'channel' => 'Email'),
-            array('id' => 3, 'channel' => 'Facebook'),
-            array('id' => 4, 'channel' => 'Sonic'),
-            array('id' => 5, 'channel' => 'Website')
+        DB::table('crm_request_channels')->insert(array(
+            array('id' => 1, 'channel' => 'Sonic'),
+            array('id' => 2, 'channel' => 'Website'),
+            array('id' => 3, 'channel' => 'Email'),
+            array('id' => 4, 'channel' => 'Call'),
+            array('id' => 5, 'channel' => 'WhatsApp'),
+            array('id' => 6, 'channel' => 'Facebook'),
         ));
     }
 }
