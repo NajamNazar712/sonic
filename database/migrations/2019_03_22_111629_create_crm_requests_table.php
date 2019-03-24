@@ -22,7 +22,7 @@ class CreateCrmRequestsTable extends Migration
             $table->integer('launched_by_id')->nullable();
             $table->tinyInteger('launched_by');
             $table->integer('shipment_id')->nullable();
-            $table->integer('agent_id');
+            $table->integer('agent_id')->nullable();
             $table->timestamps();
         });
     }

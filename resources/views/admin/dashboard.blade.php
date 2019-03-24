@@ -237,10 +237,13 @@
                     @method('POST')
                     @csrf
                     <div class="container">
-                        <div class="row justify-content-center">
+                        <div class="row">
+                            <h2 class="heading">Tracking Number(s)</h2>
+                        </div>
+
                             <input type="hidden" id="requested_shipment_ids">
-                            <div class="col form-group vertical-scroll" id="requested_shipments" style="height: 100px;">
-                            </div>
+                            <div class="row old_scroll" id="requested_shipments">
+
                         </div>
                         <hr>
                         <div class="row justify-content-center">
@@ -310,7 +313,7 @@
                         </div>
                         <div class="row justify-content-center">
                             <div class="col-3">
-                                <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block">Add Request</button>
+                                <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block d-none">Submit</button>
                             </div>
                         </div>
                     </div>
@@ -344,6 +347,10 @@
         .align-bottom{
             vertical-align: bottom;
         }
+        .old_scroll{
+            overflow-y: auto;
+            max-height: 100px;
+        }
 
     </style>
 @endsection
@@ -362,7 +369,7 @@
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/js/scripts/ui/scrollable.js')}}" type="text/javascript"></script>
+{{--    <script src="{{asset('app-assets/js/scripts/ui/scrollable.js')}}" type="text/javascript"></script>--}}
 
 
     <script type="text/javascript">
@@ -428,12 +435,16 @@
                 if(id === 1){
                     $('#request_service').addClass('d-none');
                     $('#request_complaints').removeClass('d-none');
+                    $('#AddNewRequest').removeClass('d-none');
                 }else if(id === 2){
                     $('#request_complaints').addClass('d-none');
                     $('#request_service').removeClass('d-none');
+                    $('#AddNewRequest').removeClass('d-none');
+
                 }else{
                     $('#request_complaints').addClass('d-none');
                     $('#request_service').addClass('d-none');
+                    $('#AddNewRequest').addClass('d-none');
 
                 }
             });
@@ -569,7 +580,7 @@
                                 var row = table.row(index);
                                 if ($(row.node()).hasClass('selected')) {
                                     var tracking = $(row.node()).find('td.tracking_number').text();
-                                    html_rows += '<p class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking +'</b></p>';
+                                    html_rows += '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking +'</b></span></div>';
                                     count++;
                                 }
                             });
@@ -1092,6 +1103,159 @@
 
             });
 
+            $('body').on('change','#add_request_form textarea',function() {
+                $(this).val($(this).val().trim());
+            });
+            $( "#add_request_form" ).bind('submit', function (e) {
+                e.preventDefault();
+                var case_nature_id = parseInt($('#case_nature_select').val());
+                if(case_nature_id === 1){
+                    var nature_flag = true;
+                    var case_nature_complaint_id = $('#case_nature_complaints').val();
+                    var case_nature_channel_id = $('#complaint_channels').val();
+                    var complaint_description = $('#complaint_description').val();
+                    if(!case_nature_complaint_id){
+                        nature_flag = false;
+                        var error = "Please select Complaint type!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(!case_nature_channel_id){
+                        nature_flag = false;
+                        var error = "Please select Channel!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(!complaint_description){
+                        nature_flag = false;
+                        var error = "Please select Description!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(selected_rows.length == 0){
+                        nature_flag = false;
+                        var error = "Please select atleast one tracking number!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(nature_flag){
+                        $.ajax({
+                            url: '{!! route('admin.cms.request.add') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'shipment_ids': selected_rows,
+                                'case_nature_id' : case_nature_id,
+                                'complaint_id' : case_nature_complaint_id,
+                                'channel_id': case_nature_channel_id,
+                                'description' : complaint_description
+                            }
+                        })
+                            .done(function(data) {
+                                if (data.status) {
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+
+                                table.button('.shipper_recall').disable();
+                                table.button('.print').disable();
+                                table.button('.request_add').disable();
+
+                                selected_rows = [];
+
+                                table.rows().deselect();
+
+                                table.draw('false');
+
+                                $('#AddRequestModal').modal('hide');
+                            });
+                    }
+
+                }else if(case_nature_id == 2){
+                    var nature_flag = true;
+                    var case_nature_complaint_id = $('#case_nature_requests').val();
+                    var case_nature_channel_id = $('#request_channels').val();
+                    var complaint_description = $('#service_description').val();
+                    if(!case_nature_complaint_id){
+                        nature_flag = false;
+                        var error = "Please select Complaint type!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(!case_nature_channel_id){
+                        nature_flag = false;
+                        var error = "Please select Channel!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(!complaint_description){
+                        nature_flag = false;
+                        var error = "Please select Description!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(selected_rows.length == 0){
+                        nature_flag = false;
+                        var error = "Please select atleast one tracking number!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(nature_flag){
+                        $.ajax({
+                            url: '{!! route('admin.cms.request.add') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'shipment_ids': selected_rows,
+                                'case_nature_id' : case_nature_id,
+                                'complaint_id' : case_nature_complaint_id,
+                                'channel_id': case_nature_channel_id,
+                                'description' : complaint_description
+                            }
+                        })
+                            .done(function(data) {
+                                if (data.status) {
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+
+                                table.button('.shipper_recall').disable();
+                                table.button('.print').disable();
+                                table.button('.request_add').disable();
+
+                                selected_rows = [];
+
+                                table.rows().deselect();
+
+                                table.draw('false');
+
+                                
+                                $('#AddRequestModal').modal('hide');
+                            });
+                    }
+                }else{
+                    var error = "Please select case nature!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
+                $('#AddRequestModal').on('hide.bs.modal', function (e) {
+                    $('#add_request_form')[0].reset();
+                    $('#case_nature_complaints').val('').trigger('change');
+                    $('#case_nature_select').val('').trigger('change');
+                    $('#case_nature_requests').val('').trigger('change');
+                    $('#complaint_channels').val('').trigger('change');
+                    $('#request_channels').val('').trigger('change');
+                    $('#complaint_description').val('');
+                    $('#service_description').val('');
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').addClass('d-none');
+                });
+
+                // if (data.status == 0) {
+                //     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                // }
+                // else {
+                //     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                // }
+
+
+            });
 
         });
     </script>
