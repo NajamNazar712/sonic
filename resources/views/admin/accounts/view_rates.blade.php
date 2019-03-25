@@ -404,18 +404,18 @@
                                             </div>
                                             @php
                                                 $on_return_sw = 'disabled';
-                                                $on_return_switch = 'disabled';
+                                                $on_return_switch = '';
                                             if((isset($switches[1][0]) && $switches[1][0]->return_charges == 1)){
                                             $on_return_sw = 'disabled';
                                             $on_return_switch = 'checked';
                                              }else{
                                             $on_return_sw = 'disabled';
-                                            $on_return_switch = 'disabled';
+                                            $on_return_switch = '';
                                             }
                                             @endphp
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="on_return_switch" class="switchery returnChargesOvernight" data-color="success" data-size="sm" {{$on_return_switch}}/>
+                                                    <input type="checkbox" name="on_return_switch" class="switchery returnChargesOvernight" data-color="success" data-size="sm" {{$on_return_switch}} disabled/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1137,18 +1137,18 @@
                                             </div>
                                             @php
                                                 $ol_return_sw = 'disabled';
-                                                $ol_return_switch = 'disabled';
+                                                $ol_return_switch = '';
                                             if((isset($switches[2][0]) && $switches[2][0]->return_charges == 1)){
                                             $ol_return_sw = 'disabled';
                                             $ol_return_switch = 'checked';
                                              }else{
                                             $ol_return_sw = 'disabled';
-                                            $ol_return_switch = 'disabled';
+                                            $ol_return_switch = '';
                                             }
                                             @endphp
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="ol_return_switch" class="switchery returnChargesOverland" data-color="success" data-size="sm" {{$ol_return_switch}}/>
+                                                    <input type="checkbox" name="ol_return_switch" class="switchery returnChargesOverland" data-color="success" data-size="sm" {{$ol_return_switch}} disabled/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1870,18 +1870,18 @@
                                             </div>
                                             @php
                                                 $det_return_sw = 'disabled';
-                                                $det_return_switch = 'disabled';
+                                                $det_return_switch = '';
                                             if((isset($switches[3][0]) && $switches[3][0]->return_charges == 1)){
                                             $det_return_sw = 'disabled';
                                             $det_return_switch = 'checked';
                                              }else{
                                             $det_return_sw = 'disabled';
-                                            $det_return_switch = 'disabled';
+                                            $det_return_switch = '';
                                             }
                                             @endphp
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="detain_return_switch" class="switchery returnChargesDetain" data-color="success" data-size="sm" {{$det_return_switch}}/>
+                                                    <input type="checkbox" name="detain_return_switch" class="switchery returnChargesDetain" data-color="success" data-size="sm" {{$det_return_switch}} disabled/>
                                                 </div>
                                             </div>
                                         </div>
@@ -2538,18 +2538,18 @@
                                             </div>
                                             @php
                                                 $same_return_sw = 'disabled';
-                                                $same_return_switch = 'disabled';
+                                                $same_return_switch = '';
                                             if((isset($switches[4][0]) && $switches[4][0]->return_charges == 1)){
                                             $same_return_sw = 'disabled';
                                             $same_return_switch = 'checked';
                                              }else{
                                             $same_return_sw = 'disabled';
-                                            $same_return_switch = 'disabled';
+                                            $same_return_switch = '';
                                             }
                                             @endphp
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="sameday_return_switch" class="switchery returnChargesSameday" data-color="success" data-size="sm" {{$same_return_switch}}/>
+                                                    <input type="checkbox" name="sameday_return_switch" class="switchery returnChargesSameday" data-color="success" data-size="sm" {{$same_return_switch}} disabled/>
                                                 </div>
                                             </div>
                                         </div>
