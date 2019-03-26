@@ -1,13 +1,21 @@
 /node_modules
 /public/hot
 /public/storage
+/public/reports
 /storage/*.key
 /vendor
 /.idea
 /.vscode
 /.vagrant
+/public/uploads/*
+/public/reports/*
+/public/reports/*.xlsx
 Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
 .env
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

@@ -9,7 +9,19 @@ data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
   @include('client.layout.navbar')
   <!-- ////////////////////////////////////////////////////////////////////////////-->
   @include('client.layout.sidebar')
-  @yield('content')
+  <div class="app-content content">
+    <div class="content-wrapper">
+      @if (isset($ticker))
+          <div class="marquee3k" data-speed="0.25" data-reverse="bool" data-pausable="bool">
+          <span>{{ $ticker }}</span>
+        </div>
+      @endif
+
+      <div class="content-body">
+        @yield('content')
+      </div>
+    </div>
+  </div>
   @include('client.layout.footer')
 </body>
 </html>

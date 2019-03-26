@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Http\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class City extends Model
+{
+    protected $fillable = [
+        'name','hub','hub_id','zone_id','pickup','status'
+    ];
+    public function hub(){
+       return $this->belongsTo(self::class, 'hub_id');
+    }
+    public function hub_city(){
+       return $this->belongsTo(self::class, 'hub_id');
+    }
+    public function routes(){
+        return $this->hasMany('App\Http\Models\Route');
+    }
+    public function riders(){
+        return $this->hasMany('App\Http\Models\Rider');
+    }
+    public function admins(){
+        return $this->hasMany('App\Http\Models\Admin\Admin');
+    }
+    public function disputes(){
+        return $this->hasMany('App\Http\Models\Dispute');
+    }
+
+    public function deliveries() {
+        return $this->hasMany('App\Http\Models\CityDelivery');
+    }
+
+    public function zone() {
+       return $this->belongsTo('App\Http\Models\Zone', 'zone_id');
+    }
+}

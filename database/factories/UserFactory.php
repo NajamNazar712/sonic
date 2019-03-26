@@ -21,3 +21,24 @@ $factory->define(App\User::class, function (Faker $faker) {
         'remember_token' => str_random(10),
     ];
 });
+
+
+$factory->define(App\Http\Models\Shipper\User::class,function(Faker $faker){
+
+        return [
+                'name' => $faker->company(),
+                'email' => $faker->email(),
+                'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
+                'address' => $faker->address(),
+                'poc' => $faker->name(),
+                'phone' => $faker->phoneNumber(),
+                'phone2' => $faker->phoneNumber(),
+                'cnic' => '4258384858483',
+                'ntn_no' => '1234567',
+                'url' => $faker->url(),
+                'city_id' => '202',
+                'status' => '0',
+                'api_token' => uniqid(base64_encode(str_random(60)))
+
+        ];
+});

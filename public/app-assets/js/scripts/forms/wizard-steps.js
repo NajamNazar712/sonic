@@ -60,22 +60,41 @@ $(".steps-validation").steps({
     headerTag: "h6",
     bodyTag: "fieldset",
     transitionEffect: "fade",
-    titleTemplate: '<span class="step">#index#</span> #title#',
+    titleTemplate: '<span class="step valid">#index#</span> #title#',
     labels: {
         finish: 'Submit'
     },
     onStepChanging: function (event, currentIndex, newIndex)
     {
+        if(currentIndex === 0){
+            var caddress = $('input[name="company_address"]').val();
+            var cphone = $('input[name="shipper_phone"]').val();
+            var cpoc = $('input[name="shipper_poc"]').val();
+            var ccity = $('#shipper_city').val();
+            var cproduct = $('#shipper_product_type').val();
+            var scity = $('#shipping_city').find('option[value="'+ccity+'"]').val();
+            if(scity !== undefined){
+
+                $('#pickup_address').val(caddress);
+                $('#pickup_poc').val(cpoc);
+                $('#pickup_phone').val(cphone);
+                $('#shipping_city').val(ccity).trigger('change');
+                $('#product_select').val(cproduct).trigger('change');
+            }
+        }
         // Allways allow previous action even if the current form is not valid!
         if (currentIndex > newIndex)
         {
+
             return true;
         }
+
+
         // Forbid next action on "Warning" step if the user is to young
-        if (newIndex === 3 && Number($("#age-2").val()) < 18)
-        {
-            return false;
-        }
+        // if (newIndex === 3 && Number($("#age-2").val()) < 18)
+        // {
+        //     return false;
+        // }
         // Needed in some cases if the user went back (clean up)
         if (currentIndex < newIndex)
         {
@@ -89,11 +108,21 @@ $(".steps-validation").steps({
     onFinishing: function (event, currentIndex)
     {
         form.validate().settings.ignore = ":disabled";
+        // if($('input[name="password"]') != $('input[name="password-confirm"]')){
+        //
+        //     $('#perror').css('display','block');
+        // }else if($('input[name="password"]') == $('input[name="password-confirm"]')){
+        //     $('#perror').css('display','none');
+        //
+        // }
+        if($('#nature_of_account').val() == 1){
+            $('#billing_information_div').remove();
+        }
         return form.valid();
     },
     onFinished: function (event, currentIndex)
     {
-        alert("Submitted!");
+        $('#registership').submit();
     }
 });
 

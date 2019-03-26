@@ -1,0 +1,12 @@
+html body.bg-full-screen-image {
+	background: url('/img/bg.png') no-repeat center center fixed;
+	background-size: cover;
+}
+
+.hide{
+	display: none;
+}
+
+.ps-theme-dark > .ps-scrollbar-y-rail {
+	opacity: 0.9 !important;
+}
