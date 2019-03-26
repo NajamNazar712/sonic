@@ -190,6 +190,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
     Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
 
+    Route::prefix('crm')->name('crm.')->group(function () {
+        Route::prefix('request')->name('request.')->group(function(){
+            Route::post('add', 'Shippers\ShipperCRMController@add_request')->name('add');
+        });
+        Route::prefix('feedback')->name('feedback.')->group(function(){
+            Route::post('add', 'Shippers\ShipperCRMController@add_feedback')->name('add');
+        });
+    });
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -991,6 +999,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('request')->name('request.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_request')->name('add');
             Route::get('', 'Admins\AdminCRMController@launched')->name('launched');
+        });
+        Route::prefix('feedback')->name('feedback.')->group(function(){
+            Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
         });
         Route::prefix('launched_re_open')->name('launched_re_open.')->group(function(){
             Route::get('', 'Admins\AdminCRMController@launched_re_open_index')->name('index');

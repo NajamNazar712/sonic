@@ -322,6 +322,51 @@
         </div>
     </div>
 </div>
+<div class="modal fade text-left" id="AddFeedbackModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddFeedbackModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white">Add Feedback</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <form id="add_feedback_form" action="{{route('admin.crm.feedback.add')}}" method="post">
+                    @method('POST')
+                    @csrf
+                    <div class="container">
+
+                            <div class="row justify-content-center">
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <select name="feedback_channel" id="feedback_channel" class="form-control select2">
+                                            @foreach($case_nature_channels as $channel1)
+                                                <option value="{{$channel1->id}}">{{$channel1->channel}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <textarea class="form-control info" name="feedback_description" id="feedback_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                    </fieldset>
+                                </div>
+                            </div>
+
+
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="AddNewFeedback" type="submit" class="btn btn-primary btn-block">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
   <!-- ////////////////////////////////////////////////////////////////////////////-->
 
   @endsection
@@ -472,6 +517,12 @@
                 allowClear:true,
                 dropdownParent:$('#add_request_form')
             });
+            $('#feedback_channel').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Channel",
+                allowClear:true,
+                dropdownParent:$('#add_feedback_form')
+            });
             function print(selected_rows) {
                 $.ajax({
                     url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
@@ -586,6 +637,14 @@
                             });
                             $('#requested_shipments').html(html_rows);
                         }
+                    }
+                },
+                {
+                    text: '<i class="la la-plus"></i> Add Feedback',
+                    className: 'btn btn-primary feedback_add',
+                    enabled: true,
+                    action: function (e, dt, node, config) {
+                            $('#AddFeedbackModal').modal('show');
                     }
                 },
                  {
@@ -1103,7 +1162,32 @@
 
             });
 
-            $('body').on('change','#add_request_form textarea',function() {
+            var max_char = 245;
+            $('#feedback_description').on('keypress copy paste',function (e) {
+                if ($(this).val().length == max_char) {
+                    e.preventDefault();
+                } else if ($(this).val().length > max_char) {
+                    // Maximum exceeded
+                    this.value = this.value.substring(0, max_char);
+                }
+            });
+            $('#service_description').on('keypress copy paste',function (e) {
+                if ($(this).val().length == max_char) {
+                    e.preventDefault();
+                } else if ($(this).val().length > max_char) {
+                    // Maximum exceeded
+                    this.value = this.value.substring(0, max_char);
+                }
+            });
+            $('#complaint_description').on('keypress copy paste',function (e) {
+                if ($(this).val().length == max_char) {
+                    e.preventDefault();
+                } else if ($(this).val().length > max_char) {
+                    // Maximum exceeded
+                    this.value = this.value.substring(0, max_char);
+                }
+            });
+            $('body').on('change','#add_request_form textarea, #add_feedback_form textarea',function() {
                 $(this).val($(this).val().trim());
             });
             $( "#add_request_form" ).bind('submit', function (e) {
@@ -1173,7 +1257,7 @@
                     var nature_flag = true;
                     var case_nature_complaint_id = $('#case_nature_requests').val();
                     var case_nature_channel_id = $('#request_channels').val();
-                    var complaint_description = $('#service_description').val();
+                    var service_description = $('#service_description').val();
                     if(!case_nature_complaint_id){
                         nature_flag = false;
                         var error = "Please select Complaint type!";
@@ -1184,7 +1268,7 @@
                         var error = "Please select Channel!";
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
-                    if(!complaint_description){
+                    if(!service_description){
                         nature_flag = false;
                         var error = "Please select Description!";
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -1204,7 +1288,7 @@
                                 'case_nature_id' : case_nature_id,
                                 'complaint_id' : case_nature_complaint_id,
                                 'channel_id': case_nature_channel_id,
-                                'description' : complaint_description
+                                'description' : service_description
                             }
                         })
                             .done(function(data) {
@@ -1233,28 +1317,60 @@
                     var error = "Please select case nature!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
+            });
+            $('#AddRequestModal').on('hide.bs.modal', function (e) {
+                $('#add_request_form')[0].reset();
+                $('#case_nature_complaints').val('').trigger('change');
+                $('#case_nature_select').val('').trigger('change');
+                $('#case_nature_requests').val('').trigger('change');
+                $('#complaint_channels').val('').trigger('change');
+                $('#request_channels').val('').trigger('change');
+                $('#complaint_description').val('');
+                $('#service_description').val('');
+                $('#request_complaints').addClass('d-none');
+                $('#request_service').addClass('d-none');
+            });
 
-                $('#AddRequestModal').on('hide.bs.modal', function (e) {
-                    $('#add_request_form')[0].reset();
-                    $('#case_nature_complaints').val('').trigger('change');
-                    $('#case_nature_select').val('').trigger('change');
-                    $('#case_nature_requests').val('').trigger('change');
-                    $('#complaint_channels').val('').trigger('change');
-                    $('#request_channels').val('').trigger('change');
-                    $('#complaint_description').val('');
-                    $('#service_description').val('');
-                    $('#request_complaints').addClass('d-none');
-                    $('#request_service').addClass('d-none');
-                });
+            $('#add_feedback_form').bind('submit', function (e) {
+                 e.preventDefault();
+                var feedback_flag = true;
+                var feedback_chennel = $('#feedback_channel').val();
+                var feedback_description = $('#feedback_description').val();
+                if(!feedback_description){
+                    feedback_flag = false;
+                    var error = "Please Enter Description!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(!feedback_chennel){
+                    feedback_flag = false;
+                    var error = "Please select Channel!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(feedback_flag){
+                    $.ajax({
+                        url: '{!! route('admin.crm.feedback.add') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'channel_id': feedback_chennel,
+                            'description' : feedback_description
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status) {
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            $('#AddFeedbackModal').modal('hide');
+                        });
+                }
 
-                // if (data.status == 0) {
-                //     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                // }
-                // else {
-                //     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                // }
-
-
+            });
+            $('#AddFeedbackModal').on('hide.bs.modal', function (e) {
+                $('#feedback_channel').val('').trigger('change');
+                $('#feedback_description').val('');
             });
 
         });

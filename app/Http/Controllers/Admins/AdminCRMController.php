@@ -7,6 +7,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestStatus;
+use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -30,15 +31,45 @@ class AdminCRMController extends Controller
         $complaint_id = $request->complaint_id;
         $channel_id = $request->channel_id;
         $shipment_ids = $request->shipment_ids;
+        $description = $request->description;
         if(!empty($shipment_ids)){
             foreach ($shipment_ids as $shipment_id) {
-                CRMController::add_request($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id);
+                $shipment = Shipment::find($shipment_id);
+
+//                $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
+//                if($is_shipment){
+//                    if($is_shipment->case_nature_id != $nature_id){
+                        CRMController::add_request($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+//                    }else{
+//                        $shipment = Shipment::find($shipment_id);
+//                        $present_shipments[] = $shipment->tracking_number;
+//                        $flag = true;
+//                    }
+//                }
+
             }
             return ['status' => 1, 'success' => 'Request(s) successfully added'];
         }else{
             return ['status' => 0, 'error' => 'No shipments selected!'];
         }
     }
+
+    public function add_feedback(Request $request){
+        $nature_id = 3;
+        $channel_id = $request->channel_id;
+        $description = $request->description;
+        if($channel_id == null){
+            return ['status' => 0, 'error' => 'Channel Not selected!'];
+        }
+        if($description == null){
+            return ['status' => 0, 'error' => 'Description Not Entered!'];
+        }
+
+        CRMController::add_request($nature_id, NULL, $channel_id, 1, Auth::id(), 0, NULL, NULL, NULL ,$description);
+        return ['status' => 1, 'success' => 'Feedback successfully added'];
+
+    }
+
 
     public function launched_re_open_index(){
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();

@@ -16,13 +16,15 @@ class CreateCrmRequestsTable extends Migration
         Schema::create('crm_requests', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('case_nature_id');
-            $table->integer('case_nature_type_id');
+            $table->integer('case_nature_type_id')->nullable();
             $table->integer('channel_id');
             $table->integer('status_id');
             $table->integer('launched_by_id')->nullable();
             $table->tinyInteger('launched_by');
             $table->integer('shipment_id')->nullable();
+            $table->integer('shipper_id')->nullable();
             $table->integer('agent_id')->nullable();
+            $table->string('description', 250);
             $table->timestamps();
         });
     }

@@ -12,7 +12,7 @@ class CRMController extends Controller
     //launched_by = 1 => Shipper
     //launched_by = 2 => Substitute Shipper
 
-    static public function add_request($case_nature_id, $case_nature_type_id, $channel_id, $status_id = 1, $launched_by_id = NULL, $launched_by, $shipment_id = NULL, $agent_id = NULL){
+    static public function add_request($case_nature_id, $case_nature_type_id = NULL, $channel_id, $status_id = 1, $launched_by_id = NULL, $launched_by, $shipment_id = NULL, $shipper_id = NULL, $agent_id = NULL,$description){
         $crm_request = new CrmRequest();
         $crm_request->case_nature_id = $case_nature_id;
         $crm_request->case_nature_type_id = $case_nature_type_id;
@@ -21,7 +21,9 @@ class CRMController extends Controller
         $crm_request->launched_by_id = $launched_by_id;
         $crm_request->launched_by = $launched_by;
         $crm_request->shipment_id = $shipment_id;
+        $crm_request->shipper_id = $shipper_id;
         $crm_request->agent_id = $agent_id;
+        $crm_request->description = $description;
 
         $crm_request->save();
 
