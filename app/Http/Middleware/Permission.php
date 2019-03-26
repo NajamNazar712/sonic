@@ -371,6 +371,15 @@ class Permission
             'notifications.status' => 102,
             'notifications.edit' => 101,
 
+            'crm.launched_re_open.index' => 179,
+            'crm.launched_re_open.list' => 179,
+            'crm.in_process.index' => 180,
+            'crm.in_process.list' => 180,
+            'crm.resolved.index' => 181,
+            'crm.resolved.list' => 181,
+            'crm.closed.index' => 182,
+            'crm.closed.list' => 182,
+
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,
 

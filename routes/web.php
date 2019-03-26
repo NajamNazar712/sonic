@@ -987,9 +987,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     //CMC Routes
-    Route::prefix('cms')->name('cms.')->group(function () {
+    Route::prefix('crm')->name('crm.')->group(function () {
         Route::prefix('request')->name('request.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_request')->name('add');
+            Route::get('', 'Admins\AdminCRMController@launched')->name('launched');
         });
+        Route::prefix('launched_re_open')->name('launched_re_open.')->group(function(){
+            Route::get('', 'Admins\AdminCRMController@launched_re_open_index')->name('index');
+            Route::get('list', 'Admins\AdminCRMController@launched_re_open_list')->name('list');
+        });
+        Route::prefix('in_process')->name('in_process.')->group(function(){
+            Route::get('', 'Admins\AdminCRMController@in_process_index')->name('index');
+            Route::get('list', 'Admins\AdminCRMController@in_process_list')->name('list');
+        });
+        Route::prefix('resolved')->name('resolved.')->group(function(){
+            Route::get('', 'Admins\AdminCRMController@resolved_index')->name('index');
+            Route::get('list', 'Admins\AdminCRMController@resolved_list')->name('list');
+        });
+        Route::prefix('closed')->name('closed.')->group(function(){
+            Route::get('', 'Admins\AdminCRMController@closed_index')->name('index');
+            Route::get('list', 'Admins\AdminCRMController@closed_list')->name('list');
+        });
+        Route::post('assign', 'Admins\AdminCRMController@assign')->name('assign');
     });
 });

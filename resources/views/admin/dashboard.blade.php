@@ -233,7 +233,7 @@
                 </button>
             </div>
             <div class="modal-body text-center">
-                <form id="add_request_form" action="{{route('admin.cms.request.add')}}" method="post">
+                <form id="add_request_form" action="{{route('admin.crm.request.add')}}" method="post">
                     @method('POST')
                     @csrf
                     <div class="container">
@@ -1136,7 +1136,7 @@
                     }
                     if(nature_flag){
                         $.ajax({
-                            url: '{!! route('admin.cms.request.add') !!}',
+                            url: '{!! route('admin.crm.request.add') !!}',
                             method: 'POST',
                             data: {
                                 '_token': '{{ csrf_token() }}',
@@ -1196,7 +1196,7 @@
                     }
                     if(nature_flag){
                         $.ajax({
-                            url: '{!! route('admin.cms.request.add') !!}',
+                            url: '{!! route('admin.crm.request.add') !!}',
                             method: 'POST',
                             data: {
                                 '_token': '{{ csrf_token() }}',
