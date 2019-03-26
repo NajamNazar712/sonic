@@ -8,6 +8,10 @@ use App\Http\Controllers\Controller;
 
 class CRMController extends Controller
 {
+    //launched_by = 0 => Admin
+    //launched_by = 1 => Shipper
+    //launched_by = 2 => Substitute Shipper
+
     static public function add_request($case_nature_id, $case_nature_type_id, $channel_id, $status_id = 1, $launched_by_id = NULL, $launched_by, $shipment_id = NULL, $agent_id = NULL){
         $crm_request = new CrmRequest();
         $crm_request->case_nature_id = $case_nature_id;
