@@ -483,7 +483,10 @@ class Permission
             'reports.qsr.index' => 8,
             'reports.qsr.list' => 8,
             'reports.sales.index' => 8,
-            'reports.sales.list' => 8
+            'reports.sales.list' => 8,
+
+            'crm.request.index' => 10,
+
         ]
     ];
 
