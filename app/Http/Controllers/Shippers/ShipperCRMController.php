@@ -87,8 +87,14 @@ class ShipperCRMController extends Controller
 
     public function requests_details(Request $request, $id){
         $crm_request = CrmRequest::find($id);
-        $crm_comments = CrmComments::where('crm_request_id', $id)->orderBy('created_at','asc')->get();
-        $last_comment = CrmComments::where('crm_request_id', $id)->latest()->first();
+        $crm_comments = array();
+        $last_comment = null;
+        $crm_comments = CrmComments::where('crm_request_id', $id);
+        if($crm_comments->exists()){
+            $crm_comments = $crm_comments->orderBy('created_at','asc')->get();
+            $last_comment = CrmComments::where('crm_request_id', $id)->latest()->first();
+            $last_comment = $last_comment->id;
+        }
         $launched_by  = '';
         if($crm_request->launched_by == 0){
             $launched_by = Admin::select('name')->where('id', $crm_request->launched_by_id)->first();
@@ -98,21 +104,10 @@ class ShipperCRMController extends Controller
             $launched_by = SubstituteUser::select('name')->where('id', $crm_request->launched_by_id)->first();
         }
         if($crm_request){
-            return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment->id]);
+            return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
-    }
-
-    public function get_latest_comment(Request $request){
-        $comment_id = $request->comment_id;
-        $request_id = $request->request_id;
-        if(($comment_id != null) && ($request_id != null)){
-            $comment_details = CrmComments::find($comment_id);
-
-        }
-
-
     }
 
     public function add_request(Request $request){
@@ -181,7 +176,22 @@ class ShipperCRMController extends Controller
             $comment_by = 2;
         }
         CRMCommentController::add($request_id, Auth::id(),$comment_by,0, $comment);
-        return ['status' => 1, 'success' => 'Comment successfully added'];
+        $last_comment = CrmComments::where('crm_request_id', $request_id)->latest()->first();
+        return ['status' => 1, 'success' => 'Comment successfully added', 'last_comment_id' => $last_comment->id];
 
     }
+
+    public function get_latest_comment(Request $request){
+        $comment_id = $request->comment_id;
+        $request_id = $request->request_id;
+        if(($comment_id != null) && ($request_id != null)){
+            $comment_details = CrmComments::where('crm_request_id', $request_id)->latest()->first();
+            if($comment_details->id > $comment_id){
+                return ['status' => 1, 'comment' => $comment_details];
+            }
+        }
+
+
+    }
+
 }

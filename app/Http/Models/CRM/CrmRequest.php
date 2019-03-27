@@ -21,5 +21,8 @@ class CrmRequest extends Model
     public function agent() {
         return $this->belongsTo('App\Http\Models\Admin\Admin','agent_id','id');
     }
+    public function shipment() {
+        return $this->belongsTo('App\Http\Models\Shipment','shipment_id','id');
+    }
 
 }

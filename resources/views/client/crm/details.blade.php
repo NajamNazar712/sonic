@@ -8,7 +8,7 @@
             <div class="content-wrapper">
                 <div class="content-body">
                     <h1 class="mb-1">
-                        Request Details
+                        Request Details ( {{$crm_details->id}} )
                     </h1>
 
                     <div class="card">
@@ -19,6 +19,12 @@
                                     <div class="col-6">
                                         <table class="table table-bordered table-lg">
                                             <tbody class="list">
+                                                <tr>
+                                                    <th scope="row">Tracking Number</th>
+                                                    <td class="name">
+                                                        <h4>{{$crm_details->shipment->tracking_number}}</h4>
+                                                    </td>
+                                                </tr>
                                                 <tr>
                                                     <th scope="row">Case Nature</th>
                                                     <td class="name">
@@ -34,25 +40,31 @@
                                                 <tr>
                                                     <th scope="row">Channel</th>
                                                     <td class="name">
-                                                        <h3>{{$crm_details->channel->channel}}</h3>
+                                                        <h4>{{$crm_details->channel->channel}}</h4>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Status</th>
                                                     <td class="name">
-                                                        <h3>{{$crm_details->request_status->name}}</h3>
+                                                        <h4>{{$crm_details->request_status->name}}</h4>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Launched By</th>
                                                     <td class="name">
-                                                        <h3>{{$launched_by->name}}</h3>
+                                                        <h4>{{$launched_by->name}}</h4>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Launched Date</th>
                                                     <td class="name">
-                                                        <h3>{{$crm_details->created_at}}</h3>
+                                                        <h4>{{$crm_details->created_at}}</h4>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Description</th>
+                                                    <td class="name">
+                                                        <h5>{{$crm_details->description}}</h5>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -60,39 +72,55 @@
                                     </div>
                                     <div class="col-6">
                                             <div class="content-body chat-application">
-                                                <section class="chat-app-window">
-                                                    {{--<div class="badge badge-default mb-1">Chat History</div>--}}
+                                                <section class="chat-app-window vertical-scroll scroll-example height-400 ps-container ps-theme-dark ps-active-y always-visible" style="height: 400px; overflow-y: hidden;" >
                                                     <div class="chats">
                                                         @if(!empty($comments))
+                                                            @php
+                                                            $shipper_flag = true;
+                                                            $admin_flag = true;
+                                                            @endphp
                                                         @foreach($comments as $comment)
                                                             @if($comment->comment_by == 0)
                                                                 <div class="chat admin">
+                                                                    @if($admin_flag)
                                                                     <div class="chat-avatar">
                                                                         <div class="badge block badge-success">
-                                                                            <i class="la la-user font-medium-2"></i>{{$comment->admin->name}}
+                                                                            <i class="la la-user font-medium-2"></i>Agent
                                                                         </div>
-
-
                                                                     </div>
+
+                                                                    @endif
+
                                                                     <div class="chat-body">
-                                                                        <div class="chat-content">
+                                                                        <div class="chat-content {{($admin_flag == false)? 'mr-3':'' }}">
                                                                             <p>{{$comment->comment}}</p>
                                                                         </div>
                                                                     </div>
+
                                                                 </div>
+                                                                    @php
+                                                                        $shipper_flag = true;
+                                                                        $admin_flag = false;
+                                                                    @endphp
                                                                 @else
                                                                 <div class="chat chat-left shipper">
+
                                                                     <div class="chat-avatar">
-                                                                        <div class="badge block badge-info">
+                                                                        <div class="badge block {{($shipper_flag)? 'badge-success':''}}">
                                                                             <i class="la la-user font-medium-2"></i>{{Auth::user()->name}}
                                                                         </div>
                                                                     </div>
+
                                                                     <div class="chat-body">
                                                                         <div class="chat-content">
                                                                             <p>{{$comment->comment}}</p>
                                                                         </div>
                                                                     </div>
                                                                 </div>
+                                                                    @php
+                                                                        $admin_flag = true;
+                                                                        $shipper_flag = false;
+                                                                    @endphp
                                                             @endif
                                                         @endforeach
                                                         @endif
@@ -135,7 +163,11 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/pages/chat-application.css')}}">
-
+    <style>
+        .chat-application .chat-app-window {
+            padding: 20px 10px;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -143,6 +175,7 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/ui/scrollable.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
@@ -184,16 +217,18 @@
                                 $('section.chat-app-window .chats').append(html);
                             }
                             $('#chat_input').val('');
+                            $('#last_comment_id').val(data.last_comment_id);
+                            updateScroll();
                         }
                     });
                 }
             });
 
-            setTimeout(function () {
+            setInterval(function () {
                 var last_comment_id = parseInt($('#last_comment_id').val());
                 var request_id = '{{$crm_details->id}}';
                 get_latest_comment(last_comment_id,request_id);
-            },4000);
+            },40000);
             function get_latest_comment(comment_id,request_id) {
                 if(comment_id){
                     $.ajax({
@@ -205,10 +240,28 @@
                             'request_id': request_id
                         }
                     }).done(function (data) {
-                        console.log(data)
+                        if(data.status){
+                            if($('div.chat:last-child').hasClass('admin')){
+                                var html = '<div class="chat-content mr-3"><p>'+ data.comment.comment +'</p></div>';
+                                $('div.chat:last-child').find('.chat-body').append(html);
+                            }else{
+                                var html = '<div class="chat admin"><div class="chat-avatar"><div class="badge block badge-success"><i class="la la-user font-medium-2"></i>Agent</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
+                                $('section.chat-app-window .chats').append(html);
+                            }
+                            $('#last_comment_id').val(data.comment.id);
+                            updateScroll();
+                        }
                     });
                 }
             }
+            function updateScroll(){
+                const container = document.querySelector('.chat-app-window');
+                container.scrollTop = $('.chat-app-window')[0].scrollHeight;
+
+            }
+            updateScroll();
+
         });
+
     </script>
 @endsection
