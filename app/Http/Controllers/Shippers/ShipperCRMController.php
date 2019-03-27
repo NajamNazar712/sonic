@@ -97,11 +97,11 @@ class ShipperCRMController extends Controller
         }
         $launched_by  = '';
         if($crm_request->launched_by == 0){
-            $launched_by = Admin::select('name')->where('id', $crm_request->launched_by_id)->first();
+            $launched_by = 'Agent';
         }else if($crm_request->launched_by == 1){
-            $launched_by = User::select('name')->where('id', $crm_request->launched_by_id)->first();
+            $launched_by = User::find($crm_request->launched_by_id)->name;
         }else if($crm_request->launched_by == 2){
-            $launched_by = SubstituteUser::select('name')->where('id', $crm_request->launched_by_id)->first();
+            $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
         }
         if($crm_request){
             return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment]);
