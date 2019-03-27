@@ -26,6 +26,7 @@
                                     <th class="border-primary border-darken-1">Tracking No.</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
+                                    <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Channel</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Agent</th>
@@ -89,6 +90,7 @@
                             head.push('Tracking No.');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
+                            head.push('Description');
                             head.push('Channel');
                             head.push('Status');
                             head.push('Agent');
@@ -103,6 +105,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
+                                row.push(values.description);
                                 row.push(values.channel);
                                 row.push(values.status);
                                 row.push(values.agent);
@@ -261,13 +264,14 @@
                 serverSide: true,
                 ajax: '{{ route('admin.crm.launched_re_open.list') }}',
                 rowId: 'id',
-                order: [[10, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'crcnt.id', class: 'align-middle case_nature_type'},
+                    {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'status', name: 'crs.id', class: 'align-middle status'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
@@ -308,7 +312,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.created_at')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.description') || $(header).is('.created_at')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.status')) {
