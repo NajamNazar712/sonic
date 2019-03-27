@@ -1006,6 +1006,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('request')->name('request.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_request')->name('add');
             Route::get('', 'Admins\AdminCRMController@launched')->name('launched');
+            Route::get('{id}/details', 'Admins\AdminCRMController@request_details')->name('details');
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');

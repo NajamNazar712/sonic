@@ -8,7 +8,7 @@
             <div class="content-wrapper">
                 <div class="content-body">
                     <h1 class="mb-1">
-                        Request Details ( {{$crm_details->id}} )
+                        Request Details ( {{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}} )
                     </h1>
 
                     <div class="card">
@@ -258,10 +258,9 @@
 
                             }
                                 $('section.chat-app-window .chats').append(html);
-
-                            $('#chat_input').val('');
-                            $('#last_comment_id').val(data.last_comment_id);
-                            updateScroll();
+                                $('#chat_input').val('');
+                                $('#last_comment_id').val(data.last_comment_id);
+                                updateScroll();
                         }
                     });
                 }
@@ -271,6 +270,7 @@
                 var last_comment_id = parseInt($('#last_comment_id').val());
                 var request_id = '{{$crm_details->id}}';
                 get_latest_comment(last_comment_id,request_id);
+                updateScroll();
             },40000);
             function get_latest_comment(comment_id,request_id) {
                 if(comment_id){

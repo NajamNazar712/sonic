@@ -85,7 +85,7 @@ class ShipperCRMController extends Controller
         return $datatables->make(true);
     }
 
-    public function requests_details(Request $request, $id){
+    public function request_details(Request $request, $id){
         $crm_request = CrmRequest::find($id);
         $crm_comments = array();
         $last_comment = null;
