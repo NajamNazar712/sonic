@@ -2,12 +2,22 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Controllers\CRM\CRMController;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\Shipment;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Yajra\Datatables\Datatables;
 
 class ShipperCRMController extends Controller
 {
@@ -15,6 +25,94 @@ class ShipperCRMController extends Controller
         $this->middleware('auth:web,substitute_users');
 
         $this->middleware('Permission');
+    }
+
+    public function index(){
+        $case_nature = CrmRequestCaseNature::all(['id', 'name']);
+        $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
+        $channels = CrmRequestChannel::where('id', '>', 2)->select('id', 'channel')->get();
+        $status = CrmRequestStatus::whereIn('id', [1,5])->select('id', 'name')->get();
+        return view('client.crm.requests')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status]);
+    }
+    public function requests_list(Request $request){
+        $launched_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+            ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
+            ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
+            ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
+            ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
+            ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at')
+            ->where('crm_requests.shipper_id', session('user_id'));
+        $datatables = Datatables::of($launched_request)
+            ->addColumn('tracking_number_hyperlink', function ($requests) {
+                return '<u><a href=' . route('cod.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
+            })
+            ->editColumn('agent', function ($requests){
+                if($requests->agent == null){
+                    return '-';
+                }
+                else{
+                    return $requests->agent;
+                }
+            })
+            ->editColumn('added_by', function($requests){
+                if($requests->launched_added_by == 0) {
+                    return 'Admin';
+                }
+                else if($requests->launched_added_by == 1) {
+                    return 'Shipper';
+                }
+                else{
+                    return 'Shipper Substitute User';
+                }
+            })
+            ->addColumn('action', function($requests) {
+                $route = route('cod.crm.request.details', ['id' => $requests->id]);
+                    $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                        <button type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><a href="' . $route . '"><i class="ft-plus-circle"></i> View Details</a></button>
+                    </div>
+                  </div>
+                ';
+
+                    return $dropdown;
+
+            });
+
+        return $datatables->make(true);
+    }
+
+    public function requests_details(Request $request, $id){
+        $crm_request = CrmRequest::find($id);
+        $crm_comments = CrmComments::where('crm_request_id', $id)->orderBy('created_at','asc')->get();
+        $last_comment = CrmComments::where('crm_request_id', $id)->latest()->first();
+        $launched_by  = '';
+        if($crm_request->launched_by == 0){
+            $launched_by = Admin::select('name')->where('id', $crm_request->launched_by_id)->first();
+        }else if($crm_request->launched_by == 1){
+            $launched_by = User::select('name')->where('id', $crm_request->launched_by_id)->first();
+        }else if($crm_request->launched_by == 2){
+            $launched_by = SubstituteUser::select('name')->where('id', $crm_request->launched_by_id)->first();
+        }
+        if($crm_request){
+            return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment->id]);
+        }else{
+            return redirect()->back()->with('danger', 'CRM Request Not found!');
+        }
+    }
+
+    public function get_latest_comment(Request $request){
+        $comment_id = $request->comment_id;
+        $request_id = $request->request_id;
+        if(($comment_id != null) && ($request_id != null)){
+            $comment_details = CrmComments::find($comment_id);
+
+        }
+
+
     }
 
     public function add_request(Request $request){
@@ -34,7 +132,7 @@ class ShipperCRMController extends Controller
 //                $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
 //                if($is_shipment){
 //                    if($is_shipment->case_nature_id != $nature_id){
-                        CRMController::add_request($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
 //                    }else{
 //                        $shipment = Shipment::find($shipment_id);
 //                        $present_shipments[] = $shipment->tracking_number;
@@ -65,7 +163,25 @@ class ShipperCRMController extends Controller
             return ['status' => 0, 'error' => 'Description Not Entered!'];
         }
 
-        CRMController::add_request($nature_id, NULL, $channel_id, 1, Auth::id(), $launched_by, NULL, session('user_id'), NULL ,$description);
+        CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), $launched_by, NULL, session('user_id'), NULL ,$description);
         return ['status' => 1, 'success' => 'Feedback successfully added'];
+    }
+
+    public function add_comment(Request $request){
+        $comment = $request->comment;
+        $request_id = $request->request_id;
+        $comment_by = 1;
+        if($comment == null){
+            return ['status' => 0, 'error' => 'Comment Not selected!'];
+        }
+        if(!$request_id){
+            return ['status' => 0, 'error' => 'Request ID Not selected!'];
+        }
+        if(session('user_type') == 2){
+            $comment_by = 2;
+        }
+        CRMCommentController::add($request_id, Auth::id(),$comment_by,0, $comment);
+        return ['status' => 1, 'success' => 'Comment successfully added'];
+
     }
 }
