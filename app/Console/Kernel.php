@@ -19,7 +19,8 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\ShipmentReAttemptEmail',
         '\App\Console\Commands\AutoDisableShipperAccount',
         '\App\Console\Commands\DailyPickupSalesEmail',
-        '\App\Console\Commands\GenerateInvoice'
+        '\App\Console\Commands\GenerateInvoice',
+        '\App\Console\Commands\ClearSMS'
     ];
 
     /**
@@ -30,6 +31,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('sms:clear')->everyTenMinutes()->runInBackground();
         $schedule->command('email:returnconfirmationpending')->dailyAt('10:00')->runInBackground();
         $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
         $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
