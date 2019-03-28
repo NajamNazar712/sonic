@@ -95,16 +95,16 @@
                                                         @endphp
                                                         @foreach($comments as $comment)
                                                             @if($comment->comment_by == 0)
-                                                                <div class="chat chat-left admin">
-
+                                                                <div class="chat admin">
+                                                                    @if($admin_flag)
                                                                     <div class="chat-avatar">
-                                                                        <div class="badge block {{($admin_flag)? 'badge-admin':''}}">
-                                                                            <i class="la la-user font-medium-2"></i>Agent
+                                                                        <div class="badge block badge-admin">
+                                                                            <i class="la la-user font-medium-2"></i>{{$comment->admin->name}}
                                                                         </div>
                                                                     </div>
-
+                                                                    @endif
                                                                     <div class="chat-body">
-                                                                        <div class="chat-content">
+                                                                        <div class="chat-content {{($admin_flag == false)? 'mr-3':'' }}">
                                                                             <p>{{$comment->comment}}</p>
                                                                         </div>
                                                                     </div>
@@ -116,16 +116,16 @@
                                                                     $sub_flag = true;
                                                                 @endphp
                                                             @elseif($comment->comment_by == 1)
-                                                                <div class="chat shipper">
-                                                                    @if($shipper_flag)
+                                                                <div class="chat chat-left shipper">
+
                                                                         <div class="chat-avatar">
-                                                                            <div class="badge block badge-info">
-                                                                                <i class="la la-user font-medium-2"></i>You
+                                                                            <div class="badge block {{($shipper_flag)? 'badge-info':'' }}">
+                                                                                <i class="la la-user font-medium-2"></i>Shipper
                                                                             </div>
                                                                         </div>
-                                                                    @endif
+
                                                                     <div class="chat-body">
-                                                                        <div class="chat-content {{($shipper_flag == false)? 'mr-3':'' }}">
+                                                                        <div class="chat-content">
                                                                             <p>{{$comment->comment}}</p>
                                                                         </div>
                                                                     </div>
@@ -136,16 +136,16 @@
                                                                     $sub_flag = true;
                                                                 @endphp
                                                             @else
-                                                                <div class="chat substitute-user">
-                                                                    @if($shipper_flag)
+                                                                <div class="chat chat-left substitute-user">
+
                                                                         <div class="chat-avatar">
-                                                                            <div class="badge block badge-substitute-user">
-                                                                                <i class="la la-user font-medium-2"></i>You
+                                                                            <div class="badge block {{($shipper_flag)? 'badge-substitute-user':'' }}">
+                                                                                <i class="la la-user font-medium-2"></i>Shipper
                                                                             </div>
                                                                         </div>
-                                                                    @endif
+
                                                                     <div class="chat-body">
-                                                                        <div class="chat-content {{($sub_flag == false)? 'mr-3':'' }}">
+                                                                        <div class="chat-content">
                                                                             <p>{{$comment->comment}}</p>
                                                                         </div>
                                                                     </div>
@@ -210,6 +210,26 @@
         }
         .chat-application .chats .substitute-user .chat-body .chat-content{
             background-color: deepskyblue;
+        }
+        .chat-application .chats .chat-left .chat-content {
+            text-align: left;
+            float: left;
+            margin: 0 0 10px 20px;
+            color: #ffffff;
+            background-color: #1e9ff2;
+        }
+        .chat-application .chats .chat-left .chat-content:before {
+            border-right-color: #1e9ff2;
+        }
+        .chat-application .chats .chat-left.substitute-user .chat-content:before {
+            border-right-color: deepskyblue;
+        }
+        .chat-application .chats .admin .chat-content {
+            color: #000000;
+            background-color: #edeef0;
+        }
+        .chat-application .chats .admin .chat-body .chat-content:before {
+            border-left-color: #edeef0;
         }
     </style>
 @endsection
@@ -301,7 +321,7 @@
                                 var html = '<div class="chat-content"><p>' + comment + '</p></div>';
                                 $('div.chat:last-child').find('.chat-body').append(html);
                             }else{
-                                var html = '<div class="chat chat-left admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>'+ user +'</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p></div></div></div>';
+                                var html = '<div class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>'+ user +'</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p></div></div></div>';
                                 $('section.chat-app-window .chats').append(html);
                             }
 
@@ -319,7 +339,7 @@
                 var request_id = '{{$crm_details->id}}';
                 get_latest_comment(last_comment_id,request_id);
                 updateScroll();
-            },40000);
+            },4000);
             function get_latest_comment(comment_id,request_id) {
                 if(comment_id){
                     $.ajax({
@@ -333,20 +353,22 @@
                     }).done(function (data) {
                         if(data.status){
                             var user = data.comment.comment_by;
-                            var shipper = 'You';
+                            var shipper = 'Shipper';
                             if(user == 1){
                                 if($('div.chat:last-child').hasClass('shipper')) {
-                                    var html = '<div class="chat-content"><p>' + comment + '</p></div>';
+                                    var html = '<div class="chat-content"><p>' + data.comment.comment + '</p></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 }else{
-                                    var html = '<div class="chat shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p></div></div></div>';
+                                    var html = '<div class="chat chat-left shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
+                                    $('section.chat-app-window .chats').append(html);
                                 }
                             }else{
                                 if($('div.chat:last-child').hasClass('substitute-user')) {
-                                    var html = '<div class="chat-content"><p>' + comment + '</p></div>';
+                                    var html = '<div class="chat-content"><p>' + data.comment.comment + '</p></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 }else{
-                                    var html = '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p></div></div></div>';
+                                    var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
+                                    $('section.chat-app-window .chats').append(html);
                                 }
 
                             }
