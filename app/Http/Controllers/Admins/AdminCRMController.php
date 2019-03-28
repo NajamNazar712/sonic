@@ -339,7 +339,7 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->select('s.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
             ->where(['crm_requests.status_id' => 4]);
         $datatables = Datatables::of($in_process_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
@@ -431,27 +431,73 @@ class AdminCRMController extends Controller
 
     public function valid(Request $request){
         $crm_request = CrmRequest::where('id',$request->id)->first();
-        if($crm_request['status_id'] != $request->status){
-            CrmRequest::where('id',$request->id)->update([
-                'status_id' => $request->status
-            ]);
-            CrmRequestStatusHistory::create([
-                'crm_request_id' => $request->id,
-                'status_id' => $crm_request['status_id'],
-                'agent_id' => Auth::id()
-            ]);
-            return ['status' => 0, 'success' => 'Request marked as In-Process'];
+        if($request->prev_status == 1 || $request->prev_status == 5) {
+            if ($crm_request['status_id'] != 2) {
+                CrmRequest::where('id', $request->id)->update([
+                    'status_id' => 2
+                ]);
+                CrmRequestStatusHistory::create([
+                    'crm_request_id' => $request->id,
+                    'status_id' => $crm_request['status_id'],
+                    'agent_id' => Auth::id()
+                ]);
+                return ['status' => 0, 'success' => 'Request marked as In-Process', 'marked_status' => 2];
+            } else {
+                return ['status' => 1, 'error' => 'Request is already marked as In-Process'];
+            }
         }
-        else{
-            return ['status' => 1, 'error' => 'Request is already marked as In-Process'];
+        if($request->prev_status == 2) {
+            if ($crm_request['status_id'] != 3) {
+                CrmRequest::where('id', $request->id)->update([
+                    'status_id' => 3
+                ]);
+                CrmRequestStatusHistory::create([
+                    'crm_request_id' => $request->id,
+                    'status_id' => $crm_request['status_id'],
+                    'agent_id' => Auth::id()
+                ]);
+                return ['status' => 0, 'success' => 'Request marked as Resolved', 'marked_status' => 5];
+            } else {
+                return ['status' => 1, 'error' => 'Request is already marked as Re-Open'];
+            }
+        }
+        if($request->prev_status == 3) {
+            if ($crm_request['status_id'] != 5) {
+                CrmRequest::where('id', $request->id)->update([
+                    'status_id' => 5
+                ]);
+                CrmRequestStatusHistory::create([
+                    'crm_request_id' => $request->id,
+                    'status_id' => $crm_request['status_id'],
+                    'agent_id' => Auth::id()
+                ]);
+                return ['status' => 0, 'success' => 'Request marked as Resolved', 'marked_status' => 3];
+            } else {
+                return ['status' => 1, 'error' => 'Request is already marked as Resolved'];
+            }
+        }
+        if($request->prev_status == 4) {
+            if ($crm_request['status_id'] != 5) {
+                CrmRequest::where('id', $request->id)->update([
+                    'status_id' => 5
+                ]);
+                CrmRequestStatusHistory::create([
+                    'crm_request_id' => $request->id,
+                    'status_id' => $crm_request['status_id'],
+                    'agent_id' => Auth::id()
+                ]);
+                return ['status' => 0, 'success' => 'Request marked as Re-Open', 'marked_status' => 5];
+            } else {
+                return ['status' => 1, 'error' => 'Request is already marked as Re-Open'];
+            }
         }
     }
 
     public function invalid(Request $request){
         $crm_request = CrmRequest::where('id',$request->id)->first();
-        if($crm_request['status_id'] != $request->status){
+        if($crm_request['status_id'] != 4){
             CrmRequest::where('id',$request->id)->update([
-                'status_id' => $request->status
+                'status_id' => 4
             ]);
             CrmRequestStatusHistory::create([
                 'crm_request_id' => $request->id,
