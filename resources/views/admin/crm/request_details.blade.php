@@ -22,7 +22,10 @@
                                             <tr>
                                                 <th scope="row">Tracking Number</th>
                                                 <td class="name">
+
+                                                    @if(!empty($crm_details->shipment_id))
                                                     <h5 class="mb-0">{{$crm_details->shipment->tracking_number}}</h5>
+                                                    @endif
                                                 </td>
                                             </tr>
                                             <tr>
@@ -34,7 +37,9 @@
                                             <tr>
                                                 <th scope="row">Case Nature Type</th>
                                                 <td class="name">
+                                                    @if(!empty($crm_details->case_nature_type_id))
                                                     <h5 class="mb-0">{{$crm_details->nature_type->type}}</h5>
+                                                    @endif
                                                 </td>
                                             </tr>
                                             <tr>
