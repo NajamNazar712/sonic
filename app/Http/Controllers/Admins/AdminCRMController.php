@@ -124,8 +124,10 @@ class AdminCRMController extends Controller
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
+                    if (session('role_id') == 1 || in_array(183, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item assign"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Agent</div></button>';
-                        $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><a href="' . $route . '"><i class="ft-plus-circle"></i> View Details</a></button>';
+                    }
+                    $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
                     $dropdown .= '</div>
                   </div>
                 ';
@@ -180,13 +182,17 @@ class AdminCRMController extends Controller
                 }
             })
             ->addColumn('action', function($requests) {
+                $route = route('admin.crm.request.details', ['id' => $requests->id]);
                 if (session('role_id') == 1 || in_array(180, session('permissions'))) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                        <button type="button" class="dropdown-item assign"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Agent</div></button>
-                    </div>
+                    <div class="dropdown-menu dropdown-menu-sm">';
+                    if (session('role_id') == 1 || in_array(183, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item assign"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Agent</div></button>';
+                    }
+                    $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
+                    $dropdown .= '</div>
                   </div>
                 ';
 
@@ -241,13 +247,17 @@ class AdminCRMController extends Controller
                 }
             })
             ->addColumn('action', function($requests) {
+                $route = route('admin.crm.request.details', ['id' => $requests->id]);
                 if (session('role_id') == 1 || in_array(181, session('permissions'))) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                        <button type="button" class="dropdown-item assign"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Agent</div></button>
-                    </div>
+                    <div class="dropdown-menu dropdown-menu-sm">';
+                    if (session('role_id') == 1 || in_array(183, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item assign"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Agent</div></button>';
+                    }
+                    $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
+                    $dropdown .= '</div>
                   </div>
                 ';
 
@@ -300,13 +310,17 @@ class AdminCRMController extends Controller
                 }
             })
             ->addColumn('action', function($requests) {
+                $route = route('admin.crm.request.details', ['id' => $requests->id]);
                 if (session('role_id') == 1 || in_array(182, session('permissions'))) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                        <button type="button" class="dropdown-item assign"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Agent</div></button>
-                    </div>
+                    <div class="dropdown-menu dropdown-menu-sm">';
+                    if (session('role_id') == 1 || in_array(183, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item assign"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Agent</div></button>';
+                    }
+                    $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
+                    $dropdown .= '</div>
                   </div>
                 ';
 
