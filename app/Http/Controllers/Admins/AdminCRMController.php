@@ -9,6 +9,7 @@ use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestStatus;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
@@ -175,7 +176,7 @@ class AdminCRMController extends Controller
                 }
             })
             ->addColumn('action', function($requests) {
-                $route = route('admin.crm.request.details', ['id' => $requests->id]);
+                $route = route('admin.crm.request.details', ['id' => $requests->id, 'agent' => $requests->agent]);
                 if (session('role_id') == 1 || in_array(179, session('permissions'))) {
                     $dropdown = '
                   <div class="btn-group">
@@ -428,6 +429,42 @@ class AdminCRMController extends Controller
                     }
             }
             return ['status' => 0, 'success' => 'Request(s) has been Assigned'];
+        }
+    }
+
+    public function valid(Request $request){
+        $crm_request = CrmRequest::where('id',$request->id)->first();
+        if($crm_request['status_id'] != $request->status){
+            CrmRequest::where('id',$request->id)->update([
+                'status_id' => $request->status
+            ]);
+            CrmRequestStatusHistory::create([
+                'crm_request_id' => $request->id,
+                'status_id' => $crm_request['status_id'],
+                'agent_id' => Auth::id()
+            ]);
+            return ['status' => 0, 'success' => 'Request marked as In-Process'];
+        }
+        else{
+            return ['status' => 1, 'error' => 'Request is already marked as In-Process'];
+        }
+    }
+
+    public function invalid(Request $request){
+        $crm_request = CrmRequest::where('id',$request->id)->first();
+        if($crm_request['status_id'] != $request->status){
+            CrmRequest::where('id',$request->id)->update([
+                'status_id' => $request->status
+            ]);
+            CrmRequestStatusHistory::create([
+                'crm_request_id' => $request->id,
+                'status_id' => $crm_request['status_id'],
+                'agent_id' => Auth::id()
+            ]);
+            return ['status' => 0, 'success' => 'Request marked as Closed'];
+        }
+        else{
+            return ['status' => 1, 'error' => 'Request is already marked as Closed'];
         }
     }
 }
