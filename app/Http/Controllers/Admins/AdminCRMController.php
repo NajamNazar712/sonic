@@ -84,9 +84,10 @@ class AdminCRMController extends Controller
             $last_comment = CrmComments::where('crm_request_id', $id)->latest()->first();
             $last_comment = $last_comment->id;
         }
+
         $launched_by  = '';
         if($crm_request->launched_by == 0){
-            $launched_by = 'Agent';
+            $launched_by = $launched_by = $crm_request->launched_by_admin->name;
         }else if($crm_request->launched_by == 1){
             $launched_by = User::find($crm_request->launched_by_id)->name;
         }else if($crm_request->launched_by == 2){

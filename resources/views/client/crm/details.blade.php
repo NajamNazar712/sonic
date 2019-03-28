@@ -250,6 +250,7 @@
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 }else{
                                     var html = '<div class="chat shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p></div></div></div>';
+                                    $('section.chat-app-window .chats').append(html);
                                 }
                             }else{
                                 if($('div.chat:last-child').hasClass('substitute-user')) {
@@ -257,10 +258,10 @@
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 }else{
                                     var html = '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p></div></div></div>';
+                                    $('section.chat-app-window .chats').append(html);
                                 }
-
                             }
-                                $('section.chat-app-window .chats').append(html);
+
                                 $('#chat_input').val('');
                                 $('#last_comment_id').val(data.last_comment_id);
                                 updateScroll();
@@ -274,7 +275,7 @@
                 var request_id = '{{$crm_details->id}}';
                 get_latest_comment(last_comment_id,request_id);
                 updateScroll();
-            },40000);
+            },4000);
             function get_latest_comment(comment_id,request_id) {
                 if(comment_id){
                     $.ajax({

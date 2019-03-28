@@ -10,6 +10,9 @@ class CrmComments extends Model
         return $this->belongsTo('App\Http\Models\Admin\Admin','comment_by_id','id');
     }
     public function substitute_user() {
-        return $this->belongsTo('App\Http\Models\Shipper\SubstituteUser','launched_by_id','id');
+        return $this->belongsTo('App\Http\Models\Shipper\SubstituteUser','comment_by_id','id');
+    }
+    public function shipper() {
+        return $this->belongsTo('App\Http\Models\Shipper\User','comment_by_id','id');
     }
 }
