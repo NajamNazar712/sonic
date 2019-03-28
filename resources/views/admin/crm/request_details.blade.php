@@ -79,7 +79,7 @@
                                                     @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
                                                         Valid
                                                     @elseif($crm_details['status_id'] == 2)
-                                                        Resolved
+                                                        Resolve
                                                     @elseif($crm_details['status_id'] == 3 || $crm_details['status_id'] == 4)
                                                         Re-Open
                                                     @endif

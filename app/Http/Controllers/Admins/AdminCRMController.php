@@ -456,7 +456,7 @@ class AdminCRMController extends Controller
                     'status_id' => $crm_request['status_id'],
                     'agent_id' => Auth::id()
                 ]);
-                return ['status' => 0, 'success' => 'Request marked as Resolved', 'marked_status' => 5];
+                return ['status' => 0, 'success' => 'Request marked as Resolved', 'marked_status' => 3];
             } else {
                 return ['status' => 1, 'error' => 'Request is already marked as Re-Open'];
             }
@@ -471,7 +471,7 @@ class AdminCRMController extends Controller
                     'status_id' => $crm_request['status_id'],
                     'agent_id' => Auth::id()
                 ]);
-                return ['status' => 0, 'success' => 'Request marked as Resolved', 'marked_status' => 3];
+                return ['status' => 0, 'success' => 'Request marked as Re-Open', 'marked_status' => 5];
             } else {
                 return ['status' => 1, 'error' => 'Request is already marked as Resolved'];
             }
