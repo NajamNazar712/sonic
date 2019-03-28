@@ -58,6 +58,9 @@ class AdminCRMController extends Controller
         }
     }
 
+    public function update_request(Request $request){
+        return $request;
+    }
     public function add_feedback(Request $request){
         $nature_id = 3;
         $channel_id = $request->channel_id;

@@ -8,7 +8,7 @@
             <div class="content-wrapper">
                 <div class="content-body">
                     <h1 class="mb-1">
-                        Request Details ( {{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}} )
+                        Request Details ({{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}})
                     </h1>
 
                     <div class="card">
@@ -22,49 +22,49 @@
                                                 <tr>
                                                     <th scope="row">Tracking Number</th>
                                                     <td class="name">
-                                                        <h4>{{$crm_details->shipment->tracking_number}}</h4>
+                                                        <h5 class="mb-0">{{$crm_details->shipment->tracking_number}}</h5>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Case Nature</th>
                                                     <td class="name">
-                                                        <h4>{{$crm_details->nature->name}}</h4>
+                                                        <h5 class="mb-0">{{$crm_details->nature->name}}</h5>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Case Nature Type</th>
                                                     <td class="name">
-                                                        <h4>{{$crm_details->nature_type->type}}</h4>
+                                                        <h5 class="mb-0">{{$crm_details->nature_type->type}}</h5>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Channel</th>
                                                     <td class="name">
-                                                        <h4>{{$crm_details->channel->channel}}</h4>
+                                                        <h5 class="mb-0">{{$crm_details->channel->channel}}</h5>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Status</th>
                                                     <td class="name">
-                                                        <h4>{{$crm_details->request_status->name}}</h4>
+                                                        <h5 class="mb-0">{{$crm_details->request_status->name}}</h5>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Launched By</th>
                                                     <td class="name">
-                                                        <h4>{{$launched_by}}</h4>
+                                                        <h5 class="mb-0">{{$launched_by}}</h5>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Launched Date</th>
                                                     <td class="name">
-                                                        <h4>{{$crm_details->created_at}}</h4>
+                                                        <h5 class="mb-0">{{$crm_details->created_at}}</h5>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Description</th>
                                                     <td class="name">
-                                                        <h5>{{$crm_details->description}}</h5>
+                                                        <h5 class="mb-0">{{$crm_details->description}}</h5>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -72,7 +72,7 @@
                                     </div>
                                     <div class="col-6">
                                             <div class="content-body chat-application">
-                                                <section class="chat-app-window vertical-scroll scroll-example height-400 ps-container ps-theme-dark ps-active-y always-visible" style="height: 400px; overflow-y: hidden;" >
+                                                <section class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible" style="height: 400px; overflow-y: hidden;" >
                                                     <div class="chats">
                                                         @if(!empty($comments))
                                                             @php
@@ -200,6 +200,12 @@
         }
         table, table.dataTable {
              font-size: 14px !important;
+        }
+        .height-430 {
+            height: 430px !important;
+        }
+        .table tr th, .table tr td {
+            vertical-align: middle !important;
         }
     </style>
 @endsection
