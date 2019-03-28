@@ -69,6 +69,19 @@
                                             </tr>
                                             </tbody>
                                         </table>
+                                        @if($crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
+                                        <div class="text-center">
+                                            <form id="valid_invalid">
+                                                <input type="hidden" id="req_id" value="{{$crm_details->id}}">
+                                                <button id="valid" type="submit" class="btn btn-success mr-1 width-20-per" >
+                                                    <span class="d-none d-lg-block">Valid</span>
+                                                </button>
+                                                <button id="invalid" type="submit" class="btn btn-danger width-20-per" >
+                                                    <span class="d-none d-lg-block">Invalid</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                            @endif
                                     </div>
                                     <div class="col-6">
                                         <div class="content-body chat-application">
@@ -210,6 +223,50 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+            $('#valid').on('click', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '{!! route('admin.crm.valid') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': $('#req_id').val(),
+                        'status' : 2
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status == 0) {
+                            toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                });
+
+            $('#invalid').on('click', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '{!! route('admin.crm.invalid') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': $('#req_id').val(),
+                        'status' : 4
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status == 0) {
+                            toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                });
+
+
             $('#chat_form').on('submit',function (e) {
                 e.preventDefault();
             });
