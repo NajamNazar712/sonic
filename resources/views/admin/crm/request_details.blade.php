@@ -74,16 +74,33 @@
                                             </tr>
                                             </tbody>
                                         </table>
-                                        @if($crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
+                                        @if(session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
                                         <div class="text-center">
                                             <form id="valid_invalid">
                                                 <input type="hidden" id="req_id" value="{{$crm_details->id}}">
+                                                <input type="hidden" id="prev_status" value="{{$crm_details->status_id}}">
                                                 <button id="valid" type="submit" class="btn btn-success mr-1 width-20-per" >
-                                                    <span class="d-none d-lg-block">Valid</span>
+                                                    <span class="d-none d-lg-block">
+                                                    @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
+                                                        Valid
+                                                    @elseif($crm_details['status_id'] == 2)
+                                                        Resolve
+                                                    @elseif($crm_details['status_id'] == 3 || $crm_details['status_id'] == 4)
+                                                        Re-Open
+                                                    @endif
+                                                    </span>
                                                 </button>
+                                                @if($crm_details['status_id'] != 4)
                                                 <button id="invalid" type="submit" class="btn btn-danger width-20-per" >
-                                                    <span class="d-none d-lg-block">Invalid</span>
+                                                    <span class="d-none d-lg-block">
+                                                        @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
+                                                            Invalid
+                                                        @else
+                                                            Close
+                                                        @endif
+                                                        </span>
                                                 </button>
+                                                    @endif
                                             </form>
                                         </div>
                                             @endif
@@ -263,12 +280,20 @@
                     data: {
                         '_token': '{{ csrf_token() }}',
                         'id': $('#req_id').val(),
-                        'status' : 2
+                        'prev_status' : $('#prev_status').val()
                     }
                 })
                     .done(function(data) {
                         if (data.status == 0) {
-                            $('#status').html('<h4>In-Process</h4>');
+                            if (data.marked_status == 2) {
+                                $('#status').html('<h4>In-Process</h4>');
+                            }
+                            else if (data.marked_status == 3) {
+                                $('#status').html('<h4>Resolved</h4>');
+                            }
+                            else if (data.marked_status == 5) {
+                                $('#status').html('<h4>Re-Open</h4>');
+                            }
                             toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                         else {
@@ -285,7 +310,7 @@
                     data: {
                         '_token': '{{ csrf_token() }}',
                         'id': $('#req_id').val(),
-                        'status' : 4
+                        'prev_status' : $('#prev_status').val()
                     }
                 })
                     .done(function(data) {
