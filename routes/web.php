@@ -194,7 +194,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('request')->name('request.')->group(function(){
             Route::get('', 'Shippers\ShipperCRMController@index')->name('index');
             Route::get('list', 'Shippers\ShipperCRMController@requests_list')->name('list');
-            Route::get('{id}/details', 'Shippers\ShipperCRMController@requests_details')->name('details');
+            Route::get('{id}/details', 'Shippers\ShipperCRMController@request_details')->name('details');
             Route::post('add', 'Shippers\ShipperCRMController@add_request')->name('add');
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
@@ -1028,5 +1028,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminCRMController@closed_list')->name('list');
         });
         Route::post('assign', 'Admins\AdminCRMController@assign')->name('assign');
+        Route::prefix('comment')->name('comment.')->group(function(){
+            Route::post('add', 'Admins\AdminCRMController@add_comment')->name('add');
+            Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');
+        });
     });
 });

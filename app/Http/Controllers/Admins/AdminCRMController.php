@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\Shipment;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -71,9 +75,58 @@ class AdminCRMController extends Controller
     }
 
     public function request_details(Request $request,$id){
-        return $id;
+        $crm_request = CrmRequest::find($id);
+        $crm_comments = array();
+        $last_comment = null;
+        $crm_comments = CrmComments::where('crm_request_id', $id);
+        if($crm_comments->exists()){
+            $crm_comments = $crm_comments->orderBy('created_at','asc')->get();
+            $last_comment = CrmComments::where('crm_request_id', $id)->latest()->first();
+            $last_comment = $last_comment->id;
+        }
+        $launched_by  = '';
+        if($crm_request->launched_by == 0){
+            $launched_by = 'Agent';
+        }else if($crm_request->launched_by == 1){
+            $launched_by = User::find($crm_request->launched_by_id)->name;
+        }else if($crm_request->launched_by == 2){
+            $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
+        }
+        if($crm_request){
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment]);
+        }else{
+            return redirect()->back()->with('danger', 'CRM Request Not found!');
+        }
     }
 
+    public function add_comment(Request $request){
+        $comment = $request->comment;
+        $request_id = $request->request_id;
+        $comment_by = 0;
+        if($comment == null){
+            return ['status' => 0, 'error' => 'Comment Not selected!'];
+        }
+        if(!$request_id){
+            return ['status' => 0, 'error' => 'Request ID Not selected!'];
+        }
+
+        CRMCommentController::add($request_id, Auth::id(),$comment_by,0, $comment);
+        $last_comment = CrmComments::where('crm_request_id', $request_id)->where('comment_by',0)->latest()->first();
+        return ['status' => 1, 'success' => 'Comment successfully added', 'last_comment_id' => $last_comment->id];
+    }
+
+    public function get_latest_comment(Request $request){
+        $comment_id = $request->comment_id;
+        $request_id = $request->request_id;
+        if(($comment_id != null) && ($request_id != null)){
+            $comment_details = CrmComments::where('crm_request_id', $request_id)->where('comment_by','!=',0)->latest()->first();
+            if($comment_details->id > $comment_id){
+                return ['status' => 1, 'comment' => $comment_details];
+            }
+        }
+
+
+    }
 
     public function launched_re_open_index(){
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();

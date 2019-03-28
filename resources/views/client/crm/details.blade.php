@@ -198,6 +198,9 @@
         .chat-application .chats .substitute-user .chat-body .chat-content{
             background-color: deepskyblue;
         }
+        table, table.dataTable {
+             font-size: 14px !important;
+        }
     </style>
 @endsection
 
@@ -238,7 +241,7 @@
                         }
                     }).done(function (data) {
                         if(data.status){
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                             var user = '{{session('user_type')}}';
                             var shipper = 'You';
                             if(user == 1){
