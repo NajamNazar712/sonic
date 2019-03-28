@@ -440,10 +440,10 @@ class AdminCRMController extends Controller
                 'status_id' => $crm_request['status_id'],
                 'agent_id' => Auth::id()
             ]);
-            return ['status' => 0, 'success' => 'Request marked as In-Progress'];
+            return ['status' => 0, 'success' => 'Request marked as In-Process'];
         }
         else{
-            return ['status' => 1, 'error' => 'Request is already marked as In-Progress'];
+            return ['status' => 1, 'error' => 'Request is already marked as In-Process'];
         }
     }
 

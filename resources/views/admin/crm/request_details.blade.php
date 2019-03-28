@@ -45,7 +45,7 @@
                                             </tr>
                                             <tr>
                                                 <th scope="row">Status</th>
-                                                <td class="name">
+                                                <td class="name" id="status">
                                                     <h4>{{$crm_details->request_status->name}}</h4>
                                                 </td>
                                             </tr>
@@ -257,6 +257,7 @@
                 })
                     .done(function(data) {
                         if (data.status == 0) {
+                            $('#status').html('<h4>In-Process</h4>');
                             toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                         else {
@@ -278,6 +279,7 @@
                 })
                     .done(function(data) {
                         if (data.status == 0) {
+                            $('#status').html('<h4>Closed</h4>');
                             toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                         else {
