@@ -1790,7 +1790,7 @@ class NotificationsController extends Controller
               }else{
                   $to = [$shipper->email];
               }
-            $general_admins = Admin::whereIn('role_id', [2, 4])->where('status', 1);
+            $general_admins = Admin::whereIn('role_id', [4, 6])->where('status', 1);
 
             if ($general_admins->exists()) {
               $to = array_merge($to, $general_admins->pluck('email')->toArray());
