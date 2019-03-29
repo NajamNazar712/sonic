@@ -38,7 +38,7 @@ class ProcessSMS implements ShouldQueue
      */
     public function handle()
     {
-        if ($sms->status < 2) {
+        if ($this->sms->status < 2) {
             try {
                 $client = new Client(['base_uri' => 'http://sms.its.com.pk/api/', 'http_errors' => FALSE]);
 
@@ -54,22 +54,20 @@ class ProcessSMS implements ShouldQueue
                 $response = simplexml_load_string($response->getBody());
                 $response = (array)$response;
 
-                var_dump($response['errorno']);
-
                 if ($response['errorno'] == 0) {
-                    $sms->status = 3;
+                    $this->sms->status = 3;
 
-                    $sms->save();
+                    $this->sms->save();
                 }
                 else {
-                    $sms->status = 1;
+                    $this->sms->status = 1;
 
-                    $sms->save();
+                    $this->sms->save();
                 }
             } catch (RequestException $e) {
-                $sms->status = 1;
+                $this->sms->status = 1;
 
-                $sms->save();
+                $this->sms->save();
             }
         }
     }
