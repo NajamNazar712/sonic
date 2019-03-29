@@ -199,15 +199,18 @@ class AdminMonthClosingController extends Controller
                         if($return_note_shipments_details->exists()){
                             $return_note_shipments_details = $return_note_shipments_details->get();
                             foreach ($return_note_shipments_details as $return_note_shipments){
-                                $return_note = ReturnNote::find('id', $return_note_shipments->return_note_id);
-                                if($return_note->status == 0){
-                                    ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('shipment_id', $return_note_shipments->shipment_id)->delete();
-                                    $return_note->shipments_count = $return_note->shipments_count - 1;
-                                    if(ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('status', 0)->count() == 0){
-                                        $return_note->status = 1;
+                                $return_note = ReturnNote::find($return_note_shipments->return_note_id);
+                                if($return_note){
+                                    if($return_note->status == 0){
+                                        ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('shipment_id', $return_note_shipments->shipment_id)->delete();
+                                        $return_note->shipments_count = $return_note->shipments_count - 1;
+                                        if(ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('status', 0)->count() == 0){
+                                            $return_note->status = 1;
+                                        }
+                                        $return_note->save();
                                     }
-                                    $return_note->save();
                                 }
+
                             }
 
                         }

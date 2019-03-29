@@ -24,9 +24,10 @@
                 <ul class="nav navbar-nav float-right">
                     <li class="dropdown dropdown-user nav-item">
                         <a class="nav-link d-inline-flex align-middle p-0" href="http://bit.ly/sonic_manuals" target="_blank">
-                            <h2 class="m-0 white">
-                                <i class="ft-help-circle"></i>
-                            </h2>
+                            <div class="m-0 bg-white primary border-white">
+                                <span class="align-middle font-weight-bold">HELP</span>
+                                <h2 class="d-inline-block m-0 align-middle primary"><i class="ft-help-circle m-0"></i></h2>
+                            </div>
                         </a>
 
                         <a class="dropdown-toggle nav-link d-inline-flex align-middle dropdown-user-link" href="#" data-toggle="dropdown">
