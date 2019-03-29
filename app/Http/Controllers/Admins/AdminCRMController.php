@@ -121,6 +121,10 @@ class AdminCRMController extends Controller
         $comment = $request->comment;
         $request_id = $request->request_id;
         $comment_by = 0;
+        $comment_type = 0;
+        if($request->internal_switch == 'true'){
+            $comment_type = 1;
+        }
         if($comment == null){
             return ['status' => 0, 'error' => 'Comment Not selected!'];
         }
@@ -128,7 +132,7 @@ class AdminCRMController extends Controller
             return ['status' => 0, 'error' => 'Request ID Not selected!'];
         }
 
-        CRMCommentController::add($request_id, Auth::id(),$comment_by,0, $comment);
+        CRMCommentController::add($request_id, Auth::id(),$comment_by,$comment_type, $comment);
         $last_comment = CrmComments::where('crm_request_id', $request_id)->where('comment_by',0)->latest()->first();
         return ['status' => 1, 'success' => 'Comment successfully added', 'last_comment_id' => $last_comment->id];
     }

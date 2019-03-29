@@ -117,7 +117,7 @@
                                                         @endphp
                                                         @foreach($comments as $comment)
                                                             @if($comment->comment_by == 0)
-                                                                <div class="chat admin">
+                                                                <div id="chat_{{$comment->id}}" class="chat admin {{($comment->comment_type == 1)? 'internal':'' }}">
                                                                     @if($admin_flag)
                                                                     <div class="chat-avatar">
                                                                         <div class="badge block badge-admin">
@@ -185,12 +185,15 @@
                                             </section>
                                             <section class="chat-app-form">
                                                 <form class="chat-app-input d-flex" id="chat_form">
-                                                    <fieldset class="form-group position-relative has-icon-left col-10 m-0">
+                                                    <fieldset class="form-group position-relative has-icon-left col-9 m-0">
                                                         <input type="hidden" id="last_comment_id" value="{{$last_comment_id}}">
                                                         <div class="form-control-position">
                                                             <i class="la la-chevron-right"></i>
                                                         </div>
                                                         <input type="text" class="form-control" id="chat_input" placeholder="Type your message">
+                                                    </fieldset>
+                                                    <fieldset class="form-group col-1 p-0 half-margin justify-content-center">
+                                                            <input name="internal_switch" type="checkbox"  class="switchery on-internal-chat" data-size="sm" checked/>
                                                     </fieldset>
                                                     <fieldset class="form-group position-relative has-icon-left col-2 m-0">
                                                         <button id="chat_send" type="button" class="btn btn-info" ><i class="la la-paper-plane-o d-lg-none"></i>
@@ -220,6 +223,11 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/pages/chat-application.css')}}">
     <style>
+        .half-margin{
+            margin-top: 0;
+            margin-bottopm:0;
+            margin-top: 5px;
+        }
         .chat-application .chat-app-window {
             padding: 20px 10px;
         }
@@ -258,6 +266,13 @@
         }
         .table tr th, .table tr td {
             vertical-align: middle !important;
+        }
+        .chat-application .chats .admin.internal .chat-content {
+            color: #ffffff;
+            background-color: #ab45d7;
+        }
+        .chat-application .chats .admin.internal .chat-body .chat-content:before {
+            border-left-color: #ab45d7;
         }
     </style>
 @endsection
@@ -335,6 +350,15 @@
                 var flag = true;
                 var comment = $('#chat_input').val();
                 var request_id = '{{$crm_details->id}}';
+                var internal_switch_check = document.querySelector('.switchery.on-internal-chat');
+                var internal_switch = internal_switch_check.checked;
+                var internal_class = '';
+                if(internal_switch){
+                    internal_class = 'internal';
+                }else{
+                    internal_class = '';
+                }
+                console.log(internal_class);
                 if(comment == ''){
                     flag = false;
                     toastr.error("Please Enter Comment first!", 'Error!', {
@@ -349,23 +373,30 @@
                         data: {
                             '_token': '{{ csrf_token() }}',
                             'comment': comment,
-                            'request_id':request_id
+                            'request_id':request_id,
+                            'internal_switch': internal_switch
                         }
                     }).done(function (data) {
                         if(data.status){
                             // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                             var user = '{{Auth::user()->name}}';
-                            if($('div.chat:last-child').hasClass('admin')) {
-                                var html = '<div class="chat-content"><p>' + comment + '</p></div>';
-                                $('div.chat:last-child').find('.chat-body').append(html);
+                            // if($('div.chat:last-child').hasClass('admin')) {
+                            //     var html = '<div class="chat-content"><p>' + comment + '</p></div>';
+                            //     $('div.chat:last-child').find('.chat-body').append(html);
+                            // }else{
+                            if(internal_switch){
+                                var html = '<div class="chat admin '+ internal_class +'"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p></div></div></div>';
                             }else{
-                                var html = '<div class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>'+ user +'</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p></div></div></div>';
-                                $('section.chat-app-window .chats').append(html);
+                                var html = '<div class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p></div></div></div>';
                             }
+                            $('section.chat-app-window .chats').append(html);
+
+                            // }
 
 
                             $('#chat_input').val('');
                             $('#last_comment_id').val(data.last_comment_id);
+
                             updateScroll();
                         }
                     });
@@ -377,7 +408,7 @@
                 var request_id = '{{$crm_details->id}}';
                 get_latest_comment(last_comment_id,request_id);
                 updateScroll();
-            },4000);
+            },40000);
             function get_latest_comment(comment_id,request_id) {
                 if(comment_id){
                     $.ajax({

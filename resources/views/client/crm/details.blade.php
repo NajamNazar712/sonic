@@ -281,7 +281,7 @@
                 var request_id = '{{$crm_details->id}}';
                 get_latest_comment(last_comment_id,request_id);
                 updateScroll();
-            },4000);
+            },40000);
             function get_latest_comment(comment_id,request_id) {
                 if(comment_id){
                     $.ajax({
