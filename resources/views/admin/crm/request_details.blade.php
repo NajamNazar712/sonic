@@ -9,6 +9,10 @@
                 <div class="content-body">
                     <h1 class="mb-1">
                         Request Details ( {{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}} )
+                        <div class="text-right mb-1">
+
+                            <button type="button" class="btn btn-primary width-10-per" id="tag"><span class="d-none d-lg-block" style="color: white">Tag</span></button>
+                        </div>
                     </h1>
 
                     <div class="card">
@@ -74,27 +78,29 @@
                                             <form id="valid_invalid">
                                                 <input type="hidden" id="req_id" value="{{$crm_details->id}}">
                                                 <input type="hidden" id="prev_status" value="{{$crm_details->status_id}}">
-                                                <button id="valid" type="submit" class="btn btn-success mr-1 width-20-per" >
-                                                    <span class="d-none d-lg-block">
-                                                    @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
-                                                        Valid
-                                                    @elseif($crm_details['status_id'] == 2)
-                                                        Resolve
-                                                    @elseif($crm_details['status_id'] == 3 || $crm_details['status_id'] == 4)
-                                                        Re-Open
-                                                    @endif
-                                                    </span>
-                                                </button>
-                                                @if($crm_details['status_id'] != 4)
-                                                <button id="invalid" type="submit" class="btn btn-danger width-20-per" >
-                                                    <span class="d-none d-lg-block">
+                                                @if($crm_details['status_id'] != 3)
+                                                    <button id="valid" type="submit" class="btn btn-success mr-1 width-20-per" >
+                                                        <span class="d-none d-lg-block">
                                                         @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
-                                                            Invalid
-                                                        @else
-                                                            Close
+                                                            Valid
+                                                        @elseif($crm_details['status_id'] == 2)
+                                                            Resolve
+                                                        @elseif($crm_details['status_id'] == 3 || $crm_details['status_id'] == 4)
+                                                            Re-Open
                                                         @endif
                                                         </span>
-                                                </button>
+                                                    </button>
+                                                @endif
+                                                @if($crm_details['status_id'] != 4)
+                                                    <button id="invalid" type="submit" class="btn btn-danger width-20-per" >
+                                                        <span class="d-none d-lg-block">
+                                                            @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
+                                                                Invalid
+                                                            @else
+                                                                Close
+                                                            @endif
+                                                            </span>
+                                                    </button>
                                                     @endif
                                             </form>
                                         </div>
@@ -205,7 +211,31 @@
                 </div>
             </div>
         </div>
-
+    </section>
+    <section>
+        <div class="modal fade text-left" id="tagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="tagModal"
+             aria-hidden="true">
+            <div class="modal-dialog modal-md" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="">Tag Admin</h4>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="crm_request_id" value="{{$crm_details->id}}">
+                        <select name="tag_admin" id="tag_admin" class="form-control select2">
+{{--                            @foreach($agents as $agent)--}}
+                                <option value="1" > abc </option>
+                                <option value="2" > xyz </option>
+                            {{--@endforeach--}}
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" id="tag_adminSubmit">Submit</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
 @endsection
@@ -215,6 +245,9 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/pages/chat-application.css')}}">
     <style>
+        .chat-content p{
+            word-break: break-word;
+        }
         .chat-application .chat-app-window {
             padding: 20px 10px;
         }
@@ -284,6 +317,9 @@
                                 $('#status').html('<h4>Re-Open</h4>');
                             }
                             toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            setTimeout(function(){
+                                window.location.reload(1);
+                            }, 1000);
                         }
                         else {
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -306,6 +342,9 @@
                         if (data.status == 0) {
                             $('#status').html('<h4>Closed</h4>');
                             toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            setTimeout(function(){
+                                window.location.reload(1);
+                            }, 1000);
                         }
                         else {
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -313,6 +352,47 @@
                     });
                 });
 
+            $("#tag_admin").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Admin",
+                width:'100%',
+                dropdownParent:$('#tagModal')
+            });
+            $('#tag').on('click', function (e) {
+                e.preventDefault();
+                $('#tagModal').modal('show');
+            });
+            $('#tag_adminSubmit').on('click',function () {
+                var tag = parseInt($('#tag_admin').val());
+                if(tag){
+                    $.ajax({
+                        url: '{!! route('admin.crm.tag') !!}',
+                        method: 'POST',
+                        data: {
+                            'admin_id': tag,
+                            'crm_request_id': $('#crm_request_id').val(),
+                            'crm_request_tagging_type_id': 0,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if(data.status == 0){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                setTimeout(function(){
+                                    window.location.reload(1);
+                                }, 1000);
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            $('#assign_agent').val('').trigger('change');
+                            table.draw(true);
+                        });
+                }else{
+                    var error = "Agent Not Selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
+            });
 
             $('#chat_form').on('submit',function (e) {
                 e.preventDefault();
