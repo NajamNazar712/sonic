@@ -11,6 +11,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\CRM\CrmRequestTaggingTypes;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
@@ -94,6 +95,11 @@ class AdminCRMController extends Controller
 
     public function request_details(Request $request,$id){
         $crm_request = CrmRequest::find($id);
+        $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
+            ->select('a.id as id', 'a.name as name')
+            ->where('admin_roles.department_id', '!=', 1)
+            ->where('admin_roles.department_id', '!=', 3)->get();
+        $departments = CrmRequestTaggingTypes::get();
         $crm_comments = array();
         $last_comment = null;
         $crm_comments = CrmComments::where('crm_request_id', $id);
@@ -112,7 +118,7 @@ class AdminCRMController extends Controller
             $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
         }
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'departments' => $departments]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -577,5 +583,9 @@ class AdminCRMController extends Controller
         else{
             return ['status' => 1, 'error' => 'Agent is not assigned yet'];
         }
+    }
+
+    public function admin_tag(Request $request){
+
     }
 }

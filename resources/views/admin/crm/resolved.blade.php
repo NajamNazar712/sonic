@@ -58,7 +58,7 @@
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="assign_agentSubmit">Submit</button>
+                    <button type="button" class="btn btn-success" id="assign_agentSubmit">Assign</button>
                     <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                 </div>
             </div>

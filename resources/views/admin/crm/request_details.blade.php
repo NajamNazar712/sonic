@@ -10,8 +10,9 @@
                     <h1 class="mb-1">
                         Request Details ({{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}})
                         <div class="text-right mb-1">
-
-                            <button type="button" class="btn btn-primary width-10-per" id="tag"><span class="d-none d-lg-block" style="color: white">Tag</span></button>
+                            @if($crm_details['status_id'] == 2)
+                                <button type="button" class="btn btn-primary width-10-per" id="tag"><span class="d-none d-lg-block" style="color: white">Tag</span></button>
+                            @endif
                         </div>
                     </h1>
 
@@ -226,20 +227,26 @@
             <div class="modal-dialog modal-md" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title" id="">Tag Admin</h4>
+                        <h4 class="modal-title" id="">Tag</h4>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" id="crm_request_id" value="{{$crm_details->id}}">
-                        <select name="tag_admin" id="tag_admin" class="form-control select2">
-{{--                            @foreach($agents as $agent)--}}
-                                <option value="1" > abc </option>
-                                <option value="2" > xyz </option>
-                            {{--@endforeach--}}
+                        <select name="tag_type" id="tag_type" class="form-control select2">
+                            @foreach($admins as $admin)
+                                <option value="{{$admin->id}}" > {{$admin->name}} </option>
+                            @endforeach
                         </select>
+                        <div class="d-none" id="admin_tag_div">
+                        <select name="tag_admin" id="tag_admin" class="form-control select2">
+                            @foreach($admins as $admin)
+                                <option value="{{$admin->id}}" > {{$admin->name}} </option>
+                            @endforeach
+                        </select>
+                        </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-success" id="tag_adminSubmit">Submit</button>
-                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-success width-25-per" id="tag_adminSubmit">Tag</button>
+                        <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -379,7 +386,13 @@
                 });
 
             $("#tag_admin").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Admin",
+                placeholder: "Select User",
+                width:'100%',
+                dropdownParent:$('#tagModal')
+            });
+
+            $("#tag_admin").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select User",
                 width:'100%',
                 dropdownParent:$('#tagModal')
             });
@@ -389,34 +402,34 @@
             });
             $('#tag_adminSubmit').on('click',function () {
                 var tag = parseInt($('#tag_admin').val());
-                if(tag){
-                    $.ajax({
-                        url: '{!! route('admin.crm.tag') !!}',
-                        method: 'POST',
-                        data: {
-                            'admin_id': tag,
-                            'crm_request_id': $('#crm_request_id').val(),
-                            'crm_request_tagging_type_id': 0,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function(data) {
-                            if(data.status == 0){
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                setTimeout(function(){
-                                    window.location.reload(1);
-                                }, 1000);
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                            $('#assign_agent').val('').trigger('change');
-                            table.draw(true);
-                        });
-                }else{
-                    var error = "Agent Not Selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
+                {{--if(tag){--}}
+                    {{--$.ajax({--}}
+                        {{--url: '{!! route('admin.crm.tag') !!}',--}}
+                        {{--method: 'POST',--}}
+                        {{--data: {--}}
+                            {{--'admin_id': tag,--}}
+                            {{--'crm_request_id': $('#crm_request_id').val(),--}}
+                            {{--'crm_request_tagging_type_id': 0,--}}
+                            {{--'_token': '{{ csrf_token() }}'--}}
+                        {{--}--}}
+                    {{--})--}}
+                        {{--.done(function(data) {--}}
+                            {{--if(data.status == 0){--}}
+                                {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                                {{--setTimeout(function(){--}}
+                                    {{--window.location.reload(1);--}}
+                                {{--}, 1000);--}}
+                            {{--}--}}
+                            {{--else {--}}
+                                {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                            {{--}--}}
+                            {{--$('#assign_agent').val('').trigger('change');--}}
+                            {{--table.draw(true);--}}
+                        {{--});--}}
+                {{--}else{--}}
+                    {{--var error = "Agent Not Selected!";--}}
+                    {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                {{--}--}}
 
             });
 
