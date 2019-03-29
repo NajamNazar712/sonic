@@ -60,6 +60,22 @@ class AdminCRMController extends Controller
         }
     }
 
+    public function update_request(Request $request){
+        $request_id = $request->request_id;
+        $nature_id = $request->case_nature_id;
+        $complaint_id = $request->complaint_id;
+        $channel_id = $request->channel_id;
+        if($request_id != null){
+            $crm_request = CrmRequest::find($request_id);
+            $crm_request->case_nature_id = $nature_id;
+            $crm_request->case_nature_type_id = $complaint_id;
+            $crm_request->channel_id = $channel_id;
+            $crm_request->save();
+            return ['status' => 1, 'success' => 'Request successfully updated!'];
+        }
+        return ['status' => 0, 'error' => 'Request not found!'];
+
+    }
     public function add_feedback(Request $request){
         $nature_id = 3;
         $channel_id = $request->channel_id;
@@ -106,6 +122,10 @@ class AdminCRMController extends Controller
         $comment = $request->comment;
         $request_id = $request->request_id;
         $comment_by = 0;
+        $comment_type = 0;
+        if($request->internal_switch == 'true'){
+            $comment_type = 1;
+        }
         if($comment == null){
             return ['status' => 0, 'error' => 'Comment Not selected!'];
         }
@@ -113,7 +133,7 @@ class AdminCRMController extends Controller
             return ['status' => 0, 'error' => 'Request ID Not selected!'];
         }
 
-        CRMCommentController::add($request_id, Auth::id(),$comment_by,0, $comment);
+        CRMCommentController::add($request_id, Auth::id(),$comment_by,$comment_type, $comment);
         $last_comment = CrmComments::where('crm_request_id', $request_id)->where('comment_by',0)->latest()->first();
         return ['status' => 1, 'success' => 'Comment successfully added', 'last_comment_id' => $last_comment->id];
     }
@@ -127,18 +147,33 @@ class AdminCRMController extends Controller
                 return ['status' => 1, 'comment' => $comment_details];
             }
         }
-
-
     }
+
+    public function get_request_info(Request $request){
+        $request_id = $request->request_id;
+        $request_details = CrmRequest::find($request_id);
+        if($request_details){
+            $tracking_number = '';
+            if($request_details->shipment_id != null){
+                $tracking_number = Shipment::find($request_details->shipment_id)->tracking_number;
+            }
+            return ['status' => 1, 'details' => $request_details, 'tracking_number' => $tracking_number];
+        }else{
+            return ['status' => 0, 'error' => 'Request ID not found!'];
+        }
+    }
+
 
     public function launched_re_open_index(){
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
-        $channels = CrmRequestChannel::where('id', '>', 2)->select('id', 'channel')->get();
+        $channels = CrmRequestChannel::select('id', 'channel')->get();
         $status = CrmRequestStatus::whereIn('id', [1,5])->select('id', 'name')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
-        return view('admin.crm.launched_re_open')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'agents' => $agents]);
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        return view('admin.crm.launched_re_open')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'agents' => $agents,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests]);
     }
 
     public function launched_re_open_list(Request $request){
@@ -149,9 +184,22 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
         ->whereIn('crm_requests.status_id', [1,5]);
         $datatables = Datatables::of($launched_request)
+            ->setRowAttr([
+                'nature' => function ($requests) {
+                    $nature = '';
+                    if($requests->nature_id == 1){
+                        $nature = 1;
+                    }else if($requests->nature_id == 2){
+                        $nature = 2;
+                    }else if($requests->nature_id == 3){
+                        $nature = 3;
+                    }
+                    return $nature;
+                }
+            ])
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
             })
@@ -185,6 +233,11 @@ class AdminCRMController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item assign"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Agent</div></button>';
                     }
                     $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
+                    if($requests->nature_id == 1 || $requests->nature_id == 2){
+                        $dropdown .= '<button type="button" class="dropdown-item update_request"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update</div></button>';
+                    }
+
+
                     $dropdown .= '</div>
                   </div>
                 ';

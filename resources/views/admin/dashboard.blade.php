@@ -233,7 +233,7 @@
                 </button>
             </div>
             <div class="modal-body text-center">
-                <form id="add_request_form" action="{{route('admin.crm.request.add')}}" method="post">
+                <form id="add_request_form" method="post">
                     @method('POST')
                     @csrf
                     <div class="container">
