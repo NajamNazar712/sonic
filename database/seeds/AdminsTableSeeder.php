@@ -78,9 +78,9 @@ class AdminsTableSeeder extends Seeder
         ]);
 
         Admin::create([
-            'name' => 'Syed Salman Ali Jafri',
-            'email' => 'syed.salman@trax.pk',
-            'phone_number' => '0334-2094542',
+            'name' => 'Anas Anwer',
+            'email' => 'anas.anwer@trax.pk',
+            'phone_number' => '0335-2282139',
             'cnic' => '33333-3333333-3',
             'role_id' => 1,
             'password' => '$2y$10$/zSCwtaR/YsW.UCa8qmGROAA/ok5gxHAB5C4aIgI9JeCkg1g0Dc.W',

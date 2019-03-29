@@ -282,6 +282,7 @@
                                 shipment += '<th><strong>Status</strong></th>';
                                 shipment += '<th><strong>Reason</strong></th>';
                                 shipment += '<th><strong>City</strong></th>';
+                                shipment += '<th><strong>Received/Refused By</strong></th>';
                                 shipment += '</tr>';
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
@@ -292,6 +293,7 @@
                                     shipment += '<td>' + history.status + '</td>';
                                     shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
                                     shipment += '<td>' + history.city + '</td>';
+                                    shipment += '<td>' + history.received_or_refused_by + '</td>';
                                     shipment += '</tr>';
                                 });
 

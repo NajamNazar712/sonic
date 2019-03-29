@@ -56,8 +56,13 @@
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Reports</span></a>
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{ route('cod.reports.sales.index') }}">Overall Sales</a></li>
+                        <li><a class="menu-item" href="{{ route('cod.reports.summary.index') }}">Summary</a></li>
                     </ul>
                 </li>
+            @endif
+
+            @if (session('user_type') == 1)
+                <li class=" nav-item"><a href="{{ route('cod.cancelled_shipments.index') }}"><span class="menu-title" data-i18n="nav.dash.main">Cancelled Shipments</span></a></li>
             @endif
 
             <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title">Tracking</span></a></li>

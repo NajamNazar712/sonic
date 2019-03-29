@@ -31,6 +31,7 @@
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Received/Refused By</th>
                             <th class="border-primary border-darken-1">Fake Status</th>
                             <th class="border-primary border-darken-1">Arrival Date</th>
                             <th class="border-primary border-darken-1">Call Verification</th>
@@ -161,6 +162,7 @@
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
+                    {data:'received_or_refused_by',name: 'sj.received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'fake_status',name: 'fake_status', class: 'align-middle fake_status',orderable: false, searchable: false},
                     {data:'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data:'call_verification',name: 'call_verification', class: 'align-middle call_verification',orderable: false, searchable: false},
@@ -213,7 +215,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.call_verification') || $(header).is('.fake_status')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.call_verification') || $(header).is('.fake_status') || $(header).is('.received_or_refused_by')) {
                             $(td).appendTo($(search));
                         }
                         else {

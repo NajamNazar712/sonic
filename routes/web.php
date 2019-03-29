@@ -170,6 +170,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('','Shippers\ShipperReportsController@sales_index')->name('index');
             Route::get('list','Shippers\ShipperReportsController@sales_list')->name('list');
         });
+        Route::prefix('summary')->name('summary.')->group(function (){
+            Route::get('','Shippers\ShipperReportsController@summary_index')->name('index');
+            Route::get('list','Shippers\ShipperReportsController@summary_list')->name('list');
+        });
     });
 
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
@@ -189,6 +193,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
     Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
+
+    Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
+        Route::get('','Shippers\ShipperShipmentCancelController@index')->name('index');
+        Route::get('list', 'Shippers\ShipperShipmentCancelController@list')->name('list');
+        Route::put('revert', 'Shippers\ShipperShipmentCancelController@revert')->name('revert');
+    });
 
 });
 //Admin Routes Start
