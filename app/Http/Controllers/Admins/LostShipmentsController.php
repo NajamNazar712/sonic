@@ -60,6 +60,13 @@ class LostShipmentsController extends Controller
                         ->orWhere('shipments.payment_status_id', '>', 1);
                 });
 
+//                ->where(function ($sub_query) {
+//                    $sub_query->where('shipments.payment_status_id', '=', null);
+//                })
+//                ->orWhere(function ($sub_query) {
+//                    $sub_query->where('shipments.payment_status_id', '>', 1);
+//                });
+
             if (session('role_id') != 1) {
                 $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
             }

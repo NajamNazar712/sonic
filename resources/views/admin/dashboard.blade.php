@@ -606,13 +606,8 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data2 = $.map({!! $service_type !!}, function (obj) {
-                        obj.id = obj.id
-
-                        return obj;
-                    });
-                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.id = obj.id;
                         obj.text = obj.booking_type;
-
                         return obj;
                     });
 
@@ -624,13 +619,8 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data3 = $.map({!! $products !!}, function (obj) {
-                        obj.id = obj.id // replace pk with your identifier
-
-                        return obj;
-                    });
-                    var data3 = $.map({!! $products !!}, function (obj) {
-                        obj.text = obj.product_name; // replace name with the property used for the text
-
+                        obj.id = obj.id; // replace pk with your identifier
+                        obj.text = obj.product_name;
                         return obj;
                     });
 
@@ -643,12 +633,7 @@
                     });
                     var data4 = $.map({!! $payment_status !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data4 = $.map({!! $payment_status !!}, function (obj) {
                         obj.text = obj.name;
-
                         return obj;
                     });
 
