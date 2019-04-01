@@ -19,7 +19,7 @@
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
                                 @include('admin.inc.messages')
-                                <div class="row">
+                                <div class="row mb-2">
                                     <div class="col-6">
                                         <table class="table table-bordered table-lg">
                                             <tbody class="list">
@@ -70,6 +70,14 @@
                                                     <h5 class="mb-0">{{$crm_details->created_at}}</h5>
                                                 </td>
                                             </tr>
+                                            @if($crm_details['status_id'] == 2)
+                                                <tr>
+                                                    <th scope="row">Tagged To</th>
+                                                    <td class="name">
+                                                        <h5 class="mb-0">{{$tagged_name}}</h5>
+                                                    </td>
+                                                </tr>
+                                            @endif
                                             <tr>
                                                 <th scope="row">Description</th>
                                                 <td class="name">
@@ -79,35 +87,37 @@
                                             </tbody>
                                         </table>
                                         @if(session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
-                                        <div class="text-center">
-                                            <form id="valid_invalid">
-                                                <input type="hidden" id="req_id" value="{{$crm_details->id}}">
-                                                <input type="hidden" id="prev_status" value="{{$crm_details->status_id}}">
-                                                <button id="valid" type="submit" class="btn btn-success mr-1 width-20-per" >
-                                                    <span class="d-none d-lg-block">
-                                                    @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
-                                                        Valid
-                                                    @elseif($crm_details['status_id'] == 2)
-                                                        Resolve
-                                                    @elseif($crm_details['status_id'] == 3 || $crm_details['status_id'] == 4)
-                                                        Re-Open
+                                            <div class="text-center">
+                                                <form id="valid_invalid">
+                                                    <input type="hidden" id="req_id" value="{{$crm_details->id}}">
+                                                    <input type="hidden" id="prev_status" value="{{$crm_details->status_id}}">
+                                                    @if($crm_details['status_id'] != 3)
+                                                        <button id="valid" type="submit" class="btn btn-success mr-1 width-20-per" >
+                                                       <span class="d-none d-lg-block">
+                                                       @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
+                                                               Valid
+                                                           @elseif($crm_details['status_id'] == 2)
+                                                               Resolve
+                                                           @elseif($crm_details['status_id'] == 3 || $crm_details['status_id'] == 4)
+                                                               Re-Open
+                                                           @endif
+                                                       </span>
+                                                        </button>
                                                     @endif
-                                                    </span>
-                                                </button>
-                                                @if($crm_details['status_id'] != 4)
-                                                <button id="invalid" type="submit" class="btn btn-danger width-20-per" >
-                                                    <span class="d-none d-lg-block">
-                                                        @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
-                                                            Invalid
-                                                        @else
-                                                            Close
-                                                        @endif
-                                                        </span>
-                                                </button>
+                                                    @if($crm_details['status_id'] != 4 && $crm_details['status_id'] != 2)
+                                                        <button id="invalid" type="submit" class="btn btn-danger width-20-per" >
+                                                       <span class="d-none d-lg-block">
+                                                           @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
+                                                               Invalid
+                                                           @else
+                                                               Close
+                                                           @endif
+                                                           </span>
+                                                        </button>
                                                     @endif
-                                            </form>
-                                        </div>
-                                            @endif
+                                                </form>
+                                            </div>
+                                        @endif
                                     </div>
                                     <div class="col-6">
                                         <div class="content-body chat-application">
@@ -222,6 +232,51 @@
 
                                     </div>
                                 </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h3>Agent History</h3>
+                                        <div class="table-responsive">
+                                            <table class="table mb-0">
+                                                <thead>
+                                                <tr class="border-bottom-active border-custom-color">
+                                                    <th>Firstname</th>
+                                                    <th>Lastname</th>
+                                                    <th>Email</th>
+                                                    <th>Age</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr class="border-bottom-success border-custom-color">
+                                                    <td>John</td>
+                                                    <td>Doe</td>
+                                                    <td>john@example.com</td>
+                                                    <td>20</td>
+                                                </tr>
+                                                <tr class="border-bottom-info border-custom-color">
+                                                    <td>Mary</td>
+                                                    <td>Moe</td>
+                                                    <td>mary@example.com</td>
+                                                    <td>22</td>
+                                                </tr>
+                                                <tr class="border-bottom-teal border-bottom-darken-2 border-custom-color">
+                                                    <td>July</td>
+                                                    <td>Dooley</td>
+                                                    <td>july@example.com</td>
+                                                    <td>30</td>
+                                                </tr>
+                                                <tr class="border-bottom-pink border-bottom-darken-2 border-custom-color">
+                                                    <td>Piter</td>
+                                                    <td>Draker</td>
+                                                    <td>piter@example.com</td>
+                                                    <td>30</td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
 
                         </div>
@@ -231,7 +286,60 @@
         </div>
 
     </section>
-
+    <section>
+        <div class="modal fade text-left" id="tagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="tagModal"
+             aria-hidden="true">
+            <div class="modal-dialog modal-md" role="document">
+                <div class="modal-content ">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Tag</h4>
+                    </div>
+                    <div class="modal-body text-center">
+                        <form id="tag_submit_form" method="post">
+                            @method('POST')
+                            @csrf
+                            <div class="row justify-content-center">
+                                <div class="col-11">
+                                    <fieldset class="form-group">
+                                        <input type="hidden" id="crm_request_id" value="{{$crm_details->id}}">
+                                        <select name="tag_type" id="tag_type" class="form-control select2">
+                                            @foreach($types as $type)
+                                                <option value="{{$type->id}}" > {{$type->name}} </option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <div class="d-none" id="admin_tag_div">
+                                            <select name="tag_admin" id="tag_admin" class="form-control select2">
+                                                @foreach($admins as $admin)
+                                                    <option value="{{$admin->id}}" > {{$admin->name}} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="d-none" id="department_tag_div">
+                                            <select name="tag_department" id="tag_department" class="form-control  select2">
+                                                @foreach($departments as $department)
+                                                    <option value="{{$department->id}}" > {{$department->name}} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success width-25-per" id="tag_adminSubmit">Tag</button>
+                        <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -245,7 +353,9 @@
         .btn-purple{
             background-color: #ab45d7;
         }
-
+        .chat-content p{
+            word-break: break-word;
+        }
         .chat-application .chat-app-window {
             padding: 20px 10px;
         }
@@ -327,7 +437,11 @@
                             else if (data.marked_status == 5) {
                                 $('#status').html('<h4>Re-Open</h4>');
                             }
+
                             toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            setTimeout(function(){
+                                window.location.reload();
+                            }, 1000);
                         }
                         else {
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -350,6 +464,9 @@
                         if (data.status == 0) {
                             $('#status').html('<h4>Closed</h4>');
                             toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            setTimeout(function(){
+                                window.location.reload(1);
+                            }, 1000);
                         }
                         else {
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -357,6 +474,87 @@
                     });
                 });
 
+            $("#tag_admin").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select User",
+                width:'100%',
+            });
+
+            $("#tag_department").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Department",
+                width:'100%',
+            });
+
+            $("#tag_type").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Type",
+                width:'100%',
+                dropdownParent:$('#tagModal')
+            }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id === 1){
+                    $('#admin_tag_div').addClass('d-none');
+                    $('#department_tag_div').removeClass('d-none');
+                }else if(id === 2){
+                    $('#department_tag_div').addClass('d-none');
+                    $('#admin_tag_div').removeClass('d-none');
+                }else{
+                    $('#admin_tag_div').addClass('d-none');
+                    $('#department_tag_div').addClass('d-none');
+                }
+            });
+            $('#tag').on('click', function (e) {
+                e.preventDefault();
+                $('#tagModal').modal('show');
+            });
+            $('#tagModal').on('hide.bs.modal', function (e) {
+                $('#tag_type').val('').trigger('change');
+                $('#admin_tag_div').addClass('d-none');
+                $('#department_tag_div').addClass('d-none');
+            });
+            $('#tag_adminSubmit').on('click',function () {
+                var type = parseInt($('#tag_type').val());
+                if(type === 1) {
+                    var tag = parseInt($('#tag_department').val());
+                }
+                else if(type === 2){
+                    var tag = parseInt($('#tag_admin').val());
+                }
+                if(tag){
+                    $.ajax({
+                        url: '{!! route('admin.crm.tag') !!}',
+                        method: 'POST',
+                        data: {
+                            'tagged_id': tag,
+                            'crm_request_id': $('#crm_request_id').val(),
+                            'crm_request_tagging_type_id': type,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if(data.status == 0){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                setTimeout(function(){
+                                    window.location.reload(1);
+                                }, 2500);
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                }
+                else{
+                    if(type === 1) {
+                        var error = "Department Not Selected!";
+                    }
+                    else if(type === 2) {
+                        var error = "User Not Selected!";
+                    }
+                    else{
+                        error = "Type Not Selected!";
+                    }
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
+            });
 
             $('#chat_form').on('submit',function (e) {
                 e.preventDefault();
