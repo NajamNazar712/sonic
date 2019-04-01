@@ -107,7 +107,7 @@
                                     </div>
                                     <div class="col-6">
                                         <div class="content-body chat-application">
-                                            <section class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible" style="height: 400px; overflow-y: hidden;" >
+                                            <section class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible"  >
                                                 <div class="chats">
                                                     @if(!empty($comments))
                                                         @php
@@ -183,25 +183,29 @@
 
                                                 </div>
                                             </section>
+                                            @if(session('role_id') == 1 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == session('user_id')))
                                             <section class="chat-app-form">
                                                 <form class="chat-app-input d-flex" id="chat_form">
-                                                    <fieldset class="form-group position-relative has-icon-left col-9 m-0">
+                                                    <fieldset class="form-group position-relative has-icon-left col-8 m-0">
                                                         <input type="hidden" id="last_comment_id" value="{{$last_comment_id}}">
                                                         <div class="form-control-position">
                                                             <i class="la la-chevron-right"></i>
                                                         </div>
                                                         <input type="text" class="form-control" id="chat_input" placeholder="Type your message">
                                                     </fieldset>
-                                                    <fieldset class="form-group col-1 p-0 half-margin justify-content-center">
-                                                            <input name="internal_switch" type="checkbox"  class="switchery on-internal-chat" data-size="sm" checked/>
+                                                    <fieldset class="form-group position-relative has-icon-left col-2 m-0">
+                                                        <button id="chat_send" type="button" class="btn btn-block btn-purple chat_send" to="1"><i class="la la-paper-plane-o d-lg-none"></i>
+                                                            <span class="">Internal</span>
+                                                        </button>
                                                     </fieldset>
                                                     <fieldset class="form-group position-relative has-icon-left col-2 m-0">
-                                                        <button id="chat_send" type="button" class="btn btn-info" ><i class="la la-paper-plane-o d-lg-none"></i>
-                                                            <span class="d-none d-lg-block">Send</span>
+                                                        <button id="chat_send" type="button" class="btn btn-block btn-default chat_send" to="0" ><i class="la la-paper-plane-o d-lg-none"></i>
+                                                            <span class="">Shipper</span>
                                                         </button>
                                                     </fieldset>
                                                 </form>
                                             </section>
+                                            @endif
                                         </div>
 
                                     </div>
@@ -224,10 +228,12 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/pages/chat-application.css')}}">
     <style>
         .half-margin{
-            margin-top: 0;
-            margin-bottopm:0;
-            margin-top: 5px;
+            margin: 8px 0 0 0 !important;
         }
+        .btn-purple{
+            background-color: #ab45d7;
+        }
+
         .chat-application .chat-app-window {
             padding: 20px 10px;
         }
@@ -346,19 +352,18 @@
             $('body').on('change', '#chat_form input', function () {
                 $(this).val($(this).val().trim());
             });
-            $('#chat_send').on('click', function () {
+            $('.chat_send').on('click', function () {
                 var flag = true;
                 var comment = $('#chat_input').val();
                 var request_id = '{{$crm_details->id}}';
                 var internal_switch_check = document.querySelector('.switchery.on-internal-chat');
-                var internal_switch = internal_switch_check.checked;
+                var internal_switch = parseInt($(this).attr('to'));
                 var internal_class = '';
                 if(internal_switch){
                     internal_class = 'internal';
                 }else{
                     internal_class = '';
                 }
-                console.log(internal_class);
                 if(comment == ''){
                     flag = false;
                     toastr.error("Please Enter Comment first!", 'Error!', {

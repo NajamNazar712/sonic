@@ -158,7 +158,7 @@
                                                             <input type="text" class="form-control" id="chat_input" placeholder="Type your message">
                                                         </fieldset>
                                                         <fieldset class="form-group position-relative has-icon-left col-2 m-0">
-                                                            <button id="chat_send" type="button" class="btn btn-info" ><i class="la la-paper-plane-o d-lg-none"></i>
+                                                            <button id="chat_send" type="button" class="btn btn-block btn-info" ><i class="la la-paper-plane-o d-lg-none"></i>
                                                                 <span class="d-none d-lg-block">Send</span>
                                                             </button>
                                                         </fieldset>

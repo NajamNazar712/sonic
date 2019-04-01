@@ -89,7 +89,7 @@ class ShipperCRMController extends Controller
         $crm_request = CrmRequest::find($id);
         $crm_comments = array();
         $last_comment = null;
-        $crm_comments = CrmComments::where('crm_request_id', $id);
+        $crm_comments = CrmComments::where('crm_request_id', $id)->where('comment_type',0);
         if($crm_comments->exists()){
             $crm_comments = $crm_comments->orderBy('created_at','asc')->get();
             $last_comment = CrmComments::where('crm_request_id', $id)->latest()->first();
@@ -185,7 +185,7 @@ class ShipperCRMController extends Controller
         $comment_id = $request->comment_id;
         $request_id = $request->request_id;
         if(($comment_id != null) && ($request_id != null)){
-            $comment_details = CrmComments::where('crm_request_id', $request_id)->latest()->first();
+            $comment_details = CrmComments::where('crm_request_id', $request_id)->where('comment_type',0)->latest()->first();
             if($comment_details->id > $comment_id){
                 return ['status' => 1, 'comment' => $comment_details];
             }
