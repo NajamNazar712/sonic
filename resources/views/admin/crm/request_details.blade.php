@@ -71,12 +71,14 @@
                                                     <h5 class="mb-0">{{$crm_details->created_at}}</h5>
                                                 </td>
                                             </tr>
-                                            <tr>
-                                                <th scope="row">Tagged To</th>
-                                                <td class="name">
-                                                    <h5 class="mb-0">{{$tagged_name}}</h5>
-                                                </td>
-                                            </tr>
+                                            @if($crm_details['status_id'] == 2)
+                                                <tr>
+                                                    <th scope="row">Tagged To</th>
+                                                    <td class="name">
+                                                        <h5 class="mb-0">{{$tagged_name}}</h5>
+                                                    </td>
+                                                </tr>
+                                            @endif
                                             <tr>
                                                 <th scope="row">Description</th>
                                                 <td class="name">
