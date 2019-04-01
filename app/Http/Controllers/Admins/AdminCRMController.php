@@ -304,8 +304,7 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
-            ->leftjoin('admins as at', 'at.id', '=', 'crt.tagged_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_to')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id')
             ->where(['crm_requests.status_id' => 2]);
         $datatables = Datatables::of($in_process_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
@@ -320,6 +319,19 @@ class AdminCRMController extends Controller
                 }
                 else{
                     return 'Shipper Substitute User';
+                }
+            })
+            ->editColumn('tagged_to', function($requests){
+                if($requests->crm_request_tagging_type_id == 1) {
+                    $name = AdminDepartment::find($requests->tagged_to)->name;
+                    return $name;
+                }
+                else if($requests->crm_request_tagging_type_id == 2) {
+                    $name = Admin::find($requests->tagged_to)->name;
+                    return $name;
+                }
+                else{
+                    return '-';
                 }
             })
             ->editColumn('agent', function ($requests){

@@ -275,7 +275,7 @@
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'name', name: 'a.name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
-                    {data: 'tagged_to', name: 'at.name', class: 'align-middle tagged_to'},
+                    {data: 'tagged_to', name: 'crt.tagged_id', class: 'align-middle tagged_to'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
