@@ -186,8 +186,16 @@ class ShipperCRMController extends Controller
         $request_id = $request->request_id;
         if(($comment_id != null) && ($request_id != null)){
             $comment_details = CrmComments::where('crm_request_id', $request_id)->where('comment_type',0)->latest()->first();
-            if($comment_details->id > $comment_id){
-                return ['status' => 1, 'comment' => $comment_details];
+            if($comment_details){
+                $name = '';
+                if($comment_details->id > $comment_id){
+                    if($comment_details->comment_by == 2){
+                        $name = $comment_details->substitute_user->name;
+                    }else if($comment_details->comment_by == 0){
+                        $name = 'Agent';
+                    }
+                    return ['status' => 1, 'comment' => $comment_details, 'name' => $name];
+                }
             }
         }
 

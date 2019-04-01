@@ -281,7 +281,7 @@
                 var request_id = '{{$crm_details->id}}';
                 get_latest_comment(last_comment_id,request_id);
                 updateScroll();
-            },40000);
+            },4000);
             function get_latest_comment(comment_id,request_id) {
                 if(comment_id){
                     $.ajax({
@@ -294,12 +294,22 @@
                         }
                     }).done(function (data) {
                         if(data.status){
-                            if($('div.chat:last-child').hasClass('admin')){
-                                var html = '<div class="chat-content mr-3"><p>'+ data.comment.comment +'</p></div>';
-                                $('div.chat:last-child').find('.chat-body').append(html);
-                            }else{
-                                var html = '<div class="chat chat-left admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>Agent</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
-                                $('section.chat-app-window .chats').append(html);
+                            if(data.comment.comment_by === 0){
+                                if($('div.chat:last-child').hasClass('admin')){
+                                    var html = '<div class="chat-content mr-3"><p>'+ data.comment.comment +'</p></div>';
+                                    $('div.chat:last-child').find('.chat-body').append(html);
+                                }else{
+                                    var html = '<div class="chat chat-left admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>Agent</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
+                                    $('section.chat-app-window .chats').append(html);
+                                }
+                            }else if(data.comment.comment_by === 2){
+                                if($('div.chat:last-child').hasClass('substitute-user')) {
+                                    var html = '<div class="chat-content"><p>' + data.comment.comment + '</p></div>';
+                                    $('div.chat:last-child').find('.chat-body').append(html);
+                                }else{
+                                    var html = '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>'+ data.name +'</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
+                                    $('section.chat-app-window .chats').append(html);
+                                }
                             }
                             $('#last_comment_id').val(data.comment.id);
                             updateScroll();

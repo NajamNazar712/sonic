@@ -10,7 +10,6 @@
                     <h1 class="mb-1">
                         Request Details ({{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}})
                     </h1>
-
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
@@ -183,7 +182,7 @@
 
                                                 </div>
                                             </section>
-                                            @if(session('role_id') == 1 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == session('user_id')))
+                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()))
                                             <section class="chat-app-form">
                                                 <form class="chat-app-input d-flex" id="chat_form">
                                                     <fieldset class="form-group position-relative has-icon-left col-8 m-0">
@@ -413,7 +412,7 @@
                 var request_id = '{{$crm_details->id}}';
                 get_latest_comment(last_comment_id,request_id);
                 updateScroll();
-            },40000);
+            },4000);
             function get_latest_comment(comment_id,request_id) {
                 if(comment_id){
                     $.ajax({
@@ -427,13 +426,22 @@
                     }).done(function (data) {
                         if(data.status){
                             var user = data.comment.comment_by;
-                            var shipper = 'Shipper';
-                            if(user == 1){
+                            var name = data.name;
+                            if(user == 0){
+                                if(data.comment.comment_type == 0){
+
+                                        var html = '<div class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>'+  +'</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
+                                    }else{
+                                        var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
+                                    }
+                                    $('section.chat-app-window .chats').append(html);
+
+                            }else if(user == 1){
                                 if($('div.chat:last-child').hasClass('shipper')) {
                                     var html = '<div class="chat-content"><p>' + data.comment.comment + '</p></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 }else{
-                                    var html = '<div class="chat chat-left shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
+                                    var html = '<div class="chat chat-left shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>'+ name +'</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
                             }else{
@@ -441,7 +449,7 @@
                                     var html = '<div class="chat-content"><p>' + data.comment.comment + '</p></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 }else{
-                                    var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
+                                    var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>'+ name +'</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
 

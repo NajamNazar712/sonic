@@ -122,7 +122,7 @@ class AdminCRMController extends Controller
         $request_id = $request->request_id;
         $comment_by = 0;
         $comment_type = 0;
-        if($request->internal_switch == 'true'){
+        if($request->internal_switch == 1){
             $comment_type = 1;
         }
         if($comment == null){
@@ -141,10 +141,21 @@ class AdminCRMController extends Controller
         $comment_id = $request->comment_id;
         $request_id = $request->request_id;
         if(($comment_id != null) && ($request_id != null)){
-            $comment_details = CrmComments::where('crm_request_id', $request_id)->where('comment_by','!=',0)->latest()->first();
-            if($comment_details->id > $comment_id){
-                return ['status' => 1, 'comment' => $comment_details];
+            $name = '';
+            $comment_details = CrmComments::where('crm_request_id', $request_id)->latest()->first();
+            if($comment_details){
+                if($comment_details->id > $comment_id){
+                    if($comment_details->comment_by == 0){
+                        $name = $comment_details->admin->name;
+                    }else if($comment_details->comment_by == 1){
+                        $name = $comment_details->shipper->name;
+                    }else{
+                        $name = $comment_details->substitute_user->name;
+                    }
+                    return ['status' => 1, 'comment' => $comment_details, 'name'=> $name];
+                }
             }
+
         }
     }
 
@@ -221,7 +232,7 @@ class AdminCRMController extends Controller
                 }
             })
             ->addColumn('action', function($requests) {
-                $route = route('admin.crm.request.details', ['id' => $requests->id, 'agent' => $requests->agent]);
+                $route = route('admin.crm.request.details', ['id' => $requests->id]);
                 if (session('role_id') == 1 || in_array(179, session('permissions'))) {
                     $dropdown = '
                   <div class="btn-group">
