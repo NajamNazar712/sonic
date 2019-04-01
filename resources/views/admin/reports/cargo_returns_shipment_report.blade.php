@@ -250,10 +250,10 @@
                                 row.push(values.cargo_no);
                                 row.push(values.cargo_creation_date);
                                 row.push(values.dispatching_aging);
-                                row.push(values.origin_city);
-                                row.push(values.destination_city);
-                                row.push(values.origin_hub);
-                                row.push(values.destination_hub);
+                                row.push(values.shipment_destination_city_name);
+                                row.push(values.shipment_origin_city_name);
+                                row.push(values.shipment_destination_hub_name);
+                                row.push(values.shipment_origin_hub_name);
 
                                 body.push(row);
                             });
@@ -312,8 +312,8 @@
                     {data: 'dispatching_aging', name: 'sjc.created_at', class: 'align-middle dispatching_aging'},
                     {data: 'shipment_destination_city_name', name: 'shipment_destination_city.name', class: 'align-middle origin_city'},
                     {data: 'shipment_origin_city_name', name: 'shipment_origin_city.name', class: 'align-middle destination_city'},
-                    {data: 'destination_hub', name: 'destination_hub', class: 'align-middle origin_hub'},
-                    {data: 'origin_hub', name: 'origin_hub', class: 'align-middle destination_hub'},
+                    {data: 'shipment_destination_hub_name', name: 'shipment_destination_hub.name', class: 'align-middle origin_hub'},
+                    {data: 'shipment_origin_hub_name', name: 'shipment_origin_hub.name', class: 'align-middle destination_hub'},
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
