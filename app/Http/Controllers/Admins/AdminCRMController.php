@@ -104,12 +104,16 @@ class AdminCRMController extends Controller
         $types = CrmRequestTaggingTypes::get();
         $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
         $tagged = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->first();
+        $tagged_name = '';
+        if($tagged){
             if($tagged['crm_request_tagging_type_id'] == 1){
-                $tagged_name = AdminDepartment::where('id', $tagged['tagged_id'])->first();
+                $tagged_name = AdminDepartment::find($tagged['tagged_id'])->name;
             }
             else if($tagged['crm_request_tagging_type_id'] == 2){
-                $tagged_name = Admin::where('id', $tagged['tagged_id'])->first();
+                $tagged_name = Admin::find($tagged['tagged_id'])->name;
             }
+        }
+
         $crm_comments = array();
         $last_comment = null;
         $crm_comments = CrmComments::where('crm_request_id', $id);
@@ -127,9 +131,13 @@ class AdminCRMController extends Controller
         }else if($crm_request->launched_by == 2){
             $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
         }
-        $crm_tagging = CrmRequestTagging::where('crm_request_id', $id)->first();
+        $crm_tagging = array();
+        $crm_tagging_details = CrmRequestTagging::where('crm_request_id', $id)->first();
+        if($crm_tagging_details){
+            $crm_tagging = $crm_tagging_details;
+        }
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name['name'],'crm_tagging' => $crm_tagging]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }

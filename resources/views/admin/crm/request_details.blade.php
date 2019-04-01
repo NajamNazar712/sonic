@@ -9,11 +9,6 @@
                 <div class="content-body">
                     <h1 class="mb-1">
                         Request Details ({{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}})
-                        <div class="text-right mb-1">
-                            @if($crm_details['status_id'] == 2)
-                                <button type="button" class="btn btn-primary width-10-per" id="tag"><span class="d-none d-lg-block" style="color: white">Tag</span></button>
-                            @endif
-                        </div>
                     </h1>
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
@@ -70,14 +65,6 @@
                                                     <h5 class="mb-0">{{$crm_details->created_at}}</h5>
                                                 </td>
                                             </tr>
-                                            @if($crm_details['status_id'] == 2)
-                                                <tr>
-                                                    <th scope="row">Tagged To</th>
-                                                    <td class="name">
-                                                        <h5 class="mb-0">{{$tagged_name}}</h5>
-                                                    </td>
-                                                </tr>
-                                            @endif
                                             <tr>
                                                 <th scope="row">Description</th>
                                                 <td class="name">
@@ -91,29 +78,27 @@
                                             <form id="valid_invalid">
                                                 <input type="hidden" id="req_id" value="{{$crm_details->id}}">
                                                 <input type="hidden" id="prev_status" value="{{$crm_details->status_id}}">
-                                                @if($crm_details['status_id'] != 3)
-                                                    <button id="valid" type="submit" class="btn btn-success mr-1 width-20-per" >
-                                                        <span class="d-none d-lg-block">
+                                                <button id="valid" type="submit" class="btn btn-success mr-1 width-20-per" >
+                                                    <span class="d-none d-lg-block">
+                                                    @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
+                                                        Valid
+                                                    @elseif($crm_details['status_id'] == 2)
+                                                        Resolve
+                                                    @elseif($crm_details['status_id'] == 3 || $crm_details['status_id'] == 4)
+                                                        Re-Open
+                                                    @endif
+                                                    </span>
+                                                </button>
+                                                @if($crm_details['status_id'] != 4)
+                                                <button id="invalid" type="submit" class="btn btn-danger width-20-per" >
+                                                    <span class="d-none d-lg-block">
                                                         @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
-                                                            Valid
-                                                        @elseif($crm_details['status_id'] == 2)
-                                                            Resolve
-                                                        @elseif($crm_details['status_id'] == 3 || $crm_details['status_id'] == 4)
-                                                            Re-Open
+                                                            Invalid
+                                                        @else
+                                                            Close
                                                         @endif
                                                         </span>
-                                                    </button>
-                                                @endif
-                                                @if($crm_details['status_id'] != 4 && $crm_details['status_id'] != 2)
-                                                    <button id="invalid" type="submit" class="btn btn-danger width-20-per" >
-                                                        <span class="d-none d-lg-block">
-                                                            @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
-                                                                Invalid
-                                                            @else
-                                                                Close
-                                                            @endif
-                                                            </span>
-                                                    </button>
+                                                </button>
                                                     @endif
                                             </form>
                                         </div>
@@ -124,38 +109,30 @@
                                             <section class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible"  >
                                                 <div class="chats">
                                                     @if(!empty($comments))
-                                                        @php
-                                                            $shipper_flag = true;
-                                                            $admin_flag = true;
-                                                            $sub_flag = true;
-                                                        @endphp
+
                                                         @foreach($comments as $comment)
                                                             @if($comment->comment_by == 0)
                                                                 <div id="chat_{{$comment->id}}" class="chat admin {{($comment->comment_type == 1)? 'internal':'' }}">
-                                                                    @if($admin_flag)
+
                                                                     <div class="chat-avatar">
                                                                         <div class="badge block badge-admin">
                                                                             <i class="la la-user font-medium-2"></i>{{$comment->admin->name}}
                                                                         </div>
                                                                     </div>
-                                                                    @endif
+
                                                                     <div class="chat-body">
-                                                                        <div class="chat-content {{($admin_flag == false)? 'mr-3':'' }}">
+                                                                        <div class="chat-content">
                                                                             <p>{{$comment->comment}}</p>
                                                                         </div>
                                                                     </div>
 
                                                                 </div>
-                                                                @php
-                                                                    $admin_flag = false;
-                                                                    $shipper_flag = true;
-                                                                    $sub_flag = true;
-                                                                @endphp
+
                                                             @elseif($comment->comment_by == 1)
                                                                 <div class="chat chat-left shipper">
 
                                                                         <div class="chat-avatar">
-                                                                            <div class="badge block {{($shipper_flag)? 'badge-info':'' }}">
+                                                                            <div class="badge block badge-info">
                                                                                 <i class="la la-user font-medium-2"></i>Shipper
                                                                             </div>
                                                                         </div>
@@ -166,16 +143,11 @@
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                @php
-                                                                    $admin_flag = true;
-                                                                    $shipper_flag = false;
-                                                                    $sub_flag = true;
-                                                                @endphp
                                                             @else
                                                                 <div class="chat chat-left substitute-user">
 
                                                                         <div class="chat-avatar">
-                                                                            <div class="badge block {{($shipper_flag)? 'badge-substitute-user':'' }}">
+                                                                            <div class="badge block badge-substitute-user">
                                                                                 <i class="la la-user font-medium-2"></i>Shipper
                                                                             </div>
                                                                         </div>
@@ -186,17 +158,14 @@
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                @php
-                                                                    $admin_flag = true;
-                                                                    $shipper_flag = true;
-                                                                    $sub_flag = false;
-                                                                @endphp
+
                                                             @endif
                                                         @endforeach
                                                     @endif
 
                                                 </div>
                                             </section>
+
                                             @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()))
                                             <section class="chat-app-form">
                                                 <form class="chat-app-input d-flex" id="chat_form">
@@ -219,7 +188,8 @@
                                                     </fieldset>
                                                 </form>
                                             </section>
-                                                @elseif(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 2 &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) && ($crm_tagging->crm_request_tagging_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() ))))
+                                                @elseif(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 2 &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ))))
+{{--                                                @elseif((empty($crm_tagging) ?: ($crm_tagging->crm_request_tagging_type_id == 1 ? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() )))--}}
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input d-flex" id="chat_form">
                                                         <fieldset class="form-group position-relative has-icon-left col-8 m-0">
@@ -242,6 +212,7 @@
                                                     </form>
                                                 </section>
                                             @endif
+
                                         </div>
 
                                     </div>
@@ -253,60 +224,7 @@
                 </div>
             </div>
         </div>
-    </section>
-    <section>
-        <div class="modal fade text-left" id="tagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="tagModal"
-             aria-hidden="true">
-            <div class="modal-dialog modal-md" role="document">
-                <div class="modal-content ">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Tag</h4>
-                    </div>
-                    <div class="modal-body text-center">
-                        <form id="tag_submit_form" method="post">
-                            @method('POST')
-                            @csrf
-                            <div class="row justify-content-center">
-                                <div class="col-11">
-                                    <fieldset class="form-group">
-                                        <input type="hidden" id="crm_request_id" value="{{$crm_details->id}}">
-                                        <select name="tag_type" id="tag_type" class="form-control select2">
-                                            @foreach($types as $type)
-                                                <option value="{{$type->id}}" > {{$type->name}} </option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-                            </div>
-                            <div class="row justify-content-center">
-                                <div class="col-8">
-                                    <fieldset class="form-group">
-                                        <div class="d-none" id="admin_tag_div">
-                                            <select name="tag_admin" id="tag_admin" class="form-control select2">
-                                                @foreach($admins as $admin)
-                                                    <option value="{{$admin->id}}" > {{$admin->name}} </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="d-none" id="department_tag_div">
-                                            <select name="tag_department" id="tag_department" class="form-control  select2">
-                                                @foreach($departments as $department)
-                                                    <option value="{{$department->id}}" > {{$department->name}} </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </fieldset>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-success width-25-per" id="tag_adminSubmit">Tag</button>
-                        <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+
     </section>
 
 @endsection
@@ -322,9 +240,8 @@
         .btn-purple{
             background-color: #ab45d7;
         }
-		.chat-content p{
-            word-break: break-word;
-        }        .chat-application .chat-app-window {
+
+        .chat-application .chat-app-window {
             padding: 20px 10px;
         }
         .badge.badge-admin{
@@ -406,9 +323,6 @@
                                 $('#status').html('<h4>Re-Open</h4>');
                             }
                             toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            setTimeout(function(){
-                                window.location.reload(1);
-                            }, 1000);
                         }
                         else {
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -431,9 +345,6 @@
                         if (data.status == 0) {
                             $('#status').html('<h4>Closed</h4>');
                             toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            setTimeout(function(){
-                                window.location.reload(1);
-                            }, 1000);
                         }
                         else {
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -441,87 +352,6 @@
                     });
                 });
 
-            $("#tag_admin").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select User",
-                width:'100%',
-            });
-
-            $("#tag_department").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Department",
-                width:'100%',
-            });
-
-            $("#tag_type").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Type",
-                width:'100%',
-                dropdownParent:$('#tagModal')
-            }).bind('change', function () {
-                var id = parseInt($(this).val());
-                if(id === 1){
-                    $('#admin_tag_div').addClass('d-none');
-                    $('#department_tag_div').removeClass('d-none');
-                }else if(id === 2){
-                    $('#department_tag_div').addClass('d-none');
-                    $('#admin_tag_div').removeClass('d-none');
-                }else{
-                    $('#admin_tag_div').addClass('d-none');
-                    $('#department_tag_div').addClass('d-none');
-                }
-            });
-            $('#tag').on('click', function (e) {
-                e.preventDefault();
-                $('#tagModal').modal('show');
-            });
-            $('#tagModal').on('hide.bs.modal', function (e) {
-                $('#tag_type').val('').trigger('change');
-                $('#admin_tag_div').addClass('d-none');
-                $('#department_tag_div').addClass('d-none');
-            });
-            $('#tag_adminSubmit').on('click',function () {
-                var type = parseInt($('#tag_type').val());
-                if(type === 1) {
-                    var tag = parseInt($('#tag_department').val());
-                }
-                else if(type === 2){
-                    var tag = parseInt($('#tag_admin').val());
-                }
-                if(tag){
-                    $.ajax({
-                        url: '{!! route('admin.crm.tag') !!}',
-                        method: 'POST',
-                        data: {
-                            'tagged_id': tag,
-                            'crm_request_id': $('#crm_request_id').val(),
-                            'crm_request_tagging_type_id': type,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function(data) {
-                            if(data.status == 0){
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                setTimeout(function(){
-                                    window.location.reload(1);
-                                }, 2500);
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        });
-                }
-                else{
-                    if(type === 1) {
-                        var error = "Department Not Selected!";
-                    }
-                    else if(type === 2) {
-                        var error = "User Not Selected!";
-                    }
-                    else{
-                        error = "Type Not Selected!";
-                    }
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-
-            });
 
             $('#chat_form').on('submit',function (e) {
                 e.preventDefault();
@@ -589,7 +419,6 @@
                 var last_comment_id = parseInt($('#last_comment_id').val());
                 var request_id = '{{$crm_details->id}}';
                 get_latest_comment(last_comment_id,request_id);
-                updateScroll();
             },4000);
             function get_latest_comment(comment_id,request_id) {
                 if(comment_id){
