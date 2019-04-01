@@ -193,7 +193,7 @@
                                                     </fieldset>
                                                 </form>
                                             </section>
-                                                @elseif(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 2 &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ))))
+                                                @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ))))
 {{--                                                @elseif((empty($crm_tagging) ?: ($crm_tagging->crm_request_tagging_type_id == 1 ? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() )))--}}
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input d-flex" id="chat_form">
@@ -419,12 +419,13 @@
                     });
                 }
             });
-
+            @if($crm_details->status_id != 4)
             setInterval(function () {
                 var last_comment_id = parseInt($('#last_comment_id').val());
                 var request_id = '{{$crm_details->id}}';
                 get_latest_comment(last_comment_id,request_id);
             },4000);
+            @endif
             function get_latest_comment(comment_id,request_id) {
                 if(comment_id){
                     $.ajax({
