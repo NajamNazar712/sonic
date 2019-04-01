@@ -31,6 +31,7 @@
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
+                                    <th class="border-primary border-darken-1">Tagged To</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -58,7 +59,7 @@
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="assign_agentSubmit">Submit</button>
+                    <button type="button" class="btn btn-success" id="assign_agentSubmit">Assign</button>
                     <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -94,6 +95,7 @@
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
+                            head.push('Tagged To');
                             head.push('Launched Date');
 
                             $.each(result.data, function(index, values) {
@@ -108,6 +110,7 @@
                                 row.push(values.agent);
                                 row.push(values.name);
                                 row.push(values.added_by);
+                                row.push(values.tagged_to);
                                 row.push(values.created_at);
 
                                 body.push(row);
@@ -261,7 +264,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.crm.in_process.list') }}',
                 rowId: 'id',
-                order: [[10, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -273,6 +276,7 @@
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'name', name: 'a.name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
+                    {data: 'tagged_to', name: 'at.name', class: 'align-middle tagged_to'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 

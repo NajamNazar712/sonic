@@ -1008,7 +1008,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get_request', 'Admins\AdminCRMController@get_request_info')->name('get_request');
             Route::post('update', 'Admins\AdminCRMController@update_request')->name('update');
             Route::get('', 'Admins\AdminCRMController@launched')->name('launched');
-            Route::get('{id}/details', 'Admins\AdminCRMController@request_details')->name('details');
+            Route::get('{id}', 'Admins\AdminCRMController@request_details')->name('details');
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
@@ -1032,6 +1032,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('assign', 'Admins\AdminCRMController@assign')->name('assign');
         Route::post('valid', 'Admins\AdminCRMController@valid')->name('valid');
         Route::post('invalid', 'Admins\AdminCRMController@invalid')->name('invalid');
+        Route::post('tag', 'Admins\AdminCRMController@admin_tag')->name('tag');
         Route::prefix('comment')->name('comment.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_comment')->name('add');
             Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');

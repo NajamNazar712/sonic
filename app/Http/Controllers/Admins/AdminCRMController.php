@@ -5,12 +5,16 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Models\CRM\CrmRequestTaggingHistory;
+use App\Http\Models\CRM\CrmRequestTaggingTypes;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
@@ -94,6 +98,18 @@ class AdminCRMController extends Controller
 
     public function request_details(Request $request,$id){
         $crm_request = CrmRequest::find($id);
+        $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
+            ->select('a.id as id', 'a.name as name')
+            ->whereNotIn('admin_roles.department_id', [1,3])->get();
+        $types = CrmRequestTaggingTypes::get();
+        $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
+        $tagged = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->first();
+            if($tagged['crm_request_tagging_type_id'] == 1){
+                $tagged_name = AdminDepartment::where('id', $tagged['tagged_id'])->first();
+            }
+            else if($tagged['crm_request_tagging_type_id'] == 2){
+                $tagged_name = Admin::where('id', $tagged['tagged_id'])->first();
+            }
         $crm_comments = array();
         $last_comment = null;
         $crm_comments = CrmComments::where('crm_request_id', $id);
@@ -113,7 +129,7 @@ class AdminCRMController extends Controller
         }
         $crm_tagging = CrmRequestTagging::where('crm_request_id', $id)->first();
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'crm_tagging' => $crm_tagging]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name['name'],'crm_tagging' => $crm_tagging]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -181,7 +197,8 @@ class AdminCRMController extends Controller
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $status = CrmRequestStatus::whereIn('id', [1,5])->select('id', 'name')->get();
-        $agents = Admin::whereIn('role_id',[6,13])->get();
+        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+            ->where('admin_roles.department_id',3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
         return view('admin.crm.launched_re_open')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'agents' => $agents,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests]);
@@ -266,7 +283,8 @@ class AdminCRMController extends Controller
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $channels = CrmRequestChannel::where('id', '>', 2)->select('id', 'channel')->get();
-        $agents = Admin::whereIn('role_id',[6,13])->get();
+        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+            ->where('admin_roles.department_id',3)->get();
         return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents]);
     }
 
@@ -277,7 +295,9 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
+            ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
+            ->leftjoin('admins as at', 'at.id', '=', 'crt.tagged_id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_to')
             ->where(['crm_requests.status_id' => 2]);
         $datatables = Datatables::of($in_process_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
@@ -331,7 +351,8 @@ class AdminCRMController extends Controller
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $channels = CrmRequestChannel::where('id', '>', 2)->select('id', 'channel')->get();
-        $agents = Admin::whereIn('role_id',[6,13])->get();
+        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+            ->where('admin_roles.department_id',3)->get();
         return view('admin.crm.resolved')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents]);
     }
 
@@ -495,85 +516,133 @@ class AdminCRMController extends Controller
         }
     }
 
-    public function valid(Request $request){
-        $crm_request = CrmRequest::where('id',$request->id)->first();
-        if($request->prev_status == 1 || $request->prev_status == 5) {
-            if ($crm_request['status_id'] != 2) {
-                CrmRequest::where('id', $request->id)->update([
-                    'status_id' => 2
-                ]);
-                CrmRequestStatusHistory::create([
-                    'crm_request_id' => $request->id,
-                    'status_id' => $crm_request['status_id'],
-                    'agent_id' => Auth::id()
-                ]);
-                return ['status' => 0, 'success' => 'Request marked as In-Process', 'marked_status' => 2];
-            } else {
-                return ['status' => 1, 'error' => 'Request is already marked as In-Process'];
+    public function valid(Request $request)
+    {
+        $crm_request = CrmRequest::where('id', $request->id)->first();
+        if ($crm_request['agent_id'] != null) {
+            if ($request->prev_status == 1 || $request->prev_status == 5) {
+                if ($crm_request['status_id'] != 2) {
+                    CrmRequest::where('id', $request->id)->update([
+                        'status_id' => 2
+                    ]);
+                    CrmRequestStatusHistory::create([
+                        'crm_request_id' => $request->id,
+                        'status_id' => $crm_request['status_id'],
+                        'agent_id' => $crm_request['agent_id']
+                    ]);
+                    return ['status' => 0, 'success' => 'Request marked as In-Process', 'marked_status' => 2];
+                } else {
+                    return ['status' => 1, 'error' => 'Request is already marked as In-Process'];
+                }
+            }
+            if ($request->prev_status == 2) {
+                if ($crm_request['status_id'] != 3) {
+                    CrmRequest::where('id', $request->id)->update([
+                        'status_id' => 3
+                    ]);
+                    CrmRequestStatusHistory::create([
+                        'crm_request_id' => $request->id,
+                        'status_id' => $crm_request['status_id'],
+                        'agent_id' => $crm_request['agent_id']
+                    ]);
+                    return ['status' => 0, 'success' => 'Request marked as Resolved', 'marked_status' => 3];
+                } else {
+                    return ['status' => 1, 'error' => 'Request is already marked as Re-Open'];
+                }
+            }
+            if ($request->prev_status == 3) {
+                if ($crm_request['status_id'] != 5) {
+                    CrmRequest::where('id', $request->id)->update([
+                        'status_id' => 5
+                    ]);
+                    CrmRequestStatusHistory::create([
+                        'crm_request_id' => $request->id,
+                        'status_id' => $crm_request['status_id'],
+                        'agent_id' => $crm_request['agent_id']
+                    ]);
+                    return ['status' => 0, 'success' => 'Request marked as Re-Open', 'marked_status' => 5];
+                } else {
+                    return ['status' => 1, 'error' => 'Request is already marked as Resolved'];
+                }
+            }
+            if ($request->prev_status == 4) {
+                if ($crm_request['status_id'] != 5) {
+                    CrmRequest::where('id', $request->id)->update([
+                        'status_id' => 5
+                    ]);
+                    CrmRequestStatusHistory::create([
+                        'crm_request_id' => $request->id,
+                        'status_id' => $crm_request['status_id'],
+                        'agent_id' => $crm_request['agent_id']
+                    ]);
+                    return ['status' => 0, 'success' => 'Request marked as Re-Open', 'marked_status' => 5];
+                } else {
+                    return ['status' => 1, 'error' => 'Request is already marked as Re-Open'];
+                }
             }
         }
-        if($request->prev_status == 2) {
-            if ($crm_request['status_id'] != 3) {
-                CrmRequest::where('id', $request->id)->update([
-                    'status_id' => 3
-                ]);
-                CrmRequestStatusHistory::create([
-                    'crm_request_id' => $request->id,
-                    'status_id' => $crm_request['status_id'],
-                    'agent_id' => Auth::id()
-                ]);
-                return ['status' => 0, 'success' => 'Request marked as Resolved', 'marked_status' => 3];
-            } else {
-                return ['status' => 1, 'error' => 'Request is already marked as Re-Open'];
-            }
-        }
-        if($request->prev_status == 3) {
-            if ($crm_request['status_id'] != 5) {
-                CrmRequest::where('id', $request->id)->update([
-                    'status_id' => 5
-                ]);
-                CrmRequestStatusHistory::create([
-                    'crm_request_id' => $request->id,
-                    'status_id' => $crm_request['status_id'],
-                    'agent_id' => Auth::id()
-                ]);
-                return ['status' => 0, 'success' => 'Request marked as Re-Open', 'marked_status' => 5];
-            } else {
-                return ['status' => 1, 'error' => 'Request is already marked as Resolved'];
-            }
-        }
-        if($request->prev_status == 4) {
-            if ($crm_request['status_id'] != 5) {
-                CrmRequest::where('id', $request->id)->update([
-                    'status_id' => 5
-                ]);
-                CrmRequestStatusHistory::create([
-                    'crm_request_id' => $request->id,
-                    'status_id' => $crm_request['status_id'],
-                    'agent_id' => Auth::id()
-                ]);
-                return ['status' => 0, 'success' => 'Request marked as Re-Open', 'marked_status' => 5];
-            } else {
-                return ['status' => 1, 'error' => 'Request is already marked as Re-Open'];
-            }
+        else{
+            return ['status' => 1, 'error' => 'Agent is not assigned yet'];
         }
     }
 
-    public function invalid(Request $request){
-        $crm_request = CrmRequest::where('id',$request->id)->first();
-        if($crm_request['status_id'] != 4){
-            CrmRequest::where('id',$request->id)->update([
-                'status_id' => 4
-            ]);
-            CrmRequestStatusHistory::create([
-                'crm_request_id' => $request->id,
-                'status_id' => $crm_request['status_id'],
-                'agent_id' => Auth::id()
-            ]);
-            return ['status' => 0, 'success' => 'Request marked as Closed'];
+    public function invalid(Request $request)
+    {
+        $crm_request = CrmRequest::where('id', $request->id)->first();
+        if ($crm_request['agent_id'] != null) {
+            if ($crm_request['status_id'] != 4) {
+                CrmRequest::where('id', $request->id)->update([
+                    'status_id' => 4
+                ]);
+                CrmRequestStatusHistory::create([
+                    'crm_request_id' => $request->id,
+                    'status_id' => $crm_request['status_id'],
+                    'agent_id' => $crm_request['agent_id']
+                ]);
+                return ['status' => 0, 'success' => 'Request marked as Closed'];
+            } else {
+                return ['status' => 1, 'error' => 'Request is already marked as Closed'];
+            }
         }
         else{
-            return ['status' => 1, 'error' => 'Request is already marked as Closed'];
+            return ['status' => 1, 'error' => 'Agent is not assigned yet'];
         }
+    }
+
+    public function admin_tag(Request $request){
+        $crm_request = CrmRequest::where('id', $request->crm_request_id)->first();
+        if($request->crm_request_tagging_type_id == 1){
+            $name = AdminDepartment::where('id', $request->tagged_id)->first();
+        }
+        else if($request->crm_request_tagging_type_id == 2){
+            $name = Admin::where('id', $request->tagged_id)->first();
+        }
+        $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $request->crm_request_id)->first();
+        if(!empty($tagged_crm_request)){
+            if($tagged_crm_request['tagged_id'] != $request->tagged_id) {
+                CrmRequestTagging::where('crm_request_id', $request->crm_request_id)->update([
+                    'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                    'tagged_id' => $request->tagged_id
+                ]);
+
+                CrmRequestTaggingHistory::create([
+                    'crm_request_id' => $tagged_crm_request['crm_request_id'],
+                    'crm_request_tagging_type_id' => $tagged_crm_request['crm_request_tagging_type_id'],
+                    'tagged_id' => $tagged_crm_request['tagged_id'],
+                    'agent_id' => $crm_request['agent_id']
+                ]);
+            }
+            else{
+                return ['status' => 1, 'error' => 'Request is already tagged to ' . $name['name']];
+            }
+        }
+        else{
+            CrmRequestTagging::create([
+                'crm_request_id' => $request->crm_request_id,
+                'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                'tagged_id' => $request->tagged_id
+            ]);
+        }
+        return ['status' => 0, 'success' => 'Request successfully tagged to ' . $name['name']];
     }
 }
