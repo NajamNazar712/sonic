@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Models\CRM\CrmRequestTaggingHistory;
 use App\Http\Models\CRM\CrmRequestTaggingTypes;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\SubstituteUser;
@@ -99,7 +102,15 @@ class AdminCRMController extends Controller
             ->select('a.id as id', 'a.name as name')
             ->where('admin_roles.department_id', '!=', 1)
             ->where('admin_roles.department_id', '!=', 3)->get();
-        $departments = CrmRequestTaggingTypes::get();
+        $types = CrmRequestTaggingTypes::get();
+        $departments = AdminDepartment::where('id', '!=', 1)->get();
+        $tagged = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->first();
+            if($tagged['crm_request_tagging_type_id'] == 1){
+                $tagged_name = AdminDepartment::where('id', $tagged['tagged_id'])->first();
+            }
+            else if($tagged['crm_request_tagging_type_id'] == 2){
+                $tagged_name = Admin::where('id', $tagged['tagged_id'])->first();
+            }
         $crm_comments = array();
         $last_comment = null;
         $crm_comments = CrmComments::where('crm_request_id', $id);
@@ -118,7 +129,7 @@ class AdminCRMController extends Controller
             $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
         }
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'departments' => $departments]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name['name']]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -273,7 +284,9 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
+            ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
+            ->leftjoin('admins as at', 'at.id', '=', 'crt.tagged_id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_to')
             ->where(['crm_requests.status_id' => 2]);
         $datatables = Datatables::of($in_process_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
@@ -586,6 +599,39 @@ class AdminCRMController extends Controller
     }
 
     public function admin_tag(Request $request){
+        $crm_request = CrmRequest::where('id', $request->crm_request_id)->first();
+        if($request->crm_request_tagging_type_id == 1){
+            $name = AdminDepartment::where('id', $request->tagged_id)->first();
+        }
+        else if($request->crm_request_tagging_type_id == 2){
+            $name = Admin::where('id', $request->tagged_id)->first();
+        }
+        $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $request->crm_request_id)->first();
+        if(!empty($tagged_crm_request)){
+            if($tagged_crm_request['tagged_id'] != $request->tagged_id) {
+                CrmRequestTagging::where('crm_request_id', $request->crm_request_id)->update([
+                    'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                    'tagged_id' => $request->tagged_id
+                ]);
 
+                CrmRequestTaggingHistory::create([
+                    'crm_request_id' => $tagged_crm_request['crm_request_id'],
+                    'crm_request_tagging_type_id' => $tagged_crm_request['crm_request_tagging_type_id'],
+                    'tagged_id' => $tagged_crm_request['tagged_id'],
+                    'agent_id' => $crm_request['agent_id']
+                ]);
+            }
+            else{
+                return ['status' => 1, 'error' => 'Request is already tagged to ' . $name['name']];
+            }
+        }
+        else{
+            CrmRequestTagging::create([
+                'crm_request_id' => $request->crm_request_id,
+                'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                'tagged_id' => $request->tagged_id
+            ]);
+        }
+        return ['status' => 0, 'success' => 'Request successfully tagged to ' . $name['name']];
     }
 }
