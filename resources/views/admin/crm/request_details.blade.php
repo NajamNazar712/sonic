@@ -204,6 +204,28 @@
                                                     </fieldset>
                                                 </form>
                                             </section>
+                                                @elseif(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 2 &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) && ($crm_tagging->crm_request_tagging_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() ))))
+                                                <section class="chat-app-form">
+                                                    <form class="chat-app-input d-flex" id="chat_form">
+                                                        <fieldset class="form-group position-relative has-icon-left col-8 m-0">
+                                                            <input type="hidden" id="last_comment_id" value="{{$last_comment_id}}">
+                                                            <div class="form-control-position">
+                                                                <i class="la la-chevron-right"></i>
+                                                            </div>
+                                                            <input type="text" class="form-control" id="chat_input" placeholder="Type your message">
+                                                        </fieldset>
+                                                        <fieldset class="form-group position-relative has-icon-left col-2 m-0">
+                                                            <button id="chat_send" type="button" class="btn btn-block btn-purple chat_send" to="1"><i class="la la-paper-plane-o d-lg-none"></i>
+                                                                <span class="">Internal</span>
+                                                            </button>
+                                                        </fieldset>
+                                                        <fieldset class="form-group position-relative has-icon-left col-2 m-0">
+                                                            <button id="chat_send" type="button" class="btn btn-block btn-default chat_send" to="0" ><i class="la la-paper-plane-o d-lg-none"></i>
+                                                                <span class="">Shipper</span>
+                                                            </button>
+                                                        </fieldset>
+                                                    </form>
+                                                </section>
                                             @endif
                                         </div>
 

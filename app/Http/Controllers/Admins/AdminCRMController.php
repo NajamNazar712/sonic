@@ -10,6 +10,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
@@ -110,8 +111,9 @@ class AdminCRMController extends Controller
         }else if($crm_request->launched_by == 2){
             $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
         }
+        $crm_tagging = CrmRequestTagging::where('crm_request_id', $id)->first();
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'crm_tagging' => $crm_tagging]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
