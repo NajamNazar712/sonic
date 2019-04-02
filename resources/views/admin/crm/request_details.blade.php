@@ -13,6 +13,7 @@
                             @if($crm_details['status_id'] == 2 && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(185, session('permissions'))))
                                 <button type="button" class="btn btn-primary width-10-per" id="tag"><span class="d-none d-lg-block" style="color: white">Tag</span></button>
                             @endif
+                            
                         </div>
                     </h1>
                     <div class="card">
