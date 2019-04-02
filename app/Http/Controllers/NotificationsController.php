@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\ShipperNotificationEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -2544,6 +2547,33 @@ class NotificationsController extends Controller
             }
 
             self::email($subject, $body, $to, $cc);
+          }
+          else if($id == 31){
+            $crm_request = CrmRequest::find($reference_1_id);
+            if($crm_request){
+                $tagging = CrmRequestTagging::where('crm_request_id',$crm_request->id)->first();
+                if($tagging){
+                    if($tagging->crm_request_tagging_type_id == 1){
+                        $roles = AdminRole::where('department_id',$tagging->tagged_id)->pluck('id');
+                        $admin_department = Admin::whereIn('role_id',$roles)->where('status',1);
+                        if($admin_department->exists()){
+                            $to = $admin_department->pluck('email');
+                        }
+                    }else if($tagging->crm_request_tagging_type_id == 2){
+                        $admin_department = Admin::find($tagging->tagged_id)->email;
+                        $to = $admin_department;
+                    }
+                    if($crm_request->shipment_id){
+                        $shipment = Shipment::find($crm_request->shipment_id);
+
+                    }
+
+                    $cc = array();
+                    if ($general_admins->exists()) {
+                        $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
+                    }
+                }
+            }
           }
         }
       }
