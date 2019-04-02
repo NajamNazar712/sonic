@@ -116,7 +116,7 @@
                 serverSide: true,
                 ajax: '{{ route('cod.crm.request.list') }}',
                 rowId: 'id',
-                order: [[10, 'desc']],
+                order: [[9, 'desc']],
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -160,7 +160,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.created_at')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') ) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.status')) {
