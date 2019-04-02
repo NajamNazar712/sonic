@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\CRM;
 
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestStatus;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class CRMController extends Controller
 {
@@ -26,6 +29,15 @@ class CRMController extends Controller
         $crm_request->description = $description;
 
         $crm_request->save();
+
+        $id = $crm_request->id;
+
+        $crm_request_status_history = new CrmRequestStatusHistory();
+
+        $crm_request_status_history->crm_request_id = $id;
+        $crm_request_status_history->status_id = 1;
+
+        $crm_request_status_history->save();
 
     }
 }
