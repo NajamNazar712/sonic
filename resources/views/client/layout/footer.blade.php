@@ -1,7 +1,7 @@
 <footer class="footer footer-static footer-light navbar-border navbar-shadow">
   <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2">
-      <span class="float-md-left d-block d-md-inline-block">Copyright &copy; {{ now()->year }} By <a class="text-bold-800 grey darken-2" href="#">Trax Logistics </a>, All Rights Reserved. </span>
-    <span class="float-md-right d-block d-md-inline-blockd-none d-lg-block">UAN: 0213-877-22-22</span>
+      <span class="float-md-left d-block d-md-inline-block"><i class="ft-phone-call align-middle mr-1"></i><span class="align-middle">0213-877-22-22</span></span>
+    <span class="float-md-right d-block d-md-inline-blockd-none d-lg-block">Copyright &copy; {{ now()->year }} By <a class="text-bold-800 grey darken-2" href="#">Trax Logistics </a>, All Rights Reserved.</span>
   </p>
 </footer>
 <!-- BEGIN VENDOR JS-->
