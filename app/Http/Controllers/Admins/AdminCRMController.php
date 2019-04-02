@@ -226,7 +226,15 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
-        ->whereIn('crm_requests.status_id', [1,5]);
+            ->where(function($query) {
+                 $query->whereIn('crm_requests.status_id', [1,5])
+                     ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
+	            })->orWhere(function($query) {
+                    $role = Admin::where('id', Auth::id())->first();
+                    $query->whereIn('crm_requests.status_id', [1,5])
+                   ->where(DB::raw('(SELECT permission_id FROM admin_role_module_permissions WHERE role_id = '. $role['role_id'] .' AND permission_id = 183)'), in_array(183, session('permissions')));
+           })
+            ->groupBy('crm_requests.id');
         $datatables = Datatables::of($launched_request)
             ->setRowAttr([
                 'nature' => function ($requests) {
@@ -309,8 +317,28 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
+            ->leftjoin('admin_roles as ar', 'ar.department_id', '=', 'crt.tagged_id')
+            ->leftjoin('admins as ard', 'ard.role_id', '=', 'ar.id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id')
-            ->where(['crm_requests.status_id' => 2]);
+            ->where(function ($query) {
+                $query->where('crm_requests.status_id', 2)
+                    ->where('crm_requests.agent_id', Auth::id());
+            })
+            ->orWhere(function ($query) {
+                $query->where('crm_requests.status_id', 2)
+                    ->where('crt.crm_request_tagging_type_id', 2)
+                    ->where('crt.tagged_id', '=',  Auth::id());
+            })
+            ->orWhere(function($query) {
+                $query->where('crm_requests.status_id', 2)
+                    ->where('crt.crm_request_tagging_type_id', 1)
+                    ->where('ard.id', '=', Auth::id());
+            })
+            ->orWhere(function($query) {
+                $query->where('crm_requests.status_id', 2)
+                    ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
+            })
+            ->groupBy('crm_requests.id');
         $datatables = Datatables::of($in_process_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
@@ -536,19 +564,17 @@ class AdminCRMController extends Controller
 
         return $datatables->make(true);
     }
-    
+
     public function assign(Request $request){
         if($request->multiple == 0) {
             $crm_requests = CrmRequest::find($request->crm_request_id);
 
             if ($request->crm_request_id == $crm_requests->id) {
                 if ($crm_requests->agent_id != $request->admin_id) {
-                    if ($crm_requests->agent_id != null) {
-                        CrmRequestAgentHistory::create([
-                            'crm_request_id' => $crm_requests->id,
-                            'agent_id' => $crm_requests->agent_id
-                        ]);
-                    }
+                    CrmRequestAgentHistory::create([
+                        'crm_request_id' => $crm_requests->id,
+                        'agent_id' => $request->admin_id
+                    ]);
                     $crm_requests->agent_id = $request->admin_id;
                     $crm_requests->save();
                     return ['status' => 0, 'success' => 'Request has been Assigned'];
@@ -561,17 +587,13 @@ class AdminCRMController extends Controller
             {
                 $crm_requests = CrmRequest::find($crm_request_id);
                 if ($crm_request_id == $crm_requests->id) {
-                        if ($crm_requests->agent_id != null) {
-                            if ($crm_requests->agent_id != $request->admin_id) {
-                                CrmRequestAgentHistory::create([
-                                    'crm_request_id' => $crm_requests->id,
-                                    'agent_id' => $crm_requests->agent_id
-                                ]);
-                            }
-                        }
-                        $crm_requests->agent_id = $request->admin_id;
-                        $crm_requests->save();
-                    }
+                    CrmRequestAgentHistory::create([
+                        'crm_request_id' => $crm_requests->id,
+                        'agent_id' => $request->admin_id
+                    ]);
+                    $crm_requests->agent_id = $request->admin_id;
+                    $crm_requests->save();
+                }
             }
             return ['status' => 0, 'success' => 'Request(s) has been Assigned'];
         }
@@ -612,16 +634,18 @@ class AdminCRMController extends Controller
                 }
             }
             if ($request->prev_status == 3) {
-                if ($crm_request['status_id'] != 5) {
+                if ($crm_request['status_id'] != 4) {
                     CrmRequest::where('id', $request->id)->update([
-                        'status_id' => 5
+                        'status_id' => 4
                     ]);
                     CrmRequestStatusHistory::create([
                         'crm_request_id' => $request->id,
                         'status_id' => $crm_request['status_id'],
                         'agent_id' => $crm_request['agent_id']
                     ]);
-                    return ['status' => 0, 'success' => 'Request marked as Re-Open', 'marked_status' => 5];
+
+                    CrmRequestTagging::where('crm_request_id', $request->id)->delete();
+                    return ['status' => 0, 'success' => 'Request marked as Closed', 'marked_status' => 4];
                 } else {
                     return ['status' => 1, 'error' => 'Request is already marked as Resolved'];
                 }
@@ -660,6 +684,8 @@ class AdminCRMController extends Controller
                     'status_id' => $crm_request['status_id'],
                     'agent_id' => $crm_request['agent_id']
                 ]);
+
+                CrmRequestTagging::where('crm_request_id', $request->id)->delete();
                 return ['status' => 0, 'success' => 'Request marked as Closed'];
             } else {
                 return ['status' => 1, 'error' => 'Request is already marked as Closed'];
@@ -687,11 +713,22 @@ class AdminCRMController extends Controller
                 ]);
 
                 CrmRequestTaggingHistory::create([
-                    'crm_request_id' => $tagged_crm_request['crm_request_id'],
-                    'crm_request_tagging_type_id' => $tagged_crm_request['crm_request_tagging_type_id'],
-                    'tagged_id' => $tagged_crm_request['tagged_id'],
+                    'crm_request_id' => $request->crm_request_id,
+                    'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                    'tagged_id' => $request->tagged_id,
                     'agent_id' => $crm_request['agent_id']
                 ]);
+
+                if ($request->prev_status == 3) {
+                    CrmRequest::where('id', $request->crm_request_id)->update([
+                        'status_id' => 2
+                    ]);
+                    CrmRequestStatusHistory::create([
+                        'crm_request_id' => $request->crm_request_id,
+                        'status_id' => $crm_request['status_id'],
+                        'agent_id' => $crm_request['agent_id']
+                    ]);
+                }
             }
             else{
                 return ['status' => 1, 'error' => 'Request is already tagged to ' . $name['name']];
@@ -702,6 +739,13 @@ class AdminCRMController extends Controller
                 'crm_request_id' => $request->crm_request_id,
                 'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
                 'tagged_id' => $request->tagged_id
+            ]);
+
+            CrmRequestTaggingHistory::create([
+                'crm_request_id' => $request->crm_request_id,
+                'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                'tagged_id' => $request->tagged_id,
+                'agent_id' => $crm_request['agent_id']
             ]);
         }
         return ['status' => 0, 'success' => 'Request successfully tagged to ' . $name['name']];
