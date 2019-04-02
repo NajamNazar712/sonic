@@ -175,6 +175,7 @@
                                             })
                                                 .done(function(data) {
                                                     if(data.status == 0){
+                                                        $('#AssignAgentModal').modal('hide');
                                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                                         setTimeout(function(){
                                                             window.location.reload(1);
@@ -467,6 +468,7 @@
                         })
                             .done(function(data) {
                                 if(data.status == 0){
+                                    $('#AssignAgentModal').modal('hide');
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     setTimeout(function(){
                                         window.location.reload(1);
