@@ -238,15 +238,16 @@ class AdminCRMController extends Controller
             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
-            ->where(function($query) {
-                 $query->whereIn('crm_requests.status_id', [1,5])
+            ->where(function ($query) {
+                $query->where(function($sub_query) {
+                    $sub_query->whereIn('crm_requests.status_id', [1,5])
                      ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
-	            })->orWhere(function($query) {
-                    $role = Admin::where('id', Auth::id())->first();
-                    $query->whereIn('crm_requests.status_id', [1,5])
-                   ->where(DB::raw('(SELECT permission_id FROM admin_role_module_permissions WHERE role_id = '. $role['role_id'] .' AND permission_id = 183)'), in_array(183, session('permissions')));
-           })
-            ->groupBy('crm_requests.id');
+                })->orWhere(function($sub_query) {
+                    $role = Auth::user()->role_id;
+                    $sub_query->whereIn('crm_requests.status_id', [1,5])
+                   ->where(DB::raw('(SELECT permission_id FROM admin_role_module_permissions WHERE role_id = '. $role .' AND permission_id = 183)'), in_array(183, session('permissions')));
+                });
+            });
         $datatables = Datatables::of($launched_request)
             ->setRowAttr([
                 'nature' => function ($requests) {
@@ -272,7 +273,7 @@ class AdminCRMController extends Controller
                     return $requests->agent;
                 }
             })
-            ->editColumn('name', function ($requests){
+            ->addColumn('launched_by_name', function ($requests){
                 $name = '';
                 if($requests->launched_added_by == 0){
                     $name = $requests->name;
@@ -284,20 +285,28 @@ class AdminCRMController extends Controller
                 }
                 return $name;
             })
-            ->filterColumn('name', function($query, $keyword) {
+            ->filterColumn('launched_by_name', function($query, $keyword) {
                 $keyword = strtolower($keyword);
 
                 if ($keyword != '') {
                     $query->where(function ($sub_query) use ($keyword) {
-                        $sub_query->where('a.name', 'like', '%' . $keyword . '%')
-                            ->orWhere('u.name', 'like', '%' . $keyword . '%')
-                            ->orWhere('su.name', 'like', '%' . $keyword . '%');
+                        $sub_query->where('crm_requests.launched_by', '=', 0)
+                            ->where('a.name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('crm_requests.launched_by', '=', 1)
+                            ->where('u.name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('crm_requests.launched_by', '=', 2)
+                            ->where('su.name', 'like', '%' . $keyword . '%');
                     });
                 }
                 else {
                     $query->whereRaw('false');
                 }
             })
+            ->orderColumn('launched_by_name', DB::raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, u.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1')
             ->editColumn('added_by', function($requests){
                 if($requests->launched_added_by == 0) {
                     return 'Admin';
@@ -353,30 +362,34 @@ class AdminCRMController extends Controller
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
+            ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
+            ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
             ->leftjoin('admin_roles as ar', 'ar.department_id', '=', 'crt.tagged_id')
             ->leftjoin('admins as ard', 'ard.role_id', '=', 'ar.id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id')
             ->where(function ($query) {
-                $query->where('crm_requests.status_id', 2)
-                    ->where('crm_requests.agent_id', Auth::id());
-            })
-            ->orWhere(function ($query) {
-                $query->where('crm_requests.status_id', 2)
-                    ->where('crt.crm_request_tagging_type_id', 2)
-                    ->where('crt.tagged_id', '=',  Auth::id());
-            })
-            ->orWhere(function($query) {
-                $query->where('crm_requests.status_id', 2)
-                    ->where('crt.crm_request_tagging_type_id', 1)
-                    ->where('ard.id', '=', Auth::id());
-            })
-            ->orWhere(function($query) {
-                $query->where('crm_requests.status_id', 2)
-                    ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
-            })
-            ->groupBy('crm_requests.id');
+                $query->where(function ($sub_query) {
+                    $sub_query->where('crm_requests.status_id', 2)
+                        ->where('crm_requests.agent_id', Auth::id());
+                })
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('crm_requests.status_id', 2)
+                        ->where('crt.crm_request_tagging_type_id', 2)
+                        ->where('crt.tagged_id', '=',  Auth::id());
+                })
+                ->orWhere(function($sub_query) {
+                    $sub_query->where('crm_requests.status_id', 2)
+                        ->where('crt.crm_request_tagging_type_id', 1)
+                        ->where('ard.id', '=', Auth::id());
+                })
+                ->orWhere(function($sub_query) {
+                    $sub_query->where('crm_requests.status_id', 2)
+                        ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
+                });
+            });
+
         $datatables = Datatables::of($in_process_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
@@ -413,6 +426,40 @@ class AdminCRMController extends Controller
                     return $requests->agent;
                 }
             })
+            ->addColumn('launched_by_name', function ($requests){
+                $name = '';
+                if($requests->launched_added_by == 0){
+                    $name = $requests->name;
+                }
+                else if($requests->launched_added_by == 1){
+                    $name = $requests->shipper;
+                }else{
+                    $name = $requests->sub_shipper;
+                }
+                return $name;
+            })
+            ->filterColumn('launched_by_name', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('crm_requests.launched_by', '=', 0)
+                            ->where('a.name', 'like', '%' . $keyword . '%');
+                    })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('crm_requests.launched_by', '=', 1)
+                                ->where('u.name', 'like', '%' . $keyword . '%');
+                        })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('crm_requests.launched_by', '=', 2)
+                                ->where('su.name', 'like', '%' . $keyword . '%');
+                        });
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->orderColumn('launched_by_name', DB::raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, u.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1')
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
                 if (session('role_id') == 1 || in_array(180, session('permissions'))) {
@@ -453,6 +500,8 @@ class AdminCRMController extends Controller
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
+            ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
+            ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftJoin('crm_request_status_histories as inp', function ($join) {
                 $join->on('inp.crm_request_id', '=', 'crm_requests.id')
@@ -464,15 +513,16 @@ class AdminCRMController extends Controller
                     ->where('res.created_at','=',
                         DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 3)'));
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved')
-            ->where(function($query) {
-                $query->where('crm_requests.status_id', 3)
-                    ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
-            })->orWhere(function($query) {
-                $query->where('crm_requests.status_id', 3)
-                    ->where('crm_requests.agent_id', Auth::id());
-            })
-            ->groupBy('crm_requests.id');
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved')
+            ->where(function ($query) {
+                $query->where(function($sub_query) {
+                    $sub_query->where('crm_requests.status_id', 3)
+                        ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
+                })->orWhere(function($sub_query) {
+                    $sub_query->where('crm_requests.status_id', 3)
+                        ->where('crm_requests.agent_id', Auth::id());
+                });
+            });
         $datatables = Datatables::of($in_process_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
@@ -496,6 +546,40 @@ class AdminCRMController extends Controller
                 }
                 return "-";
             })
+            ->addColumn('launched_by_name', function ($requests){
+                $name = '';
+                if($requests->launched_added_by == 0){
+                    $name = $requests->name;
+                }
+                else if($requests->launched_added_by == 1){
+                    $name = $requests->shipper;
+                }else{
+                    $name = $requests->sub_shipper;
+                }
+                return $name;
+            })
+            ->filterColumn('launched_by_name', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('crm_requests.launched_by', '=', 0)
+                            ->where('a.name', 'like', '%' . $keyword . '%');
+                    })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('crm_requests.launched_by', '=', 1)
+                                ->where('u.name', 'like', '%' . $keyword . '%');
+                        })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('crm_requests.launched_by', '=', 2)
+                                ->where('su.name', 'like', '%' . $keyword . '%');
+                        });
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->orderColumn('launched_by_name', DB::raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, u.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1')
             ->editColumn('agent', function ($requests){
                 if($requests->agent == null){
                     return '-';
@@ -541,6 +625,8 @@ class AdminCRMController extends Controller
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
+            ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
+            ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftJoin('crm_request_status_histories as inp', function ($join) {
                 $join->on('inp.crm_request_id', '=', 'crm_requests.id')
@@ -552,15 +638,16 @@ class AdminCRMController extends Controller
                     ->where('res.created_at','=',
                         DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 4)'));
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed')
             ->where(function($query) {
-                $query->where('crm_requests.status_id', 4)
-                    ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
-            })->orWhere(function($query) {
-                $query->where('crm_requests.status_id', 4)
-                    ->where('crm_requests.agent_id', Auth::id());
-            })
-            ->groupBy('crm_requests.id');
+                $query->where(function($sub_query) {
+                    $sub_query->where('crm_requests.status_id', 4)
+                        ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
+                })->orWhere(function($sub_query) {
+                    $sub_query->where('crm_requests.status_id', 4)
+                        ->where('crm_requests.agent_id', Auth::id());
+                });
+            });
         $datatables = Datatables::of($in_process_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
@@ -584,6 +671,40 @@ class AdminCRMController extends Controller
                 }
                 return "-";
             })
+            ->addColumn('launched_by_name', function ($requests){
+                $name = '';
+                if($requests->launched_added_by == 0){
+                    $name = $requests->name;
+                }
+                else if($requests->launched_added_by == 1){
+                    $name = $requests->shipper;
+                }else{
+                    $name = $requests->sub_shipper;
+                }
+                return $name;
+            })
+            ->filterColumn('launched_by_name', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('crm_requests.launched_by', '=', 0)
+                            ->where('a.name', 'like', '%' . $keyword . '%');
+                    })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('crm_requests.launched_by', '=', 1)
+                                ->where('u.name', 'like', '%' . $keyword . '%');
+                        })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('crm_requests.launched_by', '=', 2)
+                                ->where('su.name', 'like', '%' . $keyword . '%');
+                        });
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->orderColumn('launched_by_name', DB::raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, u.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1')
             ->editColumn('agent', function ($requests){
                 if($requests->agent == null){
                     return '-';

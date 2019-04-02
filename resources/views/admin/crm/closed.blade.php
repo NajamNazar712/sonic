@@ -118,7 +118,7 @@
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
-                    {data: 'name', name: 'a.name', class: 'align-middle name'},
+                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'total_tat', name: 'total_tat', class: 'align-middle total_tat'},
@@ -149,7 +149,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.description') || $(header).is('.created_at')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.description') || $(header).is('.total_tat')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.case_nature')) {
