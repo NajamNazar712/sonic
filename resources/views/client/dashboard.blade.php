@@ -177,7 +177,7 @@
                                 </div>
                                 <div class="col-8">
                                     <fieldset class="form-group">
-                                        <textarea class="form-control info" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                        <textarea class="form-control" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
                                     </fieldset>
                                 </div>
                             </div>
@@ -196,7 +196,7 @@
 
                                 <div class="col-8">
                                     <fieldset class="form-group">
-                                        <textarea class="form-control info" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                        <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
                                     </fieldset>
                                 </div>
                             </div>
@@ -554,13 +554,13 @@
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-                    if (data.shipper_status_id === 1) {
+
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shipment_id, selected_rows) !== -1) {
                             table.row(row).select();
                         }
-                    }
+                    
                 },
                 initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
