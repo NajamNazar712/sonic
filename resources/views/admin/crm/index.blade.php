@@ -101,7 +101,7 @@
                 }
             });
 
-            @if (session('role_id') == 1 || in_array(87, session('permissions')))
+            @if (session('role_id') == 1 || session('role_id') == 6 || in_array(188, session('permissions')))
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 var link = '{{ route('admin.crm.update.index', ["id" => 0]) }}';
