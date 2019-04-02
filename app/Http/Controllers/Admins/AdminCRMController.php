@@ -284,6 +284,20 @@ class AdminCRMController extends Controller
                 }
                 return $name;
             })
+            ->filterColumn('name', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('a.name', 'like', '%' . $keyword . '%')
+                            ->orWhere('u.name', 'like', '%' . $keyword . '%')
+                            ->orWhere('su.name', 'like', '%' . $keyword . '%');
+                    });
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->editColumn('added_by', function($requests){
                 if($requests->launched_added_by == 0) {
                     return 'Admin';
