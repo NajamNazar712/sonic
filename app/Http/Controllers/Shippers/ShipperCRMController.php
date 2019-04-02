@@ -30,7 +30,7 @@ class ShipperCRMController extends Controller
     public function index(){
         $case_nature = CrmRequestCaseNature::all(['id', 'name']);
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
-        $channels = CrmRequestChannel::where('id', '>', 2)->select('id', 'channel')->get();
+        $channels = CrmRequestChannel::select('id', 'channel')->get();
         $status = CrmRequestStatus::where('id', '!=', 3)->select('id', 'name')->get();
         return view('client.crm.requests')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status]);
     }
@@ -42,9 +42,8 @@ class ShipperCRMController extends Controller
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at')
-            ->where('crm_requests.shipper_id', session('user_id'))
-            ->where('crm_requests.status_id','!=', 3);
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as request_status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at','crm_requests.description','crm_requests.status_id')
+            ->where('crm_requests.shipper_id', session('user_id'));
         $datatables = Datatables::of($launched_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('cod.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
@@ -66,6 +65,33 @@ class ShipperCRMController extends Controller
                 }
                 else{
                     return 'Shipper Substitute User';
+                }
+            })
+            ->addColumn('status',function ($requests){
+                if($requests->status_id == 3){
+                    return 'In-Process';
+                }else{
+                    return $requests->request_status;
+                }
+            })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    if ($keyword == 2) {
+                        $query->whereIn('crm_requests.status_id',[2,3]);
+                    }
+                    else {
+                        $query->where('crm_requests.status_id', '=', $keyword);
+                    }
+                }
+            })
+            ->filterColumn('case_nature_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('crcnt.id','=',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
                 }
             })
             ->addColumn('action', function($requests) {

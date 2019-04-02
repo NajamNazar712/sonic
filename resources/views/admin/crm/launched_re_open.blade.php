@@ -378,12 +378,12 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
-                    {data: 'case_nature_type', name: 'crcnt.id', class: 'align-middle case_nature_type'},
+                    {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'status', name: 'crs.id', class: 'align-middle status'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
-                    {data: 'name', name: 'a.name', class: 'align-middle name'},
+                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -420,7 +420,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.description') || $(header).is('.created_at')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.status')) {
