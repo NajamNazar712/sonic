@@ -1042,40 +1042,40 @@
                     })
                         .done(function (data) {
                             if (data.status) {
-                                // if(data.flag){
-                                //     var html = '';
-                                //
-                                //     $.each(data.already_existed_shipments, function(index, tracking_number) {
-                                //         html += tracking_number + '<br/>';
-                                //     });
-                                //
-                                //     html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
-                                //
-                                //     content = document.createElement('div');
-                                //     content.innerHTML = html;
-                                //
-                                //     swal({
-                                //         title: 'Request / Complaint Already Lodged!',
-                                //         content: content,
-                                //         icon: 'warning',
-                                //         buttons: {
-                                //             cancel: {
-                                //                 text: 'Close',
-                                //                 value: null,
-                                //                 visible: true,
-                                //                 closeModal: true,
-                                //             },
-                                //         },
-                                //         closeOnClickOutside: false,
-                                //         closeOnEsc: false,
-                                //         dangerMode: true
-                                //     });
-                                // }else{
-                                //     toastr.success(data.success, 'Success!', {
-                                //         positionClass: 'toast-bottom-center',
-                                //         containerId: 'toast-bottom-center'
-                                //     });
-                                // }
+                                if(data.flag){
+                                    var html = '';
+
+                                    $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                        html += tracking_number + '<br/>';
+                                    });
+
+                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
+
+                                    swal({
+                                        title: 'Request / Complaint Already Lodged!',
+                                        content: content,
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Close',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    });
+                                }else{
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                }
                                 toastr.success(data.success, 'Success!', {
                                     positionClass: 'toast-bottom-center',
                                     containerId: 'toast-bottom-center'
