@@ -234,8 +234,10 @@ class AdminCRMController extends Controller
             ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
+            ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
+            ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
             ->where(function($query) {
                  $query->whereIn('crm_requests.status_id', [1,5])
                      ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
@@ -269,6 +271,18 @@ class AdminCRMController extends Controller
                 else{
                     return $requests->agent;
                 }
+            })
+            ->editColumn('name', function ($requests){
+                $name = '';
+                if($requests->launched_added_by == 0){
+                    $name = $requests->name;
+                }
+                else if($requests->launched_added_by == 1){
+                    $name = $requests->shipper;
+                }else{
+                    $name = $requests->sub_shipper;
+                }
+                return $name;
             })
             ->editColumn('added_by', function($requests){
                 if($requests->launched_added_by == 0) {
