@@ -59,11 +59,7 @@
                     </ul>
                 </li>
             @endif
-            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">CRM</span></a>
-                <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('cod.crm.request.index') }}">Requests</a></li>
-                </ul>
-            </li>
+            <li class=" nav-item"><a href="{{ route('cod.crm.request.index') }}"><span class="menu-title" data-i18n="nav.dash.main">Requests</span></a></li>
             <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title">Tracking</span></a></li>
         </ul>
     </div>

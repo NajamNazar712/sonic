@@ -307,6 +307,15 @@ class AdminCRMController extends Controller
                 }
             })
             ->orderColumn('launched_by_name', DB::raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, u.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1')
+            ->filterColumn('case_nature_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('crcnt.id','=',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->editColumn('added_by', function($requests){
                 if($requests->launched_added_by == 0) {
                     return 'Admin';
@@ -457,6 +466,15 @@ class AdminCRMController extends Controller
                 }
             })
             ->orderColumn('launched_by_name', DB::raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, u.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1')
+            ->filterColumn('case_nature_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('crcnt.id','=',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
                 if (session('role_id') == 1 || in_array(180, session('permissions'))) {
@@ -581,6 +599,14 @@ class AdminCRMController extends Controller
                 else{
                     return $requests->agent;
                 }
+            })->filterColumn('case_nature_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('crcnt.id','=',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
             })
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
@@ -604,9 +630,9 @@ class AdminCRMController extends Controller
         return $datatables->make(true);
     }
     public function closed_index(){
-        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();
+        $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
-        $channels = CrmRequestChannel::where('id', '>', 2)->select('id', 'channel')->get();
+        $channels = CrmRequestChannel::select('id', 'channel')->get();
         return view('admin.crm.closed')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels]);
     }
 
@@ -702,6 +728,15 @@ class AdminCRMController extends Controller
                 }
                 else{
                     return $requests->agent;
+                }
+            })
+            ->filterColumn('case_nature_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('crcnt.id','=',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
                 }
             })
             ->addColumn('action', function($requests) {
