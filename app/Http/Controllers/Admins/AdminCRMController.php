@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Controllers\CRM\CRMController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
@@ -748,6 +749,7 @@ class AdminCRMController extends Controller
                         'agent_id' => $crm_request['agent_id']
                     ]);
                 }
+                NotificationsController::send(31,$request->crm_request_id);
             }
             else{
                 return ['status' => 1, 'error' => 'Request is already tagged to ' . $name['name']];
@@ -766,6 +768,7 @@ class AdminCRMController extends Controller
                 'tagged_id' => $request->tagged_id,
                 'agent_id' => $crm_request['agent_id']
             ]);
+            NotificationsController::send(31,$request->crm_request_id);
         }
         return ['status' => 0, 'success' => 'Request successfully tagged to ' . $name['name']];
     }
