@@ -826,10 +826,11 @@ class AdminCRMController extends Controller
             $current_permission_ids = AdminRoleModulePermission::where('role_id', $id)->pluck('permission_id')->toArray();;
 
             $crm_module_permission = ModulePermission::where('module_id', '!=', 18)->pluck('id')->toArray();
+            $crm_module_main_permission = ModulePermission::where('id', '=', 188)->first();
             $delete_permission_ids = array_diff($current_permission_ids, $request->input('permission_ids'));
             $new_permission_ids = array_diff($request->input('permission_ids'), $current_permission_ids);
 
-            AdminRoleModulePermission::where('role_id', $id)->whereNotIn('permission_id', $crm_module_permission)->whereIn('permission_id', $delete_permission_ids)->delete();
+            AdminRoleModulePermission::where('role_id', $id)->where('permission_id', '!=', $crm_module_main_permission['id'])->whereNotIn('permission_id', $crm_module_permission)->whereIn('permission_id', $delete_permission_ids)->delete();
 
             foreach($new_permission_ids as $permission_id) {
                 $admin_role_module_permission = new AdminRoleModulePermission();
@@ -844,6 +845,6 @@ class AdminCRMController extends Controller
             AdminRoleModulePermission::where('role_id', $id)->delete();
         }
 
-        return redirect()->route('admin.crm.index')->with(['success' => 'CRM Permission: ' . $request->input('name') . ' has been updated!']);
+        return redirect()->route('admin.crm.permissions')->with(['success' => 'CRM Permissions: ' . $request->input('name') . ' has been updated!']);
     }
 }

@@ -1038,7 +1038,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');
         });
 
-        Route::get('', 'Admins\AdminCRMcontroller@crm_index')->name('index');
+        Route::get('permissions', 'Admins\AdminCRMcontroller@crm_index')->name('permissions');
         Route::get('list', 'Admins\AdminCRMcontroller@crm_list')->name('list');
 
         Route::prefix('update/{id}')->name('update.')->group(function() {

@@ -381,7 +381,7 @@ class Permission
             'crm.resolved.list' => 181,
             'crm.closed.index' => 182,
             'crm.closed.list' => 182,
-            'crm.index' => 188,
+            'crm.permissions' => 188,
             'crm.list' => 188,
             'crm.update.index' => 188,
             'crm.update.list' => 188,

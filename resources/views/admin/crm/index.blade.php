@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'CRM Permission')
+@section('title', 'CRM Permissions')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    CRM Permission
+                    CRM Permissions
                 </h1>
 
                 <div class="card">

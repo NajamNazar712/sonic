@@ -443,7 +443,7 @@
                             </li>
                         @endif
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(188, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.crm.index') }}">Permissions</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.crm.permissions') }}">Permissions</a></li>
                         @endif
                     </ul>
                 </li>

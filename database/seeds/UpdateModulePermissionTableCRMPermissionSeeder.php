@@ -12,7 +12,7 @@ class UpdateModulePermissionTableCRMPermissionSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 188, 'name' => 'CRM Permission', 'module_id' => 18)
+            array('id' => 188, 'name' => 'Permission', 'module_id' => 18)
         ));
     }
 }
