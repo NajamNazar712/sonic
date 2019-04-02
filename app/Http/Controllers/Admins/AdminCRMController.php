@@ -25,6 +25,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\Admin\AdminRoleModulePermission;
+use App\Http\Models\Admin\Module;
+use App\Http\Models\Admin\ModulePermission;
 
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
@@ -768,5 +771,79 @@ class AdminCRMController extends Controller
             ]);
         }
         return ['status' => 0, 'success' => 'Request successfully tagged to ' . $name['name']];
+    }
+    public function crm_index(){
+        return view('admin.crm.index');
+    }
+
+    public function crm_list(){
+        $roles = AdminRole::join('admin_departments as ad', 'admin_roles.department_id', '=', 'ad.id')
+            ->join('admins as a', 'admin_roles.updated_by', '=', 'a.id')
+            ->select('admin_roles.id', 'admin_roles.name', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by')
+            ->where('admin_roles.department_id', '=', 3);
+
+        $datatables = Datatables::of($roles)
+            ->addColumn('action', function($role) {
+                if (session('role_id') == 1 || in_array(87, session('permissions'))) {
+                    return '<div class="btn-group">
+                          <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                          <div class="dropdown-menu dropdown-menu-sm">
+                            <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                          </div>
+                        </div>
+                ';
+                }
+                else {
+                    return '';
+                }
+            });
+
+        return $datatables->make(true);
+
+    }
+
+    public function crm_update_index($id){
+        $departments = AdminDepartment::where('id', '!=', 1)->get(['id', 'name']);
+        $modules = Module::with('permissions')->where('id', '=', 18)->get();
+        $role = AdminRole::find($id);
+        $permissions = $role->module_permissions->pluck('permission_id')->toArray();
+
+        if ($role->id != 1) {
+            return view('admin.crm.update.index')->with(['departments' => $departments, 'modules' => $modules, 'role' => $role, 'permissions' => $permissions]);
+        }
+        else {
+            return redirect()->route('admin.access_denied');
+        }
+    }
+
+    public function crm_update_store(Request $request, $id) {
+        $admin_role = AdminRole::find($id);
+        $admin_role->updated_by = Auth::id();
+
+        $admin_role->save();
+
+        if ($request->has('permission_ids')) {
+            $current_permission_ids = AdminRoleModulePermission::where('role_id', $id)->pluck('permission_id')->toArray();;
+
+            $crm_module_permission = ModulePermission::where('module_id', '!=', 18)->pluck('id')->toArray();
+            $delete_permission_ids = array_diff($current_permission_ids, $request->input('permission_ids'));
+            $new_permission_ids = array_diff($request->input('permission_ids'), $current_permission_ids);
+
+            AdminRoleModulePermission::where('role_id', $id)->whereNotIn('permission_id', $crm_module_permission)->whereIn('permission_id', $delete_permission_ids)->delete();
+
+            foreach($new_permission_ids as $permission_id) {
+                $admin_role_module_permission = new AdminRoleModulePermission();
+
+                $admin_role_module_permission->role_id = $id;
+                $admin_role_module_permission->permission_id = $permission_id;
+
+                $admin_role_module_permission->save();
+            }
+        }
+        else {
+            AdminRoleModulePermission::where('role_id', $id)->delete();
+        }
+
+        return redirect()->route('admin.crm.index')->with(['success' => 'CRM Permission: ' . $request->input('name') . ' has been updated!']);
     }
 }

@@ -335,6 +335,8 @@ class Permission
             'user_management.roles.add.store' => 86,
             'user_management.roles.update.index' => 87,
             'user_management.roles.update.store' => 87,
+            'user_management.crm.index' => 188,
+            'user_management.crm.list' => 188,
 
             'management.zonal.index' => 131,
             'management.zonal.list' => 131,
@@ -379,6 +381,10 @@ class Permission
             'crm.resolved.list' => 181,
             'crm.closed.index' => 182,
             'crm.closed.list' => 182,
+            'crm.index' => 188,
+            'crm.list' => 188,
+            'crm.update.index' => 188,
+            'crm.update.list' => 188,
 
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,

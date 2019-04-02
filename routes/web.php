@@ -1037,5 +1037,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\AdminCRMController@add_comment')->name('add');
             Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');
         });
+
+        Route::get('', 'Admins\AdminCRMcontroller@crm_index')->name('index');
+        Route::get('list', 'Admins\AdminCRMcontroller@crm_list')->name('list');
+
+        Route::prefix('update/{id}')->name('update.')->group(function() {
+            Route::get('', 'Admins\AdminCRMcontroller@crm_update_index')->name('index');
+            Route::post('', 'Admins\AdminCRMcontroller@crm_update_store')->name('store');
+        });
     });
 });
