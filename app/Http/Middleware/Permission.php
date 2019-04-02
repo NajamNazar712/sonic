@@ -507,7 +507,7 @@ class Permission
         if (Auth::guard('admin')->check()) {
             $action = str_replace('admin.', '', $request->route()->getName());
 
-            if (session('role_id') == 1 || !isset($this->actions['admin'][$action]) || in_array($this->actions['admin'][$action], session('permissions'))) {
+            if (session('role_id') == 1 || !isset($this->actions['admin'][$action]) || in_array($this->actions['admin'][$action], session('permissions')) || (substr($action, 0, 4) == 'crm.' && session('role_id') == 6)) {
                 return $next($request);
             }
             else {

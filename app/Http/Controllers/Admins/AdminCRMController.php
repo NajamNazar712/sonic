@@ -784,7 +784,7 @@ class AdminCRMController extends Controller
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function($role) {
-                if (session('role_id') == 1 || in_array(87, session('permissions'))) {
+                if (session('role_id') == 1 || session('role_id') == 6 || in_array(188, session('permissions'))) {
                     return '<div class="btn-group">
                           <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                           <div class="dropdown-menu dropdown-menu-sm">
