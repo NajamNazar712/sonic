@@ -225,6 +225,11 @@
             $('body').on('change', '#chat_form input', function () {
                 $(this).val($(this).val().trim());
             });
+            $('#chat_form').keypress(function (e) {
+                if (e.keyCode == 13) {
+                    $('#chat_send').trigger('click');
+                }
+            });
             $('#chat_send').on('click', function () {
                 var flag = true;
                 var comment = $('#chat_input').val();

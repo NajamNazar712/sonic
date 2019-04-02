@@ -740,7 +740,7 @@ class AdminCRMController extends Controller
                     'crm_request_id' => $request->crm_request_id,
                     'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
                     'tagged_id' => $request->tagged_id,
-                    'agent_id' => $crm_request['agent_id']
+                    'agent_id' => Auth::id()
                 ]);
 
                 if ($request->prev_status == 3) {
@@ -750,7 +750,7 @@ class AdminCRMController extends Controller
                     CrmRequestStatusHistory::create([
                         'crm_request_id' => $request->crm_request_id,
                         'status_id' => $crm_request['status_id'],
-                        'agent_id' => $crm_request['agent_id']
+                        'agent_id' => Auth::id()
                     ]);
                 }
                 NotificationsController::send(31,$request->crm_request_id);
@@ -770,7 +770,7 @@ class AdminCRMController extends Controller
                 'crm_request_id' => $request->crm_request_id,
                 'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
                 'tagged_id' => $request->tagged_id,
-                'agent_id' => $crm_request['agent_id']
+                'agent_id' => Auth::id()
             ]);
             NotificationsController::send(31,$request->crm_request_id);
         }
