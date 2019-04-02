@@ -116,28 +116,28 @@ class ShipperCRMController extends Controller
         $shipment_ids = $request->shipment_ids;
         $description = $request->description;
         $launched_by = 1;
-//        $present_shipments = array();
-//        $flag = false;
+        $present_shipments = array();
+        $flag = false;
         if(session('user_type') == 2){
             $launched_by = 2;
         }
         if(!empty($shipment_ids)){
             foreach ($shipment_ids as $shipment_id) {
 
-//                $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
-//                if($is_shipment){
-//                    if($is_shipment->case_nature_id != $nature_id){
+                $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
+                if($is_shipment){
+                    if($is_shipment->case_nature_id != $nature_id){
                         CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
-//                    }else{
-//                        $shipment = Shipment::find($shipment_id);
-//                        $present_shipments[] = $shipment->tracking_number;
-//                        $flag = true;
-//                    }
-//                }
+                    }else{
+                        $shipment = Shipment::find($shipment_id);
+                        $present_shipments[] = $shipment->tracking_number;
+                        $flag = true;
+                    }
+                }
 
             }
-//            return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
-            return ['status' => 1, 'success' => 'Request(s) successfully added'];
+            return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+//            return ['status' => 1, 'success' => 'Request(s) successfully added'];
         }else{
             return ['status' => 0, 'error' => 'No shipments selected!'];
         }
