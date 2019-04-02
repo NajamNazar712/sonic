@@ -73,7 +73,8 @@ class ShipperCRMController extends Controller
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
-                        <button type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><a href="' . $route . '"><i class="ft-plus-circle"></i> View Details</a></button>
+                        <button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>
+                        
                     </div>
                   </div>
                 ';

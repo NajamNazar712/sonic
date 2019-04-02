@@ -687,7 +687,7 @@
                 var last_comment_id = parseInt($('#last_comment_id').val());
                 var request_id = '{{$crm_details->id}}';
                 get_latest_comment(last_comment_id,request_id);
-            },4000);
+            },10000);
             @endif
             function get_latest_comment(comment_id,request_id) {
                 if(comment_id){
