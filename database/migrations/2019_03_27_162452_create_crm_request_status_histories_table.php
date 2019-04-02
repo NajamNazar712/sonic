@@ -17,7 +17,7 @@ class CreateCrmRequestStatusHistoriesTable extends Migration
             $table->increments('id');
             $table->integer('crm_request_id');
             $table->integer('status_id');
-            $table->integer('agent_id');
+            $table->integer('agent_id')->nullable();
             $table->timestamps();
         });
     }

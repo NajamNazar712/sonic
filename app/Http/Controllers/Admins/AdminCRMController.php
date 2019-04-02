@@ -615,8 +615,8 @@ class AdminCRMController extends Controller
                     ]);
                     CrmRequestStatusHistory::create([
                         'crm_request_id' => $request->id,
-                        'status_id' => $crm_request['status_id'],
-                        'agent_id' => $crm_request['agent_id']
+                        'status_id' => 2,
+                        'agent_id' => Auth::id()
                     ]);
                     return ['status' => 0, 'success' => 'Request marked as In-Process', 'marked_status' => 2];
                 } else {
@@ -630,8 +630,8 @@ class AdminCRMController extends Controller
                     ]);
                     CrmRequestStatusHistory::create([
                         'crm_request_id' => $request->id,
-                        'status_id' => $crm_request['status_id'],
-                        'agent_id' => $crm_request['agent_id']
+                        'status_id' => 3,
+                        'agent_id' => Auth::id()
                     ]);
                     return ['status' => 0, 'success' => 'Request marked as Resolved', 'marked_status' => 3];
                 } else {
@@ -645,8 +645,8 @@ class AdminCRMController extends Controller
                     ]);
                     CrmRequestStatusHistory::create([
                         'crm_request_id' => $request->id,
-                        'status_id' => $crm_request['status_id'],
-                        'agent_id' => $crm_request['agent_id']
+                        'status_id' => 4,
+                        'agent_id' => Auth::id()
                     ]);
 
                     CrmRequestTagging::where('crm_request_id', $request->id)->delete();
