@@ -290,7 +290,9 @@
                                                         <tr class="border-bottom-success border-custom-color">
                                                             <td>{{$index}}</td>
                                                             <td>{{$status_history->status->name}}</td>
-                                                            <td>{{$status_history->agent->name}}</td>
+                                                            @if($status_history->agent_id != null)
+                                                                <td>{{$status_history->agent->name}}</td>
+                                                            @endif
                                                             <td>{{$status_history->created_at}}</td>
                                                         </tr>
                                                     @endforeach
