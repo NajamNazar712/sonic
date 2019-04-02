@@ -31,7 +31,7 @@ class ShipperCRMController extends Controller
         $case_nature = CrmRequestCaseNature::all(['id', 'name']);
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $channels = CrmRequestChannel::where('id', '>', 2)->select('id', 'channel')->get();
-        $status = CrmRequestStatus::whereIn('id', [1,5])->select('id', 'name')->get();
+        $status = CrmRequestStatus::where('id', '!=', 3)->select('id', 'name')->get();
         return view('client.crm.requests')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status]);
     }
     public function requests_list(Request $request){
@@ -43,7 +43,8 @@ class ShipperCRMController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at')
-            ->where('crm_requests.shipper_id', session('user_id'));
+            ->where('crm_requests.shipper_id', session('user_id'))
+            ->where('crm_requests.status_id','!=', 3);
         $datatables = Datatables::of($launched_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('cod.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
@@ -73,7 +74,8 @@ class ShipperCRMController extends Controller
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
-                        <button type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><a href="' . $route . '"><i class="ft-plus-circle"></i> View Details</a></button>
+                        <button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>
+                        
                     </div>
                   </div>
                 ';
