@@ -292,6 +292,8 @@
                                                             <td>{{$status_history->status->name}}</td>
                                                             @if($status_history->agent_id != null)
                                                                 <td>{{$status_history->agent->name}}</td>
+                                                            @else
+                                                                <td>-</td>
                                                             @endif
                                                             <td>{{$status_history->created_at}}</td>
                                                         </tr>
@@ -541,11 +543,13 @@
             $("#tag_admin").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select User",
                 width:'100%',
+                dropdownParent:$('#tagModal')
             });
 
             $("#tag_department").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department",
                 width:'100%',
+                dropdownParent:$('#tagModal')
             });
 
             $("#tag_type").prepend('<option value="" selected></option>').select2({

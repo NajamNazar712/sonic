@@ -179,9 +179,6 @@
                                                     if(data.status == 0){
                                                         $('#AssignAgentModal').modal('hide');
                                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                                        setTimeout(function(){
-                                                            window.location.reload(1);
-                                                        }, 1000);
                                                     }
                                                     else {
                                                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -449,49 +446,46 @@
                 }
             });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.assign', function() {
-                $('#AssignAgentModal').modal('show');
-                var crm_request_id = parseInt($(this).parents('tr').attr('id'));
+            {{--$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.assign', function() {--}}
+                {{--$('#AssignAgentModal').modal('show');--}}
+                {{--var crm_request_id = parseInt($(this).parents('tr').attr('id'));--}}
 
-                $('#AssignAgentModal').on('shown.bs.modal',function (e) {
-                });
-                $('#AssignAgentModal').on('hide.bs.modal', function (e) {
-                    $('#assign_agent').val('').trigger('change');
-                });
-                $('#assign_agentSubmit').on('click',function () {
-                    var assign = parseInt($('#assign_agent').val());
-                    if(assign){
-                        $.ajax({
-                            url: '{!! route('admin.crm.assign') !!}',
-                            method: 'POST',
-                            data: {
-                                'admin_id': assign,
-                                'crm_request_id':crm_request_id,
-                                'multiple': 0,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function(data) {
-                                if(data.status == 0){
-                                    $('#AssignAgentModal').modal('hide');
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    setTimeout(function(){
-                                        window.location.reload(1);
-                                    }, 1000);
-                                }
-                                else {
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                                $('#assign_agent').val('').trigger('change');
-                                table.draw(true);
-                            });
-                    }else{
-                        var error = "Agent Not Selected!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
+                {{--$('#AssignAgentModal').on('shown.bs.modal',function (e) {--}}
+                {{--});--}}
+                {{--$('#AssignAgentModal').on('hide.bs.modal', function (e) {--}}
+                    {{--$('#assign_agent').val('').trigger('change');--}}
+                {{--});--}}
+                {{--$('#assign_agentSubmit').on('click',function () {--}}
+                    {{--var assign = parseInt($('#assign_agent').val());--}}
+                    {{--if(assign){--}}
+                        {{--$.ajax({--}}
+                            {{--url: '{!! route('admin.crm.assign') !!}',--}}
+                            {{--method: 'POST',--}}
+                            {{--data: {--}}
+                                {{--'admin_id': assign,--}}
+                                {{--'crm_request_id':crm_request_id,--}}
+                                {{--'multiple': 0,--}}
+                                {{--'_token': '{{ csrf_token() }}'--}}
+                            {{--}--}}
+                        {{--})--}}
+                            {{--.done(function(data) {--}}
+                                {{--if(data.status == 0){--}}
+                                    {{--$('#AssignAgentModal').modal('hide');--}}
+                                    {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                                {{--}--}}
+                                {{--else {--}}
+                                    {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                                {{--}--}}
+                                {{--$('#assign_agent').val('').trigger('change');--}}
+                                {{--table.draw(true);--}}
+                            {{--});--}}
+                    {{--}else{--}}
+                        {{--var error = "Agent Not Selected!";--}}
+                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                    {{--}--}}
 
-                });
-            });
+                {{--});--}}
+            {{--});--}}
         });
     </script>
 @endsection

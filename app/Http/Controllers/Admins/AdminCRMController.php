@@ -288,9 +288,6 @@ class AdminCRMController extends Controller
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
-                    if (session('role_id') == 1 || in_array(183, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item assign"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Agent</div></button>';
-                    }
                     $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
                     if($requests->nature_id == 1 || $requests->nature_id == 2){
                         $dropdown .= '<button type="button" class="dropdown-item update_request"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update</div></button>';
@@ -392,9 +389,6 @@ class AdminCRMController extends Controller
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
-                    if (session('role_id') == 1 || in_array(183, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item assign"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Agent</div></button>';
-                    }
                     $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
                     $dropdown .= '</div>
                   </div>
@@ -483,9 +477,6 @@ class AdminCRMController extends Controller
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
-                    if (session('role_id') == 1 || in_array(183, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item assign"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Agent</div></button>';
-                    }
                     $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
                     $dropdown .= '</div>
                   </div>
@@ -571,9 +562,6 @@ class AdminCRMController extends Controller
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
-                    if (session('role_id') == 1 || in_array(183, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item assign"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Agent</div></button>';
-                    }
                     $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
                     $dropdown .= '</div>
                   </div>
@@ -590,23 +578,23 @@ class AdminCRMController extends Controller
     }
 
     public function assign(Request $request){
-        if($request->multiple == 0) {
-            $crm_requests = CrmRequest::find($request->crm_request_id);
-
-            if ($request->crm_request_id == $crm_requests->id) {
-                if ($crm_requests->agent_id != $request->admin_id) {
-                    CrmRequestAgentHistory::create([
-                        'crm_request_id' => $crm_requests->id,
-                        'agent_id' => $request->admin_id
-                    ]);
-                    $crm_requests->agent_id = $request->admin_id;
-                    $crm_requests->save();
-                    return ['status' => 0, 'success' => 'Request has been Assigned'];
-                }
-                return ['status' => 1, 'error' => 'Request is already Assigned to Agent'];
-            }
-        }
-        elseif ($request->multiple == 1) {
+//        if($request->multiple == 0) {
+//            $crm_requests = CrmRequest::find($request->crm_request_id);
+//
+//            if ($request->crm_request_id == $crm_requests->id) {
+//                if ($crm_requests->agent_id != $request->admin_id) {
+//                    CrmRequestAgentHistory::create([
+//                        'crm_request_id' => $crm_requests->id,
+//                        'agent_id' => $request->admin_id
+//                    ]);
+//                    $crm_requests->agent_id = $request->admin_id;
+//                    $crm_requests->save();
+//                    return ['status' => 0, 'success' => 'Request has been Assigned'];
+//                }
+//                return ['status' => 1, 'error' => 'Request is already Assigned to Agent'];
+//            }
+//        }
+//        elseif ($request->multiple == 1) {
             foreach ($request->crm_request_ids as $crm_request_id)
             {
                 $crm_requests = CrmRequest::find($crm_request_id);
@@ -620,7 +608,7 @@ class AdminCRMController extends Controller
                 }
             }
             return ['status' => 0, 'success' => 'Request(s) has been Assigned'];
-        }
+//        }
     }
 
     public function valid(Request $request)
