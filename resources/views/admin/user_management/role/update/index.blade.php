@@ -62,7 +62,7 @@
 												@if ($loop->first)
 													<div class="tab-pane fade show active" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
 														@foreach($module->permissions as $permission)
-															@if($permission->id != 179 && $permission->id != 180 && $permission->id != 181 && $permission->id != 182 && $permission->id != 183 && $permission->id != 184 && $permission->id != 185 && $permission->id != 186 && $permission->id != 187)
+															@if($permission->id != 183 && $permission->id != 184 && $permission->id != 185 && $permission->id != 186 && $permission->id != 187)
 																<fieldset class="d-inline-block m-1">
 																	@if (in_array($permission->id, $permissions))
 																		<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}" checked="checked">

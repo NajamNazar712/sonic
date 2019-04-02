@@ -8,6 +8,7 @@
             <div class="content-wrapper">
                 <div class="content-body">
                     <h1 class="mb-1">
+{{--                        {{dd($tag_permission)}}--}}
                         Request Details ({{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}})
                         <div class="text-right mb-1">
                             @if($crm_details['status_id'] == 2 && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(185, session('permissions'))))
@@ -93,35 +94,45 @@
                                             </tr>
                                             </tbody>
                                         </table>
-                                        @if(session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
+                                        @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id())))
                                             <div class="text-center">
                                                 <form id="valid_invalid">
                                                     <input type="hidden" id="req_id" value="{{$crm_details->id}}">
                                                     <input type="hidden" id="prev_status" value="{{$crm_details->status_id}}">
                                                     @if($crm_details['status_id'] != 3)
-                                                        <button id="valid" type="submit" class="btn btn-success mr-1 width-20-per" >
-                                                       <span class="d-none d-lg-block">
-                                                       @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
-                                                               Valid
-                                                           @elseif($crm_details['status_id'] == 2)
-                                                               Resolve
-                                                           @elseif($crm_details['status_id'] == 3 || $crm_details['status_id'] == 4)
-                                                               Re-Open
-                                                           @endif
-                                                       </span>
-                                                        </button>
-                                                    @endif
-                                                    @if($crm_details['status_id'] != 4 && $crm_details['status_id'] != 2)
-                                                        <button id="invalid" type="submit" class="btn btn-danger width-20-per" >
-                                                       <span class="d-none d-lg-block">
-                                                           @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
-                                                               Invalid
-                                                           @else
-                                                               Close
-                                                           @endif
-                                                           </span>
-                                                        </button>
-                                                    @endif
+                                                        @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
+                                                            <button id="valid" type="submit" class="btn btn-success mr-1 width-20-per" >
+                                                                    <span class="d-none d-lg-block">
+                                                                        Valid
+                                                                    </span>
+                                                            </button>
+                                                        @elseif($crm_details['status_id'] == 2)
+                                                            @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id())))
+                                                                <button id="valid" type="submit" class="btn btn-success mr-1 width-20-per" >
+                                                                        <span class="d-none d-lg-block">
+                                                                        Resolve
+                                                                        </span>
+                                                                </button>
+                                                            @endif
+                                                        @elseif($crm_details['status_id'] == 4|| in_array(186, session('permissions')))
+                                                            <button id="valid" type="submit" class="btn btn-success mr-1 width-20-per" >
+                                                                    <span class="d-none d-lg-block">
+                                                                    Re-Open
+                                                                    </span>
+                                                            </button>
+                                                            @endif
+                                                        @endif
+                                                        @if($crm_details['status_id'] != 4 && $crm_details['status_id'] != 2)
+                                                            <button id="invalid" type="submit" class="btn btn-danger width-20-per" >
+                                                        <span class="d-none d-lg-block">
+                                                            @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
+                                                                Invalid
+                                                            @else
+                                                                Close
+                                                            @endif
+                                                            </span>
+                                                            </button>
+                                                        @endif
                                                 </form>
                                             </div>
                                         @endif

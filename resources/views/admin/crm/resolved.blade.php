@@ -127,72 +127,79 @@
                 scrollX: true, scrollY: '350px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(183, session('permissions')))
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(183, session('permissions')))
                     {
                         text: 'Assign Agent',
                         className: 'btn btn-primary assign',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            swal({
-                                text: 'Are you sure, you want to Assign these Request(s)?',
-                                icon: 'info',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function(confirm) {
-                                if (confirm) {
-                                    $('#AssignAgentModal').modal('show');
+                            $('#AssignAgentModal').modal('show');
 
-                                    $('#AssignAgentModal').on('shown.bs.modal',function (e) {
-                                    });
-                                    $('#AssignAgentModal').on('hide.bs.modal', function (e) {
-                                        $('#assign_agent').val('').trigger('change');
-                                    });
-                                    $('#assign_agentSubmit').on('click',function () {
-                                        var assign = parseInt($('#assign_agent').val());
-                                        if(assign){
+                            $('#AssignAgentModal').on('shown.bs.modal',function (e) {
+                            });
+                            $('#AssignAgentModal').on('hide.bs.modal', function (e) {
+                                $('#assign_agent').val('').trigger('change');
+                            });
+                            $('#assign_agentSubmit').on('click',function () {
+                                var assign = parseInt($('#assign_agent').val());
+                                swal({
+                                    text: 'Are you sure, you want to Assign these Request(s)?',
+                                    icon: 'info',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                        if (assign) {
                                             $.ajax({
                                                 url: '{!! route('admin.crm.assign') !!}',
                                                 method: 'POST',
                                                 data: {
                                                     'admin_id': assign,
-                                                    'crm_request_ids[]':selected_rows,
+                                                    'crm_request_ids[]': selected_rows,
                                                     'multiple': 1,
                                                     '_token': '{{ csrf_token() }}'
                                                 }
                                             })
-                                                .done(function(data) {
-                                                    if(data.status == 0){
+                                                .done(function (data) {
+                                                    if (data.status == 0) {
                                                         $('#AssignAgentModal').modal('hide');
-                                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                                    }
-                                                    else {
-                                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                                        toastr.success(data.success, 'Success!', {
+                                                            positionClass: 'toast-bottom-center',
+                                                            containerId: 'toast-bottom-center'
+                                                        });
+                                                    } else {
+                                                        toastr.error(data.error, 'Error!', {
+                                                            positionClass: 'toast-top-center',
+                                                            containerId: 'toast-top-center'
+                                                        });
                                                     }
                                                     $('#assign_agent').val('').trigger('change');
-                                                    table.draw(true);
+                                                    table.draw('false');
                                                 });
-                                        }else{
+                                        } else {
                                             var error = "Agent Not Selected!";
-                                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            toastr.error(error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
                                         }
-
-                                    });
-                                }
+                                    }
+                                });
                             });
                         }
                     },

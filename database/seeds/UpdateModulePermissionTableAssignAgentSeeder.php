@@ -12,7 +12,7 @@ class UpdateModulePermissionTableAssignAgentSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 183, 'name' => 'Assign Agent', 'module_id' => 18)
+            array('id' => 179, 'name' => 'Assign Agent', 'module_id' => 18)
         ));
     }
 }

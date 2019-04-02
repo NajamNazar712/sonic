@@ -112,8 +112,13 @@ class AdminCRMController extends Controller
         $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
         $tagged = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->first();
         $tagged_name = '';
+        $tag_check = '';
+        $tag_permission = '';
         if($tagged){
             if($tagged['crm_request_tagging_type_id'] == 1){
+                $tag_check = Auth::user()->role_id;
+                $tag = AdminRole::where('id', $tag_check)->first();
+                $tag_permission = $tag->department_id;
                 $tagged_name = AdminDepartment::find($tagged['tagged_id'])->name;
             }
             else if($tagged['crm_request_tagging_type_id'] == 2){
@@ -152,7 +157,7 @@ class AdminCRMController extends Controller
         $crm_status_history = CrmRequestStatusHistory::where('crm_request_id', $id)->get();
         $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -297,7 +302,6 @@ class AdminCRMController extends Controller
             })
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
-                if (session('role_id') == 1 || in_array(179, session('permissions'))) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -313,10 +317,6 @@ class AdminCRMController extends Controller
                 ';
 
                     return $dropdown;
-                }
-                else {
-                    '';
-                }
             });
 
         return $datatables->make(true);
@@ -398,7 +398,6 @@ class AdminCRMController extends Controller
             })
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
-                if (session('role_id') == 1 || in_array(180, session('permissions'))) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -409,10 +408,6 @@ class AdminCRMController extends Controller
                 ';
 
                     return $dropdown;
-                }
-                else {
-                    '';
-                }
             });
 
         return $datatables->make(true);
@@ -486,7 +481,6 @@ class AdminCRMController extends Controller
             })
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
-                if (session('role_id') == 1 || in_array(181, session('permissions'))) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -497,10 +491,6 @@ class AdminCRMController extends Controller
                 ';
 
                     return $dropdown;
-                }
-                else {
-                    '';
-                }
             });
 
         return $datatables->make(true);
@@ -571,7 +561,6 @@ class AdminCRMController extends Controller
             })
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
-                if (session('role_id') == 1 || in_array(182, session('permissions'))) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -582,10 +571,6 @@ class AdminCRMController extends Controller
                 ';
 
                     return $dropdown;
-                }
-                else {
-                    '';
-                }
             });
 
         return $datatables->make(true);
