@@ -115,6 +115,11 @@ class AdminCRMController extends Controller
                 $tagged_name = Admin::find($tagged['tagged_id'])->name;
             }
         }
+        $agent = Admin::where('id', $crm_request['agent_id'])->first();
+        $agent_name = '';
+        if($agent){
+            $agent_name = $agent['name'];
+        }
 
         $crm_comments = array();
         $last_comment = null;
@@ -142,7 +147,7 @@ class AdminCRMController extends Controller
         $crm_status_history = CrmRequestStatusHistory::where('crm_request_id', $id)->get();
         $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }

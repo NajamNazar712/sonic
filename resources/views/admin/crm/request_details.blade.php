@@ -71,6 +71,12 @@
                                                     <h5 class="mb-0">{{$crm_details->created_at}}</h5>
                                                 </td>
                                             </tr>
+                                            <tr>
+                                                <th scope="row">Agent</th>
+                                                <td class="name">
+                                                    <h5 class="mb-0">{{$agent}}</h5>
+                                                </td>
+                                            </tr>
                                             @if($crm_details['status_id'] == 2)
                                                 <tr>
                                                     <th scope="row">Tagged To</th>
@@ -587,6 +593,7 @@
                     })
                         .done(function(data) {
                             if(data.status == 0){
+                                $('#tagModal').modal('hide');
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 setTimeout(function(){
                                     window.location.reload(1);
