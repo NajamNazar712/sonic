@@ -382,6 +382,7 @@
                         @if (session('role_id') == 1 || in_array(85, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.user_management.roles.index') }}">Roles</a></li>
                         @endif
+
                     </ul>
                 </li>
             @endif
@@ -419,20 +420,30 @@
                 <li class=" nav-item"><a href="{{ route('admin.notifications.index') }}"><span class="menu-title">Notifications</span></a></li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([179, 180, 181, 182], session('permissions'))) !== 0)
-                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">CRM Requests</span></a>
+            @if (session('role_id') == 1 || session('role_id') == 6 || count(array_intersect([179, 180, 181, 182,188], session('permissions'))) !== 0)
+                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">CRM</span></a>
                     <ul class="menu-content">
-                        @if (session('role_id') == 1 || in_array(179, session('permissions')))
-                            <li><a class="menu-item" href="{{route('admin.crm.launched_re_open.index')}}">Launched/Re-Open</a></li>
+                        @if (session('role_id') == 1 || session('role_id') == 6 || count(array_intersect([179, 180, 181, 182], session('permissions'))) !== 0)
+                            <li class=" nav-item"><a href="#"><span class="menu-title">Requests</span></a>
+
+                                <ul class="menu-content">
+                                    @if (session('role_id') == 1 || session('role_id') == 6 || in_array(179, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.crm.launched_re_open.index')}}">Launched/Re-Open</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || session('role_id') == 6 || in_array(180, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.crm.in_process.index')}}">In-Process</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || session('role_id') == 6 || in_array(181, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.crm.resolved.index')}}">Resolved</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || session('role_id') == 6 || in_array(182, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.crm.closed.index')}}">Closed</a></li>
+                                    @endif
+                                </ul>
+                            </li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(180, session('permissions')))
-                            <li><a class="menu-item" href="{{route('admin.crm.in_process.index')}}">In-Process</a></li>
-                        @endif
-                        @if (session('role_id') == 1 || in_array(181, session('permissions')))
-                            <li><a class="menu-item" href="{{route('admin.crm.resolved.index')}}">Resolved</a></li>
-                        @endif
-                        @if (session('role_id') == 1 || in_array(182, session('permissions')))
-                            <li><a class="menu-item" href="{{route('admin.crm.closed.index')}}">Closed</a></li>
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(188, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.crm.permissions') }}">Permissions</a></li>
                         @endif
                     </ul>
                 </li>

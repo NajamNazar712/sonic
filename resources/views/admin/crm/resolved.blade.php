@@ -159,6 +159,9 @@
 
                                     $('#AssignAgentModal').on('shown.bs.modal',function (e) {
                                     });
+                                    $('#AssignAgentModal').on('hide.bs.modal', function (e) {
+                                        $('#assign_agent').val('').trigger('change');
+                                    });
                                     $('#assign_agentSubmit').on('click',function () {
                                         var assign = parseInt($('#assign_agent').val());
                                         if(assign){
@@ -451,6 +454,9 @@
                 var crm_request_id = parseInt($(this).parents('tr').attr('id'));
 
                 $('#AssignAgentModal').on('shown.bs.modal',function (e) {
+                });
+                $('#AssignAgentModal').on('hide.bs.modal', function (e) {
+                    $('#assign_agent').val('').trigger('change');
                 });
                 $('#assign_agentSubmit').on('click',function () {
                     var assign = parseInt($('#assign_agent').val());
