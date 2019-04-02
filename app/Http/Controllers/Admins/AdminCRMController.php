@@ -18,6 +18,7 @@ use App\Http\Models\CRM\CrmRequestTaggingTypes;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +26,7 @@ use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
 
+use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 
 class AdminCRMController extends Controller
@@ -136,8 +138,11 @@ class AdminCRMController extends Controller
         if($crm_tagging_details){
             $crm_tagging = $crm_tagging_details;
         }
+        $crm_agent_history = CrmRequestAgentHistory::where('crm_request_id', $id)->get();
+        $crm_status_history = CrmRequestStatusHistory::where('crm_request_id', $id)->get();
+        $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -383,7 +388,17 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
+            ->leftJoin('crm_request_status_histories as inp', function ($join) {
+                $join->on('inp.crm_request_id', '=', 'crm_requests.id')
+                    ->where('inp.created_at','=',
+                        DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 2)'));
+            })
+            ->leftJoin('crm_request_status_histories as res', function ($join) {
+                $join->on('res.crm_request_id', '=', 'crm_requests.id')
+                    ->where('res.created_at','=',
+                        DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 3)'));
+            })
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved')
             ->where(['crm_requests.status_id' => 3]);
         $datatables = Datatables::of($in_process_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
@@ -399,6 +414,14 @@ class AdminCRMController extends Controller
                 else{
                     return 'Shipper Substitute User';
                 }
+            })
+            ->editColumn('in_process_resolved_tat', function ($requests){
+                if($requests->inprocess && $requests->resolved){
+                    $process = Carbon::parse($requests->inprocess);
+                    $resolved = Carbon::parse($requests->resolved);
+                    return $resolved->diffForHumans($process);
+                }
+                return "-";
             })
             ->editColumn('agent', function ($requests){
                 if($requests->agent == null){
@@ -446,7 +469,17 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
+            ->leftJoin('crm_request_status_histories as inp', function ($join) {
+                $join->on('inp.crm_request_id', '=', 'crm_requests.id')
+                    ->where('inp.created_at','=',
+                        DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 1)'));
+            })
+            ->leftJoin('crm_request_status_histories as res', function ($join) {
+                $join->on('res.crm_request_id', '=', 'crm_requests.id')
+                    ->where('res.created_at','=',
+                        DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 4)'));
+            })
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed')
             ->where(['crm_requests.status_id' => 4]);
         $datatables = Datatables::of($in_process_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
@@ -462,6 +495,14 @@ class AdminCRMController extends Controller
                 else{
                     return 'Shipper Substitute User';
                 }
+            })
+            ->editColumn('total_tat', function ($requests){
+                if($requests->inprocess && $requests->closed){
+                    $process = Carbon::parse($requests->inprocess);
+                    $closed = Carbon::parse($requests->closed);
+                    return $closed->diffForHumans($process);
+                }
+                return "-";
             })
             ->editColumn('agent', function ($requests){
                 if($requests->agent == null){

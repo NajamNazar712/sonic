@@ -204,7 +204,6 @@
                                                 </form>
                                             </section>
                                                 @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ))))
-{{--                                                @elseif((empty($crm_tagging) ?: ($crm_tagging->crm_request_tagging_type_id == 1 ? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() )))--}}
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input d-flex" id="chat_form">
                                                         <fieldset class="form-group position-relative has-icon-left col-8 m-0">
@@ -232,7 +231,9 @@
 
                                     </div>
                                 </div>
-                                <hr>
+
+                                @if(count($crm_agent_history) > 0)
+                                    <hr>
                                 <div class="row">
                                     <div class="col-12">
                                         <h3>Agent History</h3>
@@ -240,43 +241,97 @@
                                             <table class="table mb-0">
                                                 <thead>
                                                 <tr class="border-bottom-active border-custom-color">
-                                                    <th>Firstname</th>
-                                                    <th>Lastname</th>
-                                                    <th>Email</th>
-                                                    <th>Age</th>
+                                                    <th>S No.</th>
+                                                    <th>Agent Name</th>
+                                                    <th>Agent Assigned Date</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
+                                                @foreach($crm_agent_history as $index => $history)
+                                                    @php $index++; @endphp
                                                 <tr class="border-bottom-success border-custom-color">
-                                                    <td>John</td>
-                                                    <td>Doe</td>
-                                                    <td>john@example.com</td>
-                                                    <td>20</td>
+                                                    <td>{{$index}}</td>
+                                                    <td>{{$history->agent->name}}</td>
+                                                    <td>{{$history->created_at}}</td>
                                                 </tr>
-                                                <tr class="border-bottom-info border-custom-color">
-                                                    <td>Mary</td>
-                                                    <td>Moe</td>
-                                                    <td>mary@example.com</td>
-                                                    <td>22</td>
-                                                </tr>
-                                                <tr class="border-bottom-teal border-bottom-darken-2 border-custom-color">
-                                                    <td>July</td>
-                                                    <td>Dooley</td>
-                                                    <td>july@example.com</td>
-                                                    <td>30</td>
-                                                </tr>
-                                                <tr class="border-bottom-pink border-bottom-darken-2 border-custom-color">
-                                                    <td>Piter</td>
-                                                    <td>Draker</td>
-                                                    <td>piter@example.com</td>
-                                                    <td>30</td>
-                                                </tr>
+                                                @endforeach
                                                 </tbody>
                                             </table>
                                         </div>
                                     </div>
                                 </div>
+                                @endif
 
+                                @if(count($crm_status_history) > 0)
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h3>Status History</h3>
+                                            <div class="table-responsive">
+                                                <table class="table mb-0">
+                                                    <thead>
+                                                    <tr class="border-bottom-active border-custom-color">
+                                                        <th>S No.</th>
+                                                        <th>Status Name</th>
+                                                        <th>Agent</th>
+                                                        <th>Status Assigned Date</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    @foreach($crm_status_history as $index => $status_history)
+                                                        @php $index++; @endphp
+                                                        <tr class="border-bottom-success border-custom-color">
+                                                            <td>{{$index}}</td>
+                                                            <td>{{$status_history->status->name}}</td>
+                                                            <td>{{$status_history->agent->name}}</td>
+                                                            <td>{{$status_history->created_at}}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(count($crm_tagging_history) > 0)
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h3>Tagging History</h3>
+                                            <div class="table-responsive">
+                                                <table class="table mb-0">
+                                                    <thead>
+                                                    <tr class="border-bottom-active border-custom-color">
+                                                        <th>S No.</th>
+                                                        <th>Name</th>
+                                                        <th>Tagged Type</th>
+                                                        <th>Tagged Date</th>
+                                                        <th>Tagged By</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    @foreach($crm_tagging_history as $index => $tagging_history)
+                                                        @php $index++; @endphp
+                                                        <tr class="border-bottom-success border-custom-color">
+                                                            <td>{{$index}}</td>
+                                                            @if($tagging_history->crm_request_tagging_type_id == 1)
+                                                                <td>{{$tagging_history->department->name}}</td>
+                                                                <td>{{$tagging_history->tagging->name}}</td>
+                                                                @else
+                                                                <td>{{$tagging_history->user->name}}</td>
+                                                                <td>{{$tagging_history->tagging->name}}</td>
+                                                            @endif
+                                                            <td>{{$tagging_history->created_at}}</td>
+                                                            <td>{{$tagging_history->agent->name}}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
 
                         </div>

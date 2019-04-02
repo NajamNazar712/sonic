@@ -30,6 +30,7 @@
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Launched To Closed (TAT)</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -99,6 +100,7 @@
             var selected_rows = [];
 
             var table = $('#datatable').DataTable({
+                dom: 'ltipr',
                 scrollX: true, scrollY: '350px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -119,6 +121,7 @@
                     {data: 'name', name: 'a.name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'total_tat', name: 'total_tat', class: 'align-middle total_tat'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],

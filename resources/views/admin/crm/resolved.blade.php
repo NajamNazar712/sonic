@@ -32,6 +32,7 @@
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">In-Process To Resolved (TAT)</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -274,6 +275,7 @@
                     {data: 'name', name: 'a.name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'in_process_resolved_tat', name: 'in_process_resolved_tat', class: 'align-middle in_process_resolved_tat', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -307,7 +309,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.description') || $(header).is('.created_at')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.description') || $(header).is('.created_at') || $(header).is('.in_process_resolved_tat')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.case_nature')) {
