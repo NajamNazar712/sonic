@@ -18,7 +18,7 @@
                     <li class=" nav-item"><a href="#"><span class="menu-title">Requests</span></a>
 
                         <ul class="menu-content">
-                            @if (session('role_id') == 1 || Auth::user()->role->department_id == 3)
+                            @if (session('role_id') == 1 || session('department_id') == 3)
                                 <li><a class="menu-item" href="{{route('admin.crm.launched_re_open.index')}}">Launched/Re-Open</a></li>
                             @endif
                             <li><a class="menu-item" href="{{route('admin.crm.in_process.index')}}">In-Process</a></li>

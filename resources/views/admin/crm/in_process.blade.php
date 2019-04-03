@@ -98,22 +98,24 @@
                             head.push('Launched By Type');
                             head.push('Tagged To');
                             head.push('Launched Date');
+                            head.push('In-Process To Resolved (TAT)');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.id);
+                                row.push(values.id_padded);
                                 row.push(values.tracking_number);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
                                 row.push(values.channel);
                                 row.push(values.agent);
-                                row.push(values.name);
+                                row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.tagged_to);
                                 row.push(values.created_at);
+                                row.push(values.in_process_resolved_tat);
 
                                 body.push(row);
                             });

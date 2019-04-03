@@ -212,7 +212,7 @@
                                 row.push(values.channel);
                                 row.push(values.status);
                                 row.push(values.agent);
-                                row.push(values.name);
+                                row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.created_at);
 
