@@ -133,7 +133,11 @@
 											<div class="form-group">
 												<select name="product_type" class="select2" id="product_type" data-rule-required="true" data-msg-required="Product Type is required">
 													@foreach($products as $product)
-														<option value="{{ $product->id }}">{{ $product->product_name }}</option>
+														@if($user['product_id'] == $product->id)
+															<option value="{{ $product->id }}" selected>{{ $product->product_name }}</option>
+														@else
+															<option value="{{ $product->id }}">{{ $product->product_name }}</option>
+														@endif
 													@endforeach
 												</select>
 											</div>
@@ -167,7 +171,11 @@
 												<div class="form-group">
 													<select name="replacement_product_type" class="select2" id="replacement_product_type" data-rule-required="true" data-msg-required="Product Type is required">
 														@foreach($products as $product)
-															<option value="{{ $product->id }}">{{ $product->product_name }}</option>
+															@if($user['product_id'] == $product->id)
+																<option value="{{ $product->id }}" selected="selected">{{ $product->product_name }}</option>
+															@else
+																<option value="{{ $product->id }}">{{ $product->product_name }}</option>
+															@endif
 														@endforeach
 													</select>
 												</div>
@@ -195,7 +203,11 @@
 															<div class="form-group">
 																<select name="product_type" class="select2" data-rule-required="true" data-msg-required="Product Type is required">
 																	@foreach($products as $product)
-																		<option value="{{ $product->id }}">{{ $product->product_name }}</option>
+																		@if($user['product_id'] == $product->id)
+																			<option value="{{ $product->id }}" selected>{{ $product->product_name }}</option>
+																		@else
+																			<option value="{{ $product->id }}">{{ $product->product_name }}</option>
+																		@endif
 																	@endforeach
 																</select>
 															</div>
@@ -382,7 +394,6 @@
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 	<script>
-
 
 		$(document).ready(function() {
 
@@ -672,8 +683,7 @@
 
 				shipping_mode_same_day(pickup_city, consignee_city);
 			});
-
-			$('#product_type').prepend('<option value="" selected="selected"></option>').select2({
+			$('#product_type').select2({
 				width: '100%',
 				placeholder: 'Product Type*'
 			}).bind('change', function() {
@@ -713,7 +723,7 @@
 				}
 			});
 
-			$('#replacement_product_type').prepend('<option value="" selected="selected"></option>').select2({
+			$('#replacement_product_type').select2({
 				width: '100%',
 				placeholder: 'Product Type*'
 			}).bind('change', function() {

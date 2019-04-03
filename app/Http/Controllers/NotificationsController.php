@@ -25,6 +25,7 @@ use App\Http\Models\Dispute;
 use App\Http\Models\DonePayment;
 use App\Http\Models\City;
 use App\Http\Models\Invoice;
+use App\Http\Models\SMS;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
@@ -34,39 +35,19 @@ use Carbon\Carbon;
 
 use App\Mail\Notifications;
 
+use App\Jobs\ProcessSMS;
+
 class NotificationsController extends Controller
 {
     static private function sms($body, $to) {
-      try {
-        $client = new Client(['base_uri' => 'http://sms.its.com.pk/api/', 'http_errors' => FALSE]);
+      $sms = new SMS();
 
-        $response = $client->get('', [
-          'query' => [
-            'username' => 'trax',
-            'password' => '123456',
-            'receiver' => str_replace('-', '', $to),
-            'msgdata' => $body
-          ]
-        ]);
-      } catch (RequestException $e) {
-        $error_to = 'muhammad.yousuf@trax.pk';
+      $sms->to = str_replace('-', '', $to);
+      $sms->body = $body;
 
-        $error_subject = 'SMS API Down';
+      $sms->save();
 
-        $error_body = '';
-
-        $error_body .= 'Sent To: ' . str_replace('-', '', $to) . PHP_EOL;
-
-        $error_body .= 'Message: ' . PHP_EOL . $body . PHP_EOL;
-
-        $error_body .= PHP_EOL . PHP_EOL;
-
-        $error_body .= 'Request: ' . json_encode($e->getRequest()) . PHP_EOL;
-
-        $error_body .= 'Response: ' . json_encode($e->getResponse()) . PHP_EOL;
-
-        self::email($error_subject, $error_body, $error_to);
-      }
+      dispatch(new ProcessSMS($sms));
     }
 
     static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL) {
@@ -1812,7 +1793,7 @@ class NotificationsController extends Controller
               }else{
                   $to = [$shipper->email];
               }
-            $general_admins = Admin::whereIn('role_id', [2, 4])->where('status', 1);
+            $general_admins = Admin::whereIn('role_id', [4, 6])->where('status', 1);
 
             if ($general_admins->exists()) {
               $to = array_merge($to, $general_admins->pluck('email')->toArray());
