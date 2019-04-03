@@ -22,6 +22,7 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Request No.</th>
                                     <th class="border-primary border-darken-1">Tracking No.</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
@@ -86,6 +87,7 @@
                             head = [];
 
                             head.push('S No.');
+                            head.push('Request No.');
                             head.push('Tracking No.');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
@@ -102,6 +104,7 @@
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.id);
                                 row.push(values.tracking_number);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
@@ -283,6 +286,7 @@
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'id_padded', name: 'crm_requests.id', class: 'align-middle request_id'},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
