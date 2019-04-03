@@ -1048,12 +1048,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get', 'Admins\AdminCRMController@get_latest_comment')->name('get');
         });
 
-        Route::get('permissions', 'Admins\AdminCRMcontroller@crm_index')->name('permissions');
-        Route::get('list', 'Admins\AdminCRMcontroller@crm_list')->name('list');
+        Route::get('permissions', 'Admins\AdminCRMController@crm_index')->name('permissions');
+        Route::get('list', 'Admins\AdminCRMController@crm_list')->name('list');
 
         Route::prefix('update/{id}')->name('update.')->group(function() {
-            Route::get('', 'Admins\AdminCRMcontroller@crm_update_index')->name('index');
-            Route::post('', 'Admins\AdminCRMcontroller@crm_update_store')->name('store');
+            Route::get('', 'Admins\AdminCRMController@crm_update_index')->name('index');
+            Route::post('', 'Admins\AdminCRMController@crm_update_store')->name('store');
         });
     });
 });
