@@ -40,7 +40,7 @@ class ProcessSMS implements ShouldQueue
     {
         if ($this->sms->status < 2) {
             try {
-                $client = new Client(['base_uri' => 'http://sms.its.com.pk/api/', 'http_errors' => FALSE]);
+                $client = new Client(['base_uri' => 'http://sms.its.com.pk/api/', 'http_errors' => FALSE, 'connect_timeout' => 15, 'timeout' => 30]);
 
                 $response = $client->get('', [
                     'query' => [
