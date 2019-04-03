@@ -131,7 +131,7 @@
                                                         </span>
                                                 </button>
                                             @endif
-                                        @elseif($crm_details['status_id'] == 4|| in_array(186, session('permissions')))
+                                        @elseif($crm_details['status_id'] == 4 && (in_array(186, session('permissions')) || session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id())))
                                             <button id="valid" type="submit" class="btn btn-success mr-1" >
                                                     <span class="d-none d-lg-block">
                                                     Re-Open
@@ -142,7 +142,7 @@
                                 </form>
                             </div>
                         @endif
-                        @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id())))
+                        @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id())
                             <div class="text-center">
                                 <form id="invalid_form" method="post" action="{{route('admin.crm.invalid')}}">
                                     @csrf
