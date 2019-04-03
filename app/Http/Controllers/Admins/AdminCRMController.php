@@ -377,7 +377,6 @@ class AdminCRMController extends Controller
             ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crt.tagged_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id')
             ->where('crm_requests.status_id', 2);
-
         if (!in_array(session('role_id'), [1, 6])) {
             $in_process_request = $in_process_request->where(function ($query) {
                 $query->where(function ($sub_query) {
@@ -500,7 +499,7 @@ class AdminCRMController extends Controller
     }
 
     public function resolved_list(Request $request){
-        $in_process_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+        $resolved_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
@@ -519,16 +518,14 @@ class AdminCRMController extends Controller
                         DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 3)'));
             })
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved')
-            ->where(function ($query) {
-                $query->where(function($sub_query) {
-                    $sub_query->where('crm_requests.status_id', 3)
-                        ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
-                })->orWhere(function($sub_query) {
-                    $sub_query->where('crm_requests.status_id', 3)
-                        ->where('crm_requests.agent_id', Auth::id());
-                });
+            ->where('crm_requests.status_id', 3);
+        if(!in_array(session('role_id'), [1,6])){
+            $resolved_request = $resolved_request->where(function ($query) {
+                $query->where('crm_requests.agent_id', Auth::id());
             });
-        $datatables = Datatables::of($in_process_request)
+        }
+
+        $datatables = Datatables::of($resolved_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
             })
@@ -625,7 +622,7 @@ class AdminCRMController extends Controller
     }
 
     public function closed_list(Request $request){
-        $in_process_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+        $closed_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
@@ -644,16 +641,14 @@ class AdminCRMController extends Controller
                         DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 4)'));
             })
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed')
-            ->where(function($query) {
-                $query->where(function($sub_query) {
-                    $sub_query->where('crm_requests.status_id', 4)
-                        ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
-                })->orWhere(function($sub_query) {
-                    $sub_query->where('crm_requests.status_id', 4)
-                        ->where('crm_requests.agent_id', Auth::id());
+            ->where('crm_requests.status_id', 4);
+            if(!in_array(session('role_id'), [1,6])){
+                $closed_request = $closed_request->where(function($query) {
+                    $query->where('crm_requests.agent_id', Auth::id());
                 });
-            });
-        $datatables = Datatables::of($in_process_request)
+            }
+
+        $datatables = Datatables::of($closed_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
             })
