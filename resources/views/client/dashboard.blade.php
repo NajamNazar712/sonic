@@ -1076,10 +1076,10 @@
                                         containerId: 'toast-bottom-center'
                                     });
                                 }
-                                toastr.success(data.success, 'Success!', {
-                                    positionClass: 'toast-bottom-center',
-                                    containerId: 'toast-bottom-center'
-                                });
+                                // toastr.success(data.success, 'Success!', {
+                                //     positionClass: 'toast-bottom-center',
+                                //     containerId: 'toast-bottom-center'
+                                // });
                             }
                             else {
                                 toastr.error(data.error, 'Error!', {
