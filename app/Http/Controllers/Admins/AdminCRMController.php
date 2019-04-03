@@ -252,7 +252,8 @@ class AdminCRMController extends Controller
                 })->orWhere(function($sub_query) {
                     $role = Auth::user()->role_id;
                     $sub_query->whereIn('crm_requests.status_id', [1,5])
-                   ->where(DB::raw('(SELECT permission_id FROM admin_role_module_permissions WHERE role_id = '. $role .' AND permission_id = 183)'), in_array(183, session('permissions')));
+//                   ->where(DB::raw('(SELECT permission_id FROM admin_role_module_permissions WHERE role_id = '. $role .' AND permission_id = 183)'), in_array(183, session('permissions')));
+                    ->where('crm.requests.agent_id',Auth::id());
                 });
             });
         $datatables = Datatables::of($launched_request)
