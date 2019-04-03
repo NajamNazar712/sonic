@@ -45,6 +45,9 @@ class ShipperCRMController extends Controller
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as request_status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at','crm_requests.description','crm_requests.status_id')
             ->where('crm_requests.shipper_id', session('user_id'));
         $datatables = Datatables::of($launched_request)
+            ->addColumn('id_padded', function ($requests) {
+                return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
+            })
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('cod.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
             })

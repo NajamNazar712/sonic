@@ -104,7 +104,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.id);
+                                row.push(values.id_padded);
                                 row.push(values.tracking_number);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);

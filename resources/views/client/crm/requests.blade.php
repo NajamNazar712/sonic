@@ -23,6 +23,7 @@
                                     <tr role="row" class="bg-primary white">
                                         {{--<th class="border-primary border-darken-1"></th>--}}
                                         <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1">Request No.</th>
                                         <th class="border-primary border-darken-1">Tracking No.</th>
                                         <th class="border-primary border-darken-1">Case Nature</th>
                                         <th class="border-primary border-darken-1">Case Nature Type</th>
@@ -66,11 +67,12 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.crm.launched_re_open.list') }}',
+                        url: '{{ route('cod.crm.request.list') }}',
                         success: function (result) {
                             head = [];
 
                             head.push('S No.');
+                            head.push('Request No.');
                             head.push('Tracking No.');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
@@ -85,6 +87,7 @@
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.id_padded);
                                 row.push(values.tracking_number);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
@@ -109,7 +112,14 @@
 
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '350px',
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Requests',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -121,6 +131,7 @@
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'id_padded', name: 'crm_requests.id', class: 'align-middle request_id'},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
