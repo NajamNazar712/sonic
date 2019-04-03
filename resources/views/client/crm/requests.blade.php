@@ -31,7 +31,7 @@
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Agent</th>
                                         <th class="border-primary border-darken-1">Launched By</th>
-                                        <th class="border-primary border-darken-1">Launched By Type</th>
+                                        {{--<th class="border-primary border-darken-1">Launched By Type</th>--}}
                                         <th class="border-primary border-darken-1">Launched Date</th>
                                         <th class="border-primary border-darken-1"></th>
                                     </tr>
@@ -117,7 +117,7 @@
                 serverSide: true,
                 ajax: '{{ route('cod.crm.request.list') }}',
                 rowId: 'id',
-                order: [[10, 'desc']],
+                order: [[9, 'desc']],
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -128,7 +128,7 @@
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
-                    {data: 'name', name: 'a.name', class: 'align-middle name'},
+                    // {data: 'name', name: 'a.name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
