@@ -374,29 +374,25 @@ class AdminCRMController extends Controller
             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
-            ->leftjoin('admin_roles as ar', 'ar.department_id', '=', 'crt.tagged_id')
-            ->leftjoin('admins as ard', 'ard.role_id', '=', 'ar.id')
+            ->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id')
-            ->where(function ($query) {
+            ->where('crm_requests.status_id', 2);
+
+        if (!in_array(session('role_id'), [1, 6])) {
+            $in_process_request = $in_process_request->where(function ($query) {
                 $query->where(function ($sub_query) {
-                    $sub_query->where('crm_requests.status_id', 2)
-                        ->where('crm_requests.agent_id', Auth::id());
+                    $sub_query->where('crm_requests.agent_id', Auth::id());
                 })
                 ->orWhere(function ($sub_query) {
-                    $sub_query->where('crm_requests.status_id', 2)
-                        ->where('crt.crm_request_tagging_type_id', 2)
-                        ->where('crt.tagged_id', '=',  Auth::id());
+                    $sub_query->where('crt.crm_request_tagging_type_id', 2)
+                        ->where('crt.tagged_id', '=', Auth::id());
                 })
-                ->orWhere(function($sub_query) {
-                    $sub_query->where('crm_requests.status_id', 2)
-                        ->where('crt.crm_request_tagging_type_id', 1)
-                        ->where('ard.id', '=', Auth::id());
-                })
-                ->orWhere(function($sub_query) {
-                    $sub_query->where('crm_requests.status_id', 2)
-                        ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('crt.crm_request_tagging_type_id', 1)
+                        ->where('ad.id', '=', Auth::user()->role->department_id);
                 });
             });
+        }
 
         $datatables = Datatables::of($in_process_request)
             ->addColumn('tracking_number_hyperlink', function ($requests) {
