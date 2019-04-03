@@ -26,6 +26,7 @@
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Received/Refused By</th>
                             <th class="border-primary border-darken-1">Current Status</th>
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Destination</th>
@@ -132,6 +133,8 @@
             });
 
             var selected_rows = [];
+            var shipment_remarks_obj = {};
+            var shipment_received_refused_obj = {};
             var note_id = $('#return_note').val();
             var table = $('#datatable').DataTable({
                 @if (session('role_id') == 1 || in_array(50, session('permissions')))
@@ -165,12 +168,25 @@
                                     dangerMode: true
                                 }).then(function (confirm) {
                                     if (confirm) {
+                                        table.rows().nodes().each(function(index) {
+                                            var row = table.row(index);
+                                            if ($(row.node()).hasClass('selected')) {
+                                                var id = parseInt(row.id());
+                                                var remarks = $(row.node()).find('td.remarks input').val();
+                                                shipment_remarks_obj[id] = remarks;
+                                                var receiver_name =  $(row.node()).find('td.received_or_refused_by input').val();
+                                                shipment_received_refused_obj[id] = receiver_name;
+
+                                            }
+                                        });
                                         $.ajax({
                                             url: '{!! route('admin.return.receive.status.delivered') !!}',
                                             method: 'POST',
                                             data: {
                                                 'shipment_ids': selected_rows,
                                                 'return_note_id': note_id,
+                                                'remarks': shipment_remarks_obj,
+                                                'received_or_refused_by': shipment_received_refused_obj,
                                                 '_token': '{{ csrf_token() }}'
                                             }
                                         }).done(function (data) {
@@ -273,6 +289,7 @@
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
+                    {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'current_status_name',name: 'current_status_name', class: 'align-middle current_status_name',orderable: false, searchable: false},
                     {data:'address',name: 'usi.pickup_address', class: 'align-middle address'},
                     {data:'destination',name: 'oc.name', class: 'align-middle destination'},
@@ -315,7 +332,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action')|| $(header).is('.current_status_name')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.current_status_name') || $(header).is('.received_or_refused_by')) {
                             $(td).appendTo($(search));
                         }
                         else {

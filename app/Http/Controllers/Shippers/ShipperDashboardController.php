@@ -198,6 +198,11 @@ class ShipperDashboardController extends Controller
             if ($tracking_numbers = $request->get('tracking_numbers')) {
                 $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
             }
+            if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
+                $from = $request->get('booking_from_date');
+                $to = $request->get('booking_to_date');
+                $datatable->whereBetween('shipments.created_at', [$from,$to]);
+            }
             return $datatable->make(true);
     }
     public function order_cancel(Request $request){

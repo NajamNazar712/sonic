@@ -20,6 +20,7 @@ class Notifications extends Mailable implements ShouldQueue
      */
     public function __construct($subject, $body)
     {
+        $this->queue = 'email';
         $this->subject = $subject;
         $this->body = nl2br($body);
     }

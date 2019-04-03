@@ -63,7 +63,14 @@ class AdminCargoController extends Controller
                     ->where('csj.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc','csj.created_at as current_status');
+            ->leftjoin('misrouted_history as mh', function ($join) {
+                $join->on('mh.shipment_id', '=', 'shipments.id')
+                    ->on('shipments.shipper_status_id', '=', DB::raw(49))
+                    ->where('mh.id', '=',
+                        DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('cities as olddc', 'olddc.id', '=', 'mh.old_consignee_city_id')
+            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc','csj.created_at as current_status', 'olddc.name as old_destination');
 
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
@@ -71,10 +78,14 @@ class AdminCargoController extends Controller
                     $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
                         ->whereIn('dc.hub_id', session('hubs'));
                 })
-                    ->orWhere(function ($sub_query) {
-                        $sub_query->whereIn('shipments.shipper_status_id', [2,49])
-                            ->whereIn('oc.hub_id', session('hubs'));
-                    });
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('shipments.shipper_status_id', 2)
+                        ->whereIn('oc.hub_id', session('hubs'));
+                })
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('shipments.shipper_status_id', 49)
+                        ->whereIn('mh.old_consignee_city_id', session('hubs'));
+                });
             });
         }
 
@@ -86,6 +97,9 @@ class AdminCargoController extends Controller
             ->editColumn('origin', function ($shipments) {
                 if (in_array($shipments->shipper_status_id, [20, 30, 36, 37])) {
                     return $shipments->destination;
+                }
+                else if ($shipments->shipper_status_id == 49) {
+                    return $shipments->old_destination;
                 }
                 else {
                     return $shipments->origin;
@@ -155,10 +169,14 @@ class AdminCargoController extends Controller
                     $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
                         ->where('dc.name', 'like', '%' . $keyword . '%');
                 })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->whereIn('shipments.shipper_status_id', [2,49])
-                            ->where('oc.name', 'like', '%' . $keyword . '%');
-                    });
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->where('shipments.shipper_status_id', 2)
+                        ->where('oc.name', 'like', '%' . $keyword . '%');
+                })
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->where('shipments.shipper_status_id', 49)
+                        ->where('olddc.name', 'like', '%' . $keyword . '%');
+                });
             })
             ->filterColumn('dc.name', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
@@ -168,11 +186,11 @@ class AdminCargoController extends Controller
                         ->where('oc.name', 'like', '%' . $keyword . '%');
                 })
                     ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->whereIn('shipments.shipper_status_id', [2,49])
+                        $sub_query->whereIn('shipments.shipper_status_id', [2, 49])
                             ->where('dc.name', 'like', '%' . $keyword . '%');
                     });
             })
-            ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), dc.name, oc.name)') . ' $1')
+            ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), dc.name, IF (shipments.shipper_status_id = 49, olddc.name, oc.name))') . ' $1')
             ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), oc.name, dc.name)') . ' $1');
 
         if ($shipment_type = $request->get('shipment_type')) {
@@ -180,7 +198,7 @@ class AdminCargoController extends Controller
                 $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37, 49]);
             }
             else if ($shipment_type == 1) {
-                $datatables->whereIn('shipments.shipper_status_id', [2,49]);
+                $datatables->whereIn('shipments.shipper_status_id', [2, 49]);
             }
             else if ($shipment_type == 2) {
                 $datatables->whereIn('shipments.shipper_status_id', [20, 30, 36, 37]);
