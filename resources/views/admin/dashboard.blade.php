@@ -279,7 +279,7 @@
                                 </div>
                                 <div class="col-6">
                                     <fieldset class="form-group">
-                                        <textarea class="form-control info" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                        <textarea class="form-control" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..."></textarea>
                                     </fieldset>
                                 </div>
                             </div>
@@ -306,7 +306,7 @@
                                 </div>
                                 <div class="col-6">
                                     <fieldset class="form-group">
-                                        <textarea class="form-control info" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                        <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..."></textarea>
                                     </fieldset>
                                 </div>
                             </div>

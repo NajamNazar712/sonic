@@ -233,7 +233,7 @@
 
                             <div class="col-8">
                                 <fieldset class="form-group">
-                                    <textarea class="form-control info" name="feedback_description" id="feedback_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                    <textarea class="form-control" name="feedback_description" id="feedback_description" rows="5" placeholder="Enter Description Here..."></textarea>
                                 </fieldset>
                             </div>
                         </div>
@@ -560,7 +560,7 @@
                         if ($.inArray(data.shipment_id, selected_rows) !== -1) {
                             table.row(row).select();
                         }
-                    
+
                 },
                 initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
