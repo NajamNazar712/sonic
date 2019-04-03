@@ -389,7 +389,7 @@ class AdminCRMController extends Controller
                 })
                 ->orWhere(function ($sub_query) {
                     $sub_query->where('crt.crm_request_tagging_type_id', 1)
-                        ->where('ad.id', '=', Auth::user()->role->department_id);
+                        ->where('ad.id', '=', session('department_id'));
                 });
             });
         }
