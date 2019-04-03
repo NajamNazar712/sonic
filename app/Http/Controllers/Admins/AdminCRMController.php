@@ -911,7 +911,7 @@ class AdminCRMController extends Controller
                     ]);
                     CrmRequestStatusHistory::create([
                         'crm_request_id' => $request->crm_request_id,
-                        'status_id' => $crm_request['status_id'],
+                        'status_id' => 2,
                         'agent_id' => Auth::id()
                     ]);
                 }

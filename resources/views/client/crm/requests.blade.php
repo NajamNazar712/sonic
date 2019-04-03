@@ -30,7 +30,7 @@
                                         <th class="border-primary border-darken-1">Description</th>
                                         <th class="border-primary border-darken-1">Channel</th>
                                         <th class="border-primary border-darken-1">Status</th>
-                                        <th class="border-primary border-darken-1">Agent</th>
+                                        {{--<th class="border-primary border-darken-1">Agent</th>--}}
                                         <th class="border-primary border-darken-1">Launched By</th>
                                         {{--<th class="border-primary border-darken-1">Launched By Type</th>--}}
                                         <th class="border-primary border-darken-1">Launched Date</th>
@@ -78,9 +78,8 @@
                             head.push('Case Nature Type');
                             head.push('Channel');
                             head.push('Status');
-                            head.push('Agent');
+                            // head.push('Agent');
                             head.push('Launched By');
-                            head.push('Launched By Type');
                             head.push('Launched Date');
 
                             $.each(result.data, function(index, values) {
@@ -93,8 +92,7 @@
                                 row.push(values.case_nature_type);
                                 row.push(values.channel);
                                 row.push(values.status);
-                                row.push(values.agent);
-                                row.push(values.name);
+                                // row.push(values.agent);
                                 row.push(values.added_by);
                                 row.push(values.created_at);
 
@@ -127,7 +125,7 @@
                 serverSide: true,
                 ajax: '{{ route('cod.crm.request.list') }}',
                 rowId: 'id',
-                order: [[9, 'desc']],
+                    order: [[9, 'desc']],
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -138,7 +136,7 @@
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
+                    // {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     // {data: 'name', name: 'a.name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
@@ -273,7 +271,7 @@
                     });
 
                     $('#added_by').prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Launched By Type",
+                        placeholder: "Select Launched By",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

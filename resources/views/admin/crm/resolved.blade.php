@@ -264,7 +264,7 @@
                     },
                     {
                         extend: 'excel',
-                        title: 'CRM Request(Resolved)',
+                        title: 'CRM Request (Resolved)',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
@@ -281,7 +281,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.crm.resolved.list') }}',
                 rowId: 'id',
-                order: [[10, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

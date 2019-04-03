@@ -90,7 +90,7 @@
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.created_at);
-                                row.push(values.in_process_resolved_tat);
+                                row.push(values.total_tat);
 
                                 body.push(row);
                             });
@@ -109,7 +109,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'CRM Requests(Closed)',
+                        title: 'CRM Requests (Closed)',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
@@ -121,7 +121,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.crm.closed.list') }}',
                 rowId: 'id',
-                order: [[9, 'desc']],
+                order: [[10, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded', name: 'crm_requests.id', class: 'align-middle request_id'},

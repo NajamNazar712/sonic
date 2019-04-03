@@ -364,7 +364,7 @@
                     },
                     {
                         extend: 'excel',
-                        title: 'CRM Request(Launched/Re-Open)',
+                        title: 'CRM Request (Launched/Re-Open)',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
@@ -381,7 +381,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.crm.launched_re_open.list') }}',
                 rowId: 'id',
-                order: [[11, 'desc']],
+                order: [[12, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
