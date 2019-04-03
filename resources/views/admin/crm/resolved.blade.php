@@ -256,6 +256,12 @@
                                 }
                             });
                         }
+                    },
+                    {
+                        extend: 'excel',
+                        title: 'CRM Request(Resolved)',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
                 select: {
                     info: false,

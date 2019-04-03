@@ -358,6 +358,12 @@
                                 }
                             });
                         }
+                    },
+                    {
+                        extend: 'excel',
+                        title: 'CRM Request(Launched/Re-Open)',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
                 select: {
                     info: false,
