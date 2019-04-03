@@ -257,6 +257,12 @@
                                 }
                             });
                         }
+                    },
+                    {
+                        extend: 'excel',
+                        title: 'CRM Request(In-Process)',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
                 select: {
                     info: false,

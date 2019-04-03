@@ -864,8 +864,8 @@ class AdminCRMController extends Controller
                 ]);
                 CrmRequestStatusHistory::create([
                     'crm_request_id' => $request->id,
-                    'status_id' => $crm_request['status_id'],
-                    'agent_id' => $crm_request['agent_id']
+                    'status_id' => 4,
+                    'agent_id' => Auth::id()
                 ]);
 
                 CrmRequestTagging::where('crm_request_id', $request->id)->delete();

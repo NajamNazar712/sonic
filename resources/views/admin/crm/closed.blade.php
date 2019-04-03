@@ -100,7 +100,14 @@
             var selected_rows = [];
 
             var table = $('#datatable').DataTable({
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'CRM Requests(Closed)',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
                 scrollX: true, scrollY: '350px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -109,7 +116,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.crm.closed.list') }}',
                 rowId: 'id',
-                order: [[8, 'desc']],
+                order: [[9, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
