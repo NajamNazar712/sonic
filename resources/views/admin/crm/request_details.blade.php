@@ -22,7 +22,7 @@
                             <div class="card-body">
                                 @include('admin.inc.messages')
                                 <div class="row mb-2">
-                                    <div class="col-4">
+                                    <div class="col-5">
                                         <table class="table table-bordered table-lg">
                                             <tbody class="list">
                                             <tr>
@@ -137,7 +137,7 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <div class="col-8">
+                                    <div class="col-7">
                                         <div class="content-body chat-application">
                                             <section class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible"  >
                                                 <div class="chats">
