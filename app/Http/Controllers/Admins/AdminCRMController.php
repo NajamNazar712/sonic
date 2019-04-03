@@ -53,17 +53,19 @@ class AdminCRMController extends Controller
         if(!empty($shipment_ids)){
             foreach ($shipment_ids as $shipment_id) {
                 $shipment = Shipment::find($shipment_id);
-
-                $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
-                if($is_shipment){
-                    if($is_shipment->case_nature_id != $nature_id){
-                        CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                if($shipment){
+                    $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
+                    if($is_shipment){
+                        if($is_shipment->case_nature_id != $nature_id){
+                            CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                        }else{
+                            $present_shipments[] = $shipment->tracking_number;
+                            $flag = true;
+                        }
                     }else{
-                        $present_shipments[] = $shipment->tracking_number;
-                        $flag = true;
+                        CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
                     }
                 }
-
             }
             return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
         }else{

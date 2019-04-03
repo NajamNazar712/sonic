@@ -151,15 +151,19 @@ class ShipperCRMController extends Controller
         }
         if(!empty($shipment_ids)){
             foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+                if($shipment){
+                    $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
+                    if($is_shipment){
+                        if($is_shipment->case_nature_id != $nature_id){
+                            CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                        }else{
 
-                $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
-                if($is_shipment){
-                    if($is_shipment->case_nature_id != $nature_id){
-                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                            $present_shipments[] = $shipment->tracking_number;
+                            $flag = true;
+                        }
                     }else{
-                        $shipment = Shipment::find($shipment_id);
-                        $present_shipments[] = $shipment->tracking_number;
-                        $flag = true;
+                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                     }
                 }
 
