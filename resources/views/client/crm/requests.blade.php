@@ -76,6 +76,7 @@
                             head.push('Tracking No.');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
+                            head.push('Description');
                             head.push('Channel');
                             head.push('Status');
                             // head.push('Agent');
@@ -90,6 +91,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
+                                row.push(values.description);
                                 row.push(values.channel);
                                 row.push(values.status);
                                 // row.push(values.agent);
@@ -135,7 +137,7 @@
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'status', name: 'crs.name', class: 'align-middle status'},
                     // {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     // {data: 'name', name: 'a.name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
