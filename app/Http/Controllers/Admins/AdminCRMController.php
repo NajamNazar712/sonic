@@ -784,98 +784,98 @@ class AdminCRMController extends Controller
 
     public function valid(Request $request)
     {
-        $crm_request = CrmRequest::where('id', $request->id)->first();
+        $crm_request = CrmRequest::where('id', $request->req_id)->first();
         if ($crm_request['agent_id'] != null) {
             if ($request->prev_status == 1 || $request->prev_status == 5) {
                 if ($crm_request['status_id'] != 2) {
-                    CrmRequest::where('id', $request->id)->update([
+                    CrmRequest::where('id', $request->req_id)->update([
                         'status_id' => 2
                     ]);
                     CrmRequestStatusHistory::create([
-                        'crm_request_id' => $request->id,
+                        'crm_request_id' => $request->req_id,
                         'status_id' => 2,
                         'agent_id' => Auth::id()
                     ]);
-                    return ['status' => 0, 'success' => 'Request marked as In-Process', 'marked_status' => 2];
+                    return redirect()->back()->with(['success' => 'Request marked as In-Process']);
                 } else {
-                    return ['status' => 1, 'error' => 'Request is already marked as In-Process'];
+                    return redirect()->back()->with(['error' => 'Request is already marked as In-Process']);
                 }
             }
             if ($request->prev_status == 2) {
                 if ($crm_request['status_id'] != 3) {
-                    CrmRequest::where('id', $request->id)->update([
+                    CrmRequest::where('id', $request->req_id)->update([
                         'status_id' => 3
                     ]);
                     CrmRequestStatusHistory::create([
-                        'crm_request_id' => $request->id,
+                        'crm_request_id' => $request->req_id,
                         'status_id' => 3,
                         'agent_id' => Auth::id()
                     ]);
-                    return ['status' => 0, 'success' => 'Request marked as Resolved', 'marked_status' => 3];
+                    return redirect()->back()->with(['success' => 'Request marked as Resolved']);
                 } else {
-                    return ['status' => 1, 'error' => 'Request is already marked as Re-Open'];
+                    return redirect()->back()->with(['error' => 'Request is already marked as Resolved']);
                 }
             }
             if ($request->prev_status == 3) {
                 if ($crm_request['status_id'] != 4) {
-                    CrmRequest::where('id', $request->id)->update([
+                    CrmRequest::where('id', $request->req_id)->update([
                         'status_id' => 4
                     ]);
                     CrmRequestStatusHistory::create([
-                        'crm_request_id' => $request->id,
+                        'crm_request_id' => $request->req_id,
                         'status_id' => 4,
                         'agent_id' => Auth::id()
                     ]);
 
                     CrmRequestTagging::where('crm_request_id', $request->id)->delete();
-                    return ['status' => 0, 'success' => 'Request marked as Closed', 'marked_status' => 4];
+                    return redirect()->back()->with(['success' => 'Request marked as Closed']);
                 } else {
-                    return ['status' => 1, 'error' => 'Request is already marked as Resolved'];
+                    return redirect()->back()->with(['error' => 'Request is already marked as Closed']);
                 }
             }
             if ($request->prev_status == 4) {
                 if ($crm_request['status_id'] != 5) {
-                    CrmRequest::where('id', $request->id)->update([
+                    CrmRequest::where('id', $request->req_id)->update([
                         'status_id' => 5
                     ]);
                     CrmRequestStatusHistory::create([
-                        'crm_request_id' => $request->id,
-                        'status_id' => $crm_request['status_id'],
-                        'agent_id' => $crm_request['agent_id']
+                        'crm_request_id' => $request->req_id,
+                        'status_id' => 5,
+                        'agent_id' => Auth::id()
                     ]);
-                    return ['status' => 0, 'success' => 'Request marked as Re-Open', 'marked_status' => 5];
+                    return redirect()->back()->with(['success' => 'Request marked as Re-Open']);
                 } else {
-                    return ['status' => 1, 'error' => 'Request is already marked as Re-Open'];
+                    return redirect()->back()->with(['error' => 'Request is already marked as Re-Open']);
                 }
             }
         }
         else{
-            return ['status' => 1, 'error' => 'Agent is not assigned yet'];
+            return redirect()->back()->with(['error' => 'Agent is not assigned yet']);
         }
     }
 
     public function invalid(Request $request)
     {
-        $crm_request = CrmRequest::where('id', $request->id)->first();
+        $crm_request = CrmRequest::where('id', $request->req_id)->first();
         if ($crm_request['agent_id'] != null) {
             if ($crm_request['status_id'] != 4) {
-                CrmRequest::where('id', $request->id)->update([
+                CrmRequest::where('id', $request->req_id)->update([
                     'status_id' => 4
                 ]);
                 CrmRequestStatusHistory::create([
-                    'crm_request_id' => $request->id,
+                    'crm_request_id' => $request->req_id,
                     'status_id' => 4,
                     'agent_id' => Auth::id()
                 ]);
 
                 CrmRequestTagging::where('crm_request_id', $request->id)->delete();
-                return ['status' => 0, 'success' => 'Request marked as Closed'];
+                return redirect()->back()->with(['success' => 'Request marked as Closed']);
             } else {
-                return ['status' => 1, 'error' => 'Request is already marked as Closed'];
+                return redirect()->back()->with(['error' => 'Request is already marked as Closed']);
             }
         }
         else{
-            return ['status' => 1, 'error' => 'Agent is not assigned yet'];
+            return redirect()->back()->with(['error' => 'Agent is not assigned yet']);
         }
     }
 
