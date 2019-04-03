@@ -22,7 +22,7 @@
                             <div class="card-body">
                                 @include('admin.inc.messages')
                                 <div class="row mb-2">
-                                    <div class="col-6">
+                                    <div class="col-4">
                                         <table class="table table-bordered table-lg">
                                             <tbody class="list">
                                             <tr>
@@ -137,7 +137,7 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-8">
                                         <div class="content-body chat-application">
                                             <section class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible"  >
                                                 <div class="chats">
@@ -721,9 +721,9 @@
                             if(user == 0){
                                 if(data.comment.comment_type == 0){
 
-                                        var html = '<div class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>'+  +'</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
+                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
                                     }else{
-                                        var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
+                                        var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p></div></div></div>';
                                     }
                                     $('section.chat-app-window .chats').append(html);
 
