@@ -24,7 +24,7 @@
           <ul class="nav navbar-nav float-right">
             <li class="dropdown dropdown-user nav-item">
               <a class="nav-link d-inline-flex align-middle p-0" href="http://bit.ly/sonic_video_tutorial" target="_blank">
-                  <div class="m-0 pl-1 pr-1 bg-white primary">
+                  <div class="m-0 bg-white primary rounded" style="padding: 10px;">
                       <span class="align-middle font-weight-bold">HELP</span>
                       <h2 class="d-inline-block m-0 align-middle primary"><i class="ft-help-circle m-0"></i></h2>
                   </div>
