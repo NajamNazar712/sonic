@@ -377,14 +377,24 @@ class AdminCRMController extends Controller
             ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+            ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
             ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
             ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crt.tagged_id')
+            ->leftjoin('sale_person_tags as spt', function($join) {
+                $join->on('spt.user_id', '=', 's.user_id')
+                    ->where('spt.status', '=', 0);
+            })
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id')
             ->where('crm_requests.status_id', 2);
-        if (!in_array(session('role_id'), [1, 6])) {
+        if (!in_array(session('role_id'), [1, 4, 6])) {
             $in_process_request = $in_process_request->where(function ($query) {
                 $query->where(function ($sub_query) {
                     $sub_query->where('crm_requests.agent_id', Auth::id());
+                })
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('spt.admin_id', '=', Auth::id());
                 })
                 ->orWhere(function ($sub_query) {
                     $sub_query->where('crt.crm_request_tagging_type_id', 2)
@@ -392,7 +402,11 @@ class AdminCRMController extends Controller
                 })
                 ->orWhere(function ($sub_query) {
                     $sub_query->where('crt.crm_request_tagging_type_id', 1)
-                        ->where('adp.id', '=', session('department_id'));
+                        ->where('adp.id', '=', session('department_id'))
+                        ->where(function ($sub_sub_query) {
+                            $sub_sub_query->whereIn('oc.hub_id', session('hubs'))
+                                ->orWhereIn('dc.hub_id', session('hubs'));
+                        });
                 });
             });
         }
