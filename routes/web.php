@@ -984,6 +984,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_store')->name('store');
         });
+        Route::prefix('fuel_factor')->name('fuel_factor.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@fuel_factor_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@fuel_factor_store')->name('store');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {

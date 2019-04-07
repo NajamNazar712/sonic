@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\PettyCashAccountHead;
@@ -9,9 +10,12 @@ use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 
+use App\Http\Models\FuelSurcharge;
+use App\Http\Models\Shipper\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 
 class GlobalSettingsController extends Controller
@@ -586,5 +590,40 @@ class GlobalSettingsController extends Controller
         $settings_due_date->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function fuel_factor_index(){
+        return view('admin.settings.fuel_factor');
+    }
+
+    public function fuel_factor_store(Request $request){
+        $fuel_factor = $request->fuel_factor;
+        if ($fuel_factor != null) {
+            $users = User::where('status', 3)->select('id')->get();
+            if(!$users->isEmpty()){
+                foreach ($users as $user) {
+                    if ( FuelSurcharge::where('user_id',$user->id)->exists() ) {
+                        $fuel_charges = FuelSurcharge::where('user_id',$user->id)->get();
+                        foreach ($fuel_charges as $fuel_charge) {
+                            if ($fuel_charge->fuel_surcharge > 0) {
+                                $update_fuel_surcharge = $fuel_charge->fuel_surcharge + $fuel_factor;
+                                if($update_fuel_surcharge >= 0){
+                                    $fuel_charge->fuel_surcharge = $update_fuel_surcharge;
+                                    $fuel_charge->save();
+                                }
+                            }
+                        }
+                    }
+                }
+                $fuel_factor_history = new FuelFactorHistory();
+                $fuel_factor_history->fuel_factor = $fuel_factor;
+                $fuel_factor_history->admin_id = Auth::id();
+                $fuel_factor_history->save();
+
+                return redirect()->back()->with('success', 'Fuel Factor Updated!');
+            }else{
+                return redirect()->back()->with('error', 'Fuel Factor failed to update!');
+            }
+        }
     }
 }

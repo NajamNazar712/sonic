@@ -469,7 +469,12 @@
 					@if (session('role_id') == 1 || in_array(175, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.settings.debriefing_report_cut_off_time.index')}}">Debriefing Report Cut-Off Time</a></li>
                     @endif
-				</ul>            </li>
+
+                    @if (session('role_id') == 1 || in_array(189, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.settings.fuel_factor.index')}}">Fuel Factor</a></li>
+                    @endif
+
+				</ul></li>
             @endif
         </ul>
     </div>
