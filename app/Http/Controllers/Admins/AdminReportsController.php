@@ -4132,11 +4132,11 @@ class AdminReportsController extends Controller
         $delivery_note = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
-            ->select('r.name as rider_name', 'c.name as rider_city', 'delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'delivery_notes.status_verified_at as verified_at', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', DB::raw('(select count(shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1) as shipment_fake_status'))
+            ->select('r.name as rider_name', 'c.name as rider_city', 'delivery_notes.id as delivery_note_id', 'delivery_notes.created_at', 'delivery_notes.status_verified_at as verified_at', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', DB::raw('(select count(shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1) as shipment_fake_status'))
         ->where('dns.fake_status', 1)->groupBy('delivery_notes.id');
 
 
-        $delivery_note = Datatables::of($delivery_note)
+        $datatables = Datatables::of($delivery_note)
             ->editColumn('delivery_note_id', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
@@ -4166,15 +4166,17 @@ class AdminReportsController extends Controller
                 }
             });
         if ($rider = $request->get('rider')) {
-            $delivery_note->where('r.id', '=', $rider);
+            $datatables->where('r.id', '=', $rider);
         }
         if ($hub = $request->get('hub')) {
-            $delivery_note->where('delivery_notes.hub_id', $hub);
+            $datatables->where('delivery_notes.hub_id', $hub);
         }
-        if($search_date = $request->get('search_date')){
-            $delivery_note->whereDate('delivery_notes.created_at',$search_date);
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
         }
-        return $delivery_note->make(true);
+        return $datatables->make(true);
     }
 
     public function fake_status_shipments_total(Request $request){
