@@ -2671,6 +2671,11 @@ class AdminFinanceController extends Controller
             ->where('ss.tracking_number', '=', $tracking_number);
         }
 
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatables->whereBetween('done_payments.created_at', [$from,$to]);
+        }
         return $datatables->make(true);
     }
 
