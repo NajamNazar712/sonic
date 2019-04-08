@@ -597,31 +597,31 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.fuel_factor');
     }
 
-    public function fuel_factor_store(Request $request){
+    public function fuel_factor_store(Request $request)
+    {
         $fuel_factor = $request->fuel_factor;
         if ($fuel_factor != null) {
             $users = User::where('status', 3)->select('id')->get();
-            if(!$users->isEmpty()){
+            if (!$users->isEmpty()) {
                 foreach ($users as $user) {
-                    if ( FuelSurcharge::where('user_id',$user->id)->exists() ) {
-                        $fuel_charges = FuelSurcharge::where('user_id',$user->id)->get();
+                    if (FuelSurcharge::where('user_id', $user->id)->exists()) {
+                        $fuel_charges = FuelSurcharge::where('user_id', $user->id)->get();
                         foreach ($fuel_charges as $fuel_charge) {
-//                            if ($fuel_charge->fuel_surcharge > 0) {
-                                $fuel_surcharge_history = new HistoryFuelSurcharge();
-                                $fuel_surcharge_history->user_id = $fuel_charge->user_id;
-                                $fuel_surcharge_history->shipping_mode_id = $fuel_charge->shipping_mode_id;
-                                $fuel_surcharge_history->fuel_surcharge = $fuel_charge->fuel_surcharge;
-                                $fuel_surcharge_history->save();
 
-                                $update_fuel_surcharge = $fuel_charge->fuel_surcharge + $fuel_factor;
-                                if($update_fuel_surcharge >= 0){
-                                    $fuel_charge->fuel_surcharge = $update_fuel_surcharge;
-                                    $fuel_charge->save();
-                                }else{
-                                    $fuel_charge->fuel_surcharge = 0;
-                                    $fuel_charge->save();
-                                }
-//                            }
+                            $fuel_surcharge_history = new HistoryFuelSurcharge();
+                            $fuel_surcharge_history->user_id = $fuel_charge->user_id;
+                            $fuel_surcharge_history->shipping_mode_id = $fuel_charge->shipping_mode_id;
+                            $fuel_surcharge_history->fuel_surcharge = $fuel_charge->fuel_surcharge;
+                            $fuel_surcharge_history->save();
+
+                            $update_fuel_surcharge = $fuel_charge->fuel_surcharge + $fuel_factor;
+                            if ($update_fuel_surcharge >= 0) {
+                                $fuel_charge->fuel_surcharge = $update_fuel_surcharge;
+                                $fuel_charge->save();
+                            } else {
+                                $fuel_charge->fuel_surcharge = 0;
+                                $fuel_charge->save();
+                            }
                         }
                     }
                 }
@@ -631,7 +631,7 @@ class GlobalSettingsController extends Controller
                 $fuel_factor_history->save();
 
                 return redirect()->back()->with('success', 'Fuel Factor Updated!');
-            }else{
+            } else {
                 return redirect()->back()->with('error', 'Fuel Factor failed to update!');
             }
         }
