@@ -301,20 +301,33 @@ class AdminPettyCashController extends Controller
         $petty = PettyCashStatement::find($statement_id);
         if($petty){
             if($petty->station_approved_by == null){
-                $petty->station_approved_by = Auth::id();
-                $petty->station_approved_at = Carbon::now();
-                $petty->status = 1;
-                $petty->save();
+                if(session('role_id') == 1 || in_array(190, session('permissions'))){
+                    $petty->station_approved_by = Auth::id();
+                    $petty->station_approved_at = Carbon::now();
+                    $petty->status = 1;
+                    $petty->save();
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request not ready to approve!']);
+                }
+
             }else if($petty->operation_approved_by == null){
+                if(session('role_id') == 1 || in_array(191, session('permissions'))){
                 $petty->operation_approved_by = Auth::id();
                 $petty->operation_approved_at = Carbon::now();
                 $petty->status = 2;
                 $petty->save();
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request not ready to approve!']);
+                }
             }else if($petty->finance_approved_by == null){
+                if(session('role_id') == 1 || in_array(173, session('permissions'))){
                 $petty->finance_approved_by = Auth::id();
                 $petty->finance_approved_at = Carbon::now();
                 $petty->status = 3;
                 $petty->save();
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request not ready to approve!']);
+                }
             }
             return response()->json(['status' => 1, 'success' => 'Petty Cash Request Successfully Approved!']);
         }else{
