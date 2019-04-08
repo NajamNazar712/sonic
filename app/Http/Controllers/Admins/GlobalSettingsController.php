@@ -11,6 +11,7 @@ use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 
 use App\Http\Models\FuelSurcharge;
+use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\Shipper\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -605,13 +606,22 @@ class GlobalSettingsController extends Controller
                     if ( FuelSurcharge::where('user_id',$user->id)->exists() ) {
                         $fuel_charges = FuelSurcharge::where('user_id',$user->id)->get();
                         foreach ($fuel_charges as $fuel_charge) {
-                            if ($fuel_charge->fuel_surcharge > 0) {
+//                            if ($fuel_charge->fuel_surcharge > 0) {
+                                $fuel_surcharge_history = new HistoryFuelSurcharge();
+                                $fuel_surcharge_history->user_id = $fuel_charge->user_id;
+                                $fuel_surcharge_history->shipping_mode_id = $fuel_charge->shipping_mode_id;
+                                $fuel_surcharge_history->fuel_surcharge = $fuel_charge->fuel_surcharge;
+                                $fuel_surcharge_history->save();
+
                                 $update_fuel_surcharge = $fuel_charge->fuel_surcharge + $fuel_factor;
                                 if($update_fuel_surcharge >= 0){
                                     $fuel_charge->fuel_surcharge = $update_fuel_surcharge;
                                     $fuel_charge->save();
+                                }else{
+                                    $fuel_charge->fuel_surcharge = 0;
+                                    $fuel_charge->save();
                                 }
-                            }
+//                            }
                         }
                     }
                 }
