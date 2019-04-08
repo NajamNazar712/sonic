@@ -9,6 +9,7 @@ use App\Http\Models\ChargesModes;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\Zone;
+use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -330,12 +331,27 @@ class AdminWalkInBookShipmentController extends Controller
     }
 
     public function check_standard_weight(Request $request){
+        $city_zone = City::where('id', $request->consignee_city)->first();
+        $zone = ZoneClassCity::where(['city_id' => $request->consignee_city, 'zone_id' => $city_zone['zone_id']])->first();
         $check = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
+        
+        if($zone['class'] == 0){
+            $check_zone = $check['chargeable_weight_charges_class_0'];
+        }
+        elseif ($zone['class'] == 1){
+            $check_zone = $check['chargeable_weight_charges_class_1'];
+        }
+        elseif ($zone['class'] == 2){
+            $check_zone = $check['chargeable_weight_charges_class_2'];
+        }
+        else{
+            $check_zone = $check['chargeable_weight_charges_class_3'];
+        }
         if($request->actual_weight < $check['actual_weight']){
             return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to '. $check['actual_weight']]);
         }
-        elseif ($request->charges_per_kg < $check['chargeable_weight']){
-            return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to '. $check['chargeable_weight']]);
+        elseif ($request->charges_per_kg < $check_zone){
+            return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to '. $check_zone]);
         }
         else {
             return response()->json(['status' => 2, 'error' => '']);
