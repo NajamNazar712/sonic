@@ -1054,8 +1054,6 @@ class APIController extends Controller
           return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('destination_city_id')]) . ' is deactivated';
         }
 
-        $pickup_city_id = $user_shipping_info->city_id;
-
         if ($request->input('origin_city_id') != $request->input('destination_city_id') && $request->input('shipping_mode_id') == 4) {
           return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
         }
