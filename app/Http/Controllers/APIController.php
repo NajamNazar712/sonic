@@ -1102,41 +1102,41 @@ class APIController extends Controller
             }
 
             $information['destination']['class'] = $class;
-
-            $information['charges'] = array();
-
-            $calculation = ShipmentChargesController::calculate_weight($user->account_type_id, $user->id, $request->input('shipping_mode_id'), $request->input('same_day_timing_id'), NULL, $request->input('estimated_weight'), $origin_city->id, $origin_city->zone_id, $destination_city->id);
-
-            if ($calculation) {
-              $information['charges']['weight'] = $calculation['weight_charges'];
-              $information['chargeable_weight'] = $calculation['chargeable_weight'];
-            }
-            else {
-              $information['charges']['weight'] = 0;
-              $information['chargeable_weight'] = 0;
-            }
-
-            $calculation = ShipmentChargesController::calculate_cash_handling($user->account_type_id, $user->id, $request->input('shipping_mode_id'), $request->input('amount'));
-
-            if ($calculation) {
-              $information['charges']['cash_handling'] = $calculation['cash_handling_charges'];
-            }
-            else {
-              $information['charges']['cash_handling'] = 0;
-            }
-
-            $calculation = ShipmentChargesController::calculate_fuel_surcharge($user->account_type_id, $user->id, $request->input('shipping_mode_id'), $information['charges']['weight']);
-
-            if ($calculation) {
-              $information['charges']['fuel_surcharge'] = $calculation['fuel_surcharge'];
-            }
-            else {
-              $information['charges']['fuel_surcharge'] = 0;
-            }
-
-            return response()->json(['status' => 0, 'message' => 'Charges Calculated', 'information' => $information]);
           }
         }
+
+        $information['charges'] = array();
+
+        $calculation = ShipmentChargesController::calculate_weight($user->account_type_id, $user->id, $request->input('shipping_mode_id'), $request->input('same_day_timing_id'), NULL, $request->input('estimated_weight'), $origin_city->id, $origin_city->zone_id, $destination_city->id);
+
+        if ($calculation) {
+          $information['charges']['weight'] = $calculation['weight_charges'];
+          $information['chargeable_weight'] = $calculation['chargeable_weight'];
+        }
+        else {
+          $information['charges']['weight'] = 0;
+          $information['chargeable_weight'] = 0;
+        }
+
+        $calculation = ShipmentChargesController::calculate_cash_handling($user->account_type_id, $user->id, $request->input('shipping_mode_id'), $request->input('amount'));
+
+        if ($calculation) {
+          $information['charges']['cash_handling'] = $calculation['cash_handling_charges'];
+        }
+        else {
+          $information['charges']['cash_handling'] = 0;
+        }
+
+        $calculation = ShipmentChargesController::calculate_fuel_surcharge($user->account_type_id, $user->id, $request->input('shipping_mode_id'), $information['charges']['weight']);
+
+        if ($calculation) {
+          $information['charges']['fuel_surcharge'] = $calculation['fuel_surcharge'];
+        }
+        else {
+          $information['charges']['fuel_surcharge'] = 0;
+        }
+
+        return response()->json(['status' => 0, 'message' => 'Charges Calculated', 'information' => $information]);
       }
     }
 }
