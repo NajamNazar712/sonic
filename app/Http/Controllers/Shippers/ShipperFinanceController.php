@@ -569,7 +569,23 @@ class ShipperFinanceController extends Controller
 
         $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'Adjustments (PKR)'];
 
+        $account_type_id = $done_payment->shipper->account_type_id;
+
         $serial_number = 1;
+
+        $total_collection_amount = 0;
+        $total_weight_charges = 0;
+        $total_cash_handling_charges = 0;
+        $total_insurance_charges = 0;
+        $total_replacement_charges = 0;
+        // $total_try_and_buy_charges = 0;
+        $total_return_charges = 0;
+        $total_packaging_material_charges = 0;
+        $total_fuel_surcharge = 0;
+        $total_gst = 0;
+        $total_charges = 0;
+        $total_adjustments = 0;
+        $total_payable = 0;
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
@@ -597,8 +613,8 @@ class ShipperFinanceController extends Controller
             $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->actual_weight;
             $row[] = $done_payment_shipment->amount;
-            $row[] = (($done_payment_shipment->type != 2) ? $shipment->weight_charges : 0);
-            $row[] = (($done_payment_shipment->type == 0) ? $shipment->cash_handling_charges : 0);
+            $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->weight_charges : 0);
+            $row[] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
             $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
 
             $details[] = $row;
