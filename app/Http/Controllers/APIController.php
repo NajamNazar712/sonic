@@ -71,7 +71,10 @@ class APIController extends Controller
       'items.*.product_value' => 'Product Value',
 
       'tracking_number' => 'Tracking Number',
-      'type' => 'Type'
+      'type' => 'Type',
+
+      'origin_city_id' => 'Origin City ID',
+      'destination_city_id' => 'Destination City ID'
     ];
 
     private $messages = [
@@ -1085,16 +1088,16 @@ class APIController extends Controller
           else {
             $zone_class_city = $zone_class_city->first();
 
-            if ($zone_class_city->class = 0) {
+            if ($zone_class_city->class == 0) {
               $class = 'A';
             }
-            else if ($zone_class_city->class = 1) {
+            else if ($zone_class_city->class == 1) {
               $class = 'B';
             }
-            else if ($zone_class_city->class = 2) {
+            else if ($zone_class_city->class == 2) {
               $class = 'C';
             }
-            else if ($zone_class_city->class = 3) {
+            else if ($zone_class_city->class == 3) {
               $class = 'D';
             }
             else {
