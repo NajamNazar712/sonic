@@ -331,30 +331,57 @@ class AdminWalkInBookShipmentController extends Controller
     }
 
     public function check_standard_weight(Request $request){
-        $city_zone = City::where('id', $request->consignee_city)->first();
-        $zone = ZoneClassCity::where(['city_id' => $request->consignee_city, 'zone_id' => $city_zone['zone_id']])->first();
-        $check = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
-        
-        if($zone['class'] == 0){
-            $check_zone = $check['chargeable_weight_charges_class_0'];
-        }
-        elseif ($zone['class'] == 1){
-            $check_zone = $check['chargeable_weight_charges_class_1'];
-        }
-        elseif ($zone['class'] == 2){
-            $check_zone = $check['chargeable_weight_charges_class_2'];
+        if($request->shipping_mode != null && $request->delivery_type != null && $request->consignee_city != null && $request->pickup_city != null && $request->delivery_type != null) {
+            $check = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
+            if ($request->pickup_city != $request->consignee_city) {
+                $city_zone = City::where('id', $request->consignee_city)->first();
+                $zone = ZoneClassCity::where(['city_id' => $request->consignee_city, 'zone_id' => $city_zone['zone_id']]);
+                if ($zone->exists()) {
+                    $zone = $zone->first();
+
+                    if ($zone['class'] == 0) {
+                        $check_zone = $check['chargeable_weight_charges_class_0'];
+                    } elseif ($zone['class'] == 1) {
+                        $check_zone = $check['chargeable_weight_charges_class_1'];
+                    } elseif ($zone['class'] == 2) {
+                        $check_zone = $check['chargeable_weight_charges_class_2'];
+                    } else {
+                        $check_zone = $check['chargeable_weight_charges_class_3'];
+                    }
+                    if ($request->actual_weight < $check['actual_weight']) {
+                        return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $check['actual_weight']]);
+                    } elseif ($request->charges_per_kg < $check_zone) {
+                        return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' . $check_zone]);
+                    } else {
+                        return response()->json(['status' => 2, 'error' => '']);
+                    }
+                } else {
+                    return response()->json(['status' => 0, 'error' => "Zone class does'nt exists"]);
+                }
+            }
+            else{
+                if ($request->actual_weight < $check['actual_weight']) {
+                    return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $check['actual_weight']]);
+                } elseif ($request->charges_per_kg < $check['chargeable_weight_local']) {
+                    return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' .  $check['chargeable_weight_local']]);
+                } else {
+                    return response()->json(['status' => 2, 'error' => '']);
+                }
+            }
         }
         else{
-            $check_zone = $check['chargeable_weight_charges_class_3'];
-        }
-        if($request->actual_weight < $check['actual_weight']){
-            return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to '. $check['actual_weight']]);
-        }
-        elseif ($request->charges_per_kg < $check_zone){
-            return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to '. $check_zone]);
-        }
-        else {
-            return response()->json(['status' => 2, 'error' => '']);
+            if($request->pickup_city == null){
+                return response()->json(['status' => 3, 'error' => 'Pickup city is required']);
+            }
+            elseif($request->delivery_type == null){
+                return response()->json(['status' => 4, 'error' => 'Delivery type is required']);
+            }
+            elseif($request->consignee_city == null){
+                return response()->json(['status' => 5, 'error' => 'Consignee city is required']);
+            }
+            elseif($request->shipping_mode == null){
+                return response()->json(['status' => 6, 'error' => 'Shipping mode is required']);
+            }
         }
     }
 
