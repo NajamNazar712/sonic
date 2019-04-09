@@ -1845,7 +1845,7 @@ class AdminFinanceController extends Controller
         ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
         ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
         ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-        ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_cycle', 's.booking_type_id', 'usi.poc',DB::raw('(select count(id) from shipments where shipments.user_id = u.id and shipments.shipper_status_id in (2,3,5,21,23,24,18,49,8,9,10,12,7,11,15,51)) as total_pending_shipments'))
+        ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_cycle', 's.booking_type_id', 'usi.poc',DB::raw('(select count(id) from shipments where shipments.user_id = u.id and shipments.shipper_status_id in (2,3,5,21,23,24,18,49,8,9,10,12,7,11,15,51)) as total_pending_shipments'), DB::raw('SUM(IF(pps.type = 2, pps.payable, 0)) as total_adjustments'))
         ->groupBy('pending_payments.id');
 
         if (session('role_id') != 1) {
@@ -1910,6 +1910,9 @@ class AdminFinanceController extends Controller
         })
         ->editColumn('total_payable', function($pending_payment) {
             return number_format($pending_payment->total_payable);
+        })
+        ->editColumn('total_adjustments', function($pending_payment) {
+            return number_format($pending_payment->total_adjustments);
         })
         ->addColumn('phone_numbers', function($pending_payment) {
             $phone_numbers = $pending_payment->phone;
