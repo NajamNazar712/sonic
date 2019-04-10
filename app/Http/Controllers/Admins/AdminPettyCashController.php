@@ -275,7 +275,7 @@ class AdminPettyCashController extends Controller
                 $dropdown .= '<a href="'.$route.'" class="dropdown-item" ><i class="ft-eye"></i> View Details</a>';
 
 //                if((session('role_id') == 1) || ($petty->status == 0 && (session('role_id') == 9) || session('role_id') == 10) || ($petty->status == 1 && (session('role_id') == 3) || session('role_id') == 8 || session('role_id') == 20) || ($petty->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
-                if((session('role_id') == 1) || in_array(173, session('permissions'))){
+                if((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions'))){
                     if((session('role_id') == 1) || ($petty->status == 0 && session('department_id') == 6) || ($petty->status == 1 && (session('department_id') == 6)) || ($petty->status == 2 && session('department_id') == 4)) {
                         $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div>Approve</button>';
                     }
@@ -301,20 +301,33 @@ class AdminPettyCashController extends Controller
         $petty = PettyCashStatement::find($statement_id);
         if($petty){
             if($petty->station_approved_by == null){
-                $petty->station_approved_by = Auth::id();
-                $petty->station_approved_at = Carbon::now();
-                $petty->status = 1;
-                $petty->save();
+                if(session('role_id') == 1 || in_array(190, session('permissions'))){
+                    $petty->station_approved_by = Auth::id();
+                    $petty->station_approved_at = Carbon::now();
+                    $petty->status = 1;
+                    $petty->save();
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request not ready to approve!']);
+                }
+
             }else if($petty->operation_approved_by == null){
+                if(session('role_id') == 1 || in_array(191, session('permissions'))){
                 $petty->operation_approved_by = Auth::id();
                 $petty->operation_approved_at = Carbon::now();
                 $petty->status = 2;
                 $petty->save();
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request not ready to approve!']);
+                }
             }else if($petty->finance_approved_by == null){
+                if(session('role_id') == 1 || in_array(173, session('permissions'))){
                 $petty->finance_approved_by = Auth::id();
                 $petty->finance_approved_at = Carbon::now();
                 $petty->status = 3;
                 $petty->save();
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request not ready to approve!']);
+                }
             }
             return response()->json(['status' => 1, 'success' => 'Petty Cash Request Successfully Approved!']);
         }else{

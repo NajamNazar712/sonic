@@ -269,6 +269,14 @@
             });
 
             $('#actual_weight, #charges_per_kg').change(function(){
+                $('#span').remove();
+                var pickup;
+                if ($('#pickup_address').val() == 0) {
+                    var pickup_city_id = $('#new_pickup_city').val();
+                }
+                else {
+                    var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
+                }
 
                 $.ajax({
                     url:'{!! route('admin.shipment.book.check_standard_weight') !!}',
@@ -277,6 +285,9 @@
                         '_token': '{{ csrf_token() }}',
                         'actual_weight': $('#actual_weight').val(),
                         'charges_per_kg': $('#charges_per_kg').val(),
+                        'pickup_city': pickup_city_id,
+                        'pickup': pickup,
+                        'consignee_city': $('#consignee_city').val(),
                         'delivery_type': $('#delivery_type').val(),
                         'shipping_mode': $('#shipping_mode').val()
                     }
@@ -296,11 +307,53 @@
                             $('#sub_book').prop('disabled', true);
                             $('#sub_book_print').prop('disabled', true);
                         }
-                    if(data.status === 2) {
-                        $('#span').remove();
-                        $('#sub_book').prop('disabled', false);
-                        $('#sub_book_print').prop('disabled', false);
-                    }
+                        if(data.status === 3) {
+                            $('#span').remove();
+                            if ($('#pickup_address').val() == "") {
+                                var span = '<span id="span" style="color: red">Pickup address is required</span>';
+                                $('#pickup_address').parent('div').append(span);
+                            }
+                            else{
+                                var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                                $('#new_pickup_city').parent('div').append(span);
+                            }
+                            $('#actual_weight').val('');
+                            $('#charges_per_kg').val('');
+                            $('#sub_book').prop('disabled', true);
+                            $('#sub_book_print').prop('disabled', true);
+                        }
+                        if(data.status === 4) {
+                            $('#span').remove();
+                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                            $('#delivery_type').parent('div').append(span);
+                            $('#actual_weight').val('');
+                            $('#charges_per_kg').val('');
+                            $('#sub_book').prop('disabled', true);
+                            $('#sub_book_print').prop('disabled', true);
+                        }
+                        if(data.status === 5) {
+                            $('#span').remove();
+                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                            $('#consignee_city').parent('div').append(span);
+                            $('#actual_weight').val('');
+                            $('#charges_per_kg').val('');
+                            $('#sub_book').prop('disabled', true);
+                            $('#sub_book_print').prop('disabled', true);
+                        }
+                        if(data.status === 6) {
+                            $('#span').remove();
+                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                            $('#shipping_mode').parent('div').append(span);
+                            $('#actual_weight').val('');
+                            $('#charges_per_kg').val('');
+                            $('#sub_book').prop('disabled', true);
+                            $('#sub_book_print').prop('disabled', true);
+                        }
+                        if(data.status === 2) {
+                            $('#span').remove();
+                            $('#sub_book').prop('disabled', false);
+                            $('#sub_book_print').prop('disabled', false);
+                        }
                 });
             });
 

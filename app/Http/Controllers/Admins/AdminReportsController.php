@@ -2316,11 +2316,11 @@ class AdminReportsController extends Controller
                 $row['revenue_wo_gst'] = number_format($revenue_wo_gst);
                 $avg_rev = round($avg_revenue);
                 $row['average_revenue'] = number_format($avg_rev);
-                $row['actual_weight'] = $actual_weight;
+                $row['actual_weight'] = round($actual_weight,2);
                 $row['avg_actual_weight'] = round($avg_actual_weight);
                 $row['avg_rev_actual_weight'] = round($avg_rev_actual_weight);
 
-                $row['chargeable_weight'] = round($chargeable_weight);
+                $row['chargeable_weight'] = round($chargeable_weight,2);
                 $row['avg_chargeable_weight'] = round($avg_chargeable_weight);
                 $row['avg_rev_chargeable_weight'] = round($avg_rev_chargeable_weight);
                 $row['cod_collection'] = number_format($cod_collection);
@@ -2328,7 +2328,7 @@ class AdminReportsController extends Controller
                 $avg_cc = round($avg_cash_collection);
                 $row['average_cash_collection'] = number_format($avg_cc);
                 $rev_occ =   round($rev_on_cash_collection);
-                $row['revenue_cash_collection'] = number_format($rev_occ);
+                $row['revenue_cash_collection'] = number_format($rev_occ).'%';
                 $sort_support_array[] = $received;
 
                 $sorted_details_array[] = $row;
@@ -2337,23 +2337,29 @@ class AdminReportsController extends Controller
                 $total_revenue_wo_gst += $revenue_wo_gst;
                 $total_cod_collection += $cod_collection;
                 $total_actual_weight += $actual_weight;
-                $total_avg_actual_weight += $avg_actual_weight;
-                $total_avg_rev_actual_weight += $avg_rev_actual_weight;
+//                $total_avg_actual_weight += $avg_actual_weight;
+//                $total_avg_rev_actual_weight += $avg_rev_actual_weight;
                 $total_chargeable_weight += $chargeable_weight;
-                $total_avg_chargeable_weight += $avg_chargeable_weight;
-                $total_avg_rev_chargeable_weight += $avg_rev_chargeable_weight;
-                $total_avg_revenue += $avg_rev;
+//                $total_avg_chargeable_weight += $avg_chargeable_weight;
+//                $total_avg_rev_chargeable_weight += $avg_rev_chargeable_weight;
+//                $total_avg_revenue += $avg_rev;
                 $total_avg_cash_collection += $avg_cc;
-                $total_rev_on_cash_collection += $rev_occ;
+//                $total_rev_on_cash_collection += $rev_occ;
                 $serial_number_hubs++;
             }
 
         }
+        $total_avg_revenue = $total_revenue_wo_gst / $total_received;
+        $total_avg_actual_weight = $total_actual_weight / $total_received;
+        $total_avg_rev_actual_weight = $total_revenue_wo_gst / $total_actual_weight;
+        $total_avg_chargeable_weight = $total_chargeable_weight / $total_received;
+        $total_avg_rev_chargeable_weight = $total_revenue_wo_gst / $total_chargeable_weight;
+        $total_rev_on_cash_collection = $total_avg_revenue / $total_avg_cash_collection;
         array_multisort($sort_support_array, SORT_DESC, $sorted_details_array);
         foreach ($sorted_details_array as $item) {
             $details[] = $item;
         }
-        $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),number_format($total_actual_weight),round($total_avg_actual_weight),round($total_avg_rev_actual_weight),number_format($total_chargeable_weight),round($total_avg_chargeable_weight),round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection)];
+        $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),round($total_actual_weight,2),round($total_avg_actual_weight),round($total_avg_rev_actual_weight),round($total_chargeable_weight,2),round($total_avg_chargeable_weight),round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection).'%'];
 
         $details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg. Actual Weight/Parcel','Avg. Revenue On Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
 
@@ -2591,10 +2597,10 @@ class AdminReportsController extends Controller
                 $shipper_row['shipper_rev_wo_gst'] = number_format($shipper_rev_wo_gst);
                 $s_avg_revenue = round($shipper_avg_revenue);
                 $shipper_row['shipper_avg_revenue'] = number_format($s_avg_revenue);
-                $shipper_row['shipper_actual_weight'] = round($shipper_actual_weight);
+                $shipper_row['shipper_actual_weight'] = round($shipper_actual_weight,2);
                 $shipper_row['shipper_avg_actual_weight'] = round($shipper_avg_actual_weight);
                 $shipper_row['$shipper_avg_rev_actual_weight'] = round($shipper_avg_rev_actual_weight);
-                $shipper_row['shipper_chargeable_weight'] = round($shipper_chargeable_weight);
+                $shipper_row['shipper_chargeable_weight'] = round($shipper_chargeable_weight,2);
                 $shipper_row['shipper_avg_chargeable_weight'] = round($shipper_avg_chargeable_weight);
                 $shipper_row['shipper_avg_rev_chargeable_weight'] = round($shipper_avg_rev_chargeable_weight);
                 $shipper_row['shipper_cod'] = number_format($shipper_cod);
@@ -2602,7 +2608,7 @@ class AdminReportsController extends Controller
                 $avg_cash_coll = round($shipper_avg_cash_collection);
                 $shipper_row['shipper_avg_cc'] = number_format($avg_cash_coll);
                 $avg_rev_cc = round($shipper_rev_on_cash_collection);
-                $shipper_row['shipper_rcc'] = number_format($avg_rev_cc);
+                $shipper_row['shipper_rcc'] = number_format($avg_rev_cc).'%';
 
                 $sorted_shipper_array[] = $shipper_row;
                 $shipper_sort_support_array[] = $shipper_received;
@@ -2611,24 +2617,32 @@ class AdminReportsController extends Controller
                 $total_shipper_cod_collection += $shipper_cod;
                 $total_shipper_revenue_wo_gst += $shipper_rev_wo_gst;
                 $total_shipper_actual_weight += $shipper_actual_weight;
-                $total_shipper_avg_actual_weight += $shipper_avg_actual_weight;
-                $total_shipper_avg_rev_actual_weight += $shipper_avg_rev_actual_weight;
+//                $total_shipper_avg_actual_weight += $shipper_avg_actual_weight;
+//                $total_shipper_avg_rev_actual_weight += $shipper_avg_rev_actual_weight;
                 $total_shipper_chargeable_weight += $shipper_chargeable_weight;
-                $total_shipper_avg_chargeable_weight += $shipper_avg_chargeable_weight;
-                $total_shipper_avg_rev_chargeable_weight += $shipper_avg_rev_chargeable_weight;
-                $total_shipper_avg_revenue += $s_avg_revenue;
+//                $total_shipper_avg_chargeable_weight += $shipper_avg_chargeable_weight;
+//                $total_shipper_avg_rev_chargeable_weight += $shipper_avg_rev_chargeable_weight;
+//                $total_shipper_avg_revenue += $s_avg_revenue;
                 $total_shipper_avg_cash_collection += $avg_cash_coll;
-                $total_shipper_rev_on_cash_collection += $avg_rev_cc;
+//                $total_shipper_rev_on_cash_collection += $avg_rev_cc;
 
 
                 $serial_number_shippers++;
             }
         }
+
+        $total_shipper_avg_revenue = $total_shipper_revenue_wo_gst / $total_shipper_received;
+        $total_shipper_avg_actual_weight = $total_shipper_actual_weight / $total_shipper_received;
+        $total_shipper_avg_rev_actual_weight = $total_shipper_revenue_wo_gst / $total_shipper_actual_weight;
+        $total_shipper_avg_chargeable_weight = $total_shipper_chargeable_weight / $total_shipper_received;
+        $total_shipper_avg_rev_chargeable_weight = $total_shipper_revenue_wo_gst / $total_shipper_chargeable_weight;
+        $total_shipper_rev_on_cash_collection = $total_shipper_avg_revenue / $total_shipper_avg_cash_collection;
+
         array_multisort($shipper_sort_support_array, SORT_DESC, $sorted_shipper_array);
         foreach ($sorted_shipper_array as $shipper) {
             $details_shipper[] = $shipper;
         }
-        $details_shipper[] = ['Grand Total','DSR '.$only_date, number_format($total_shipper_booked), number_format($total_shipper_received), number_format($total_shipper_revenue_wo_gst),number_format($total_shipper_avg_revenue),number_format($total_shipper_actual_weight),round($total_shipper_avg_actual_weight),round($total_shipper_avg_rev_actual_weight),number_format($total_shipper_chargeable_weight),round($total_shipper_avg_chargeable_weight),round($total_shipper_avg_rev_chargeable_weight), number_format($total_shipper_cod_collection),number_format($total_shipper_avg_cash_collection),number_format($total_shipper_rev_on_cash_collection)];
+        $details_shipper[] = ['Grand Total','DSR '.$only_date, number_format($total_shipper_booked), number_format($total_shipper_received), number_format($total_shipper_revenue_wo_gst),number_format($total_shipper_avg_revenue),round($total_shipper_actual_weight,2),round($total_shipper_avg_actual_weight),round($total_shipper_avg_rev_actual_weight),round($total_shipper_chargeable_weight,2),round($total_shipper_avg_chargeable_weight),round($total_shipper_avg_rev_chargeable_weight), number_format($total_shipper_cod_collection),number_format($total_shipper_avg_cash_collection),number_format($total_shipper_rev_on_cash_collection).'%'];
 
         $spreadsheet = new Spreadsheet();
         $cell_st =[
@@ -3605,8 +3619,13 @@ class AdminReportsController extends Controller
                 $join->on('si.shipment_id', '=', 'shipments.id')
                     ->where('si.type','=',0);
             })
+            ->leftjoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'shipments.user_id')
+                    ->leftjoin('admins as adsp','adsp.id','=','spt.admin_id')
+                    ->where('spt.status','=',0);
+            })
             ->leftjoin('products as p','p.id','=','si.product_type_id')
-            ->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.id as payment_id', 'shipments.booking_type_id', 'usi.poc')
+            ->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person')
             ->whereNotIn('shipments.shipper_status_id',[1,17]);
 //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
 //            $now = Carbon::now();
@@ -4113,11 +4132,11 @@ class AdminReportsController extends Controller
         $delivery_note = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
-            ->select('r.name as rider_name', 'c.name as rider_city', 'delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'delivery_notes.status_verified_at as verified_at', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', DB::raw('(select count(shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1) as shipment_fake_status'))
+            ->select('r.name as rider_name', 'c.name as rider_city', 'delivery_notes.id as delivery_note_id', 'delivery_notes.created_at', 'delivery_notes.status_verified_at as verified_at', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', DB::raw('(select count(shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1) as shipment_fake_status'))
         ->where('dns.fake_status', 1)->groupBy('delivery_notes.id');
 
 
-        $delivery_note = Datatables::of($delivery_note)
+        $datatables = Datatables::of($delivery_note)
             ->editColumn('delivery_note_id', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
@@ -4147,15 +4166,17 @@ class AdminReportsController extends Controller
                 }
             });
         if ($rider = $request->get('rider')) {
-            $delivery_note->where('r.id', '=', $rider);
+            $datatables->where('r.id', '=', $rider);
         }
         if ($hub = $request->get('hub')) {
-            $delivery_note->where('delivery_notes.hub_id', $hub);
+            $datatables->where('delivery_notes.hub_id', $hub);
         }
-        if($search_date = $request->get('search_date')){
-            $delivery_note->whereDate('delivery_notes.created_at',$search_date);
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
         }
-        return $delivery_note->make(true);
+        return $datatables->make(true);
     }
 
     public function fake_status_shipments_total(Request $request){

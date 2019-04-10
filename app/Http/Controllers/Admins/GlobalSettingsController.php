@@ -450,7 +450,11 @@ class GlobalSettingsController extends Controller
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 1])->update([
             'actual_weight' => $request->walk_in_door_on_a,
-            'chargeable_weight' => $request->walk_in_door_on_c,
+            'chargeable_weight_local' => $request->walk_in_door_on_chargeable_weight_local,
+            'chargeable_weight_charges_class_0' => $request->walk_in_door_on_chargeable_weight_class_0_charges,
+            'chargeable_weight_charges_class_1' => $request->walk_in_door_on_chargeable_weight_class_1_charges,
+            'chargeable_weight_charges_class_2' => $request->walk_in_door_on_chargeable_weight_class_2_charges,
+            'chargeable_weight_charges_class_3' => $request->walk_in_door_on_chargeable_weight_class_3_charges,
             'local' => $request->walk_in_door_on_a_local,
             'national_charges_class_0'=> $request->walk_in_door_on_return_class_0_charges,
             'national_charges_class_1'=> $request->walk_in_door_on_return_class_1_charges,
@@ -460,7 +464,11 @@ class GlobalSettingsController extends Controller
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->update([
             'actual_weight' => $request->walk_in_hub_on_a,
-            'chargeable_weight' => $request->walk_in_hub_on_c,
+            'chargeable_weight_local' => $request->walk_in_hub_on_chargeable_weight_local,
+            'chargeable_weight_charges_class_0' => $request->walk_in_hub_on_chargeable_weight_class_0_charges,
+            'chargeable_weight_charges_class_1' => $request->walk_in_hub_on_chargeable_weight_class_1_charges,
+            'chargeable_weight_charges_class_2' => $request->walk_in_hub_on_chargeable_weight_class_2_charges,
+            'chargeable_weight_charges_class_3' => $request->walk_in_hub_on_chargeable_weight_class_3_charges,
             'local' => $request->walk_in_hub_on_a_local,
             'national_charges_class_0'=> $request->walk_in_hub_on_return_class_0_charges,
             'national_charges_class_1'=> $request->walk_in_hub_on_return_class_1_charges,
@@ -470,7 +478,11 @@ class GlobalSettingsController extends Controller
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->update([
             'actual_weight' => $request->walk_in_door_ol_a,
-            'chargeable_weight' => $request->walk_in_door_ol_c,
+            'chargeable_weight_local' => $request->walk_in_door_ol_chargeable_weight_local,
+            'chargeable_weight_charges_class_0' => $request->walk_in_door_ol_chargeable_weight_class_0_charges,
+            'chargeable_weight_charges_class_1' => $request->walk_in_door_ol_chargeable_weight_class_1_charges,
+            'chargeable_weight_charges_class_2' => $request->walk_in_door_ol_chargeable_weight_class_2_charges,
+            'chargeable_weight_charges_class_3' => $request->walk_in_door_ol_chargeable_weight_class_3_charges,
             'local' => $request->walk_in_door_ol_a_local,
             'national_charges_class_0'=> $request->walk_in_door_ol_return_class_0_charges,
             'national_charges_class_1'=> $request->walk_in_door_ol_return_class_1_charges,
@@ -480,7 +492,11 @@ class GlobalSettingsController extends Controller
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->update([
             'actual_weight' => $request->walk_in_hub_ol_a,
-            'chargeable_weight' => $request->walk_in_hub_ol_c,
+            'chargeable_weight_local' => $request->walk_in_hub_ol_chargeable_weight_local,
+            'chargeable_weight_charges_class_0' => $request->walk_in_hub_ol_chargeable_weight_class_0_charges,
+            'chargeable_weight_charges_class_1' => $request->walk_in_hub_ol_chargeable_weight_class_1_charges,
+            'chargeable_weight_charges_class_2' => $request->walk_in_hub_ol_chargeable_weight_class_2_charges,
+            'chargeable_weight_charges_class_3' => $request->walk_in_hub_ol_chargeable_weight_class_3_charges,
             'local' => $request->walk_in_hub_ol_a_local,
             'national_charges_class_0'=> $request->walk_in_hub_ol_return_class_0_charges,
             'national_charges_class_1'=> $request->walk_in_hub_ol_return_class_1_charges,
@@ -490,7 +506,11 @@ class GlobalSettingsController extends Controller
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 1])->update([
             'actual_weight' => $request->walk_in_door_dn_a,
-            'chargeable_weight' => $request->walk_in_door_dn_c,
+            'chargeable_weight_local' => $request->walk_in_door_dn_chargeable_weight_local,
+            'chargeable_weight_charges_class_0' => $request->walk_in_door_dn_chargeable_weight_class_0_charges,
+            'chargeable_weight_charges_class_1' => $request->walk_in_door_dn_chargeable_weight_class_1_charges,
+            'chargeable_weight_charges_class_2' => $request->walk_in_door_dn_chargeable_weight_class_2_charges,
+            'chargeable_weight_charges_class_3' => $request->walk_in_door_dn_chargeable_weight_class_3_charges,
             'local' => $request->walk_in_door_dn_a_local,
             'national_charges_class_0'=> $request->walk_in_door_dn_return_class_0_charges,
             'national_charges_class_1'=> $request->walk_in_door_dn_return_class_1_charges,
@@ -500,7 +520,11 @@ class GlobalSettingsController extends Controller
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 2])->update([
             'actual_weight' => $request->walk_in_hub_dn_a,
-            'chargeable_weight' => $request->walk_in_hub_dn_c,
+            'chargeable_weight_local' => $request->walk_in_hub_dn_chargeable_weight_local,
+            'chargeable_weight_charges_class_0' => $request->walk_in_hub_dn_chargeable_weight_class_0_charges,
+            'chargeable_weight_charges_class_1' => $request->walk_in_hub_dn_chargeable_weight_class_1_charges,
+            'chargeable_weight_charges_class_2' => $request->walk_in_hub_dn_chargeable_weight_class_2_charges,
+            'chargeable_weight_charges_class_3' => $request->walk_in_hub_dn_chargeable_weight_class_3_charges,
             'local' => $request->walk_in_hub_dn_a_local,
             'national_charges_class_0'=> $request->walk_in_hub_dn_return_class_0_charges,
             'national_charges_class_1'=> $request->walk_in_hub_dn_return_class_1_charges,
