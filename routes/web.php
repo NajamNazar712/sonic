@@ -200,6 +200,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::put('revert', 'Shippers\ShipperShipmentCancelController@revert')->name('revert');
     });
 
+    Route::prefix('intercept')->name('intercept.')->group(function (){
+        Route::get('/{row_id}','Shippers\ShipperInterceptReBookController@intercept_re_book_index')->name('index');
+        Route::post('update','Shippers\ShipperInterceptReBookController@intercept_re_book_update')->name('update');
+//        Route::get('list', 'Shippers\ShipperShipmentCancelController@list')->name('list');
+//        Route::put('revert', 'Shippers\ShipperShipmentCancelController@revert')->name('revert');
+    });
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {

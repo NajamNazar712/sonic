@@ -728,6 +728,16 @@
 
                 }
             });
+
+            $('body').on('click','.intercept',function () {
+                var row_id = $(this).parents('tr').attr('id');
+
+                if(row_id != ''){
+                    var redirect = '{!! route('cod.intercept.index', ':id') !!}';
+                    var url = redirect.replace(':id', row_id);
+                    window.location = url;
+                }
+            });
         });
     </script>
 @endsection
