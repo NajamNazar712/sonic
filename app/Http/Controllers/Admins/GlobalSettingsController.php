@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Models\Admin\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\PettyCashAccountHead;
@@ -21,7 +20,6 @@ use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 
 class GlobalSettingsController extends Controller
@@ -230,7 +228,7 @@ class GlobalSettingsController extends Controller
                     return '';
                 }
             })
-        
+
         ->make(true);
     }
 
@@ -521,7 +519,7 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-	
+
 
 	public function debriefing_report_cut_off_time_index() {
         $settings = GlobalSettings::where('type', 'debriefing_report_arrival_cut_off_time')->first();
