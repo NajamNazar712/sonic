@@ -607,8 +607,7 @@ class GlobalSettingsController extends Controller
         $fuel_factor = $request->fuel_factor;
         if ($fuel_factor != null) {
             $shipping_modes = ShippingMode::all();
-            $empty_array = array();
-            $users = User::where('status', 3)->select('id')->get();
+            $users = User::where('status', 3)->select('id','account_type_id')->get();
             if (!$users->isEmpty()) {
                 foreach ($users as $user) {
                     foreach($shipping_modes as $shipping_mode) {
