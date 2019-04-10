@@ -10,7 +10,10 @@ use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 
+use App\Http\Models\CorporateFuelSurcharge;
+use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\FuelSurcharge;
+use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\RateStatus;
 use App\Http\Models\Shipper\User;
@@ -607,12 +610,23 @@ class GlobalSettingsController extends Controller
             $users = User::where('status', 3)->select('id')->get();
             if (!$users->isEmpty()) {
                 foreach ($users as $user) {
-                    foreach($shipping_modes as $shipping_mode){
-                        $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id',$shipping_mode->id);
+                    foreach($shipping_modes as $shipping_mode) {
+                        if ($user->account_type_id == 1) {
+                            $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                        }
+                        else {
+                            $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                        }
+
                         if($rate_status->exists()) {
                             $rate_status = $rate_status->first();
 
-                            $fuel_surcharge = FuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id',$shipping_mode->id);
+                            if ($user->account_type_id == 1) {
+                                $fuel_surcharge = FuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                            }
+                            else {
+                                $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id',$shipping_mode->id);
+                            }
 
                             if ($fuel_surcharge->exists()) {
                                 $fuel_surcharge = $fuel_surcharge->first();
@@ -634,7 +648,13 @@ class GlobalSettingsController extends Controller
                                 }
                                 $fuel_surcharge->save();
 
-                                $fuel_surcharge_history = new HistoryFuelSurcharge();
+                                if ($user->account_type_id == 1) {
+                                    $fuel_surcharge_history = new HistoryFuelSurcharge();
+                                }
+                                else {
+                                    $fuel_surcharge_history = new HistoryCorporateFuelSurcharge();
+                                }
+
                                 $fuel_surcharge_history->user_id = $user->id;
                                 $fuel_surcharge_history->shipping_mode_id = $shipping_mode->id;
                                 $fuel_surcharge_history->fuel_surcharge = $update_fuel_surcharge;
