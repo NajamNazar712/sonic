@@ -2316,7 +2316,8 @@ class AdminReportsController extends Controller
                 $row['revenue_wo_gst'] = number_format($revenue_wo_gst);
                 $avg_rev = round($avg_revenue);
                 $row['average_revenue'] = number_format($avg_rev);
-                $row['actual_weight'] = number_format((float)$actual_weight,2,'.','');
+                $string_actual_weight = (string) $actual_weight;
+                $row['actual_weight'] = number_format((float)$string_actual_weight,2,'.','');
                 $row['avg_actual_weight'] = round($avg_actual_weight);
                 $row['avg_rev_actual_weight'] = round($avg_rev_actual_weight);
 
@@ -2359,7 +2360,7 @@ class AdminReportsController extends Controller
         foreach ($sorted_details_array as $item) {
             $details[] = $item;
         }
-        $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),number_format((float)$total_actual_weight,2,'.',''),round($total_avg_actual_weight),round($total_avg_rev_actual_weight),number_format((float)$chargeable_weight,2,'.',''),round($total_avg_chargeable_weight),round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection).'%'];
+        $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),number_format((float)$total_actual_weight,2,'.',''),round($total_avg_actual_weight),round($total_avg_rev_actual_weight),number_format((float)$total_chargeable_weight,2,'.',''),round($total_avg_chargeable_weight),round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection).'%'];
 
         $details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg. Actual Weight/Parcel','Avg. Revenue On Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
 
@@ -2659,9 +2660,12 @@ class AdminReportsController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
 
         $sheet->fromArray($details,NULL,'A1',true);
-
         $count_hubs = count($hubs);
         $count_hub_rows = count($details);
+//        $set_actual_number_format = 'G2:G'.$count_hub_rows;
+//        $set_chargeable_number_format = 'J2:J'.$count_hub_rows;
+//        $sheet->getStyle($set_actual_number_format)->getNumberFormat()->setFormatCode('0.00');
+//        $sheet->getStyle($set_chargeable_number_format)->getNumberFormat()->setFormatCode('0.00');
         $count_hubs += 3;
         $total_shipper_rows = count($details_shipper);
         $total_shipper_rows += $count_hubs;
@@ -2683,6 +2687,10 @@ class AdminReportsController extends Controller
         $sheet->getStyle($shipper_style_cell)->applyFromArray($cell_st);
         $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
         $sheet->getStyle($total_shipper_style_cell)->applyFromArray($total_cell_st);
+        $set_shipper_actual_number_format = 'G2:G'.$total_shipper_rows;
+        $set_shipper_chargeable_number_format = 'J2:J'.$total_shipper_rows;
+        $sheet->getStyle($set_shipper_actual_number_format)->getNumberFormat()->setFormatCode('0.00');
+        $sheet->getStyle($set_shipper_chargeable_number_format)->getNumberFormat()->setFormatCode('0.00');
 
         $sheet->getStyle('H1:I1')
             ->getFill()
