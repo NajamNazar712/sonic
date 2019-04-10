@@ -247,7 +247,7 @@ class AdminCRMController extends Controller
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
             ->where('crm_requests.status_id', [1, 5]);
 
-        if (!(in_array(session('role_id'), [1, 6]) || in_array(179, session('permissions')))) {
+        if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions'))) {
             $launched_request = $launched_request->where('crm_requests.agent_id', Auth::id());
         }
 
