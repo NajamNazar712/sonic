@@ -21,6 +21,7 @@ use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 
 class GlobalSettingsController extends Controller
