@@ -245,17 +245,12 @@ class AdminCRMController extends Controller
             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
-            ->where(function ($query) {
-                $query->where(function($sub_query) {
-                    $sub_query->whereIn('crm_requests.status_id', [1,5])
-                     ->whereIn(DB::raw('(SELECT role_id FROM admins WHERE id = '. Auth::id() .')'), [1,6]);
-                })->orWhere(function($sub_query) {
-                    $role = Auth::user()->role_id;
-                    $sub_query->whereIn('crm_requests.status_id', [1,5])
-//                   ->where(DB::raw('(SELECT permission_id FROM admin_role_module_permissions WHERE role_id = '. $role .' AND permission_id = 183)'), in_array(183, session('permissions')));
-                    ->where('crm_requests.agent_id',Auth::id());
-                });
-            });
+            ->where('crm_requests.status_id', [1, 5]);
+
+        if (!(in_array(session('role_id'), [1, 6]) || in_array(179, session('permissions')))) {
+            $launched_request = $launched_request->where('crm_requests.agent_id', Auth::id());
+        }
+
         $datatables = Datatables::of($launched_request)
             ->setRowAttr([
                 'nature' => function ($requests) {
