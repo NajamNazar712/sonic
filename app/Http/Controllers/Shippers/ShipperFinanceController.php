@@ -569,7 +569,23 @@ class ShipperFinanceController extends Controller
 
         $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'Adjustments (PKR)'];
 
+        $account_type_id = $done_payment->shipper->account_type_id;
+
         $serial_number = 1;
+
+        $total_collection_amount = 0;
+        $total_weight_charges = 0;
+        $total_cash_handling_charges = 0;
+        $total_insurance_charges = 0;
+        $total_replacement_charges = 0;
+        // $total_try_and_buy_charges = 0;
+        $total_return_charges = 0;
+        $total_packaging_material_charges = 0;
+        $total_fuel_surcharge = 0;
+        $total_gst = 0;
+        $total_charges = 0;
+        $total_adjustments = 0;
+        $total_payable = 0;
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
@@ -597,13 +613,88 @@ class ShipperFinanceController extends Controller
             $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->actual_weight;
             $row[] = $done_payment_shipment->amount;
-            $row[] = (($done_payment_shipment->type != 2) ? $shipment->weight_charges : 0);
-            $row[] = (($done_payment_shipment->type == 0) ? $shipment->cash_handling_charges : 0);
+            $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->weight_charges : 0);
+            $row[] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
             $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
 
             $details[] = $row;
 
             $serial_number++;
+
+            if ($account_type_id == 1) {
+                if ($done_payment_shipment->type != 2) {
+                    if ($done_payment_shipment->charges != 0) {
+                        if ($done_payment_shipment->type == 0) {
+                            $total_collection_amount += $done_payment_shipment->amount;
+                            $total_cash_handling_charges += $shipment->cash_handling_charges;
+                            $total_replacement_charges += $shipment->replacement_charges;
+                            // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                        }
+                        else {
+                            $total_return_charges += $shipment->return_charges;
+                        }
+
+                        $total_weight_charges += $shipment->weight_charges;
+
+                        if ($shipment->packaging_material_request) {
+                            $total_packaging_material_charges += $shipment->packaging_material_charges;
+                        }
+
+                        $total_insurance_charges += $shipment->insurance_charges;
+                        $total_fuel_surcharge += $shipment->fuel_surcharge;
+                    }
+                    else if ($done_payment_shipment->type == 0) {
+                        $total_collection_amount += $done_payment_shipment->amount;
+                    }
+                }
+                else {
+                    $total_adjustments += $done_payment_shipment->payable;
+                }
+
+                $total_gst += $done_payment_shipment->gst;
+                $total_charges += $done_payment_shipment->charges;
+                $total_payable += $done_payment_shipment->payable;
+            }
+            else {
+                if ($done_payment_shipment->type == 0) {
+                    $total_collection_amount += $done_payment_shipment->amount;
+                }
+                else if ($done_payment_shipment->type == 2) {
+                    $total_adjustments += $done_payment_shipment->payable;
+                }
+
+                $total_payable += $done_payment_shipment->payable;
+            }
+        }
+
+        $total_columns = count($details[0]);
+
+        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments)];
+
+        $details[] = [];
+
+        $row = array();
+
+        for ($c = 0; $c < $total_columns; $c++) {
+            $row[] = '';
+        }
+
+        $row[] = 'Charges Summary (PKR)';
+        $row[] = '';
+
+        $details[] = $row;
+
+        foreach ($summary as $name => $value) {
+            $row = array();
+
+            for ($c = 0; $c < $total_columns; $c++) {
+                $row[] = '';
+            }
+
+            $row[] = $name;
+            $row[] = $value;
+
+            $details[] = $row;
         }
 
         $spreadsheet = new Spreadsheet();
@@ -613,6 +704,7 @@ class ShipperFinanceController extends Controller
         $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
