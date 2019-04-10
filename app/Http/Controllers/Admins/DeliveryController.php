@@ -25,6 +25,7 @@ use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -3784,5 +3785,94 @@ class DeliveryController extends Controller
 
             $writer->save('php://output');
         }
+    }
+    public function intercept_request_index()
+    {
+        $shipping_mode = ShippingMode::all();
+        $service_type = BookingType::all();
+//        $city =  City::where('status', 1)->whereNotNull('zone_id')->where('pickup', 1)->orderBy('name')->get();
+        return view('admin.delivery.intercept.index')->with(['shipping_mode' => $shipping_mode, 'service_type' => $service_type]);
+    }
+
+    public function intercept_request_list(Request $request)
+    {
+
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+//            ->join('delivery_note_shipments as dns','dns.shipment_id','=','shipments.id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.created_at', '=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.created_at', '=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->select('shipments.id as shId','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id')
+            ->where('shipments.shipper_status_id', 54);
+
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->editColumn('order_id', function($shipment){
+                if($shipment->order_id == null) {
+                    return '-';
+                }
+                else{
+                    return $shipment->order_id;
+                }
+            })
+            ->editColumn('status_date', function ($shipments) {
+                if ($shipments->status_date) {
+                    if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
+                        return "<span class='danger font-weight-bold'>" . $shipments->status_date . "</span>";
+                    } else {
+                        return $shipments->status_date;
+                    }
+                } else {
+                    return " - ";
+                }
+            })
+            ->editColumn('arrival', function ($shipments) {
+                if ($shipments->arrival) {
+                    return $shipments->arrival;
+                } else {
+                    return " - ";
+                }
+            })
+            ->filterColumn('shipping_mode', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('sm.id', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('service_type', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('bt.id', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->make(true);
     }
 }

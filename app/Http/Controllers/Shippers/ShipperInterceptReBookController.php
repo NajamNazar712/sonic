@@ -32,8 +32,7 @@ class ShipperInterceptReBookController extends Controller
         $user_id = session('user_id');
 
         if($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address  || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $request->amount) {
-            $intercept_request = InterceptReBookRequest::where(['shipment_id' => $request->shipment_id, 'status' => 0]);
-            if($intercept_request->exists()) {
+            if($shipment['intercepted'] == 1) {
                 return redirect()->back()->with('error', 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']);
             }
             else{
@@ -46,10 +45,24 @@ class ShipperInterceptReBookController extends Controller
                     'consignee_phone_number_2' => $request->consignee_phone_number_2,
                     'consignee_email' => $request->consignee_email,
                     'amount' => $request->amount,
-                    'shipper_id' => $user_id
+                    'shipper_id' => $user_id,
+                    'status' => 0
                 ]);
 
-                ShipmentsJourneyController::add($request->shipment_id, 53, 53, NULL, NULL, $user_id, NULL);
+                $shipment = Shipment::find($request->shipment_id);
+
+                $shipment->consignee_city_id = $request->consignee_city;
+                $shipment->consignee_name = $request->consignee_name;
+                $shipment->consignee_address = $request->consignee_address;
+                $shipment->consignee_phone_number_1 = $request->consignee_phone_number_1;
+                $shipment->consignee_phone_number_2 = $request->consignee_phone_number_2;
+                $shipment->consignee_email = $request->consignee_email;
+                $shipment->amount = $request->amount;
+                $shipment->shipper_status_id = 54;
+                $shipment->consignee_status_id = 54;
+                $shipment->save();
+
+                ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
 
                 return redirect()->route('cod.return.pending.index')->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
             }

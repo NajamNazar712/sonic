@@ -495,6 +495,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         //Lost Module End
 
+        Route::prefix('intercept')->name('intercept.')->group(function () {
+            Route::get('', 'Admins\DeliveryController@intercept_request_index')->name('index');
+            Route::get('list', 'Admins\DeliveryController@intercept_request_list')->name('list');
+        });
+
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
