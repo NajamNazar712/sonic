@@ -12,7 +12,9 @@ use App\Http\Models\Admin\WalkInStandardWeightCharge;
 
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
+use App\Http\Models\RateStatus;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -601,28 +603,56 @@ class GlobalSettingsController extends Controller
     {
         $fuel_factor = $request->fuel_factor;
         if ($fuel_factor != null) {
+            $shipping_modes = ShippingMode::all();
             $users = User::where('status', 3)->select('id')->get();
             if (!$users->isEmpty()) {
                 foreach ($users as $user) {
-                    if (FuelSurcharge::where('user_id', $user->id)->exists()) {
-                        $fuel_charges = FuelSurcharge::where('user_id', $user->id)->get();
-                        foreach ($fuel_charges as $fuel_charge) {
+                    foreach($shipping_modes as $shipping_mode){
+                        $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id',$shipping_mode->id);
+                        if($rate_status->exists()) {
+                            $rate_status = $rate_status->first();
 
-                            $fuel_surcharge_history = new HistoryFuelSurcharge();
-                            $fuel_surcharge_history->user_id = $fuel_charge->user_id;
-                            $fuel_surcharge_history->shipping_mode_id = $fuel_charge->shipping_mode_id;
-                            $fuel_surcharge_history->fuel_surcharge = $fuel_charge->fuel_surcharge;
-                            $fuel_surcharge_history->save();
+                            $fuel_surcharge = FuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id',$shipping_mode->id);
 
-                            $update_fuel_surcharge = $fuel_charge->fuel_surcharge + $fuel_factor;
-                            if ($update_fuel_surcharge >= 0) {
-                                $fuel_charge->fuel_surcharge = $update_fuel_surcharge;
-                                $fuel_charge->save();
-                            } else {
-                                $fuel_charge->fuel_surcharge = 0;
-                                $fuel_charge->save();
+                            if ($fuel_surcharge->exists()) {
+                                $fuel_surcharge = $fuel_surcharge->first();
+
+                                if ($rate_status->fuel_charges == 1) {
+                                    $update_fuel_surcharge = $fuel_surcharge->fuel_surcharge + $fuel_factor;
+                                }
+                                else {
+                                    $update_fuel_surcharge = $fuel_factor;
+
+                                    $rate_status->fuel_charges = 1;
+                                    $rate_status->save();
+                                }
+
+                                if ($update_fuel_surcharge >= 0) {
+                                    $fuel_surcharge->fuel_surcharge = $update_fuel_surcharge;
+                                } else {
+                                    $fuel_surcharge->fuel_surcharge = 0;
+                                }
+                                $fuel_surcharge->save();
+
+                                $fuel_surcharge_history = new HistoryFuelSurcharge();
+                                $fuel_surcharge_history->user_id = $user->id;
+                                $fuel_surcharge_history->shipping_mode_id = $shipping_mode->id;
+                                $fuel_surcharge_history->fuel_surcharge = $update_fuel_surcharge;
+                                $fuel_surcharge_history->save();
+
+                            }
+                            else {
+                                $rate_status->fuel_charges = 1;
+                                $rate_status->save();
+
+                                $fuel_surcharge = new FuelSurcharge();
+                                $fuel_surcharge->user_id = $user->id;
+                                $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                $fuel_surcharge->save();
                             }
                         }
+
                     }
                 }
                 $fuel_factor_history = new FuelFactorHistory();
