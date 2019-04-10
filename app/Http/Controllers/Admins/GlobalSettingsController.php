@@ -607,6 +607,7 @@ class GlobalSettingsController extends Controller
         $fuel_factor = $request->fuel_factor;
         if ($fuel_factor != null) {
             $shipping_modes = ShippingMode::all();
+            $empty_array = array();
             $users = User::where('status', 3)->select('id')->get();
             if (!$users->isEmpty()) {
                 foreach ($users as $user) {
@@ -618,7 +619,7 @@ class GlobalSettingsController extends Controller
                             $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                         }
 
-                        if($rate_status->exists()) {
+                        if ($rate_status->exists()) {
                             $rate_status = $rate_status->first();
 
                             if ($user->account_type_id == 1) {
@@ -627,7 +628,6 @@ class GlobalSettingsController extends Controller
                             else {
                                 $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id',$shipping_mode->id);
                             }
-
                             if ($fuel_surcharge->exists()) {
                                 $fuel_surcharge = $fuel_surcharge->first();
 
@@ -664,13 +664,14 @@ class GlobalSettingsController extends Controller
                             else {
                                 $rate_status->fuel_charges = 1;
                                 $rate_status->save();
-                                if($user->account_type_id == 1){
+                                if ($user->account_type_id == 1) {
                                     $fuel_surcharge = new FuelSurcharge();
                                     $fuel_surcharge->user_id = $user->id;
                                     $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
                                     $fuel_surcharge->fuel_surcharge = $fuel_factor;
                                     $fuel_surcharge->save();
-                                }else{
+                                }
+                                else {
                                     $fuel_surcharge = new CorporateFuelSurcharge();
                                     $fuel_surcharge->user_id = $user->id;
                                     $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
@@ -683,6 +684,7 @@ class GlobalSettingsController extends Controller
 
                     }
                 }
+                
                 $fuel_factor_history = new FuelFactorHistory();
                 $fuel_factor_history->fuel_factor = $fuel_factor;
                 $fuel_factor_history->admin_id = Auth::id();
