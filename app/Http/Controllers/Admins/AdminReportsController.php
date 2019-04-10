@@ -2316,11 +2316,11 @@ class AdminReportsController extends Controller
                 $row['revenue_wo_gst'] = number_format($revenue_wo_gst);
                 $avg_rev = round($avg_revenue);
                 $row['average_revenue'] = number_format($avg_rev);
-                $row['actual_weight'] = round($actual_weight,2);
+                $row['actual_weight'] = number_format((float)$actual_weight,2,'.','');
                 $row['avg_actual_weight'] = round($avg_actual_weight);
                 $row['avg_rev_actual_weight'] = round($avg_rev_actual_weight);
 
-                $row['chargeable_weight'] = round($chargeable_weight,2);
+                $row['chargeable_weight'] = number_format((float)$chargeable_weight,2,'.','');
                 $row['avg_chargeable_weight'] = round($avg_chargeable_weight);
                 $row['avg_rev_chargeable_weight'] = round($avg_rev_chargeable_weight);
                 $row['cod_collection'] = number_format($cod_collection);
@@ -2349,17 +2349,17 @@ class AdminReportsController extends Controller
             }
 
         }
-        $total_avg_revenue = $total_revenue_wo_gst / $total_received;
-        $total_avg_actual_weight = $total_actual_weight / $total_received;
-        $total_avg_rev_actual_weight = $total_revenue_wo_gst / $total_actual_weight;
-        $total_avg_chargeable_weight = $total_chargeable_weight / $total_received;
-        $total_avg_rev_chargeable_weight = $total_revenue_wo_gst / $total_chargeable_weight;
-        $total_rev_on_cash_collection = $total_avg_revenue / $total_avg_cash_collection;
+        $total_avg_revenue = ($total_revenue_wo_gst != 0) ? $total_revenue_wo_gst / $total_received:0;
+        $total_avg_actual_weight = ($total_actual_weight != 0) ? $total_actual_weight / $total_received:0;
+        $total_avg_rev_actual_weight = ($total_revenue_wo_gst != 0) ? $total_revenue_wo_gst / $total_actual_weight:0;
+        $total_avg_chargeable_weight = ($total_chargeable_weight != 0) ? $total_chargeable_weight / $total_received:0;
+        $total_avg_rev_chargeable_weight = ($total_revenue_wo_gst != 0) ? $total_revenue_wo_gst / $total_chargeable_weight:0;
+        $total_rev_on_cash_collection = ($total_avg_revenue != 0) ? $total_avg_revenue / $total_avg_cash_collection:0;
         array_multisort($sort_support_array, SORT_DESC, $sorted_details_array);
         foreach ($sorted_details_array as $item) {
             $details[] = $item;
         }
-        $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),round($total_actual_weight,2),round($total_avg_actual_weight),round($total_avg_rev_actual_weight),round($total_chargeable_weight,2),round($total_avg_chargeable_weight),round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection).'%'];
+        $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),number_format((float)$total_actual_weight,2,'.',''),round($total_avg_actual_weight),round($total_avg_rev_actual_weight),number_format((float)$chargeable_weight,2,'.',''),round($total_avg_chargeable_weight),round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection).'%'];
 
         $details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg. Actual Weight/Parcel','Avg. Revenue On Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
 
@@ -2597,10 +2597,10 @@ class AdminReportsController extends Controller
                 $shipper_row['shipper_rev_wo_gst'] = number_format($shipper_rev_wo_gst);
                 $s_avg_revenue = round($shipper_avg_revenue);
                 $shipper_row['shipper_avg_revenue'] = number_format($s_avg_revenue);
-                $shipper_row['shipper_actual_weight'] = round($shipper_actual_weight,2);
+                $shipper_row['shipper_actual_weight'] = number_format((float)$shipper_actual_weight,2,'.','');
                 $shipper_row['shipper_avg_actual_weight'] = round($shipper_avg_actual_weight);
                 $shipper_row['$shipper_avg_rev_actual_weight'] = round($shipper_avg_rev_actual_weight);
-                $shipper_row['shipper_chargeable_weight'] = round($shipper_chargeable_weight,2);
+                $shipper_row['shipper_chargeable_weight'] = number_format((float)$shipper_chargeable_weight,2,'.','');
                 $shipper_row['shipper_avg_chargeable_weight'] = round($shipper_avg_chargeable_weight);
                 $shipper_row['shipper_avg_rev_chargeable_weight'] = round($shipper_avg_rev_chargeable_weight);
                 $shipper_row['shipper_cod'] = number_format($shipper_cod);
@@ -2631,18 +2631,18 @@ class AdminReportsController extends Controller
             }
         }
 
-        $total_shipper_avg_revenue = $total_shipper_revenue_wo_gst / $total_shipper_received;
-        $total_shipper_avg_actual_weight = $total_shipper_actual_weight / $total_shipper_received;
-        $total_shipper_avg_rev_actual_weight = $total_shipper_revenue_wo_gst / $total_shipper_actual_weight;
-        $total_shipper_avg_chargeable_weight = $total_shipper_chargeable_weight / $total_shipper_received;
-        $total_shipper_avg_rev_chargeable_weight = $total_shipper_revenue_wo_gst / $total_shipper_chargeable_weight;
-        $total_shipper_rev_on_cash_collection = $total_shipper_avg_revenue / $total_shipper_avg_cash_collection;
+        $total_shipper_avg_revenue = ($total_shipper_revenue_wo_gst != 0) ? $total_shipper_revenue_wo_gst / $total_shipper_received:0;
+        $total_shipper_avg_actual_weight = ($total_shipper_actual_weight != 0) ? $total_shipper_actual_weight / $total_shipper_received:0;
+        $total_shipper_avg_rev_actual_weight = ($total_shipper_revenue_wo_gst != 0) ? $total_shipper_revenue_wo_gst / $total_shipper_actual_weight:0;
+        $total_shipper_avg_chargeable_weight = ($total_shipper_chargeable_weight != 0) ? $total_shipper_chargeable_weight / $total_shipper_received:0;
+        $total_shipper_avg_rev_chargeable_weight = ($total_shipper_revenue_wo_gst != 0) ? $total_shipper_revenue_wo_gst / $total_shipper_chargeable_weight:0;
+        $total_shipper_rev_on_cash_collection = ($total_shipper_avg_revenue != 0) ? $total_shipper_avg_revenue / $total_shipper_avg_cash_collection:0;
 
         array_multisort($shipper_sort_support_array, SORT_DESC, $sorted_shipper_array);
         foreach ($sorted_shipper_array as $shipper) {
             $details_shipper[] = $shipper;
         }
-        $details_shipper[] = ['Grand Total','DSR '.$only_date, number_format($total_shipper_booked), number_format($total_shipper_received), number_format($total_shipper_revenue_wo_gst),number_format($total_shipper_avg_revenue),round($total_shipper_actual_weight,2),round($total_shipper_avg_actual_weight),round($total_shipper_avg_rev_actual_weight),round($total_shipper_chargeable_weight,2),round($total_shipper_avg_chargeable_weight),round($total_shipper_avg_rev_chargeable_weight), number_format($total_shipper_cod_collection),number_format($total_shipper_avg_cash_collection),number_format($total_shipper_rev_on_cash_collection).'%'];
+        $details_shipper[] = ['Grand Total','DSR '.$only_date, number_format($total_shipper_booked), number_format($total_shipper_received), number_format($total_shipper_revenue_wo_gst),number_format($total_shipper_avg_revenue),number_format((float)$total_shipper_actual_weight,2,'.',''),round($total_shipper_avg_actual_weight),round($total_shipper_avg_rev_actual_weight),number_format((float)$total_shipper_chargeable_weight,2,'.',''),round($total_shipper_avg_chargeable_weight),round($total_shipper_avg_rev_chargeable_weight), number_format($total_shipper_cod_collection),number_format($total_shipper_avg_cash_collection),number_format($total_shipper_rev_on_cash_collection).'%'];
 
         $spreadsheet = new Spreadsheet();
         $cell_st =[
