@@ -154,7 +154,7 @@ class ShipmentChargesController extends Controller
                         $shipment->weight_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
-                    if ($shipment->actual_weight < 1) {
+                    if ($shipment->actual_weight > 1) {
                         $shipment->chargeable_weight = ROUND($shipment->actual_weight, 0);
                     }
                     else {
