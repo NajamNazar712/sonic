@@ -664,12 +664,20 @@ class GlobalSettingsController extends Controller
                             else {
                                 $rate_status->fuel_charges = 1;
                                 $rate_status->save();
+                                if($user->account_type_id == 1){
+                                    $fuel_surcharge = new FuelSurcharge();
+                                    $fuel_surcharge->user_id = $user->id;
+                                    $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                    $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                    $fuel_surcharge->save();
+                                }else{
+                                    $fuel_surcharge = new CorporateFuelSurcharge();
+                                    $fuel_surcharge->user_id = $user->id;
+                                    $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                    $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                    $fuel_surcharge->save();
+                                }
 
-                                $fuel_surcharge = new FuelSurcharge();
-                                $fuel_surcharge->user_id = $user->id;
-                                $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
-                                $fuel_surcharge->fuel_surcharge = $fuel_factor;
-                                $fuel_surcharge->save();
                             }
                         }
 
