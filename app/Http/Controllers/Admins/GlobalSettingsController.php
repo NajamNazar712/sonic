@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\PettyCashAccountHead;
