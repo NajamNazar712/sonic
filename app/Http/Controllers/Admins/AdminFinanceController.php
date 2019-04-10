@@ -3237,14 +3237,27 @@ class AdminFinanceController extends Controller
             }
         }
 
-        $total_columns = count($details);
+        $total_columns = count($details[0]);
 
         $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments)];
+
+        $details[] = [];
+
+        $row = array();
+
+        for ($c = 0; $c < $total_columns; $c++) {
+            $row[] = '';
+        }
+
+        $row[] = 'Charges Summary (PKR)';
+        $row[] = '';
+
+        $details[] = $row;
 
         foreach ($summary as $name => $value) {
             $row = array();
 
-            foreach ($c = 0; $c < $total_columns; $c++) {
+            for ($c = 0; $c < $total_columns; $c++) {
                 $row[] = '';
             }
 
