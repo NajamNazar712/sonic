@@ -97,7 +97,7 @@
                 <li class=" nav-item"><a href="{{route('admin.sameday.index')}}"><span class="menu-title">Same-Day Delivery</span></a></li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([33, 35, 36, 40, 105, 107], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([33, 35, 36, 40, 105, 107, 193], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Delivery</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(33, session('permissions')))
@@ -160,11 +160,11 @@
                             </li>
                         @endif
 
-                            @if (session('role_id') == 1 || count(array_intersect([107,108,119], session('permissions'))) !== 0)
-                                        @if (session('role_id') == 1 || in_array(107, session('permissions')))
-                                            <li><a class="menu-item" href="{{route('admin.delivery.intercept.index')}}">Intercept Request</a></li>
-                                        @endif
-                            @endif
+                        @if (session('role_id') == 1 || count(array_intersect([193], session('permissions'))) !== 0)
+                                    @if (session('role_id') == 1 || in_array(193, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.delivery.intercept.index')}}">Intercept Request</a></li>
+                                    @endif
+                        @endif
                     </ul>
                 </li>
             @endif

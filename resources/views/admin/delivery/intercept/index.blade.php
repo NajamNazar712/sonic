@@ -21,7 +21,8 @@
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Origin</th>
-                        <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Old Destination</th>
+                        <th class="border-primary border-darken-1">New Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone</th>
@@ -161,6 +162,9 @@
                             .done(function(data) {
                                 if(data.status == 0){
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    setTimeout(function(){
+                                        window.location.reload();
+                                    },2000);
                                 }
                                 else{
                                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -205,6 +209,9 @@
                             .done(function(data) {
                                 if(data.status == 0){
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    setTimeout(function(){
+                                        window.location.reload();
+                                    },2000);
                                 }
                                 else{
                                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -228,19 +235,18 @@
 
                             head.push('S.No');
                             head.push('Tracking .No');
+                            head.push('Order ID');
                             head.push('Shipper');
                             head.push('Origin');
-                            head.push('Destination');
+                            head.push('Old Destination');
+                            head.push('New Destination');
                             head.push('Hub');
                             head.push('Consignee Name');
-                            head.push('Phone');
-                            head.push('Address');
-                            head.push('Collection Amount');
+                            head.push('Consignee Phone');
+                            head.push('Consignee Address');
+                            head.push('COD Amount');
                             head.push('Shipping Mode');
                             head.push('Service Type');
-                            head.push('Status');
-                            head.push('Reason');
-                            head.push('Remarks');
                             head.push('Arrival Date');
                             head.push('Status Date');
                             $.each(result.data, function(index, values) {
@@ -249,9 +255,11 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
+                                row.push(values.order_id);
                                 row.push(values.shipper);
                                 row.push(values.origin);
-                                row.push(values.destination);
+                                row.push(values.old_destination);
+                                row.push(values.new_destination);
                                 row.push(values.hub);
                                 row.push(values.consignee_name);
                                 row.push(values.phone);
@@ -259,11 +267,8 @@
                                 row.push(values.amount);
                                 row.push(values.mode);
                                 row.push(values.service_type);
-                                row.push(values.status);
-                                row.push(values.reason);
-                                row.push(values.remarks);
                                 row.push(values.arrival);
-                                row.push(values.current_status_date);
+                                row.push(values.status_date);
 
                                 body.push(row);
                             });
@@ -278,6 +283,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                        @if (session('role_id') == 1 || in_array(194, session('permissions')))
                     {
                         text: 'Approve',
                         className: 'btn btn-primary approve',
@@ -291,7 +297,10 @@
 
                             approve(rows);
                         }
-                    },{
+                    },
+                        @endif
+                        @if (session('role_id') == 1 || in_array(195, session('permissions')))
+                    {
                         text: 'Reject',
                         className: 'btn btn-danger reject',
                         enabled: false,
@@ -304,7 +313,10 @@
 
                             reject(rows);
                         }
-                    },{
+                    },
+                        @endif
+                        @if (session('role_id') == 1 || in_array(194, 195, session('permissions')))
+                    {
                         extend: 'selectAll',
                         text: 'Select All',
                         className: 'select_all',
@@ -360,6 +372,7 @@
                             });
                         }
                     },
+                    @endif
                     {
                         extend: 'excel',
                         title: 'Intercept Request',
@@ -381,7 +394,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.intercept.list') }}',
                 rowId: 'shId',
-                order: [[5, 'desc']],
+                order: [[16, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -389,7 +402,8 @@
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'old_destination', name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'new_destination', name: 'odc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},

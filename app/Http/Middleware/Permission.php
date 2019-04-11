@@ -163,6 +163,9 @@ class Permission
             'delivery.lost.add.index' => 130,
             'delivery.lost.add.shipment.info' => 130,
             'delivery.lost.add.shipments.store' => 130,
+            'delivery.intercept.index' => 193,
+            'delivery.intercept.approve' => 194,
+            'delivery.intercept.reject' => 195,
 
             'return.index' => 44,
             'return.list' => 44,
@@ -448,6 +451,8 @@ class Permission
             'return.pending.list' => 9,
             'return.pending.marked.status' => 9,
             'return.pending.marked.status.single' => 9,
+
+            'intercept.index' => 9,
 
             'packaging.requests.index' => 4,
             'packaging.requests.submit' => 4,

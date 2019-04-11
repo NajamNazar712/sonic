@@ -203,8 +203,6 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('intercept')->name('intercept.')->group(function (){
         Route::get('/{row_id}','Shippers\ShipperInterceptReBookController@intercept_re_book_index')->name('index');
         Route::post('update','Shippers\ShipperInterceptReBookController@intercept_re_book_update')->name('update');
-//        Route::get('list', 'Shippers\ShipperShipmentCancelController@list')->name('list');
-//        Route::put('revert', 'Shippers\ShipperShipmentCancelController@revert')->name('revert');
     });
 
 });
@@ -498,8 +496,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('intercept')->name('intercept.')->group(function () {
             Route::get('', 'Admins\DeliveryController@intercept_request_index')->name('index');
             Route::get('list', 'Admins\DeliveryController@intercept_request_list')->name('list');
-            Route::get('approve', 'Admins\DeliveryController@approve')->name('approve');
-            Route::get('reject', 'Admins\DeliveryController@reject')->name('reject');
+            Route::post('approve', 'Admins\DeliveryController@approve')->name('approve');
+            Route::post('reject', 'Admins\DeliveryController@reject')->name('reject');
         });
 
     });

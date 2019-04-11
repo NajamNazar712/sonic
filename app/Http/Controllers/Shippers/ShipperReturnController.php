@@ -82,17 +82,6 @@ class ShipperReturnController extends Controller
                 return $remark;
             })
             ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
-            ->editColumn('status_date',function ($shipments){
-                if($shipments->status_date) {
-                    if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
-                        return "<span class='danger font-weight-bold'>" . $shipments->status_date . "</span>";
-                    } else {
-                        return $shipments->status_date;
-                    }
-                }else{
-                    return " - ";
-                }
-            })
             ->editColumn('arrival',function($shipments){
                 if($shipments->arrival){
                     return $shipments->arrival;

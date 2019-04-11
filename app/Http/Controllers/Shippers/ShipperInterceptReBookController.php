@@ -27,15 +27,18 @@ class ShipperInterceptReBookController extends Controller
     }
 
     public function intercept_re_book_update(Request $request){
-
+        $s_amount = str_replace(",","","$request->amount");
+        $amount = intval($s_amount);
         $shipment = Shipment::where('id',$request->shipment_id)->first();
         $user_id = session('user_id');
 
-        if($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address  || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $request->amount) {
+        if($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address  || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
             if($shipment['intercepted'] == 1) {
                 return redirect()->back()->with('error', 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']);
             }
             else{
+                $s_amount = str_replace(",","","$request->amount");
+                $amount = (int)$s_amount;
                 $new_intercept_request = InterceptReBookRequest::create([
                     'shipment_id' => $request->shipment_id,
                     'consignee_city_id' => $request->consignee_city,
@@ -44,22 +47,16 @@ class ShipperInterceptReBookController extends Controller
                     'consignee_phone_number_1' => $request->consignee_phone_number_1,
                     'consignee_phone_number_2' => $request->consignee_phone_number_2,
                     'consignee_email' => $request->consignee_email,
-                    'amount' => $request->amount,
+                    'amount' => $amount,
                     'shipper_id' => $user_id,
                     'status' => 0
                 ]);
 
                 $shipment = Shipment::find($request->shipment_id);
 
-                $shipment->consignee_city_id = $request->consignee_city;
-                $shipment->consignee_name = $request->consignee_name;
-                $shipment->consignee_address = $request->consignee_address;
-                $shipment->consignee_phone_number_1 = $request->consignee_phone_number_1;
-                $shipment->consignee_phone_number_2 = $request->consignee_phone_number_2;
-                $shipment->consignee_email = $request->consignee_email;
-                $shipment->amount = $request->amount;
-                $shipment->shipper_status_id = 54;
                 $shipment->consignee_status_id = 54;
+                $shipment->shipper_status_id = 54;
+                $shipment->intercepted = 1;
                 $shipment->save();
 
                 ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);

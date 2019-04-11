@@ -19,10 +19,10 @@ class CreateInterceptReBookRequestsTable extends Migration
             $table->integer('consignee_city_id');
             $table->string('consignee_name');
             $table->string('consignee_address');
-            $table->integer('consignee_phone_number_1');
-            $table->integer('consignee_phone_number_2')->nullable();
+            $table->string('consignee_phone_number_1');
+            $table->string('consignee_phone_number_2')->nullable();
             $table->string('consignee_email')->nullable();
-            $table->integer('amount');
+            $table->bigInteger('amount');
             $table->integer('shipper_id');
             $table->integer('status');
             $table->integer('updated_by')->nullable();
