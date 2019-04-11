@@ -307,7 +307,7 @@ class AdminPettyCashController extends Controller
                     $petty->status = 1;
                     $petty->save();
                 }else{
-                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request not ready to approve!']);
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
                 }
 
             }else if($petty->operation_approved_by == null){
@@ -317,7 +317,7 @@ class AdminPettyCashController extends Controller
                 $petty->status = 2;
                 $petty->save();
                 }else{
-                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request not ready to approve!']);
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
                 }
             }else if($petty->finance_approved_by == null){
                 if(session('role_id') == 1 || in_array(173, session('permissions'))){
@@ -326,7 +326,7 @@ class AdminPettyCashController extends Controller
                 $petty->status = 3;
                 $petty->save();
                 }else{
-                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request not ready to approve!']);
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
                 }
             }
             return response()->json(['status' => 1, 'success' => 'Petty Cash Request Successfully Approved!']);
