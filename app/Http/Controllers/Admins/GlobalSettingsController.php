@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\PettyCashAccountHead;
@@ -608,6 +609,42 @@ class GlobalSettingsController extends Controller
 
         $settings_invoice->save();
         $settings_due_date->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function return_note_restriction_bypass_index(){
+        $role_ids = array();
+
+        $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+
+        if($settings->exists()){
+            $settings = $settings->first();
+            $role_ids = array_map('intval', explode(',', $settings->text));
+        }
+
+        $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+
+        return view('admin.settings.return_note_restriction_bypass')->with(['roles'=>$roles,'role_ids' => $role_ids]);
+    }
+
+    public function return_note_restriction_bypass_store(Request $request){
+        $roles = implode(',', $request->roles);
+        $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        }
+        else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'return_note_restriction_bypass';
+            $settings->setting_value = 0;
+            $settings->text = $roles;
+        }
+        $settings->text = $roles;
+
+        $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
