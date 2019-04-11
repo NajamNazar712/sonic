@@ -4282,7 +4282,7 @@ class AdminReportsController extends Controller
                 $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
             }
 
-            $types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'on_hold', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'delivery_tomorrow', 'delivery_note_pending'];
+            $types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'on_hold', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'delivery_note_pending', 'delivery_tomorrow'];
 
             $counts = array();
 
@@ -4370,6 +4370,12 @@ class AdminReportsController extends Controller
                             ->where('dn.status', '=', 1);
                         });
                     }
+                    else if ($type == 'delivery_note_pending') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(isj.id) from shipments_journey as isj left join shipments_journey as isjj on isj.shipment_id = isjj.shipment_id and isj.reference_1_id = isjj.reference_1_id and isj.id != isjj.id where isj.shipment_id = s.id and isj.verification = 1 and isj.shipper_status_id = 5 and isjj.id is null)'));
+                        });
+                    }
                     else if ($type == 'delivery_tomorrow') {
                         $rows = $rows->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
                         ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
@@ -4390,12 +4396,6 @@ class AdminReportsController extends Controller
                             ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and ((usi.city_id = s.consignee_city_id and shipments_journey.shipper_status_id = 2) or (usi.city_id != s.consignee_city_id and shipments_journey.shipper_status_id = 4)) and (hour(shipments_journey.created_at) >= ' . $arrival_cut_off_time . ' or zcc.class in (2, 3)) and dns.delivery_note_id is null)'));
                         });
                     }
-                    else if ($type == 'delivery_note_pending') {
-                        $rows = $rows->join('shipments_journey as sj', function($join) {
-                            $join->on('s.id', '=', 'sj.shipment_id')
-                        ->where('sj.id', '=', DB::raw('(select max(isj.id) from shipments_journey as isj left join shipments_journey as isjj on isj.shipment_id = isjj.shipment_id and isj.reference_1_id = isjj.reference_1_id and isj.id != isjj.id where isj.shipment_id = s.id and isj.verification = 1 and isj.shipper_status_id = 5 and isjj.id is null)'));
-                        });
-                    }
 
                     $rows = $rows->select('s.tracking_number')->where('cities.hub_id', $hub->id);
 
@@ -4414,12 +4414,20 @@ class AdminReportsController extends Controller
                         $counts[$hub->name][$type] = $rows->count();
 
                         if ($type != 'correct_status' && $type != 'fake_status') {
-                            if ($type != 'delivery_tomorrow' && $type != 'delivery_note_pending') {
-                                if (!isset($counts[$hub->name]['total'])) {
-                                    $counts[$hub->name]['total'] = 0;
+                            if ($type != 'delivery_note_pending' && $type != 'delivery_tomorrow') {
+                                if (!isset($counts[$hub->name]['total_1'])) {
+                                    $counts[$hub->name]['total_1'] = 0;
                                 }
 
-                                $counts[$hub->name]['total'] += $counts[$hub->name][$type];
+                                $counts[$hub->name]['total_1'] += $counts[$hub->name][$type];
+                            }
+
+                            if ($type != 'delivery_tomorrow') {
+                                if (!isset($counts[$hub->name]['total_2'])) {
+                                    $counts[$hub->name]['total_2'] = 0;
+                                }
+
+                                $counts[$hub->name]['total_2'] += $counts[$hub->name][$type];
                             }
 
                             if (!isset($counts[$hub->name]['grand_total'])) {
@@ -4443,24 +4451,45 @@ class AdminReportsController extends Controller
                 }
 
                 foreach ($counts as $hub => $count) {
-                    if (isset($count['total']) && $count['total']) {
-                        $counts[$hub]['total_ratio'] = round(($count['delivered'] / $count['total']) * 100);
+                    if (isset($count['total_1']) && $count['total_1']) {
+                        $counts[$hub]['total_1_ratio'] = round(($count['delivered'] / $count['total_1']) * 100);
 
                         if (!$export) {
-                            $counts[$hub]['total_ratio'] .= '%';
+                            $counts[$hub]['total_1_ratio'] .= '%';
                         }
                         else {
-                            $counts[$hub]['total_ratio'] = ($counts[$hub]['total_ratio'] / 100);
+                            $counts[$hub]['total_1_ratio'] = ($counts[$hub]['total_1_ratio'] / 100);
                         }
                     }
                     else {
-                        $counts[$hub]['total'] = 0;
+                        $counts[$hub]['total_1'] = 0;
 
                         if (!$export) {
-                            $counts[$hub]['total_ratio'] = '0%';
+                            $counts[$hub]['total_1_ratio'] = '0%';
                         }
                         else {
-                            $counts[$hub]['total_ratio'] = 0;
+                            $counts[$hub]['total_1_ratio'] = 0;
+                        }
+                    }
+
+                    if (isset($count['total_2']) && $count['total_2']) {
+                        $counts[$hub]['total_2_ratio'] = round(($count['delivered'] / $count['total_2']) * 100);
+
+                        if (!$export) {
+                            $counts[$hub]['total_2_ratio'] .= '%';
+                        }
+                        else {
+                            $counts[$hub]['total_2_ratio'] = ($counts[$hub]['total_2_ratio'] / 100);
+                        }
+                    }
+                    else {
+                        $counts[$hub]['total_2'] = 0;
+
+                        if (!$export) {
+                            $counts[$hub]['total_2_ratio'] = '0%';
+                        }
+                        else {
+                            $counts[$hub]['total_2_ratio'] = 0;
                         }
                     }
 
@@ -4528,14 +4557,14 @@ class AdminReportsController extends Controller
 
         $details = array();
 
-        $details[] = ['Hubs', 'Status Not Updated', 'Delivered', 'Delivery Unsuccessful', 'On Hold', 'Confirmation Pending', 'Lost', 'Confirm', 'Correct Status', 'Fake Status', 'Total', 'Ratio', 'Delivery Tomorrow', 'Delivery Note Pending', 'Grand Total', 'Ratio'];
+        $details[] = ['Hubs', 'Status Not Updated', 'Delivered', 'Delivery Unsuccessful', 'On Hold', 'Confirmation Pending', 'Lost', 'Confirm', 'Correct Status', 'Fake Status', 'Total', 'Ratio', 'Delivery Note Pending', 'Total', 'Ratio', 'Delivery Tomorrow', 'Grand Total', 'Ratio'];
 
         $result = $this->debriefing_data($date, $hub, $zone, TRUE);
 
         if ($result['status'] == 0) {
-            $types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'on_hold', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total', 'total_ratio', 'delivery_tomorrow', 'delivery_note_pending', 'grand_total', 'grand_total_ratio'];
+            $types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'on_hold', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];
 
-            $type_names = ['status_not_updated' => 'Status Not Updated', 'delivered' => 'Delivered', 'delivery_unsucessful' => 'Delivery Unsuccessful', 'on_hold' => 'On Hold', 'confirmation_pending' => 'Confirmation Pending', 'lost' => 'Lost', 'confirm' => 'Confirm', 'correct_status' => 'Correct Status', 'fake_status' => 'Fake Status', 'total' => 'Total', 'total_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'delivery_note_pending' => 'Delivery Note Pending', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
+            $type_names = ['status_not_updated' => 'Status Not Updated', 'delivered' => 'Delivered', 'delivery_unsucessful' => 'Delivery Unsuccessful', 'on_hold' => 'On Hold', 'confirmation_pending' => 'Confirmation Pending', 'lost' => 'Lost', 'confirm' => 'Confirm', 'correct_status' => 'Correct Status', 'fake_status' => 'Fake Status', 'total_1' => 'Total', 'total_1_ratio' => 'Ratio', 'delivery_note_pending' => 'Delivery Note Pending', 'total_2' => 'Total', 'total_2_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
 
             foreach ($result['counts'] as $hub => $count) {
                 $row = array();
@@ -4569,8 +4598,10 @@ class AdminReportsController extends Controller
             $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE);
             $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
             $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-            $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-            $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE);
+            $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE);
+            $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('R')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE);
 
             $spreadsheet->getActiveSheet()->getStyle('B')->getFont()->getColor()->setARGB('FFFF0000');
             $spreadsheet->getActiveSheet()->getStyle('J')->getFont()->getColor()->setARGB('FFFF0000');
@@ -4580,19 +4611,30 @@ class AdminReportsController extends Controller
             foreach ($result['shipments'] as $type => $hubs) {
                 $details = array();
 
-                foreach ($hubs as $hub => $tracking_numbers) {
-                    $detail = array();
+                if (count($hubs) > 1) {
+                    foreach ($hubs as $hub => $tracking_numbers) {
+                        $detail = array();
 
-                    $detail[] = $hub;
+                        $detail[] = $hub;
 
-                    foreach ($tracking_numbers as $tracking_number) {
-                        $detail[] = $tracking_number;
+                        foreach ($tracking_numbers as $tracking_number) {
+                            $detail[] = $tracking_number;
+                        }
+
+                        $details[] = $detail;
                     }
 
-                    $details[] = $detail;
+                    $details = array_map(null, ...$details);
                 }
+                else {
+                    foreach ($hubs as $hub => $tracking_numbers) {
+                        $details[] = [$hub];
 
-                $details = array_map(null, ...$details);
+                        foreach ($tracking_numbers as $tracking_number) {
+                            $details[] = [$tracking_number];
+                        }
+                    }
+                }
 
                 $spreadsheet->createSheet()->setTitle($type_names[$type]);
 
