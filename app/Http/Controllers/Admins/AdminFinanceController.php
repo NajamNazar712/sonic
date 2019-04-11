@@ -79,9 +79,9 @@ class AdminFinanceController extends Controller
     }
 
     public function __construct() {
-      $this->middleware('auth:admin');
+        $this->middleware('auth:admin');
 
-      $this->middleware('Permission');
+        $this->middleware('Permission');
     }
 
     public function outstanding_sdn_index() {
@@ -92,53 +92,53 @@ class AdminFinanceController extends Controller
 
     public function outstanding_sdn_list(Request $request) {
         $station_deposit_notes = StationDepositNote::join('cities as h', 'station_deposit_notes.hub_id', '=', 'h.id')
-        ->join('admins as a', 'station_deposit_notes.deposited_by', '=', 'a.id')
-        ->join('banks_lists as b', 'station_deposit_notes.banks_list_id', '=', 'b.id')
-        ->select('station_deposit_notes.id', 'station_deposit_notes.id as sdn_number', 'h.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_count_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'a.name as deposited_by', 'b.name as bank', 'station_deposit_notes.created_at as deposited_at', 'station_deposit_notes.deposit_slip')
-        ->where('station_deposit_notes.status', 1);
+            ->join('admins as a', 'station_deposit_notes.deposited_by', '=', 'a.id')
+            ->join('banks_lists as b', 'station_deposit_notes.banks_list_id', '=', 'b.id')
+            ->select('station_deposit_notes.id', 'station_deposit_notes.id as sdn_number', 'h.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_count_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'a.name as deposited_by', 'b.name as bank', 'station_deposit_notes.created_at as deposited_at', 'station_deposit_notes.deposit_slip')
+            ->where('station_deposit_notes.status', 1);
 
         if (session('role_id') != 1) {
             $station_deposit_notes = $station_deposit_notes->whereIn('h.id', session('hubs'));
         }
 
         $datatables = Datatables::of($station_deposit_notes)
-        ->editColumn('sdn_number', function($station_deposit_note) {
-            return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($station_deposit_note->sdn_number, 6, '0', STR_PAD_LEFT) . '</span></button>';
-        })
-        ->filterColumn('station_deposit_notes.id', function ($query, $keyword) {
-            return $query->where('station_deposit_notes.id', '=', $keyword);
-        })
-        ->editColumn('dncc_count_link', function($station_deposit_note) {
-            if ($station_deposit_note->dncc_count != 0) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $station_deposit_note->dncc_count . '</button>';
-            }
-            else {
-                return 0;
-            }
-        })
+            ->editColumn('sdn_number', function($station_deposit_note) {
+                return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($station_deposit_note->sdn_number, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->filterColumn('station_deposit_notes.id', function ($query, $keyword) {
+                return $query->where('station_deposit_notes.id', '=', $keyword);
+            })
+            ->editColumn('dncc_count_link', function($station_deposit_note) {
+                if ($station_deposit_note->dncc_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $station_deposit_note->dncc_count . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
             ->editColumn('sdn_amount', function($shipment){
                 return number_format($shipment->sdn_amount);
             })
-        ->editColumn('delivered_shipments_link', function($station_deposit_note) {
-            if ($station_deposit_note->sdn_delivered_shipments != 0) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $station_deposit_note->sdn_delivered_shipments . '</button>';
-            }
-            else {
-                return 0;
-            }
-        })
-        ->addColumn('sdn_number_padded', function ($station_deposit_note) {
-            return str_pad($station_deposit_note->sdn_number, 6, '0', STR_PAD_LEFT);
-        })
-        ->editColumn('deposit_slip', function($station_deposit_note) {
-            if ($station_deposit_note->deposit_slip) {
-                return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $station_deposit_note->deposit_slip) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
-            }
-            else {
-                return '';
-            }
-        })
-        ->filterColumn('bank', function($query, $keyword) {
+            ->editColumn('delivered_shipments_link', function($station_deposit_note) {
+                if ($station_deposit_note->sdn_delivered_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $station_deposit_note->sdn_delivered_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->addColumn('sdn_number_padded', function ($station_deposit_note) {
+                return str_pad($station_deposit_note->sdn_number, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('deposit_slip', function($station_deposit_note) {
+                if ($station_deposit_note->deposit_slip) {
+                    return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $station_deposit_note->deposit_slip) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                }
+                else {
+                    return '';
+                }
+            })
+            ->filterColumn('bank', function($query, $keyword) {
 
                 if ($keyword !='') {
                     $query->where('b.id', '=', $keyword);
@@ -146,30 +146,30 @@ class AdminFinanceController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-        })
-        ->addColumn('action', function($station_deposit_note) {
-            $reconcile_delivery_notes_button = '<button type="button" class="dropdown-item reconcile_delivery_notes"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Reconcile Delivery Notes</div></button>';
-            $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
+            })
+            ->addColumn('action', function($station_deposit_note) {
+                $reconcile_delivery_notes_button = '<button type="button" class="dropdown-item reconcile_delivery_notes"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Reconcile Delivery Notes</div></button>';
+                $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
 
-            $dropdown = '
+                $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-            if (session('role_id') == 1 || in_array(53, session('permissions'))) {
-              $dropdown .= $reconcile_delivery_notes_button;
-            }
+                if (session('role_id') == 1 || in_array(53, session('permissions'))) {
+                    $dropdown .= $reconcile_delivery_notes_button;
+                }
 
-            $dropdown .= $export_to_excel_button;
+                $dropdown .= $export_to_excel_button;
 
-            $dropdown .= '
+                $dropdown .= '
                 </div>
               </div>
             ';
 
-            return $dropdown;
-        });
+                return $dropdown;
+            });
 
         return $datatables->make(true);
     }
@@ -477,39 +477,39 @@ class AdminFinanceController extends Controller
     }
     public function outstanding_sdn_delivery_notes_list(Request $request) {
         $delivery_notes = StationDepositNote::join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
-        ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
-        ->join('cities as h', 'dn.hub_id', '=', 'h.id')
-        ->join('riders as ri', 'dn.rider_id', '=', 'ri.id')
-        ->join('admins as a', 'dn.admin_id', '=', 'a.id')
-        ->join('admins as au', 'dn.updated_by', '=', 'au.id')
-        ->select('dn.id', 'dn.id as delivery_note_number', 'h.name as hub', 'ri.name as rider', 'dn.shipments_count as shipments', 'dn.delivered_shipments', 'a.name as assigned_by', 'dn.created_at as assigned_at', 'au.name as updated_by', 'dn.updated_at', 'dn.received_cod_amount as dncc_amount');
+            ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
+            ->join('cities as h', 'dn.hub_id', '=', 'h.id')
+            ->join('riders as ri', 'dn.rider_id', '=', 'ri.id')
+            ->join('admins as a', 'dn.admin_id', '=', 'a.id')
+            ->join('admins as au', 'dn.updated_by', '=', 'au.id')
+            ->select('dn.id', 'dn.id as delivery_note_number', 'h.name as hub', 'ri.name as rider', 'dn.shipments_count as shipments', 'dn.delivered_shipments', 'a.name as assigned_by', 'dn.created_at as assigned_at', 'au.name as updated_by', 'dn.updated_at', 'dn.received_cod_amount as dncc_amount');
 
         if ($request->has('id')) {
-           $delivery_notes->where('station_deposit_notes.id', $request->id);
+            $delivery_notes->where('station_deposit_notes.id', $request->id);
         }
         else {
             $delivery_notes->whereRaw('FALSE');
         }
 
         $datatables = Datatables::of($delivery_notes)
-        ->editColumn('delivery_note_number', function ($delivery_notes) {
-            return str_pad($delivery_notes->delivery_note_number, 6, '0', STR_PAD_LEFT);
-        })
-        ->filterColumn('dn.id', function ($query, $keyword) {
-            return $query->where('dn.id', '=', $keyword);
-        })
+            ->editColumn('delivery_note_number', function ($delivery_notes) {
+                return str_pad($delivery_notes->delivery_note_number, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('dn.id', function ($query, $keyword) {
+                return $query->where('dn.id', '=', $keyword);
+            })
             ->editColumn('dncc_amount', function($shipment){
                 return number_format($shipment->dncc_amount);
             })
-        ->addColumn('action', function($delivery_notes) {
-            return '<div class="btn-group">
+            ->addColumn('action', function($delivery_notes) {
+                return '<div class="btn-group">
                   <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                   <div class="dropdown-menu dropdown-menu-sm">
                     <button type="button" class="dropdown-item edit_expense"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Expense</div></button>
                   </div>
                 </div>
             ';
-        });
+            });
 
         return $datatables->make(true);
     }
@@ -599,24 +599,24 @@ class AdminFinanceController extends Controller
 
     public function outstanding_shipments_list(Request $request) {
         $shipments = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
-        ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
-        ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-        ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
-        ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
-        ->join('users as u', 's.user_id', '=', 'u.id')
-        ->join('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
-        ->leftjoin('shipments_journey as sj', function($join) {
-            $join->on('sj.shipment_id', '=', 's.id')
-            ->where('sj.created_at', '=', DB::raw('(SELECT MAX(created_at) FROM shipments_journey WHERE shipment_id = s.id)'));
-        })
-        ->leftjoin('shipments_journey as sjd', function($join) {
-            $join->on('sjd.shipment_id', '=', 's.id')
-            ->where('sjd.created_at', '=', DB::raw('(SELECT MAX(created_at) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
-        })
-        ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
-        ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-        ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc')
-        ->whereIn('delivery_note_shipments.status', [4, 5, 6]);
+            ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
+            ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
+            ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
+            ->join('users as u', 's.user_id', '=', 'u.id')
+            ->join('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
+            ->leftjoin('shipments_journey as sj', function($join) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.created_at', '=', DB::raw('(SELECT MAX(created_at) FROM shipments_journey WHERE shipment_id = s.id)'));
+            })
+            ->leftjoin('shipments_journey as sjd', function($join) {
+                $join->on('sjd.shipment_id', '=', 's.id')
+                    ->where('sjd.created_at', '=', DB::raw('(SELECT MAX(created_at) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
+            })
+            ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
+            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc')
+            ->whereIn('delivery_note_shipments.status', [4, 5, 6]);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
@@ -661,85 +661,85 @@ class AdminFinanceController extends Controller
                 return number_format($shipment->amount);
             })
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
-        ->editColumn('tracking_number',function ($shipments){
-            $route = route('admin.tracking.index');
-            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
-        })
-        ->editColumn('dncc', function ($shipment) {
-            if ($shipment->dncc) {
-                return str_pad($shipment->dncc, 6, '0', STR_PAD_LEFT);
-            }
-            else {
-                return '';
-            }
-        })
-        ->filterColumn('delivery_note_shipments.delivery_note_id', function ($query, $keyword) {
-            return $query->where('delivery_note_shipments.delivery_note_id', '=', $keyword);
-        })
-        ->editColumn('dncc_link', function($shipment) {
-            if ($shipment->dncc) {
-                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipment->dncc, 6, '0', STR_PAD_LEFT) . '</span></button>';
-            }
-            else {
-                return '';
-            }
-        })
-        ->editColumn('sdn', function ($shipment) {
-            if ($shipment->sdn) {
-                return str_pad($shipment->sdn, 6, '0', STR_PAD_LEFT);
-            }
-            else {
-                return '';
-            }
-        })
-        ->editColumn('sdn_link', function($shipment) {
-            if ($shipment->sdn) {
-                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipment->sdn, 6, '0', STR_PAD_LEFT) . '</span></button>';
-            }
-            else {
-                return '';
-            }
-        })
-        ->filterColumn('dnsdn.station_deposit_note_id', function ($query, $keyword) {
-            return $query->where('dnsdn.station_deposit_note_id', '=', $keyword);
-        })
-        ->addColumn('aging', function($shipment) {
-            $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('dncc', function ($shipment) {
+                if ($shipment->dncc) {
+                    return str_pad($shipment->dncc, 6, '0', STR_PAD_LEFT);
+                }
+                else {
+                    return '';
+                }
+            })
+            ->filterColumn('delivery_note_shipments.delivery_note_id', function ($query, $keyword) {
+                return $query->where('delivery_note_shipments.delivery_note_id', '=', $keyword);
+            })
+            ->editColumn('dncc_link', function($shipment) {
+                if ($shipment->dncc) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipment->dncc, 6, '0', STR_PAD_LEFT) . '</span></button>';
+                }
+                else {
+                    return '';
+                }
+            })
+            ->editColumn('sdn', function ($shipment) {
+                if ($shipment->sdn) {
+                    return str_pad($shipment->sdn, 6, '0', STR_PAD_LEFT);
+                }
+                else {
+                    return '';
+                }
+            })
+            ->editColumn('sdn_link', function($shipment) {
+                if ($shipment->sdn) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipment->sdn, 6, '0', STR_PAD_LEFT) . '</span></button>';
+                }
+                else {
+                    return '';
+                }
+            })
+            ->filterColumn('dnsdn.station_deposit_note_id', function ($query, $keyword) {
+                return $query->where('dnsdn.station_deposit_note_id', '=', $keyword);
+            })
+            ->addColumn('aging', function($shipment) {
+                $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
 
-            $now = Carbon::now()->startOfDay();
+                $now = Carbon::now()->startOfDay();
 
-            return $updated_at->diffInDays($now) . 'd';
-        })
-        ->addColumn('action', function($shipment) {
-            $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
-            $adjust_in_payment_button = '<button type="button" class="dropdown-item adjust_in_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Adjust in Payment</div></button>';
+                return $updated_at->diffInDays($now) . 'd';
+            })
+            ->addColumn('action', function($shipment) {
+                $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
+                $adjust_in_payment_button = '<button type="button" class="dropdown-item adjust_in_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Adjust in Payment</div></button>';
 
-            if (session('role_id') == 1 || count(array_intersect([55, 56], session('permissions'))) !== 0) {
-                $dropdown = '
+                if (session('role_id') == 1 || count(array_intersect([55, 56], session('permissions'))) !== 0) {
+                    $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
 
-                if (session('role_id') == 1 || in_array(55, session('permissions'))) {
-                  $dropdown .= $resolve_button;
-                }
+                    if (session('role_id') == 1 || in_array(55, session('permissions'))) {
+                        $dropdown .= $resolve_button;
+                    }
 
-                if (session('role_id') == 1 || in_array(56, session('permissions'))) {
-                  $dropdown .= $adjust_in_payment_button;
-                }
+                    if (session('role_id') == 1 || in_array(56, session('permissions'))) {
+                        $dropdown .= $adjust_in_payment_button;
+                    }
 
-                $dropdown .= '
+                    $dropdown .= '
                     </div>
                   </div>
                 ';
 
-                return $dropdown;
-            }
-            else {
-                return '';
-            }
-        });
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            });
 
         if ($hub = $request->get('hub')) {
             $datatables->where('hc.id', '=', $hub);
@@ -804,7 +804,7 @@ class AdminFinanceController extends Controller
                     ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id)'));
             })
             ->leftjoin('charges_modes as cm', 'shipments.charges_mode_id', '=', 'cm.id')
-			->leftjoin('shipments_journey as an', function($join) {
+            ->leftjoin('shipments_journey as an', function($join) {
                 $join->on('an.shipment_id', '=', 'shipments.id')
                     ->where('an.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id and shipper_status_id = 1)'));
             })
@@ -1833,29 +1833,29 @@ class AdminFinanceController extends Controller
 
     public function make_payments_index() {
         $banks = BanksList::all();
-      return view('admin.finance.make_payments')->with(['banks'=>$banks]);
+        return view('admin.finance.make_payments')->with(['banks'=>$banks]);
     }
 
     public function make_payments_list(Request $request) {
         $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
-        ->join('cities as c', 'u.city_id', '=', 'c.id')
-        ->join('user_bank_infos as ubi', 'pending_payments.user_id', '=', 'ubi.user_id')
-        ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
-        ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
-        ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
-        ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
-        ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-        ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_cycle', 's.booking_type_id', 'usi.poc',DB::raw('(select count(id) from shipments where shipments.user_id = u.id and shipments.shipper_status_id in (2,3,5,21,23,24,18,49,8,9,10,12,7,11,15,51)) as total_pending_shipments'))
-        ->groupBy('pending_payments.id');
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->join('user_bank_infos as ubi', 'pending_payments.user_id', '=', 'ubi.user_id')
+            ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
+            ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
+            ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
+            ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_cycle', 's.booking_type_id', 'usi.poc',DB::raw('(select count(id) from shipments where shipments.user_id = u.id and shipments.shipper_status_id not in (1, 17)) as total_pending_shipments'), DB::raw('SUM(IF(pps.type = 2, pps.payable, 0)) as total_adjustments'))
+            ->groupBy('pending_payments.id');
 
         if (session('role_id') != 1) {
             $pending_payments = $pending_payments->whereIn('c.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($pending_payments)
-        ->addColumn('total_deductable', function($pending_payments) {
-            return number_format($pending_payments->total_charges + $pending_payments->total_gst);
-        })
+            ->addColumn('total_deductable', function($pending_payments) {
+                return number_format($pending_payments->total_charges + $pending_payments->total_gst);
+            })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
                     return $shipment->shipper .' (' . $shipment->poc . ')';
@@ -1875,115 +1875,118 @@ class AdminFinanceController extends Controller
                     });
             })
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
-        ->editColumn('delivered_shipments', function($pending_payment) {
-            if ($pending_payment->delivered_shipments != 0) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->delivered_shipments . '</button>';
-            }
-            else {
-                return 0;
-            }
-        })
-        ->editColumn('returned_shipments', function($pending_payment) {
-            if ($pending_payment->returned_shipments != 0) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->returned_shipments . '</button>';
-            }
-            else {
-                return 0;
-            }
-        })
-        ->editColumn('adjusted_shipments', function($pending_payment) {
-            if ($pending_payment->adjusted_shipments != 0) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->adjusted_shipments . '</button>';
-            }
-            else {
-                return 0;
-            }
-        })
-        ->editColumn('total_amount', function($pending_payment) {
-            return number_format($pending_payment->total_amount);
-        })
-        ->editColumn('total_charges', function($pending_payment) {
-            return number_format($pending_payment->total_charges);
-        })
-        ->editColumn('total_gst', function($pending_payment) {
-            return number_format($pending_payment->total_gst);
-        })
-        ->editColumn('total_payable', function($pending_payment) {
-            return number_format($pending_payment->total_payable);
-        })
-        ->addColumn('phone_numbers', function($pending_payment) {
-            $phone_numbers = $pending_payment->phone;
+            ->editColumn('delivered_shipments', function($pending_payment) {
+                if ($pending_payment->delivered_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->delivered_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('returned_shipments', function($pending_payment) {
+                if ($pending_payment->returned_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->returned_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('adjusted_shipments', function($pending_payment) {
+                if ($pending_payment->adjusted_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->adjusted_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('total_amount', function($pending_payment) {
+                return number_format($pending_payment->total_amount);
+            })
+            ->editColumn('total_charges', function($pending_payment) {
+                return number_format($pending_payment->total_charges);
+            })
+            ->editColumn('total_gst', function($pending_payment) {
+                return number_format($pending_payment->total_gst);
+            })
+            ->editColumn('total_payable', function($pending_payment) {
+                return number_format($pending_payment->total_payable);
+            })
+            ->editColumn('total_adjustments', function($pending_payment) {
+                return number_format($pending_payment->total_adjustments);
+            })
+            ->addColumn('phone_numbers', function($pending_payment) {
+                $phone_numbers = $pending_payment->phone;
 
-            if (!empty($pending_payment->phone2)) {
-                $phone_numbers .= ' - ' . $pending_payment->phone2;
-            }
-
-            return $phone_numbers;
-        })
-        ->removeColumn('phone')
-        ->removeColumn('phone2')
-        ->addColumn('return_shipments_average_aging', function($pending_payment) {
-            if ($pending_payment->returned_shipments != 0) {
-                $shipments = 0;
-                $days = 0;
-
-                $now = Carbon::now()->startOfDay();
-
-                $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->where('type', 1)->get();
-
-                foreach ($pending_payment_shipments as $pending_payment_shipment) {
-                    $created_at = Carbon::parse($pending_payment_shipment->created_at)->startOfDay();
-
-                    $days += $created_at->diffInDays($now);
-
-                    $shipments++;
+                if (!empty($pending_payment->phone2)) {
+                    $phone_numbers .= ' - ' . $pending_payment->phone2;
                 }
 
-                $aging = round(($days / $shipments), 2) . 'd';
+                return $phone_numbers;
+            })
+            ->removeColumn('phone')
+            ->removeColumn('phone2')
+            ->addColumn('return_shipments_average_aging', function($pending_payment) {
+                if ($pending_payment->returned_shipments != 0) {
+                    $shipments = 0;
+                    $days = 0;
 
-                return $aging;
-            }
-            else {
-                return '-';
-            }
-        })
-        ->addColumn('action', function($pending_payment) {
-            $view_details_button = '<button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
-            $make_payments_button = '<button type="button" class="dropdown-item make_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-credit-card"></i></div><div class="col-9 offset-1">Make Payment</div></button>';
+                    $now = Carbon::now()->startOfDay();
 
-            $dropdown = '
+                    $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->where('type', 1)->get();
+
+                    foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                        $created_at = Carbon::parse($pending_payment_shipment->created_at)->startOfDay();
+
+                        $days += $created_at->diffInDays($now);
+
+                        $shipments++;
+                    }
+
+                    $aging = round(($days / $shipments), 2) . 'd';
+
+                    return $aging;
+                }
+                else {
+                    return '-';
+                }
+            })
+            ->addColumn('action', function($pending_payment) {
+                $view_details_button = '<button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
+                $make_payments_button = '<button type="button" class="dropdown-item make_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-credit-card"></i></div><div class="col-9 offset-1">Make Payment</div></button>';
+
+                $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-            $dropdown .= $view_details_button;
+                $dropdown .= $view_details_button;
 
-            if (session('role_id') == 1 || in_array(60, session('permissions'))) {
-              $dropdown .= $make_payments_button;
-            }
+                if (session('role_id') == 1 || in_array(60, session('permissions'))) {
+                    $dropdown .= $make_payments_button;
+                }
 
-            $dropdown .= '
+                $dropdown .= '
                 </div>
               </div>
             ';
 
-            return $dropdown;
-        })
-        ->filterColumn('phone_numbers', function($query, $keyword) {
-            $search = str_replace('-', '', $keyword);
+                return $dropdown;
+            })
+            ->filterColumn('phone_numbers', function($query, $keyword) {
+                $search = str_replace('-', '', $keyword);
 
-            if ($keyword != '') {
-                $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('u.phone', 'like', '%' . $keyword . '%')
-                    ->orWhere('u.phone2', 'like', '%' . $keyword . '%');
-                });
-            }
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('u.phone', 'like', '%' . $keyword . '%')
+                            ->orWhere('u.phone2', 'like', '%' . $keyword . '%');
+                    });
+                }
 
-            else {
-                $query->whereRaw('false');
-            }
-        })
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->filterColumn('bank', function($query, $keyword) {
 
                 if ($keyword !='') {
@@ -1993,12 +1996,12 @@ class AdminFinanceController extends Controller
                     $query->whereRaw('false');
                 }
             })
-        ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
+            ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
 
         if ($tracking_number = $request->get('tracking_number')) {
             $datatables->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
-            ->where('ss.tracking_number', '=', $tracking_number);
+                ->where('ss.tracking_number', '=', $tracking_number);
         }
 
         if ($positive_negative_filter = $request->get('positive_negative_filter')) {
@@ -2091,63 +2094,63 @@ class AdminFinanceController extends Controller
 
     public function make_payments_shipment_list(Request $request) {
         $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
-        ->join('users as u', 's.user_id', '=', 'u.id')
-        ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
-        ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable');
+            ->join('users as u', 's.user_id', '=', 'u.id')
+            ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
+            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable');
 
         if ($request->has('ids')) {
-           $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
+            $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
         }
         else {
             $pending_payment_shipments->whereRaw('FALSE');
         }
 
         $datatables = Datatables::of($pending_payment_shipments)
-        ->addColumn('deductable', function($pending_payment_shipments) {
-            return number_format($pending_payment_shipments->charges + $pending_payment_shipments->gst);
-        })
-        ->addColumn('aging', function($pending_payment_shipments) {
-            $now = Carbon::now()->startOfDay();
+            ->addColumn('deductable', function($pending_payment_shipments) {
+                return number_format($pending_payment_shipments->charges + $pending_payment_shipments->gst);
+            })
+            ->addColumn('aging', function($pending_payment_shipments) {
+                $now = Carbon::now()->startOfDay();
 
-            $created_at = Carbon::parse($pending_payment_shipments->created_at)->startOfDay();
+                $created_at = Carbon::parse($pending_payment_shipments->created_at)->startOfDay();
 
-            return $created_at->diffInDays($now) . 'd';
-        })
-        ->editColumn('amount', function($pending_payment_shipment) {
-            return number_format($pending_payment_shipment->amount);
-        })
-        ->editColumn('charges', function($pending_payment_shipment) {
-            return number_format($pending_payment_shipment->charges);
-        })
-        ->editColumn('gst', function($pending_payment_shipment) {
-            return number_format($pending_payment_shipment->gst);
-        })
-        ->editColumn('payable', function($pending_payment_shipment) {
-            return number_format($pending_payment_shipment->payable);
-        })
-        ->editColumn('type', function($pending_payment_shipment) {
-            if ($pending_payment_shipment->type == 0) {
-                return 'Delivered';
-            }
-            else if ($pending_payment_shipment->type == 1) {
-                return 'Returned';
-            }
-            else {
-                return 'Adjusted';
-            }
-        })
-        ->filterColumn('type',function ($query,$keyword){
-            if ($keyword == 0 || $keyword == 1 || $keyword == 2) {
-                $query->where('pending_payment_shipments.type', '=', $keyword);
-            }
-            else{
-                $query->whereIn('pending_payment_shipments.type', [0,1,2]);
-            }
-        })
-        ->filterColumn('deductable', function ($query, $keyword) {
-            $query->where(DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst'), '=', $keyword);
-        })
-        ->orderColumn('deductable', DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst') . ' $1');
+                return $created_at->diffInDays($now) . 'd';
+            })
+            ->editColumn('amount', function($pending_payment_shipment) {
+                return number_format($pending_payment_shipment->amount);
+            })
+            ->editColumn('charges', function($pending_payment_shipment) {
+                return number_format($pending_payment_shipment->charges);
+            })
+            ->editColumn('gst', function($pending_payment_shipment) {
+                return number_format($pending_payment_shipment->gst);
+            })
+            ->editColumn('payable', function($pending_payment_shipment) {
+                return number_format($pending_payment_shipment->payable);
+            })
+            ->editColumn('type', function($pending_payment_shipment) {
+                if ($pending_payment_shipment->type == 0) {
+                    return 'Delivered';
+                }
+                else if ($pending_payment_shipment->type == 1) {
+                    return 'Returned';
+                }
+                else {
+                    return 'Adjusted';
+                }
+            })
+            ->filterColumn('type',function ($query,$keyword){
+                if ($keyword == 0 || $keyword == 1 || $keyword == 2) {
+                    $query->where('pending_payment_shipments.type', '=', $keyword);
+                }
+                else{
+                    $query->whereIn('pending_payment_shipments.type', [0,1,2]);
+                }
+            })
+            ->filterColumn('deductable', function ($query, $keyword) {
+                $query->where(DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst'), '=', $keyword);
+            })
+            ->orderColumn('deductable', DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst') . ' $1');
 
         return $datatables->make(true);
     }
@@ -2270,8 +2273,8 @@ class AdminFinanceController extends Controller
 
     public function make_payments_store(Request $request) {
         $pending_payment_shipment_ids = PendingPaymentShipment::whereIn('id', explode(',', $request->pending_payment_shipment_ids))->select('pending_payment_id', 'id')->get()->mapToGroups(function ($item, $key) {
-                return [$item['pending_payment_id'] => $item['id']];
-            })->toArray();
+            return [$item['pending_payment_id'] => $item['id']];
+        })->toArray();
 
         $done_payment_ids = array();
 
@@ -2473,114 +2476,114 @@ class AdminFinanceController extends Controller
 
     public function done_payments_list(Request $request) {
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
-        ->join('cities as c', 'u.city_id', '=', 'c.id')
-        ->join('user_bank_infos as ubi', 'done_payments.user_id', '=', 'ubi.user_id')
-        ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
-        ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
-        ->join('shipments as s', 's.id', '=', 'dps.shipment_id')
-        ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-        ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-        ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 's.booking_type_id', 'usi.poc')
-        ->groupBy('done_payments.id');
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->join('user_bank_infos as ubi', 'done_payments.user_id', '=', 'ubi.user_id')
+            ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
+            ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
+            ->join('shipments as s', 's.id', '=', 'dps.shipment_id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
+            ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 's.booking_type_id', 'usi.poc')
+            ->groupBy('done_payments.id');
 
         if (session('role_id') != 1) {
             $done_payments = $done_payments->whereIn('c.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($done_payments)
-        ->addColumn('id_padded', function ($done_payment) {
-            return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
-        })
-        ->filterColumn('done_payments.id', function ($query, $keyword) {
-            return $query->where('done_payments.id', '=', $keyword);
-        })
-        ->editColumn('payment_id', function($done_payment) {
-            return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
-        })
-        ->editColumn('shipper', function ($shipment) {
-            if ($shipment->booking_type_id == 4) {
-                return $shipment->shipper .' (' . $shipment->poc . ')';
-            }
-            else {
-                return $shipment->shipper;
-            }
-        })
-        ->filterColumn('u.name', function ($query, $keyword) {
-            $query->where(function ($sub_query) use ($keyword) {
-                $sub_query->where('s.booking_type_id', '!=', 4)
-                    ->where('u.name', 'like', '%' . $keyword . '%');
+            ->addColumn('id_padded', function ($done_payment) {
+                return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
             })
-                ->orWhere(function ($sub_query) use ($keyword) {
-                    $sub_query->where('s.booking_type_id', '=', 4)
-                        ->where('usi.poc', 'like', '%' . $keyword . '%');
-                });
-        })
+            ->filterColumn('done_payments.id', function ($query, $keyword) {
+                return $query->where('done_payments.id', '=', $keyword);
+            })
+            ->editColumn('payment_id', function($done_payment) {
+                return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->filterColumn('u.name', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('s.booking_type_id', '!=', 4)
+                        ->where('u.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('s.booking_type_id', '=', 4)
+                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+                    });
+            })
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
-        ->addColumn('total_deductable', function($done_payment) {
-            return number_format($done_payment->total_charges + $done_payment->total_gst);
-        })
-        ->editColumn('delivered_shipments', function($done_payment) {
-            if ($done_payment->delivered_shipments != 0) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->delivered_shipments . '</button>';
-            }
-            else {
-                return 0;
-            }
-        })
-        ->editColumn('returned_shipments', function($done_payment) {
-            if ($done_payment->returned_shipments != 0) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->returned_shipments . '</button>';
-            }
-            else {
-                return 0;
-            }
-        })
-        ->editColumn('adjusted_shipments', function($done_payment) {
-            if ($done_payment->adjusted_shipments != 0) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->adjusted_shipments . '</button>';
-            }
-            else {
-                return 0;
-            }
-        })
-        ->editColumn('total_amount', function($done_payment) {
-            return number_format($done_payment->total_amount);
-        })
-        ->editColumn('total_charges', function($done_payment) {
-            return number_format($done_payment->total_charges);
-        })
-        ->editColumn('total_gst', function($done_payment) {
-            return number_format($done_payment->total_gst);
-        })
-        ->editColumn('total_payable', function($done_payment) {
-            return number_format($done_payment->total_payable);
-        })
-        ->addColumn('phone_numbers', function($done_payment) {
-            $phone_numbers = $done_payment->phone;
+            ->addColumn('total_deductable', function($done_payment) {
+                return number_format($done_payment->total_charges + $done_payment->total_gst);
+            })
+            ->editColumn('delivered_shipments', function($done_payment) {
+                if ($done_payment->delivered_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->delivered_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('returned_shipments', function($done_payment) {
+                if ($done_payment->returned_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->returned_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('adjusted_shipments', function($done_payment) {
+                if ($done_payment->adjusted_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->adjusted_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('total_amount', function($done_payment) {
+                return number_format($done_payment->total_amount);
+            })
+            ->editColumn('total_charges', function($done_payment) {
+                return number_format($done_payment->total_charges);
+            })
+            ->editColumn('total_gst', function($done_payment) {
+                return number_format($done_payment->total_gst);
+            })
+            ->editColumn('total_payable', function($done_payment) {
+                return number_format($done_payment->total_payable);
+            })
+            ->addColumn('phone_numbers', function($done_payment) {
+                $phone_numbers = $done_payment->phone;
 
-            if (!empty($done_payment->phone2)) {
-                $phone_numbers .= ' - ' . $done_payment->phone2;
-            }
+                if (!empty($done_payment->phone2)) {
+                    $phone_numbers .= ' - ' . $done_payment->phone2;
+                }
 
-            return $phone_numbers;
-        })
-        ->removeColumn('phone')
-        ->removeColumn('phone2')
-        ->editColumn('status', function($done_payment) {
-            if ($done_payment->status == 0) {
-                return 'Processed';
-            }
-            else if ($done_payment->status == 1) {
-                return 'Paid';
-            }
-            else if ($done_payment->status == 2) {
-                return 'Reverted';
-            }
-            else {
-                return 'Unknown';
-            }
-        })
-        ->filterColumn('bank', function($query, $keyword) {
+                return $phone_numbers;
+            })
+            ->removeColumn('phone')
+            ->removeColumn('phone2')
+            ->editColumn('status', function($done_payment) {
+                if ($done_payment->status == 0) {
+                    return 'Processed';
+                }
+                else if ($done_payment->status == 1) {
+                    return 'Paid';
+                }
+                else if ($done_payment->status == 2) {
+                    return 'Reverted';
+                }
+                else {
+                    return 'Unknown';
+                }
+            })
+            ->filterColumn('bank', function($query, $keyword) {
 
                 if ($keyword !='') {
                     $query->where('ub.id', '=', $keyword);
@@ -2588,8 +2591,8 @@ class AdminFinanceController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-        })
-        ->filterColumn('company_bank', function($query, $keyword) {
+            })
+            ->filterColumn('company_bank', function($query, $keyword) {
 
                 if ($keyword !='') {
                     $query->where('b.id', '=', $keyword);
@@ -2597,34 +2600,34 @@ class AdminFinanceController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-        })
-        ->addColumn('return_shipments_average_aging', function($done_payment) {
-            if ($done_payment->returned_shipments != 0) {
-                $shipments = 0;
-                $days = 0;
+            })
+            ->addColumn('return_shipments_average_aging', function($done_payment) {
+                if ($done_payment->returned_shipments != 0) {
+                    $shipments = 0;
+                    $days = 0;
 
-                $now = Carbon::now()->startOfDay();
+                    $now = Carbon::now()->startOfDay();
 
-                $done_payment_shipments = donePaymentShipment::where('done_payment_id', $done_payment->id)->where('type', 1)->get();
+                    $done_payment_shipments = donePaymentShipment::where('done_payment_id', $done_payment->id)->where('type', 1)->get();
 
-                foreach ($done_payment_shipments as $done_payment_shipment) {
-                    $created_at = Carbon::parse($done_payment_shipment->created_at)->startOfDay();
+                    foreach ($done_payment_shipments as $done_payment_shipment) {
+                        $created_at = Carbon::parse($done_payment_shipment->created_at)->startOfDay();
 
-                    $days += $created_at->diffInDays($now);
+                        $days += $created_at->diffInDays($now);
 
-                    $shipments++;
+                        $shipments++;
+                    }
+
+                    $aging = round(($days / $shipments), 2) . 'd';
+
+                    return $aging;
                 }
-
-                $aging = round(($days / $shipments), 2) . 'd';
-
-                return $aging;
-            }
-            else {
-                return '-';
-            }
-        })
-        ->addColumn('action', function($done_payment) {
-            return '<div class="btn-group">
+                else {
+                    return '-';
+                }
+            })
+            ->addColumn('action', function($done_payment) {
+                return '<div class="btn-group">
                   <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                   <div class="dropdown-menu dropdown-menu-sm">
                     <button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>
@@ -2633,44 +2636,49 @@ class AdminFinanceController extends Controller
                   </div>
                 </div>
             ';
-        })
-        ->filterColumn('phone_numbers', function($query, $keyword) {
-            $search = str_replace('-', '', $keyword);
+            })
+            ->filterColumn('phone_numbers', function($query, $keyword) {
+                $search = str_replace('-', '', $keyword);
 
-            if ($keyword != '') {
-                $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('u.phone', 'like', '%' . $keyword . '%')
-                    ->orWhere('u.phone2', 'like', '%' . $keyword . '%');
-                });
-            }
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('u.phone', 'like', '%' . $keyword . '%')
+                            ->orWhere('u.phone2', 'like', '%' . $keyword . '%');
+                    });
+                }
 
-            else {
-                $query->whereRaw('false');
-            }
-        })
-        ->filterColumn('status', function($query, $keyword) {
-            $keyword = strtolower($keyword);
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('status', function($query, $keyword) {
+                $keyword = strtolower($keyword);
 
-            if ($keyword == 0) {
-                $query->where('done_payments.status', '=', 0);
-            }
-            else if ($keyword == 1) {
-                $query->where('done_payments.status', '=', 1);
-            }
-            else if ($keyword == 2) {
-                $query->where('done_payments.status', '=', 2);
-            }
-            else {
-                $query->whereRaw('false');
-            }
-        })
-        ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
+                if ($keyword == 0) {
+                    $query->where('done_payments.status', '=', 0);
+                }
+                else if ($keyword == 1) {
+                    $query->where('done_payments.status', '=', 1);
+                }
+                else if ($keyword == 2) {
+                    $query->where('done_payments.status', '=', 2);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
         if ($tracking_number = $request->get('tracking_number')) {
             $datatables->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
-            ->where('ss.tracking_number', '=', $tracking_number);
+                ->where('ss.tracking_number', '=', $tracking_number);
         }
 
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatables->whereBetween('done_payments.created_at', [$from,$to]);
+        }
         return $datatables->make(true);
     }
 
@@ -2890,25 +2898,25 @@ class AdminFinanceController extends Controller
                             </tr>
         ';
 
-      $shipment_details = '';
+        $shipment_details = '';
 
-      $serial_number = 1;
+        $serial_number = 1;
 
-      $total_collection_amount = 0;
-      $total_weight_charges = 0;
-      $total_cash_handling_charges = 0;
-      $total_insurance_charges = 0;
-      $total_replacement_charges = 0;
-      // $total_try_and_buy_charges = 0;
-      $total_return_charges = 0;
-      $total_packaging_material_charges = 0;
-      $total_fuel_surcharge = 0;
-      $total_gst = 0;
-      $total_charges = 0;
-      $total_adjustments = 0;
-      $total_payable = 0;
+        $total_collection_amount = 0;
+        $total_weight_charges = 0;
+        $total_cash_handling_charges = 0;
+        $total_insurance_charges = 0;
+        $total_replacement_charges = 0;
+        // $total_try_and_buy_charges = 0;
+        $total_return_charges = 0;
+        $total_packaging_material_charges = 0;
+        $total_fuel_surcharge = 0;
+        $total_gst = 0;
+        $total_charges = 0;
+        $total_adjustments = 0;
+        $total_payable = 0;
 
-      foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+        foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
 
             if ($done_payment_shipment->type == 0) {
@@ -2984,9 +2992,9 @@ class AdminFinanceController extends Controller
 
                 $total_payable += $done_payment_shipment->payable;
             }
-      }
+        }
 
-      $shipment_details .= '
+        $shipment_details .= '
                             <tr>
                                 <td colspan="7"></td>
                                 <td class="color primary"><strong>Total</strong></td>
@@ -2997,7 +3005,7 @@ class AdminFinanceController extends Controller
                             </tr>
       ';
 
-      $html .= '
+        $html .= '
                             <tr>
                               <td class="color secondary"><strong>Total Collection Amount (PKR)</strong></td>
                               <td>' . number_format($total_collection_amount) . '</td>
@@ -3027,9 +3035,9 @@ class AdminFinanceController extends Controller
                             </tr>
       ';
 
-      $html .= $shipment_details;
+        $html .= $shipment_details;
 
-      $html .= '
+        $html .= '
                           </tbody>
                         </table>
 
@@ -3100,7 +3108,7 @@ class AdminFinanceController extends Controller
                 </html>
       ';
 
-      return $html;
+        return $html;
     }
 
     public function done_payments_details(Request $request) {
@@ -3134,7 +3142,23 @@ class AdminFinanceController extends Controller
 
         $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'Adjustments (PKR)'];
 
+        $account_type_id = $done_payment->shipper->account_type_id;
+
         $serial_number = 1;
+
+        $total_collection_amount = 0;
+        $total_weight_charges = 0;
+        $total_cash_handling_charges = 0;
+        $total_insurance_charges = 0;
+        $total_replacement_charges = 0;
+        // $total_try_and_buy_charges = 0;
+        $total_return_charges = 0;
+        $total_packaging_material_charges = 0;
+        $total_fuel_surcharge = 0;
+        $total_gst = 0;
+        $total_charges = 0;
+        $total_adjustments = 0;
+        $total_payable = 0;
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
@@ -3161,14 +3185,89 @@ class AdminFinanceController extends Controller
             $row[] = $shipment->consignee_city->name;
             $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->actual_weight;
-            $row[] = number_format($done_payment_shipment->amount);
-            $row[] = (($done_payment_shipment->type != 2) ? $shipment->weight_charges : 0);
-            $row[] = (($done_payment_shipment->type == 0) ? $shipment->cash_handling_charges : 0);
+            $row[] = $done_payment_shipment->amount;
+            $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->weight_charges : 0);
+            $row[] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
             $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
 
             $details[] = $row;
 
             $serial_number++;
+
+            if ($account_type_id == 1) {
+                if ($done_payment_shipment->type != 2) {
+                    if ($done_payment_shipment->charges != 0) {
+                        if ($done_payment_shipment->type == 0) {
+                            $total_collection_amount += $done_payment_shipment->amount;
+                            $total_cash_handling_charges += $shipment->cash_handling_charges;
+                            $total_replacement_charges += $shipment->replacement_charges;
+                            // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                        }
+                        else {
+                            $total_return_charges += $shipment->return_charges;
+                        }
+
+                        $total_weight_charges += $shipment->weight_charges;
+
+                        if ($shipment->packaging_material_request) {
+                            $total_packaging_material_charges += $shipment->packaging_material_charges;
+                        }
+
+                        $total_insurance_charges += $shipment->insurance_charges;
+                        $total_fuel_surcharge += $shipment->fuel_surcharge;
+                    }
+                    else if ($done_payment_shipment->type == 0) {
+                        $total_collection_amount += $done_payment_shipment->amount;
+                    }
+                }
+                else {
+                    $total_adjustments += $done_payment_shipment->payable;
+                }
+
+                $total_gst += $done_payment_shipment->gst;
+                $total_charges += $done_payment_shipment->charges;
+                $total_payable += $done_payment_shipment->payable;
+            }
+            else {
+                if ($done_payment_shipment->type == 0) {
+                    $total_collection_amount += $done_payment_shipment->amount;
+                }
+                else if ($done_payment_shipment->type == 2) {
+                    $total_adjustments += $done_payment_shipment->payable;
+                }
+
+                $total_payable += $done_payment_shipment->payable;
+            }
+        }
+
+        $total_columns = count($details[0]);
+
+        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments)];
+
+        $details[] = [];
+
+        $row = array();
+
+        for ($c = 0; $c < $total_columns; $c++) {
+            $row[] = '';
+        }
+
+        $row[] = 'Charges Summary (PKR)';
+        $row[] = '';
+
+        $details[] = $row;
+
+        foreach ($summary as $name => $value) {
+            $row = array();
+
+            for ($c = 0; $c < $total_columns; $c++) {
+                $row[] = '';
+            }
+
+            $row[] = $name;
+            $row[] = $value;
+
+            $details[] = $row;
         }
 
         $spreadsheet = new Spreadsheet();
@@ -3178,6 +3277,7 @@ class AdminFinanceController extends Controller
         $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
@@ -3667,107 +3767,107 @@ class AdminFinanceController extends Controller
 
     public function invoices_list(Request $request) {
         $invoices = Invoice::join('users as u', 'invoices.user_id', '=', 'u.id')
-        ->join('cities as c', 'u.city_id', '=', 'c.id')
-        ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
-        ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
-        ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id');
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
+            ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
+            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id');
 
         $datatables = Datatables::of($invoices)
-        ->addColumn('invoice_number_button', function($invoice) {
-            return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->invoice_number . '</button>';
-        })
-        ->editColumn('total_charges', function($invoice) {
-            return number_format($invoice->total_charges);
-        })
-        ->editColumn('total_gst', function($invoice) {
-            return number_format($invoice->total_gst);
-        })
-        ->editColumn('total_invoice_amount', function($invoice) {
-            return number_format($invoice->total_invoice_amount);
-        })
-        ->editColumn('created_at', function($invoice) {
-            return Carbon::parse($invoice->created_at)->format('Y-m-d');
-        })
-        ->addColumn('aging', function($invoice) {
-            if ($invoice->status_id == 1) {
-                $days = Carbon::now()->diffInDays($invoice->created_at);
+            ->addColumn('invoice_number_button', function($invoice) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->invoice_number . '</button>';
+            })
+            ->editColumn('total_charges', function($invoice) {
+                return number_format($invoice->total_charges);
+            })
+            ->editColumn('total_gst', function($invoice) {
+                return number_format($invoice->total_gst);
+            })
+            ->editColumn('total_invoice_amount', function($invoice) {
+                return number_format($invoice->total_invoice_amount);
+            })
+            ->editColumn('created_at', function($invoice) {
+                return Carbon::parse($invoice->created_at)->format('Y-m-d');
+            })
+            ->addColumn('aging', function($invoice) {
+                if ($invoice->status_id == 1) {
+                    $days = Carbon::now()->diffInDays($invoice->created_at);
 
-                if ($days == 0) {
-                    return '-';
+                    if ($days == 0) {
+                        return '-';
+                    }
+                    else {
+                        return $days;
+                    }
                 }
                 else {
-                    return $days;
-                }
-            }
-            else {
-                return '-';
-            }
-        })
-        ->editColumn('due_date', function($invoice) {
-            return Carbon::parse($invoice->due_date)->format('Y-m-d');
-        })
-        ->editColumn('received_date', function($invoice) {
-            if ($invoice->received_date) {
-                return Carbon::parse($invoice->received_date)->format('Y-m-d');
-            }
-            else {
-                return '';
-            }
-        })
-        ->editColumn('deposit_date', function($invoice) {
-            if ($invoice->deposit_date) {
-                return Carbon::parse($invoice->received_date)->format('Y-m-d');
-            }
-            else {
-                return '';
-            }
-        })
-        ->editColumn('due_date', function($invoice) {
-            return Carbon::parse($invoice->due_date)->format('Y-m-d');
-        })
-        ->addColumn('overdue_by', function($invoice) {
-            if ($invoice->status_id == 1) {
-                $days = Carbon::now()->diffInDays($invoice->due_date);
-
-                if ($days == 0) {
                     return '-';
                 }
-                else {
-                    return $days;
+            })
+            ->editColumn('due_date', function($invoice) {
+                return Carbon::parse($invoice->due_date)->format('Y-m-d');
+            })
+            ->editColumn('received_date', function($invoice) {
+                if ($invoice->received_date) {
+                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
                 }
-            }
-            else {
-                return '-';
-            }
-        })
-        ->addColumn('action', function($invoice) {
-            $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
-            $email_reminder_button = '<button type="button" class="dropdown-item email_reminder"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Email Reminder</div></button>';
-            $mark_as_received_button = '<button type="button" class="dropdown-item mark_as_received"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark as Received</div></button>';
+                else {
+                    return '';
+                }
+            })
+            ->editColumn('deposit_date', function($invoice) {
+                if ($invoice->deposit_date) {
+                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
+                }
+                else {
+                    return '';
+                }
+            })
+            ->editColumn('due_date', function($invoice) {
+                return Carbon::parse($invoice->due_date)->format('Y-m-d');
+            })
+            ->addColumn('overdue_by', function($invoice) {
+                if ($invoice->status_id == 1) {
+                    $days = Carbon::now()->diffInDays($invoice->due_date);
 
-            $dropdown = '
+                    if ($days == 0) {
+                        return '-';
+                    }
+                    else {
+                        return $days;
+                    }
+                }
+                else {
+                    return '-';
+                }
+            })
+            ->addColumn('action', function($invoice) {
+                $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
+                $email_reminder_button = '<button type="button" class="dropdown-item email_reminder"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Email Reminder</div></button>';
+                $mark_as_received_button = '<button type="button" class="dropdown-item mark_as_received"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark as Received</div></button>';
+
+                $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-            $dropdown .= $export_to_excel_button;
+                $dropdown .= $export_to_excel_button;
 
-            if ((session('role_id') == 1 || in_array(121, session('permissions'))) && $invoice->status_id == 1 && Notification::find(28)->status) {
-              $dropdown .= $email_reminder_button;
-            }
+                if ((session('role_id') == 1 || in_array(121, session('permissions'))) && $invoice->status_id == 1 && Notification::find(28)->status) {
+                    $dropdown .= $email_reminder_button;
+                }
 
-            if ((session('role_id') == 1 || in_array(122, session('permissions'))) && $invoice->status_id != 3) {
-              $dropdown .= $mark_as_received_button;
-            }
+                if ((session('role_id') == 1 || in_array(122, session('permissions'))) && $invoice->status_id != 3) {
+                    $dropdown .= $mark_as_received_button;
+                }
 
-            $dropdown .= '
+                $dropdown .= '
                 </div>
               </div>
             ';
 
-            return $dropdown;
-        });
+                return $dropdown;
+            });
 
         return $datatables->make(true);
     }
