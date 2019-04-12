@@ -1921,7 +1921,45 @@
                                                 </fieldset>
                                             </div>
                                         </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Fuel Surcharge</h3>
+                                            </div>
+                                            @php
+                                                $detain_fuel_sw = '';
+                                                $detain_fuel_switch = '';
+                                            if((isset($switches[3][0]) && $switches[3][0]->fuel_charges == 1)){
+                                            $detain_fuel_sw = '';
+                                            $detain_fuel_switch = 'checked';
+                                             }else{
+                                            $detain_fuel_sw = 'disabled';
+                                            $detain_fuel_switch = '';
+                                            }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="sameday_fuel_switch" class="switchery fuelSurchargeSameday" data-color="success" data-size="sm" {{$detain_fuel_switch}} disabled/>
+                                                </div>
+                                            </div>
+                                        </div>
 
+                                        <div class="row fuel-surcharge-div-sameday">
+                                            <input type="hidden" name="sameday_fuel_record" value="{{ (isset($fuelCharges[3][0]) && $fuelCharges[3][0]->id != '')? $fuelCharges[3][0]->id : ''}}">
+
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="text"  class="form-control " name="sameday_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[3][0]) && $fuelCharges[3][0]->fuel_surcharge != '')? $fuelCharges[3][0]->fuel_surcharge : ''}}" {{$detain_fuel_sw}} disabled>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
                                         <hr>
                                         <div class="row">
                                             <div class="col-md-2">

@@ -986,6 +986,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_store')->name('store');
         });
 
+		 Route::prefix('fuel_factor')->name('fuel_factor.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@fuel_factor_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@fuel_factor_store')->name('store');
+        });
+
+
         Route::prefix('return_note_restriction_bypass')->name('return_note_restriction_bypass.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_note_restriction_bypass_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@return_note_restriction_bypass_store')->name('store');

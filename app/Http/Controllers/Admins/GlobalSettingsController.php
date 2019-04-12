@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\FuelFactorHistory
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\PettyCashAccountHead;
@@ -612,6 +613,103 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+	public function fuel_factor_index(){
+        return view('admin.settings.fuel_factor');
+    }
+
+    public function fuel_factor_store(Request $request)
+    {
+        $fuel_factor = $request->fuel_factor;
+        if ($fuel_factor != null) {
+            $shipping_modes = ShippingMode::all();
+            $users = User::where('status', 3)->select('id','account_type_id')->get();
+            if (!$users->isEmpty()) {
+                foreach ($users as $user) {
+                    foreach($shipping_modes as $shipping_mode) {
+                        if ($user->account_type_id == 1) {
+                            $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                        }
+                        else {
+                            $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                        }
+
+                        if ($rate_status->exists()) {
+                            $rate_status = $rate_status->first();
+
+                            if ($user->account_type_id == 1) {
+                                $fuel_surcharge = FuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                            }
+                            else {
+                                $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id',$shipping_mode->id);
+                            }
+                            if ($fuel_surcharge->exists()) {
+                                $fuel_surcharge = $fuel_surcharge->first();
+
+                                if ($rate_status->fuel_charges == 1) {
+                                    $update_fuel_surcharge = $fuel_surcharge->fuel_surcharge + $fuel_factor;
+                                }
+                                else {
+                                    $update_fuel_surcharge = $fuel_factor;
+
+                                    $rate_status->fuel_charges = 1;
+                                    $rate_status->save();
+                                }
+
+                                if ($update_fuel_surcharge >= 0) {
+                                    $fuel_surcharge->fuel_surcharge = $update_fuel_surcharge;
+                                } else {
+                                    $fuel_surcharge->fuel_surcharge = 0;
+                                }
+                                $fuel_surcharge->save();
+
+                                if ($user->account_type_id == 1) {
+                                    $fuel_surcharge_history = new HistoryFuelSurcharge();
+                                }
+                                else {
+                                    $fuel_surcharge_history = new HistoryCorporateFuelSurcharge();
+                                }
+
+                                $fuel_surcharge_history->user_id = $user->id;
+                                $fuel_surcharge_history->shipping_mode_id = $shipping_mode->id;
+                                $fuel_surcharge_history->fuel_surcharge = $update_fuel_surcharge;
+                                $fuel_surcharge_history->save();
+
+                            }
+                            else {
+                                $rate_status->fuel_charges = 1;
+                                $rate_status->save();
+                                if ($user->account_type_id == 1) {
+                                    $fuel_surcharge = new FuelSurcharge();
+                                    $fuel_surcharge->user_id = $user->id;
+                                    $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                    $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                    $fuel_surcharge->save();
+                                }
+                                else {
+                                    $fuel_surcharge = new CorporateFuelSurcharge();
+                                    $fuel_surcharge->user_id = $user->id;
+                                    $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                    $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                    $fuel_surcharge->save();
+                                }
+
+                            }
+                        }
+
+                    }
+                }
+                
+                $fuel_factor_history = new FuelFactorHistory();
+                $fuel_factor_history->fuel_factor = $fuel_factor;
+                $fuel_factor_history->admin_id = Auth::id();
+                $fuel_factor_history->save();
+
+                return redirect()->back()->with('success', 'Fuel Factor Updated!');
+            } else {
+                return redirect()->back()->with('error', 'Fuel Factor failed to update!');
+            }
+        }
 
     public function return_note_restriction_bypass_index(){
         $role_ids = array();
