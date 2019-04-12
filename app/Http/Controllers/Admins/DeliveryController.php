@@ -225,7 +225,7 @@ class DeliveryController extends Controller
                     }
 
                     if ($is_updateable == 0) {
-                        if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && ($shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 49)) {
+                        if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && ($shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 55)) {
                             return ['status' => 1, 'error' => 'Cargo not arrived at destination center!'];
                         }
                         if ($request->has('hub_id')) {
@@ -295,7 +295,7 @@ class DeliveryController extends Controller
 
         $admin = Auth::id();
 
-        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15,49, 55);
+        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15, 49, 55);
 
         $valid_shipments = array();
 
