@@ -984,6 +984,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_store')->name('store');
         });
+
+        Route::prefix('return_note_restriction_bypass')->name('return_note_restriction_bypass.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@return_note_restriction_bypass_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@return_note_restriction_bypass_store')->name('store');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
