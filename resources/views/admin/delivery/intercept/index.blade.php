@@ -126,100 +126,40 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var selected_rows = [];
 
-            function approve(selected_rows) {
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select confirm to Confirm Intercept Request!',
-                    icon: 'info',
-                    buttons: {
-                        cancel: {
-                            text: 'Cancel',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Confirm',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url: '{!! route('admin.delivery.intercept.approve') !!}',
-                            method: 'POST',
-                            data: {
-                                'ids[]': selected_rows,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function(data) {
-                                if(data.status == 0){
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    setTimeout(function(){
-                                        window.location.reload();
-                                    },2000);
-                                }
-                                else{
-                                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            });
-                    }
-                });
-            }
 
-            function reject(selected_rows) {
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select confirm to Reject Intercept Request!',
-                    icon: 'info',
-                    buttons: {
-                        cancel: {
-                            text: 'Cancel',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Confirm',
-                            value: true,
-                            visible: true,
-                            closeModal: true
+                function print(selected_rows) {
+                    $.ajax({
+                        url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                        method: 'POST',
+                        data: {
+                            'ids[]': selected_rows,
+                            'admin': {!! Auth::id() !!},
+                            '_token': '{{ csrf_token() }}'
                         }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url: '{!! route('admin.delivery.intercept.reject') !!}',
-                            method: 'POST',
-                            data: {
-                                'ids[]': selected_rows,
-                                '_token': '{{ csrf_token() }}'
+                    })
+                        .done(function(data) {
+                            var tab = window.open('', '_blank');
+
+                            if(!tab) {
+                                swal({
+                                    title: 'Popup Blocker Enabled!',
+                                    text: 'Please add this site to your exception list.',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
                             }
-                        })
-                            .done(function(data) {
-                                if(data.status == 0){
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    setTimeout(function(){
-                                        window.location.reload();
-                                    },2000);
-                                }
-                                else{
-                                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            });
-                    }
-                });
-            }
+                            else {
+                                tab.document.write(data);
+                                tab.document.close();
+                                tab.focus();
+                            }
+                        });
+                }
+
+
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -279,7 +219,7 @@
                     return {body: body, header: head};
                 }
             } );
-            var selected_rows = [];
+
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -290,11 +230,6 @@
                         enabled: false,
                         action: function (e, dt, node, config) {
                             var rows = selected_rows.slice();
-
-                            selected_rows = [];
-
-                            table.rows().deselect();
-
                             approve(rows);
                         }
                     },
@@ -315,7 +250,7 @@
                         }
                     },
                         @endif
-                        @if (session('role_id') == 1 || in_array(194, 195, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(194, session('permissions')) || in_array(195, session('permissions')))
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -526,6 +461,102 @@
                     table.button(1).disable();
                 }
             });
+
+            function approve(ids) {
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select confirm to Confirm Intercept Request!',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'Cancel',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Confirm',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.delivery.intercept.approve') !!}',
+                            method: 'POST',
+                            data: {
+                                'ids[]': ids,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function(data) {
+                                if(data.status == 0){
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    print(data.print);
+                                    table.draw(false);
+                                    selected_rows = [];
+
+                                    table.rows().deselect();
+                                }
+                                else{
+                                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
+                    }
+                });
+            }
+
+            function reject(selected_rows) {
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select confirm to Reject Intercept Request!',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'Cancel',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Confirm',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.delivery.intercept.reject') !!}',
+                            method: 'POST',
+                            data: {
+                                'ids[]': selected_rows,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function(data) {
+                                if(data.status == 0){
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    setTimeout(function(){
+                                        window.location.reload();
+                                    },2000);
+                                }
+                                else{
+                                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
+                    }
+                });
+            }
 
         });
     </script>

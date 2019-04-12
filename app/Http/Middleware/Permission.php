@@ -166,6 +166,7 @@ class Permission
             'delivery.intercept.index' => 193,
             'delivery.intercept.approve' => 194,
             'delivery.intercept.reject' => 195,
+            'delivery.intercept.history.index' => 196,
 
             'return.index' => 44,
             'return.list' => 44,
