@@ -1912,7 +1912,12 @@ class AdminFinanceController extends Controller
                 return number_format($pending_payment->total_payable);
             })
             ->editColumn('total_adjustments', function($pending_payment) {
-                return number_format($pending_payment->total_adjustments);
+                if ($pending_payment->total_adjustments) {
+                    return number_format($pending_payment->total_adjustments);
+                }
+                else {
+                    return 0;
+                }
             })
             ->addColumn('phone_numbers', function($pending_payment) {
                 $phone_numbers = $pending_payment->phone;
