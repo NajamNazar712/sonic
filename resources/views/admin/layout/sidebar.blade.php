@@ -1045,8 +1045,9 @@
 
                     @if (session('role_id') == 1 || in_array(192, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.settings.return_note_restriction_bypass.index')}}">Return Note Restriction Bypass</a></li>
-                    @endif            @endif
-
+                    @endif
+                @endif
+            </li>
         </ul>
     </div>
 </div>
