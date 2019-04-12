@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CorporateRateStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -338,6 +339,33 @@ class APIController extends Controller
         if ($request->input('consignee_city_id') != $pickup_city_id && $request->input('shipping_mode_id') == 4) {
           return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
         }
+
+          if ($user_shipping_info->city->id != $consignee_city->id) {
+              $city_zone = City::where('id', $consignee_city->id)->first();
+              $zone = ZoneClassCity::where(['city_id' => $consignee_city->id, 'zone_id' => $city_zone['zone_id']]);
+              $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
+              $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first();
+              $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first();
+              $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first();
+              if ($zone->exists()) {
+                  $zone = $zone->first();
+
+                  if ($zone['class'] == 0) {
+                      $check_zone = $class_a['setting_value'];
+                  } elseif ($zone['class'] == 1) {
+                      $check_zone = $class_b['setting_value'];
+                  } elseif ($zone['class'] == 2) {
+                      $check_zone = $class_c['setting_value'];
+                  } else {
+                      $check_zone = $class_d['setting_value'];
+                  }
+                  if ((int)$request->input('amount') > $check_zone) {
+                      return response()->json(['status' => 1, 'message' => 'Amount must be smaller then or equal to ' . $check_zone]);
+                  }
+              } else {
+                  return response()->json(['status' => 1, 'message' => "Zone class does'nt exists"]);
+              }
+          }
 
         if (!CityDelivery::where('city_id', $request->input('consignee_city_id'))->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
           return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);

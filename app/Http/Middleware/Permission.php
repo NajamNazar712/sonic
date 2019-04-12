@@ -413,6 +413,11 @@ class Permission
             'settings.debriefing_report_cut_off_time.store' => 175,
             'settings.return_note_restriction_bypass.index' => 192,
 
+            'settings.cod_cap_zones.index' => 197,
+            'settings.cod_cap_zones.update' => 197,
+
+
+
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118,
