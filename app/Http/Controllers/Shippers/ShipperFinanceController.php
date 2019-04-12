@@ -365,6 +365,7 @@ class ShipperFinanceController extends Controller
       $total_return_charges = 0;
       $total_packaging_material_charges = 0;
       $total_fuel_surcharge = 0;
+      $total_intercept_charges = 0;
       $total_gst = 0;
       $total_charges = 0;
       $total_adjustments = 0;
@@ -422,6 +423,7 @@ class ShipperFinanceController extends Controller
 
                   $total_insurance_charges += $shipment->insurance_charges;
                   $total_fuel_surcharge += $shipment->fuel_surcharge;
+                  $total_intercept_charges += $shipment->intercept_charges;
               }
               else {
                   $total_adjustments += $done_payment_shipment->payable;
@@ -522,6 +524,10 @@ class ShipperFinanceController extends Controller
                                         <td>' . number_format($total_fuel_surcharge) . '</td>
                                     </tr>
                                     <tr>
+                                        <td class="color secondary"><strong>Total Intercept Charges</strong></td>
+                                        <td>' . number_format($total_intercept_charges) . '</td>
+                                    </tr>
+                                    <tr>
                                         <td class="color secondary"><strong>Total Charges (w/o GST)</strong></td>
                                         <td>' . number_format($total_charges - $total_packaging_material_charges) . '</td>
                                     </tr>
@@ -582,6 +588,7 @@ class ShipperFinanceController extends Controller
         $total_return_charges = 0;
         $total_packaging_material_charges = 0;
         $total_fuel_surcharge = 0;
+        $total_intercept_charges = 0;
         $total_gst = 0;
         $total_charges = 0;
         $total_adjustments = 0;
@@ -642,6 +649,7 @@ class ShipperFinanceController extends Controller
 
                         $total_insurance_charges += $shipment->insurance_charges;
                         $total_fuel_surcharge += $shipment->fuel_surcharge;
+                        $total_intercept_charges += $shipment->intercept_charges;
                     }
                     else if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
@@ -669,7 +677,7 @@ class ShipperFinanceController extends Controller
 
         $total_columns = count($details[0]);
 
-        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments)];
+        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments)];
 
         $details[] = [];
 
