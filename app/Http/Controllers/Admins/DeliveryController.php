@@ -224,10 +224,35 @@ class DeliveryController extends Controller
                         $is_updateable = 0;
                     }
 
+
                     if ($is_updateable == 0) {
-                        if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && ($shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 55)) {
+                        if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && $shipment->shipper_status_id == 2) {
                             return ['status' => 1, 'error' => 'Cargo not arrived at destination center!'];
+                        }else if($shipment->shipper_status_id == 49){
+                            $misroute_history = MisroutedHistory::where('shipment_id', $shipment->id);
+                            if($misroute_history->exists()){
+                                $misroute_history = $misroute_history->latest()->first();
+                                if ($misroute_history->old_consignee_city_id != $misroute_history->new_consignee_city_id){
+                                    return ['status' => 1, 'error' => 'Shipment needs to be moved through cargo!'];
+                                }
+                            }else{
+                                return ['status' => 1, 'error' => 'Shipment Not found!'];
+                            }
+
                         }
+                        else if($shipment->shipper_status_id == 55){
+                            $request_history = InterceptReBookRequestHistory::where('shipment_id', $shipment->id);
+                            if($request_history->exists()){
+                                $request_history = $request_history->first();
+                                if ($request_history->old_consignee_city_id != $request_history->new_consignee_city_id){
+                                    return ['status' => 1, 'error' => 'Shipment needs to be moved through cargo!'];
+                                }
+                            }else{
+                                return ['status' => 1, 'error' => 'Shipment Not found!'];
+                            }
+
+                        }
+
                         if ($request->has('hub_id')) {
                             $hub_id = $shipment->consignee_city->hub_id;
                             if ($request->hub_id == $hub_id) {
