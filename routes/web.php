@@ -693,6 +693,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('adjusted_shipments', 'Admins\AdminFinanceController@make_payments_adjusted_shipments')->name('adjusted_shipments');
             Route::post('shipment_details', 'Admins\AdminFinanceController@make_payments_shipment_details')->name('shipment_details');
             Route::get('shipment_list', 'Admins\AdminFinanceController@make_payments_shipment_list')->name('shipment_list');
+            Route::get('shipment_export_selected', 'Admins\AdminFinanceController@make_payments_shipment_export_selected')->name('shipment_export_selected');
             Route::post('verify', 'Admins\AdminFinanceController@make_payments_verify')->name('verify');
             Route::get('export_bank_order', 'Admins\AdminFinanceController@make_payments_export_bank_order')->name('export_bank_order');
             Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
@@ -983,6 +984,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('debriefing_report_cut_off_time')->name('debriefing_report_cut_off_time.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_store')->name('store');
+        });
+
+		 Route::prefix('fuel_factor')->name('fuel_factor.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@fuel_factor_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@fuel_factor_store')->name('store');
+        });
+
+
+        Route::prefix('return_note_restriction_bypass')->name('return_note_restriction_bypass.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@return_note_restriction_bypass_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@return_note_restriction_bypass_store')->name('store');
         });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
