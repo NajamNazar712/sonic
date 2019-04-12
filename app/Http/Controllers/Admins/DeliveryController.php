@@ -17,6 +17,8 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\InterceptReBookRequest;
+use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\MisroutedHistory;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
@@ -25,6 +27,7 @@ use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -56,7 +59,7 @@ class DeliveryController extends Controller
 
     public function pending_list(Request $request)
     {
-        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49); //for pending deliveries
+        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55); //for pending deliveries
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -76,9 +79,11 @@ class DeliveryController extends Controller
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+            ->leftjoin('intercept_re_book_request_histories as irrh', 'irrh.shipment_id', '=', 'shipments.id')
             ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc')
             ->whereRaw('IF (shipments.shipper_status_id = 2, (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 49, (oc.hub_id = dc.hub_id), TRUE)')
+            ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
 
         if (session('role_id') != 1) {
@@ -201,7 +206,7 @@ class DeliveryController extends Controller
 
     public function get_shipment_details(Request $request)
     {
-        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49);
+        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55);
         if ($request->tracking != '') {
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
             $remarks = '';
@@ -292,7 +297,7 @@ class DeliveryController extends Controller
 
         $admin = Auth::id();
 
-        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15,49);
+        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15,49, 55);
 
         $valid_shipments = array();
 
@@ -3783,6 +3788,220 @@ class DeliveryController extends Controller
             header('Cache-Control: max-age=0');
 
             $writer->save('php://output');
+        }
+    }
+    public function intercept_request_index()
+    {
+        $shipping_mode = ShippingMode::all();
+        $service_type = BookingType::all();
+//        $city =  City::where('status', 1)->whereNotNull('zone_id')->where('pickup', 1)->orderBy('name')->get();
+        return view('admin.delivery.intercept.index')->with(['shipping_mode' => $shipping_mode, 'service_type' => $service_type]);
+    }
+
+    public function intercept_request_list(Request $request)
+    {
+
+        $shipments = Shipment::leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftjoin('intercept_re_book_requests as irbr', 'irbr.shipment_id', '=', 'shipments.id')
+            ->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftjoin('cities AS odc', 'irbr.consignee_city_id', '=', 'odc.id')
+            ->leftjoin('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftjoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+//            ->join('delivery_note_shipments as dns','dns.shipment_id','=','shipments.id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.created_at', '=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.created_at', '=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->select('shipments.id as shId','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id')
+            ->where('shipments.shipper_status_id', 54)
+        ->groupBy('shipments.id');
+
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->editColumn('order_id', function($shipment){
+                if($shipment->order_id == null) {
+                    return '-';
+                }
+                else{
+                    return $shipment->order_id;
+                }
+            })
+            ->editColumn('arrival', function ($shipments) {
+                if ($shipments->arrival) {
+                    return $shipments->arrival;
+                } else {
+                    return " - ";
+                }
+            })
+            ->filterColumn('shipping_mode', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('sm.id', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('service_type', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('bt.id', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->make(true);
+    }
+
+    public function approve(Request $request){
+        $shipment_ids = $request->ids;
+        $print = array();
+        if (!empty($shipment_ids)) {
+            $valid = FALSE;
+
+            foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+
+                if ($shipment && $shipment->shipper_status_id == 54) {
+                    $valid = TRUE;
+
+                    $intercept = InterceptReBookRequest::where('shipment_id',$shipment_id)->first();
+
+                    $previous_consignee_city_id = $shipment->consignee_city_id;
+                    $new_consignee_city_id = $intercept->consignee_city_id;
+
+                    InterceptReBookRequestHistory::create([
+                        'shipment_id' => $shipment->id,
+                        'old_consignee_city_id' => $shipment->consignee_city_id,
+                        'new_consignee_city_id' => $intercept->consignee_city_id,
+                        'old_consignee_name' => $shipment->consignee_name,
+                        'new_consignee_name' => $intercept->consignee_name,
+                        'old_consignee_address' => $shipment->consignee_address,
+                        'new_consignee_address' => $intercept->consignee_address,
+                        'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                        'new_consignee_phone_number_1' => $intercept->consignee_phone_number_1,
+                        'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                        'new_consignee_phone_number_2' => $intercept->consignee_phone_number_2,
+                        'old_consignee_email' => $shipment->consignee_email,
+                        'new_consignee_email' => $intercept->consignee_email,
+                        'old_amount' => $shipment->amount,
+                        'new_amount' => $intercept->amount,
+                        'shipper_id' => $intercept->shipper_id
+                    ]);
+
+                    $shipment->consignee_city_id = $intercept['consignee_city_id'];
+                    $shipment->consignee_name = $intercept['consignee_name'];
+                    $shipment->consignee_address = $intercept['consignee_address'];
+                    $shipment->consignee_phone_number_1 = $intercept['consignee_phone_number_1'];
+                    $shipment->consignee_phone_number_2 = $intercept['consignee_phone_number_2'];
+                    $shipment->consignee_email = $intercept['consignee_email'];
+                    $shipment->amount = $intercept['amount'];
+                    $shipment->shipper_status_id = 55;
+                    $shipment->consignee_status_id = 55;
+
+                    $shipment->save();
+
+
+                    InterceptReBookRequest::where('shipment_id',$shipment_id)->update([
+                        'status' => 1,
+                        'updated_by' => Auth::id(),
+                        'updated_by_date' => Carbon::now()
+                    ]);
+
+                    ShipmentChargesController::cash_handling($shipment_id);
+                    ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
+
+                    ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
+                    $print[] = $shipment_id;
+                }
+            }
+
+            if ($valid) {
+                return ['status' => 0, 'success' => 'Shipment(s) has been marked as Intercept Approved', 'print' => $print];
+            }
+            else {
+                return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipment Selected'];
+        }
+    }
+
+    public function reject(Request $request){
+        $shipment_ids = $request->ids;
+
+        if (!empty($shipment_ids)) {
+            $valid = FALSE;
+
+            foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+
+                if ($shipment && $shipment->shipper_status_id == 54) {
+                    $valid = TRUE;
+
+                    NotificationsController::send(15, 0, $shipment_id);
+                    NotificationsController::send(16, 0, $shipment_id);
+
+                    if ($shipment->booking_type_id != 4) {
+                        ShipmentChargesController::return($shipment_id);
+
+                        AdminFinanceController::add_payment($shipment_id, 1);
+                    }
+                    else {
+                        ShipmentChargesController::walk_in_return($shipment_id);
+
+                        $shipment->walk_in_status = 2;
+
+                        $shipment->save();
+
+                        AdminFinanceController::done_payment($shipment_id, 1);
+                    }
+
+
+                    $shipment->shipper_status_id = 20;
+                    $shipment->consignee_status_id = 20;
+
+                    $shipment->save();
+
+                    $new_intercept_request = InterceptReBookRequest::where('shipment_id',$shipment_id)->update([
+                        'status' => 2,
+                        'updated_by' => Auth::id(),
+                        'updated_by_date' => Carbon::now()
+                    ]);
+
+                    ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+                }
+            }
+
+            if ($valid) {
+                return ['status' => 0, 'success' => 'Shipment(s) has been marked as Return Confirm'];
+            }
+            else {
+                return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipment Selected'];
         }
     }
 }

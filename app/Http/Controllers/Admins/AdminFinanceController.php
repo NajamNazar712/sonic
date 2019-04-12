@@ -1571,14 +1571,14 @@ class AdminFinanceController extends Controller
 
         if (!$shipment->packaging_material_request) {
             if ($type == 0) {
-                $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
+                $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges;
                 $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 0, PHP_ROUND_HALF_DOWN);
 
                 $payable = $amount - ($charges + $gst);
             }
             else {
                 $amount = 0;
-                $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
+                $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges;
                 $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 0, PHP_ROUND_HALF_DOWN);
 
                 $payable = 0 - ($charges + $gst);
@@ -2981,20 +2981,20 @@ class AdminFinanceController extends Controller
 
         $serial_number = 1;
 
-        $total_collection_amount = 0;
-        $total_weight_charges = 0;
-        $total_cash_handling_charges = 0;
-        $total_insurance_charges = 0;
-        $total_replacement_charges = 0;
-        // $total_try_and_buy_charges = 0;
-        $total_return_charges = 0;
-        $total_packaging_material_charges = 0;
-        $total_fuel_surcharge = 0;
-        $total_gst = 0;
-        $total_charges = 0;
-        $total_adjustments = 0;
-        $total_payable = 0;
-
+      $total_collection_amount = 0;
+      $total_weight_charges = 0;
+      $total_cash_handling_charges = 0;
+      $total_insurance_charges = 0;
+      $total_replacement_charges = 0;
+      // $total_try_and_buy_charges = 0;
+      $total_return_charges = 0;
+      $total_packaging_material_charges = 0;
+      $total_fuel_surcharge = 0;
+      $total_intercept_charges = 0;
+      $total_gst = 0;
+      $total_charges = 0;
+      $total_adjustments = 0;
+      $total_payable = 0;
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
 
@@ -3048,6 +3048,7 @@ class AdminFinanceController extends Controller
 
                         $total_insurance_charges += $shipment->insurance_charges;
                         $total_fuel_surcharge += $shipment->fuel_surcharge;
+                        $total_intercept_charges += $shipment->intercept_charges;
                     }
                     else if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
@@ -3150,6 +3151,10 @@ class AdminFinanceController extends Controller
                                     <tr>
                                         <td class="color secondary"><strong>Total Fuel Surcharge</strong></td>
                                         <td>' . number_format($total_fuel_surcharge) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Intercept Charges</strong></td>
+                                        <td>' . number_format($total_intercept_charges) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Charges (w/o GST)</strong></td>
@@ -3604,6 +3609,7 @@ class AdminFinanceController extends Controller
         $total_replacement_charges = 0;
         // $total_try_and_buy_charges = 0;
         $total_packaging_material_charges = 0;
+        $total_intercept_charges = 0;
         $total_adjustment_charges = 0;
         $total_charges = 0;
         $total_gst = 0;
@@ -3648,6 +3654,7 @@ class AdminFinanceController extends Controller
                           <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->replacement_charges) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 1) ? number_format($shipment->return_charges) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->intercept_charges) : '0') . '</td>
                           <td>' . (($shipment->packaging_material_request == 1 && $invoice_shipment->type == 0) ? number_format($shipment->packaging_material_charges) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount) : '0') . '</td>
                           <td>' . number_format($invoice_shipment->charges) . '</td>
@@ -3676,6 +3683,7 @@ class AdminFinanceController extends Controller
 
                 $total_insurance_charges += $shipment->insurance_charges;
                 $total_fuel_surcharge += $shipment->fuel_surcharge;
+                $total_intercept_charges += $shipment->intercept_charges;
             }
             else {
                 $total_adjustment_charges += $invoice_shipment->invoice_amount;
@@ -3716,6 +3724,10 @@ class AdminFinanceController extends Controller
                         <tr>
                           <td class="text-left">Fuel Surcharge</td>
                           <td class="text-right">' . number_format($total_fuel_surcharge) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Intercept Charges</td>
+                          <td class="text-right">' . number_format($total_intercept_charges) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">Packaging Charges</td>
@@ -3803,6 +3815,7 @@ class AdminFinanceController extends Controller
                           <td class="color secondary"><strong>Replacement Charges (PKR)</strong></td>
                           <td class="color secondary"><strong>Return Charges (PKR)</strong></td>
                           <td class="color secondary"><strong>Fuel Surcharge (PKR)</strong></td>
+                          <td class="color secondary"><strong>Intercept Charges (PKR)</strong></td>
                           <td class="color secondary"><strong>Packaging Charges (PKR)</strong></td>
                           <td class="color secondary"><strong>Adjustment Charges (PKR)</strong></td>
                           <td class="color secondary"><strong>Total Charges (PKR)</strong></td>
@@ -3969,7 +3982,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Type', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'Insurance Charges (PKR)', 'Replacement Charges (PKR)', 'Return Charges (PKR)', 'Fuel Surcharge (PKR)', 'Packaging Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Type', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'Insurance Charges (PKR)', 'Replacement Charges (PKR)', 'Return Charges (PKR)', 'Fuel Surcharge (PKR)', 'Intercept Charges (PKR)', 'Packaging Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
 
         $serial_number = 1;
 
@@ -4012,6 +4025,7 @@ class AdminFinanceController extends Controller
             $row[] = (($invoice_shipment->type == 0) ? $shipment->replacement_charges : 0);
             $row[] = (($invoice_shipment->type == 2) ? $shipment->return_charges : 0);
             $row[] = (($invoice_shipment->type != 2) ? $shipment->fuel_surcharge : 0);
+            $row[] = (($invoice_shipment->type != 2) ? $shipment->intercept_charges : 0);
             $row[] = (($shipment->packaging_material_request == 1 && $invoice_shipment->type == 0) ? $shipment->packaging_material_charges : 0);
             $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
             $row[] = $invoice_shipment->charges;
@@ -4037,6 +4051,7 @@ class AdminFinanceController extends Controller
         $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('R')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('T')->getNumberFormat()->setFormatCode('#,##0');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 

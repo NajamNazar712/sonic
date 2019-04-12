@@ -200,6 +200,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::put('revert', 'Shippers\ShipperShipmentCancelController@revert')->name('revert');
     });
 
+    Route::prefix('intercept')->name('intercept.')->group(function (){
+        Route::get('/{row_id}','Shippers\ShipperInterceptReBookController@intercept_re_book_index')->name('index');
+        Route::post('update','Shippers\ShipperInterceptReBookController@intercept_re_book_update')->name('update');
+    });
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -487,6 +492,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
         //Lost Module End
+
+        Route::prefix('intercept')->name('intercept.')->group(function () {
+            Route::get('', 'Admins\DeliveryController@intercept_request_index')->name('index');
+            Route::get('list', 'Admins\DeliveryController@intercept_request_list')->name('list');
+            Route::post('approve', 'Admins\DeliveryController@approve')->name('approve');
+            Route::post('reject', 'Admins\DeliveryController@reject')->name('reject');
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\AdminInterceptRebookRequestHistoryController@intercept_request_history_index')->name('index');
+                Route::get('list', 'Admins\AdminInterceptRebookRequestHistoryController@intercept_request_history_list')->name('list');
+            });
+
+        });
 
     });
     Route::prefix('return')->name('return.')->group(function (){
