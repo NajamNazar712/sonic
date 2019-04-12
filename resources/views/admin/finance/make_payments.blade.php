@@ -616,6 +616,16 @@
 			var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
 				dom: '<"pull-right"B>tr',
 				buttons: [{
+					text: 'Export Selected',
+					className: 'export_selected',
+					action: function(e) {
+						e.preventDefault();
+
+						if (selected_rows_shipments.length != 0) {
+							window.open('{!! route('admin.finance.make_payments.shipment_export_selected') !!}?ids=' + selected_rows_shipments, '_blank');
+						}
+					}
+				}, {
 					extend: 'selectAll',
                     text: 'Select All',
                     className: 'select_all',
