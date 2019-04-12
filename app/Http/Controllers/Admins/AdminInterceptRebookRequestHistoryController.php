@@ -42,6 +42,12 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->editColumn('old_amount', function($shipment){
+                return number_format($shipment->old_amount);
+            })
+            ->editColumn('new_amount', function($shipment){
+                return number_format($shipment->new_amount);
+            })
             ->make(true);
     }
 }
