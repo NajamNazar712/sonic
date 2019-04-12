@@ -35,7 +35,6 @@ class ShipperInterceptReBookController extends Controller
         $shipment = Shipment::find($request->shipment_id);
         $user_id = session('user_id');
 
-
         $shipment_status = $shipment->status_shipper->name;
 
         if ($shipment['shipper_status_id'] == 12) {
@@ -58,25 +57,6 @@ class ShipperInterceptReBookController extends Controller
                         'shipper_id' => $user_id,
                         'status' => 0
                     ]);
-                    InterceptReBookRequestHistory::create([
-                        'shipment_id' => $shipment->id,
-                        'old_consignee_city_id' => $shipment->consignee_city_id,
-                        'new_consignee_city_id' => $request->consignee_city,
-                        'old_consignee_name' => $shipment->consignee_name,
-                        'new_consignee_name' => $request->consignee_name,
-                        'old_consignee_address' => $shipment->consignee_address,
-                        'new_consignee_address' => $request->consignee_address,
-                        'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
-                        'new_consignee_phone_number_1' => $request->consignee_phone_number_1,
-                        'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
-                        'new_consignee_phone_number_2' => $request->consignee_phone_number_2,
-                        'old_consignee_email' => $shipment->consignee_email,
-                        'new_consignee_email' => $request->consignee_email,
-                        'old_amount' => $shipment->amount,
-                        'new_amount' => $amount,
-                        'shipper_id' => $user_id
-                    ]);
-
 
                     $shipment->consignee_status_id = 54;
                     $shipment->shipper_status_id = 54;

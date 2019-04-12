@@ -26,7 +26,7 @@ class CreateInterceptReBookRequestsTable extends Migration
             $table->integer('shipper_id');
             $table->integer('status');
             $table->integer('updated_by')->nullable();
-            $table->integer('updated_by_date')->nullable();
+            $table->timestamp('updated_by_date')->nullable();
             $table->timestamps();
         });
     }
