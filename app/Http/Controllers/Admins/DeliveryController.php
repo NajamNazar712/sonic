@@ -3885,6 +3885,9 @@ class DeliveryController extends Controller
 
                     $intercept = InterceptReBookRequest::where('shipment_id',$shipment_id)->first();
 
+                    $previous_consignee_city_id = $shipment->consignee_city_id;
+                    $new_consignee_city_id = $intercept->consignee_city_id;
+
                     $shipment->consignee_city_id = $intercept['consignee_city_id'];
                     $shipment->consignee_name = $intercept['consignee_name'];
                     $shipment->consignee_address = $intercept['consignee_address'];
@@ -3902,6 +3905,8 @@ class DeliveryController extends Controller
                         'updated_by' => Auth::id(),
                         'updated_by_date' => Carbon::now()
                     ]);
+
+                    ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
                     $print[] = $shipment_id;
