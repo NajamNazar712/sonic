@@ -24,7 +24,7 @@ class ShipperInterceptReBookController extends Controller
     public function intercept_re_book_index($shipment_id){
 //        dd(session('user_id'));
         $shipment = Shipment::where('id',$shipment_id)->first();
-        $consignee_cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        $consignee_cities = City::where('status', 1)->where('pickup',1)->whereNotNull('zone_id')->orderBy('name')->get();
         return view('client.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
     }
 
