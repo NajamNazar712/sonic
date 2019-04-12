@@ -599,6 +599,8 @@ class AdminFinanceController extends Controller
 
     public function outstanding_shipments_list(Request $request) {
         $shipments = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
+            ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id)'));
+            ->where('sjd.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
             ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
