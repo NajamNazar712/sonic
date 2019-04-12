@@ -498,6 +498,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\DeliveryController@intercept_request_list')->name('list');
             Route::post('approve', 'Admins\DeliveryController@approve')->name('approve');
             Route::post('reject', 'Admins\DeliveryController@reject')->name('reject');
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\AdminInterceptRebookRequestHistoryController@intercept_request_history_index')->name('index');
+                Route::get('list', 'Admins\AdminInterceptRebookRequestHistoryController@intercept_request_history_list')->name('list');
+            });
+
         });
 
     });
