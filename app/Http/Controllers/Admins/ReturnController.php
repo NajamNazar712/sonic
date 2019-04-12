@@ -234,7 +234,7 @@ class ReturnController extends Controller
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
                 $remark_inp = "remark.$shipment";
-                if($parcel->shipper_status_id != 20){
+                if($parcel->shipper_status_id != 20 && $parcel->shipper_status_id != 52){
                     if (!$parcel->packaging_material_request) {
 
                         $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
@@ -282,7 +282,7 @@ class ReturnController extends Controller
         if($request->action == 'reattempt'){
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
-                if($parcel->shipper_status_id != 13){
+                if($parcel->shipper_status_id != 13 && $parcel->shipper_status_id != 52){
                     $remark_inp = "remark.$shipment";
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
@@ -302,7 +302,7 @@ class ReturnController extends Controller
         $remark = $request->remark;
         if($request->action == 'confirm'){
             $parcel = Shipment::find($request->shipment_id);
-            if($parcel->shipper_status_id != 20){
+            if($parcel->shipper_status_id != 20 && $parcel->shipper_status_id != 52){
                 if (!$parcel->packaging_material_request) {
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
                     $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
@@ -343,7 +343,7 @@ class ReturnController extends Controller
 
         }elseif($request->action == 'reattempt'){
             $parcel = Shipment::find($request->shipment_id);
-            if($parcel->shipper_status_id != 13){
+            if($parcel->shipper_status_id != 13 && $parcel->shipper_status_id != 52){
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
                 ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remark, NULL, Auth::id());
 

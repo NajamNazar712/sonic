@@ -50,7 +50,7 @@ class ShipperShipmentCancelController extends Controller
 
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_hyperlink', function ($shipment) {
-                return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $shipment->tracking_number . ' class="tracking" target="_blank">' . $shipment->tracking_number . '</a></u>';
+                return '<u><a href=' . route('cod.tracking.index') . '?tracking_number=' . $shipment->tracking_number . ' class="tracking" target="_blank">' . $shipment->tracking_number . '</a></u>';
             })
             ->editColumn('collection_amount', function($shipment){
                 return number_format($shipment->collection_amount);
@@ -156,7 +156,7 @@ class ShipperShipmentCancelController extends Controller
 
                 AdminPickupsController::generate($shipment_id);
 
-                ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Reverted', NULL, Auth::id());
+                ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Reverted', session('user_id'), NULL);
             }
         }
 

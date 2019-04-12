@@ -599,6 +599,8 @@ class AdminFinanceController extends Controller
 
     public function outstanding_shipments_list(Request $request) {
         $shipments = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
+            ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id)'));
+            ->where('sjd.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
             ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
@@ -1912,7 +1914,12 @@ class AdminFinanceController extends Controller
                 return number_format($pending_payment->total_payable);
             })
             ->editColumn('total_adjustments', function($pending_payment) {
-                return number_format($pending_payment->total_adjustments);
+                if ($pending_payment->total_adjustments) {
+                    return number_format($pending_payment->total_adjustments);
+                }
+                else {
+                    return 0;
+                }
             })
             ->addColumn('phone_numbers', function($pending_payment) {
                 $phone_numbers = $pending_payment->phone;
@@ -2153,6 +2160,78 @@ class AdminFinanceController extends Controller
             ->orderColumn('deductable', DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst') . ' $1');
 
         return $datatables->make(true);
+    }
+
+    public function make_payments_shipment_export_selected(Request $request) {
+        $pending_payment_shipment_ids = explode(',', $request->ids);
+
+        $filename = 'sonic_pending_payment_shipments';
+
+        $details = array();
+
+        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'Deductable', 'Payable'];
+
+        $serial_number = 1;
+
+        foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
+            $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
+
+            $shipment = $pending_payment_shipment->shipment;
+
+            if ($pending_payment_shipment->type == 0) {
+                $type = 'Delivered';
+            }
+            else if ($pending_payment_shipment->type == 1) {
+                $type = 'Returned';
+            }
+            else {
+                $type = 'Adjusted';
+            }
+
+            $now = Carbon::now()->startOfDay();
+            $created_at = Carbon::parse($pending_payment_shipment->created_at)->startOfDay();
+            $aging = $created_at->diffInDays($now) . 'd';
+
+            $row = array();
+
+            $row[] = $serial_number;
+            $row[] = $shipment->user->name;
+            $row[] = $shipment->tracking_number;
+            $row[] = $type;
+            $row[] = $shipment->status_shipper->name;
+            $row[] = $pending_payment_shipment->created_at;
+            $row[] = $aging;
+            $row[] = $pending_payment_shipment->amount;
+            $row[] = $pending_payment_shipment->charges;
+            $row[] = $pending_payment_shipment->gst;
+            $row[] = ($pending_payment_shipment->charges + $pending_payment_shipment->gst);
+            $row[] = $pending_payment_shipment->payable;
+
+            $serial_number++;
+
+            $details[] = $row;
+        }
+
+        $filename .= '.xlsx';
+
+        $spreadsheet = new Spreadsheet();
+
+        $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('G')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');
+
+        $spreadsheet->getActiveSheet()->fromArray($details);
+
+        $writer = new Xlsx($spreadsheet);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename .'"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
     }
 
     public function make_payments_verify(Request $request) {
