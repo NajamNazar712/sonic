@@ -517,12 +517,8 @@ class AdminWalkInBookShipmentController extends Controller
                             background: #c8c8c8;
                             border-radius: 25px;
                           }
-                          
-                          .invoice {
-                                page-break-before: always;
-                           }
                            
-                           .invoice table.table-bordered tbody tr td {
+                          .invoice table.table-bordered tbody tr td {
                             width: auto !important;
                           }
                         </style>
@@ -549,7 +545,7 @@ class AdminWalkInBookShipmentController extends Controller
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
 
-                            <td class="color primary border twice-left"><strong>Serivce</strong></td>
+                            <td class="color primary border twice-left"><strong>Service</strong></td>
                             ';
                     $table_start  .= '
                             <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
@@ -657,9 +653,6 @@ class AdminWalkInBookShipmentController extends Controller
 
             $html .= $shipment_details;
 
-            if ($request->has('twice')) {
-                $html .= $shipment_details;
-            }
             $item = $shipment->items->first();
             $invoice = '<div class="invoice p-1">
                     <table class="table table-bordered border">

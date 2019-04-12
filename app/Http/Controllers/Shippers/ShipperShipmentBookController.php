@@ -1744,7 +1744,7 @@ class ShipperShipmentBookController extends Controller
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
 
-                            <td class="color primary border twice-left"><strong>Serivce</strong></td>
+                            <td class="color primary border twice-left"><strong>Service</strong></td>
                 ';
 
             if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
