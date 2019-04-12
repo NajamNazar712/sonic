@@ -229,9 +229,34 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    
-                    $('#selected_rows').val(selected_rows);
-                    form.submit();
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to change make petty cash statement!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $('#selected_rows').val(selected_rows);
+                            form.submit();
+                        }
+                    });
+
                 }
             });
             var result;

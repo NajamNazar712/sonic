@@ -394,7 +394,8 @@ class Permission
             'settings.ticker.store' => 152,
 
             'settings.walk_in.store' => 154,
-			'settings.petty_cash.heads.index' => 157,            'settings.petty_cash.heads.list' => 157,
+			'settings.petty_cash.heads.index' => 157,
+            'settings.petty_cash.heads.list' => 157,
             'settings.petty_cash.heads.add' => 159,
             'settings.petty_cash.heads.edit' => 160,
             'settings.petty_cash.heads.active' => 161,
@@ -410,6 +411,8 @@ class Permission
             'settings.auto_invoice_generation_and_due_date.store' => 171,
 			'settings.debriefing_report_cut_off_time.index' => 175,
             'settings.debriefing_report_cut_off_time.store' => 175,
+            'settings.return_note_restriction_bypass.index' => 192,
+
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118,

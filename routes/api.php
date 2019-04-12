@@ -28,4 +28,6 @@ Route::middleware('APIToken')->name('api.')->group(function () {
 	});
 
 	Route::get('cities', 'APIController@cities')->name('cities');
+
+	Route::post('charges_calculate', 'APIController@charges_calculate')->name('charges_calculate');
 });
