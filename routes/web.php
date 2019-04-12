@@ -59,6 +59,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('corporate_invoice', 'Shippers\ShipperShipmentBookController@corporate_invoice')->name('corporate_invoice');
             Route::post('check', 'Shippers\ShipperShipmentBookController@check')->name('check');
 
+            Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
+
             Route::prefix('excel')->name('excel_')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
                 Route::post('', 'Shippers\ShipperShipmentBookController@excel_store')->name('store');
@@ -988,6 +990,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('return_note_restriction_bypass')->name('return_note_restriction_bypass.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_note_restriction_bypass_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@return_note_restriction_bypass_store')->name('store');
+        });
+
+        Route::prefix('cod_cap_zones')->name('cod_cap_zones.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@cod_cap_zones_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@cod_cap_zones_update')->name('update');
         });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {

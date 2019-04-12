@@ -473,6 +473,10 @@
                     @if (session('role_id') == 1 || in_array(192, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.settings.return_note_restriction_bypass.index')}}">Return Note Restriction Bypass</a></li>
                     @endif
+
+                    @if (session('role_id') == 1 || in_array(197, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.settings.cod_cap_zones.index') }}">COD CAP for Zone Classes</a></li>
+                    @endif
 				</ul>            </li>
             @endif
         </ul>
