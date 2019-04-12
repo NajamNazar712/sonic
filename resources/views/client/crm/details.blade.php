@@ -233,6 +233,7 @@
             $('#chat_send').on('click', function () {
                 var flag = true;
                 var comment = $('#chat_input').val();
+                $('#chat_input').val('');
                 var request_id = '{{$crm_details->id}}';
                 if(comment == ''){
                     flag = false;
@@ -273,7 +274,7 @@
                                 }
                             }
 
-                                $('#chat_input').val('');
+
                                 $('#last_comment_id').val(data.last_comment_id);
                                 updateScroll();
                         }
