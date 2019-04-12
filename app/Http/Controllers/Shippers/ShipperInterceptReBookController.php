@@ -91,7 +91,7 @@ class ShipperInterceptReBookController extends Controller
                 return redirect()->back()->with('error', 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']);
             }
         } else {
-            return redirect()->route('cod.return.pending.index')->with('error', 'Shipment is already updated with Status : ' . $shipment_status . 'against Tracking Number: ' . $shipment['tracking_number']);
+            return redirect()->route('cod.return.pending.index')->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
         }
     }
 
