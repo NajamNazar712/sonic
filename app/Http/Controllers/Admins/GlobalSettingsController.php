@@ -650,10 +650,10 @@ class GlobalSettingsController extends Controller
     }
 
     public function cod_cap_zones_index(){
-        $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first()();
-        $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first()();
-        $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first()();
-        $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first()();
+        $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
+        $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first();
+        $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first();
+        $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first();
 
         return view('admin.settings.cod_cap_zone')->with(['class_a' => $class_a, 'class_b' => $class_b ,'class_c' => $class_c, 'class_d' => $class_d]);
     }
@@ -661,16 +661,16 @@ class GlobalSettingsController extends Controller
     public function cod_cap_zones_update(Request $request){
         if($request->class_a != null && $request->class_b != null && $request->class_c != null && $request->class_d != null)
         {
-            GlobalSettings::where('class', 0)->update([
+            GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->update([
                 'setting_value' =>  $request->class_a
             ]);
-            GlobalSettings::where('class', 1)->update([
+            GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->update([
                 'setting_value' =>  $request->class_b
             ]);
-            GlobalSettings::where('class', 2)->update([
+            GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->update([
                 'setting_value' =>  $request->class_c
             ]);
-            GlobalSettings::where('class', 3)->update([
+            GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->update([
                 'setting_value' =>  $request->class_d
             ]);
             return redirect()->back()->with('success', 'Settings Updated!');
