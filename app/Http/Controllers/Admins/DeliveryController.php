@@ -58,7 +58,7 @@ class DeliveryController extends Controller
 
     public function pending_list(Request $request)
     {
-        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49); //for pending deliveries
+        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55); //for pending deliveries
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -78,9 +78,11 @@ class DeliveryController extends Controller
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+            ->leftjoin('intercept_re_book_request_histories as irrh', 'irrh.shipment_id', '=', 'shipments.id')
             ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc')
             ->whereRaw('IF (shipments.shipper_status_id = 2, (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 49, (oc.hub_id = dc.hub_id), TRUE)')
+            ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
 
         if (session('role_id') != 1) {
@@ -203,7 +205,7 @@ class DeliveryController extends Controller
 
     public function get_shipment_details(Request $request)
     {
-        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49);
+        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55);
         if ($request->tracking != '') {
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
             $remarks = '';
@@ -294,7 +296,7 @@ class DeliveryController extends Controller
 
         $admin = Auth::id();
 
-        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15,49);
+        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15,49, 55);
 
         $valid_shipments = array();
 
@@ -3871,7 +3873,7 @@ class DeliveryController extends Controller
 
     public function approve(Request $request){
         $shipment_ids = $request->ids;
-
+        $print = array();
         if (!empty($shipment_ids)) {
             $valid = FALSE;
 
@@ -3895,18 +3897,19 @@ class DeliveryController extends Controller
 
                     $shipment->save();
 
-                    $update_intercept_request = InterceptReBookRequest::where('shipment_id',$shipment_id)->update([
+                    InterceptReBookRequest::where('shipment_id',$shipment_id)->update([
                         'status' => 1,
                         'updated_by' => Auth::id(),
                         'updated_by_date' => Carbon::now()
                     ]);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
+                    $print[] = $shipment_id;
                 }
             }
 
             if ($valid) {
-                return ['status' => 0, 'success' => 'Shipment(s) has been marked as Intercept Approved'];
+                return ['status' => 0, 'success' => 'Shipment(s) has been marked as Intercept Approved', 'print' => $print];
             }
             else {
                 return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];
