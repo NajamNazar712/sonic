@@ -53,7 +53,7 @@
     <div class="modal fade" id="add_mapping" role="dialog" aria-labelledby="add_mapping_title" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-                <form class="form-horizontal" method="POST" action="{{ route('admin.cargo.mapping.update') }}" novalidate="novalidate">
+                <form class="form-horizontal" method="POST" action="{{ route('admin.cargo.mapping.store') }}" novalidate="novalidate">
                     {{ csrf_field() }}
 
                     <div class="modal-header">

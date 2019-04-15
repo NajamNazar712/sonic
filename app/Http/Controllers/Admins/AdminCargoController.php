@@ -463,6 +463,18 @@ class AdminCargoController extends Controller
             $details['origin'] = $destination_details;
             $details['destination'] = $origin_details;
         }
+        $mapping = JunctionMapping::where(['origin_id' => $origin_details['id'], 'destination_id' => $destination_details['id']])->first();
+        if($mapping){
+            $details['junction_1'] = $mapping['junction_1'];
+            $details['junction_2'] = $mapping['junction_2'];
+            $details['receiver'] = $mapping['receiver'];
+        }
+        $details['actual_weight'] = 0;
+
+        foreach ($request->shipment_ids as $shipment_id){
+            $shipment_actual_weight = Shipment::find($shipment_id);
+            $details['actual_weight'] = $details['actual_weight'] + $shipment_actual_weight->actual_weight;
+        }
 
         return $details;
     }
