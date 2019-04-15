@@ -6,7 +6,9 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignmentStatus;
 use App\Http\Models\DraftCargo;
 use App\Http\Models\DraftCargoShipment;
+use App\Http\Models\JunctionMapping;
 use App\Http\Models\ShipmentStatus;
+use http\Env\Response;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -2039,5 +2041,102 @@ class AdminCargoController extends Controller
         }
 
         return response()->json(['status' => 1, 'success' => 'Shipments Added to Draft # '.$draft_cargo_id]);
+    }
+
+    public function mapping_index()
+    {
+        $junctions = City::select(['id', 'name'])->where('hub', 1)->where('status', 1)->get();
+        $cities = City::all();
+        $admins = Admin::where('status', 1)->select(['id', 'name'])->get();
+        return view('admin.cargo.mapping')->with(['cities' => $cities, 'junctions' => $junctions, 'admins' => $admins]);
+    }
+
+    public function mapping_list()
+    {
+        $mapping =  JunctionMapping::join('cities as oc','oc.id', '=', 'junction_mappings.origin_id')
+            ->join('cities as dc','dc.id', '=', 'junction_mappings.destination_id')
+            ->join('cities as jc1','jc1.id', '=', 'junction_mappings.junction_1')
+            ->leftjoin('cities as jc2','jc2.id', '=', 'junction_mappings.junction_2')
+            ->join('admins as a','a.id', '=', 'junction_mappings.updated_by')
+            ->leftjoin('admins as ar','ar.id', '=', 'junction_mappings.receiver')
+            ->select('junction_mappings.id as id', 'junction_mappings.updated_at as updated_at','oc.name as origin','dc.name as destination','jc1.name as junction_1', 'jc2.name as junction_2', 'ar.name as receiver', 'a.name as updated_by');
+
+        return Datatables::of($mapping)
+            ->editColumn('junction_2',function ($mapping){
+                if($mapping->junction_2 != null){
+                    return $mapping->junction_2;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('receiver',function ($mapping){
+                if($mapping->receiver != null){
+                    return $mapping->receiver;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->addColumn('action',function ($mapping) {
+                    $dropdown = '
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                                <button type="button" class="dropdown-item edit_mapping"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></div></button>
+                            </div>
+                        </div>
+                    ';
+
+                    return $dropdown;
+            })
+            ->make(true);
+    }
+
+    public function mapping_store(Request $request){
+        $check = JunctionMapping::where(['origin_id' => $request->origin, 'destination_id' => $request->destiination_id])->first();
+        if(!$check) {
+            $mapping = new JunctionMapping();
+
+            $mapping->origin_id = $request->origin;
+            $mapping->destination_id = $request->destination;
+            $mapping->junction_1 = $request->junction_1;
+            $mapping->junction_2 = $request->junction_2;
+            $mapping->receiver = $request->receiver_id;
+            $mapping->updated_by = Auth::id();
+
+            $mapping->save();
+
+            return redirect()->back()->with('success', 'Mapping added successfully.');
+        }
+        else{
+            return redirect()->back()->with('error', 'Mapping against these hubs already exists!');
+        }
+    }
+
+    public function mapping_edit(Request $request){
+        $mapping = JunctionMapping::where('id', $request->mapping_id)->first();
+        return response()->json(['details' => $mapping]);
+    }
+
+    public function mapping_edit_update(Request $request){
+        $mapping = JunctionMapping::where('id', $request->mapping_id);
+        if($mapping) {
+            $mapping = $mapping->first();
+
+            $mapping->origin_id = $request->origin;
+            $mapping->destination_id = $request->destination;
+            $mapping->junction_1 = $request->junction_1;
+            $mapping->junction_2 = $request->junction_2;
+            $mapping->receiver = $request->receiver_id;
+            $mapping->updated_by = Auth::id();
+
+            $mapping->save();
+
+            return redirect()->back()->with('success', 'Mapping added successfully.');
+        }
+        else{
+            return redirect()->back()->with('error', 'Mapping against these hubs already exists!');
+        }
     }
 }
