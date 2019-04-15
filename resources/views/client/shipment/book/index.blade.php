@@ -92,7 +92,11 @@
 
 									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Consignee Information</h4>
-
+										<label for="consignee_info">Search Consignee Information</label>
+										<div class="form-group">
+											<select name="consignee_info" class="select2" id="consignee_info">
+											</select>
+										</div>
 										<div class="form-group">
 											<select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
 												@foreach($consignee_cities as $city)
@@ -660,6 +664,25 @@
 				var consignee_city = $('#consignee_city').val();
 
 				shipping_mode_same_day(pickup_city, consignee_city);
+			});
+
+			$('#consignee_info').prepend('<option value="" selected="selected"></option>').select2({
+				width:'100%',
+                ajax: {
+                    url: 'https://api.github.com/orgs/select2/repos',
+                    data: function (params) {
+                        console.log(params.term);
+						if(params.term.length > 5){
+                            var query = {
+                                search: params.term,
+                                type: 'public'
+                            }
+                            // Query parameters will be ?search=[term]&type=public
+                            return query;
+						}
+
+                    }
+                }
 			});
 
 			$('#information_display').checkboxpicker();

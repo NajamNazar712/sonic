@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shippers;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\ChargesModes;
+use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
@@ -329,7 +330,7 @@ class ShipperShipmentBookController extends Controller
                     $payment_mode_id = $request->input('payment_mode');
 
                     $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id);
-
+                    $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
                     if ($service_type_id == 1) {
@@ -2094,6 +2095,7 @@ class ShipperShipmentBookController extends Controller
             return ['status' => 1, 'error' => 'No Shipping Modes has been Enabled for you'];
         }
     }
+
     public function corporate_excel_store(Request $request) {
         $user_id = session('user_id');
 //        dd($request->all('form'));
@@ -2547,4 +2549,41 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
+    public static function add_consignee_info($shipper_id, $city_id, $name, $address, $phone1, $phone2 = NULL, $email = NULL){
+
+        $consignee_info = ConsigneeInfo::where('phone_number_1', $phone1)->where('shipper_id', $shipper_id);
+        if($consignee_info->exists()){
+
+            $consignee_info = $consignee_info->first();
+
+            $consignee_info->city_id = $city_id;
+            $consignee_info->name = $name;
+            $consignee_info->address = $address;
+            $consignee_info->phone1 = $phone1;
+            $consignee_info->phone2 = $phone2;
+            $consignee_info->email = $email;
+            $consignee_info->save();
+
+        }else{
+
+            $consignee_info = new ConsigneeInfo();
+
+            $consignee_info->shipper_id = $shipper_id;
+
+            $consignee_info->city_id = $city_id;
+
+            $consignee_info->name = $name;
+
+            $consignee_info->address = $address;
+
+            $consignee_info->phone_number_1 = $phone1;
+
+            $consignee_info->phone_number_2 = $phone2;
+
+            $consignee_info->email = $email;
+
+            $consignee_info->save();
+
+        }
+    }
 }
