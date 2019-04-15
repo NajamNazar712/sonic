@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\ShipmentsJourneyController;
 
 use Validator;
 use Illuminate\Validation\Rule;
@@ -989,6 +991,46 @@ class APIController extends Controller
         }
         else {
           return response()->json(['status' => 1, 'message' => 'No Payments']);
+        }
+      }
+    }
+
+    public function shipment_cancel(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })]
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $tracking_number = $request->tracking_number;
+        $type = $request->type;
+
+        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+
+        if ($shipment->shipper_status_id == 1) {
+          $shipment->shipper_status_id = 17;
+          $shipment->consignee_status_id = 17;
+
+          $shipment->save();
+
+          AdminPickupsController::cancel($shipment->id);
+
+          ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Cancelled by Shipper', $user_id, NULL);
+
+          return response()->json(['status' => 0, 'message' => 'Shipment #' . $tracking_number . ' is Cancelled']);
+        }
+        else {
+          return response()->json(['status' => 1, 'message' => 'Shipment\'s Status has already been changed']);
         }
       }
     }
