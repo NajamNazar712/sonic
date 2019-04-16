@@ -75,15 +75,15 @@ class AdminCargoController extends Controller
                     ->where(function ($query) {
                         $query->where(function ($sub_query) {
                             $sub_query->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37])
-                                ->where('oc.hub_id', '!=', 'dc.hub_id');
+                                ->where('oc.hub_id', '!=', DB:raw('dc.hub_id'));
                         })
                         ->orWhere(function ($sub_query) {
                             $sub_query->where('shipments.shipper_status_id', '=', 49)
-                                ->where('mh.old_consignee_city_id', '!=', 'dc.hub_id');
+                                ->where('mh.old_consignee_city_id', '!=', DB:raw('dc.hub_id'));
                         })
                         ->orWhere(function ($sub_query) {
                             $sub_query->where('shipments.shipper_status_id', '=', 55)
-                                ->where('irbrh.old_consignee_city_id', '!=', 'dc.hub_id');
+                                ->where('irbrh.old_consignee_city_id', '!=', DB:raw('dc.hub_id'));
                         });
                     });
             })
