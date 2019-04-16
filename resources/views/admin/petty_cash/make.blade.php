@@ -199,8 +199,8 @@
                 paging:false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
-                    {name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
+                    {name: 'account_head', class: 'align-middle account_head  form-group'},
+                    {name: 'account_title', class: 'align-middle account_title  form-group'},
                     {name: 'hub', class: 'align-middle hub custom-hub-col-width form-group'},
                     {name: 'date', class: 'align-middle date date-col-width form-group'},
                     {name: 'details_of_expense', class: 'align-middle details_of_expense form-group'},
