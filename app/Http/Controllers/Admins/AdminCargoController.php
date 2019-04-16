@@ -2128,7 +2128,9 @@ class AdminCargoController extends Controller
 
     public function mapping_edit(Request $request){
         $mapping = JunctionMapping::where('id', $request->mapping_id)->first();
-        return response()->json(['details' => $mapping]);
+        $origin = City::where('id', $mapping['origin_id'])->first();
+        $destination = City::where('id', $mapping['destination_id'])->first();
+        return response()->json(['details' => $mapping, 'origin' => $origin, 'destination' => $destination]);
     }
 
     public function mapping_edit_update(Request $request){
@@ -2136,8 +2138,6 @@ class AdminCargoController extends Controller
         if($mapping) {
             $mapping = $mapping->first();
 
-            $mapping->origin_id = $request->origin;
-            $mapping->destination_id = $request->destination;
             $mapping->junction_1 = $request->junction_1;
             $mapping->junction_2 = $request->junction_2;
             $mapping->receiver = $request->receiver_id;

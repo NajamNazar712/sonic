@@ -142,23 +142,17 @@
                         <div class="row">
                             <div class="col">
                                 <div class="form-group">
-                                    <label>Origin Hub:<span class="red">*</span></label>
-                                    <select name="origin" class="select2 origin" data-rule-required="true" data-msg-required="Origin Hub is required">
-                                        @foreach($cities as $city)
-                                            <option value="{{$city->id}}">{{$city->name}}</option>
-                                        @endforeach
-                                    </select>
+                                    <input type="hidden" name="origin" class="origin">
+
+                                    <p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 origin_line"></p>
                                 </div>
                             </div>
 
                             <div class="col">
                                 <div class="form-group">
-                                    <label>Destination Hub:<span class="red">*</span></label>
-                                    <select name="destination" class="select2 destination" data-rule-required="true" data-msg-required="Destination Hub is required">
-                                        @foreach($cities as $city)
-                                            <option value="{{$city->id}}">{{$city->name}}</option>
-                                        @endforeach
-                                    </select>
+                                    <input type="hidden" name="destination" class="destination">
+
+                                    <p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 destination_line"></p>
                                 </div>
                             </div>
                         </div>
@@ -231,7 +225,6 @@
                             head.push('S.No');
                             head.push('Origin Hub');
                             head.push('Destination Hub');
-                            head.push('Junction');
                             head.push('Junction 1');
                             head.push('Junction 2');
                             head.push('Receiver');
@@ -411,21 +404,10 @@
                     $('#edit_mapping').modal('show');
                     $('#edit_mapping form .mapping_id').val(mapping_id);
                     $('#edit_mapping form .origin').val(data.details['origin_id']);
+                    $('#edit_mapping form .origin_line').html(data.origin['name']);
                     $('#edit_mapping form .destination').val(data.details['destination_id']);
+                    $('#edit_mapping form .destination_line').html(data.destination['name']);
                     $('#edit_mapping form .junction_1').val(data.details['junction_1']);
-                    $('#edit_mapping form .origin').select2({
-                        width: '100%',
-                        placeholder: 'Origin Hub*'
-                    }).bind('change', function() {
-                        $(this).valid();
-                    });
-
-                    $('#edit_mapping form .destination').select2({
-                        width: '100%',
-                        placeholder: 'Destination Hub*'
-                    }).bind('change', function() {
-                        $(this).valid();
-                    });
 
                     $('#edit_mapping form .junction_1').select2({
                         width: '100%',

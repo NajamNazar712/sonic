@@ -74,7 +74,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([25, 26, 27], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([25, 26, 27, 124, 198], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title">Cargo</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(25, session('permissions')))
@@ -95,7 +95,7 @@
                         @if (session('role_id') == 1 || in_array(124, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.cargo.history.index') }}">History</a></li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(124, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(198, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.cargo.mapping.index') }}">Mapping</a></li>
                         @endif
                     </ul>
