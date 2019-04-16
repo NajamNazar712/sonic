@@ -238,7 +238,7 @@ class ShipperReturnController extends Controller
                     return ['status'=>0,'error'=>"Shipment is already updated for Re-attempt!"];
                 }
             }
-            return ['status'=>0,'error'=>"Shipment is already requested for Re-attempt!"];
+            return ['status'=>0,'error'=>"Shipment is already updated, Please check tracking!"];
 
         }
         return ['status'=>0,'error'=>"Something went wrong, try again later!"];
