@@ -216,9 +216,7 @@ class APIController extends Controller
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'filled', 'email'],
-            'order_id' => ['nullable', 'filled', Rule::unique('shipments')->where(function ($query) use ($user_id) {
-                $query->where('user_id', $user_id);
-            })],
+            'order_id' => ['nullable', 'filled'],
             'package_type' => ['required_if:service_type_id,3', 'boolean'],
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
             'special_instructions' => ['nullable', 'filled', 'between:0,190'],
@@ -265,9 +263,7 @@ class APIController extends Controller
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'filled', 'email'],
-            'order_id' => ['nullable', 'filled', Rule::unique('shipments')->where(function($query) use($user_id) {
-                $query->where('user_id', $user_id);
-            })],
+            'order_id' => ['nullable', 'filled'],
             'package_type' => ['required_if:service_type_id,3', 'boolean'],
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
             'special_instructions' => ['nullable', 'filled', 'between:0,190'],
