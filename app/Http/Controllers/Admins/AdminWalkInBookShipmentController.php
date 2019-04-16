@@ -9,6 +9,7 @@ use App\Http\Models\ChargesModes;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\Zone;
+use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -330,15 +331,57 @@ class AdminWalkInBookShipmentController extends Controller
     }
 
     public function check_standard_weight(Request $request){
-        $check = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
-        if($request->actual_weight < $check['actual_weight']){
-            return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to '. $check['actual_weight']]);
+        if($request->shipping_mode != null && $request->delivery_type != null && $request->consignee_city != null && $request->pickup_city != null && $request->delivery_type != null) {
+            $check = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
+            if ($request->pickup_city != $request->consignee_city) {
+                $city_zone = City::where('id', $request->consignee_city)->first();
+                $zone = ZoneClassCity::where(['city_id' => $request->consignee_city, 'zone_id' => $city_zone['zone_id']]);
+                if ($zone->exists()) {
+                    $zone = $zone->first();
+
+                    if ($zone['class'] == 0) {
+                        $check_zone = $check['chargeable_weight_charges_class_0'];
+                    } elseif ($zone['class'] == 1) {
+                        $check_zone = $check['chargeable_weight_charges_class_1'];
+                    } elseif ($zone['class'] == 2) {
+                        $check_zone = $check['chargeable_weight_charges_class_2'];
+                    } else {
+                        $check_zone = $check['chargeable_weight_charges_class_3'];
+                    }
+                    if ($request->actual_weight < $check['actual_weight']) {
+                        return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $check['actual_weight']]);
+                    } elseif ($request->charges_per_kg < $check_zone) {
+                        return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' . $check_zone]);
+                    } else {
+                        return response()->json(['status' => 2, 'error' => '']);
+                    }
+                } else {
+                    return response()->json(['status' => 0, 'error' => "Zone class does'nt exists"]);
+                }
+            }
+            else{
+                if ($request->actual_weight < $check['actual_weight']) {
+                    return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to ' . $check['actual_weight']]);
+                } elseif ($request->charges_per_kg < $check['chargeable_weight_local']) {
+                    return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to ' .  $check['chargeable_weight_local']]);
+                } else {
+                    return response()->json(['status' => 2, 'error' => '']);
+                }
+            }
         }
-        elseif ($request->charges_per_kg < $check['chargeable_weight']){
-            return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to '. $check['chargeable_weight']]);
-        }
-        else {
-            return response()->json(['status' => 2, 'error' => '']);
+        else{
+            if($request->pickup_city == null){
+                return response()->json(['status' => 3, 'error' => 'Pickup city is required']);
+            }
+            elseif($request->delivery_type == null){
+                return response()->json(['status' => 4, 'error' => 'Delivery type is required']);
+            }
+            elseif($request->consignee_city == null){
+                return response()->json(['status' => 5, 'error' => 'Consignee city is required']);
+            }
+            elseif($request->shipping_mode == null){
+                return response()->json(['status' => 6, 'error' => 'Shipping mode is required']);
+            }
         }
     }
 
@@ -474,12 +517,8 @@ class AdminWalkInBookShipmentController extends Controller
                             background: #c8c8c8;
                             border-radius: 25px;
                           }
-                          
-                          .invoice {
-                                page-break-before: always;
-                           }
                            
-                           .invoice table.table-bordered tbody tr td {
+                          .invoice table.table-bordered tbody tr td {
                             width: auto !important;
                           }
                         </style>
@@ -506,7 +545,7 @@ class AdminWalkInBookShipmentController extends Controller
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
 
-                            <td class="color primary border twice-left"><strong>Serivce</strong></td>
+                            <td class="color primary border twice-left"><strong>Service</strong></td>
                             ';
                     $table_start  .= '
                             <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
@@ -614,10 +653,7 @@ class AdminWalkInBookShipmentController extends Controller
 
             $html .= $shipment_details;
 
-            if ($request->has('twice')) {
-                $html .= $shipment_details;
-            }
-
+            $item = $shipment->items->first();
             $invoice = '<div class="invoice p-1">
                     <table class="table table-bordered border">
                       <tbody>
@@ -637,7 +673,7 @@ class AdminWalkInBookShipmentController extends Controller
                             <table class="table table-sm table-bordered border">
                               <tbody>
                                 <tr>
-                                    <td class="color primary" colspan="2"><strong>Customer Details</strong></td>
+                                    <td class="color primary" colspan="2"><strong>Sender Details</strong></td>
                                 </tr>
                                 <tr>
                                     <td class="color secondary"><strong>Name</strong></td>
@@ -651,21 +687,85 @@ class AdminWalkInBookShipmentController extends Controller
                             </table>
                         </div>
 
-                        <div class="col-4">
+                        <div class="col-6">
                             <table class="table table-sm table-bordered border invoice">
                               <tbody>
                                 <tr>
                                     <td class="color primary"><strong>Tracking No.</strong></td>
                                     <td>'. $shipment->tracking_number .'</td>
                                 </tr>
-                                <tr>
-                                    <td class="color primary"><strong>Due Date</strong></td>
-                                    <td>' . Carbon::parse($shipment->created_at)->format('d/m/Y') . '</td>
-                                </tr>
                                </tbody>
                             </table>
                         </div>
                     </div>
+                    <div class="row align-items-start justify-content-between summary">
+                    <div class="col-6">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="2"><strong>Receiver Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Name</strong></td>
+                                    <td>'. $shipment->consignee_name .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Address</strong></td>
+                                    <td>'. $shipment->consignee_address .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Contact No.</strong></td>
+                                    <td>'. $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border invoice">
+                              <tbody>
+                                <tr class="color secondary">
+                                    <td colspan="4"><strong>Shipment Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Shipping Mode</strong></td>
+                                    <td>'. $shipment->shipping_mode->mode .'</td>
+                                    <td class="color secondary"><strong>Order ID</strong></td>
+                                    <td>'. $shipment->order_id .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Origin</strong></td>
+                                    <td>'. $shipment->pickup_address->city->name .'</td>
+                                    <td class="color secondary"><strong>Destination</strong></td>
+                                    <td>'. $shipment->consignee_city->name .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Booking Date</strong></td>
+                                    <td>'. $shipment->created_at->format('Y-m-d H:i:s') .'</td>
+                                    <td class="color secondary"><strong>Weight</strong></td>
+                                    <td>'. $shipment->actual_weight .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                        <div class="col-12">
+                            <table class="table table-sm table-bordered border invoice">
+                                  <tbody>
+                                    <tr>
+                                      <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
+                                      <td class="color secondary border twice-top"><strong>Type</strong></td>
+                                      <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                                      <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                      <td class="border twice-top">' . $item->quantity . '</td>
+                                    </tr>
+                                    <tr>
+                                      <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                                      <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
             ';
             $invoice_serial_number = 1;
 
@@ -696,7 +796,7 @@ class AdminWalkInBookShipmentController extends Controller
                         </tr>
                       </tbody>
                     </table>
-
+            
                     <div class="row justify-content-end">
                         <div class="col-4">
                             <table class="table table-sm table-bordered border">
@@ -717,7 +817,7 @@ class AdminWalkInBookShipmentController extends Controller
                             </table>
                         </div>
                     </div>
-                    
+                    </div>
                     <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
             ';
             $invoice .= $invoice_details;

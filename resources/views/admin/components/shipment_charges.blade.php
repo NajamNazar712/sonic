@@ -137,6 +137,29 @@
         </table>
         </div>
     @endif
+    @if ($shipment->intercept_charges != null)
+        <div style="margin-top:15px">
+        <h6 style="text-align: left"><b>Intercept</b></h6>
+        <table class="table table-sm table-bordered">
+            <thead>
+            <tr role="row" class="bg-primary white">
+                <th class="border-primary border-darken-1 align-middle text-center">Charges</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (($shipment->intercept_charges == null))
+                <tr>
+                    <td>No Charges!</td>
+                </tr>
+            @else
+                <tr>
+                    <td class="align-middle text-center">Rs. {{ floatval($shipment->intercept_charges) }}</td>
+                </tr>
+            @endif
+            </tbody>
+        </table>
+        </div>
+    @endif
 @else
     <div style="margin-top:15px">
     <h6 style="text-align: left"><b>Packaging Material</b></h6>

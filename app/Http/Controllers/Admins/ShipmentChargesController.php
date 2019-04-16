@@ -26,32 +26,27 @@ use App\Http\Models\CorporateDiscountCharge;
 
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 
+use App\Http\Models\City;
 use App\Http\Models\ZoneClassCity;
 
 use Carbon\Carbon;
 
 class ShipmentChargesController extends Controller
 {
-    static public function weight($id) {
-        $shipment = Shipment::find($id);
-
-        $account_type_id = $shipment->user->account_type_id;
-
+    static public function calculate_weight($account_type_id, $user_id, $shipping_mode_id, $same_day_timing_id, $walk_in_delivery_type_id, $weight, $origin_city_id, $origin_city_zone_id, $destination_city_id) {
         if ($account_type_id == 1) {
-            $rate_status = RateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('status', 1);
+            $rate_status = RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('status', 1);
         }
         else {
-            $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('status', 1);
+            $rate_status = CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('status', 1);
         }
 
         if ($rate_status->exists()) {
-            $weight = $shipment->actual_weight;
-
             if ($account_type_id == 1) {
-                $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                $weight_charge = WeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
             }
             else {
-                $weight_charge = CorporateWeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('delivery_type_id', $shipment->walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                $weight_charge = CorporateWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
             }
 
             if ($weight_charge->exists()) {
@@ -60,10 +55,10 @@ class ShipmentChargesController extends Controller
                 $today = Carbon::today();
 
                 if ($account_type_id == 1) {
-                    $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    $discount_charge = DiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                 }
                 else {
-                    $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    $discount_charge = CorporateDiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                 }
 
                 if ($discount_charge->exists()) {
@@ -77,8 +72,8 @@ class ShipmentChargesController extends Controller
 
                 $class = 0;
 
-                if ($shipment->shipping_mode_id == 4) {
-                    if ($shipment->same_day_timing_id == 1) {
+                if ($shipping_mode_id == 4) {
+                    if ($same_day_timing_id == 1) {
                         $type_of_charges = 0;
                     }
                     else {
@@ -86,15 +81,15 @@ class ShipmentChargesController extends Controller
                     }
                 }
                 else {
-                    if ($shipment->pickup_address->city_id == $shipment->consignee_city_id) {
+                    if ($origin_city_id == $destination_city_id) {
                         $type_of_charges = 0;
                     }
                     else {
                         $type_of_charges = 1;
 
-                        $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
+                        $zone_class_city = ZoneClassCity::where('zone_id', $origin_city_zone_id)->where('city_id', $destination_city_id);
 
-                        if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
+                        if ($shipping_mode_id == 2 || $shipping_mode_id == 3) {
                             $zone_class_city = $zone_class_city->where('zone_classification_id', 2);
                         }
                         else {
@@ -144,24 +139,26 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($account_type_id == 2) {
-                        $charges = $charges * ROUND($shipment->actual_weight, 0);
+                        $charges = $charges * ROUND($weight, 0);
                     }
+
+                    $result = array();
 
                     if ($charges < $discount) {
-                        $shipment->weight_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                        $result['weight_charges'] = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->weight_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $result['weight_charges'] = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
-                    if ($shipment->actual_weight > 1) {
-                        $shipment->chargeable_weight = ROUND($shipment->actual_weight, 0);
+                    if ($weight > 1) {
+                        $result['chargeable_weight'] = ROUND($weight, 0);
                     }
                     else {
-                        $shipment->chargeable_weight = $shipment->actual_weight;
+                        $result['chargeable_weight'] = $weight;
                     }
 
-                    $shipment->save();
+                    return $result;
                 }
                 else {
                     $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
@@ -199,12 +196,14 @@ class ShipmentChargesController extends Controller
                         }
                     }
 
-                    $shipment->chargeable_weight = $weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1);
+                    $result = array();
+
+                    $result['chargeable_weight'] = $weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1);
 
                     $previous = TRUE;
 
                     while ($previous) {
-                        $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+                        $weight_charge = WeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
 
                         if ($weight_charge->exists()) {
                             $weight_charge = $weight_charge->first();
@@ -295,39 +294,52 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($charges < $discount) {
-                        $shipment->weight_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                        $result['weight_charges'] = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->weight_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $result['weight_charges'] = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
-                    $shipment->save();
+                    return $result;
                 }
             }
+            else {
+                return FALSE;
+            }
+        }
+        else {
+            return FALSE;
         }
     }
 
-    static public function cash_handling($id) {
+    static public function weight($id) {
         $shipment = Shipment::find($id);
 
-        $account_type_id = $shipment->user->account_type_id;
+        $result = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight, $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id);
 
-        if ($shipment->amount != 0) {
+        if ($result) {
+            $shipment->weight_charges = $result['weight_charges'];
+            $shipment->chargeable_weight = $result['chargeable_weight'];
+
+            $shipment->save();
+        }
+    }
+
+    static public function calculate_cash_handling($account_type_id, $user_id, $shipping_mode_id, $amount) {
+        if ($amount != 0) {
             if ($account_type_id == 1) {
-                $rate_status = RateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('cash_handling_charges', 1)->where('status', 1);
+                $rate_status = RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('cash_handling_charges', 1)->where('status', 1);
             }
             else {
-                $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('cash_handling_charges', 1)->where('status', 1);
+                $rate_status = CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('cash_handling_charges', 1)->where('status', 1);
             }
 
             if ($rate_status->exists()) {
-                $amount = $shipment->amount;
-
                 if ($account_type_id == 1) {
-                    $cash_handling_charge = CashHandlingCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
+                    $cash_handling_charge = CashHandlingCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
                 }
                 else {
-                    $cash_handling_charge = CorporateCashHandlingCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
+                    $cash_handling_charge = CorporateCashHandlingCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
                 }
 
                 if ($cash_handling_charge->exists()) {
@@ -336,10 +348,10 @@ class ShipmentChargesController extends Controller
                     $today = Carbon::today();
 
                     if ($account_type_id == 1) {
-                        $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                        $discount_charge = DiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                     }
                     else {
-                        $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                        $discount_charge = CorporateDiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                     }
 
                     if ($discount_charge->exists()) {
@@ -367,19 +379,41 @@ class ShipmentChargesController extends Controller
                         $discount = floatval($discount);
                     }
 
+                    $result = array();
+
                     if ($charges < $discount) {
-                        $shipment->cash_handling_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                        $result['cash_handling_charges'] = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->cash_handling_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $result['cash_handling_charges'] = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
-                    $shipment->save();
+                    return $result;
                 }
+                else {
+                    return FALSE;
+                }
+            }
+            else {
+                return FALSE;
             }
         }
         else {
-            $shipment->cash_handling_charges = 0;
+            $result = array();
+
+            $result['cash_handling_charges'] = 0;
+
+            return $result;
+        }
+    }
+
+    static public function cash_handling($id) {
+        $shipment = Shipment::find($id);
+
+        $result = self::calculate_cash_handling($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->amount);
+
+        if ($result) {
+            $shipment->cash_handling_charges = $result['cash_handling_charges'];
 
             $shipment->save();
         }
@@ -593,33 +627,46 @@ class ShipmentChargesController extends Controller
         }
     }
 
-    static public function fuel_surcharge($id) {
-        $shipment = Shipment::find($id);
-
-        $account_type_id = $shipment->user->account_type_id;
-
+    static public function calculate_fuel_surcharge($account_type_id, $user_id, $shipping_mode_id, $weight_charges) {
         if ($account_type_id == 1) {
-            $rate_status = RateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('fuel_charges', 1)->where('status', 1);
+            $rate_status = RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('fuel_charges', 1)->where('status', 1);
         }
         else {
-            $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('fuel_charges', 1)->where('status', 1);
+            $rate_status = CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('fuel_charges', 1)->where('status', 1);
         }
 
         if ($rate_status->exists()) {
             if ($account_type_id == 1) {
-                $fuel_charge = FuelSurcharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+                $fuel_charge = FuelSurcharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
             }
             else {
-                $fuel_charge = CorporateFuelSurcharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+                $fuel_charge = CorporateFuelSurcharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
             }
 
             if ($fuel_charge->exists()) {
                 $fuel_charge = $fuel_charge->first();
 
-                $shipment->fuel_surcharge = ROUND((($fuel_charge->fuel_surcharge / 100) * $shipment->weight_charges), 0, PHP_ROUND_HALF_DOWN);
+                $result = array();
 
-                $shipment->save();
+                $result['fuel_surcharge'] = ROUND((($fuel_charge->fuel_surcharge / 100) * $weight_charges), 0, PHP_ROUND_HALF_DOWN);
+
+                return $result;
             }
+        }
+        else {
+            return FALSE;
+        }
+    }
+
+    static public function fuel_surcharge($id) {
+        $shipment = Shipment::find($id);
+
+        $result = self::calculate_cash_handling($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->amount);
+
+        if ($result) {
+            $shipment->fuel_surcharge = $result['fuel_surcharge'];
+
+            $shipment->save();
         }
     }
 
@@ -1064,5 +1111,273 @@ class ShipmentChargesController extends Controller
         $shipment->received_amount = $shipment->amount + $charges;
 
         $shipment->save();
+    }
+
+    static public function intercept($id, $previous_consignee_city_id, $new_consignee_city_id) {
+        $shipment = Shipment::find($id);
+
+        $account_type_id = $shipment->user->account_type_id;
+
+        if ($account_type_id == 1) {
+            $rate_status = RateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('status', 1);
+        }
+        else {
+            $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('status', 1);
+        }
+
+        if ($rate_status->exists()) {
+            $weight = $shipment->actual_weight;
+
+            if ($account_type_id == 1) {
+                $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+            }
+            else {
+                $weight_charge = CorporateWeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('delivery_type_id', $shipment->walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+            }
+
+            if ($weight_charge->exists()) {
+                $weight_charge = $weight_charge->first();
+
+                $today = Carbon::today();
+
+                if ($account_type_id == 1) {
+                    $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                }
+                else {
+                    $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                }
+
+                if ($discount_charge->exists()) {
+                    $discount_charge = $discount_charge->first();
+
+                    $discount = $discount_charge->weight;
+                }
+                else {
+                    $discount = 0;
+                }
+
+                $class = 0;
+
+                if ($shipment->shipping_mode_id == 4) {
+                    if ($shipment->same_day_timing_id == 1) {
+                        $type_of_charges = 0;
+                    }
+                    else {
+                        $type_of_charges = 1;
+                    }
+                }
+                else {
+                    if ($previous_consignee_city_id == $new_consignee_city_id) {
+                        $type_of_charges = 0;
+                    }
+                    else {
+                        $type_of_charges = 1;
+
+                        $previous_consignee_city = City::find($previous_consignee_city_id);
+
+                        $zone_class_city = ZoneClassCity::where('zone_id', $previous_consignee_city->zone_id)->where('city_id', $new_consignee_city_id);
+
+                        if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
+                            $zone_class_city = $zone_class_city->where('zone_classification_id', 2);
+                        }
+                        else {
+                            $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
+                        }
+
+                        if ($zone_class_city) {
+                            $zone_class_city = $zone_class_city->first();
+
+                            $class = $zone_class_city->class;
+                        }
+                    }
+                }
+
+                if ($weight_charge->weight_addition == 0 || $account_type_id == 2) {
+                    if ($type_of_charges == 0) {
+                        $charges = $weight_charge->local_or_6hr;
+                    }
+                    else {
+                        if ($class == 1) {
+                            if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
+                                $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
+                            }
+                            else {
+                                $charges = intval($weight_charge->national_charges_class_1);
+                            }
+                        }
+                        else if ($class == 2) {
+                            if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
+                                $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
+                            }
+                            else {
+                                $charges = intval($weight_charge->national_charges_class_2);
+                            }
+                        }
+                        else if ($class == 3) {
+                            if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
+                                $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
+                            }
+                            else {
+                                $charges = intval($weight_charge->national_charges_class_3);
+                            }
+                        }
+                        else {
+                            $charges = $weight_charge->national_charges_class_0;
+                        }
+                    }
+
+                    if ($account_type_id == 2) {
+                        $charges = $charges * ROUND($shipment->actual_weight, 0);
+                    }
+
+                    if ($charges < $discount) {
+                        $shipment->intercept_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                    }
+                    else {
+                        $shipment->intercept_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    $shipment->save();
+                }
+                else {
+                    $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
+
+                    if ($type_of_charges == 0) {
+                        $charges = ($weight_charge->local_or_6hr * $multiplier);
+                    }
+                    else {
+                        if ($class == 1) {
+                            if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
+                                $charges = (((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
+                            }
+                            else {
+                                $charges = intval($weight_charge->national_charges_class_1) * $multiplier;
+                            }
+                        }
+                        else if ($class == 2) {
+                            if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
+                                $charges = (((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
+                            }
+                            else {
+                                $charges = intval($weight_charge->national_charges_class_2) * $multiplier;
+                            }
+                        }
+                        else if ($class == 3) {
+                            if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
+                                $charges = (((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
+                            }
+                            else {
+                                $charges = intval($weight_charge->national_charges_class_3) * $multiplier;
+                            }
+                        }
+                        else {
+                            $charges = ($weight_charge->national_charges_class_0 * $multiplier);
+                        }
+                    }
+
+                    $previous = TRUE;
+
+                    while ($previous) {
+                        $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+
+                        if ($weight_charge->exists()) {
+                            $weight_charge = $weight_charge->first();
+
+                            if ($weight_charge->weight_addition == 0) {
+                                if ($type_of_charges == 0) {
+                                    $charges += $weight_charge->local_or_6hr;
+                                }
+                                else {
+                                    if ($class == 1) {
+                                        if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
+                                            $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
+                                        }
+                                        else {
+                                            $charges += intval($weight_charge->national_charges_class_1);
+                                        }
+                                    }
+                                    else if ($class == 2) {
+                                        if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
+                                            $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
+                                        }
+                                        else {
+                                            $charges += intval($weight_charge->national_charges_class_2);
+                                        }
+                                    }
+                                    else if ($class == 3) {
+                                        if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
+                                            $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
+                                        }
+                                        else {
+                                            $charges += intval($weight_charge->national_charges_class_3);
+                                        }
+                                    }
+                                    else {
+                                        $charges += $weight_charge->national_charges_class_0;
+                                    }
+                                }
+
+                                $previous = FALSE;
+                            }
+                            else {
+                                $multiplier = (intval($weight_charge->range_down - $weight_charge->range_up) / $weight_charge->spkg) + 1;
+
+                                if ($type_of_charges == 0) {
+                                    $charges += ($weight_charge->local_or_6hr * $multiplier);
+                                }
+                                else {
+                                    if ($class == 1) {
+                                        if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
+                                            $charges += (((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
+                                        }
+                                        else {
+                                            $charges += intval($weight_charge->national_charges_class_1) * $multiplier;
+                                        }
+                                    }
+                                    else if ($class == 2) {
+                                        if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
+                                            $charges += (((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
+                                        }
+                                        else {
+                                            $charges += intval($weight_charge->national_charges_class_2) * $multiplier;
+                                        }
+                                    }
+                                    else if ($class == 3) {
+                                        if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
+                                            $charges += (((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
+                                        }
+                                        else {
+                                            $charges += intval($weight_charge->national_charges_class_3) * $multiplier;
+                                        }
+                                    }
+                                    else {
+                                        $charges += ($weight_charge->national_charges_class_0 * $multiplier);
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            $previous = FALSE;
+                        }
+                    }
+
+                    if (strpos($discount, '%') !== FALSE) {
+                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                    }
+                    else {
+                        $discount = floatval($discount);
+                    }
+
+                    if ($charges < $discount) {
+                        $shipment->intercept_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                    }
+                    else {
+                        $shipment->intercept_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    $shipment->save();
+                }
+            }
+        }
     }
 }

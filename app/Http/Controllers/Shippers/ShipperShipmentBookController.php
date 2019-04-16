@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\ZoneClassCity;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -181,6 +183,50 @@ class ShipperShipmentBookController extends Controller
         }
         else {
             return ['status' => 1, 'error' => 'No Shipping Modes has been Enabled for you'];
+        }
+    }
+
+    public function check_cod_cap_zone_classes(Request $request){
+        if($request->consignee_city != null && $request->pickup_city != null) {
+            if ($request->pickup_city != $request->consignee_city) {
+                $city_zone = City::where('id', $request->consignee_city)->first();
+                $zone = ZoneClassCity::where(['city_id' => $request->consignee_city, 'zone_id' => $city_zone['zone_id']]);
+                $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
+                $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first();
+                $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first();
+                $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first();
+                if ($zone->exists()) {
+                    $zone = $zone->first();
+
+                    if ($zone['class'] == 0) {
+                        $check_zone = $class_a['setting_value'];
+                    } elseif ($zone['class'] == 1) {
+                        $check_zone = $class_b['setting_value'];
+                    } elseif ($zone['class'] == 2) {
+                        $check_zone = $class_c['setting_value'];
+                    } else {
+                        $check_zone = $class_d['setting_value'];
+                    }
+                    if ($request->amount > $check_zone) {
+                        return response()->json(['status' => 1, 'error' => 'Amount must be smaller then or equal to ' . $check_zone]);
+                    } else {
+                        return response()->json(['status' => 2, 'error' => '']);
+                    }
+                } else {
+                    return response()->json(['status' => 0, 'error' => "Zone class does'nt exists"]);
+                }
+            }
+            else{
+                    return response()->json(['status' => 2, 'error' => '']);
+            }
+        }
+        else{
+            if($request->pickup_city == null){
+                return response()->json(['status' => 3, 'error' => 'Pickup city is required']);
+            }
+            else{
+                return response()->json(['status' => 4, 'error' => 'Consignee city is required']);
+            }
         }
     }
 
@@ -883,6 +929,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function excel_store(Request $request) {
+//        return $request;
         $user_id = session('user_id');
 //        dd($request->all('form'));
         $names = [
@@ -973,7 +1020,7 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
+            'amount' => ['required', 'integer', 'digits_between:1,20', 'min:0'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })]
@@ -1062,7 +1109,6 @@ class ShipperShipmentBookController extends Controller
                                 }
                             }
                         }
-
                         $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
 
                         if (!$user_shipping_info->status) {
@@ -1099,6 +1145,33 @@ class ShipperShipmentBookController extends Controller
                         if ($consignee_city->id != $pickup_city_id && $row['shipping_mode_id'] == 4) {
                             $errors[$row_id]['consignee_city_name'] = 'Same Day Delivery is not available for Different City Shipment';
                         }
+
+                            if ($user_shipping_info->city->id != $consignee_city->id) {
+                                $city_zone = City::where('id', $consignee_city->id)->first();
+                                $zone = ZoneClassCity::where(['city_id' => $consignee_city->id, 'zone_id' => $city_zone['zone_id']]);
+                                $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
+                                $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first();
+                                $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first();
+                                $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first();
+                                if ($zone->exists()) {
+                                    $zone = $zone->first();
+
+                                    if ($zone['class'] == 0) {
+                                        $check_zone = $class_a['setting_value'];
+                                    } elseif ($zone['class'] == 1) {
+                                        $check_zone = $class_b['setting_value'];
+                                    } elseif ($zone['class'] == 2) {
+                                        $check_zone = $class_c['setting_value'];
+                                    } else {
+                                        $check_zone = $class_d['setting_value'];
+                                    }
+                                    if ((int)$row['amount'] > $check_zone) {
+                                        $errors[$row_id]['amount'] = 'Amount must be smaller then or equal to ' . $check_zone;
+                                    }
+                                } else {
+                                    $errors[$row_id]['amount'] = "Zone class does'nt exists";
+                                }
+                            }
 
                         if (!CityDelivery::where('city_id', $consignee_city->id)->where('booking_type_id', $row['service_type_id'])->where('shipping_mode_id', $row['shipping_mode_id'])->exists()) {
                             $errors[$row_id]['consignee_city_name'] = 'Delivery is not allowed for City: ' . $consignee_city->name . ' with Service Type ID #' . $row['service_type_id'] . ' and Shipping Mode ID #' . $row['shipping_mode_id'];
@@ -1671,7 +1744,7 @@ class ShipperShipmentBookController extends Controller
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
 
-                            <td class="color primary border twice-left"><strong>Serivce</strong></td>
+                            <td class="color primary border twice-left"><strong>Service</strong></td>
                 ';
 
             if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
@@ -2118,7 +2191,7 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
+            'amount' => ['required', 'integer', 'digits_between:1,20', 'min:0'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })]
@@ -2208,6 +2281,8 @@ class ShipperShipmentBookController extends Controller
                             }
                         }
 
+//                        dd($errors[$row_id]['amount']);
+
                         $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
 
                         if (!$user_shipping_info->status) {
@@ -2243,6 +2318,33 @@ class ShipperShipmentBookController extends Controller
 
                         if ($consignee_city->id != $pickup_city_id && $row['shipping_mode_id'] == 4) {
                             $errors[$row_id]['consignee_city_name'] = 'Same Day Delivery is not available for Different City Shipment';
+                        }
+
+                        if ($user_shipping_info->city->id != $consignee_city->id) {
+                            $city_zone = City::where('id', $consignee_city->id)->first();
+                            $zone = ZoneClassCity::where(['city_id' => $consignee_city->id, 'zone_id' => $city_zone['zone_id']]);
+                            $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
+                            $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first();
+                            $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first();
+                            $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first();
+                            if ($zone->exists()) {
+                                $zone = $zone->first();
+
+                                if ($zone['class'] == 0) {
+                                    $check_zone = $class_a['setting_value'];
+                                } elseif ($zone['class'] == 1) {
+                                    $check_zone = $class_b['setting_value'];
+                                } elseif ($zone['class'] == 2) {
+                                    $check_zone = $class_c['setting_value'];
+                                } else {
+                                    $check_zone = $class_d['setting_value'];
+                                }
+                                if ((int)$row['amount'] > $check_zone) {
+                                    $errors[$row_id]['amount'] = 'Amount must be smaller then or equal to ' . $check_zone;
+                                }
+                            } else {
+                                $errors[$row_id]['amount'] = "Zone class does'nt exists";
+                            }
                         }
 
                         if (!CityDelivery::where('city_id', $consignee_city->id)->where('booking_type_id', $row['service_type_id'])->where('shipping_mode_id', $row['shipping_mode_id'])->exists()) {

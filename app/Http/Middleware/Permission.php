@@ -163,6 +163,10 @@ class Permission
             'delivery.lost.add.index' => 130,
             'delivery.lost.add.shipment.info' => 130,
             'delivery.lost.add.shipments.store' => 130,
+            'delivery.intercept.index' => 193,
+            'delivery.intercept.approve' => 194,
+            'delivery.intercept.reject' => 195,
+            'delivery.intercept.history.index' => 196,
 
             'return.index' => 44,
             'return.list' => 44,
@@ -390,7 +394,8 @@ class Permission
             'settings.ticker.store' => 152,
 
             'settings.walk_in.store' => 154,
-			'settings.petty_cash.heads.index' => 157,            'settings.petty_cash.heads.list' => 157,
+			'settings.petty_cash.heads.index' => 157,
+            'settings.petty_cash.heads.list' => 157,
             'settings.petty_cash.heads.add' => 159,
             'settings.petty_cash.heads.edit' => 160,
             'settings.petty_cash.heads.active' => 161,
@@ -406,6 +411,13 @@ class Permission
             'settings.auto_invoice_generation_and_due_date.store' => 171,
 			'settings.debriefing_report_cut_off_time.index' => 175,
             'settings.debriefing_report_cut_off_time.store' => 175,
+            'settings.return_note_restriction_bypass.index' => 192,
+
+            'settings.cod_cap_zones.index' => 197,
+            'settings.cod_cap_zones.update' => 197,
+
+
+
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118,
@@ -448,6 +460,8 @@ class Permission
             'return.pending.list' => 9,
             'return.pending.marked.status' => 9,
             'return.pending.marked.status.single' => 9,
+
+            'intercept.index' => 9,
 
             'packaging.requests.index' => 4,
             'packaging.requests.submit' => 4,
