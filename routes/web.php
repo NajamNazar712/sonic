@@ -603,6 +603,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('mapping')->name('mapping.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@mapping_index')->name('index');
+            Route::get('list', 'Admins\AdminCargoController@mapping_list')->name('list');
+            Route::post('store', 'Admins\AdminCargoController@mapping_store')->name('store');
+            Route::post('edit', 'Admins\AdminCargoController@mapping_edit')->name('edit');
+            Route::post('update', 'Admins\AdminCargoController@mapping_edit_update')->name('update');
+//            Route::post('print', 'Admins\AdminCargoController@history_cargo_print')->name('print');
+        });
+
     });
     Route::prefix('dispute')->name('dispute.')->group(function (){
         Route::get('','Admins\DisputeController@dispute_index')->name('index');
