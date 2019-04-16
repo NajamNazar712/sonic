@@ -46,6 +46,7 @@ class AdminTrackingController extends Controller
     			$details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
     			$details['shipper']['phone_number_1'] = $shipper->phone;
     			$details['shipper']['phone_number_2'] = $shipper->phone2;
+    			$details['shipper']['email'] = $shipper->email;
     			$details['shipper']['origin'] = $shipper->city->name;
     			$details['shipper']['address'] = $shipper->address;
 

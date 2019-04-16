@@ -137,7 +137,7 @@
                                         <h4 class="form-section mb-2 text-center">Order Information</h4>
 
                                         <div class="form-group">
-                                            <input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
+                                            <input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
                                         </div>
 
                                         <div id="regular">

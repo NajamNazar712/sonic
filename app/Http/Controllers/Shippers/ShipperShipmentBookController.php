@@ -41,9 +41,9 @@ use Illuminate\Validation\Rule;
 
 class ShipperShipmentBookController extends Controller
 {
-    private function unique_order_id($order_id) {
-        return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
-    }
+//    private function unique_order_id($order_id) {
+//        return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+//    }
 
     private function set_service_type($service_type_id) {
         $service_type = BookingType::find($service_type_id);
@@ -233,15 +233,8 @@ class ShipperShipmentBookController extends Controller
 
     public function store(Request $request) {
         if (BookingType::where('id', '!=', 3)->where('id', $request->input('selected_service_type'))->exists()) {
-            if ($request->filled('order_id')) {
-                $valid = $this->unique_order_id($request->input('order_id'));
-            }
-            else {
-                $valid = TRUE;
-            }
 
             if (!empty($request->input('shipping_mode'))) {
-                if ($valid) {
                     $user_id = session('user_id');
 
                     $service_type_id = $request->input('selected_service_type');
@@ -435,10 +428,6 @@ class ShipperShipmentBookController extends Controller
                         $print = FALSE;
                     }
                     return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
-                }
-                else {
-                    return redirect()->back()->with('error', 'Order ID must be Unique');
-                }
             }
             else {
                 return redirect()->back()->with('error', 'Shipping Mode needs to be Selected');
@@ -449,14 +438,14 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    public function order_id(Request $request) {
-        if ($request->filled('order_id')) {
-            return json_encode($this->unique_order_id($request->input('order_id')));
-        }
-        else {
-            return 'false';
-        }
-    }
+//    public function order_id(Request $request) {
+//        if ($request->filled('order_id')) {
+//            return json_encode($this->unique_order_id($request->input('order_id')));
+//        }
+//        else {
+//            return 'false';
+//        }
+//    }
 
     public static function air_waybill($user_type, $user_id, $ids, $twice = FALSE) {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
@@ -1000,9 +989,7 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
-            'order_id' => ['nullable', 'between:0,100', Rule::unique('shipments')->where(function($query) use($user_id) {
-                $query->where('user_id', $user_id);
-            })],
+            'order_id' => ['nullable', 'between:0,100'],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'item_description' => ['required_if:service_type_id,1,2', 'between:0,250'],
@@ -1101,13 +1088,8 @@ class ShipperShipmentBookController extends Controller
                                 $order_id_row[$row['order_id']] = $row_id;
                             }
                             else {
-                                if (in_array($row['order_id'], $order_ids)) {
-                                    $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
-                                }
-                                else {
                                     $order_ids[] = $row['order_id'];
                                     $order_id_row[$row['order_id']] = $row_id;
-                                }
                             }
                         }
                         $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
@@ -1425,15 +1407,8 @@ class ShipperShipmentBookController extends Controller
 
     public function corporate_store(Request $request) {
 //        return $request;
-        if ($request->filled('order_id')) {
-            $valid = $this->unique_order_id($request->input('order_id'));
-        }
-        else {
-            $valid = TRUE;
-        }
 
         if (!empty($request->input('shipping_mode'))) {
-            if ($valid) {
                 $user_id = session('user_id');
 
                 $service_type_id = $request->input('selected_service_type');
@@ -1630,10 +1605,6 @@ class ShipperShipmentBookController extends Controller
                 }
                 return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
-            else {
-                return redirect()->back()->with('error', 'Order ID must be Unique');
-            }
-        }
         else {
             return redirect()->back()->with('error', 'Shipping Mode needs to be Selected');
         }
@@ -2171,9 +2142,7 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
-            'order_id' => ['nullable', 'between:0,100', Rule::unique('shipments')->where(function($query) use($user_id) {
-                $query->where('user_id', $user_id);
-            })],
+            'order_id' => ['nullable', 'between:0,100'],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'item_description' => ['required_if:service_type_id,1,2', 'between:0,250'],
@@ -2273,13 +2242,8 @@ class ShipperShipmentBookController extends Controller
                                 $order_id_row[$row['order_id']] = $row_id;
                             }
                             else {
-                                if (in_array($row['order_id'], $order_ids)) {
-                                    $errors[$row_id]['order_id'] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
-                                }
-                                else {
                                     $order_ids[] = $row['order_id'];
                                     $order_id_row[$row['order_id']] = $row_id;
-                                }
                             }
                         }
 

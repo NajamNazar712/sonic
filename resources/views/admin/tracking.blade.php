@@ -183,6 +183,15 @@
 							shipment += '<td>' + details.shipper.origin + '</td>';
 							shipment += '</tr>';
 							shipment += '<tr>';
+							shipment += '<td><strong>Email</strong></td>';
+							if (details.shipper.email) {
+								shipment += '<td colspan="3">' + details.shipper.email + '</td>';
+							}
+							else{
+								shipment += '<td colspan="3"></td>'
+							}
+							shipment += '</tr>';
+							shipment += '<tr>';
 							shipment += '<td><strong>Address</strong></td>';
 							shipment += '<td colspan="3">' + details.shipper.address + '</td>';
 							shipment += '</tr>';
