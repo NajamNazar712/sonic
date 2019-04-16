@@ -567,7 +567,7 @@ class AdminCargoController extends Controller
 
             NotificationsController::send(9, $id);
 
-            if ($request->filled('submit_and_print')) {
+            if ($request->filled('submit_and_print_form')) {
                 $print = $id;
             }
             else {
