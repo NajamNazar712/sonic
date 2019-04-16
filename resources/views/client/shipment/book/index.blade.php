@@ -309,7 +309,7 @@
 												<span class="input-group-text">Rs</span>
 											</div>
 
-											<input type="text" name="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
+											<input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
 										</div>
 
 										<div class="form-group">
@@ -847,6 +847,62 @@
 				}
 			});
 
+			$('#amount, #consignee_city').change(function(){
+				$('#span').remove();
+				if ($('#pickup_address').val() == 0) {
+					var pickup_city_id = $('#new_pickup_city').val();
+				}
+				else {
+					var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
+				}
+
+				$.ajax({
+					url:'{!! route('cod.shipment.book.check_cod_cap_zone_classes') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'amount': $('#amount').val(),
+						'pickup_city': pickup_city_id,
+						'consignee_city': $('#consignee_city').val(),
+					}
+				}).done(function (data) {
+					if(data.status === 1){
+						$('#span').remove();
+						var span = '<span id="span" style="color: red">'+data.error+'</span>';
+						$('#amount').val('');
+						$('#amount').parent('div').append(span);
+
+					}
+					if(data.status === 2) {
+						$('#span').remove();
+					}
+					if(data.status === 0) {
+						$('#span').remove();
+						var span = '<span id="span" style="color: red">'+data.error+'</span>';
+						$('#amount').val('');
+						$('#amount').parent('div').append(span);
+					}
+					if(data.status === 3) {
+						$('#span').remove();
+						if ($('#pickup_address').val() == "") {
+							var span = '<span id="span" style="color: red">Pickup address is required</span>';
+							$('#pickup_address').parent('div').append(span);
+						}
+						else{
+							var span = '<span id="span" style="color: red">'+data.error+'</span>';
+							$('#new_pickup_city').parent('div').append(span);
+						}
+						$('#amount').val('');
+					}
+					if(data.status === 4) {
+						$('#span').remove();
+						var span = '<span id="span" style="color: red">'+data.error+'</span>';
+						$('#consignee_city').parent('div').append(span);
+						$('#amount').val('');
+					}
+				});
+			});
+
 			$('#same-day_timing').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'Same-day Timing*'
@@ -977,10 +1033,7 @@
 			$('.amount').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
-				'allowPlus': false,
-				'groupSeparator': ',',
-				'autoGroup': true,
-				'max': 1000000
+				'allowPlus': false
 			});
 		});
 	</script>

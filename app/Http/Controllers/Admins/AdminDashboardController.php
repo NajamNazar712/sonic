@@ -6264,8 +6264,7 @@ class AdminDashboardController extends Controller
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
                 'zone_id'=>City::find($request->hubs)->zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0,
-                'status'=>1
+                'pickup'=>($request->has('pickup'))? 1:0
             ]);
 
             $walk_in_city = WalkInCities::where('city_id',$id)->update([
@@ -6292,8 +6291,7 @@ class AdminDashboardController extends Controller
                 'hub'=>1,
                 'hub_id'=>$id,
                 'zone_id'=>$request->zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0,
-                'status'=>1
+                'pickup'=>($request->has('pickup'))? 1:0
             ]);
 
             $walk_in_city = WalkInCities::where('city_id',$id)->update([

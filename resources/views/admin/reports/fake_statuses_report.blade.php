@@ -36,8 +36,21 @@
                             </span>
                                 </div>
 
-                                <input type="text" name="search_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date" placeholder="Date (Creation Date)">
+                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)">
                             </div>
+
+
+                            <div class="form-group input-group ml-1">
+                                <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                                </div>
+
+                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Search Date (To)" disabled>
+                            </div>
+
+
                         <div class="form-group ml-1">
                             <button type="button" id="search_filter_btn" class="btn btn-primary"><i class="la la-search"></i> Search</button>
                         </div>
@@ -203,14 +216,36 @@
                 allowClear:true
             });
 
-            $('#search_form #search_date').pickadate({
+            var future_date = new Date();
+            future_date.setDate(future_date.getDate()-7);
+            $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                min:future_date,
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    $('#search_date_to').pickadate('picker').clear({muted: true});
+                    if (context.select) {
+                        var selected_date = new Date(context.select);
+                        $('#search_date_to').attr('disabled', false);
+                        $('#search_form #search_date_to').pickadate('picker').set({'min':selected_date},{muted: true});
+                    }
+                }
+            });
+            $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
+                    if (context.select) {
+                        // $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
                 }
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -221,9 +256,10 @@
                         url: '{{ route('admin.reports.fake_status.list') }}',
                         data: {
                             'page': 'all',
-                            'search_date': $('input[name="search_date_formatted"]').val(),
                             'rider': $('#riders').val(),
-                            'hub': $('#hubs').val()
+                            'hub': $('#hubs').val(),
+                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
+                            'search_date_to': $('input[name="search_date_to_formatted"]').val(),
                         },
                         success: function (result) {
                             head = [];
@@ -279,9 +315,10 @@
                 ajax: {
                     url: '{{ route('admin.reports.fake_status.list') }}',
                     data: function (d) {
-                        d.search_date = $('input[name="search_date_formatted"]').val(),
                         d.rider = $('#riders').val();
-                        d.hub = $('#hubs').val()
+                        d.hub = $('#hubs').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 order: [[5, 'desc']],

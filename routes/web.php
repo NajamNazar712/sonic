@@ -59,6 +59,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('corporate_invoice', 'Shippers\ShipperShipmentBookController@corporate_invoice')->name('corporate_invoice');
             Route::post('check', 'Shippers\ShipperShipmentBookController@check')->name('check');
 
+            Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
+
             Route::prefix('excel')->name('excel_')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
                 Route::post('', 'Shippers\ShipperShipmentBookController@excel_store')->name('store');
@@ -198,6 +200,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::get('','Shippers\ShipperShipmentCancelController@index')->name('index');
         Route::get('list', 'Shippers\ShipperShipmentCancelController@list')->name('list');
         Route::put('revert', 'Shippers\ShipperShipmentCancelController@revert')->name('revert');
+    });
+
+    Route::prefix('intercept')->name('intercept.')->group(function (){
+        Route::get('/{row_id}','Shippers\ShipperInterceptReBookController@intercept_re_book_index')->name('index');
+        Route::post('update','Shippers\ShipperInterceptReBookController@intercept_re_book_update')->name('update');
     });
 
 });
@@ -488,6 +495,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         //Lost Module End
 
+        Route::prefix('intercept')->name('intercept.')->group(function () {
+            Route::get('', 'Admins\DeliveryController@intercept_request_index')->name('index');
+            Route::get('list', 'Admins\DeliveryController@intercept_request_list')->name('list');
+            Route::post('approve', 'Admins\DeliveryController@approve')->name('approve');
+            Route::post('reject', 'Admins\DeliveryController@reject')->name('reject');
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\AdminInterceptRebookRequestHistoryController@intercept_request_history_index')->name('index');
+                Route::get('list', 'Admins\AdminInterceptRebookRequestHistoryController@intercept_request_history_list')->name('list');
+            });
+
+        });
+
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
@@ -693,6 +712,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('adjusted_shipments', 'Admins\AdminFinanceController@make_payments_adjusted_shipments')->name('adjusted_shipments');
             Route::post('shipment_details', 'Admins\AdminFinanceController@make_payments_shipment_details')->name('shipment_details');
             Route::get('shipment_list', 'Admins\AdminFinanceController@make_payments_shipment_list')->name('shipment_list');
+            Route::get('shipment_export_selected', 'Admins\AdminFinanceController@make_payments_shipment_export_selected')->name('shipment_export_selected');
             Route::post('verify', 'Admins\AdminFinanceController@make_payments_verify')->name('verify');
             Route::get('export_bank_order', 'Admins\AdminFinanceController@make_payments_export_bank_order')->name('export_bank_order');
             Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
@@ -984,9 +1004,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_store')->name('store');
         });
-        Route::prefix('fuel_factor')->name('fuel_factor.')->group(function () {
+
+		 Route::prefix('fuel_factor')->name('fuel_factor.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@fuel_factor_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@fuel_factor_store')->name('store');
+        });
+
+
+        Route::prefix('return_note_restriction_bypass')->name('return_note_restriction_bypass.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@return_note_restriction_bypass_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@return_note_restriction_bypass_store')->name('store');
+        });
+
+        Route::prefix('cod_cap_zones')->name('cod_cap_zones.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@cod_cap_zones_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@cod_cap_zones_update')->name('update');
         });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {

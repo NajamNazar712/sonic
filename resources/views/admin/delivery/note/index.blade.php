@@ -164,7 +164,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-                    @if(session('print'))
+           @if(session('print'))
             var pid = '{{ session('print') }}';
             print(pid);
             function print(id) {
