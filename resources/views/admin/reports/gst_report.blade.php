@@ -32,7 +32,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)" disabled>
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)">
                         </div>
 
 
@@ -159,7 +159,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.fake_status.list') }}',
+                        url: '{{ route('admin.reports.gst.list') }}',
                         data: {
                             'page': 'all',
                             'search_date_from': $('input[name="search_date_from_formatted"]').val(),
@@ -224,9 +224,9 @@
                 order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'account_no', name: 'users.id', class: 'align-middle account_no'},
-                    {data: 'user_name', name: 'users.name', class: 'align-middle user_name'},
-                    {data: 'ntn_number', name: 'users.ntn_no', class: 'align-middle ntn_number'},
+                    {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
+                    {data: 'user_name', name: 'u.name', class: 'align-middle user_name'},
+                    {data: 'ntn_number', name: 'u.ntn_no', class: 'align-middle ntn_number'},
                     {data: 'w_o_gst', name: 'w_o_gst', class: 'align-middle text-center w_o_gst'},
                     {data: 'gst', name: 'gst', class: 'align-middle gst'},
                     {data: 'total_charges', name: 'total_charges', class: 'align-middle total_charges', orderable: false, searchable: false}

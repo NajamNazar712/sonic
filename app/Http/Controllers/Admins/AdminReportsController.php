@@ -18,6 +18,7 @@ use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\PickupNote;
@@ -5102,10 +5103,10 @@ public function revenue_index(){
     }
 
     public function gst_list(Request $request){
-        $gst = User::leftjoin('done_payments as dp', 'dp.user_id', '=', 'users.id')
-            ->leftjoin('done_payment_shipments as dps','dps.done_payment_id', '=', 'dp.id')
-            ->select('users.id as account_no', 'users.name as user_name', 'users.ntn_no as ntn_number', DB::raw('SUM(dps.charges) as w_o_gst'), DB::raw('SUM(dps.gst) as gst'), DB::raw('SUM(dps.payable) as total_charges'))
-        ->groupBy('users.id');
+        $gst = DonePayment::leftjoin('done_payment_shipments as dps','dps.done_payment_id', '=', 'done_payments.id')
+            ->leftjoin('users as u', 'done_payments.user_id', '=', 'u.id')
+            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::raw('SUM(dps.charges) as w_o_gst'), DB::raw('SUM(dps.gst) as gst'), DB::raw('SUM(dps.payable) as total_charges'))
+        ->groupBy('done_payments.user_id');
 
         $datatables = Datatables::of($gst)
             ->editColumn('account_no', function ($gst) {
