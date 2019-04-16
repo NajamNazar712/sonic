@@ -5096,5 +5096,35 @@ public function revenue_index(){
         }
         return $datatable->make(true);
     }
+
+    public function gst_index(){
+        return view('admin.reports.gst_report');
+    }
+
+    public function gst_list(Request $request){
+        $gst = User::leftjoin('done_payments as dp', 'dp.user_id', '=', 'users.id')
+            ->leftjoin('done_payment_shipments as dps','dps.done_payment_id', '=', 'dp.id')
+            ->select('users.id as account_no', 'users.name as user_name', 'users.ntn_no as ntn_number', DB::raw('SUM(dps.charges) as w_o_gst'), DB::raw('SUM(dps.gst) as gst'), DB::raw('SUM(dps.payable) as total_charges'))
+        ->groupBy('users.id');
+
+        $datatables = Datatables::of($gst)
+            ->editColumn('account_no', function ($gst) {
+                return str_pad($gst->account_no, 8, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('ntn_number', function ($gst) {
+                if($gst->ntn_number) {
+                    return $gst->ntn_number;
+                }
+                else{
+                    return "-";
+                }
+            });
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('dps.created_at', [$from,$to]);
+        }
+        return $datatables->make(true);
+    }
 }
 

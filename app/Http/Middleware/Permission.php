@@ -322,6 +322,8 @@ class Permission
             'reports.multiple_payment_report.list' => 176,
 			'reports.revenue.index' => 177,
             'reports.revenue.list' => 177,
+            'reports.gst.index' => 199,
+            'reports.gst.list' => 199,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
