@@ -107,18 +107,18 @@
         /*.custom-hub-col-width{*/
             /*min-width: 80px;*/
         /*}*/
-        /*.date-col-width{*/
-            /*min-width: 190px;*/
-        /*}*/
+        .date-col-width{
+            min-width: 90px;
+        }
         div.picker .picker__holder{
             width: 250px;
         }
-        td .picker__day {
-            padding: 1px;
-        }
-        .date .picker td {
-            border: transparent;
-        }
+        /*div.picker th, td {*/
+            /*padding: 0px;*/
+        /*}*/
+        /*.date .picker td {*/
+            /*border: transparent;*/
+        /*}*/
         .total_amount_span{
             font-size: 24px;
             color: #64a0d2;
@@ -200,8 +200,6 @@
                         add_row();
                     }
                 }],
-                autoWidth: false,
-                scrollX: true, scrollY:'270px',
                 ordering:false,
                 paging:false,
                 columns: [
@@ -278,7 +276,7 @@
                 var heads_select = '<select class="form-control form-control-sm select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
                 var titles_select = '<select class="form-control form-control-sm select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
                 var hub_select = '<select class="form-control form-control-sm hub_select select2" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="City is required"></select>';
-                var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date (From) is required"></div>';
+                var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date (From) is required"></div>';
 
                 var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
                 var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount"  data-rule-required="true" data-msg-required="Amount is required">';
@@ -287,7 +285,7 @@
                 if(rows_count == 1){
                     var remove = '';
                 }else{
-                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove_row"><i class="la la-close"></i></a>';
+                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
 
                 }
 
@@ -307,16 +305,20 @@
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
                     placeholder:'Select Account Head',
-                    allowClear:true
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
                 $('select[name="title['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     placeholder:'Select Account Title',
-                    allowClear:true
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
+
                 });
                 $('select[name="hub['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data: hubs_select,
                     placeholder:'Select a City',
-                    allowClear:true
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
                 $('.reference_row').inputmask({
                     'alias': 'integer',
@@ -324,16 +326,15 @@
                     'allowPlus': false,
                     'rightAlign': false,
                 });
-                $('input[name="date['+rows_count+']"]').pickadate({
+                $('#expense_date_' + rows_count).pickadate({
                     firstDay: 1,
+                    today: '',
                     clear: '',
+                    close: '',
                     weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
                     showMonthsShort: true,
                     formatSubmit: 'yyyy-mm-dd 00:00:00',
-                    hiddenSuffix: '_formatted',
-                    onSet: function(context) {
-
-                    }
+                    hiddenSuffix: '_formatted'
                 });
 
                 $('.amount').inputmask({
