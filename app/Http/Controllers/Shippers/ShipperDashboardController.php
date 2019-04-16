@@ -209,7 +209,6 @@ class ShipperDashboardController extends Controller
                 if ($shipment->shipper_status_id == 1) {
                     $shipment->shipper_status_id = 17;
                     $shipment->consignee_status_id = 17;
-                    $shipment->consignee_status_id = 17;
                     $shipment->save();
 
                     AdminPickupsController::cancel($shipment_id);

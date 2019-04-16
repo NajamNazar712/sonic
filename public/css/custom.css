@@ -88,7 +88,6 @@ table.dataTable thead tr th {
 	padding-left: 0.5em;
 	white-space: normal;
 	word-wrap: break-word;
-
 }
 
 table.table-sm.table-borderless thead tr th {
@@ -141,6 +140,24 @@ table.dataTable tbody tr td.select-checkbox:before {
 table.dataTable tbody tr.selected td.select-checkbox:after {
 	top: 50%;
 	text-shadow: none;
+}
+
+.picker .picker__header {
+	padding-top: 5px;
+}
+
+.picker .picker__table {
+	margin-bottom: 5px;
+}
+
+.picker table thead tr th {
+	padding: 0;
+	border: 0;
+}
+
+.picker table tbody tr td {
+	padding: 0;
+	border: 0;
 }
 
 .pagination .page-link {

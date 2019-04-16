@@ -170,15 +170,15 @@ class AdminPettyCashController extends Controller
                 return $expense;
             })
             ->editColumn('amount', function ($petty_details){
-                $amount = '<input class="form-control" disabled value="' .$petty_details->amount. '" name="amount['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Amount is required">';
+                $amount = '<input class="form-control form-control-sm" disabled value="' .$petty_details->amount. '" name="amount['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Amount is required">';
                 return $amount;
             })
             ->editColumn('reference_no', function ($petty_details){
-                $reference = '<input class="form-control" disabled value="' .$petty_details->reference_no. '" name="reference['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Reference No. is required">';
+                $reference = '<input class="form-control form-control-sm" disabled value="' .$petty_details->reference_no. '" name="reference['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Reference No. is required">';
                 return $reference;
             })
             ->editColumn('remarks', function ($petty_details){
-                $remarks = '<textarea class="form-control" disabled name="remarks['.$petty_details->statement_detail_id.']">'.$petty_details->remarks.'</textarea>';
+                $remarks = '<textarea class="form-control form-control-sm" disabled name="remarks['.$petty_details->statement_detail_id.']">'.$petty_details->remarks.'</textarea>';
                 return $remarks;
             })
             ->editColumn('status', function ($petty_details){
