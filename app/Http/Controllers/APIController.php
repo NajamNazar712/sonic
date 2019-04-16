@@ -977,7 +977,7 @@ class APIController extends Controller
             $payment = array();
 
             $payment['id'] = $done_payment_shipment->done_payment_id;
-            $payment['datetime'] = $done_payment_shipment->updated_at;
+            $payment['datetime'] = $done_payment_shipment->updated_at->toDateTimeString();
             $payment['type'] = $done_payment_shipment->type;
             $payment['amount'] = $done_payment_shipment->amount;
             $payment['charges'] = $done_payment_shipment->charges;
