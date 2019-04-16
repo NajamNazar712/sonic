@@ -194,7 +194,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     title: 'Add Row',
-                    className: 'btn btn-primary',
+                    className: 'btn btn-primary mb-1',
                     text: '<i class="la la-plus"></i> Add Row',
                     action:function (e) {
                         add_row();
@@ -359,7 +359,10 @@
                     weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
                     showMonthsShort: true,
                     formatSubmit: 'yyyy-mm-dd 00:00:00',
-                    hiddenSuffix: '_formatted'
+                    hiddenSuffix: '_formatted',
+                    onOpen: function() {
+                        $('#expense_date_' + rows_count+'_root').css('top', '-262px');
+                    },
                 });
 
                 $('.amount').inputmask({
