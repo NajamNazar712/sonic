@@ -719,7 +719,7 @@
                                                             <div class="input-group-prepend">
                                                                 <span class="input-group-text">Local</span>
                                                             </div>
-                                                            <input type="text" name="walk_in_door_on_chargeable_weight_local" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_dn->chargeable_weight_local }}">
+                                                            <input type="text" name="walk_in_door_dn_chargeable_weight_local" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_dn->chargeable_weight_local }}">
                                                             {{--<div class="input-group-append">--}}
                                                                 {{--<span class="input-group-text">%</span>--}}
                                                             {{--</div>--}}
