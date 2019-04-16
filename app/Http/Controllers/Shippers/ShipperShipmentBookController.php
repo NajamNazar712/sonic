@@ -1526,7 +1526,7 @@ class ShipperShipmentBookController extends Controller
                 $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id);
 
                 $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
-
+                $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                 if ($service_type_id == 1) {
                     $product_type_id = $request->input('product_type');
 
@@ -2559,8 +2559,8 @@ class ShipperShipmentBookController extends Controller
             $consignee_info->city_id = $city_id;
             $consignee_info->name = $name;
             $consignee_info->address = $address;
-            $consignee_info->phone1 = $phone1;
-            $consignee_info->phone2 = $phone2;
+            $consignee_info->phone_number_1 = $phone1;
+            $consignee_info->phone_number_2 = $phone2;
             $consignee_info->email = $email;
             $consignee_info->save();
 
@@ -2584,6 +2584,31 @@ class ShipperShipmentBookController extends Controller
 
             $consignee_info->save();
 
+        }
+    }
+
+    public function get_consignee_infos(Request $request){
+        $data = array();
+        $consignee_info = ConsigneeInfo::where('shipper_id', $request->shipper)->where('phone_number_1','LIKE', "%".$request->q."%");
+        if($consignee_info->exists()){
+            $consignee_info = $consignee_info->limit(10)->get();
+            foreach ($consignee_info as $item) {
+                $data[] = ['id' => $item->id, 'full_name' => $item->phone_number_1. ' / '.$item->name, 'text' => $item->name];
+            }
+            return response()->json(['status' => 1,'data' => $data,'total_count' => count($data)]);
+        }
+
+    }
+
+    public function get_consignee_info(Request $request){
+        $id = $request->id;
+        if($id){
+            $consignee_info = ConsigneeInfo::find($id);
+            if($consignee_info){
+                return response()->json(['status' => 1, 'details' => $consignee_info]);
+            }else{
+                return response()->json(['status' => 0, 'error' => 'Consignee Information not found!']);
+            }
         }
     }
 }

@@ -666,24 +666,74 @@
 				shipping_mode_same_day(pickup_city, consignee_city);
 			});
 
-			$('#consignee_info').prepend('<option value="" selected="selected"></option>').select2({
+            $("#consignee_info").select2({
 				width:'100%',
+                placeholder: "Search Consignee By Phone",
+                minimumInputLength: 5,
                 ajax: {
-                    url: 'https://api.github.com/orgs/select2/repos',
+                    url: '{{ route('cod.shipment.book.get_consignee_infos') }}',
+                    dataType: 'json',
+                    type: "GET",
+                    quietMillis: 50,
                     data: function (params) {
-                        console.log(params.term);
-						if(params.term.length > 5){
-                            var query = {
-                                search: params.term,
-                                type: 'public'
-                            }
-                            // Query parameters will be ?search=[term]&type=public
-                            return query;
-						}
+                        return {
+                            q: params.term,
+                            page: params.page,
+							'shipper': '{{session('user_id')}}'
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
 
-                    }
-                }
+                        return {
+                            results: data.data,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                escapeMarkup: function (markup) { return markup; },
+                templateResult: formatRepo,
+                templateSelection: formatRepoSelection
+
+            });
+            function formatRepo (repo) {
+                if (repo.loading) return repo.text;
+                var markup = "<option value='" + repo.id + "'>"+ repo.full_name +"</option>";
+
+                return markup;
+            }
+            function formatRepoSelection (repo) {
+                return repo.full_name || repo.text;
+            }
+
+            $('#consignee_info').on('select2:select', function () {
+                var id = parseInt($(this).val());
+                if(id){
+                    $.ajax({
+                        url:'{!! route('cod.shipment.book.get_consignee_info') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id,
+                        }
+                    }).done(function (data) {
+                        if(data.status){
+                            $('#consignee_city').val(data.details.city_id).trigger('change');
+                            $('input[name="consignee_name"]').val(data.details.name);
+                            $('#consignee_address').val(data.details.address);
+                            $('input[name="consignee_phone_number_1"]').val(data.details.phone_number_1);
+                            $('input[name="consignee_phone_number_2"]').val(data.details.phone_number_2);
+                            $('input[name="consignee_email_address"]').val(data.details.email);
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+						}
+					});
+				}
 			});
+
 
 			$('#information_display').checkboxpicker();
 

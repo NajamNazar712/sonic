@@ -58,6 +58,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('print_air_waybill', 'Shippers\ShipperShipmentBookController@print_air_waybill')->name('print_air_waybill');
             Route::post('corporate_invoice', 'Shippers\ShipperShipmentBookController@corporate_invoice')->name('corporate_invoice');
             Route::post('check', 'Shippers\ShipperShipmentBookController@check')->name('check');
+            Route::get('get_consignee_infos', 'Shippers\ShipperShipmentBookController@get_consignee_infos')->name('get_consignee_infos');
+            Route::post('get_consignee_info', 'Shippers\ShipperShipmentBookController@get_consignee_info')->name('get_consignee_info');
 
             Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
 
