@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\CorporateRateStatus;
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
@@ -11,6 +10,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
 use Validator;
 use Illuminate\Validation\Rule;
@@ -23,6 +23,8 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ZoneClassCity;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\CorporateRateStatus;
 
 use Carbon\Carbon;
 
@@ -77,7 +79,12 @@ class APIController extends Controller
       'type' => 'Type',
 
       'origin_city_id' => 'Origin City ID',
-      'destination_city_id' => 'Destination City ID'
+      'destination_city_id' => 'Destination City ID',
+
+      'tracking_numbers' => 'Tracking Numbers',
+      'tracking_numbers.*' => 'Tracking Number',
+
+      'receiving_sheet_id' => 'Receiving Sheet ID'
     ];
 
     private $messages = [
@@ -96,7 +103,9 @@ class APIController extends Controller
       'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
       'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
-      'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
+      'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+
+      'distinct' => ':attribute must not be Repeated.'
     ];
 
     public function pickup_addresses(Request $request) {
@@ -1032,6 +1041,68 @@ class APIController extends Controller
         else {
           return response()->json(['status' => 1, 'message' => 'Shipment\'s Status has already been changed']);
         }
+      }
+    }
+
+    public function receiving_sheet_create(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'tracking_numbers' => ['required', 'array', 'min:1'],
+        'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })]
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $tracking_numbers = $request->tracking_numbers;
+
+        $shipment_ids = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
+
+        $recieving_sheet = ShipperReceivingSheetController::create($shipment_ids, $user_id);
+
+        if ($recieving_sheet['status'] == 0) {
+          return response()->json(['status' => 0, 'message' => $recieving_sheet['success'], 'receiving_sheet_id' => $recieving_sheet['receiving_sheet_id']]);
+        }
+        else {
+          return response()->json(['status' => 1, 'message' => $recieving_sheet['error']]);
+        }
+      }
+    }
+
+    public function receiving_sheet_view(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'receiving_sheet_id' => ['required', 'integer', Rule::exists('receiving_sheets', 'id')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })]
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $receiving_sheet_id = $request->receiving_sheet_id;
+
+        $receiving_sheet = ShipperReceivingSheetController::view($receiving_sheet_id, 4);
+
+        $image = SnappyImage::loadHTML($receiving_sheet);
+
+        $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
+
+        return $image->download($filename);
       }
     }
 

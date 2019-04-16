@@ -28,6 +28,11 @@ Route::middleware('APIToken')->name('api.')->group(function () {
 		Route::post('cancel', 'APIController@shipment_cancel')->name('cancel');
 	});
 
+	Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function() {
+		Route::post('create', 'APIController@receiving_sheet_create')->name('create');
+		Route::get('view', 'APIController@receiving_sheet_view')->name('view');
+	});
+
 	Route::get('cities', 'APIController@cities')->name('cities');
 
 	Route::post('charges_calculate', 'APIController@charges_calculate')->name('charges_calculate');
