@@ -94,7 +94,18 @@
                 $.ajax({
                     url:'{!! route("cod.resources.city_list") !!}',
                 }).done(function (data) {
-                    console.log(data)
+                    if(data.status){
+                        function download(filename) {
+                            var a = document.createElement("a");
+                            a.href = filename;
+                            // a.setAttribute("download", filename);
+                            a.click();
+                            return false;
+                        }
+
+                        download(data.file_name);
+                    }
+
                 })
             })
         });

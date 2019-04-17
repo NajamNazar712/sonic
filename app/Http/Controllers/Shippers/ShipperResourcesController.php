@@ -20,27 +20,45 @@ class ShipperResourcesController extends Controller
     }
     public function get_network_list(Request $request){
         $response = self::get_city_list();
-        return $response;
+        if($response){
+            return response()->json(['status' => 1, 'file_name' => $response]);
+        }else{
+            return response()->json(['status' => 0, 'error' => 'File Could Downloaded!']);
+        }
     }
 
     static public function get_city_list(){
+        $city_list_array = array();
         $city_list = City::where('status', 1)->select('id','name')->get();
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        if($city_list){
+            $city_list_array['header'] = ['S. No.','ID', 'Name'];
+            $serial = 1;
+            foreach ($city_list as $list){
+                $city_list_array[] = ['serial'=> $serial ,'id' => $list->id, 'name' => $list->name];
+                $serial++;
+            }
+            $cell_st =[
+                'font' =>['bold' => true],
+                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getDefaultColumnDimension()->setWidth(20);
 
-        $sheet->getDefaultColumnDimension()->setWidth(20);
+            $sheet->fromArray($city_list_array,NULL,'A2',true);
+            $sheet->getStyle("A2:C2")->applyFromArray($cell_st);
+            $sheet->setTitle('Network List');
+            $writer = new Xlsx($spreadsheet);
 
-        $sheet->fromArray($city_list,NULL,'A1',true);
-        $sheet->setTitle('Network List');
-        $writer = new Xlsx($spreadsheet);
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="daily_pickup_sales_report.xlsx"');
-        header('Cache-Control: max-age=0');
-        $file_name_without_path = "file/documents/Network List.xlsx";
-        $file_name = public_path() .'/'.$file_name_without_path ;
-        $writer->save($file_name);
-        return url('/').'/'.$file_name_without_path;
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Network List.xlsx"');
+            header('Cache-Control: max-age=0');
+            $file_name_without_path = "file/documents/Network List.xlsx";
+            $file_name = public_path() .'/'.$file_name_without_path ;
+            $writer->save($file_name);
+            return url('/').'/'.$file_name_without_path;
+        }
 
     }
 }

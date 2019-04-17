@@ -201,7 +201,6 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('resources')->name('resources.')->group(function (){
         Route::get('','Shippers\ShipperResourcesController@index')->name('index');
         Route::get('city_list','Shippers\ShipperResourcesController@get_network_list')->name('city_list');
-
     });
 
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
