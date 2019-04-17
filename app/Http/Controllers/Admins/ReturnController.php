@@ -584,6 +584,10 @@ class ReturnController extends Controller
                     return " - ";
                 }
             })
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = '<input class="form-control form-control-sm" placeholder="Remarks here.." value="'.$shipments->remarks.'" />';
+                return $remark;
+            })
             ->filterColumn('status',function ($query,$keyword){
 
                 if ($keyword != '') {
@@ -1565,7 +1569,7 @@ class ReturnController extends Controller
             }
 
 
-            ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
+            ShipmentsJourneyController::add($request->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
 
             AdminFinanceController::return_confirmed_revert($request->id);
 
