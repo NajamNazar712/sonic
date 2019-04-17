@@ -116,6 +116,7 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Cargo No.</th>
+                        <th class="border-primary border-darken-1">Seal No.</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Shipment(s)</th>
@@ -353,6 +354,7 @@
 
                             head.push('S. No');
                             head.push('Cargo No.');
+                            head.push('Seal No.');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Shipment(s)');
@@ -372,6 +374,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.cargo_id);
+                                row.push(values.seal_number);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.shipments);
@@ -432,6 +435,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'cargo_id_link', name: 'cargo_consignments.id', class: 'align-middle cargo_id_link'},
+                    {data: 'seal_number', name: 'cargo_consignments.seal_number', class: 'align-middle seal_number'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'h.name', class: 'align-middle destination'},
                     {data: 'shipments_link', name: 'cargo_consignments.shipments', class: 'align-middle text-center shipments_link'},
