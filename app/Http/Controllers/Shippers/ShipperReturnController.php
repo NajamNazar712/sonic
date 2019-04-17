@@ -101,7 +101,7 @@ class ShipperReturnController extends Controller
             ->addColumn("action", function ($result) {
                 $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i>Confirm</a>';
                 $reattempt_button = '<a href="javascript:void(0);" class="dropdown-item returnReattemptStatus"><i class="ft-plus-circle primary"></i>Re-Attempt Request</a>';
-                $intercept = '<button type="button" class="dropdown-item intercept"><div class="row no-gutters align-items-center"><a href=""><i class="ft-plus-circle"></i></a>  Intercept/Re-Book</div></button>';
+//                $intercept = '<button type="button" class="dropdown-item intercept"><div class="row no-gutters align-items-center"><a href=""><i class="ft-plus-circle"></i></a>  Intercept/Re-Book</div></button>';
 
 
                     $dropdown = "
@@ -112,9 +112,9 @@ class ShipperReturnController extends Controller
                         $dropdown .= $confirm_button;
                         $dropdown .= $reattempt_button;
 
-                        if ($result->shipper_status_id == 12 && $result->journey_shipper_status_id != 53 && $result->pickup == 1 && $result->intercepted == 0) {
-                            $dropdown .= $intercept;
-                        }
+//                        if ($result->shipper_status_id == 12 && $result->journey_shipper_status_id != 53 && $result->pickup == 1 && $result->intercepted == 0) {
+//                            $dropdown .= $intercept;
+//                        }
 
                     $dropdown .= "
                             </div>
@@ -238,7 +238,7 @@ class ShipperReturnController extends Controller
                     return ['status'=>0,'error'=>"Shipment is already updated for Re-attempt!"];
                 }
             }
-            return ['status'=>0,'error'=>"Shipment is already requested for Re-attempt!"];
+            return ['status'=>0,'error'=>"Shipment is already updated, Please check tracking!"];
 
         }
         return ['status'=>0,'error'=>"Something went wrong, try again later!"];

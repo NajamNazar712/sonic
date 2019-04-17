@@ -72,24 +72,24 @@ class AdminCargoController extends Controller
                 $join->on('irbrh.shipment_id', '=', 'shipments.id')
                     ->on('shipments.shipper_status_id', '=', DB::raw(55));
             })
+            ->leftjoin('cities as olddci', 'olddci.id', '=', 'irbrh.old_consignee_city_id')
             ->join('cities as dc', function($join) {
                 $join->on('shipments.consignee_city_id', '=', 'dc.id')
                     ->where(function ($query) {
                         $query->where(function ($sub_query) {
                             $sub_query->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37])
-                                ->where('oc.hub_id', '!=', 'dc.hub_id');
+                                ->where('oc.hub_id', '!=', DB::raw('dc.hub_id'));
                         })
                         ->orWhere(function ($sub_query) {
                             $sub_query->where('shipments.shipper_status_id', '=', 49)
-                                ->where('mh.old_consignee_city_id', '!=', 'dc.hub_id');
+                                ->where('mh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
                         })
                         ->orWhere(function ($sub_query) {
                             $sub_query->where('shipments.shipper_status_id', '=', 55)
-                                ->where('irbrh.old_consignee_city_id', '!=', 'dc.hub_id');
+                                ->where('irbrh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
                         });
                     });
             })
-            ->leftjoin('cities as olddci', 'olddci.id', '=', 'irbrh.old_consignee_city_id')
             ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc','csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept');
 
         if (session('role_id') != 1) {
@@ -613,7 +613,7 @@ class AdminCargoController extends Controller
 
             NotificationsController::send(9, $id);
 
-            if ($request->filled('submit_and_print')) {
+            if ($request->filled('submit_and_print_form')) {
                 $print = $id;
             }
             else {
