@@ -198,6 +198,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
     Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
 
+    Route::prefix('resources')->name('resources.')->group(function (){
+        Route::get('','Shippers\ShipperResourcesController@index')->name('index');
+        Route::get('city_list','Shippers\ShipperResourcesController@get_network_list')->name('city_list');
+
+    });
+
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
         Route::get('','Shippers\ShipperShipmentCancelController@index')->name('index');
         Route::get('list', 'Shippers\ShipperShipmentCancelController@list')->name('list');

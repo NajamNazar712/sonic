@@ -759,7 +759,7 @@
                 }).done(function (data) {
                     $('#shipment_charges_body').html(data);
                     $('#shipment_charges_modal_heading span').text(shipment_id);
-                })
+                });
             });
 
 
