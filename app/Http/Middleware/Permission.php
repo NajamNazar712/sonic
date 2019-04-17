@@ -113,7 +113,6 @@ class Permission
             'delivery.receive.status' => 37,
             'delivery.receive.add.status' => 37,
             'delivery.receive.add.list' => 37,
-            'delivery.receive.reason' => 37,
             'delivery.receive.delivered' => 37,
             'delivery.receive.shipmentstatuscheck' => 37,
             'delivery.receive.replacements' => 37,
