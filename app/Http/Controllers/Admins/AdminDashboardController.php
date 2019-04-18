@@ -918,6 +918,7 @@ class AdminDashboardController extends Controller
     public function addRatesView($id){
         $user = User::find($id);
         if(!RateStatus::where('user_id', $user->id)->exists()) {
+            $sale_person = SalePersonTag::where('user_id',$id)->first();
             $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
             $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
             $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
@@ -925,7 +926,7 @@ class AdminDashboardController extends Controller
             $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
             $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
             $packaging = StandardPackagingCharge::all()->groupBy('shipping_mode_id');
-            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging]);
+            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'sale_person' => $sale_person]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }
@@ -957,6 +958,7 @@ class AdminDashboardController extends Controller
 
     public function editRatesView($id){
         $user = User::find($id);
+        $sale_person = SalePersonTag::where('user_id',$id)->first();
         if ((($user['rate_status']>=0) && $user['status']==1)||(($user['rate_status']==0) && $user['status']==3)) {
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
@@ -991,7 +993,7 @@ class AdminDashboardController extends Controller
             return redirect(route('admin.accounts.pending'));
         }
 //        return $discount;
-        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'rate_status'=>$rate_status]);
+        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person]);
 
     }
 
@@ -1508,6 +1510,13 @@ class AdminDashboardController extends Controller
 
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
+
+                if($request->has('on_default') && $request->on_default == 'on'){
+                    $default_shipping_mode = User::where('id', $id)->update([
+                        'default_shipping_mode' => 1
+                    ]);
+                }
+
                 $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
@@ -1773,6 +1782,13 @@ class AdminDashboardController extends Controller
 
             //overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
+
+                if($request->has('ol_default') && $request->ol_default == 'on'){
+                    $default_shipping_mode = User::where('id', $id)->update([
+                        'default_shipping_mode' => 2
+                    ]);
+                }
+
                 $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 2])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
@@ -2037,6 +2053,12 @@ class AdminDashboardController extends Controller
 
             //detain
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
+
+                if($request->has('det_default') && $request->det_default == 'on'){
+                    $default_shipping_mode = User::where('id', $id)->update([
+                        'default_shipping_mode' => 3
+                    ]);
+                }
                 $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
@@ -2301,6 +2323,13 @@ class AdminDashboardController extends Controller
 
             //sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
+
+                if($request->has('sameday_default') && $request->sameday_default == 'on'){
+                    $default_shipping_mode = User::where('id', $id)->update([
+                        'default_shipping_mode' => 4
+                    ]);
+                }
+
                 $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
@@ -5006,6 +5035,11 @@ class AdminDashboardController extends Controller
         }
 
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
+            if($request->has('on_default') && $request->on_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 1
+                ]);
+            }
             $ONRateAlready = RateStatus::where('user_id',$id)->where('shipping_mode_id',1)->get();
 
             if($ONRateAlready->isEmpty()) {
@@ -5171,6 +5205,11 @@ class AdminDashboardController extends Controller
         }
         //Overland
         if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
+            if($request->has('ol_default') && $request->ol_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 2
+                ]);
+            }
 
             $OLRatePresent = RateStatus::where('user_id',$id)->where('shipping_mode_id',2)->get();
 
@@ -5336,6 +5375,11 @@ class AdminDashboardController extends Controller
         }
         //Detain
         if($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
+            if($request->has('det_default') && $request->det_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 3
+                ]);
+            }
 
             $DetainRatePresent = RateStatus::where('user_id', $id)->where('shipping_mode_id', 3)->get();
 
@@ -5501,6 +5545,11 @@ class AdminDashboardController extends Controller
         }
         //Sameday
         if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
+            if($request->has('sameday_default') && $request->sameday_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 4
+                ]);
+            }
 
             $SamedayRatePresent = RateStatus::where('user_id',$id)->where('shipping_mode_id',4)->get();
             if($SamedayRatePresent->isEmpty()) {

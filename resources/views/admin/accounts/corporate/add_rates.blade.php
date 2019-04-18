@@ -24,7 +24,11 @@
                             <div id="" class="card-header border-success">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3 class="card-title lead success">Overnight</h3>
+                                        <h3 class="display-inline card-title lead success">Overnight</h3>
+                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                            <label class="display-inline ml-1">Make Default</label>
+                                            <input type="checkbox" name="on_default" id="on_default" class="switchery on_default" data-size="xs" data-switchery="true">
+                                        @endif
                                     </div>
                                     <div class="col-md-6">
                                         <a href="javascript:void(0);" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox"  class="switchery on-main-switch" data-size="sm" /></a>
@@ -547,7 +551,11 @@
                             <div id="" class="card-header mt-1 border-success">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3 class="card-title lead success">Overland</h3>
+                                        <h3 class="display-inline card-title lead success">Overland</h3>
+                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                            <label class="display-inline ml-1">Make Default</label>
+                                            <input type="checkbox" name="ol_default" id="ol_default" class="switchery ol_default" data-size="xs" data-switchery="true">
+                                        @endif
                                     </div>
                                     <div class="col-md-6">
                                         <a id="ol_main_switch" href="javascript:void(0);" class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm"/></a>
@@ -1059,7 +1067,11 @@
                             <div id="" class="card-header mt-1 border-success">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3 class="card-title lead success">Detain</h3>
+                                        <h3 class="display-inline card-title lead success">Detain</h3>
+                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                            <label class="display-inline ml-1">Make Default</label>
+                                            <input type="checkbox" name="det_default" id="det_default" class="switchery det_default" data-size="xs" data-switchery="true">
+                                        @endif
                                     </div>
                                     <div class="col-md-6">
                                         <a id="detain_main_switch" href="javascript:void(0);" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm"/></a>
@@ -1577,7 +1589,11 @@
                             <div id="" class="card-header mt-1 border-success">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3 class="card-title lead success">Sameday</h3>
+                                        <h3 class="display-inline card-title lead success">Sameday</h3>
+                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                            <label class="display-inline ml-1">Make Default</label>
+                                            <input type="checkbox" name="sameday_default" id="sameday_default" class="switchery sameday_default" data-size="xs" data-switchery="true">
+                                        @endif
                                     </div>
                                     <div class="col-md-6">
                                         <a id="sameday_main_switch" href="javascript:void(0);" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm"/></a>
@@ -2062,6 +2078,54 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $("#on_default").on('change', function(){
+                if($(".ol_default").is(":checked")){
+                    $(".ol_default").trigger('click');
+                }
+                if($(".det_default").is(":checked")){
+                    $(".det_default").trigger('click');
+                }
+                if($(".sameday_default").is(":checked")){
+                    $(".sameday_default").trigger('click');
+                }
+            });
+
+            $("#ol_default").on('change', function(){
+                if($(".on_default").is(":checked")){
+                    $(".on_default").trigger('click');
+                }
+                if($(".det_default").is(":checked")){
+                    $(".det_default").trigger('click');
+                }
+                if($(".sameday_default").is(":checked")){
+                    $(".sameday_default").trigger('click');
+                }
+            });
+
+            $("#det_default").on('change', function(){
+                if($(".on_default").is(":checked")){
+                    $(".on_default").trigger('click');
+                }
+                if($(".ol_default").is(":checked")){
+                    $(".ol_default").trigger('click');
+                }
+                if($(".sameday_default").is(":checked")){
+                    $(".sameday_default").trigger('click');
+                }
+            });
+
+            $("#sameday_default").on('change', function(){
+                if($(".on_default").is(":checked")){
+                    $(".on_default").trigger('click');
+                }
+                if($(".ol_default").is(":checked")){
+                    $(".ol_default").trigger('click');
+                }
+                if($(".det_default").is(":checked")){
+                    $(".det_default").trigger('click');
+                }
+            });
+
             $('input[name="on_door_mcw_charges"]').on('change', function () {
                 var value = $(this).val();
                 var maxvalue = parseFloat(value);

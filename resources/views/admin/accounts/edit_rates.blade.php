@@ -29,7 +29,15 @@
                             <div id="headingCollapse61" class="card-header border-success">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3 class="card-title lead success">Overnight</h3>
+                                        <h3 class="display-inline card-title lead success">Overnight</h3>
+                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                            <label class="display-inline ml-1">Make Default</label>
+                                            @if($shipper['default_shipping_mode'] == 1)
+                                                <input type="checkbox" name="on_default" id="on_default" class="switchery on_default" checked data-size="xs" data-switchery="true">
+                                            @else
+                                                <input type="checkbox" name="on_default" id="on_default" class="switchery on_default" data-size="xs" data-switchery="true">
+                                            @endif
+                                        @endif
                                     </div>
                                     <div class="col-md-6">
                                         <a href="javascript:void(0);" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox" id="" class="switchery on-main-switch" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->status == 1) ? 'checked' : '') }}/></a>
@@ -778,7 +786,15 @@
                             <div id="" class="card-header mt-1 border-success">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3 class="card-title lead success">Overland</h3>
+                                        <h3 class="display-inline card-title lead success">Overland</h3>
+                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                            <label class="display-inline ml-1">Make Default</label>
+                                            @if($shipper['default_shipping_mode'] == 2)
+                                                <input type="checkbox" name="ol_default" id="ol_default" class="switchery ol_default" checked data-size="xs" data-switchery="true">
+                                            @else
+                                                <input type="checkbox" name="ol_default" id="ol_default" class="switchery ol_default" data-size="xs" data-switchery="true">
+                                            @endif
+                                        @endif
                                     </div>
                                     <div class="col-md-6">
                                         <a href="javascript:void(0);" class="pull-right" id="ol_main_switch"><input name="ol_main_switch" type="checkbox" class="switchery ol-main-switch" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? 'checked' : '') }}/></a>
@@ -1526,7 +1542,15 @@
                             <div id="" class="card-header mt-1 border-success">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3 class="card-title lead success">Detain</h3>
+                                        <h3 class="display-inline card-title lead success">Detain</h3>
+                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                            <label class="display-inline ml-1">Make Default</label>
+                                            @if($shipper['default_shipping_mode'] == 3)
+                                                <input type="checkbox" name="det_default" id="det_default" class="switchery det_default" checked data-size="xs" data-switchery="true">
+                                            @else
+                                                <input type="checkbox" name="det_default" id="det_default" class="switchery det_default" data-size="xs" data-switchery="true">
+                                            @endif
+                                        @endif
                                     </div>
                                     <div class="col-md-6">
                                         <a id="detain_main_switch" href="javascript:void(0);" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->status == 1) ? 'checked' : '') }}/></a>
@@ -2281,7 +2305,15 @@
                             <div id="" class="card-header mt-1 border-success">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3 class="card-title lead success">Sameday</h3>
+                                        <h3 class="display-inline card-title lead success">Sameday</h3>
+                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                            <label class="display-inline ml-1">Make Default</label>
+                                            @if($shipper['default_shipping_mode'] == 4)
+                                                <input type="checkbox" name="sameday_default" id="sameday_default" class="switchery sameday_default" checked data-size="xs" data-switchery="true">
+                                            @else
+                                                <input type="checkbox" name="sameday_default" id="sameday_default" class="switchery sameday_default" data-size="xs" data-switchery="true">
+                                            @endif
+                                        @endif
                                     </div>
                                     <div class="col-md-6">
                                         <a id="sameday_main_switch" href="javascript:void(0);" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->status == 1) ? 'checked' : '') }}/></a>
@@ -3056,6 +3088,55 @@
             o.style.height = (25+o.scrollHeight)+"px";
         }
         $(document).ready(function () {
+
+            $("#on_default").on('change', function(){
+                if($(".ol_default").is(":checked")){
+                    $(".ol_default").trigger('click');
+                }
+                if($(".det_default").is(":checked")){
+                    $(".det_default").trigger('click');
+                }
+                if($(".sameday_default").is(":checked")){
+                    $(".sameday_default").trigger('click');
+                }
+            });
+
+            $("#ol_default").on('change', function(){
+                if($(".on_default").is(":checked")){
+                    $(".on_default").trigger('click');
+                }
+                if($(".det_default").is(":checked")){
+                    $(".det_default").trigger('click');
+                }
+                if($(".sameday_default").is(":checked")){
+                    $(".sameday_default").trigger('click');
+                }
+            });
+
+            $("#det_default").on('change', function(){
+                if($(".on_default").is(":checked")){
+                    $(".on_default").trigger('click');
+                }
+                if($(".ol_default").is(":checked")){
+                    $(".ol_default").trigger('click');
+                }
+                if($(".sameday_default").is(":checked")){
+                    $(".sameday_default").trigger('click');
+                }
+            });
+
+            $("#sameday_default").on('change', function(){
+                if($(".on_default").is(":checked")){
+                    $(".on_default").trigger('click');
+                }
+                if($(".ol_default").is(":checked")){
+                    $(".ol_default").trigger('click');
+                }
+                if($(".det_default").is(":checked")){
+                    $(".det_default").trigger('click');
+                }
+            });
+
             $(".touchspin-color").trigger("touchspin.updatesettings", {min: 1});
             // var on_main_switch = document.querySelector('#on_main_switch');
             $('#on_main_switch').on('change',function(){
