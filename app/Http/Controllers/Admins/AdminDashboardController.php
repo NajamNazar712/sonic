@@ -1361,7 +1361,6 @@ class AdminDashboardController extends Controller
                     ->withInput();
             }
 
-
             if ($request->on_rate_record != null) {
                 RateStatus::where('id', $request->on_rate_record)
                     ->update([
@@ -2960,6 +2959,27 @@ class AdminDashboardController extends Controller
                 return redirect()->back()
                     ->withErrors($validate)
                     ->withInput();
+            }
+
+            if($request->has('on_default') && $request->on_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 1
+                ]);
+            }
+            if($request->has('ol_default') && $request->ol_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 2
+                ]);
+            }
+            if($request->has('det_default') && $request->det_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 3
+                ]);
+            }
+            if($request->has('sameday_default') && $request->sameday_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 4
+                ]);
             }
 
             PendingRateStatus::where('user_id', $id)->delete();
