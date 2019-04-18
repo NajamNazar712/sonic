@@ -295,12 +295,15 @@ class ShipperShipmentBookController extends Controller
                             $pickup_city_id = $request->input('consignee_city');
                         }
                     }
-
-                    if ($request->filled('information_display')) {
-                        $information_display = TRUE;
+                    if ($service_type_id != 5) {
+                        if ($request->filled('information_display')) {
+                            $information_display = TRUE;
+                        } else {
+                            $information_display = FALSE;
+                        }
                     }
-                    else {
-                        $information_display = FALSE;
+                    else{
+                        $information_display = TRUE;
                     }
 
                     if ($service_type_id != 5) {
@@ -1591,11 +1594,15 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
 
-                if ($request->filled('information_display')) {
-                    $information_display = TRUE;
+                if ($service_type_id != 5) {
+                    if ($request->filled('information_display')) {
+                        $information_display = TRUE;
+                    } else {
+                        $information_display = FALSE;
+                    }
                 }
-                else {
-                    $information_display = FALSE;
+                else{
+                    $information_display = TRUE;
                 }
 
                 if ($service_type_id != 5) {
