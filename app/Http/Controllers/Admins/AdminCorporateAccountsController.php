@@ -3037,6 +3037,27 @@ class AdminCorporateAccountsController extends Controller
             $detain_validations = array();
             $sameday_validations = array();
 
+            if($request->has('on_default') && $request->on_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 1
+                ]);
+            }
+            if($request->has('ol_default') && $request->ol_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 2
+                ]);
+            }
+            if($request->has('det_default') && $request->det_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 3
+                ]);
+            }
+            if($request->has('sameday_default') && $request->sameday_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 4
+                ]);
+            }
+
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
 
