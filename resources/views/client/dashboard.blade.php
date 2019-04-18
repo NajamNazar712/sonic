@@ -162,6 +162,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style type="text/css">
         .small-calender-icon{
             font-size: 17px !important;
@@ -189,6 +190,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
@@ -255,23 +257,48 @@
                     });
             }
             function cancel(selected_rows) {
-                $.ajax({
-                    url: '{!! route('cod.orders.cancel_all') !!}',
-                    method: 'POST',
-                    data: {
-                        'ids[]': selected_rows,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function (data) {
-                        if(data.status === 1){
-                            table.draw('false');
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                swal({
+                    text: 'Are you sure, you want to cancel these Shipment(s)?',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
                         }
-                    });
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('cod.orders.cancel_all') !!}',
+                            method: 'POST',
+                            data: {
+                                'ids[]': selected_rows,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if(data.status === 1){
+                                    table.draw('false');
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                }else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
+                    }
+                });
+
             }
             var selected_rows = [];
             var table = $('#datatable').DataTable({
@@ -732,7 +759,7 @@
                 }).done(function (data) {
                     $('#shipment_charges_body').html(data);
                     $('#shipment_charges_modal_heading span').text(shipment_id);
-                })
+                });
             });
 
 

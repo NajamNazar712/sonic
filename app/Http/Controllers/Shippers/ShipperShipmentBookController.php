@@ -144,7 +144,8 @@ class ShipperShipmentBookController extends Controller
     public function index() {
         $booking_types = BookingType::whereNotIn('id', [4, 3])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
-        $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        $shipper_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
+        $cities = City::leftjoin('city_deliveries as cd','cd.city_id','=','cities.id')->whereIn('cd.shipping_mode_id', $shipper_shipping_modes)->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $consignee_cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
@@ -156,6 +157,7 @@ class ShipperShipmentBookController extends Controller
 
     public function shipping_modes(Request $request) {
         $shipper_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1);
+        $user = User::where('id',session('user_id'))->first();
 
         if ($shipper_shipping_modes->exists()) {
             $shipper_shipping_modes = $shipper_shipping_modes->pluck('shipping_mode_id')->toArray();
@@ -172,7 +174,7 @@ class ShipperShipmentBookController extends Controller
                 if (!empty($city_shipping_modes)) {
                     $shipping_modes = ShippingMode::whereIn('id', $city_shipping_modes)->get();
 
-                    return ['status' => 0, 'success' => 'Shipping Modes Updated', 'shipping_modes' => $shipping_modes];
+                    return ['status' => 0, 'success' => 'Shipping Modes Updated', 'shipping_modes' => $shipping_modes, 'default_shipping_mode' => $user['default_shipping_mode']];
                 }
                 else {
                     return ['status' => 1, 'error' => 'No Shipping Modes Enabled for Selected Service Type, Pickup City and Consignee City'];

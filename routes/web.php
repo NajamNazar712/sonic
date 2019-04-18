@@ -198,6 +198,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
     Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
 
+    Route::prefix('resources')->name('resources.')->group(function (){
+        Route::get('','Shippers\ShipperResourcesController@index')->name('index');
+        Route::get('city_list','Shippers\ShipperResourcesController@get_network_list')->name('city_list');
+    });
+
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
         Route::get('','Shippers\ShipperShipmentCancelController@index')->name('index');
         Route::get('list', 'Shippers\ShipperShipmentCancelController@list')->name('list');
@@ -221,14 +226,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
 
-    Route::get('dashboard', 'Admins\AdminDashboardController@index')->name('dashboard');
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('', 'Admins\AdminDashboardController@index')->name('index');
+        Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
+    });
+
 
     Route::prefix('orders')->name('orders.')->group(function () {
-        Route::get('dashboard', 'Admins\AdminDashboardController@index')->name('index');
-        Route::get('list', 'Admins\AdminDashboardController@orders_list')->name('list');
-        Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
-        Route::post('shipment_charges','Admins\AdminDashboardController@get_shipment_charges')->name('charges');
-        Route::post('shipper_recall','Admins\AdminDashboardController@shipper_recall')->name('shipper_recall');
+        Route::get('', 'Admins\OrderManagementController@index')->name('index');
+        Route::get('list', 'Admins\OrderManagementController@orders_list')->name('list');
+        Route::post('shipment_charges','Admins\OrderManagementController@get_shipment_charges')->name('charges');
+        Route::post('shipper_recall','Admins\OrderManagementController@shipper_recall')->name('shipper_recall');
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){

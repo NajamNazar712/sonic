@@ -210,7 +210,7 @@
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'return_pending_for', name: 'return_pending_for', class: 'align-middle return_pending_for', orderable: false},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
+                    {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks', orderable: false, searchable: false},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -232,7 +232,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.remarks')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
@@ -262,13 +262,8 @@
                     });
 
                     var data = $.map({!! $shipment_status !!}, function (obj) {
-                        obj.id = obj.id // replace pk with your identifier
-
-                        return obj;
-                    });
-                    var data = $.map({!! $shipment_status !!}, function (obj) {
-                        obj.text = obj.text || obj.name; // replace name with the property used for the text
-
+                        obj.id = obj.id;
+                        obj.text = obj.name;
                         return obj;
                     });
 
@@ -280,13 +275,8 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data1 = $.map({!! $shipping_mode !!}, function (obj) {
-                        obj.id = obj.id
-
-                        return obj;
-                    });
-                    var data1 = $.map({!! $shipping_mode !!}, function (obj) {
+                        obj.id = obj.id;
                         obj.text = obj.mode;
-
                         return obj;
                     });
 
@@ -298,13 +288,8 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data2 = $.map({!! $service_type !!}, function (obj) {
-                        obj.id = obj.id
-
-                        return obj;
-                    });
-                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.id = obj.id;
                         obj.text = obj.booking_type;
-
                         return obj;
                     });
 
@@ -346,24 +331,34 @@
                             dangerMode: true
                         }).then(function(confirm) {
                             if (confirm) {
-                                $.ajax({
-                                    url: '{!! route('admin.return.confirmed.revert') !!}',
-                                    method: 'POST',
-                                    data: {
-                                        '_token': '{{ csrf_token() }}',
-                                        'id': id
-                                    }
-                                })
-                                .done(function(data) {
-                                    table.draw(false);
+                                if(id) {
+                                    var remark = $.trim($('tr#' + id).find('td.remarks input').val());
+                                    $.ajax({
+                                        url: '{!! route('admin.return.confirmed.revert') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            '_token': '{{ csrf_token() }}',
+                                            'id': id,
+                                            'remarks':remark
+                                        }
+                                    })
+                                        .done(function (data) {
+                                            table.draw(false);
 
-                                    if (data.status == 0) {
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }
-                                    else {
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    }
-                                });
+                                            if (data.status == 0) {
+                                                toastr.success(data.success, 'Success!', {
+                                                    positionClass: 'toast-bottom-center',
+                                                    containerId: 'toast-bottom-center'
+                                                });
+                                            }
+                                            else {
+                                                toastr.error(data.error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            }
+                                        });
+                                }
                             }
                         });
                     }

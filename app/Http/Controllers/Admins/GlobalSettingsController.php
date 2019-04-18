@@ -11,9 +11,18 @@ use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 
+use App\Http\Models\CorporateFuelSurcharge;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\FuelSurcharge;
+use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
+use App\Http\Models\Rates\HistoryFuelSurcharge;
+use App\Http\Models\RateStatus;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 
 class GlobalSettingsController extends Controller
