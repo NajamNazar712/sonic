@@ -1344,10 +1344,12 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode','id');
+                    $charges_modes = ChargesModes::whereIn('id' , [2, 4])->pluck('charges_mode','id');
+
                     foreach ($cities as $city){
                         $city_name[$city->name]=$city->name;
                     }
-                    return view('client.shipment.book.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name,'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'user_shipping_modes' => $user_shipping_modes]);
+                    return view('client.shipment.book.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name,'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'user_shipping_modes' => $user_shipping_modes, 'charges_modes' => $charges_modes]);
                 }
             }
             else {
@@ -2497,7 +2499,7 @@ class ShipperShipmentBookController extends Controller
                     })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->pluck('id');
                     $products = Product::pluck('product_name','id');
                     $delivery_types = DeliveryType::pluck('delivery_type','id');;
-                    $charges_modes = ChargesModes::where('id' ,'!=', 1)->pluck('charges_mode','id');
+                    $charges_modes = ChargesModes::whereIn('id' , [2, 3])->pluck('charges_mode','id');
 
                     $user_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
 
