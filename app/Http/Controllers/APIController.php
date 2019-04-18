@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Http\Models\Admin\NonServiceArea;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
@@ -552,8 +553,30 @@ class APIController extends Controller
         }
 
         NotificationsController::send(2, $shipment_id);
+          $check = NonServiceArea::pluck('name')->toArray();
+          $msg_string = null;
+          $str_arr = null;
+          $str_arr = preg_split("/[ ,]+/", $consignee_address);
+          foreach ($check as $nsa) {
+              foreach ($str_arr as $arr_value) {
+                  if (strtolower($nsa) == strtolower($arr_value)) {
+                      $con_nsa = $arr_value;
+                      if ($msg_string != null) {
+                          $msg_string = $msg_string . ', ' . $arr_value;
+                      } else {
+                          $msg_string = $arr_value;
+                      }
+                  }
+              }
+          }
 
-        return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
+          if ($msg_string != null) {
+              $msg_string = $msg_string . " Detected!";
+              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => 'Possible NSA ' . $msg_string . ' In case of, Out of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
+          }
+          else{
+              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
+          }
       }
     }
 
