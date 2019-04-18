@@ -161,9 +161,9 @@ class AdminPickupsController extends Controller
               PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request->id)->delete();
             }
 
-            $pickup_note_requests = $pickup_note->pickup_note_requests;
+            $pickup_note_requests = PickupNoteRequest::where('pickup_note_id', $pickup_note->id);
 
-            if ($pickup_note_requests) {
+            if ($pickup_note_requests->exists()) {
               if ($bookings == 0) {
                 $pickup_note->pickups = $pickup_note->pickups - 1;
               }
