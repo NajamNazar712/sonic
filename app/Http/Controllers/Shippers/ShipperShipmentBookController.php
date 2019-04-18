@@ -10,6 +10,7 @@ use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\ZoneClassCity;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -143,6 +144,12 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function index() {
+        $time = Carbon::today()->addHour(15);
+        $current_time = Carbon::now();
+        $date = Carbon::today();
+        if($current_time > $time){
+            $date = Carbon::tomorrow();
+        }
         $booking_types = BookingType::whereNotIn('id', [4, 3])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
         $shipper_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
@@ -154,7 +161,7 @@ class ShipperShipmentBookController extends Controller
         $check = NonServiceArea::pluck('name')->toArray();
 		$charges_modes = ChargesModes::whereIn('id', [2, 4])->get();
 
-        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes]);
+        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date]);
     }
 
     public function shipping_modes(Request $request) {
@@ -1462,6 +1469,12 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_index() {
+        $time = Carbon::today()->addHour(15);
+        $current_time = Carbon::now();
+        $date = Carbon::today();
+        if($current_time > $time){
+            $date = Carbon::tomorrow();
+        }
         $booking_types = BookingType::whereNotIn('id', [4, 3])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
         $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
@@ -1474,7 +1487,7 @@ class ShipperShipmentBookController extends Controller
         $check = NonServiceArea::pluck('name')->toArray();
 
 
-        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes]);
+        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date]);
     }
 
     public function corporate_store(Request $request) {

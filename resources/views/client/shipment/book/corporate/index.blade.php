@@ -765,7 +765,7 @@
             });
 
             $('#package_type').checkboxpicker();
-
+            var current_date = '{{$date}}';
             $('#pickup_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -781,7 +781,7 @@
                     $('#pickup_date').valid();
                 }
             });
-
+            $('#pickup_date').pickadate('picker').set({'select': new Date(current_date),'min': new Date(current_date)},{muted: true});
             $('#replacement_product_type').select2({
                 width: '100%',
                 placeholder: 'Product Type*'
