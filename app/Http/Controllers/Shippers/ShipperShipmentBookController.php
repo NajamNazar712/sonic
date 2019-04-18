@@ -429,6 +429,26 @@ class ShipperShipmentBookController extends Controller
                     else {
                         $print = FALSE;
                     }
+                    $check = NonServiceArea::pluck('name')->toArray();
+                    $msg_string = null;
+                    $str_arr = null;
+                    $str_arr = preg_split("/[ ,]+/", $consignee_address);
+                    foreach ($check as $nsa) {
+                        foreach ($str_arr as $arr_value) {
+                            if (strtolower($nsa) == strtolower($arr_value)) {
+                                $con_nsa = $arr_value;
+                                if ($msg_string != null) {
+                                    $msg_string = $msg_string . ', ' . $arr_value;
+                                } else {
+                                    $msg_string = $arr_value;
+                                }
+                            }
+                        }
+                    }
+
+                    if ($msg_string != null) {
+                        NotificationsController::send(32, $shipment_id, $msg_string);
+                    }
                     return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
             else {
@@ -1317,6 +1337,28 @@ class ShipperShipmentBookController extends Controller
                                 }
 
                                 $tracking_numbers['Row #' . $row_id] = $tracking_number;
+                                if($request->excel_nsa) {
+                                    $con_nsa = array();
+                                    $msg_string = '';
+                                    $str_arr = null;
+                                    $str_arr = preg_split("/[ ,]+/", $row['consignee_address']);
+                                    foreach ($check as $nsa) {
+                                        foreach ($str_arr as $arr_value) {
+                                            if (strtolower($nsa) == strtolower($arr_value)) {
+                                                $con_nsa[$row_id] = $arr_value;
+                                                if ($msg_string != null) {
+                                                    $msg_string = $msg_string . ', ' . $arr_value;
+                                                } else {
+                                                    $msg_string = $arr_value;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (isset($con_nsa[$row_id])) {
+                                        NotificationsController::send(32, $shipment_id, $msg_string);
+                                        $nsa_error[$row_id]['msg'] = $msg_string . " Detected!";
+                                    }
+                                }
 
                                 NotificationsController::send(2, $shipment_id);
                             }
@@ -1622,6 +1664,26 @@ class ShipperShipmentBookController extends Controller
                 else {
                     $print = FALSE;
                 }
+            $check = NonServiceArea::pluck('name')->toArray();
+            $msg_string = null;
+            $str_arr = null;
+            $str_arr = preg_split("/[ ,]+/", $consignee_address);
+            foreach ($check as $nsa) {
+                foreach ($str_arr as $arr_value) {
+                    if (strtolower($nsa) == strtolower($arr_value)) {
+                        $con_nsa = $arr_value;
+                        if ($msg_string != null) {
+                            $msg_string = $msg_string . ', ' . $arr_value;
+                        } else {
+                            $msg_string = $arr_value;
+                        }
+                    }
+                }
+            }
+
+            if ($msg_string != null) {
+                NotificationsController::send(32, $shipment_id, $msg_string);
+            }
                 return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
         else {
@@ -2509,6 +2571,29 @@ class ShipperShipmentBookController extends Controller
                         }
 
                         $tracking_numbers['Row #' . $row_id] = $tracking_number;
+
+                        if($request->excel_nsa) {
+                            $con_nsa = array();
+                            $msg_string = '';
+                            $str_arr = null;
+                            $str_arr = preg_split("/[ ,]+/", $row['consignee_address']);
+                            foreach ($check as $nsa) {
+                                foreach ($str_arr as $arr_value) {
+                                    if (strtolower($nsa) == strtolower($arr_value)) {
+                                        $con_nsa[$row_id] = $arr_value;
+                                        if ($msg_string != null) {
+                                            $msg_string = $msg_string . ', ' . $arr_value;
+                                        } else {
+                                            $msg_string = $arr_value;
+                                        }
+                                    }
+                                }
+                            }
+                            if (isset($con_nsa[$row_id])) {
+                                NotificationsController::send(32, $shipment_id, $msg_string);
+                                $nsa_error[$row_id]['msg'] = $msg_string . " Detected!";
+                            }
+                        }
 
                         NotificationsController::send(2, $shipment_id);
                     }
