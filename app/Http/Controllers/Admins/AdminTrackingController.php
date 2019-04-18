@@ -55,6 +55,7 @@ class AdminTrackingController extends Controller
     			$details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
     			$details['consignee']['destination'] = $shipment->consignee_city->name;
     			$details['consignee']['address'] = $shipment->consignee_address;
+                $details['consignee']['email'] = $shipment->consignee_email;
 
     			foreach ($shipment->items as $item) {
     				$item_details = array();

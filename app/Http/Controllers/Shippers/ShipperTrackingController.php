@@ -47,6 +47,7 @@ class ShipperTrackingController extends Controller
         			$details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
         			$details['shipper']['phone_number_1'] = $shipper->phone;
         			$details['shipper']['phone_number_2'] = $shipper->phone2;
+                    $details['shipper']['email'] = $shipper->email;
         			$details['shipper']['origin'] = $shipper->city->name;
         			$details['shipper']['address'] = $shipper->address;
 
@@ -55,6 +56,7 @@ class ShipperTrackingController extends Controller
         			$details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
         			$details['consignee']['destination'] = $shipment->consignee_city->name;
         			$details['consignee']['address'] = $shipment->consignee_address;
+        			$details['consignee']['email'] = $shipment->consignee_email;
 
         			foreach ($shipment->items as $item) {
         				$item_details = array();
