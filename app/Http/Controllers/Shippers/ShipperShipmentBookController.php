@@ -388,7 +388,7 @@ class ShipperShipmentBookController extends Controller
                     $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
-                    if ($service_type_id == 1) {
+                    if ($service_type_id == 1 || $service_type_id == 5) {
                         $product_type_id = $request->input('product_type');
 
                         if ($request->filled('item_description')) {
@@ -666,7 +666,7 @@ class ShipperShipmentBookController extends Controller
                             <td class="color primary border twice-left"><strong>Serivce</strong></td>
                 ';
 
-                if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
+                if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
                     $table_start  .= '
                             <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
                     ';
@@ -724,15 +724,14 @@ class ShipperShipmentBookController extends Controller
                             <td colspan="3" class="border twice-right">' . $shipment->user->name . ' (' . $shipment->pickup_address->poc . ')</td>
                     ';
                 }
-                if ($shipment->booking_type_id != 5) {
-                    $table_start .= '
+
+                $table_start .= '
                             <td class="color secondary border twice-left"><strong>Name</strong></td>
                             <td colspan="3">' . $shipment->consignee_name . '</td>
                           </tr>
 
                           <tr>
                 ';
-                }
 
                 if ($shipment->information_display == 1) {
                     if ($shipment->booking_type_id != 4) {
@@ -794,7 +793,14 @@ class ShipperShipmentBookController extends Controller
                           <tr>
                 ';
 
-                if ($shipment->booking_type_id != 4) {
+                if ($shipment->booking_type_id == 5) {
+                    $table_end .= '
+                            <td class="border twice-top twice-bottom twice-left" colspan="2" rowspan="2" style="height: 32px;"></td>
+                          </tr>
+                          <tr>
+                    ';
+                }
+                elseif ($shipment->booking_type_id != 4) {
                     $table_end .= '
                             <td class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
                             <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->payment_mode->mode . '</strong></td>
@@ -807,21 +813,22 @@ class ShipperShipmentBookController extends Controller
                     ';
                 }
 
-                $table_end .= '
+                if ($shipment->booking_type_id != 5) {
+                    $table_end .= '
                           </tr>
                           <tr>
                             <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
-                ';
+                    ';
 
-                if ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1) {
-                    $table_end .= '
+                    if ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1) {
+                        $table_end .= '
                             <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
-                    ';
-                }
-                else {
-                    $table_end .= '
+                        ';
+                    } else {
+                        $table_end .= '
                             <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
-                    ';
+                        ';
+                    }
                 }
 
                 $table_end .= '
@@ -835,7 +842,7 @@ class ShipperShipmentBookController extends Controller
                       <hr>
                 ';
 
-                if ($shipment->booking_type_id == 1  || $shipment->booking_type_id == 4) {
+                if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
                     $shipment_details .= $table_start;
 
                     $item = $shipment->items->first();
@@ -1341,7 +1348,7 @@ class ShipperShipmentBookController extends Controller
 
                                 $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
-                                if ($service_type_id == 1) {
+                                if ($service_type_id == 1 || $service_type_id == 5) {
                                     $item_product_type_id = $row['item_product_type_id'];
 
                                     if (!empty(trim($row['item_description']))) {
@@ -1677,7 +1684,7 @@ class ShipperShipmentBookController extends Controller
 
                 $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
                 $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
-                if ($service_type_id == 1) {
+                if ($service_type_id == 1 || $service_type_id == 5) {
                     $product_type_id = $request->input('product_type');
 
                     if ($request->filled('item_description')) {
@@ -2618,7 +2625,7 @@ class ShipperShipmentBookController extends Controller
 
                         $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
-                        if ($service_type_id == 1) {
+                        if ($service_type_id == 1 || $service_type_id == 5) {
                             $item_product_type_id = $row['item_product_type_id'];
 
                             if (!empty(trim($row['item_description']))) {
