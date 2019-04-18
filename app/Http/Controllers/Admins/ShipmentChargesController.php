@@ -661,7 +661,7 @@ class ShipmentChargesController extends Controller
     static public function fuel_surcharge($id) {
         $shipment = Shipment::find($id);
 
-        $result = self::calculate_cash_handling($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->amount);
+        $result = self::calculate_fuel_surcharge($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->weight_charges);
 
         if ($result) {
             $shipment->fuel_surcharge = $result['fuel_surcharge'];

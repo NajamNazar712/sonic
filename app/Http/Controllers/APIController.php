@@ -7,10 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
 use Validator;
 use Illuminate\Validation\Rule;
@@ -982,7 +980,7 @@ class APIController extends Controller
             $payment = array();
 
             $payment['id'] = $done_payment_shipment->done_payment_id;
-            $payment['datetime'] = $done_payment_shipment->updated_at;
+            $payment['datetime'] = $done_payment_shipment->updated_at->toDateTimeString();
             $payment['type'] = $done_payment_shipment->type;
             $payment['amount'] = $done_payment_shipment->amount;
             $payment['charges'] = $done_payment_shipment->charges;
