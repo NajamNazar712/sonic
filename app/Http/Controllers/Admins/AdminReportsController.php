@@ -727,6 +727,11 @@ class AdminReportsController extends Controller
         if($cargo_no = $request->get('search_cargo_no')){
             $cargo->where('cargo_consignments.id','=',$cargo_no);
         }
+        if($tracking = $request->get('search_tracking')){
+            $cargo->join('cargo_consignment_shipments as ccs','ccs.cargo_consignment_id','=','cargo_consignments.id')
+                ->join('shipments as s', 'ccs.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking);
+        }
         if($origin = $request->get('search_origin')){
             $cargo->where('oc.id','=',$origin);
         }
