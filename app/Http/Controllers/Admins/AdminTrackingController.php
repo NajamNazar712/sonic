@@ -55,6 +55,7 @@ class AdminTrackingController extends Controller
     			$details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
     			$details['consignee']['destination'] = $shipment->consignee_city->name;
     			$details['consignee']['address'] = $shipment->consignee_address;
+                $details['consignee']['email'] = $shipment->consignee_email;
 
     			foreach ($shipment->items as $item) {
     				$item_details = array();
@@ -86,7 +87,9 @@ class AdminTrackingController extends Controller
 
                 $details['order_information']['account_type_id'] = $shipment->user->account_type_id;
 
-                if ($shipment->user->account_type_id == 2 || $shipment->booking_type_id == 4) {
+                $details['order_information']['charges_mode_id'] = $shipment->charges_mode_id;
+
+                if ($shipment->charges_mode_id) {
                     $details['order_information']['charges_mode'] = $shipment->charges_mode->charges_mode;
                 }
 

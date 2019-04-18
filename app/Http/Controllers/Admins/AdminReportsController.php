@@ -18,6 +18,7 @@ use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\PickupNote;
@@ -726,6 +727,11 @@ class AdminReportsController extends Controller
 
         if($cargo_no = $request->get('search_cargo_no')){
             $cargo->where('cargo_consignments.id','=',$cargo_no);
+        }
+        if($tracking = $request->get('search_tracking')){
+            $cargo->join('cargo_consignment_shipments as ccs','ccs.cargo_consignment_id','=','cargo_consignments.id')
+                ->join('shipments as s', 'ccs.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking);
         }
         if($origin = $request->get('search_origin')){
             $cargo->where('oc.id','=',$origin);
@@ -3837,7 +3843,17 @@ class AdminReportsController extends Controller
 
         $start_date = Carbon::parse($start_date);
         $current_date = Carbon::parse($current_date);
-        $number_of_days = $start_date->diffInDays($current_date);
+        $account_status = array();
+        if($request->account == ''){
+            $account_status = [3,4,5];
+        }else if($request->account == 3){
+            $account_status = [3];
+        }else if($request->account == 4){
+            $account_status = [4];
+        }else if($request->account == 5){
+            $account_status = [5];
+        }
+
         $dates = [];
 
         for($d = $start_date; $d->lte($current_date); $d->addDay()) {
@@ -3887,10 +3903,10 @@ class AdminReportsController extends Controller
 
                     $user = User::whereHas('city',function($query) use($hub){
                         $query->where('hub_id',$hub);
-                    })->where('id', $shipper->user_id)->first();
+                    })->where('id', $shipper->user_id)->whereIn('status',$account_status)->first();
                 }else{
 
-                    $user = User::find($shipper->user_id);
+                    $user = User::where('id',$shipper->user_id)->whereIn('status',$account_status)->first();
                 }
                 if($user){
 
@@ -3944,11 +3960,12 @@ class AdminReportsController extends Controller
         $shipper_index = 2;
         $pickup_index = 2;
         $pickup_col_index = 4;
+
         foreach ($sales_persons_data as $sales_persons) {
 
-            $sheet->setCellValue('A'.$admin_index, $sales_persons['name']);
 
             if(!empty($sales_persons['shipper'])) {
+                $sheet->setCellValue('A'.$admin_index, $sales_persons['name']);
                 foreach ($sales_persons['shipper'] as $key => $person) {
 
                     $sheet->setCellValue('B' . $shipper_index, str_pad($key, 6, '0', STR_PAD_LEFT));
@@ -5119,6 +5136,36 @@ public function revenue_index(){
             $datatable->whereBetween('sj.created_at', [$from,$to]);
         }
         return $datatable->make(true);
+    }
+
+    public function gst_index(){
+        return view('admin.reports.gst_report');
+    }
+
+    public function gst_list(Request $request){
+        $gst = DonePayment::leftjoin('done_payment_shipments as dps','dps.done_payment_id', '=', 'done_payments.id')
+            ->leftjoin('users as u', 'done_payments.user_id', '=', 'u.id')
+            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::raw('SUM(dps.charges) as w_o_gst'), DB::raw('SUM(dps.gst) as gst'), DB::raw('SUM(dps.payable) as total_charges'))
+        ->groupBy('done_payments.user_id');
+
+        $datatables = Datatables::of($gst)
+            ->editColumn('account_no', function ($gst) {
+                return str_pad($gst->account_no, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('ntn_number', function ($gst) {
+                if($gst->ntn_number) {
+                    return $gst->ntn_number;
+                }
+                else{
+                    return "-";
+                }
+            });
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('dps.created_at', [$from,$to]);
+        }
+        return $datatables->make(true);
     }
 }
 

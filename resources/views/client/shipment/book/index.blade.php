@@ -303,6 +303,14 @@
 												</select>
 											</div>
 										</div>
+
+										<div class="form-group">
+                                            <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
+                                                @foreach($charges_modes as $charges_mode)
+                                                    <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
 									</div>
 
 									<div id="payment_info" class="col col_custom">
@@ -494,6 +502,15 @@
 				});
 			}
 
+			$('#charges_mode').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Charges Mode*'
+            }).bind('change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
+            });
+
 			function shipping_modes() {
 				if ($('#pickup_address').val() == 0) {
 					var pickup_city_id = $('#new_pickup_city').val();
@@ -518,11 +535,14 @@
 							.done(function(data) {
 								$('#shipping_mode').html('').select2('destroy');
 
+								default_shipping_mode = false;
+
 								if (data.status == 0) {
-									console.log(data.default_shipping_mode);
 									$.each(data.shipping_modes, function (index, shipping_mode) {
 										if(data.default_shipping_mode === shipping_mode['id']) {
 											$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '" selected>' + shipping_mode['mode'] + '</option>');
+
+											default_shipping_mode = true;
 										}
 										else{
 											$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '">' + shipping_mode['mode'] + '</option>');
@@ -536,7 +556,7 @@
 
 									present = false;
 								}
-								if(data.default_shipping_mode === null) {
+								if(default_shipping_mode === false) {
 									$('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
 										width: '100%',
 										placeholder: 'Mode of Shipping*'
@@ -835,6 +855,7 @@
 
 			$('#package_type').checkboxpicker();
 
+			var current_date = '{{$date}}';
 			$('#pickup_date').pickadate({
 				firstDay: 1,
 				clear: '',
@@ -848,10 +869,11 @@
 				},
 				onSet: function(context) {
 					$('#pickup_date').valid();
-				}
+                }
 			});
+            $('#pickup_date').pickadate('picker').set({'select': new Date(current_date),'min': new Date(current_date)},{muted: true});
 
-			$('#replacement_product_type').select2({
+            $('#replacement_product_type').select2({
 				width: '100%',
 				placeholder: 'Product Type*'
 			}).bind('change', function() {
@@ -1070,30 +1092,49 @@
 					// console.log(present.length);
 					// console.log(present);
 					if(present.length > 0){
+						var html = '<div class="text-left">In case of,<br/>';
+						html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
+						html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
+						html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
+						content = document.createElement('div');
+						content.innerHTML = html;
 						swal({
-							title: 'Warning',
-							text: 'Potential Non Service Area: ' + present,
+							title: present + ' Detected!',
+							content: content,
 							icon: 'info',
-							buttons:{
+							buttons: {
+								cancel: {
+									text: 'No',
+									value: null,
+									visible: true,
+									closeModal: true,
+								},
 								confirm: {
-									text: 'Ok',
-									value: false,
+									text: 'Yes',
+									value: true,
 									visible: true,
 									closeModal: true
-								}},
+								}
+							},
 							closeOnClickOutside: false,
-							closeOnEsc: false
-						}).then(function() {
-							swal({
-								title: 'Please Wait!',
-								text: 'Your shipment is being booked!',
-								icon: 'info',
-								buttons: false,
-								closeOnClickOutside: false,
-								closeOnEsc: false
-							});
+							closeOnEsc: false,
+							// dangerMode: true
+						}).then(function(confirm) {
+							if(confirm) {
+								swal({
+									title: 'Please Wait!',
+									text: 'Your shipment is being booked!',
+									icon: 'info',
+									buttons: false,
+									closeOnClickOutside: false,
+									closeOnEsc: false
+								});
 
-							form.submit();
+								form.submit();
+							}
+							else{
+								$(form).find('button[type=submit]').prop('disabled', false);
+							}
 						});
 					}
 					else {
