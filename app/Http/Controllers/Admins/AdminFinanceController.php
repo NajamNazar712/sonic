@@ -1371,6 +1371,9 @@ class AdminFinanceController extends Controller
         $weight = $request->input('weight');
 
         $shipment = Shipment::find($shipment_id);
+        if($shipment->actual_weight == null){
+            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
+        }
         $change_shipment_weight = new ChangeShipmentWeightLog();
 
         $change_shipment_weight->shipment_id = $shipment->id;
