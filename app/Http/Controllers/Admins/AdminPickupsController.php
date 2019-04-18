@@ -233,6 +233,21 @@ class AdminPickupsController extends Controller
           }
 
           $pickup_request->save();
+
+          $pickup_note = $pickup_request->pickup_note_request->pickup_note;
+
+          $weight = $pickup_note->total_estimated_weight - $shipment->estimated_weight;
+
+          $pickup_note->total_estimated_weight = $weight;
+
+          if ($weight < $defined_pickup_weight) {
+            $pickup_note->pickup_type = 0;
+          }
+          else {
+            $pickup_note->pickup_type = 1;
+          }
+
+          $pickup_note->save();
         }
       }
     }
