@@ -239,7 +239,9 @@ class APIController extends Controller
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
-            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:charges_modes,id'],
+            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+                $query->whereIn('id', [2, 4]);
+            })],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'item_description' => ['required_if:service_type_id,1,2', 'between:0,250'],
@@ -266,7 +268,6 @@ class APIController extends Controller
                 $query->where('user_id', $user_id)->where('hidden', 0);
             })],
             'delivery_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'],
-            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:charges_modes,id'],
             'information_display' => ['required', 'boolean'],
             'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
             'consignee_name' => ['required', 'between:1,100'],
@@ -286,6 +287,9 @@ class APIController extends Controller
             'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
+            })],
+            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+                $query->whereIn('id', [2, 3]);
             })],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
