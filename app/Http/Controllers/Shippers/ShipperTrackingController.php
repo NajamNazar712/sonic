@@ -57,7 +57,6 @@ class ShipperTrackingController extends Controller
         			$details['consignee']['destination'] = $shipment->consignee_city->name;
         			$details['consignee']['address'] = $shipment->consignee_address;
         			$details['consignee']['email'] = $shipment->consignee_email;
-
         			foreach ($shipment->items as $item) {
         				$item_details = array();
 

@@ -212,14 +212,6 @@
 							shipment += '<td>' + details.consignee.destination + '</td>';
 							shipment += '</tr>';
 							shipment += '<tr>';
-							shipment += '<td><strong>Email</strong></td>';
-							if (details.consignee.email) {
-								shipment += '<td colspan="3">' + details.consignee.email + '</td>';
-							}
-							else{
-								shipment += '<td colspan="3"></td>'
-							}
-							shipment += '</tr>';
 							shipment += '<tr>';
 							shipment += '<td><strong>Phone No(s).</strong></td>';
 
@@ -232,6 +224,14 @@
 
 							shipment += '<td colspan="2"></td>';
 							shipment += '</tr>';
+                            shipment += '<td><strong>Email</strong></td>';
+                            if (details.consignee.email) {
+                                shipment += '<td colspan="3">' + details.consignee.email + '</td>';
+                            }
+                            else{
+                                shipment += '<td colspan="3"></td>'
+                            }
+                            shipment += '</tr>';
 							shipment += '<tr>';
 							shipment += '<td><strong>Address</strong></td>';
 							shipment += '<td colspan="3">' + details.consignee.address + '</td>';
