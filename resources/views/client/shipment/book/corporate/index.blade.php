@@ -1026,29 +1026,49 @@
                                 closeOnEsc: false
                             }).then(function() {
                                 if(present.length > 0){
+                                    var html = '<div class="text-left">In case of,<br/>';
+                                    html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
+                                    html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
+                                    html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
                                     swal({
-                                        title: 'Warning',
-                                        text: 'Potential Non Service Area: ' + present,
+                                        title: present + ' Detected!',
+                                        content: content,
                                         icon: 'info',
-                                        buttons:{
+                                        buttons: {
+                                            cancel: {
+                                                text: 'No',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
                                             confirm: {
-                                                text: 'Ok',
-                                                value: false,
+                                                text: 'Yes',
+                                                value: true,
                                                 visible: true,
                                                 closeModal: true
-                                            }},
+                                            }
+                                        },
                                         closeOnClickOutside: false,
-                                        closeOnEsc: false
-                                    }).then(function() {
-                                        swal({
-                                            title: 'Please Wait!',
-                                            text: 'Your shipment is being booked!',
-                                            icon: 'info',
-                                            buttons: false,
-                                            closeOnClickOutside: false,
-                                            closeOnEsc: false
-                                        });
-                                        form.submit();
+                                        closeOnEsc: false,
+                                        // dangerMode: true
+                                    }).then(function(confirm) {
+                                        if(confirm) {
+                                            swal({
+                                                title: 'Please Wait!',
+                                                text: 'Your shipment is being booked!',
+                                                icon: 'info',
+                                                buttons: false,
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false
+                                            });
+
+                                            form.submit();
+                                        }
+                                        else{
+                                            $(form).find('button[type=submit]').prop('disabled', false);
+                                        }
                                     });
                                 }
                                 else {

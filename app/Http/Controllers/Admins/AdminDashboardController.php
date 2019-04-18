@@ -901,8 +901,9 @@ class AdminDashboardController extends Controller
         $fuel = FuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $packaging = PackagingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $sale_person = SalePersonTag::where('user_id',$id)->first();
 //        return $discount;
-        return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount]);
+        return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person]);
 
     }
 
@@ -1360,7 +1361,6 @@ class AdminDashboardController extends Controller
                     ->withErrors($validate)
                     ->withInput();
             }
-
 
             if ($request->on_rate_record != null) {
                 RateStatus::where('id', $request->on_rate_record)
@@ -2960,6 +2960,27 @@ class AdminDashboardController extends Controller
                 return redirect()->back()
                     ->withErrors($validate)
                     ->withInput();
+            }
+
+            if($request->has('on_default') && $request->on_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 1
+                ]);
+            }
+            if($request->has('ol_default') && $request->ol_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 2
+                ]);
+            }
+            if($request->has('det_default') && $request->det_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 3
+                ]);
+            }
+            if($request->has('sameday_default') && $request->sameday_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 4
+                ]);
             }
 
             PendingRateStatus::where('user_id', $id)->delete();

@@ -3279,6 +3279,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $("#on_default").on('change', function(){
+                // $(".on_default").trigger('click');
                 if($(".ol_default").is(":checked")){
                     $(".ol_default").trigger('click');
                 }

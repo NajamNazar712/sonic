@@ -20,6 +20,11 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
                                 @foreach($cities as $city)
                                     <option value="{{$city->id}}">{{$city->name}}</option>
@@ -57,18 +62,6 @@
                             </div>
 
                     </div>
-                    <div class="col-4">
-
-                            <div class="form-group input-group">
-                                <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                                </div>
-                            <input type="text" name="received_date" class="form-control bg-primary border-primary white rounded-right" id="received_date" placeholder="Received Date" data-value="">
-                            </div>
-
-                    </div>
                     <div class="col-3 ">
                         <div class="form-group">
                             <select name="cargo_type" class="select2" id="cargo_type">
@@ -80,9 +73,22 @@
                         </div>
 
                     </div>
+                    <div class="col-3">
+
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                                </div>
+                            <input type="text" name="received_date" class="form-control bg-primary border-primary white rounded-right" id="received_date" placeholder="Received Date" data-value="">
+                            </div>
+
+                    </div>
+
                     <div class="col-3 ">
 
-                        <div class="form-group input-group ml-1">
+                        <div class="form-group input-group ">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -93,7 +99,7 @@
                         </div>
                     </div>
                     <div class="col-3 ">
-                        <div class="form-group input-group ml-1">
+                        <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -340,6 +346,7 @@
                         data: {
                             'page': 'all',
                             'search_cargo_no': $('#search_cargo_no').val(),
+                            'search_tracking': $('#search_tracking_no').val(),
                             'search_origin': $('#search_origin').val(),
                             'search_destination': $('#search_destination').val(),
                             'search_shippimg_modes': $('#search_shippimg_modes').val(),
@@ -420,6 +427,7 @@
                     url: '{{ route('admin.reports.cargo_received.list') }}',
                     data: function (d) {
                         d.search_cargo_no = $('#search_cargo_no').val();
+                        d.search_tracking = $('#search_tracking_no').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_shippimg_modes = $('#search_shippimg_modes').val();

@@ -18,6 +18,7 @@ use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\PickupNote;
@@ -726,6 +727,11 @@ class AdminReportsController extends Controller
 
         if($cargo_no = $request->get('search_cargo_no')){
             $cargo->where('cargo_consignments.id','=',$cargo_no);
+        }
+        if($tracking = $request->get('search_tracking')){
+            $cargo->join('cargo_consignment_shipments as ccs','ccs.cargo_consignment_id','=','cargo_consignments.id')
+                ->join('shipments as s', 'ccs.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking);
         }
         if($origin = $request->get('search_origin')){
             $cargo->where('oc.id','=',$origin);
@@ -5119,6 +5125,36 @@ public function revenue_index(){
             $datatable->whereBetween('sj.created_at', [$from,$to]);
         }
         return $datatable->make(true);
+    }
+
+    public function gst_index(){
+        return view('admin.reports.gst_report');
+    }
+
+    public function gst_list(Request $request){
+        $gst = DonePayment::leftjoin('done_payment_shipments as dps','dps.done_payment_id', '=', 'done_payments.id')
+            ->leftjoin('users as u', 'done_payments.user_id', '=', 'u.id')
+            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::raw('SUM(dps.charges) as w_o_gst'), DB::raw('SUM(dps.gst) as gst'), DB::raw('SUM(dps.payable) as total_charges'))
+        ->groupBy('done_payments.user_id');
+
+        $datatables = Datatables::of($gst)
+            ->editColumn('account_no', function ($gst) {
+                return str_pad($gst->account_no, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('ntn_number', function ($gst) {
+                if($gst->ntn_number) {
+                    return $gst->ntn_number;
+                }
+                else{
+                    return "-";
+                }
+            });
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('dps.created_at', [$from,$to]);
+        }
+        return $datatables->make(true);
     }
 }
 

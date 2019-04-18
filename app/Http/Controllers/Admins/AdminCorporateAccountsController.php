@@ -3037,6 +3037,27 @@ class AdminCorporateAccountsController extends Controller
             $detain_validations = array();
             $sameday_validations = array();
 
+            if($request->has('on_default') && $request->on_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 1
+                ]);
+            }
+            if($request->has('ol_default') && $request->ol_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 2
+                ]);
+            }
+            if($request->has('det_default') && $request->det_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 3
+                ]);
+            }
+            if($request->has('sameday_default') && $request->sameday_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 4
+                ]);
+            }
+
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
 
@@ -4920,7 +4941,8 @@ class AdminCorporateAccountsController extends Controller
         $return = CorporateReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $fuel = CorporateFuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $discount = CorporateDiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $sale_person = SalePersonTag::where('user_id',$id)->first();
 
-        return view('admin.accounts.corporate.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'min_weight' => $min_weight]);
+        return view('admin.accounts.corporate.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person]);
     }
 }
