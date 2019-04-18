@@ -940,7 +940,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 		Route::prefix('revenue')->name('revenue.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@revenue_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@revenue_list')->name('list');
-
+        });
+		Route::prefix('gst')->name('gst.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@gst_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@gst_list')->name('list');
         });
     });
 

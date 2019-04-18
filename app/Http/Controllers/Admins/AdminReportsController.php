@@ -18,6 +18,7 @@ use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\PickupNote;
@@ -5135,6 +5136,36 @@ public function revenue_index(){
             $datatable->whereBetween('sj.created_at', [$from,$to]);
         }
         return $datatable->make(true);
+    }
+
+    public function gst_index(){
+        return view('admin.reports.gst_report');
+    }
+
+    public function gst_list(Request $request){
+        $gst = DonePayment::leftjoin('done_payment_shipments as dps','dps.done_payment_id', '=', 'done_payments.id')
+            ->leftjoin('users as u', 'done_payments.user_id', '=', 'u.id')
+            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::raw('SUM(dps.charges) as w_o_gst'), DB::raw('SUM(dps.gst) as gst'), DB::raw('SUM(dps.payable) as total_charges'))
+        ->groupBy('done_payments.user_id');
+
+        $datatables = Datatables::of($gst)
+            ->editColumn('account_no', function ($gst) {
+                return str_pad($gst->account_no, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('ntn_number', function ($gst) {
+                if($gst->ntn_number) {
+                    return $gst->ntn_number;
+                }
+                else{
+                    return "-";
+                }
+            });
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('dps.created_at', [$from,$to]);
+        }
+        return $datatables->make(true);
     }
 }
 

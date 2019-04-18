@@ -31,7 +31,7 @@
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Overnight</h3>
                                         @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
-                                            <label class="display-inline ml-1">Make Default</label>
+                                            <label class="display-inline ml-1"> Default</label>
                                             @if($shipper['default_shipping_mode'] == 1)
                                                 <input type="checkbox" name="on_default" id="on_default" class="switchery on_default" checked data-size="xs" data-switchery="true" disabled>
                                             @else
@@ -774,7 +774,7 @@
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Overland</h3>
                                         @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
-                                            <label class="display-inline ml-1">Make Default</label>
+                                            <label class="display-inline ml-1"> Default</label>
                                             @if($shipper['default_shipping_mode'] == 2)
                                                 <input type="checkbox" name="ol_default" id="ol_default" class="switchery ol_default" checked data-size="xs" data-switchery="true" disabled>
                                             @else
@@ -1517,7 +1517,7 @@
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Detain</h3>
                                         @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
-                                            <label class="display-inline ml-1">Make Default</label>
+                                            <label class="display-inline ml-1"> Default</label>
                                             @if($shipper['default_shipping_mode'] == 3)
                                                 <input type="checkbox" name="det_default" id="det_default" class="switchery det_default" checked data-size="xs" data-switchery="true" disabled>
                                             @else
@@ -2259,7 +2259,7 @@
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Sameday</h3>
                                         @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
-                                            <label class="display-inline ml-1">Make Default</label>
+                                            <label class="display-inline ml-1"> Default</label>
                                             @if($shipper['default_shipping_mode'] == 4)
                                                 <input type="checkbox" name="sameday_default" id="sameday_default" class="switchery sameday_default" checked data-size="xs" data-switchery="true" disabled>
                                             @else

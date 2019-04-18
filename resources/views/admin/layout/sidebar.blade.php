@@ -430,6 +430,9 @@
                         @if (session('role_id') == 1 || in_array(177, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.revenue.index') }}">Revenue</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(199, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.gst.index') }}">GST</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

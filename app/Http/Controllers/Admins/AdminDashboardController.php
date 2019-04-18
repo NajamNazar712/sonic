@@ -901,8 +901,9 @@ class AdminDashboardController extends Controller
         $fuel = FuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $packaging = PackagingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $sale_person = SalePersonTag::where('user_id',$id)->first();
 //        return $discount;
-        return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount]);
+        return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person]);
 
     }
 
