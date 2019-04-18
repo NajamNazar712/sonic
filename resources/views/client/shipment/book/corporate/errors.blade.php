@@ -23,7 +23,6 @@
                                         <th>Service Type ID</th>
                                         <th>Pickup Address ID</th>
                                         <th>Delivery Type ID</th>
-                                        <th>Charges Mode ID</th>
                                         <th>Show Information on Air Waybill (Optional)</th>
                                         <th>Consignee City Name</th>
                                         <th>Consignee Name</th>
@@ -47,6 +46,7 @@
                                         <th>Same Day Timing ID</th>
                                         <th>Amount</th>
                                         <th>Mode of Payment ID</th>
+                                        <th>Charges Mode ID</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -82,11 +82,6 @@
                                                 <td>{!! Form::select('form[' . $no . '][delivery_type_id]',$delivery_types,null, ['class' => 'form-control is-invalid delivery_type_id select2','id'=>'delivery_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['delivery_type_id']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][delivery_type_id]', $ro['delivery_type_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
-                                            @endif
-                                            @if(isset($errors[$no]['charges_mode_id']))
-                                                <td>{!! Form::select('form[' . $no . '][charges_mode_id]',$charges_modes,null, ['class' => 'form-control is-invalid charges_mode_id select2','id'=>'charges_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['charges_mode_id']}}</font></td>
-                                            @else
-                                                <td>{!! Form::text('form[' . $no . '][charges_mode_id]', $ro['charges_mode_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
                                             @if(isset($errors[$no]['information_display']))
                                                 <td>{!! Form::select('form[' . $no . '][information_display]',['no'=>'no','yes'=>'yes'],null, ['class' => 'form-control is-invalid select2','id'=>'information_display','placeholder' => '']) !!}<font color="red">{{$errors[$no]['information_display']}}</font></td>
@@ -207,6 +202,11 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][payment_mode_id]', $ro['payment_mode_id'],['class' => 'form-control','style'=>'width:40px','readonly' => 'readonly']) !!}</td>
                                             @endif
+                                            @if(isset($errors[$no]['charges_mode_id']))
+                                                <td>{!! Form::select('form[' . $no . '][charges_mode_id]',$charges_modes,null, ['class' => 'form-control is-invalid charges_mode_id select2','id'=>'charges_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['charges_mode_id']}}</font></td>
+                                            @else
+                                                <td>{!! Form::text('form[' . $no . '][charges_mode_id]', $ro['charges_mode_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                            @endif
                                         </tr>
 
                                     @endforeach
@@ -256,10 +256,6 @@
                 width: '100%',
                 placeholder: 'Delivery Type'
             });
-            $('.charges_mode_id').select2({
-                width: '100%',
-                placeholder: 'Charges Mode'
-            });
             $('.information_display').select2({
                 width: '100%',
                 placeholder: 'Air Waybill'
@@ -291,6 +287,10 @@
             $('.payment_mode_id').select2({
                 width: '100%',
                 placeholder: 'Payment Mode'
+            });
+            $('.charges_mode_id').select2({
+                width: '100%',
+                placeholder: 'Charges Mode'
             });
         });
     </script>
