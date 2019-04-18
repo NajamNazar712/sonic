@@ -18,7 +18,7 @@
                             @include('admin.inc.messages')
 
                             <div class="row justify-content-center">
-                                <div class="col-5 col-sm-4 col-md-3 col-lg-2">
+                                <div class="col">
                                     <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.non_service_area.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
 
