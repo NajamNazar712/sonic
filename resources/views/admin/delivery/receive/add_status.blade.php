@@ -1015,6 +1015,14 @@
                                 }
 
                                 if(submit_all_status_flag){
+                                    swal({
+                                        title: 'Please Wait!',
+                                        text: 'Shipment(s) are being updated!',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
                                     $.ajax({
                                         url: '{!! route('admin.delivery.receive.add.status.all') !!}',
                                         method: 'POST',
