@@ -80,6 +80,7 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">History Status</th>
@@ -239,7 +240,8 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('Tracking .No');
+                            head.push('Tracking No.');
+                            head.push('Account No.');
                             head.push('Shipper');
                             head.push('Consignee Name');
                             head.push('History Status');
@@ -261,6 +263,7 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.shipper);
+                                row.push(values.account_no);
                                 row.push(values.name);
                                 row.push(values.history_status);
                                 row.push(values.service_type);
@@ -315,10 +318,11 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[6, 'asc']],
+                order: [[7, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
+                    {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name'},
                     {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},

@@ -92,7 +92,7 @@
 
 									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Consignee Information</h4>
-										<label for="consignee_info">Search Consignee Information</label>
+										<label for="consignee_info">Search By Phone No.</label>
 										<div class="form-group">
 											<select name="consignee_info" class="select2" id="consignee_info">
 											</select>
@@ -519,8 +519,14 @@
 								$('#shipping_mode').html('').select2('destroy');
 
 								if (data.status == 0) {
+									console.log(data.default_shipping_mode);
 									$.each(data.shipping_modes, function (index, shipping_mode) {
-										$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '">' + shipping_mode['mode'] + '</option>');
+										if(data.default_shipping_mode === shipping_mode['id']) {
+											$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '" selected>' + shipping_mode['mode'] + '</option>');
+										}
+										else{
+											$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '">' + shipping_mode['mode'] + '</option>');
+										}
 									});
 
 									present = true;
@@ -530,22 +536,38 @@
 
 									present = false;
 								}
+								if(data.default_shipping_mode === null) {
+									$('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+										width: '100%',
+										placeholder: 'Mode of Shipping*'
+									}).bind('change', function () {
+										if ($(this).hasClass('danger')) {
+											$(this).valid();
+										}
 
-								$('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-									width: '100%',
-									placeholder: 'Mode of Shipping*'
-								}).bind('change', function() {
-									if ($(this).hasClass('danger')) {
-										$(this).valid();
-									}
+										if (this.value == 4) {
+											$('#shipping_same-day').removeClass('d-none');
+										} else {
+											$('#shipping_same-day').addClass('d-none');
+										}
+									});
+								}
+								else{
+									$('#shipping_mode').select2({
+										width: '100%',
+										placeholder: 'Mode of Shipping*'
+									}).bind('change', function () {
+										if ($(this).hasClass('danger')) {
+											$(this).valid();
+										}
 
-									if (this.value == 4) {
-										$('#shipping_same-day').removeClass('d-none');
-									}
-									else {
-										$('#shipping_same-day').addClass('d-none');
-									}
-								});
+										if (this.value == 4) {
+											$('#shipping_same-day').removeClass('d-none');
+										} else {
+											$('#shipping_same-day').addClass('d-none');
+										}
+									});
+								}
 
 								if (present) {
 									$('#shipping_mode').prop('disabled', false);
@@ -668,7 +690,7 @@
 
             $("#consignee_info").select2({
 				width:'100%',
-                placeholder: "Search Consignee By Phone",
+                placeholder: "Search Here...",
                 minimumInputLength: 5,
                 ajax: {
                     url: '{{ route('cod.shipment.book.get_consignee_infos') }}',
