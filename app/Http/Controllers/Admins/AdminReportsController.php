@@ -5139,7 +5139,7 @@ public function revenue_index(){
 
         $datatables = Datatables::of($gst)
             ->editColumn('account_no', function ($gst) {
-                return str_pad($gst->account_no, 8, '0', STR_PAD_LEFT);
+                return str_pad($gst->account_no, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('ntn_number', function ($gst) {
                 if($gst->ntn_number) {
