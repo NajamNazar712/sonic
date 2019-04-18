@@ -236,6 +236,8 @@ class AdminPickupsController extends Controller
 
           $pickup_note = $pickup_request->pickup_note_request->pickup_note;
 
+          $pickup_note->bookings = $pickup_note->bookings - 1;
+
           $weight = $pickup_note->total_estimated_weight - $shipment->estimated_weight;
 
           $pickup_note->total_estimated_weight = $weight;
