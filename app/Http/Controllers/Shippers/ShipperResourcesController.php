@@ -23,7 +23,7 @@ class ShipperResourcesController extends Controller
         if($response){
             return response()->json(['status' => 1, 'file_name' => $response]);
         }else{
-            return response()->json(['status' => 0, 'error' => 'File Could Downloaded!']);
+            return response()->json(['status' => 0, 'error' => 'File Could not be Downloaded!']);
         }
     }
 
