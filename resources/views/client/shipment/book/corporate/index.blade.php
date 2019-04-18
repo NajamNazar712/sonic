@@ -91,7 +91,7 @@
 
                                     <div class="col col_6">
                                         <h4 id="consignee_header_info" class="form-section mb-2 text-center">Consignee Information</h4>
-                                        <label for="consignee_info">Search Consignee Information</label>
+                                        <label for="consignee_info">Search By Phone No.</label>
                                         <div class="form-group">
                                             <select name="consignee_info" class="select2" id="consignee_info">
                                             </select>
@@ -721,9 +721,10 @@
 
                 shipping_mode_same_day(pickup_city, consignee_city);
             });
+
             $("#consignee_info").select2({
                 width:'100%',
-                placeholder: "Search Consignee By Phone",
+                placeholder: "Search Here...",
                 minimumInputLength: 5,
                 ajax: {
                     url: '{{ route('cod.shipment.book.get_consignee_infos') }}',
@@ -1154,19 +1155,33 @@
                         }
                         else {
                             if(present.length > 0){
+                                var html = '<div class="text-left">In case of,<br/>';
+                                html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
+                                html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
+                                html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
+                                content = document.createElement('div');
+                                content.innerHTML = html;
                                 swal({
-                                    title: 'Warning',
-                                    text: 'Potential Non Service Area: ' + present,
+                                    title: present + ' Detected!',
+                                    content: content,
                                     icon: 'info',
-                                    buttons:{
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
                                         confirm: {
-                                            text: 'Ok',
-                                            value: false,
+                                            text: 'Yes',
+                                            value: true,
                                             visible: true,
                                             closeModal: true
-                                        }},
+                                        }
+                                    },
                                     closeOnClickOutside: false,
-                                    closeOnEsc: false
+                                    closeOnEsc: false,
+                                    // dangerMode: true
                                 }).then(function() {
                                     swal({
                                         title: 'Please Wait!',
