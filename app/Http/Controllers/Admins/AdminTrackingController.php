@@ -55,6 +55,7 @@ class AdminTrackingController extends Controller
     			$details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
     			$details['consignee']['destination'] = $shipment->consignee_city->name;
     			$details['consignee']['address'] = $shipment->consignee_address;
+                $details['consignee']['email'] = $shipment->consignee_email;
 
     			foreach ($shipment->items as $item) {
     				$item_details = array();
@@ -183,6 +184,37 @@ class AdminTrackingController extends Controller
                         $details['pickup_history'][] = $journey_details;
                     }
                 }
+
+                $shipment_amount_log = $shipment->amount_change_log;
+
+                if ($shipment_amount_log) {
+                    foreach ($shipment_amount_log as $journey) {
+                        $journey_details = array();
+
+                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                        $journey_details['old_amount'] = number_format($journey->old_amount);
+                        $journey_details['new_amount'] = number_format($journey->new_amount);
+                        $journey_details['user'] = $journey->admin->name;
+
+                        $details['amount_history'][] = $journey_details;
+                    }
+                }
+
+                $shipment_weight_log = $shipment->weight_change_log;
+
+                if ($shipment_weight_log) {
+                    foreach ($shipment_weight_log as $journey) {
+                        $journey_details = array();
+
+                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                        $journey_details['old_weight'] = number_format($journey->old_weight);
+                        $journey_details['new_weight'] = number_format($journey->new_weight);
+                        $journey_details['user'] = $journey->admin->name;
+
+                        $details['weight_history'][] = $journey_details;
+                    }
+                }
+
 
     			$tracking['shipments'][$shipment->id] = $details;
     		}

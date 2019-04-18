@@ -91,22 +91,8 @@
         $(document).ready(function () {
             $('li a.city_list_download').on('click', function () {
                 $(this).attr('disabled', true);
-                $.ajax({
-                    url:'{!! route("cod.resources.city_list") !!}',
-                }).done(function (data) {
-                    if(data.status){
-                        function download(filename) {
-                            var a = document.createElement("a");
-                            a.href = filename;
-                            // a.setAttribute("download", filename);
-                            a.click();
-                            return false;
-                        }
+                window.open('{!! route('cod.resources.city_list') !!}', '_blank');
 
-                        download(data.file_name);
-                    }
-
-                })
             })
         });
 
