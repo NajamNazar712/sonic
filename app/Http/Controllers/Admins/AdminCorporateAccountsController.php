@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StandardBookingTypeCharge;
 use App\Http\Models\Admin\StandardCashHandlingCharge;
 use App\Http\Models\Admin\StandardFuelSurcharge;
@@ -65,6 +66,7 @@ class AdminCorporateAccountsController extends Controller
     {
         $user = User::find($id);
         if (!CorporateRateStatus::where('user_id', $user->id)->exists()) {
+            $sale_person = SalePersonTag::where('user_id',$id)->first();
             $min_weight = CorporateStandardMinChargeableWeight::all()->groupBy('shipping_mode_id');
             $weight = CorporateStandardWeightCharge::all()->groupBy('shipping_mode_id');
             $bookingType = CorporateStandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
@@ -72,7 +74,7 @@ class AdminCorporateAccountsController extends Controller
             $insurance = CorporateStandardInsuranceCharge::all()->groupBy('shipping_mode_id');
             $return = CorporateStandardReturnCharge::all()->groupBy('shipping_mode_id');
             $fuel = CorporateStandardFuelSurcharge::all()->groupBy('shipping_mode_id');
-            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight,'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight]);
+            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight,'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }
@@ -490,6 +492,11 @@ class AdminCorporateAccountsController extends Controller
 //        return $request;
 
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
+            if($request->has('on_default') && $request->on_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 1
+                ]);
+            }
             $ONRateAlready = CorporateRateStatus::where('user_id',$id)->where('shipping_mode_id',1)->get();
 
             if($ONRateAlready->isEmpty()) {
@@ -646,6 +653,12 @@ class AdminCorporateAccountsController extends Controller
         //Overland
         if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
 
+            if($request->has('ol_default') && $request->ol_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 2
+                ]);
+            }
+
             $OLRatePresent = CorporateRateStatus::where('user_id',$id)->where('shipping_mode_id',2)->get();
 
             if($OLRatePresent->isEmpty()) {
@@ -799,6 +812,12 @@ class AdminCorporateAccountsController extends Controller
         }
         //Detain
         if($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
+
+            if($request->has('det_default') && $request->det_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 3
+                ]);
+            }
 
             $DetainRatePresent = CorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 3)->get();
 
@@ -955,6 +974,12 @@ class AdminCorporateAccountsController extends Controller
         }
         //Sameday
         if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
+
+            if($request->has('sameday_default') && $request->sameday_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 4
+                ]);
+            }
 
             $SamedayRatePresent = CorporateRateStatus::where('user_id',$id)->where('shipping_mode_id',4)->get();
             if($SamedayRatePresent->isEmpty()) {
@@ -1114,6 +1139,7 @@ class AdminCorporateAccountsController extends Controller
 
     public function edit_rates_index($id){
         $user = User::find($id);
+        $sale_person = SalePersonTag::where('user_id',$id)->first();
         if ((($user['rate_status'] >= 0) && $user['status']==1) || (($user['rate_status']==0) && $user['status']==3)) {
             $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1141,7 +1167,7 @@ class AdminCorporateAccountsController extends Controller
             $rate_status = $user['rate_status'];
         }
 //        return $discount;
-        return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight]);
+        return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person]);
     }
 
     public function edit_rates_submit(Request $request, $id)
@@ -1648,6 +1674,11 @@ class AdminCorporateAccountsController extends Controller
 
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
+                if($request->has('on_default') && $request->on_default == 'on'){
+                    $default_shipping_mode = User::where('id', $id)->update([
+                        'default_shipping_mode' => 1
+                    ]);
+                }
                 $ONRateAlready = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
@@ -1924,6 +1955,11 @@ class AdminCorporateAccountsController extends Controller
             }
 
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
+                if($request->has('ol_default') && $request->ol_default == 'on'){
+                    $default_shipping_mode = User::where('id', $id)->update([
+                        'default_shipping_mode' => 2
+                    ]);
+                }
                 $OLRateAlready = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 2])->get();
 
                 if (!$OLRateAlready->isEmpty()) {
@@ -2204,6 +2240,11 @@ class AdminCorporateAccountsController extends Controller
 
             //detain
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
+                if($request->has('det_default') && $request->det_default == 'on'){
+                    $default_shipping_mode = User::where('id', $id)->update([
+                        'default_shipping_mode' => 3
+                    ]);
+                }
                 $DTRateAlready = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->get();
 
                 if (!$DTRateAlready->isEmpty()) {
@@ -2486,6 +2527,11 @@ class AdminCorporateAccountsController extends Controller
 
             //sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
+                if($request->has('sameday_default') && $request->sameday_default == 'on'){
+                    $default_shipping_mode = User::where('id', $id)->update([
+                        'default_shipping_mode' => 4
+                    ]);
+                }
                 $SDRateAlready = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->get();
 
                 if (!$SDRateAlready->isEmpty()) {

@@ -267,7 +267,7 @@
                     },
                     {
                         extend: 'excel',
-                        title: 'Pending Cargo',
+                        title: 'Cargo Mapping',
                         className:'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }
@@ -281,14 +281,14 @@
                     url: '{{ route('admin.cargo.mapping.list') }}'
                 },
                 rowId: 'id',
-                order: [4, 'desc'],
+                order: [6, 'desc'],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'junction_1', name: 'jc1.name', class: 'align-middle junction_1'},
                     {data: 'junction_2', name: 'jc2.name', class: 'align-middle junction_2'},
-                    {data: 'receiver', name: 'a.name', class: 'align-middle receiver'},
+                    {data: 'receiver', name: 'ar.name', class: 'align-middle receiver'},
                     {data: 'updated_at', name: 'junction_mappings.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -314,7 +314,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {
