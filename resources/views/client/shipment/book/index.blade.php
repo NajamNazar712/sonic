@@ -92,7 +92,7 @@
 
 									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Consignee Information</h4>
-										<label for="consignee_info">Search Consignee Information</label>
+										<label for="consignee_info">Search By Phone No.</label>
 										<div class="form-group">
 											<select name="consignee_info" class="select2" id="consignee_info">
 											</select>
@@ -690,7 +690,7 @@
 
             $("#consignee_info").select2({
 				width:'100%',
-                placeholder: "Search Consignee By Phone",
+                placeholder: "Search Here...",
                 minimumInputLength: 5,
                 ajax: {
                     url: '{{ route('cod.shipment.book.get_consignee_infos') }}',
