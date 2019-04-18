@@ -9,6 +9,7 @@ use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
 use Validator;
 use Illuminate\Validation\Rule;
