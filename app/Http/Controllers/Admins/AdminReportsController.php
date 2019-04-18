@@ -4441,10 +4441,10 @@ class AdminReportsController extends Controller
                         }
 
                         if ($export) {
-                            $shipments[$type][$hub->name] = array();
+                            $shipments[$hub->name][$type] = array();
 
                             foreach ($rows as $row) {
-                                $shipments[$type][$hub->name][] = $row->tracking_number;
+                                $shipments[$hub->name][$type][] = $row->tracking_number;
                             }
                         }
                     }
@@ -4611,14 +4611,16 @@ class AdminReportsController extends Controller
 
             $spreadsheet->getActiveSheet()->setTitle('Overall')->fromArray($details, NULL);
 
-            foreach ($result['shipments'] as $type => $hubs) {
+            $types = array();
+
+            foreach ($result['shipments'] as $hub => $types) {
                 $details = array();
 
-                if (count($hubs) > 1) {
-                    foreach ($hubs as $hub => $tracking_numbers) {
+                if (count($types) > 1) {
+                    foreach ($types as $type => $tracking_numbers) {
                         $detail = array();
 
-                        $detail[] = $hub;
+                        $detail[] = $type_names[$type];
 
                         foreach ($tracking_numbers as $tracking_number) {
                             $detail[] = $tracking_number;
@@ -4630,8 +4632,8 @@ class AdminReportsController extends Controller
                     $details = array_map(null, ...$details);
                 }
                 else {
-                    foreach ($hubs as $hub => $tracking_numbers) {
-                        $details[] = [$hub];
+                    foreach ($types as $type => $tracking_numbers) {
+                        $details[] = [$type_names[$type]];
 
                         foreach ($tracking_numbers as $tracking_number) {
                             $details[] = [$tracking_number];
@@ -4639,11 +4641,11 @@ class AdminReportsController extends Controller
                     }
                 }
 
-                $spreadsheet->createSheet()->setTitle($type_names[$type]);
+                $spreadsheet->createSheet()->setTitle($hub);
 
-                $spreadsheet->setActiveSheetIndexByName($type_names[$type]);
+                $spreadsheet->setActiveSheetIndexByName($hub);
 
-                for ($counter = 1; $counter <= count($hubs); $counter++) {
+                for ($counter = 1; $counter <= count($types); $counter++) {
                     $column_name = Coordinate::stringFromColumnIndex($counter);
 
                     $spreadsheet->getActiveSheet()->getStyle($column_name)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
@@ -4651,7 +4653,7 @@ class AdminReportsController extends Controller
                     $spreadsheet->getActiveSheet()->getColumnDimension($column_name)->setWidth(15);
                 }
 
-                $spreadsheet->getActiveSheet()->setTitle($type_names[$type])->fromArray($details);
+                $spreadsheet->getActiveSheet()->setTitle($hub)->fromArray($details);
             }
 
             $spreadsheet->setActiveSheetIndex(0);
