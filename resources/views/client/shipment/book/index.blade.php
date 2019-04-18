@@ -84,7 +84,7 @@
 											</div>
 										</div>
 
-										<div class="form-group text-center p-1 border border-light rounded">
+										<div id="info_display" class="form-group text-center p-1 border border-light rounded">
 											<label class="d-block">Show Information on Air Waybill</label>
 											<input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
 										</div>
@@ -304,7 +304,7 @@
 											</div>
 										</div>
 
-										<div class="form-group">
+										<div id="charges_mode_div" class="form-group">
                                             <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
                                                 @foreach($charges_modes as $charges_mode)
                                                     <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
@@ -677,13 +677,11 @@
 					else if (service_type == 5) {
 						$('#regular').removeClass('d-none');
 						$('#replacement').addClass('d-none');
-						$('#shipping_custom').removeClass('col col_custom');
-						$('#shipping_custom').addClass('col col_6');
-						$('#replacement').addClass('d-none');
 						$('#try_and_buy').addClass('d-none');
 						$('#order_header_info').addClass('mt-2');
 						$('#shipping_header_info').addClass('mt-2');
 						$('#payment_info').addClass('d-none');
+						$('#charges_mode_div').addClass('d-none');
 						$('#shipper_header_info').html('Shipper Information<br><h6>(Delivery Address)</h6>');
 						$('#consignee_header_info').html('Consignee Information<br><h6>(Pickup/Collection Address)</h6>');
 					}
@@ -709,15 +707,14 @@
 			$('#pickup_address').select2({
 				width: '100%',
 				placeholder: 'Pickup Address*'
-			}).bind('change', function() {
+			}).bind('change', function () {
 				$(this).valid();
 
 				shipping_modes();
 
 				if (this.value == 0) {
 					$('#new_pickup_address').removeClass('d-none');
-				}
-				else {
+				} else {
 					$('#new_pickup_address').addClass('d-none');
 				}
 

@@ -26,8 +26,8 @@
                                 <input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ Session::get('service_type_id') }}">
 
                                 <div class="row">
-                                    <div class="col col_custom">
-                                        <h4 class="form-section mb-2 text-center">Shipper Information</h4>
+                                    <div id="shipping_custom" class="col col_custom">
+                                        <h4 id="shipper_header_info" class="form-section mb-2 text-center">Shipper Information</h4>
 
                                         <div class="form-group">
                                             <p class="border-bottom border-light text-center font-medium-1 text-bold-600">{{ $user->name }}</p>
@@ -83,14 +83,14 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group text-center p-1 border border-light rounded">
+                                        <div id="info_display" class="form-group text-center p-1 border border-light rounded">
                                             <label class="d-block">Show Information on Invoice</label>
                                             <input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
                                         </div>
                                     </div>
 
-                                    <div class="col col_custom">
-                                        <h4 class="form-section mb-2 text-center">Consignee Information</h4>
+                                    <div class="col col_6">
+                                        <h4 id="consignee_header_info" class="form-section mb-2 text-center">Consignee Information</h4>
                                         <label for="consignee_info">Search Consignee Information</label>
                                         <div class="form-group">
                                             <select name="consignee_info" class="select2" id="consignee_info">
@@ -133,8 +133,8 @@
                                         </div>
                                     </div>
 
-                                    <div class="col col_custom_middle">
-                                        <h4 class="form-section mb-2 text-center">Order Information</h4>
+                                    <div class="col col_6">
+                                        <h4 id="order_header_info" class="form-section mb-2 text-center">Order Information</h4>
 
                                         <div class="form-group">
                                             <input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
@@ -283,8 +283,8 @@
                                         </div>
                                     </div>
 
-                                    <div class="col col_custom">
-                                        <h4 class="form-section mb-2 text-center">Shipping Information</h4>
+                                    <div class="col col_6">
+                                        <h4 id="shipping_header_info" class="form-section mb-2 text-center">Shipping Information</h4>
 
                                         <div class="form-group input-group mb-0">
                                             <input type="text" name="estimated_weight" id="estimated_weight" class="form-control weight" placeholder="Estimated Weight*" data-rule-required="true" data-msg-required="Estimated Weight is required">
@@ -301,7 +301,7 @@
                                             </select>
                                         </div>
 
-                                        <div class="form-group">
+                                        <div id="charges_mode_div" class="form-group">
                                             <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
                                                 @foreach($charges_modes as $charges_mode)
                                                     <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
@@ -310,7 +310,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col col_custom">
+                                    <div id="payment_info" class="col col_custom">
                                         <h4 class="form-section mb-2 text-center">Payment Information</h4>
 
                                         <div class="form-group input-group">
@@ -608,21 +608,59 @@
                     $('#select_service_type form #service_type-error').addClass('d-none');
 
                     if (service_type == 1) {
+                        $('#shipping_custom').addClass('col col_custom');
+                        $('#shipping_custom').removeClass('col col_6');
                         $('#regular').removeClass('d-none');
+                        $('#payment_info').removeClass('d-none');
+                        $('#charges_mode_div').removeClass('d-none');
+                        $('#info_display').removeClass('d-none');
                         $('#replacement').addClass('d-none');
                         $('#try_and_buy').addClass('d-none');
+                        $('#order_header_info').removeClass('mt-2');
+                        $('#shipping_header_info').removeClass('mt-2');
+                        $('#shipper_header_info').html('Shipper Information');
+                        $('#consignee_header_info').html('Consignee Information');
                     }
                     else if (service_type == 2) {
+                        $('#shipping_custom').addClass('col col_custom');
+                        $('#shipping_custom').removeClass('col col_6');
                         $('#regular').removeClass('d-none');
+                        $('#payment_info').removeClass('d-none');
+                        $('#charges_mode_div').removeClass('d-none');
+                        $('#info_display').removeClass('d-none');
                         $('#replacement').removeClass('d-none');
                         $('#try_and_buy').addClass('d-none');
+                        $('#order_header_info').removeClass('mt-2');
+                        $('#shipping_header_info').removeClass('mt-2');
+                        $('#shipper_header_info').html('Shipper Information');
+                        $('#consignee_header_info').html('Consignee Information');
                     }
                     else if (service_type == 3) {
+                        $('#shipping_custom').addClass('col col_custom');
+                        $('#shipping_custom').removeClass('col col_6');
                         $('#regular').addClass('d-none');
                         $('#replacement').addClass('d-none');
+                        $('#payment_info').removeClass('d-none');
+                        $('#charges_mode_div').removeClass('d-none');
+                        $('#info_display').removeClass('d-none');
                         $('#try_and_buy').removeClass('d-none');
+                        $('#order_header_info').removeClass('mt-2');
+                        $('#shipping_header_info').removeClass('mt-2');
+                        $('#shipper_header_info').html('Shipper Information');
+                        $('#consignee_header_info').html('Consignee Information');
                     }
-
+                    else if (service_type == 5) {
+                        $('#regular').removeClass('d-none');
+                        $('#replacement').addClass('d-none');
+                        $('#try_and_buy').addClass('d-none');
+                        $('#order_header_info').addClass('mt-2');
+                        $('#shipping_header_info').addClass('mt-2');
+                        $('#payment_info').addClass('d-none');
+                        $('#charges_mode_div').addClass('d-none');
+                        $('#info_display').addClass('d-none');
+                        $('#shipper_header_info').html('Shipper Information<br><h6>(Delivery Address)</h6>');
+                        $('#consignee_header_info').html('Consignee Information<br><h6>(Pickup/Collection Address)</h6>');
+                    }
                     $('#booking_form #selected_service_type').val(service_type);
 
                     $('#selected_service_type_name').html('(' + selected.html() + ')');
