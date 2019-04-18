@@ -550,7 +550,6 @@ class APIController extends Controller
           }
         }
 
-        NotificationsController::send(2, $shipment_id);
           $check = NonServiceArea::pluck('name')->toArray();
           $msg_string = null;
           $str_arr = null;
@@ -573,6 +572,7 @@ class APIController extends Controller
               return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => 'Possible NSA ' . $msg_string . ' In case of, Out of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
           }
           else{
+              NotificationsController::send(2, $shipment_id);
               return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
           }
       }
