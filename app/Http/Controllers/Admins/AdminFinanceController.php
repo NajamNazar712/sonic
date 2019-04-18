@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\ChangeShipmentAmountLog;
+use App\Http\Models\Admin\ChangeShipmentWeightLog;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsPaymentJourney;
@@ -1248,6 +1250,14 @@ class AdminFinanceController extends Controller
 
         $shipment = Shipment::find($shipment_id);
 
+        $change_shipment_amount = new ChangeShipmentAmountLog();
+
+        $change_shipment_amount->shipment_id = $shipment->id;
+        $change_shipment_amount->old_amount = $shipment->amount;
+        $change_shipment_amount->new_amount = $amount;
+        $change_shipment_amount->admin_id = Auth::id();
+        $change_shipment_amount->save();
+
         $shipment->amount = $amount;
 
         $shipment->save();
@@ -1344,7 +1354,13 @@ class AdminFinanceController extends Controller
         $weight = $request->input('weight');
 
         $shipment = Shipment::find($shipment_id);
+        $change_shipment_weight = new ChangeShipmentWeightLog();
 
+        $change_shipment_weight->shipment_id = $shipment->id;
+        $change_shipment_weight->old_weight = $shipment->actual_weight;
+        $change_shipment_weight->new_weight = $weight;
+        $change_shipment_weight->admin_id = Auth::id();
+        $change_shipment_weight->save();
         $shipment->actual_weight = $weight;
 
         $shipment->save();
