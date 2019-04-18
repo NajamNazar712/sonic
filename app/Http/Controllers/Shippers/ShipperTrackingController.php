@@ -88,7 +88,7 @@ class ShipperTrackingController extends Controller
 
                     $details['order_information']['charges_mode_id'] = $shipment->charges_mode_id;
 
-                    if ($shipment->user->charges_mode_id) {
+                    if ($shipment->charges_mode_id) {
                         $details['order_information']['charges_mode'] = $shipment->charges_mode->charges_mode;
                     }
 
