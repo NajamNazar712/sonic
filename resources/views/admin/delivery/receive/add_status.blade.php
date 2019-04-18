@@ -924,100 +924,124 @@
                 var delivery_note = $('#delivery_note').val();
                 if(selected_rows.length > 0){
                     if(select_all_status != ''){
-                        var not_updated_shipments = [];
-                        var shipment_remarks_obj = {};
-                        var shipment_received_refused_obj = {};
-                        // blockPagePermanently();
-                        submit_all_status_flag = true;
-                        if(select_all_status == 14){
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-                                if ($(row.node()).hasClass('selected')) {
-                                    var id = parseInt(row.id());
-                                    var amount = parseInt($(row.node()).attr('amount'));
-                                    var remarks = $(row.node()).find('td.remarks input').val();
-                                    shipment_remarks_obj[id] = remarks;
-                                    if(amount == 0){
-                                        var receiver_name =  $(row.node()).find('td.received_or_refused_by input').val();
-                                        if(receiver_name == ''){
-                                            not_updated_shipments.push($(row.node()).find('td.tracking_number').text()) ;
-                                            submit_all_status_flag = false;
-                                        }else{
-                                            shipment_received_refused_obj[id] = receiver_name;
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to change the status of shipments!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                var not_updated_shipments = [];
+                                var shipment_remarks_obj = {};
+                                var shipment_received_refused_obj = {};
+                                // blockPagePermanently();
+                                submit_all_status_flag = true;
+                                if(select_all_status == 14){
+                                    table.rows().nodes().each(function(index) {
+                                        var row = table.row(index);
+                                        if ($(row.node()).hasClass('selected')) {
+                                            var id = parseInt(row.id());
+                                            var amount = parseInt($(row.node()).attr('amount'));
+                                            var remarks = $(row.node()).find('td.remarks input').val();
+                                            shipment_remarks_obj[id] = remarks;
+                                            if(amount == 0){
+                                                var receiver_name =  $(row.node()).find('td.received_or_refused_by input').val();
+                                                if(receiver_name == ''){
+                                                    not_updated_shipments.push($(row.node()).find('td.tracking_number').text()) ;
+                                                    submit_all_status_flag = false;
+                                                }else{
+                                                    shipment_received_refused_obj[id] = receiver_name;
+                                                }
+                                            }
+
+
                                         }
+                                    });
+                                    if(submit_all_status_flag == false){
+
+                                        var html = '';
+                                        $.each(not_updated_shipments, function(index, tracking_number) {
+                                            html += tracking_number + '<br/>';
+                                        });
+
+                                        html += '<br/>Update Received / Refused By for all shipments of 0 (zero) amount!';
+
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+                                        swal({
+                                            title: 'Names Not Updated',
+                                            content: content,
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
                                     }
 
-
-                                }
-                            });
-                            if(submit_all_status_flag == false){
-
-                                var html = '';
-                                $.each(not_updated_shipments, function(index, tracking_number) {
-                                    html += tracking_number + '<br/>';
-                                });
-
-                                html += '<br/>Update Received / Refused By for all shipments of 0 (zero) amount!';
-
-                                content = document.createElement('div');
-                                content.innerHTML = html;
-                                swal({
-                                    title: 'Names Not Updated',
-                                    content: content,
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'Close',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                });
-                            }
-
-                        }else{
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-                                if ($(row.node()).hasClass('selected')) {
-                                    var id = parseInt(row.id());
-                                    var remarks = $(row.node()).find('td.remarks input').val();
-                                    shipment_remarks_obj[id] = remarks;
-
-                                }
-                            });
-                        }
-
-                        if(submit_all_status_flag){
-                            $.ajax({
-                                url: '{!! route('admin.delivery.receive.add.status.all') !!}',
-                                method: 'POST',
-                                data: {
-                                    'shipment_ids': selected_rows,
-                                    'selected_status': select_all_status,
-                                    'delivery_note_id': delivery_note,
-                                    'remarks': shipment_remarks_obj,
-                                    'received_or_refused_by': shipment_received_refused_obj,
-                                    '_token': '{{ csrf_token() }}',
-                                }
-                            }).done(function (data) {
-                                if(data.status === 1){
-                                    UnblockPagePermanently();
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
                                 }else{
-                                    UnblockPagePermanently();
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    table.rows().nodes().each(function(index) {
+                                        var row = table.row(index);
+                                        if ($(row.node()).hasClass('selected')) {
+                                            var id = parseInt(row.id());
+                                            var remarks = $(row.node()).find('td.remarks input').val();
+                                            shipment_remarks_obj[id] = remarks;
 
+                                        }
+                                    });
                                 }
-                                location.reload();
 
-                            });
-                        }
+                                if(submit_all_status_flag){
+                                    $.ajax({
+                                        url: '{!! route('admin.delivery.receive.add.status.all') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            'shipment_ids': selected_rows,
+                                            'selected_status': select_all_status,
+                                            'delivery_note_id': delivery_note,
+                                            'remarks': shipment_remarks_obj,
+                                            'received_or_refused_by': shipment_received_refused_obj,
+                                            '_token': '{{ csrf_token() }}',
+                                        }
+                                    }).done(function (data) {
+                                        if(data.status === 1){
+                                            UnblockPagePermanently();
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                                        }else{
+                                            UnblockPagePermanently();
+                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                        }
+                                        location.reload();
+
+                                    });
+                                }
+                            }
+                        });
                     }
                     else{
                         var error = "Please Select A Status!";
