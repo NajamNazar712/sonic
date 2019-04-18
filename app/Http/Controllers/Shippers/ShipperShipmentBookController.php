@@ -1022,7 +1022,7 @@ class ShipperShipmentBookController extends Controller
             })],
 
             'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
-                $query->whereIn('id', [2, 3]);
+                $query->whereIn('id', [2, 4]);
             })],
         ];
 
