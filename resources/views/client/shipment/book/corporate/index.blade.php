@@ -96,7 +96,7 @@
                                             <select name="consignee_info" class="select2" id="consignee_info">
                                             </select>
                                         </div>
-                                        <div class="form-group">
+                                        <div id="delivery_type_div" class="form-group">
                                             <select name="delivery_type" class="form-control select2" id="delivery_type" data-rule-required="true" data-msg-required="Delivery Type is required">
                                                 @foreach($delivery_type as $delivery)
                                                     <option value="{{ $delivery->id }}">{{ $delivery->delivery_type }}</option>
@@ -614,6 +614,7 @@
                         $('#payment_info').removeClass('d-none');
                         $('#charges_mode_div').removeClass('d-none');
                         $('#info_display').removeClass('d-none');
+                        $('#delivery_type_div').removeClass('d-none');
                         $('#replacement').addClass('d-none');
                         $('#try_and_buy').addClass('d-none');
                         $('#order_header_info').removeClass('mt-2');
@@ -630,6 +631,7 @@
                         $('#info_display').removeClass('d-none');
                         $('#replacement').removeClass('d-none');
                         $('#try_and_buy').addClass('d-none');
+                        $('#delivery_type_div').removeClass('d-none');
                         $('#order_header_info').removeClass('mt-2');
                         $('#shipping_header_info').removeClass('mt-2');
                         $('#shipper_header_info').html('Shipper Information');
@@ -643,6 +645,7 @@
                         $('#payment_info').removeClass('d-none');
                         $('#charges_mode_div').removeClass('d-none');
                         $('#info_display').removeClass('d-none');
+                        $('#delivery_type_div').removeClass('d-none');
                         $('#try_and_buy').removeClass('d-none');
                         $('#order_header_info').removeClass('mt-2');
                         $('#shipping_header_info').removeClass('mt-2');
@@ -657,6 +660,7 @@
                         $('#shipping_header_info').addClass('mt-2');
                         $('#payment_info').addClass('d-none');
                         $('#charges_mode_div').addClass('d-none');
+                        $('#delivery_type_div').addClass('d-none');
                         $('#info_display').addClass('d-none');
                         $('#shipper_header_info').html('Shipper Information<br><h6>(Delivery Address)</h6>');
                         $('#consignee_header_info').html('Consignee Information<br><h6>(Pickup/Collection Address)</h6>');
