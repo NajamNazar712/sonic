@@ -84,7 +84,9 @@ class APIController extends Controller
       'tracking_numbers' => 'Tracking Numbers',
       'tracking_numbers.*' => 'Tracking Number',
 
-      'receiving_sheet_id' => 'Receiving Sheet ID'
+      'receiving_sheet_id' => 'Receiving Sheet ID',
+
+      'charges_mode_id' => 'Charges Mode ID'
     ];
 
     private $messages = [
@@ -238,6 +240,9 @@ class APIController extends Controller
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
+            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+                $query->whereIn('id', [2, 4]);
+            })],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'item_description' => ['required_if:service_type_id,1,2', 'between:0,250'],
@@ -264,7 +269,6 @@ class APIController extends Controller
                 $query->where('user_id', $user_id)->where('hidden', 0);
             })],
             'delivery_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'],
-            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:charges_modes,id'],
             'information_display' => ['required', 'boolean'],
             'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
             'consignee_name' => ['required', 'between:1,100'],
@@ -284,6 +288,9 @@ class APIController extends Controller
             'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
+            })],
+            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+                $query->whereIn('id', [2, 3]);
             })],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
@@ -395,6 +402,7 @@ class APIController extends Controller
         }
         else{
             $consignee_address = $request->input('consignee_address');
+            $charges_mode_id = $request->input('charges_mode_id');
         }
 
         $consignee_name = $request->input('consignee_name');
@@ -450,7 +458,7 @@ class APIController extends Controller
         $amount = $request->input('amount');
         $payment_mode_id = $request->input('payment_mode_id');
           if($user_type['account_type_id'] == 1) {
-              $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id);
+              $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id);
           }
           else {
               $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id);

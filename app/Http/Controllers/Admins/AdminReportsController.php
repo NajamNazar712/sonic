@@ -3843,7 +3843,17 @@ class AdminReportsController extends Controller
 
         $start_date = Carbon::parse($start_date);
         $current_date = Carbon::parse($current_date);
-        $number_of_days = $start_date->diffInDays($current_date);
+        $account_status = array();
+        if($request->account == ''){
+            $account_status = [3,4,5];
+        }else if($request->account == 3){
+            $account_status = [3];
+        }else if($request->account == 4){
+            $account_status = [4];
+        }else if($request->account == 5){
+            $account_status = [5];
+        }
+
         $dates = [];
 
         for($d = $start_date; $d->lte($current_date); $d->addDay()) {
@@ -3893,10 +3903,10 @@ class AdminReportsController extends Controller
 
                     $user = User::whereHas('city',function($query) use($hub){
                         $query->where('hub_id',$hub);
-                    })->where('id', $shipper->user_id)->first();
+                    })->where('id', $shipper->user_id)->whereIn('status',$account_status)->first();
                 }else{
 
-                    $user = User::find($shipper->user_id);
+                    $user = User::where('id',$shipper->user_id)->whereIn('status',$account_status)->first();
                 }
                 if($user){
 
@@ -3950,11 +3960,12 @@ class AdminReportsController extends Controller
         $shipper_index = 2;
         $pickup_index = 2;
         $pickup_col_index = 4;
+
         foreach ($sales_persons_data as $sales_persons) {
 
-            $sheet->setCellValue('A'.$admin_index, $sales_persons['name']);
 
             if(!empty($sales_persons['shipper'])) {
+                $sheet->setCellValue('A'.$admin_index, $sales_persons['name']);
                 foreach ($sales_persons['shipper'] as $key => $person) {
 
                     $sheet->setCellValue('B' . $shipper_index, str_pad($key, 6, '0', STR_PAD_LEFT));
