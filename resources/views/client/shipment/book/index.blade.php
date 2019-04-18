@@ -303,6 +303,14 @@
 												</select>
 											</div>
 										</div>
+
+										<div class="form-group">
+                                            <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
+                                                @foreach($charges_modes as $charges_mode)
+                                                    <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
 									</div>
 
 									<div class="col col_custom">
@@ -493,6 +501,15 @@
 					}
 				});
 			}
+
+			$('#charges_mode').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Charges Mode*'
+            }).bind('change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
+            });
 
 			function shipping_modes() {
 				if ($('#pickup_address').val() == 0) {

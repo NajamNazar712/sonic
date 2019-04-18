@@ -64,6 +64,26 @@
 									</table>
 
 									<table class="table table-bordered">
+                                        <thead>
+                                        <tr role="row" class="bg-primary white text-center">
+                                            <th colspan="2" class="border-primary border-darken-1">Charges Modes</th>
+                                        </tr>
+                                        <tr role="row" class="bg-primary bg-lighten-1 white">
+                                            <th class="text-center border-primary border-lighten-2">ID</th>
+                                            <th class="border-primary border-lighten-2">Name</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @foreach ($charges_modes as $charges_mode)
+                                            <tr role="row">
+                                                <td class="text-center">{{ $charges_mode->id }}</td>
+                                                <td>{{ $charges_mode->charges_mode }}</td>
+                                            </tr>
+                                        @endforeach
+                                        </tbody>
+                                    </table>
+
+									<table class="table table-bordered">
 										<thead>
 											<tr role="row" class="bg-primary white text-center">
 												<th colspan="2" class="border-primary border-darken-1">Show Information on Air Waybill</th>
