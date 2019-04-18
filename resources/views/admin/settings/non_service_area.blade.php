@@ -23,7 +23,7 @@
                                         {{ csrf_field() }}
 
                                         <div class="form-group">
-                                            <input type="text" name="non_service_area" class="form-control non_service_area" placeholder="Non Service Area*" data-rule-required="true" data-msg-required="Non Service Area is required" value="">
+                                            <input type="text" name="non_service_areas" class="form-control non_service_area" placeholder="Non Service Area*" data-rule-required="true" data-msg-required="Non Service Area is required" data-tags-input-name="non_service_area" value="{{ $current_nsa }}">
                                         </div>
 
                                         <button type="submit" class="btn btn-primary">Update</button>
@@ -39,15 +39,32 @@
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
+            $('#settings_form input.non_service_area').selectize({
+                placeholder: 'Non Service Area(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                create: function(input) {
+                    return {
+                        value: input,
+                        text: input
+                    }
+                }
+            });
 
             $('#settings_form').validate({
                 errorClass: 'danger',

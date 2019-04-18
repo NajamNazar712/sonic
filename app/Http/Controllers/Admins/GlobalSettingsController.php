@@ -90,20 +90,38 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
     public function non_service_area_index() {
-    return view('admin.settings.non_service_area');
+        $current_nsa = NonServiceArea::all();
+
+        if ($current_nsa) {
+            $current_nsa = $current_nsa->pluck('name')->toArray();
+
+            $current_nsa = implode(',', $current_nsa);
+        }
+
+        return view('admin.settings.non_service_area')->with('current_nsa', $current_nsa);
     }
 
     public function non_service_area_store(Request $request) {
-        $nsa = NonServiceArea::where('name',$request->non_service_area)->first();
-        if($nsa['name'] == $request->non_service_area)
-        {
-            return redirect()->back()->with('error', 'Non Service Area Is Already Updated!');
+        $new_nsa = explode(',', $request->non_service_areas);
+
+        $current_nsa = NonServiceArea::pluck('name')->toArray();
+
+        $add_nsa = array_diff($new_nsa, $current_nsa);
+        $delete_nsa = array_diff($current_nsa, $new_nsa);
+
+        if (!empty($delete_nsa)) {
+            NonServiceArea::whereIn('name', $delete_nsa)->delete();
         }
-        else
-        {
-            $create=NonServiceArea::create(['name' => $request->non_service_area]);
-            return redirect()->back()->with('success', 'Non Service Area Updated!');
+
+        foreach ($add_nsa as $name) {
+            $nsa = new NonServiceArea();
+
+            $nsa->name = $name;
+
+            $nsa->save();
         }
+
+        return redirect()->back()->with('success', 'Non Service Area(s) Updated!');
     }
 
     public function daily_pickup_sales_cron_index(){
