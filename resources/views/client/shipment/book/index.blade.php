@@ -518,11 +518,14 @@
 							.done(function(data) {
 								$('#shipping_mode').html('').select2('destroy');
 
+								default_shipping_mode = false;
+
 								if (data.status == 0) {
-									console.log(data.default_shipping_mode);
 									$.each(data.shipping_modes, function (index, shipping_mode) {
 										if(data.default_shipping_mode === shipping_mode['id']) {
 											$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '" selected>' + shipping_mode['mode'] + '</option>');
+
+											default_shipping_mode = true;
 										}
 										else{
 											$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '">' + shipping_mode['mode'] + '</option>');
@@ -536,7 +539,7 @@
 
 									present = false;
 								}
-								if(data.default_shipping_mode === null) {
+								if(default_shipping_mode === false) {
 									$('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
 										width: '100%',
 										placeholder: 'Mode of Shipping*'

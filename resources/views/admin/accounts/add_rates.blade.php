@@ -1918,50 +1918,62 @@
         $(document).ready(function () {
 
             $("#on_default").on('change', function(){
-                if($(".ol_default").is(":checked")){
-                    $(".ol_default").trigger('click');
+                if($("#ol_default").is(":checked")){
+                    $("#ol_default").trigger('click');
                 }
-                if($(".det_default").is(":checked")){
-                    $(".det_default").trigger('click');
+                if($("#det_default").is(":checked")){
+                    $("#det_default").trigger('click');
                 }
-                if($(".sameday_default").is(":checked")){
-                    $(".sameday_default").trigger('click');
+                if($("#sameday_default").is(":checked")){
+                    $("#sameday_default").trigger('click');
+                }
+                if (this.checked != true) {
+                    $(this).trigger('click');
                 }
             });
 
             $("#ol_default").on('change', function(){
-                if($(".on_default").is(":checked")){
-                    $(".on_default").trigger('click');
+                if($("#on_default").is(":checked")){
+                    $("#on_default").trigger('click');
                 }
-                if($(".det_default").is(":checked")){
-                    $(".det_default").trigger('click');
+                if($("#det_default").is(":checked")){
+                    $("#det_default").trigger('click');
                 }
-                if($(".sameday_default").is(":checked")){
-                    $(".sameday_default").trigger('click');
+                if($("#sameday_default").is(":checked")){
+                    $("#sameday_default").trigger('click');
+                }
+                if (this.checked != true) {
+                    $(this).trigger('click');
                 }
             });
 
             $("#det_default").on('change', function(){
-                if($(".on_default").is(":checked")){
-                    $(".on_default").trigger('click');
+                if($("#on_default").is(":checked")){
+                    $("#on_default").trigger('click');
                 }
-                if($(".ol_default").is(":checked")){
-                    $(".ol_default").trigger('click');
+                if($("#ol_default").is(":checked")){
+                    $("#ol_default").trigger('click');
                 }
-                if($(".sameday_default").is(":checked")){
-                    $(".sameday_default").trigger('click');
+                if($("#sameday_default").is(":checked")){
+                    $("#sameday_default").trigger('click');
+                }
+                if (this.checked != true) {
+                    $(this).trigger('click');
                 }
             });
 
             $("#sameday_default").on('change', function(){
-                if($(".on_default").is(":checked")){
-                    $(".on_default").trigger('click');
+                if($("#on_default").is(":checked")){
+                    $("#on_default").trigger('click');
                 }
-                if($(".ol_default").is(":checked")){
-                    $(".ol_default").trigger('click');
+                if($("#ol_default").is(":checked")){
+                    $("#ol_default").trigger('click');
                 }
-                if($(".det_default").is(":checked")){
-                    $(".det_default").trigger('click');
+                if($("#det_default").is(":checked")){
+                    $("#det_default").trigger('click');
+                }
+                if (this.checked != true) {
+                    $(this).trigger('click');
                 }
             });
 

@@ -2117,6 +2117,7 @@ class ShipperShipmentBookController extends Controller
 
     public function corporate_shipping_modes(Request $request) {
         $shipper_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1);
+        $user = User::where('id',session('user_id'))->first();
 
         if ($shipper_shipping_modes->exists()) {
             $shipper_shipping_modes = $shipper_shipping_modes->pluck('shipping_mode_id')->toArray();
@@ -2133,7 +2134,7 @@ class ShipperShipmentBookController extends Controller
                 if (!empty($city_shipping_modes)) {
                     $shipping_modes = ShippingMode::whereIn('id', $city_shipping_modes)->get();
 
-                    return ['status' => 0, 'success' => 'Shipping Modes Updated', 'shipping_modes' => $shipping_modes];
+                    return ['status' => 0, 'success' => 'Shipping Modes Updated', 'shipping_modes' => $shipping_modes, 'default_shipping_mode' => $user['default_shipping_mode']];
                 }
                 else {
                     return ['status' => 1, 'error' => 'No Shipping Modes Enabled for Selected Service Type, Pickup City and Consignee City'];
