@@ -335,7 +335,6 @@
                                     <div class="col">
                                         <div class="form-group text-center">
                                             <button type="submit" name="book" id="sub_book" class="btn btn-primary" value="Book">Book</button>
-                                            <input type="hidden" name="" id="book_input_print">
                                             <button type="submit" name="book_and_print" id="sub_book_print" class="btn btn-primary ml-1" value="Book & Print">Book &amp; Print</button>
                                         </div>
                                     </div>
@@ -411,7 +410,7 @@
 
             @if (session('print'))
             $.ajax({
-                url: '{!! route('cod.shipment.book.corporate_invoice') !!}',
+                url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
                 method: 'POST',
                 data: {
                     '_token': '{{ csrf_token() }}',
@@ -1061,12 +1060,6 @@
                 placeholder: 'Mode of Payment*'
             }).bind('change', function() {
                 $(this).valid();
-            });
-
-            $('button[type=submit]').on('click', function () {
-                var name = $(this).attr('name');
-                $('#book_input_print').attr('name', name);
-                $('#book_input_print').val('Book & Print');
             });
 
             var check = @json($check);
