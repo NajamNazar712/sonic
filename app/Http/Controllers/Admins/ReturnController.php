@@ -949,16 +949,7 @@ class ReturnController extends Controller
 
                         $shipment = $shipment->first();
 
-                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) { //attempt failed and arrived at origin center
-
-                            ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
-                            $shipment->shipper_status_id = 23;
-                            $shipment->consignee_status_id = 23;
-                            $shipment->save();
-                            ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
-
-
-                        } else if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
+                        if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
 
                             ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
                             $shipment->shipper_status_id = 28;
@@ -976,6 +967,12 @@ class ReturnController extends Controller
                             ShipmentsJourneyController::add($shipment->id, 34, 34, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
 
 
+                        }else{
+                            ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
+                            $shipment->shipper_status_id = 23;
+                            $shipment->consignee_status_id = 23;
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
                         }
 
 
