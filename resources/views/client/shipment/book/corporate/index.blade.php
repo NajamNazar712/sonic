@@ -89,7 +89,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col col_6">
+                                    <div id="consignee_header_div" class="col col_6">
                                         <h4 id="consignee_header_info" class="form-section mb-2 text-center">Consignee Information</h4>
                                         <label for="consignee_info">Search By Phone No.</label>
                                         <div class="form-group">
@@ -133,7 +133,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col col_6">
+                                    <div id="order_information_header_div" class="col col_6">
                                         <h4 id="order_header_info" class="form-section mb-2 text-center">Order Information</h4>
 
                                         <div class="form-group">
@@ -283,7 +283,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col col_6">
+                                    <div id="shipping_header_div" class="col col_6">
                                         <h4 id="shipping_header_info" class="form-section mb-2 text-center">Shipping Information</h4>
 
                                         <div class="form-group input-group mb-0">
@@ -608,8 +608,12 @@
                     $('#select_service_type form #service_type-error').addClass('d-none');
 
                     if (service_type == 1) {
-                        $('#shipping_custom').addClass('col col_custom');
-                        $('#shipping_custom').removeClass('col col_6');
+                        $('#shipping_header_div').addClass('col col_custom');
+                        $('#order_information_header_div').addClass('col col_custom_middle');
+                        $('#consignee_header_div').addClass('col col_custom');
+                        $('#shipping_header_div').removeClass('col col_6');
+                        $('#order_information_header_div').removeClass('col col_6');
+                        $('#consignee_header_div').removeClass('col col_6');
                         $('#regular').removeClass('d-none');
                         $('#payment_info').removeClass('d-none');
                         $('#charges_mode_div').removeClass('d-none');
@@ -623,8 +627,12 @@
                         $('#consignee_header_info').html('Consignee Information');
                     }
                     else if (service_type == 2) {
-                        $('#shipping_custom').addClass('col col_custom');
-                        $('#shipping_custom').removeClass('col col_6');
+                        $('#shipping_header_div').addClass('col col_custom');
+                        $('#order_information_header_div').addClass('col col_custom_middle');
+                        $('#consignee_header_div').addClass('col col_custom');
+                        $('#shipping_header_div').removeClass('col col_6');
+                        $('#order_information_header_div').removeClass('col col_6');
+                        $('#consignee_header_div').removeClass('col col_6');
                         $('#regular').removeClass('d-none');
                         $('#payment_info').removeClass('d-none');
                         $('#charges_mode_div').removeClass('d-none');
@@ -638,8 +646,12 @@
                         $('#consignee_header_info').html('Consignee Information');
                     }
                     else if (service_type == 3) {
-                        $('#shipping_custom').addClass('col col_custom');
-                        $('#shipping_custom').removeClass('col col_6');
+                        $('#shipping_header_div').addClass('col col_custom');
+                        $('#order_information_header_div').addClass('col col_custom_middle');
+                        $('#consignee_header_div').addClass('col col_custom');
+                        $('#shipping_header_div').removeClass('col col_6');
+                        $('#order_information_header_div').removeClass('col col_6');
+                        $('#consignee_header_div').removeClass('col col_6');
                         $('#regular').addClass('d-none');
                         $('#replacement').addClass('d-none');
                         $('#payment_info').removeClass('d-none');
@@ -653,6 +665,12 @@
                         $('#consignee_header_info').html('Consignee Information');
                     }
                     else if (service_type == 5) {
+                        $('#shipping_header_div').removeClass('col col_custom');
+                        $('#order_information_header_div').removeClass('col col_custom_middle');
+                        $('#consignee_header_div').removeClass('col col_custom');
+                        $('#shipping_header_div').addClass('col col_6');
+                        $('#order_information_header_div').addClass('col col_6');
+                        $('#consignee_header_div').addClass('col col_6');
                         $('#regular').removeClass('d-none');
                         $('#replacement').addClass('d-none');
                         $('#try_and_buy').addClass('d-none');
