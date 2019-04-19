@@ -414,7 +414,7 @@
                 method: 'POST',
                 data: {
                     '_token': '{{ csrf_token() }}',
-                    'ids': '{{ session('print') }}',
+                    'ids[]': '{{ session('print') }}',
                     'twice': true
                 }
             })
