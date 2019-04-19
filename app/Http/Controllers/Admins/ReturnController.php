@@ -586,6 +586,10 @@ class ReturnController extends Controller
                     return " - ";
                 }
             })
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = '<input class="form-control form-control-sm" placeholder="Remarks here.." value="'.$shipments->remarks.'" />';
+                return $remark;
+            })
             ->filterColumn('status',function ($query,$keyword){
 
                 if ($keyword != '') {
@@ -944,17 +948,14 @@ class ReturnController extends Controller
                         $shipment = Shipment::where('id', $tracking);
 
                         $shipment = $shipment->first();
-
-                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) { //attempt failed and arrived at origin center
-
+                        if(in_array($shipment->booking_type_id, [1,4,5])){
                             ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
                             $shipment->shipper_status_id = 23;
                             $shipment->consignee_status_id = 23;
                             $shipment->save();
                             ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
-
-
-                        } else if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
+                        }else
+                        if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
 
                             ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
                             $shipment->shipper_status_id = 28;
@@ -972,6 +973,12 @@ class ReturnController extends Controller
                             ShipmentsJourneyController::add($shipment->id, 34, 34, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
 
 
+                        }else{
+                            ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
+                            $shipment->shipper_status_id = 23;
+                            $shipment->consignee_status_id = 23;
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
                         }
 
 
@@ -1191,7 +1198,7 @@ class ReturnController extends Controller
                 if(in_array($deliveries->shipper_status_id,$delivered_array)){
                     return $deliveries->current_status_name;
                 }else{
-                    if($deliveries->booking_type_id == 1 || $deliveries->booking_type_id == 4){
+                    if(in_array($deliveries->booking_type_id,[1,4,5])){
                         $where = array(24,47,48);
                     }else if($deliveries->booking_type_id == 2){
                         $where = array(29,47,48);
@@ -1323,7 +1330,7 @@ class ReturnController extends Controller
         if(!empty($request->shipment_ids)){
             foreach ($request->shipment_ids as $shipment){
                 $parcel = Shipment::where('id',$shipment)->first();
-                if($parcel->booking_type_id == 1 || $parcel->booking_type_id == 4){
+                if($parcel->booking_type_id == 1 || $parcel->booking_type_id == 4 || $parcel->booking_type_id == 5){
                     ShipmentsJourneyController::add($shipment, 25, 25, NULL, NULL, NULL, Auth::id(),$request->return_note_id,NULL,1,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment]:null));
 
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
@@ -1341,6 +1348,11 @@ class ReturnController extends Controller
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>38,'consignee_status_id'=>38]);
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
 
+                }else{
+                    ShipmentsJourneyController::add($shipment, 25, 25, NULL, NULL, NULL, Auth::id(),$request->return_note_id,NULL,1,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment]:null));
+
+                    Shipment::where('id',$shipment)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
+                    ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
                 }
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
@@ -1567,7 +1579,7 @@ class ReturnController extends Controller
             }
 
 
-            ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
+            ShipmentsJourneyController::add($request->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
 
             AdminFinanceController::return_confirmed_revert($request->id);
 

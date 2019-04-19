@@ -2,6 +2,9 @@
      data-scroll-to-active="true">
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
+            <li class=" nav-item"><a href="{{route('admin.dashboard.index')}}"><span class="menu-title"
+                                                                                  data-i18n="nav.dash.main">Dashboard</span></a>
+            </li>
             <li class=" nav-item"><a href="{{route('admin.orders.index')}}"><span class="menu-title"
                                                                                   data-i18n="nav.dash.main">Order Management</span></a>
             </li>
@@ -74,7 +77,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([25, 26, 27], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([25, 26, 27, 124, 198], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title">Cargo</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(25, session('permissions')))
@@ -86,16 +89,18 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(26, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.cargo.draft.index') }}">Draft</a>
+                                <li><a class="menu-item" href="{{ route('admin.cargo.draft.index') }}">Draft</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(27, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.cargo.in_transit.index') }}">In Transit</a>
+                                <li><a class="menu-item" href="{{ route('admin.cargo.in_transit.index') }}">In Transit</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(124, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.cargo.history.index') }}">History</a>
-                                @endif
-                            </li>
+                            <li><a class="menu-item" href="{{ route('admin.cargo.history.index') }}">History</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(198, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.cargo.mapping.index') }}">Mapping</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -424,6 +429,9 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(177, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.revenue.index') }}">Revenue</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(199, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.gst.index') }}">GST</a></li>
                         @endif
                     </ul>
                 </li>

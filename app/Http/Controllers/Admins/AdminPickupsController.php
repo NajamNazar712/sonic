@@ -255,7 +255,7 @@ class AdminPickupsController extends Controller
           $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
           ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
           ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
-          ->select('pickup_requests.id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
+          ->select('pickup_requests.id','pickup_requests.id as pickup_request_id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
           ->where('pickup_requests.status', 0);
 
           if (session('role_id') != 1) {
@@ -267,6 +267,10 @@ class AdminPickupsController extends Controller
             }
         }
       $datatables = Datatables::of($pickup_requests)
+          ->editColumn('pickup_request_id', function ($pickup_requests) {
+              return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
+          })
+
       ->editColumn('total_estimated_weight', '{{ floatval($total_estimated_weight) }}')
       ->editColumn('pickup_type', function($pickup_request) {
         return ($pickup_request->pickup_type == 0) ? 'Light' : 'Heavy';
@@ -1257,7 +1261,7 @@ class AdminPickupsController extends Controller
           ShipmentChargesController::insurance($shipment_id);
           ShipmentChargesController::fuel_surcharge($shipment_id);
 
-          if ($shipment->user->account_type_id == 2 && $shipment->charges_mode_id == 2) {
+          if ($shipment->charges_mode_id == 2) {
             $shipment = Shipment::find($shipment_id);
 
             $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;

@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\CorporateRateStatus;
+
+use App\Http\Models\Admin\NonServiceArea;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
 use Validator;
 use Illuminate\Validation\Rule;
@@ -23,6 +23,8 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ZoneClassCity;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\CorporateRateStatus;
 
 use Carbon\Carbon;
 
@@ -77,7 +79,14 @@ class APIController extends Controller
       'type' => 'Type',
 
       'origin_city_id' => 'Origin City ID',
-      'destination_city_id' => 'Destination City ID'
+      'destination_city_id' => 'Destination City ID',
+
+      'tracking_numbers' => 'Tracking Numbers',
+      'tracking_numbers.*' => 'Tracking Number',
+
+      'receiving_sheet_id' => 'Receiving Sheet ID',
+
+      'charges_mode_id' => 'Charges Mode ID'
     ];
 
     private $messages = [
@@ -96,7 +105,9 @@ class APIController extends Controller
       'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
       'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
-      'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
+      'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+
+      'distinct' => ':attribute must not be Repeated.'
     ];
 
     public function pickup_addresses(Request $request) {
@@ -205,7 +216,9 @@ class APIController extends Controller
       $user_type = User::where('id',$user_id)->first();
       if($user_type['account_type_id'] == 1) {
         $rules = [
-            'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
+            'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
+                $query->whereNotIn('id', [3, 4, 5]);
+            })],
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id)->where('hidden', 0);
             })],
@@ -216,9 +229,7 @@ class APIController extends Controller
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'filled', 'email'],
-            'order_id' => ['nullable', 'filled', Rule::unique('shipments')->where(function ($query) use ($user_id) {
-                $query->where('user_id', $user_id);
-            })],
+            'order_id' => ['nullable', 'filled'],
             'package_type' => ['required_if:service_type_id,3', 'boolean'],
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
             'special_instructions' => ['nullable', 'filled', 'between:0,190'],
@@ -230,6 +241,9 @@ class APIController extends Controller
             'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->whereNotIn('id', [2, 3]);
+            })],
+            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+                $query->whereIn('id', [2, 4]);
             })],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
@@ -252,12 +266,13 @@ class APIController extends Controller
       }
       else {
         $rules = [
-            'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
+            'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
+                $query->whereNotIn('id', [3, 4, 5]);
+            })],
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id)->where('hidden', 0);
             })],
             'delivery_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'],
-            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:charges_modes,id'],
             'information_display' => ['required', 'boolean'],
             'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
             'consignee_name' => ['required', 'between:1,100'],
@@ -265,9 +280,7 @@ class APIController extends Controller
             'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'filled', 'email'],
-            'order_id' => ['nullable', 'filled', Rule::unique('shipments')->where(function($query) use($user_id) {
-                $query->where('user_id', $user_id);
-            })],
+            'order_id' => ['nullable', 'filled'],
             'package_type' => ['required_if:service_type_id,3', 'boolean'],
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
             'special_instructions' => ['nullable', 'filled', 'between:0,190'],
@@ -279,6 +292,9 @@ class APIController extends Controller
             'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
+            })],
+            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+                $query->whereIn('id', [2, 3]);
             })],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
@@ -390,6 +406,7 @@ class APIController extends Controller
         }
         else{
             $consignee_address = $request->input('consignee_address');
+            $charges_mode_id = $request->input('charges_mode_id');
         }
 
         $consignee_name = $request->input('consignee_name');
@@ -445,7 +462,7 @@ class APIController extends Controller
         $amount = $request->input('amount');
         $payment_mode_id = $request->input('payment_mode_id');
           if($user_type['account_type_id'] == 1) {
-              $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id);
+              $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id);
           }
           else {
               $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id);
@@ -546,9 +563,32 @@ class APIController extends Controller
           }
         }
 
-        NotificationsController::send(2, $shipment_id);
+          $check = NonServiceArea::pluck('name')->toArray();
+          $msg_string = null;
+          $str_arr = null;
+          $str_arr = preg_split("/[ ,]+/", $consignee_address);
+          foreach ($check as $nsa) {
+              foreach ($str_arr as $arr_value) {
+                  if (strtolower($nsa) == strtolower($arr_value)) {
+                      $con_nsa = $arr_value;
+                      if ($msg_string != null) {
+                          $msg_string = $msg_string . ', ' . $arr_value;
+                      } else {
+                          $msg_string = $arr_value;
+                      }
+                  }
+              }
+          }
 
-        return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
+          if ($msg_string != null) {
+              NotificationsController::send(32, $shipment_id, $msg_string);
+              $msg_string = $msg_string . " Detected!";
+              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => 'Possible NSA ' . $msg_string . ' In case of, Out of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
+          }
+          else{
+              NotificationsController::send(2, $shipment_id);
+              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
+          }
       }
     }
 
@@ -1032,6 +1072,68 @@ class APIController extends Controller
         else {
           return response()->json(['status' => 1, 'message' => 'Shipment\'s Status has already been changed']);
         }
+      }
+    }
+
+    public function receiving_sheet_create(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'tracking_numbers' => ['required', 'array', 'min:1'],
+        'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })]
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $tracking_numbers = $request->tracking_numbers;
+
+        $shipment_ids = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
+
+        $recieving_sheet = ShipperReceivingSheetController::create($shipment_ids, $user_id);
+
+        if ($recieving_sheet['status'] == 0) {
+          return response()->json(['status' => 0, 'message' => $recieving_sheet['success'], 'receiving_sheet_id' => $recieving_sheet['receiving_sheet_id']]);
+        }
+        else {
+          return response()->json(['status' => 1, 'message' => $recieving_sheet['error']]);
+        }
+      }
+    }
+
+    public function receiving_sheet_view(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'receiving_sheet_id' => ['required', 'integer', Rule::exists('receiving_sheets', 'id')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })]
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $receiving_sheet_id = $request->receiving_sheet_id;
+
+        $receiving_sheet = ShipperReceivingSheetController::view($receiving_sheet_id, 4);
+
+        $image = SnappyImage::loadHTML($receiving_sheet);
+
+        $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
+
+        return $image->download($filename);
       }
     }
 

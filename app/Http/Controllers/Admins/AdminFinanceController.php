@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\ChangeShipmentAmountLog;
+use App\Http\Models\Admin\ChangeShipmentWeightLog;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsPaymentJourney;
@@ -1036,6 +1038,23 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($request->id);
 
+            $shipper_payable = 0;
+            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+            if ($pending_payment->exists()) {
+                $pending_payment = $pending_payment->first();
+
+                $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                if ($pending_payment_shipments->exists()) {
+                    $pending_payment_shipments = $pending_payment_shipments->get();
+                    foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                        $shipper_payable += $pending_payment_shipment->payable;
+                    }
+                }
+            }
+            if ($shipper_payable < 0) {
+                return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+            }
+
             $delivery_note_shipment->status = 8;
 
             $delivery_note_shipment->save();
@@ -1248,6 +1267,14 @@ class AdminFinanceController extends Controller
 
         $shipment = Shipment::find($shipment_id);
 
+        $change_shipment_amount = new ChangeShipmentAmountLog();
+
+        $change_shipment_amount->shipment_id = $shipment->id;
+        $change_shipment_amount->old_amount = $shipment->amount;
+        $change_shipment_amount->new_amount = $amount;
+        $change_shipment_amount->admin_id = Auth::id();
+        $change_shipment_amount->save();
+
         $shipment->amount = $amount;
 
         $shipment->save();
@@ -1344,7 +1371,16 @@ class AdminFinanceController extends Controller
         $weight = $request->input('weight');
 
         $shipment = Shipment::find($shipment_id);
+        if($shipment->actual_weight == null){
+            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
+        }
+        $change_shipment_weight = new ChangeShipmentWeightLog();
 
+        $change_shipment_weight->shipment_id = $shipment->id;
+        $change_shipment_weight->old_weight = $shipment->actual_weight;
+        $change_shipment_weight->new_weight = $weight;
+        $change_shipment_weight->admin_id = Auth::id();
+        $change_shipment_weight->save();
         $shipment->actual_weight = $weight;
 
         $shipment->save();

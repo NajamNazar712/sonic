@@ -2526,6 +2526,33 @@ class NotificationsController extends Controller
 
             self::email($subject, $body, $to, $cc);
           }
+          else if ($id == 32) {
+              $nsa_shipment = Shipment::find($reference_1_id);
+
+              if (strpos($subject, '[nsa]') !== FALSE) {
+                  $subject = str_replace('[nsa]', $reference_2_id, $subject);
+              }
+
+              if (strpos($body, '[nsa]') !== FALSE) {
+                  $body = str_replace('[nsa]', $reference_2_id, $body);
+              }
+
+              if (strpos($subject, '[tracking_number]') !== FALSE) {
+                  $subject = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $subject);
+              }
+
+              if (strpos($body, '[tracking_number]') !== FALSE) {
+                  $body = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $body);
+              }
+
+              if(ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->exists()){
+                  $to = ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->pluck('email')->toArray();
+              }else{
+                  $to = $nsa_shipment->user->email;
+              }
+
+              self::email($subject, $body, $to);
+          }
         }
       }
     }

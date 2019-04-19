@@ -51,13 +51,15 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('index', 'Shippers\ShipperShipmentBookController@corporate_index')->name('corporate.index');
             Route::post('corporate_store', 'Shippers\ShipperShipmentBookController@corporate_store')->name('corporate.store');
-            Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
+//            Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
             Route::post('shipping_modes', 'Shippers\ShipperShipmentBookController@shipping_modes')->name('shipping_modes');
             Route::post('corporate_shipping_modes', 'Shippers\ShipperShipmentBookController@corporate_shipping_modes')->name('corporate_shipping_modes');
             Route::post('corporate_min_chargeable_weight', 'Shippers\ShipperShipmentBookController@corporate_min_chargeable_weight')->name('corporate_min_chargeable_weight');
             Route::post('print_air_waybill', 'Shippers\ShipperShipmentBookController@print_air_waybill')->name('print_air_waybill');
             Route::post('corporate_invoice', 'Shippers\ShipperShipmentBookController@corporate_invoice')->name('corporate_invoice');
             Route::post('check', 'Shippers\ShipperShipmentBookController@check')->name('check');
+            Route::get('get_consignee_infos', 'Shippers\ShipperShipmentBookController@get_consignee_infos')->name('get_consignee_infos');
+            Route::post('get_consignee_info', 'Shippers\ShipperShipmentBookController@get_consignee_info')->name('get_consignee_info');
 
             Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
 
@@ -196,6 +198,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('edit/emails','Shippers\ShipperDashboardController@edit_notification_emails')->name('edit.emails');
     Route::post('add/emails','Shippers\ShipperDashboardController@add_notification_emails')->name('add.emails');
 
+    Route::prefix('resources')->name('resources.')->group(function (){
+        Route::get('','Shippers\ShipperResourcesController@index')->name('index');
+        Route::get('city_list','Shippers\ShipperResourcesController@get_network_list')->name('city_list');
+    });
+
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
         Route::get('','Shippers\ShipperShipmentCancelController@index')->name('index');
         Route::get('list', 'Shippers\ShipperShipmentCancelController@list')->name('list');
@@ -219,14 +226,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
 
-    Route::get('dashboard', 'Admins\AdminDashboardController@index')->name('dashboard');
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('', 'Admins\AdminDashboardController@index')->name('index');
+        Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
+    });
+
 
     Route::prefix('orders')->name('orders.')->group(function () {
-        Route::get('dashboard', 'Admins\AdminDashboardController@index')->name('index');
-        Route::get('list', 'Admins\AdminDashboardController@orders_list')->name('list');
-        Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
-        Route::post('shipment_charges','Admins\AdminDashboardController@get_shipment_charges')->name('charges');
-        Route::post('shipper_recall','Admins\AdminDashboardController@shipper_recall')->name('shipper_recall');
+        Route::get('', 'Admins\OrderManagementController@index')->name('index');
+        Route::get('list', 'Admins\OrderManagementController@orders_list')->name('list');
+        Route::post('shipment_charges','Admins\OrderManagementController@get_shipment_charges')->name('charges');
+        Route::post('shipper_recall','Admins\OrderManagementController@shipper_recall')->name('shipper_recall');
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
@@ -603,6 +613,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('mapping')->name('mapping.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@mapping_index')->name('index');
+            Route::get('list', 'Admins\AdminCargoController@mapping_list')->name('list');
+            Route::post('store', 'Admins\AdminCargoController@mapping_store')->name('store');
+            Route::post('edit', 'Admins\AdminCargoController@mapping_edit')->name('edit');
+            Route::post('update', 'Admins\AdminCargoController@mapping_edit_update')->name('update');
+//            Route::post('print', 'Admins\AdminCargoController@history_cargo_print')->name('print');
+        });
+
     });
     Route::prefix('dispute')->name('dispute.')->group(function (){
         Route::get('','Admins\DisputeController@dispute_index')->name('index');
@@ -921,7 +940,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 		Route::prefix('revenue')->name('revenue.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@revenue_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@revenue_list')->name('list');
-
+        });
+		Route::prefix('gst')->name('gst.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@gst_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@gst_list')->name('list');
         });
     });
 
@@ -1024,7 +1046,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@index')->name('walk_in');
-            Route::get('order_id', 'Admins\AdminWalkInBookShipmentController@order_id')->name('order_id');
+//            Route::get('order_id', 'Admins\AdminWalkInBookShipmentController@order_id')->name('order_id');
             Route::post('store', 'Admins\AdminWalkInBookShipmentController@walk_in_store')->name('store');
             Route::post('add_fuel_surcharge_gst_total', 'Admins\AdminWalkInBookShipmentController@add_fuel_surcharge_gst_total')->name('add_fuel_surcharge_gst_total');
             Route::post('print_air_waybill', 'Admins\AdminWalkInBookShipmentController@print_air_waybill')->name('print_air_waybill');

@@ -381,7 +381,6 @@
             var id = parseInt($(this).parents('tr').attr('id'));
             $('#undelivered_shipments_modal .modal-body').html('');
             $('#undelivered_shipments_modal').modal('show');
-            console.log(id);
             $.ajax({
                 url: '{!! route('admin.reports.fake_status.shipments.undelivered') !!}',
                 method: 'POST',

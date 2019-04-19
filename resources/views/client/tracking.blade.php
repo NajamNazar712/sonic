@@ -184,6 +184,15 @@
                                 shipment += '<td>' + details.shipper.origin + '</td>';
                                 shipment += '</tr>';
                                 shipment += '<tr>';
+                                shipment += '<td><strong>Email</strong></td>';
+                                if (details.shipper.email) {
+                                    shipment += '<td colspan="3">' + details.shipper.email + '</td>';
+                                }
+                                else{
+                                    shipment += '<td colspan="3"></td>'
+                                }
+                                shipment += '</tr>';
+                                shipment += '<tr>';
                                 shipment += '<td><strong>Address</strong></td>';
                                 shipment += '<td colspan="3">' + details.shipper.address + '</td>';
                                 shipment += '</tr>';
@@ -214,6 +223,14 @@
                                 }
 
                                 shipment += '<td colspan="2"></td>';
+                                shipment += '</tr>';
+                                shipment += '<td><strong>Email</strong></td>';
+                                if (details.consignee.email) {
+                                    shipment += '<td colspan="3">' + details.consignee.email + '</td>';
+                                }
+                                else{
+                                    shipment += '<td colspan="3"></td>'
+                                }
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Address</strong></td>';
@@ -255,7 +272,7 @@
                                 shipment += '<td>' + ((details.order_information.order_id) ? details.order_information.order_id : '-') + '</td>';
                                 shipment += '<td><strong>Instructions</strong></td>';
 
-                                if (details.order_information.account_type_id == 2 || details.order_information.booking_type_id == 4) {
+                                if (details.order_information.charges_mode_id) {
                                     shipment += '<td>' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
                                     shipment += '<td><strong>Charges Mode</strong></td>';
                                     shipment += '<td>' + details.order_information.charges_mode + '</td>';
@@ -281,7 +298,6 @@
                                 shipment += '<th><strong>Date / Time</strong></th>';
                                 shipment += '<th><strong>Status</strong></th>';
                                 shipment += '<th><strong>Reason</strong></th>';
-                                shipment += '<th><strong>City</strong></th>';
                                 shipment += '<th><strong>Received/Refused By</strong></th>';
                                 shipment += '</tr>';
                                 shipment += '</thead>';
@@ -292,7 +308,6 @@
                                     shipment += '<td>' + history.date_time + '</td>';
                                     shipment += '<td>' + history.status + '</td>';
                                     shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
-                                    shipment += '<td>' + history.city + '</td>';
                                     shipment += '<td>' + history.received_or_refused_by + '</td>';
                                     shipment += '</tr>';
                                 });
