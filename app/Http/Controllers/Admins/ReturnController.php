@@ -948,7 +948,13 @@ class ReturnController extends Controller
                         $shipment = Shipment::where('id', $tracking);
 
                         $shipment = $shipment->first();
-
+                        if(in_array($shipment->booking_type_id, [1,4,5])){
+                            ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
+                            $shipment->shipper_status_id = 23;
+                            $shipment->consignee_status_id = 23;
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
+                        }else
                         if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
 
                             ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
@@ -1342,6 +1348,11 @@ class ReturnController extends Controller
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>38,'consignee_status_id'=>38]);
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
 
+                }else{
+                    ShipmentsJourneyController::add($shipment, 25, 25, NULL, NULL, NULL, Auth::id(),$request->return_note_id,NULL,1,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment]:null));
+
+                    Shipment::where('id',$shipment)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
+                    ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
                 }
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
