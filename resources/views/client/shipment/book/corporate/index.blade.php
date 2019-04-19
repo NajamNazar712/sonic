@@ -1073,6 +1073,9 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
+                    var pressed_button = $(this.submitButton);
+
+                    $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
 
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
                     var consignee_address = $('#consignee_address').val();
