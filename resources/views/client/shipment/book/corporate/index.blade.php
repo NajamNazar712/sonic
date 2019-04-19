@@ -318,7 +318,7 @@
                                                 <span class="input-group-text">Rs</span>
                                             </div>
 
-                                            <input type="text" name="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
+                                            <input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
                                         </div>
 
                                         <div class="form-group">
@@ -957,7 +957,7 @@
                 }
             });
 
-            $('#amount, #consignee_city').change(function(){
+            $('#amount, #consignee_city, #pickup_address').change(function(){
                 $('#span').remove();
                 if ($('#pickup_address').val() == 0) {
                     var pickup_city_id = $('#new_pickup_city').val();
