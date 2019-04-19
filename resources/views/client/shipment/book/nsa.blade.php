@@ -33,7 +33,6 @@
                                             <th>Item Product Type ID</th>
                                             <th>Item Description</th>
                                             <th>Item Quantity</th>
-                                            <th>Item Price</th>
                                             <th>Replacement Item Product Type ID</th>
                                             <th>Replacement Item Description</th>
                                             <th>Replacement Item Quantity</th>

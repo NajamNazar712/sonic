@@ -994,7 +994,7 @@
 				}
 			});
 
-			$('#amount, #consignee_city').change(function(){
+			$('#amount, #consignee_city, #pickup_address').change(function(){
 				$('#span').remove();
 				if ($('#pickup_address').val() == 0) {
 					var pickup_city_id = $('#new_pickup_city').val();

@@ -33,7 +33,6 @@
                                             <th>Item Product Type ID</th>
                                             <th>Item Description</th>
                                             <th>Item Quantity</th>
-                                            <th>Item Price</th>
                                             <th>Replacement Item Product Type ID</th>
                                             <th>Replacement Item Description</th>
                                             <th>Replacement Item Quantity</th>
@@ -67,7 +66,7 @@
                                                     <td><input type="text" name="form[{{$no}}][item_description]" class="form-control text" value="{{$ro['item_description']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][item_quantity]" class="form-control number" value="{{$ro['item_quantity']}}" readonly="readonly"></td>
                                                     <input type="hidden" name="form[{{$no}}][item_insurance]" value="{{$ro['item_insurance']}}">
-                                                    <td><input type="text" name="form[{{$no}}][item_price]" class="form-control text" value="{{$ro['item_price']}}" readonly="readonly"></td>
+                                                    <input type="hidden" name="form[{{$no}}][item_price]" value="{{$ro['item_price']}}">
                                                     <td><input type="text" name="form[{{$no}}][replacement_item_product_type_id]" class="form-control number" value="{{$ro['replacement_item_product_type_id']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][replacement_item_description]" class="form-control text" value="{{$ro['replacement_item_description']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][replacement_item_quantity]" class="form-control number" value="{{$ro['replacement_item_quantity']}}" readonly="readonly"></td>
