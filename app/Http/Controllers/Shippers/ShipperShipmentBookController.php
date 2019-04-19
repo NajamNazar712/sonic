@@ -1552,7 +1552,6 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
-//        return $request;
 
         if (!empty($request->input('shipping_mode'))) {
                 $user_id = session('user_id');
