@@ -2606,7 +2606,7 @@ class AdminReportsController extends Controller
                 //end
                 $shipper_row = array();
                 $shipper_row['shipper_serial'] = $serial_number_shippers;
-                $shipper_row['name'] = $shipper->name . ' (' . $shipper->id . ')';
+                $shipper_row['name'] = $shipper->name . ' (' . str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . ')';
                 $shipper_row['shipper_booked'] = number_format($shipper_booked);
                 $shipper_row['shipper_received'] = number_format($shipper_received);
                 $shipper_row['shipper_rev_wo_gst'] = number_format($shipper_rev_wo_gst);
