@@ -161,9 +161,9 @@ class AdminPickupsController extends Controller
               PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request->id)->delete();
             }
 
-            $pickup_note_requests = $pickup_note->pickup_note_requests;
+            $pickup_note_requests = PickupNoteRequest::where('pickup_note_id', $pickup_note->id);
 
-            if ($pickup_note_requests) {
+            if ($pickup_note_requests->exists()) {
               if ($bookings == 0) {
                 $pickup_note->pickups = $pickup_note->pickups - 1;
               }
@@ -172,7 +172,7 @@ class AdminPickupsController extends Controller
 
               $shipment = Shipment::find($shipment_id);
 
-              $weight = $pickup_request->total_estimated_weight - $shipment->estimated_weight;
+              $weight = $pickup_note->total_estimated_weight - $shipment->estimated_weight;
 
               $pickup_note->total_estimated_weight = $weight;
 
@@ -233,6 +233,23 @@ class AdminPickupsController extends Controller
           }
 
           $pickup_request->save();
+
+          $pickup_note = $pickup_request->pickup_note_request->pickup_note;
+
+          $pickup_note->bookings = $pickup_note->bookings - 1;
+
+          $weight = $pickup_note->total_estimated_weight - $shipment->estimated_weight;
+
+          $pickup_note->total_estimated_weight = $weight;
+
+          if ($weight < $defined_pickup_weight) {
+            $pickup_note->pickup_type = 0;
+          }
+          else {
+            $pickup_note->pickup_type = 1;
+          }
+
+          $pickup_note->save();
         }
       }
     }
