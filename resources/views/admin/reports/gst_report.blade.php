@@ -214,6 +214,7 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
+                autoWidth: false,
                 ajax: {
                     url: '{{ route('admin.reports.gst.list') }}',
                     data: function (d) {
