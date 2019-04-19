@@ -358,7 +358,7 @@ class ShipperReceivingSheetController extends Controller
 
                 $shipment = Shipment::find($receiving_sheet_shipment->shipment_id);
 
-                if ($shipment->booking_type_id < 3) {
+                if ($shipment->booking_type_id != 3) {
                     $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_shipments . '</td>
@@ -455,6 +455,20 @@ class ShipperReceivingSheetController extends Controller
                         $first = FALSE;
                     }
                 }
+                else {
+                    $shipment_details .= $shipment_details_row_start;
+
+                    $item = $shipment->items->first();
+
+                    $shipment_details .= '
+                            <td>' . $item->product->product_name . '</td>
+                            <td>' . $item->created_at . '</td>
+                            <td>' . $item->description . '</td>
+                            <td>' . $item->quantity . '</td>
+                    ';
+
+                    $shipment_details .= $shipment_details_row_end;
+                }
 
                 $total_cod += $shipment->amount;
             }
@@ -472,7 +486,20 @@ class ShipperReceivingSheetController extends Controller
                       <table class="table table-sm table-bordered border">
                         <tbody>
                           <tr>
+            ';
+
+            if ($user_type != 4) {
+                $main_details .= '
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                ';
+            }
+            else {
+                $main_details .= '
                             <td class="text-center align-middle"><img src="' . public_path('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                ';
+            }
+
+            $main_details .= '
                             <td class="text-center align-middle color primary"><strong>Receiving Sheet</strong></td>
             ';
 
