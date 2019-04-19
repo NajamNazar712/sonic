@@ -2376,7 +2376,7 @@ class AdminReportsController extends Controller
         }
         $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),number_format($total_actual_weight),number_format((float) $total_avg_actual_weight,2,'.',''),round($total_avg_rev_actual_weight),number_format($total_chargeable_weight),number_format((float) $total_avg_chargeable_weight,2,'.',''),round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection).'%'];
 
-        $details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg. Actual Weight/Parcel','Avg. Revenue On Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
+        $details_shipper['header'] = ['S. No.','Shipper Name (Account No.)', 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg. Actual Weight/Parcel','Avg. Revenue On Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
 
 //        $details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
         $serial_number_shippers = 1;
@@ -2606,7 +2606,7 @@ class AdminReportsController extends Controller
                 //end
                 $shipper_row = array();
                 $shipper_row['shipper_serial'] = $serial_number_shippers;
-                $shipper_row['name'] = $shipper->name;
+                $shipper_row['name'] = $shipper->name . ' (' . $shipper->id . ')';
                 $shipper_row['shipper_booked'] = number_format($shipper_booked);
                 $shipper_row['shipper_received'] = number_format($shipper_received);
                 $shipper_row['shipper_rev_wo_gst'] = number_format($shipper_rev_wo_gst);
