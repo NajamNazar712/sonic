@@ -335,6 +335,7 @@
                                     <div class="col">
                                         <div class="form-group text-center">
                                             <button type="submit" name="book" id="sub_book" class="btn btn-primary" value="Book">Book</button>
+                                            <input type="hidden" name="" id="book_input_print">
                                             <button type="submit" name="book_and_print" id="sub_book_print" class="btn btn-primary ml-1" value="Book & Print">Book &amp; Print</button>
                                         </div>
                                     </div>
@@ -1055,12 +1056,19 @@
                 $(this).valid();
             });
 
-            $('#payment_mode').prepend('<option value="" selected="selected"></option>').select2({
+            $('#payment_mode').select2({
                 width: '100%',
                 placeholder: 'Mode of Payment*'
             }).bind('change', function() {
                 $(this).valid();
             });
+
+            $('button[type=submit]').on('click', function () {
+                var name = $(this).attr('name');
+                $('#book_input_print').attr('name', name);
+                $('#book_input_print').val('Book & Print');
+            });
+
             var check = @json($check);
             $('#booking_form').validate({
                 errorClass: 'danger',
