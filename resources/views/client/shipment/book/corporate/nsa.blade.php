@@ -67,17 +67,19 @@
                                                     <td><input type="text" name="form[{{$no}}][item_description]" class="form-control text" value="{{$ro['item_description']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][item_quantity]" class="form-control number" value="{{$ro['item_quantity']}}" readonly="readonly"></td>
                                                     <input type="hidden" name="form[{{$no}}][item_insurance]" value="{{$ro['item_insurance']}}">
-                                                    <td><input type="text" name="form[{{$no}}]['item_price']" class="form-control text" value="{{$ro['item_price']}}" readonly="readonly"></td>
+                                                    <td><input type="text" name="form[{{$no}}][item_price]" class="form-control text" value="{{$ro['item_price']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][replacement_item_product_type_id]" class="form-control number" value="{{$ro['replacement_item_product_type_id']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][replacement_item_description]" class="form-control text" value="{{$ro['replacement_item_description']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][replacement_item_quantity]" class="form-control number" value="{{$ro['replacement_item_quantity']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][pickup_date]" class="form-control date" value="{{$ro['pickup_date']}}" readonly="readonly"></td>
-                                                    <td><textarea type="text" name="form[{{$no}}][special_instructions]" class="form-control text" value="{{$ro['special_instructions']}}"></textarea></td>
+                                                    <td><textarea type="text" name="form[{{$no}}][special_instructions]" class="form-control text" readonly="readonly">{{$ro['special_instructions']}}</textarea></td>
                                                     <td><input type="text" name="form[{{$no}}][estimated_weight]" class="form-control number" value="{{$ro['estimated_weight']}}" readonly="readonly"></td>
                                                     <input type="hidden" name="form[{{$no}}][shipping_mode_id]" value="{{$ro['shipping_mode_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][same_day_timing_id]" value="{{$ro['same_day_timing_id']}}">
                                                     <td><input type="text" name="form[{{$no}}][amount]" class="form-control text" value="{{$ro['amount']}}" readonly="readonly"></td>
                                                     <input type="hidden" name="form[{{$no}}][payment_mode_id]" value="{{$ro['payment_mode_id']}}">
+                                                    <input type="hidden" name="form[{{$no}}][charges_mode_id]" value="{{$ro['charges_mode_id']}}">
+                                                    <input type="hidden" name="form[{{$no}}][delivery_type_id]" value="{{$ro['delivery_type_id']}}">
                                                 @else
                                                     <input type="hidden" name="form[{{$no}}][service_type_id]" value="{{$ro['service_type_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][pickup_address_id]" value="{{$ro['pickup_address_id']}}">
@@ -104,6 +106,8 @@
                                                     <input type="hidden" name="form[{{$no}}][same_day_timing_id]" value="{{$ro['same_day_timing_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][amount]" value="{{$ro['amount']}}">
                                                     <input type="hidden" name="form[{{$no}}][payment_mode_id]" value="{{$ro['payment_mode_id']}}">
+                                                    <input type="hidden" name="form[{{$no}}][charges_mode_id]" value="{{$ro['charges_mode_id']}}">
+                                                    <input type="hidden" name="form[{{$no}}][delivery_type_id]" value="{{$ro['delivery_type_id']}}">
                                                 @endif
                                             </tr>
                                         @endforeach

@@ -26,8 +26,8 @@
                                 <input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ Session::get('service_type_id') }}">
 
                                 <div class="row">
-                                    <div class="col col_custom">
-                                        <h4 class="form-section mb-2 text-center">Shipper Information</h4>
+                                    <div id="shipping_custom" class="col col_custom">
+                                        <h4 id="shipper_header_info" class="form-section mb-2 text-center">Shipper Information</h4>
 
                                         <div class="form-group">
                                             <p class="border-bottom border-light text-center font-medium-1 text-bold-600">{{ $user->name }}</p>
@@ -83,20 +83,20 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group text-center p-1 border border-light rounded">
+                                        <div id="info_display" class="form-group text-center p-1 border border-light rounded">
                                             <label class="d-block">Show Information on Invoice</label>
                                             <input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
                                         </div>
                                     </div>
 
-                                    <div class="col col_custom">
-                                        <h4 class="form-section mb-2 text-center">Consignee Information</h4>
-                                        <label for="consignee_info">Search Consignee Information</label>
+                                    <div class="col col_6">
+                                        <h4 id="consignee_header_info" class="form-section mb-2 text-center">Consignee Information</h4>
+                                        <label for="consignee_info">Search By Phone No.</label>
                                         <div class="form-group">
                                             <select name="consignee_info" class="select2" id="consignee_info">
                                             </select>
                                         </div>
-                                        <div class="form-group">
+                                        <div id="delivery_type_div" class="form-group">
                                             <select name="delivery_type" class="form-control select2" id="delivery_type" data-rule-required="true" data-msg-required="Delivery Type is required">
                                                 @foreach($delivery_type as $delivery)
                                                     <option value="{{ $delivery->id }}">{{ $delivery->delivery_type }}</option>
@@ -133,8 +133,8 @@
                                         </div>
                                     </div>
 
-                                    <div class="col col_custom_middle">
-                                        <h4 class="form-section mb-2 text-center">Order Information</h4>
+                                    <div class="col col_6">
+                                        <h4 id="order_header_info" class="form-section mb-2 text-center">Order Information</h4>
 
                                         <div class="form-group">
                                             <input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
@@ -283,8 +283,8 @@
                                         </div>
                                     </div>
 
-                                    <div class="col col_custom">
-                                        <h4 class="form-section mb-2 text-center">Shipping Information</h4>
+                                    <div class="col col_6">
+                                        <h4 id="shipping_header_info" class="form-section mb-2 text-center">Shipping Information</h4>
 
                                         <div class="form-group input-group mb-0">
                                             <input type="text" name="estimated_weight" id="estimated_weight" class="form-control weight" placeholder="Estimated Weight*" data-rule-required="true" data-msg-required="Estimated Weight is required">
@@ -301,7 +301,7 @@
                                             </select>
                                         </div>
 
-                                        <div class="form-group">
+                                        <div id="charges_mode_div" class="form-group">
                                             <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
                                                 @foreach($charges_modes as $charges_mode)
                                                     <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
@@ -310,7 +310,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col col_custom">
+                                    <div id="payment_info" class="col col_custom">
                                         <h4 class="form-section mb-2 text-center">Payment Information</h4>
 
                                         <div class="form-group input-group">
@@ -504,9 +504,18 @@
                         .done(function(data) {
                             $('#shipping_mode').html('').select2('destroy');
 
+                            default_shipping_mode = false;
+
                             if (data.status == 0) {
                                 $.each(data.shipping_modes, function (index, shipping_mode) {
-                                    $('#shipping_mode').append('<option value="' + shipping_mode['id'] + '">' + shipping_mode['mode'] + '</option>');
+                                    if(data.default_shipping_mode === shipping_mode['id']) {
+                                        $('#shipping_mode').append('<option value="' + shipping_mode['id'] + '" selected>' + shipping_mode['mode'] + '</option>');
+
+                                        default_shipping_mode = true;
+                                    }
+                                    else{
+                                        $('#shipping_mode').append('<option value="' + shipping_mode['id'] + '">' + shipping_mode['mode'] + '</option>');
+                                    }
                                 });
 
                                 present = true;
@@ -516,22 +525,38 @@
 
                                 present = false;
                             }
+                            if(default_shipping_mode === false) {
+                                $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                                    width: '100%',
+                                    placeholder: 'Mode of Shipping*'
+                                }).bind('change', function () {
+                                    if ($(this).hasClass('danger')) {
+                                        $(this).valid();
+                                    }
 
-                            $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-                                width: '100%',
-                                placeholder: 'Mode of Shipping*'
-                            }).bind('change', function() {
-                                if ($(this).hasClass('danger')) {
-                                    $(this).valid();
-                                }
+                                    if (this.value == 4) {
+                                        $('#shipping_same-day').removeClass('d-none');
+                                    } else {
+                                        $('#shipping_same-day').addClass('d-none');
+                                    }
+                                });
+                            }
+                            else{
+                                $('#shipping_mode').select2({
+                                    width: '100%',
+                                    placeholder: 'Mode of Shipping*'
+                                }).bind('change', function () {
+                                    if ($(this).hasClass('danger')) {
+                                        $(this).valid();
+                                    }
 
-                                if (this.value == 4) {
-                                    $('#shipping_same-day').removeClass('d-none');
-                                }
-                                else {
-                                    $('#shipping_same-day').addClass('d-none');
-                                }
-                            });
+                                    if (this.value == 4) {
+                                        $('#shipping_same-day').removeClass('d-none');
+                                    } else {
+                                        $('#shipping_same-day').addClass('d-none');
+                                    }
+                                });
+                            }
 
                             if (present) {
                                 $('#shipping_mode').prop('disabled', false);
@@ -583,21 +608,63 @@
                     $('#select_service_type form #service_type-error').addClass('d-none');
 
                     if (service_type == 1) {
+                        $('#shipping_custom').addClass('col col_custom');
+                        $('#shipping_custom').removeClass('col col_6');
                         $('#regular').removeClass('d-none');
+                        $('#payment_info').removeClass('d-none');
+                        $('#charges_mode_div').removeClass('d-none');
+                        $('#info_display').removeClass('d-none');
+                        $('#delivery_type_div').removeClass('d-none');
                         $('#replacement').addClass('d-none');
                         $('#try_and_buy').addClass('d-none');
+                        $('#order_header_info').removeClass('mt-2');
+                        $('#shipping_header_info').removeClass('mt-2');
+                        $('#shipper_header_info').html('Shipper Information');
+                        $('#consignee_header_info').html('Consignee Information');
                     }
                     else if (service_type == 2) {
+                        $('#shipping_custom').addClass('col col_custom');
+                        $('#shipping_custom').removeClass('col col_6');
                         $('#regular').removeClass('d-none');
+                        $('#payment_info').removeClass('d-none');
+                        $('#charges_mode_div').removeClass('d-none');
+                        $('#info_display').removeClass('d-none');
                         $('#replacement').removeClass('d-none');
                         $('#try_and_buy').addClass('d-none');
+                        $('#delivery_type_div').removeClass('d-none');
+                        $('#order_header_info').removeClass('mt-2');
+                        $('#shipping_header_info').removeClass('mt-2');
+                        $('#shipper_header_info').html('Shipper Information');
+                        $('#consignee_header_info').html('Consignee Information');
                     }
                     else if (service_type == 3) {
+                        $('#shipping_custom').addClass('col col_custom');
+                        $('#shipping_custom').removeClass('col col_6');
                         $('#regular').addClass('d-none');
                         $('#replacement').addClass('d-none');
+                        $('#payment_info').removeClass('d-none');
+                        $('#charges_mode_div').removeClass('d-none');
+                        $('#info_display').removeClass('d-none');
+                        $('#delivery_type_div').removeClass('d-none');
                         $('#try_and_buy').removeClass('d-none');
+                        $('#order_header_info').removeClass('mt-2');
+                        $('#shipping_header_info').removeClass('mt-2');
+                        $('#shipper_header_info').html('Shipper Information');
+                        $('#consignee_header_info').html('Consignee Information');
                     }
-
+                    else if (service_type == 5) {
+                        $('#regular').removeClass('d-none');
+                        $('#replacement').addClass('d-none');
+                        $('#try_and_buy').addClass('d-none');
+                        $('#order_header_info').addClass('mt-2');
+                        $('#shipping_header_info').addClass('mt-2');
+                        $('#payment_info').addClass('d-none');
+                        $('#charges_mode_div').addClass('d-none');
+                        $('#delivery_type_div').addClass('d-none');
+                        $('#info_display').addClass('d-none');
+                        $('#shipper_header_info').html('Shipper Information<br><h6>(Delivery Address)</h6>');
+                        $('#consignee_header_info').html('Consignee Information<br><h6>(Pickup/Collection Address)</h6>');
+                    }
                     $('#booking_form #selected_service_type').val(service_type);
 
                     $('#selected_service_type_name').html('(' + selected.html() + ')');
@@ -654,9 +721,10 @@
 
                 shipping_mode_same_day(pickup_city, consignee_city);
             });
+
             $("#consignee_info").select2({
                 width:'100%',
-                placeholder: "Search Consignee By Phone",
+                placeholder: "Search Here...",
                 minimumInputLength: 5,
                 ajax: {
                     url: '{{ route('cod.shipment.book.get_consignee_infos') }}',
@@ -1087,19 +1155,33 @@
                         }
                         else {
                             if(present.length > 0){
+                                var html = '<div class="text-left">In case of,<br/>';
+                                html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
+                                html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
+                                html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
+                                content = document.createElement('div');
+                                content.innerHTML = html;
                                 swal({
-                                    title: 'Warning',
-                                    text: 'Potential Non Service Area: ' + present,
+                                    title: present + ' Detected!',
+                                    content: content,
                                     icon: 'info',
-                                    buttons:{
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
                                         confirm: {
-                                            text: 'Ok',
-                                            value: false,
+                                            text: 'Yes',
+                                            value: true,
                                             visible: true,
                                             closeModal: true
-                                        }},
+                                        }
+                                    },
                                     closeOnClickOutside: false,
-                                    closeOnEsc: false
+                                    closeOnEsc: false,
+                                    // dangerMode: true
                                 }).then(function() {
                                     swal({
                                         title: 'Please Wait!',

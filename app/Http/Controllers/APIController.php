@@ -216,7 +216,9 @@ class APIController extends Controller
       $user_type = User::where('id',$user_id)->first();
       if($user_type['account_type_id'] == 1) {
         $rules = [
-            'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
+            'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
+                $query->whereNotIn('id', [3, 4, 5]);
+            })],
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id)->where('hidden', 0);
             })],
@@ -264,7 +266,9 @@ class APIController extends Controller
       }
       else {
         $rules = [
-            'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
+            'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
+                $query->whereNotIn('id', [3, 4, 5]);
+            })],
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id)->where('hidden', 0);
             })],
