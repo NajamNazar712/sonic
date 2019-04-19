@@ -1262,10 +1262,7 @@
             $('.amount').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
-                'allowPlus': false,
-                'groupSeparator': ',',
-                'autoGroup': true,
-                'max': 1000000
+                'allowPlus': false
             });
         });
     </script>
