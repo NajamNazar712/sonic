@@ -313,6 +313,8 @@ class Permission
             'reports.multiple_payment_report.list' => 176,
 			'reports.revenue.index' => 177,
             'reports.revenue.list' => 177,
+            'reports.crm.index' => 200,
+            'reports.crm.list' => 200,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

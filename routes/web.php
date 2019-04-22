@@ -918,6 +918,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminReportsController@revenue_list')->name('list');
 
         });
+		Route::prefix('crm')->name('crm.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@crm_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@crm_list')->name('list');
+
+        });
     });
 
     //Reports end
