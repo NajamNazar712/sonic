@@ -279,7 +279,7 @@ class ShipperShipmentBookController extends Controller
                         }
                         UserShippingInfo::where('user_id', $user_id)->update(['default_address' => 0]);
 
-                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, $default, TRUE);
+                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, $default);
                     }
                     else {
                         if ($service_type_id != 5) {
@@ -1180,7 +1180,7 @@ class ShipperShipmentBookController extends Controller
                 foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
 
-                    if (!(isset($row['charges_mode_id']) && in_array($row['charges_mode_id'], [2, 4]))) {
+                    if (!isset($row['charges_mode_id'])) {
                       $row['charges_mode_id'] = 4;
                     }
 
@@ -2458,7 +2458,7 @@ class ShipperShipmentBookController extends Controller
                 foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
 
-                    if (!(isset($row['charges_mode_id']) && in_array($row['charges_mode_id'], [2, 3]))) {
+                    if (!isset($row['charges_mode_id'])) {
                       $row['charges_mode_id'] = 3;
                     }
 
