@@ -25,6 +25,7 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Request No.</th>
                                     <th class="border-primary border-darken-1">Tracking No.</th>
+                                    <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
@@ -190,6 +191,7 @@
                             head.push('S No.');
                             head.push('Request No.');
                             head.push('Tracking No.');
+                            head.push('Shipment Status');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
                             head.push('Description');
@@ -206,6 +208,7 @@
                                 row.push(index + 1);
                                 row.push(values.id);
                                 row.push(values.tracking_number);
+                                row.push(values.status);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
@@ -390,6 +393,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded', name: 'crm_requests.id', class: 'align-middle request_id'},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'shipment_status', name: 'ss.name', class: 'align-middle shipment_status'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
@@ -420,6 +424,7 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var case_nature = '<select name="case_nature" id="case_nature" class="select2 form-control"></select>';
+                    var shipment_status = '<select name="shipment_status" id="shipment_status" class="select2 form-control"></select>';
                     var status = '<select name="status" id="status" class="select2 form-control"></select>';
                     var channel = '<select name="channel" id="channel" class="select2 form-control"></select>';
                     var case_nature_type = '<select name="case_nature_type" id="case_nature_type" class="select2 form-control"></select>';
@@ -438,6 +443,12 @@
                         }
                         else if ($(header).is('.status')) {
                             $(status).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                        else if ($(header).is('.shipment_status')) {
+                            $(shipment_status).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -552,6 +563,26 @@
                     $('#case_nature_type').prepend('<option value="" selected></option>').select2({
                         data:data3,
                         placeholder: "Select Case Nature Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var data4 = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+
+                    var data4 = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $('#shipment_status').prepend('<option value="" selected></option>').select2({
+                        data:data4,
+                        placeholder: "Select Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

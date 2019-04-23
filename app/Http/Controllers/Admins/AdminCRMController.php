@@ -17,6 +17,7 @@ use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\CRM\CrmRequestTaggingHistory;
 use App\Http\Models\CRM\CrmRequestTaggingTypes;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use Carbon\Carbon;
@@ -107,6 +108,8 @@ class AdminCRMController extends Controller
 
     public function request_details(Request $request,$id){
         $crm_request = CrmRequest::find($id);
+        $shipment_status = Shipment::find($crm_request->shipment_id);
+        $shipment_status = $shipment_status->status_shipper->name;
         $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
             ->select('a.id as id', 'a.name as name')
             ->whereNotIn('admin_roles.department_id', [1,3])->get();
@@ -159,7 +162,7 @@ class AdminCRMController extends Controller
         $crm_status_history = CrmRequestStatusHistory::where('crm_request_id', $id)->get();
         $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -227,11 +230,12 @@ class AdminCRMController extends Controller
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $status = CrmRequestStatus::whereIn('id', [1,5])->select('id', 'name')->get();
+        $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
-        return view('admin.crm.launched_re_open')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'agents' => $agents,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests]);
+        return view('admin.crm.launched_re_open')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'agents' => $agents,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'shipment_status' => $shipment_status]);
     }
 
     public function launched_re_open_list(Request $request){
@@ -244,7 +248,8 @@ class AdminCRMController extends Controller
             ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'ss.name as shipment_status')
             ->whereIn('crm_requests.status_id', [1, 5]);
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
@@ -357,10 +362,11 @@ class AdminCRMController extends Controller
     public function in_process_index(){
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
+        $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $channels = CrmRequestChannel::where('id', '>', 2)->select('id', 'channel')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
-        return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents]);
+        return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status]);
     }
 
     public function in_process_list(Request $request){
@@ -372,6 +378,7 @@ class AdminCRMController extends Controller
             ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
             ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftjoin('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
@@ -381,7 +388,7 @@ class AdminCRMController extends Controller
                 $join->on('spt.user_id', '=', 's.user_id')
                     ->where('spt.status', '=', 0);
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status')
             ->where('crm_requests.status_id', 2);
         if (!in_array(session('role_id'), [1, 4, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $in_process_request = $in_process_request->where(function ($query) {
@@ -509,9 +516,10 @@ class AdminCRMController extends Controller
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $channels = CrmRequestChannel::where('id', '>', 2)->select('id', 'channel')->get();
+        $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
-        return view('admin.crm.resolved')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents]);
+        return view('admin.crm.resolved')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status]);
     }
 
     public function resolved_list(Request $request){
@@ -523,6 +531,7 @@ class AdminCRMController extends Controller
             ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
             ->leftJoin('crm_request_status_histories as inp', function ($join) {
                 $join->on('inp.crm_request_id', '=', 'crm_requests.id')
                     ->where('inp.created_at','=',
@@ -533,7 +542,7 @@ class AdminCRMController extends Controller
                     ->where('res.created_at','=',
                         DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 3)'));
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved', 'ss.name as status')
             ->where('crm_requests.status_id', 3);
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
@@ -635,8 +644,9 @@ class AdminCRMController extends Controller
     public function closed_index(){
         $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
+        $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
-        return view('admin.crm.closed')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels]);
+        return view('admin.crm.closed')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'shipment_status' => $shipment_status]);
     }
 
     public function closed_list(Request $request){
@@ -648,6 +658,7 @@ class AdminCRMController extends Controller
             ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
             ->leftJoin('crm_request_status_histories as inp', function ($join) {
                 $join->on('inp.crm_request_id', '=', 'crm_requests.id')
                     ->where('inp.created_at','=',
@@ -658,7 +669,7 @@ class AdminCRMController extends Controller
                     ->where('res.created_at','=',
                         DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 4)'));
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed', 'ss.name as status')
             ->where('crm_requests.status_id', 4);
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
