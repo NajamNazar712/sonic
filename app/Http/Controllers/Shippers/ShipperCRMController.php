@@ -183,17 +183,35 @@ class ShipperCRMController extends Controller
         $channel_id = 1;
         $description = $request->description;
         $launched_by = 1;
-        if(session('user_type') == 2){
-            $launched_by = 2;
-        }
-        if($channel_id == null){
-            return ['status' => 0, 'error' => 'Channel Not selected!'];
-        }
-        if($description == null){
-            return ['status' => 0, 'error' => 'Description Not Entered!'];
-        }
+        $shipment_ids = $request->shipment_ids;
+        if($shipment_ids != null) {
+            foreach ($shipment_ids as $shipment_id) {
+                if (session('user_type') == 2) {
+                    $launched_by = 2;
+                }
+                if ($channel_id == null) {
+                    return ['status' => 0, 'error' => 'Channel Not selected!'];
+                }
+                if ($description == null) {
+                    return ['status' => 0, 'error' => 'Description Not Entered!'];
+                }
 
-        CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), $launched_by, NULL, session('user_id'), NULL ,$description);
+                CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+            }
+        }
+        else{
+            if (session('user_type') == 2) {
+                $launched_by = 2;
+            }
+            if ($channel_id == null) {
+                return ['status' => 0, 'error' => 'Channel Not selected!'];
+            }
+            if ($description == null) {
+                return ['status' => 0, 'error' => 'Description Not Entered!'];
+            }
+
+            CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), $launched_by, null, session('user_id'), NULL, $description);
+        }
         return ['status' => 1, 'success' => 'Feedback successfully added'];
     }
 
