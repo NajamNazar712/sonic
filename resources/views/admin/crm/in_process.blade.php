@@ -38,7 +38,7 @@
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
                                     <th class="border-primary border-darken-1">Tagged To</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
-                                    <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
+                                    <th class="border-primary border-darken-1">Launched (TAT)</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
