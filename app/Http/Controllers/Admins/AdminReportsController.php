@@ -4171,6 +4171,7 @@ class AdminReportsController extends Controller
 
     public function fake_status_list(request $request){
         $delivery_note = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
             ->select('r.name as rider_name', 'c.name as rider_city', 'delivery_notes.id as delivery_note_id', 'delivery_notes.created_at', 'delivery_notes.status_verified_at as verified_at', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', DB::raw('(select count(shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1) as shipment_fake_status'))
@@ -4211,6 +4212,9 @@ class AdminReportsController extends Controller
         }
         if ($hub = $request->get('hub')) {
             $datatables->where('delivery_notes.hub_id', $hub);
+        }
+        if ($tracking_number = $request->get('search_tracking_no')) {
+            $datatables->where('s.tracking_number', $tracking_number);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
