@@ -24,6 +24,9 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Request No.</th>
                                     <th class="border-primary border-darken-1">Tracking No.</th>
+                                    <th class="border-primary border-darken-1">Shipper Name</th>
+                                    <th class="border-primary border-darken-1">Origin</th>
+                                    <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
@@ -32,6 +35,7 @@
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
+                                    <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
                                     <th class="border-primary border-darken-1">Tagged To</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1"></th>
@@ -90,6 +94,9 @@
                             head.push('S No.');
                             head.push('Request No.');
                             head.push('Tracking No.');
+                            head.push('Shipper Name');
+                            head.push('Origin');
+                            head.push('Destination');
                             head.push('Shipment Status');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
@@ -98,6 +105,7 @@
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
+                            head.push('Tagged (Admin/Department)');
                             head.push('Tagged To');
                             head.push('Launched Date');
                             head.push('In-Process To Resolved (TAT)');
@@ -108,6 +116,9 @@
                                 row.push(index + 1);
                                 row.push(values.id_padded);
                                 row.push(values.tracking_number);
+                                row.push(values.shipper_name);
+                                row.push(values.origin);
+                                row.push(values.destination);
                                 row.push(values.status);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
@@ -116,6 +127,7 @@
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
+                                row.push(values.tagged);
                                 row.push(values.tagged_to);
                                 row.push(values.created_at);
                                 row.push(values.in_process_resolved_tat);
@@ -366,12 +378,15 @@
                 serverSide: true,
                 ajax: '{{ route('admin.crm.in_process.list') }}',
                 rowId: 'id',
-                order: [[12, 'desc']],
+                order: [[17, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded', name: 'crm_requests.id', class: 'align-middle request_id'},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'status', name: 'ss.name', class: 'align-middle shipment_status'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
@@ -380,6 +395,7 @@
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
+                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'tagged_to', name: 'crt.tagged_id', class: 'align-middle tagged_to'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

@@ -248,8 +248,12 @@ class AdminCRMController extends Controller
             ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+            ->leftjoin('user_shipping_infos AS usi', 'usi.id', '=', 's.pickup_address_id')
+            ->leftjoin('users as user', 'user.id', '=', 's.user_id')
+            ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
+            ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'ss.name as shipment_status')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'ss.name as shipment_status', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination')
             ->whereIn('crm_requests.status_id', [1, 5]);
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
@@ -379,6 +383,7 @@ class AdminCRMController extends Controller
             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
+            ->leftjoin('users as user', 'user.id', '=', 's.user_id')
             ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftjoin('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
@@ -388,7 +393,7 @@ class AdminCRMController extends Controller
                 $join->on('spt.user_id', '=', 's.user_id')
                     ->where('spt.status', '=', 0);
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'crt.crm_request_tagging_type_id as tagged_type')
             ->where('crm_requests.status_id', 2);
         if (!in_array(session('role_id'), [1, 4, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $in_process_request = $in_process_request->where(function ($query) {
@@ -416,6 +421,17 @@ class AdminCRMController extends Controller
         $datatables = Datatables::of($in_process_request)
             ->addColumn('id_padded', function ($requests) {
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('tagged', function ($requests) {
+                if($requests->tagged_type == 1){
+                    return 'Department';
+                }
+                else if($requests->tagged_type == 2){
+                    return 'Admin';
+                }
+                else{
+                    return '-';
+                }
             })
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
@@ -532,6 +548,10 @@ class AdminCRMController extends Controller
             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
+            ->leftjoin('user_shipping_infos AS usi', 'usi.id', '=', 's.pickup_address_id')
+            ->leftjoin('users as user', 'user.id', '=', 's.user_id')
+            ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
+            ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftJoin('crm_request_status_histories as inp', function ($join) {
                 $join->on('inp.crm_request_id', '=', 'crm_requests.id')
                     ->where('inp.created_at','=',
@@ -542,7 +562,8 @@ class AdminCRMController extends Controller
                     ->where('res.created_at','=',
                         DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 3)'));
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved', 'ss.name as status')
+            ->leftjoin('admins as ra', 'ra.id', '=', 'res.agent_id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'ra.name as resolved_by')
             ->where('crm_requests.status_id', 3);
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
@@ -659,6 +680,10 @@ class AdminCRMController extends Controller
             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
+            ->leftjoin('user_shipping_infos AS usi', 'usi.id', '=', 's.pickup_address_id')
+            ->leftjoin('users as user', 'user.id', '=', 's.user_id')
+            ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
+            ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftJoin('crm_request_status_histories as inp', function ($join) {
                 $join->on('inp.crm_request_id', '=', 'crm_requests.id')
                     ->where('inp.created_at','=',
@@ -669,7 +694,7 @@ class AdminCRMController extends Controller
                     ->where('res.created_at','=',
                         DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 4)'));
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed', 'ss.name as status')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination')
             ->where('crm_requests.status_id', 4);
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {

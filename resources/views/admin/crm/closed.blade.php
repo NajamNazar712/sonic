@@ -23,6 +23,9 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Request No.</th>
                                     <th class="border-primary border-darken-1">Tracking No.</th>
+                                    <th class="border-primary border-darken-1">Shipper Name</th>
+                                    <th class="border-primary border-darken-1">Origin</th>
+                                    <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
@@ -67,6 +70,9 @@
                             head.push('S No.');
                             head.push('Request No.');
                             head.push('Tracking No.');
+                            head.push('Shipper Name');
+                            head.push('Origin');
+                            head.push('Destination');
                             head.push('Shipment Status');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
@@ -84,6 +90,9 @@
                                 row.push(index + 1);
                                 row.push(values.id_padded);
                                 row.push(values.tracking_number);
+                                row.push(values.shipper_name);
+                                row.push(values.origin);
+                                row.push(values.destination);
                                 row.push(values.status);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
@@ -124,11 +133,14 @@
                 serverSide: true,
                 ajax: '{{ route('admin.crm.closed.list') }}',
                 rowId: 'id',
-                order: [[10, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded', name: 'crm_requests.id', class: 'align-middle request_id'},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'status', name: 'ss.name', class: 'align-middle shipment_status'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
