@@ -195,6 +195,7 @@
                                                                     <div class="chat-body">
                                                                         <div class="chat-content">
                                                                             <p>{{$comment->comment}}</p>
+                                                                            <small>{{$comment->created_at}}</small>
                                                                         </div>
                                                                     </div>
 
@@ -212,6 +213,7 @@
                                                                     <div class="chat-body">
                                                                         <div class="chat-content">
                                                                             <p>{{$comment->comment}}</p>
+                                                                            <small>{{$comment->created_at}}</small>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -227,6 +229,7 @@
                                                                     <div class="chat-body">
                                                                         <div class="chat-content">
                                                                             <p>{{$comment->comment}}</p>
+                                                                            <small>{{$comment->created_at}}</small>
                                                                         </div>
                                                                     </div>
                                                                 </div>
