@@ -1045,6 +1045,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminCRMController@closed_list')->name('list');
         });
         Route::post('assign', 'Admins\AdminCRMController@assign')->name('assign');
+        Route::post('close', 'Admins\AdminCRMController@close')->name('close');
         Route::post('valid', 'Admins\AdminCRMController@valid')->name('valid');
         Route::post('invalid', 'Admins\AdminCRMController@invalid')->name('invalid');
         Route::post('tag', 'Admins\AdminCRMController@admin_tag')->name('tag');

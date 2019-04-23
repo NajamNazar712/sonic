@@ -890,6 +890,29 @@ class AdminCRMController extends Controller
         }
     }
 
+    public function close(Request $request){
+        $crm_requests = $request->crm_request_ids;
+        if($crm_requests){
+            foreach ($crm_requests as $crm_request){
+                CrmRequest::where('id', $crm_request)->update([
+                    'status_id' => 4
+                ]);
+                CrmRequestStatusHistory::create([
+                    'crm_request_id' => $crm_request,
+                    'status_id' => 3,
+                    'agent_id' => Auth::id()
+                ]);
+                CrmRequestStatusHistory::create([
+                    'crm_request_id' => $crm_request,
+                    'status_id' => 4,
+                    'agent_id' => Auth::id()
+                ]);
+            }
+            return ['status' => 0, 'success' => 'Request marked as Closed'];
+        }
+        return ['status' => 1, 'error' => 'Requests does\'nt exists'];
+    }
+
     public function admin_tag(Request $request){
         $crm_request = CrmRequest::where('id', $request->crm_request_id)->first();
         if($request->crm_request_tagging_type_id == 1){

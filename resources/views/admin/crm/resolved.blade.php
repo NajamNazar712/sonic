@@ -193,26 +193,10 @@
                                                             containerId: 'toast-top-center'
                                                         });
                                                     }
-                                                    table.rows().nodes().each(function(index) {
-                                                        var row = table.row(index);
+                                                    selected_rows = [];
 
-                                                        if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                                            row.deselect();
+                                                    table.rows().deselect();
 
-                                                            id = parseInt(row.id());
-
-                                                            var index = $.inArray(id, selected_rows);
-
-                                                            if (index !== -1) {
-                                                                selected_rows.splice(index, 1);
-                                                            }
-
-                                                            if (selected_rows.length == 0) {
-                                                                table.button('.assign').disable();
-                                                            }
-                                                        }
-                                                    });
-                                                    $('#assign_agent').val('').trigger('change');
                                                     table.draw('false');
                                                 });
                                         } else {

@@ -229,6 +229,66 @@
                         }
                     },
                         @endif
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(202, session('permissions')))
+                    {
+                        text: 'Close',
+                        className: 'btn btn-danger close_request',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                                swal({
+                                    text: 'Are you sure, you want to Close these Request(s)?',
+                                    icon: 'info',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                            $.ajax({
+                                                url: '{!! route('admin.crm.close') !!}',
+                                                method: 'POST',
+                                                data: {
+                                                    'crm_request_ids[]': selected_rows,
+                                                    '_token': '{{ csrf_token() }}'
+                                                }
+                                            })
+                                                .done(function (data) {
+                                                    console.log(data.crm_request_ids);
+                                                    if (data.status == 0) {
+                                                        toastr.success(data.success, 'Success!', {
+                                                            positionClass: 'toast-bottom-center',
+                                                            containerId: 'toast-bottom-center'
+                                                        });
+                                                    } else {
+                                                        toastr.error(data.error, 'Error!', {
+                                                            positionClass: 'toast-top-center',
+                                                            containerId: 'toast-top-center'
+                                                        });
+                                                    }
+                                                    selected_rows = [];
+
+                                                    table.rows().deselect();
+
+                                                    table.draw('false');
+                                                });
+                                    }
+                                });
+                        }
+                    },
+                    @endif
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -251,6 +311,7 @@
                                     }
 
                                     table.button('.assign').enable();
+                                    table.button('.close_request').enable();
                                 }
                             });
                         }
@@ -277,6 +338,7 @@
 
                                     if (selected_rows.length == 0) {
                                         table.button('.assign').disable();
+                                        table.button('.close_request').disable();
                                     }
                                 }
                             });
@@ -479,9 +541,11 @@
 
                 if (selected_rows.length > 0) {
                     table.button('.assign').enable();
+                    table.button('.close_request').enable();
                 }
                 else {
                     table.button('.assign').disable();
+                    table.button('.close_request').disable();
                 }
             });
         });
