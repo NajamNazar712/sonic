@@ -592,7 +592,7 @@ class AdminCRMController extends Controller
                 if($requests->inprocess && $requests->resolved){
                     $process = Carbon::parse($requests->inprocess);
                     $resolved = Carbon::parse($requests->resolved);
-                    return $resolved->diffForHumans($process);
+                    return $resolved->diffInDays($process);
                 }
                 return "-";
             })
@@ -723,7 +723,7 @@ class AdminCRMController extends Controller
                 if($requests->inprocess && $requests->closed){
                     $process = Carbon::parse($requests->inprocess);
                     $closed = Carbon::parse($requests->closed);
-                    return $closed->diffForHumans($process);
+                    return $closed->diffInDays($process);
                 }
                 return "-";
             })
