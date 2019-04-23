@@ -506,7 +506,7 @@
 				});
 			}
 
-			$('#charges_mode').prepend('<option value="" selected="selected"></option>').select2({
+			$('#charges_mode').select2({
                 width: '100%',
                 placeholder: 'Charges Mode*'
             }).bind('change', function() {
