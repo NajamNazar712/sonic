@@ -1181,7 +1181,7 @@ class ShipperShipmentBookController extends Controller
                     $row_id = $key + 2;
 
                     if (!isset($row['charges_mode_id'])) {
-                      $row['charges_mode_id'] = 4;
+                      $rows[$key]['charges_mode_id'] = 4;
                     }
 
                     $validate = Validator::make($row, $rules, $messages);
@@ -2459,7 +2459,7 @@ class ShipperShipmentBookController extends Controller
                     $row_id = $key + 2;
 
                     if (!isset($row['charges_mode_id'])) {
-                      $row['charges_mode_id'] = 3;
+                      $rows[$key]['charges_mode_id'] = 3;
                     }
 
                     $validate = Validator::make($row, $rules, $messages);
