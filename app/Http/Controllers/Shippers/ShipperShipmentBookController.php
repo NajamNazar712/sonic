@@ -1180,6 +1180,10 @@ class ShipperShipmentBookController extends Controller
                 foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
 
+                    if (!(isset($row['charges_mode_id']) && in_array($row['charges_mode_id'], [2, 4]))) {
+                      $row['charges_mode_id'] = 4;
+                    }
+
                     $validate = Validator::make($row, $rules, $messages);
 
                     $validate->setAttributeNames($names);
@@ -1356,12 +1360,7 @@ class ShipperShipmentBookController extends Controller
                                 $amount = $row['amount'];
                                 $payment_mode_id = $row['payment_mode_id'];
 
-                                if (isset($row['charges_mode_id']) && in_array($row['charges_mode_id'], [2, 4])) {
-                                  $charges_mode_id = $row['charges_mode_id'];
-                                }
-                                else {
-                                  $charges_mode_id = 4;
-                                }
+                                $charges_mode_id = $row['charges_mode_id'];
 
                                 $package_type = TRUE;
 
@@ -2459,6 +2458,10 @@ class ShipperShipmentBookController extends Controller
                 foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
 
+                    if (!(isset($row['charges_mode_id']) && in_array($row['charges_mode_id'], [2, 3]))) {
+                      $row['charges_mode_id'] = 3;
+                    }
+
                     $validate = Validator::make($row, $rules, $messages);
 
                     $validate->setAttributeNames($names);
@@ -2590,12 +2593,7 @@ class ShipperShipmentBookController extends Controller
                         $pickup_address_id = $row['pickup_address_id'];
                         $delivery_type_id = $row['delivery_type_id'];
 
-                        if (isset($row['charges_mode_id']) && in_array($row['charges_mode_id'], [2, 3])) {
-                          $charges_mode_id = $row['charges_mode_id'];
-                        }
-                        else {
-                          $charges_mode_id = 3;
-                        }
+                        $charges_mode_id = $row['charges_mode_id'];
 
                         if (strtolower($row['information_display']) == 'yes') {
                             $information_display = TRUE;
