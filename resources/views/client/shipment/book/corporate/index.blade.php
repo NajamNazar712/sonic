@@ -867,7 +867,7 @@
                     $('#pickup_date').valid();
                 }
             });
-            $('#pickup_date').pickadate('picker').set({'select': new Date(current_date),'min': new Date(current_date)},{muted: true});
+            $('#pickup_date').pickadate('picker').set({'select': new Date(current_date)},{muted: true});
             $('#replacement_product_type').select2({
                 width: '100%',
                 placeholder: 'Product Type*'
