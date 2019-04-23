@@ -65,6 +65,9 @@
                             text: input
                         }
                     }
+                    else {
+                        return false;
+                    }
                 }
             });
 
