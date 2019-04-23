@@ -46,7 +46,7 @@
                                                 <td class="name">
 
                                                     @if(!empty($crm_details->shipment_id))
-                                                        <h5 class="mb-0">{{$crm_details->shipment->tracking_number}}</h5>
+                                                        <h5 class="mb-0"><u><a href='{{route('admin.tracking.index')}}?tracking_number={{$crm_details->shipment->tracking_number}}' class='tracking' target='_blank'>{{$crm_details->shipment->tracking_number}}</a></u></h5>
                                                     @endif
                                                 </td>
                                             </tr>
