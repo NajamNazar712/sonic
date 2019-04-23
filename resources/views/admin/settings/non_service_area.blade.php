@@ -60,6 +60,8 @@
                 },
                 create: function(input) {
                     if ($.trim(input)) {
+                        input = input.replace(/\s/g, '');
+
                         return {
                             value: input,
                             text: input
