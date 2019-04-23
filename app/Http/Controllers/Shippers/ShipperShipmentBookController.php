@@ -148,12 +148,12 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function index() {
-        $time = Carbon::today()->addHour(15);
-        $current_time = Carbon::now();
+        // $time = Carbon::today()->addHour(15);
+        // $current_time = Carbon::now();
         $date = Carbon::today();
-        if($current_time > $time){
-            $date = Carbon::tomorrow();
-        }
+        // if($current_time > $time){
+        //     $date = Carbon::tomorrow();
+        // }
         $booking_types = BookingType::whereNotIn('id', [4, 3])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
         $shipper_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
@@ -1548,12 +1548,12 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_index() {
-        $time = Carbon::today()->addHour(15);
-        $current_time = Carbon::now();
+        // $time = Carbon::today()->addHour(15);
+        // $current_time = Carbon::now();
         $date = Carbon::today();
-        if($current_time > $time){
-            $date = Carbon::tomorrow();
-        }
+        // if($current_time > $time){
+        //     $date = Carbon::tomorrow();
+        // }
         $booking_types = BookingType::whereNotIn('id', [4, 3])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
         $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();

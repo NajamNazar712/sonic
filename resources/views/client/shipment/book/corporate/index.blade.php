@@ -304,7 +304,11 @@
                                         <div id="charges_mode_div" class="form-group">
                                             <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
                                                 @foreach($charges_modes as $charges_mode)
-                                                    <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
+                                                    @if ($charges_mode->id == 3)
+                                                        <option value="{{ $charges_mode->id }}" selected="selected">{{ $charges_mode->charges_mode }}</option>
+                                                    @else
+                                                        <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
+                                                    @endif
                                                 @endforeach
                                             </select>
                                         </div>
