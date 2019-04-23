@@ -59,7 +59,7 @@
                     dropdown.remove();
                 },
                 create: function(input) {
-                    if (!$.trim(input)) {
+                    if ($.trim(input)) {
                         return {
                             value: input,
                             text: input
