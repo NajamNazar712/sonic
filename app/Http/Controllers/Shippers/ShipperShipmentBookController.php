@@ -1107,7 +1107,7 @@ class ShipperShipmentBookController extends Controller
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
-            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+            'charges_mode_id' => ['nullable', 'filled', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [2, 4]);
             })]
         ];
@@ -1123,8 +1123,20 @@ class ShipperShipmentBookController extends Controller
 
             $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID'];
         }
-        if (!isset($spreadsheet) || $spreadsheet[0] == $header) {
-            if (isset($spreadsheet) && $spreadsheet[0] == $header) {
+        if (!isset($spreadsheet)) {
+            $header_correct = TRUE;
+
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if ($header_value == 'Charges Mode ID') {}
+                else if ($header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                }
+            }
+
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+            else {
                 unset($spreadsheet[0]);
             }
 
@@ -1343,7 +1355,13 @@ class ShipperShipmentBookController extends Controller
 
                                 $amount = $row['amount'];
                                 $payment_mode_id = $row['payment_mode_id'];
-                                $charges_mode_id = $row['charges_mode_id'];
+
+                                if (isset($row['charges_mode_id']) && in_array($row['charges_mode_id'], [2, 4])) {
+                                  $charges_mode_id = $row['charges_mode_id'];
+                                }
+                                else {
+                                  $charges_mode_id = 4;
+                                }
 
                                 $package_type = TRUE;
 
@@ -2340,7 +2358,7 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id);
             })],
             'delivery_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('delivery_types', 'id')],
-            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+            'charges_mode_id' => ['nullable', 'filled', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [2, 3]);
             })],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
@@ -2387,8 +2405,18 @@ class ShipperShipmentBookController extends Controller
 
             $header = ['Service Type ID', 'Pickup Address ID', 'Delivery Type ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID'];
         }
-        if (!isset($spreadsheet) || $spreadsheet[0] == $header) {
-            if (isset($spreadsheet) && $spreadsheet[0] == $header) {
+        if (!isset($spreadsheet)) {
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if ($header_value == 'Charges Mode ID') {}
+                else if ($header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                }
+            }
+
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+            else {
                 unset($spreadsheet[0]);
             }
 
@@ -2561,7 +2589,13 @@ class ShipperShipmentBookController extends Controller
                         $service_type_id = $row['service_type_id'];
                         $pickup_address_id = $row['pickup_address_id'];
                         $delivery_type_id = $row['delivery_type_id'];
-                        $charges_mode_id = $row['charges_mode_id'];
+
+                        if (isset($row['charges_mode_id']) && in_array($row['charges_mode_id'], [2, 3])) {
+                          $charges_mode_id = $row['charges_mode_id'];
+                        }
+                        else {
+                          $charges_mode_id = 3;
+                        }
 
                         if (strtolower($row['information_display']) == 'yes') {
                             $information_display = TRUE;
