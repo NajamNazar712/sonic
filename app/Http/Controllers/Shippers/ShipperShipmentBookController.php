@@ -156,8 +156,7 @@ class ShipperShipmentBookController extends Controller
         // }
         $booking_types = BookingType::whereNotIn('id', [4, 3])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
-        $shipper_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
-        $cities = City::leftjoin('city_deliveries as cd','cd.city_id','=','cities.id')->whereIn('cd.shipping_mode_id', $shipper_shipping_modes)->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $consignee_cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
