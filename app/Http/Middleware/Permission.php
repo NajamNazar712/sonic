@@ -95,6 +95,11 @@ class Permission
             'cargo.history.list' => 124,
             'cargo.history.shipments.' => 124,
             'cargo.history.print.' => 124,
+            'cargo.mapping.index' => 198,
+            'cargo.mapping.list' => 198,
+            'cargo.mapping.store' => 198,
+            'cargo.mapping.edit' => 198,
+            'cargo.mapping.update' => 198,
             'sameday.index' => 32,
             'sameday.list' => 32,
 
@@ -316,6 +321,8 @@ class Permission
             'reports.multiple_payment_report.list' => 176,
 			'reports.revenue.index' => 177,
             'reports.revenue.list' => 177,
+            'reports.gst.index' => 199,
+            'reports.gst.list' => 199,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

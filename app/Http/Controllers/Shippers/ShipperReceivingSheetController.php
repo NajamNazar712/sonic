@@ -28,16 +28,17 @@ class ShipperReceivingSheetController extends Controller
         return view('client.shipment.receiving_sheet.index')->with('service_type',$service_type);
     }
 
-    public function store(Request $request) {
-
-        $shipment_ids = $request->input('shipment_ids');
-
+    static public function create($shipment_ids, $user_id) {
         $pickup_address_id = 0;
 
         foreach ($shipment_ids as $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
-            if ($shipment->user_id != session('user_id')) {
+            if ($shipment->shipper_status_id != 1) {
+                return ['status' => 1, 'error' => $shipment->tracking_number . ' can no longer be added to a Receiving Sheet'];
+            }
+
+            if ($shipment->user_id != $user_id) {
                 return ['status' => 1, 'error' => $shipment->tracking_number . ' doesn\'t belong to you'];
             }
 
@@ -57,7 +58,7 @@ class ShipperReceivingSheetController extends Controller
 
         $receiving_sheet = new ReceivingSheet();
 
-        $receiving_sheet->user_id = session('user_id');
+        $receiving_sheet->user_id = $user_id;
         $receiving_sheet->pickup_address_id = $pickup_address_id;
         $receiving_sheet->booked = count($shipment_ids);
         $receiving_sheet->status = 0;
@@ -75,7 +76,16 @@ class ShipperReceivingSheetController extends Controller
             $receiving_sheet_shipment->save();
         }
 
-        return ['status' => 0, 'success' => 'Receiving Sheet has been created', 'receiving_sheet_id' => $receiving_sheet_id];
+        return ['status' => 0, 'success' => 'Receiving Sheet has been Created', 'receiving_sheet_id' => $receiving_sheet_id];
+    }
+
+    public function store(Request $request) {
+        if (!empty($request->input('shipment_ids'))) {
+            return $this->create($request->input('shipment_ids'), session('user_id'));
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipment Selected'];
+        }
     }
 
     public function list() {
@@ -85,7 +95,7 @@ class ShipperReceivingSheetController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftjoin('receiving_sheet_shipments as rss', 'shipments.id', '=', 'rss.shipment_id')
             ->leftjoin('receiving_sheets AS rs', 'rss.receiving_sheet_id', '=', 'rs.id')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'usi.pickup_address', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet', 'rs.id AS receiving_sheet_no')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'usi.pickup_address', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet', 'rs.id AS receiving_sheet_no','shipments.amount')
             ->where('shipments.user_id', session('user_id'))
             ->where('shipments.shipper_status_id', 1)
             ->where(function ($query) {
@@ -100,6 +110,9 @@ class ShipperReceivingSheetController extends Controller
                 else {
                     return '';
                 }
+            })
+            ->editColumn('amount', function($shipment) {
+                return number_format($shipment->amount);
             })
             ->addColumn('action', function($shipment) {
                 $dropdown = '
@@ -232,7 +245,7 @@ class ShipperReceivingSheetController extends Controller
         }
     }
 
-    public function print(Request $request) {
+    static public function view($id, $user_type) {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         $html = '
@@ -241,9 +254,20 @@ class ShipperReceivingSheetController extends Controller
                   <head>
                     <meta charset="utf-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        ';
 
+        if ($user_type != 4) {
+            $html .= '
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+            ';
+        }
+        else {
+            $html .= '
+                    <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
+            ';
+        }
 
+        $html .= '
                     <title>Receiving Sheet</title>
 
                     <style>
@@ -302,9 +326,9 @@ class ShipperReceivingSheetController extends Controller
                   </head>
                   <body>
                     <div class="p-1">
-      ';
+        ';
 
-        $receiving_sheet_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $request->id);
+        $receiving_sheet_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $id);
 
         if ($receiving_sheet_shipments->exists()) {
             $total_shipments = 0;
@@ -327,14 +351,14 @@ class ShipperReceivingSheetController extends Controller
                             <td class="color primary"><strong>Estimated Weight</strong></td>
                             <td class="color primary"><strong>Amount</strong></td>
                           </tr>
-        ';
+            ';
 
             foreach ($receiving_sheet_shipments->orderBy('shipment_id')->get() as $receiving_sheet_shipment) {
                 $total_shipments++;
 
                 $shipment = Shipment::find($receiving_sheet_shipment->shipment_id);
 
-                if ($shipment->booking_type_id < 3) {
+                if ($shipment->booking_type_id != 3) {
                     $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_shipments . '</td>
@@ -342,14 +366,14 @@ class ShipperReceivingSheetController extends Controller
                             <td>' . $shipment->order_id . '</td>
                             <td>' . $shipment->booking_type->booking_type . '</td>
                             <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-            ';
+                    ';
 
                     $shipment_details_row_end = '
                             <td>' . $shipment->consignee_city->name . '</td>
                             <td>' . $shipment->estimated_weight . '</td>
                             <td>Rs ' . number_format($shipment->amount) . '</td>
                           </tr>
-          ';
+                    ';
                 }
                 else {
                     $number_of_items = $shipment->items->count();
@@ -361,14 +385,14 @@ class ShipperReceivingSheetController extends Controller
                             <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->order_id . '</td>
                             <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->booking_type->booking_type . ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')</td>
                             <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-            ';
+                    ';
 
                     $shipment_details_row_end = '
                             <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->consignee_city->name . '</td>
                             <td rowspan=' . $number_of_items . ' class="align-middle">' . number_format($shipment->estimated_weight) . '</td>
                             <td rowspan=' . $number_of_items . ' class="align-middle">Rs ' . number_format($shipment->amount) . '</td>
                           </tr>
-            ';
+                    ';
                 }
 
                 if ($shipment->booking_type_id == 1) {
@@ -381,7 +405,7 @@ class ShipperReceivingSheetController extends Controller
                             <td>' . $item->created_at . '</td>
                             <td>' . $item->description . '</td>
                             <td>' . $item->quantity . '</td>
-            ';
+                    ';
 
                     $shipment_details .= $shipment_details_row_end;
                 }
@@ -395,7 +419,7 @@ class ShipperReceivingSheetController extends Controller
                             <td>' . $item->created_at . '</td>
                             <td>' . $item->description . '</td>
                             <td>' . $item->quantity . '</td>
-            ';
+                    ';
 
                     $shipment_details .= $shipment_details_row_end;
                 }
@@ -409,7 +433,7 @@ class ShipperReceivingSheetController extends Controller
                         else {
                             $shipment_details .= '
                           <tr>
-                ';
+                            ';
                         }
 
                         $shipment_details .= '
@@ -417,7 +441,7 @@ class ShipperReceivingSheetController extends Controller
                             <td>' . $item->created_at . '</td>
                             <td>' . $item->description . '</td>
                             <td>' . $item->quantity . '</td>
-              ';
+                        ';
 
                         if ($first) {
                             $shipment_details .= $shipment_details_row_end;
@@ -425,11 +449,25 @@ class ShipperReceivingSheetController extends Controller
                         else {
                             $shipment_details .= '
                           </tr>
-                ';
+                            ';
                         }
 
                         $first = FALSE;
                     }
+                }
+                else {
+                    $shipment_details .= $shipment_details_row_start;
+
+                    $item = $shipment->items->first();
+
+                    $shipment_details .= '
+                            <td>' . $item->product->product_name . '</td>
+                            <td>' . $item->created_at . '</td>
+                            <td>' . $item->description . '</td>
+                            <td>' . $item->quantity . '</td>
+                    ';
+
+                    $shipment_details .= $shipment_details_row_end;
                 }
 
                 $total_cod += $shipment->amount;
@@ -438,7 +476,7 @@ class ShipperReceivingSheetController extends Controller
             $shipment_details .= '
                         </tbody>
                       </table>
-        ';
+            ';
 
             $first_shipment = $receiving_sheet_shipments->first();
 
@@ -448,16 +486,42 @@ class ShipperReceivingSheetController extends Controller
                       <table class="table table-sm table-bordered border">
                         <tbody>
                           <tr>
+            ';
+
+            if ($user_type != 4) {
+                $main_details .= '
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                ';
+            }
+            else {
+                $main_details .= '
+                            <td class="text-center align-middle"><img src="' . public_path('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                ';
+            }
+
+            $main_details .= '
                             <td class="text-center align-middle color primary"><strong>Receiving Sheet</strong></td>
+            ';
+
+            if ($user_type != 4) {
+                $main_details .= '
                             <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                ';
+            }
+            else {
+                $main_details .= '
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst($shipment->user->name) . '</td>
+                ';
+            }
+
+            $main_details .= '
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Shipper</strong></td>
-                            <td>' . Auth::user()->name . '</td>
+                            <td>' . $shipment->user->name . '</td>
                             <td rowspan="7" class="text-center align-middle">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
                           </tr>
                           <tr>
@@ -486,7 +550,7 @@ class ShipperReceivingSheetController extends Controller
                           </tr>
                         </tbody>
                       </table>
-        ';
+            ';
 
             $html .= $main_details;
 
@@ -494,7 +558,7 @@ class ShipperReceivingSheetController extends Controller
 
             $html .= '
                       <div class="mt-2 manual_form">
-                        <div class="row justify-content-between align-items-end">
+                        <div class="row align-items-end">
                           <div class="col">
                             <strong class="d-inline-block w-200">No. of Shipments Received:</strong>
                             <span class="d-inline-block w-200 line"></span>
@@ -512,7 +576,7 @@ class ShipperReceivingSheetController extends Controller
 
                         <hr>
 
-                        <div class="row justify-content-between align-items-end mt-2">
+                        <div class="row mt-2">
                           <div class="col">
                             <div>
                               <strong class="d-inline-block w-200">Rider Name:</strong>
@@ -524,17 +588,17 @@ class ShipperReceivingSheetController extends Controller
                               <span class="d-inline-block w-200 line"></span>
                             </div>
                           </div>
+                        </div>
 
-                          <div class="w-100"></div>
-
-                          <div class="col text-left mt-4">
+                        <div class="row mt-4">
+                          <div class="col text-left">
                             <div class="d-inline-block text-center">
                               <span class="d-block w-200 mx-auto line"></span>
                               <strong class="d-inline-block w-200">Rider Signature</strong>
                             </div>
                           </div>
 
-                          <div class="col text-right mt-4">
+                          <div class="col text-right">
                             <div class="d-inline-block text-center">
                               <span class="d-block w-200 mx-auto line"></span>
                               <strong class="d-inline-block w-200">Office Signature</strong>
@@ -542,33 +606,61 @@ class ShipperReceivingSheetController extends Controller
                           </div>
                         </div>
 
-                        <div class="text-center mt-2">
-                          <span class="d-block">Plot # 4, BMCHS,Block 7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi, Pakistan</span>
-                          <span class="d-block">Phone: 0304-11-11-232 | Email: info@trax.pk | URL: www.trax.pk</span>
+                        <div class="row">
+                          <div class="col text-center mt-2">
+                            <span class="d-block">Plot # 4, BMCHS,Block 7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi, Pakistan</span>
+                            <span class="d-block">Phone: 0304-11-11-232 | Email: info@trax.pk | URL: www.trax.pk</span>
+                          </div>
                         </div>
                       </div>
-        ';
+            ';
         }
 
         $html .= '
                     </div>
+        ';
 
+        if ($user_type != 4) {
+            $html .= '
                     <script>
                       window.onload = function() {
                         window.print();
                       }
                     </script>
+            ';
+        }
+
+        $html .= '
                   </body>
                 </html>
-      ';
+        ';
 
         return $html;
     }
-    public function create_view(){
+
+    public function print(Request $request) {
+        $user_type = NULL;
+
+        if (Auth::guard('admin')->check()) {
+            $user_type = 3;
+        }
+        else if (Auth::guard('web')->check()) {
+            $user_type = 1;
+        }
+        else if (Auth::guard('substitute_users')->check()) {
+            $user_type = 2;
+        }
+
+        if ($user_type) {
+            return $this->view($request->id, $user_type);
+        }
+    }
+
+    public function create_view() {
         return view('client.shipment.receiving_sheet.create');
     }
 
-    public function get_shipment_details(Request $request){
+    public function get_shipment_details(Request $request) {
         $tracking_number = $request->tracking;
 
         if($tracking_number != ''){

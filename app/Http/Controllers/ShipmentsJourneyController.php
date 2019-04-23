@@ -29,6 +29,7 @@ class ShipmentsJourneyController extends Controller
       $shipment_journey->reference_1_id = $reference_1_id;
       $shipment_journey->reference_2_id = $reference_2_id;
       $shipment_journey->received_or_refused_by = $received_or_refused_by;
+
       if (in_array($shipper_status_id, [1, 2, 17, 19, 39, 40, 41, 42, 43, 47, 50])) {
         $shipment = Shipment::find($shipment_id);
 
@@ -50,7 +51,7 @@ class ShipmentsJourneyController extends Controller
           $shipment_journey->city_id = $cargo_consignment->destination_hub_id;
         }
       }
-      else if (in_array($shipper_status_id, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 28, 29, 30, 34, 35, 36, 37, 45, 46])) {
+      else if (in_array($shipper_status_id, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18])) {
         if ($shipment_journey->reference_1_id) {
           $delivery_note = DeliveryNote::find($shipment_journey->reference_1_id);
 
@@ -66,7 +67,7 @@ class ShipmentsJourneyController extends Controller
           }
         }
       }
-      else if (in_array($shipper_status_id, [23, 24, 25, 31, 38, 44])) {
+      else if (in_array($shipper_status_id, [23, 24, 25, 28, 29, 30, 31, 34, 35, 36, 37, 38, 44, 45, 46, 47, 48])) {
         $return_note = ReturnNote::find($shipment_journey->reference_1_id);
 
         if ($return_note) {
@@ -80,11 +81,14 @@ class ShipmentsJourneyController extends Controller
           $shipment_journey->city_id = $shipment->consignee_city_id;
         }
       }
-        $whip = new Whip();
-        $clientAddress = $whip->getValidIpAddress();
-        if($clientAddress != ''){
-            $shipment_journey->ip_address = $clientAddress;
-        }
+
+      $whip = new Whip();
+      $client_address = $whip->getValidIpAddress();
+
+      if ($client_address != '') {
+        $shipment_journey->ip_address = $client_address;
+      }
+
       $shipment_journey->save();
     }
 }

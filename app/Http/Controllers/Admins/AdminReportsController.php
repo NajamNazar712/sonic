@@ -18,6 +18,7 @@ use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\PickupNote;
@@ -84,7 +85,7 @@ class AdminReportsController extends Controller
                     ->where('si.type','=',0);
             })
             ->leftjoin('products as p','p.id','=','si.product_type_id')
-            ->select(['p.product_name as product_type','si.description as description','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name', 'shipments.booking_type_id', 'usi.poc'])
+            ->select(['p.product_name as product_type','si.description as description','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name', 'shipments.booking_type_id', 'usi.poc','u.id as account_no'])
             ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,25,31,36,38,39,40,41,43,47]);
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -101,6 +102,9 @@ class AdminReportsController extends Controller
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
+            })
+            ->editColumn('account_no', function ($shipments) {
+                return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -695,7 +699,7 @@ class AdminReportsController extends Controller
             ->join('shipping_modes as sm','sm.id','=','cargo_consignments.shipping_mode_id')
             ->join('admins as si','si.id','=','cargo_consignments.sender_id')
             ->join('admins as ri','ri.id','=','cargo_consignments.receiver_id')
-            ->select(['cargo_consignments.id as cargo_id','cargo_consignments.id as cargo_id_link','oc.name as origin','h.name as destination','cargo_consignments.shipments','cargo_consignments.shipments as shipments_link','sm.mode as shipping_mode','cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at','si.name as transit_by','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.received_shipments','cargo_consignments.type as cargo_type'])
+            ->select(['cargo_consignments.id as cargo_id','cargo_consignments.id as cargo_id_link','oc.name as origin','h.name as destination','cargo_consignments.shipments','cargo_consignments.shipments as shipments_link','sm.mode as shipping_mode','cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at','si.name as transit_by','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.received_shipments','cargo_consignments.type as cargo_type','cargo_consignments.seal_number'])
             ->where('cargo_consignments.status_id',3);
         if (session('role_id') != 1) {
             $cargo_received = $cargo_received->where(function ($query) {
@@ -723,6 +727,11 @@ class AdminReportsController extends Controller
 
         if($cargo_no = $request->get('search_cargo_no')){
             $cargo->where('cargo_consignments.id','=',$cargo_no);
+        }
+        if($tracking = $request->get('search_tracking')){
+            $cargo->join('cargo_consignment_shipments as ccs','ccs.cargo_consignment_id','=','cargo_consignments.id')
+                ->join('shipments as s', 'ccs.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking);
         }
         if($origin = $request->get('search_origin')){
             $cargo->where('oc.id','=',$origin);
@@ -1439,7 +1448,7 @@ class AdminReportsController extends Controller
             })
             ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as current_status', 'sod.created_at as operation_status_date','svd.created_at as verification_status_date', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status','sps.name as payment_status','rider.name as rider_name', 's.booking_type_id', 'usi.poc')
+            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as current_status', 'sod.created_at as operation_status_date','svd.created_at as verification_status_date', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status','sps.name as payment_status','rider.name as rider_name', 's.booking_type_id', 'usi.poc','u.id as account_no')
             ->whereIn('delivery_note_shipments.status', [4,5,6,7,8]);
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -1463,6 +1472,9 @@ class AdminReportsController extends Controller
                 else {
                     return '';
                 }
+            })
+            ->editColumn('account_no', function ($shipments) {
+                    return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -2364,7 +2376,7 @@ class AdminReportsController extends Controller
         }
         $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),number_format($total_actual_weight),number_format((float) $total_avg_actual_weight,2,'.',''),round($total_avg_rev_actual_weight),number_format($total_chargeable_weight),number_format((float) $total_avg_chargeable_weight,2,'.',''),round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection).'%'];
 
-        $details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg. Actual Weight/Parcel','Avg. Revenue On Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
+        $details_shipper['header'] = ['S. No.','Shipper Name(s) (Account No(s))', 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg. Actual Weight/Parcel','Avg. Revenue On Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
 
 //        $details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
         $serial_number_shippers = 1;
@@ -2594,7 +2606,7 @@ class AdminReportsController extends Controller
                 //end
                 $shipper_row = array();
                 $shipper_row['shipper_serial'] = $serial_number_shippers;
-                $shipper_row['name'] = $shipper->name;
+                $shipper_row['name'] = $shipper->name . ' (' . str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . ')';
                 $shipper_row['shipper_booked'] = number_format($shipper_booked);
                 $shipper_row['shipper_received'] = number_format($shipper_received);
                 $shipper_row['shipper_rev_wo_gst'] = number_format($shipper_rev_wo_gst);
@@ -2830,7 +2842,7 @@ class AdminReportsController extends Controller
         $shippers = array();
 //        unset($months_array[0]);
 
-        $details['header'] = ['Origin', 'Client Name' ];
+        $details['header'] = ['Origin', 'Client Account No.', 'Client Name' ];
         $details['subheader'] = ['Parcels', 'Weight','Collection Amount','Revenue' ];
 
         foreach ($months_array as $month){
@@ -2908,8 +2920,8 @@ class AdminReportsController extends Controller
         ];
         $sheet->getStyle('A1:B1')->applyFromArray($cell_st);
 
-        $cellIndexcol1 = 3;
-        $cellIndexcol2 = 6;
+        $cellIndexcol1 = 4;
+        $cellIndexcol2 = 7;
 
         foreach ($details['months'] as $key => $name) {
             $cellIndex1 = Coordinate::stringFromColumnIndex($cellIndexcol1);
@@ -2927,10 +2939,10 @@ class AdminReportsController extends Controller
         }
         $sheet->fromArray($details['header'],NULL,'A1');
         $col = 4;
-        $parcelIndex = 3;
-        $weightIndex = 4;
-        $codIndex = 5;
-        $revenueIndex = 6;
+        $parcelIndex = 4;
+        $weightIndex = 5;
+        $codIndex = 6;
+        $revenueIndex = 7;
         foreach ($details['hubs'] as $key => $h) {
 
             $sheet->setCellValue('A'.$col,$h);
@@ -2940,11 +2952,12 @@ class AdminReportsController extends Controller
                 foreach ($details['shipper'] as $hkey => $client){
                     foreach ($client as $ship_key => $cli){
                         if($hkey == $key){
-                            $sheet->setCellValue('B'.$col,$cli);
-                            $parcelIndex = 3;
-                            $weightIndex = 4;
-                            $codIndex = 5;
-                            $revenueIndex = 6;
+                            $sheet->setCellValue('B'.$col,str_pad($hkey, 6, '0', STR_PAD_LEFT));
+                            $sheet->setCellValue('C'.$col,$cli);
+                            $parcelIndex = 4;
+                            $weightIndex = 5;
+                            $codIndex = 6;
+                            $revenueIndex = 7;
                             foreach ($details['months'] as $m){
                                 $parcelIndexl = Coordinate::stringFromColumnIndex($parcelIndex);
                                 $weightIndexl = Coordinate::stringFromColumnIndex($weightIndex);
@@ -3377,7 +3390,7 @@ class AdminReportsController extends Controller
 
         $details = array();
         $shippers = array();
-        $shippers['header'] = ['S.No','Client Name'];
+        $shippers['header'] = ['S.No','Client Account No.','Client Name'];
 
 
 
@@ -3544,11 +3557,12 @@ class AdminReportsController extends Controller
         $sheet->fromArray($shippers['header'],NULL,'A13');
         $col = 14;
         $serials = 1;
-        $dateIndex = 3;
+        $dateIndex = 4;
         if(count($shippers['shipper']) > 0) {
             foreach ($shippers['name'] as $id => $shipper) {
                 $sheet->setCellValue('A' . $col, $serials);
-                $sheet->setCellValue('B' . $col, $shipper);
+                $sheet->setCellValue('B' . $col, str_pad($id, 6, '0', STR_PAD_LEFT));
+                $sheet->setCellValue('C' . $col, $shipper);
                 foreach ($months_array as $m) {
                     $cellIndexShipper = Coordinate::stringFromColumnIndex($dateIndex);
                     $sheet->setCellValue($cellIndexShipper . $col, $shippers['parcels'][$id][$m]);
@@ -3557,7 +3571,7 @@ class AdminReportsController extends Controller
 //            $sheet->setCellValue($dateIndex.$col,$shippers['total'][$id]);
                 $col++;
                 $serials++;
-                $dateIndex = 3;
+                $dateIndex = 4;
             }
         }
         $writer = new Xlsx($spreadsheet);
@@ -3657,6 +3671,9 @@ class AdminReportsController extends Controller
             ->addColumn('attempts', function($shipment){
                 $out_for_delivery = ShipmentsJourney::where('shipment_id',$shipment->shipment_id)->where('shipper_status_id',5)->count();
                 return $out_for_delivery;
+            })
+            ->editColumn('account_no', function ($shipments) {
+                return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('insurance_charges', function($shipment){
                 return number_format($shipment->insurance_charges);
@@ -3826,7 +3843,17 @@ class AdminReportsController extends Controller
 
         $start_date = Carbon::parse($start_date);
         $current_date = Carbon::parse($current_date);
-        $number_of_days = $start_date->diffInDays($current_date);
+        $account_status = array();
+        if($request->account == ''){
+            $account_status = [3,4,5];
+        }else if($request->account == 3){
+            $account_status = [3];
+        }else if($request->account == 4){
+            $account_status = [4];
+        }else if($request->account == 5){
+            $account_status = [5];
+        }
+
         $dates = [];
 
         for($d = $start_date; $d->lte($current_date); $d->addDay()) {
@@ -3864,7 +3891,7 @@ class AdminReportsController extends Controller
         $sales_persons_data = array();
         $shippers = array();
 
-        $details['header'] = ['Sales Persons', 'Client Name' ];
+        $details['header'] = ['Sales Persons', 'Client Account No', 'Client Name' ];
 //        $details['subheader'] = ['Parcels', 'Weight','Collection Amount','Revenue' ];
 
         foreach ($sales_person as $person){
@@ -3876,14 +3903,15 @@ class AdminReportsController extends Controller
 
                     $user = User::whereHas('city',function($query) use($hub){
                         $query->where('hub_id',$hub);
-                    })->where('id', $shipper->user_id)->first();
+                    })->where('id', $shipper->user_id)->whereIn('status',$account_status)->first();
                 }else{
 
-                    $user = User::find($shipper->user_id);
+                    $user = User::where('id',$shipper->user_id)->whereIn('status',$account_status)->first();
                 }
                 if($user){
 
                     $sales_persons_data[$person->id]['shipper'][$user->id] = $user->name;
+//                    $sales_persons_data[$person->id]['account'][$user->id] = str_pad($user->id, 6, '0', STR_PAD_LEFT);
                     foreach ($dates as $date){
                         if($hub != null){
                             $sum = Shipment::whereHas('shipment_journey', function($query) use ($date) {
@@ -3931,15 +3959,17 @@ class AdminReportsController extends Controller
         $admin_index = 2;
         $shipper_index = 2;
         $pickup_index = 2;
-        $pickup_col_index = 3;
+        $pickup_col_index = 4;
+
         foreach ($sales_persons_data as $sales_persons) {
 
-            $sheet->setCellValue('A'.$admin_index, $sales_persons['name']);
 
             if(!empty($sales_persons['shipper'])) {
+                $sheet->setCellValue('A'.$admin_index, $sales_persons['name']);
                 foreach ($sales_persons['shipper'] as $key => $person) {
 
-                    $sheet->setCellValue('B' . $shipper_index, $person);
+                    $sheet->setCellValue('B' . $shipper_index, str_pad($key, 6, '0', STR_PAD_LEFT));
+                    $sheet->setCellValue('C' . $shipper_index, $person);
 
                     $shipper_index++;
                     $admin_index++;
@@ -3955,7 +3985,7 @@ class AdminReportsController extends Controller
 
                     }
 
-                    $pickup_col_index = 3;
+                    $pickup_col_index = 4;
                     $pickup_index++;
                 }
 
@@ -3963,7 +3993,7 @@ class AdminReportsController extends Controller
 
         }
         $pickup_index += 2;
-        $date_sum_col_index = 3;
+        $date_sum_col_index = 4;
         $date_sum_index = $pickup_index;
         $sheet->setCellValue('A'.$date_sum_index, "Grand Total");
         foreach ($date_sums as $date => $sum) {
@@ -3973,7 +4003,7 @@ class AdminReportsController extends Controller
             $date_sum_col_index++;
         }
 
-        $cellIndexcol1 = 3;
+        $cellIndexcol1 = 4;
         foreach ($details['dates'] as $key => $name) {
             $cellIndex1 = Coordinate::stringFromColumnIndex($cellIndexcol1);
             $cellIndex11 = $cellIndex1 . '1';
@@ -4441,10 +4471,10 @@ class AdminReportsController extends Controller
                         }
 
                         if ($export) {
-                            $shipments[$type][$hub->name] = array();
+                            $shipments[$hub->name][$type] = array();
 
                             foreach ($rows as $row) {
-                                $shipments[$type][$hub->name][] = $row->tracking_number;
+                                $shipments[$hub->name][$type][] = $row->tracking_number;
                             }
                         }
                     }
@@ -4611,14 +4641,16 @@ class AdminReportsController extends Controller
 
             $spreadsheet->getActiveSheet()->setTitle('Overall')->fromArray($details, NULL);
 
-            foreach ($result['shipments'] as $type => $hubs) {
+            $types = array();
+
+            foreach ($result['shipments'] as $hub => $types) {
                 $details = array();
 
-                if (count($hubs) > 1) {
-                    foreach ($hubs as $hub => $tracking_numbers) {
+                if (count($types) > 1) {
+                    foreach ($types as $type => $tracking_numbers) {
                         $detail = array();
 
-                        $detail[] = $hub;
+                        $detail[] = $type_names[$type];
 
                         foreach ($tracking_numbers as $tracking_number) {
                             $detail[] = $tracking_number;
@@ -4630,8 +4662,8 @@ class AdminReportsController extends Controller
                     $details = array_map(null, ...$details);
                 }
                 else {
-                    foreach ($hubs as $hub => $tracking_numbers) {
-                        $details[] = [$hub];
+                    foreach ($types as $type => $tracking_numbers) {
+                        $details[] = [$type_names[$type]];
 
                         foreach ($tracking_numbers as $tracking_number) {
                             $details[] = [$tracking_number];
@@ -4639,11 +4671,11 @@ class AdminReportsController extends Controller
                     }
                 }
 
-                $spreadsheet->createSheet()->setTitle($type_names[$type]);
+                $spreadsheet->createSheet()->setTitle($hub);
 
-                $spreadsheet->setActiveSheetIndexByName($type_names[$type]);
+                $spreadsheet->setActiveSheetIndexByName($hub);
 
-                for ($counter = 1; $counter <= count($hubs); $counter++) {
+                for ($counter = 1; $counter <= count($types); $counter++) {
                     $column_name = Coordinate::stringFromColumnIndex($counter);
 
                     $spreadsheet->getActiveSheet()->getStyle($column_name)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
@@ -4651,7 +4683,7 @@ class AdminReportsController extends Controller
                     $spreadsheet->getActiveSheet()->getColumnDimension($column_name)->setWidth(15);
                 }
 
-                $spreadsheet->getActiveSheet()->setTitle($type_names[$type])->fromArray($details);
+                $spreadsheet->getActiveSheet()->setTitle($hub)->fromArray($details);
             }
 
             $spreadsheet->setActiveSheetIndex(0);
@@ -4780,7 +4812,7 @@ class AdminReportsController extends Controller
                     ->where('journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->select(['shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as current_status_date', 'shipments.booking_type_id', 'return_reattempt_ratios.return_confirm_date','return_reattempt_ratios.created_at as reattempt_date']);
+            ->select(['shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as current_status_date', 'shipments.booking_type_id', 'return_reattempt_ratios.return_confirm_date','return_reattempt_ratios.created_at as reattempt_date', 'u.id as account_no']);
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
@@ -4792,6 +4824,9 @@ class AdminReportsController extends Controller
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
+            })
+            ->editColumn('account_no', function ($shipments) {
+                return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -4963,6 +4998,9 @@ public function revenue_index(){
             ->editColumn('insurance_charges', function($shipment){
                 return number_format($shipment->insurance_charges);
             })
+            ->editColumn('account_no', function ($shipments) {
+                return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
+            })
             ->editColumn('return_charges', function($shipment){
                 return number_format($shipment->return_charges);
             })
@@ -5098,6 +5136,36 @@ public function revenue_index(){
             $datatable->whereBetween('sj.created_at', [$from,$to]);
         }
         return $datatable->make(true);
+    }
+
+    public function gst_index(){
+        return view('admin.reports.gst_report');
+    }
+
+    public function gst_list(Request $request){
+        $gst = DonePayment::leftjoin('done_payment_shipments as dps','dps.done_payment_id', '=', 'done_payments.id')
+            ->leftjoin('users as u', 'done_payments.user_id', '=', 'u.id')
+            ->select('u.id as account_no', 'u.name as user_name', 'u.ntn_no as ntn_number', DB::raw('SUM(dps.charges) as w_o_gst'), DB::raw('SUM(dps.gst) as gst'), DB::raw('SUM(dps.payable) as total_charges'))
+        ->groupBy('done_payments.user_id');
+
+        $datatables = Datatables::of($gst)
+            ->editColumn('account_no', function ($gst) {
+                return str_pad($gst->account_no, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('ntn_number', function ($gst) {
+                if($gst->ntn_number) {
+                    return $gst->ntn_number;
+                }
+                else{
+                    return "-";
+                }
+            });
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('dps.created_at', [$from,$to]);
+        }
+        return $datatables->make(true);
     }
 }
 

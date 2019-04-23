@@ -227,7 +227,7 @@ class ShipperDashboardController extends Controller
     }
     public function order_cancel_all(Request $request)
     {
-
+        $correct = FALSE;
         foreach ($request->ids as $id) {
             $shipment_id = Shipment::find($id);
             if ($shipment_id) {
@@ -244,15 +244,17 @@ class ShipperDashboardController extends Controller
 
                         ShipmentsJourneyController::add($shipment_id->id, 17, 17, NULL, 'Cancelled by Shipper', session('user_id'), NULL);
 
-                    } else {
-                        return response()->json(['status' => 0, 'error' => 'Shipment\'s Status has already been changed']);
+                        $correct = TRUE;
                     }
-                } else {
-                    return  response()->json(['status' => 0, 'error' => 'Shipment not found']);
                 }
             }
         }
-        return response()->json(['status' => 1, 'success' => 'Shipment has been cancelled successfully']);
+        if ($correct) {
+            return response()->json(['status' => 1, 'success' => 'Shipment(s) has been cancelled successfully']);
+        }
+        else {
+            return response()->json(['status' => 0, 'error' => 'No Shipment could be cancelled']);
+        }
     }
     public function get_shipment_charges(Request $request){
         $shipment_id = $request->shipment_id;

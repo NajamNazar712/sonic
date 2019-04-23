@@ -52,7 +52,7 @@ class AdminLoginController extends Controller
             $department = AdminRole::find($role_id)->department_id;
             session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers]);
 
-            return redirect()->intended(route('admin.dashboard'));
+            return redirect()->intended(route('admin.dashboard.index'));
         }
         $errors = [$this->username() => trans('auth.failed')];
 //        $errors = new MessageBag(['password' => ['Email and/or password invalid.']]);
