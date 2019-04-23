@@ -1107,7 +1107,7 @@ class ShipperShipmentBookController extends Controller
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
-            'charges_mode_id' => ['nullable', 'filled', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+            'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [2, 4]);
             })]
         ];
@@ -2355,7 +2355,7 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id);
             })],
             'delivery_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('delivery_types', 'id')],
-            'charges_mode_id' => ['nullable', 'filled', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+            'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [2, 3]);
             })],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
