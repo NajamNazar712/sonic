@@ -1123,7 +1123,7 @@ class ShipperShipmentBookController extends Controller
 
             $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID'];
         }
-        if (!isset($spreadsheet)) {
+        if (isset($spreadsheet)) {
             $header_correct = TRUE;
 
             foreach ($spreadsheet[0] as $index => $header_value) {
@@ -2405,7 +2405,7 @@ class ShipperShipmentBookController extends Controller
 
             $header = ['Service Type ID', 'Pickup Address ID', 'Delivery Type ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID', 'Charges Mode ID'];
         }
-        if (!isset($spreadsheet)) {
+        if (isset($spreadsheet)) {
             foreach ($spreadsheet[0] as $index => $header_value) {
                 if ($header_value == 'Charges Mode ID') {}
                 else if ($header_value != $header[$index]) {
