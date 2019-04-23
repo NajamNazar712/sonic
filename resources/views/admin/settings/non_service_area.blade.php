@@ -59,9 +59,11 @@
                     dropdown.remove();
                 },
                 create: function(input) {
-                    return {
-                        value: input,
-                        text: input
+                    if (!$.trim(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
                     }
                 }
             });
