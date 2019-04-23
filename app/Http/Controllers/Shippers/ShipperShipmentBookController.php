@@ -162,7 +162,7 @@ class ShipperShipmentBookController extends Controller
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
-        $charges_modes = ChargesModes::whereIn('id', [2, 4])->get();
+        $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
         return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date]);
     }
@@ -1006,7 +1006,7 @@ class ShipperShipmentBookController extends Controller
         }
 
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
-        $charges_modes = ChargesModes::whereIn('id', [2, 4])->get();
+        $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
         return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
     }
@@ -1107,7 +1107,7 @@ class ShipperShipmentBookController extends Controller
                 $query->whereNotIn('id', [2, 3]);
             })],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
-                $query->whereIn('id', [2, 4]);
+                $query->whereIn('id', [4]);
             })]
         ];
 
@@ -1487,7 +1487,7 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode', 'id');
-                    $charges_modes = ChargesModes::whereIn('id' , [2, 4])->pluck('charges_mode','id');
+                    $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
 
                     foreach ($cities as $city) {
                         $city_name[$city->name] = $city->name;
