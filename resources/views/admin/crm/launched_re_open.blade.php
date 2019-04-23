@@ -38,6 +38,7 @@
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -207,6 +208,7 @@
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Launched Date');
+                            head.push('Launched To Today (TAT)');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -227,6 +229,7 @@
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.created_at);
+                                row.push(values.current_tat);
 
                                 body.push(row);
                             });
@@ -415,6 +418,7 @@
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],

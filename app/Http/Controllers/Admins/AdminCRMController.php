@@ -322,6 +322,14 @@ class AdminCRMController extends Controller
                 }
             })
             ->orderColumn('launched_by_name', DB::raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, u.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1')
+            ->addColumn('current_tat', function ($requests){
+                if($requests->created_at){
+                    $launched = Carbon::parse($requests->created_at);
+                    $current = Carbon::now();
+                    return $current->diffInWeekdays($launched);
+                }
+                return "-";
+            })
             ->filterColumn('case_nature_type',function ($query,$keyword){
 
                 if ($keyword != '') {
@@ -446,6 +454,14 @@ class AdminCRMController extends Controller
                 else{
                     return 'Shipper Substitute User';
                 }
+            })
+            ->addColumn('current_tat', function ($requests){
+                if($requests->created_at){
+                    $launched = Carbon::parse($requests->created_at);
+                    $current = Carbon::now();
+                    return $current->diffInWeekdays($launched);
+                }
+                return "-";
             })
             ->editColumn('tagged_to', function($requests){
                 if($requests->crm_request_tagging_type_id == 1) {
@@ -592,7 +608,7 @@ class AdminCRMController extends Controller
                 if($requests->inprocess && $requests->resolved){
                     $process = Carbon::parse($requests->inprocess);
                     $resolved = Carbon::parse($requests->resolved);
-                    return $resolved->diffInDays($process);
+                    return $resolved->diffInWeekdays($process);
                 }
                 return "-";
             })
@@ -723,7 +739,7 @@ class AdminCRMController extends Controller
                 if($requests->inprocess && $requests->closed){
                     $process = Carbon::parse($requests->inprocess);
                     $closed = Carbon::parse($requests->closed);
-                    return $closed->diffInDays($process);
+                    return $closed->diffInWeekdays($process);
                 }
                 return "-";
             })
