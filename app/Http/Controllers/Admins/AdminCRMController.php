@@ -247,7 +247,7 @@ class AdminCRMController extends Controller
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description')
             ->whereIn('crm_requests.status_id', [1, 5]);
 
-        if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions'))) {
+        if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $launched_request = $launched_request->where('crm_requests.agent_id', Auth::id());
         }
 
@@ -383,7 +383,7 @@ class AdminCRMController extends Controller
             })
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id')
             ->where('crm_requests.status_id', 2);
-        if (!in_array(session('role_id'), [1, 4, 6]) && !in_array(179, session('permissions'))) {
+        if (!in_array(session('role_id'), [1, 4, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $in_process_request = $in_process_request->where(function ($query) {
                 $query->where(function ($sub_query) {
                     $sub_query->where('crm_requests.agent_id', Auth::id());
@@ -536,7 +536,7 @@ class AdminCRMController extends Controller
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved')
             ->where('crm_requests.status_id', 3);
 
-        if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions'))) {
+        if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $resolved_request = $resolved_request->where('crm_requests.agent_id', Auth::id());
         }
 
@@ -661,7 +661,7 @@ class AdminCRMController extends Controller
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed')
             ->where('crm_requests.status_id', 4);
 
-        if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions'))) {
+        if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $closed_request = $closed_request->where('crm_requests.agent_id', Auth::id());
         }
 

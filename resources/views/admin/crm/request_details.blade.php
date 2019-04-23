@@ -238,7 +238,7 @@
                                                 </div>
                                             </section>
 
-                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()))
+                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input d-flex" id="chat_form">
                                                         <fieldset
