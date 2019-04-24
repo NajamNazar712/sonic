@@ -2533,20 +2533,26 @@ class NotificationsController extends Controller
               $possible_fields = ['tracking_number', 'shipper_name', 'email', 'phone', 'destination', 'channel', 'case_nature', 'case_nature_type', 'details'];
 
             $crm_request = CrmRequest::find($reference_1_id);
-            if($crm_request){
-                $tagging = CrmRequestTagging::where('crm_request_id',$crm_request->id)->first();
-                if($tagging){
+            if($crm_request) {
+                $tagging = CrmRequestTagging::where('crm_request_id', $crm_request->id)->first();
+                if ($crm_request->status_id != 1) {
+                    if ($tagging) {
 
-                    if($tagging->crm_request_tagging_type_id == 1){
-                        $roles = AdminRole::where('department_id',$tagging->tagged_id)->pluck('id');
-                        $admin_department = Admin::whereIn('role_id',$roles)->where('status',1);
-                        if($admin_department->exists()){
-                            $to =  $admin_department->pluck('email');
+                        if ($tagging->crm_request_tagging_type_id == 1) {
+                            $roles = AdminRole::where('department_id', $tagging->tagged_id)->pluck('id');
+                            $admin_department = Admin::whereIn('role_id', $roles)->where('status', 1);
+                            if ($admin_department->exists()) {
+                                $to = $admin_department->pluck('email');
+                            }
+                        } else if ($tagging->crm_request_tagging_type_id == 2) {
+                            $admin_department = Admin::find($tagging->tagged_id)->email;
+                            $to = $admin_department;
                         }
-                    }else if($tagging->crm_request_tagging_type_id == 2){
-                        $admin_department = Admin::find($tagging->tagged_id)->email;
-                        $to = $admin_department;
                     }
+                }
+                else{
+                    $to = 'complaints@trax.pk';
+                }
 
                     $table_details = '';
 
@@ -2633,7 +2639,7 @@ class NotificationsController extends Controller
                         }
                     }
                     if (strpos($body, '[details]') !== FALSE) {
-                        $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Description</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $crm_request->details .'</td></tr>';
+                        $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Description</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $crm_request->description .'</td></tr>';
                     }
 
                     $table_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody>' . $table_details . '</tbody></table>';
@@ -2653,10 +2659,13 @@ class NotificationsController extends Controller
                         }
                     }
 
-
-                    $cc = 'complaints@trax.pk';
-                    self::email($subject, $body, $to, $cc);
-                }
+                    if($crm_request->status_id != 1) {
+                        $cc = 'complaints@trax.pk';
+                        self::email($subject, $body, $to, $cc);
+                    }
+                    else{
+                        self::email($subject, $body, $to);
+                    }
             }
           }
         }

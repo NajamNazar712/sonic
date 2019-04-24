@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\CRM;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
@@ -38,6 +39,7 @@ class CRMController extends Controller
         $crm_request_status_history->status_id = 1;
 
         $crm_request_status_history->save();
+        NotificationsController::send(31, $id);
 
     }
 }

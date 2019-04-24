@@ -411,6 +411,23 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
+    public function shipment_check(Request $request){
+        $shipment_ids = array();
+        if($request->ids){
+            $i = 0;
+            foreach ($request->ids as $id){
+                $shipment_id = Shipment::find($id);
+                if($shipment_id){
+                    if($shipment_id->shipper_status_id == 1){
+                        $shipment_ids[$i] = $id;
+                        $i++;
+                    }
+                }
+            }
+        }
+        return ['status' => 1, 'ids' => $shipment_ids];
+    }
+
     public static function air_waybill($user_type, $user_id, $ids, $twice = FALSE) {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
