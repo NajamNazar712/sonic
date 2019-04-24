@@ -368,6 +368,21 @@
             });
 
             function print(selected_rows) {
+                table.rows().nodes().each(function (index) {
+                    var row = table.row(index);
+
+                    if ($(row.node().firstChild).hasClass('select-checkbox')) {
+
+                        var data = row.data();
+                        if(data.shipper_status_id !== 1) {
+                            var index = $.inArray(data.shipment_id, selected_rows);
+                            if (index !== -1) {
+                                selected_rows.splice(index, 1);
+                            }
+                        }
+                    }
+                });
+
                 $.ajax({
                     url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
                     method: 'POST',
