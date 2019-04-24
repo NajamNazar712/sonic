@@ -2768,11 +2768,13 @@ class DeliveryController extends Controller
                 ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
                 ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
                 ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
+                ->where('s.tracking_number', '=', $tracking_number)
+                ->groupBy('station_deposit_notes.id');
         }
         if ($dncc = $request->get('scan_dncc')) {
             $datatable->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
-                ->where('dnsdns.delivery_note_id', '=', $dncc);
+                ->where('dnsdns.delivery_note_id', '=', $dncc)
+                ->groupBy('station_deposit_notes.id');
         }
         return $datatable->make(true);
     }
