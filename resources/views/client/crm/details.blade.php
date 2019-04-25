@@ -23,7 +23,7 @@
                                                     <th scope="row">Tracking Number</th>
                                                     <td class="name">
                                                         @if(!empty($crm_details->shipment_id))
-                                                            <h5 class="mb-0"><u><a href='{{route('admin.tracking.index')}}?tracking_number={{$crm_details->shipment->tracking_number}}' class='tracking' target='_blank'>{{$crm_details->shipment->tracking_number}}</a></u></h5>
+                                                            <h5 class="mb-0"><u><a href='{{route('cod.tracking.index')}}?tracking_number={{$crm_details->shipment->tracking_number}}' class='tracking' target='_blank'>{{$crm_details->shipment->tracking_number}}</a></u></h5>
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -97,6 +97,7 @@
                                                                     <div class="chat-body">
                                                                         <div class="chat-content">
                                                                             <p>{{$comment->comment}}</p>
+                                                                            <small>{{$comment->created_at}}</small>
                                                                         </div>
                                                                     </div>
 
@@ -118,6 +119,7 @@
                                                                     <div class="chat-body">
                                                                         <div class="chat-content {{($shipper_flag == false)? 'mr-3':'' }}">
                                                                             <p>{{$comment->comment}}</p>
+                                                                            <small>{{$comment->created_at}}</small>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -138,6 +140,7 @@
                                                                         <div class="chat-body">
                                                                             <div class="chat-content {{($sub_flag == false)? 'mr-3':'' }}">
                                                                                 <p>{{$comment->comment}}</p>
+                                                                                <small>{{$comment->created_at}}</small>
                                                                             </div>
                                                                         </div>
                                                                     </div>
