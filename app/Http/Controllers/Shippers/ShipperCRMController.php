@@ -12,6 +12,7 @@ use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
@@ -32,7 +33,8 @@ class ShipperCRMController extends Controller
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $status = CrmRequestStatus::where('id', '!=', 3)->select('id', 'name')->get();
-        return view('client.crm.requests')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status]);
+        $shipment_status = ShipmentStatus::select('id', 'name')->get();
+        return view('client.crm.requests')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'shipment_status' => $shipment_status]);
     }
     public function requests_list(Request $request){
         $launched_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
@@ -42,7 +44,8 @@ class ShipperCRMController extends Controller
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as request_status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at','crm_requests.description','crm_requests.status_id')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as request_status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at','crm_requests.description','crm_requests.status_id', 'ss.name as shipment_status')
             ->where('crm_requests.shipper_id', session('user_id'));
         $datatables = Datatables::of($launched_request)
             ->addColumn('id_padded', function ($requests) {
@@ -118,6 +121,8 @@ class ShipperCRMController extends Controller
 
     public function request_details(Request $request, $id){
         $crm_request = CrmRequest::find($id);
+        $shipment_status = Shipment::find($crm_request->shipment_id);
+        $shipment_status = $shipment_status->status_shipper->name;
         $crm_comments = array();
         $last_comment = null;
         $crm_comments = CrmComments::where('crm_request_id', $id)->where('comment_type',0);
@@ -135,7 +140,7 @@ class ShipperCRMController extends Controller
             $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
         }
         if($crm_request){
-            return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment]);
+            return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'shipment_status' => $shipment_status]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }

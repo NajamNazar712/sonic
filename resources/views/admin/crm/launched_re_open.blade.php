@@ -33,12 +33,12 @@
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Channel</th>
-                                    <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Request Status</th>
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
-                                    <th class="border-primary border-darken-1">Launched (TAT)</th>
+                                    <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -203,7 +203,7 @@
                             head.push('Case Nature Type');
                             head.push('Description');
                             head.push('Channel');
-                            head.push('Status');
+                            head.push('Request Status');
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
@@ -219,7 +219,7 @@
                                 row.push(values.shipper_name);
                                 row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.status);
+                                row.push(values.shipment_status);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
@@ -418,7 +418,7 @@
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
-                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat'},
+                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -454,7 +454,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.status')) {

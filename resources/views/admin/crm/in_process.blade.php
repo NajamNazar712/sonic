@@ -38,7 +38,7 @@
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
                                     <th class="border-primary border-darken-1">Tagged To</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
-                                    <th class="border-primary border-darken-1">Launched (TAT)</th>
+                                    <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -399,7 +399,7 @@
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'tagged_to', name: 'crt.tagged_id', class: 'align-middle tagged_to'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
-                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat'},
+                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -434,7 +434,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') ) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat') ) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.case_nature')) {

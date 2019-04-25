@@ -328,7 +328,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Lead Time Report',
+                        title: 'CRM Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -360,7 +360,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'request_number', name: 'crm_requests.id', class: 'align-middle request_number'},
-                    {data: 'tracking_number', name: 's.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'tracking_number_link', name: 's.tracking_number', class: 'ralign-middle tracking_number_link'},
                     {data: 'case_nature', name: 'crcn.name', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'crcnt.type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},

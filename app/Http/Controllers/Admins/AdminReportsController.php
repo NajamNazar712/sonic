@@ -5072,7 +5072,7 @@ public function revenue_index(){
             ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crsh.created_at as valid_invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id')
         ->groupBy('crm_requests.id');
         $datatable = Datatables::of($crm)
-            ->editColumn('tracking_number', function ($crm_request) {
+            ->editColumn('tracking_number_link', function ($crm_request) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$crm_request->tracking_number' class='tracking' target='_blank'>$crm_request->tracking_number</a></u>";
             })

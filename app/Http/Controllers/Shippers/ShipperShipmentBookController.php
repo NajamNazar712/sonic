@@ -424,8 +424,16 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
             }
+            if($i > 0) {
+                return ['status' => 1, 'ids' => $shipment_ids];
+            }
+            else{
+                return ['status' => 2];
+            }
         }
-        return ['status' => 1, 'ids' => $shipment_ids];
+        else{
+            return ['status' => 2];
+        }
     }
 
     public static function air_waybill($user_type, $user_id, $ids, $twice = FALSE) {
