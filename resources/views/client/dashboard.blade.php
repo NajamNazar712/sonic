@@ -517,6 +517,7 @@
                                     table.button('.print').enable();
                                     table.button('.cancel').enable();
                                     table.button(2).enable();
+                                    table.button(3).disable();
 
                                 }
                             });
@@ -546,6 +547,7 @@
                                         table.button('.print').disable();
                                         table.button('.cancel').disable();
                                         table.button(2).disable();
+                                        table.button(3).enable();
 
                                     }
                                 }
@@ -812,12 +814,14 @@
                     table.button(0).enable();
                     table.button(1).enable();
                     table.button(2).enable();
+                    table.button(3).disable();
 
                 }
                 else {
                     table.button(0).disable();
                     table.button(1).disable();
                     table.button(2).disable();
+                    table.button(3).enable();
                 }
             });
 
@@ -1143,11 +1147,46 @@
                                 }
                             })
                                 .done(function(data) {
-                                    if (data.status) {
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }
-                                    else {
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    if(data.status){
+                                        if(data.flag){
+                                            var html = '';
+
+                                            $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                                html += tracking_number + '<br/>';
+                                            });
+
+                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                            content = document.createElement('div');
+                                            content.innerHTML = html;
+
+                                            swal({
+                                                title: 'Request / Complaint Already Lodged!',
+                                                content: content,
+                                                icon: 'warning',
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'Close',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                dangerMode: true
+                                            });
+                                        }else{
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
                                     }
 
                                     table.button('.print').disable();

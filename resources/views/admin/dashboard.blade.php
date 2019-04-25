@@ -331,6 +331,24 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="feedback d-none" id="request_feedback">
+                            <div class="row justify-content-center">
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <select name="feedback_channel_request" id="feedback_channel_request" class="form-control select2">
+                                            @foreach($case_nature_channels as $channel1)
+                                                <option value="{{$channel1->id}}">{{$channel1->channel}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <textarea class="form-control" name="feedback_description_request" id="feedback_description_request" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row justify-content-center">
                             <div class="col-3">
                                 <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block d-none">Submit</button>
@@ -540,17 +558,23 @@
                 if(id === 1){
                     $('#request_service').addClass('d-none');
                     $('#request_complaints').removeClass('d-none');
+                    $('#request_feedback').addClass('d-none');
                     $('#AddNewRequest').removeClass('d-none');
                 }else if(id === 2){
                     $('#request_complaints').addClass('d-none');
                     $('#request_service').removeClass('d-none');
+                    $('#request_feedback').addClass('d-none');
                     $('#AddNewRequest').removeClass('d-none');
-
+                }
+                else if(id === 3){
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').addClass('d-none');
+                    $('#request_feedback').removeClass('d-none');
+                    $('#AddNewRequest').removeClass('d-none');
                 }else{
                     $('#request_complaints').addClass('d-none');
                     $('#request_service').addClass('d-none');
                     $('#AddNewRequest').addClass('d-none');
-
                 }
             });
             $('#case_nature_complaints').prepend('<option value="" selected="selected"></option>').select2({
@@ -582,6 +606,12 @@
                 placeholder:"Select Channel",
                 allowClear:true,
                 dropdownParent:$('#add_feedback_form')
+            });
+            $('#feedback_channel_request').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Channel",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
             });
             function print(selected_rows) {
                 $.ajax({
@@ -749,6 +779,7 @@
                         table.button('.shipper_recall').enable();
                         table.button('.print').enable();
                         table.button('.request_add').enable();
+                        table.button('.feedback_add').disable();
 
                       }
                     });
@@ -778,6 +809,7 @@
                           table.button('.shipper_recall').disable();
                           table.button('.print').disable();
                           table.button('.request_add').disable();
+                          table.button('.feedback_add').enable();
 
                         }
                       }
@@ -968,11 +1000,13 @@
                     table.button('.shipper_recall').enable();
                     table.button('.print').enable();
                     table.button('.request_add').enable();
+                    table.button('.feedback_add').disable();
                 }
                 else {
                     table.button('.shipper_recall').disable();
                     table.button('.print').disable();
                     table.button('.request_add').disable();
+                    table.button('.feedback_add').enable();
                 }
             });
 
@@ -1431,9 +1465,100 @@
                                 $('#AddRequestModal').modal('hide');
                             });
                     }
-                }else{
-                    var error = "Please select case nature!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }else if(case_nature_id == 3) {
+                    var feedback_flag = true;
+                    var feedback_channel = $('#feedback_channel_request').val();
+                    var feedback_description = $('#feedback_description_request').val();
+                    if (!feedback_description) {
+                        feedback_flag = false;
+                        var error = "Please select Description!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (!feedback_channel) {
+                        feedback_flag = false;
+                        var error = "Please select Channel!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (selected_rows.length == 0) {
+                        nature_flag = false;
+                        var error = "Please select at least one tracking number!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (feedback_flag) {
+                        $.ajax({
+                            url: '{!! route('admin.crm.feedback.add') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'channel_id': $('#feedback_channel_request').val(),
+                                'shipment_ids': selected_rows,
+                                'description': feedback_description
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status) {
+                                    if(data.flag){
+                                        var html = '';
+
+                                        $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                            html += tracking_number + '<br/>';
+                                        });
+
+                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+
+                                        swal({
+                                            title: 'Request / Complaint Already Lodged!',
+                                            content: content,
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+                                    }else{
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    }
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                table.button('.shipper_recall').disable();
+                                table.button('.print').disable();
+                                table.button('.request_add').disable();
+
+                                selected_rows = [];
+
+                                table.rows().deselect();
+
+                                table.draw('false');
+
+                                $('#AddRequestModal').modal('hide');
+                            });
+                    }
                 }
             });
             $('#AddRequestModal').on('hide.bs.modal', function (e) {
@@ -1443,10 +1568,14 @@
                 $('#case_nature_requests').val('').trigger('change');
                 $('#complaint_channels').val('').trigger('change');
                 $('#request_channels').val('').trigger('change');
+                $('#feedback_channel_request').val('').trigger('change');
                 $('#complaint_description').val('');
                 $('#service_description').val('');
+                $('#feedback_description_request').val('');
                 $('#request_complaints').addClass('d-none');
                 $('#request_service').addClass('d-none');
+                $('#request_feedback').addClass('d-none');
+
             });
 
             $('#add_feedback_form').bind('submit', function (e) {

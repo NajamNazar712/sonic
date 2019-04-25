@@ -184,6 +184,8 @@ class ShipperCRMController extends Controller
         $description = $request->description;
         $launched_by = 1;
         $shipment_ids = $request->shipment_ids;
+        $flag = false;
+        $present_shipments = null;
         if($shipment_ids != null) {
             foreach ($shipment_ids as $shipment_id) {
                 if (session('user_type') == 2) {
@@ -195,8 +197,19 @@ class ShipperCRMController extends Controller
                 if ($description == null) {
                     return ['status' => 0, 'error' => 'Description Not Entered!'];
                 }
+                $shipment = Shipment::find($shipment_id);
+                if($shipment) {
+                    $is_shipment = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $nature_id)->first();
+                    if (!$is_shipment) {
+                        CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                    } else {
 
-                CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                        $present_shipments[] = $shipment->tracking_number;
+                        $flag = true;
+                    }
+                }else{
+                    CRMController::add($nature_id, null, $channel_id, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                }
             }
         }
         else{
@@ -212,7 +225,7 @@ class ShipperCRMController extends Controller
 
             CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), $launched_by, null, session('user_id'), NULL, $description);
         }
-        return ['status' => 1, 'success' => 'Feedback successfully added'];
+        return ['status' => 1, 'success' => 'Feedback successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
     }
 
     public function add_comment(Request $request){

@@ -244,7 +244,7 @@ class AdminDashboardController extends Controller
         $service_type = BookingType::all();
         $products = Product::select('id','product_name')->get();
         $payment_status = ShipmentPaymentStatus::all();
-        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
+        $case_nature = CrmRequestCaseNature::get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '>', 2)->get();

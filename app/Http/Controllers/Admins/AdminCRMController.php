@@ -94,15 +94,45 @@ class AdminCRMController extends Controller
         $nature_id = 3;
         $channel_id = $request->channel_id;
         $description = $request->description;
-        if($channel_id == null){
-            return ['status' => 0, 'error' => 'Channel Not selected!'];
+        $shipment_ids = $request->shipment_ids;
+        $flag = false;
+        $present_shipments = null;
+        if($shipment_ids != null) {
+            foreach ($shipment_ids as $shipment_id) {
+                if (session('user_type') == 2) {
+                    $launched_by = 2;
+                }
+                if ($channel_id == null) {
+                    return ['status' => 0, 'error' => 'Channel Not selected!'];
+                }
+                if ($description == null) {
+                    return ['status' => 0, 'error' => 'Description Not Entered!'];
+                }
+                $shipment = Shipment::find($shipment_id);
+                if($shipment) {
+                    $is_shipment = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $nature_id)->first();
+                    if (!$is_shipment) {
+                        CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), 0, $shipment_id, session('user_id'), NULL, $description);
+                    } else {
+                        $present_shipments[] = $shipment->tracking_number;
+                        $flag = true;
+                    }
+                }else{
+                    CRMController::add($nature_id, null, $channel_id, 1, Auth::id(), 0, $shipment_id, session('user_id'), NULL, $description);
+                }
+            }
         }
-        if($description == null){
-            return ['status' => 0, 'error' => 'Description Not Entered!'];
-        }
+        else {
+            if ($channel_id == null) {
+                return ['status' => 0, 'error' => 'Channel Not selected!'];
+            }
+            if ($description == null) {
+                return ['status' => 0, 'error' => 'Description Not Entered!'];
+            }
 
-        CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), 0, NULL, NULL, NULL ,$description);
-        return ['status' => 1, 'success' => 'Feedback successfully added'];
+            CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), 0, NULL, NULL, NULL, $description);
+        }
+        return ['status' => 1, 'success' => 'Feedback successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
 
     }
 
