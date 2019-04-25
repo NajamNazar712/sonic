@@ -334,7 +334,7 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                lengthMenu: [[50, 100, 500], [50, 100, 500]],
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
