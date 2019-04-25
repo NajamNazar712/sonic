@@ -4021,4 +4021,55 @@ class DeliveryController extends Controller
             return ['status' => 1, 'error' => 'No Shipment Selected'];
         }
     }
+
+    public function fake_status_remove_index(){
+        return view('admin.delivery.fake_status.index');
+    }
+    public function fake_status_remove_list(Request $request){
+        $fake_status = DeliveryNoteShipment::leftjoin('delivery_notes as dn', 'dn.id', '=', 'delivery_note_shipments.delivery_note_id')
+            ->leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
+            ->leftjoin('shipments_journey as sj', function($join) {
+                $join->on('sj.shipment_id', '=', 'delivery_note_shipments.shipment_id')
+                    ->where('sj.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and shipments_journey.reference_1_id = delivery_note_shipments.delivery_note_id)'));
+                    })
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'sj.shipper_status_id')
+            ->leftjoin('cities as h', 'h.id', '=', 'dn.hub_id')
+            ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
+            ->select('delivery_note_shipments.delivery_note_id as delivery_note_id', 'delivery_note_shipments.shipment_id as shipment_id', 'dn.id as delivery_note', 'dn.received_cod_amount as amount', 'h.name as hub', 'r.name as rider', 'ss.name as status', 'dn.created_at as created_at')
+            ->where('delivery_note_shipments.fake_status', 1);
+
+        $datatables = Datatables::of($fake_status)
+            ->editColumn('tracking_number_link', function ($fake_status) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$fake_status->tracking_number' class='tracking' target='_blank'>$fake_status->tracking_number</a></u>";
+            })
+            ->editColumn('delivery_note', function ($fake_status) {
+                return str_pad($fake_status->delivery_note, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            });
+            if ($request->has('search_tracking_no')) {
+                $tracking_number = $request->get('search_tracking_no');
+            }
+            else{
+                $tracking_number = null;
+            }
+            $datatables->where('s.tracking_number', '=', $tracking_number);
+
+            return $datatables->make(true);
+    }
+    public function fake_status_remove(Request $request){
+        if($request->has('ids')){
+            $shipment = Shipment::where('tracking_number',$request->tracking_number)->first();
+            foreach($request->ids as $delivery_note_id)
+            {
+                DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment['id']])->update([
+                    'fake_status' => 0
+                ]);
+            }
+            return ['status' => 1, 'success' => 'Fake Status has been removed'];
+        }
+        return ['status' => 0, 'error' => 'Something went wrong'];
+    }
 }

@@ -517,6 +517,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('fake_status')->name('fake_status.')->group(function () {
+            Route::get('', 'Admins\DeliveryController@fake_status_remove_index')->name('index');
+            Route::get('list', 'Admins\DeliveryController@fake_status_remove_list')->name('list');
+            Route::post('remove', 'Admins\DeliveryController@fake_status_remove')->name('remove');
+        });
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
