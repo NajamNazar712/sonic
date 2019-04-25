@@ -38,7 +38,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Amount</th>
-                        <th class="border-primary border-darken-1">created_at</th>
+                        <th class="border-primary border-darken-1">Created At</th>
                     </tr>
                     </thead>
                 </table>
@@ -115,7 +115,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.delivery.completed.list') }}',
+                        url: '{{ route('admin.delivery.fake_status.list') }}',
                         data: {
                             'page': 'all',
                             'search_tracking_no': $('#search_tracking_no').val(),
@@ -128,7 +128,6 @@
                             head.push('Last Status');
                             head.push('Hub');
                             head.push('Rider');
-                            head.push('Route');
                             head.push('Created At');
 
                             $.each(result.data, function(index, values) {
@@ -140,7 +139,6 @@
                                 row.push(values.status);
                                 row.push(values.hub);
                                 row.push(values.rider);
-                                row.push(values.route);
                                 row.push(values.created_at);
 
                                 body.push(row);
