@@ -1058,4 +1058,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
         });
     });
+    Route::prefix('quick_tracking')->name('quick_tracking.')->group(function () {
+        Route::get('', 'Admins\AdminQuickTrackingController@index')->name('index');
+    });
 });

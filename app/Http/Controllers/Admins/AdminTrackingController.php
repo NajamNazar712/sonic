@@ -301,4 +301,8 @@ class AdminTrackingController extends Controller
             }
         }
     }
+
+    public function quick_tracking_index(){
+        return view('admin.tracking.quick_tracking');
+    }
 }
