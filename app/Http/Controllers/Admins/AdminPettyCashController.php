@@ -339,26 +339,55 @@ class AdminPettyCashController extends Controller
 
     public function edit_petty_cash_statements_approve(Request $request){
         $id = $request->detail_id;
-        if($id){
-            $petty_details = PettyCashStatementDetail::find($id);
-            if($petty_details){
-                if($petty_details->status == 0 || $petty_details->status == 1){
-                    $petty_details->status = 2;
-                    $petty_details->updated_by = Auth::id();
-                    $petty_details->save();
-                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
-                }else if($petty_details->status == 2){
-                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
+        if($request->has('approve_all')){
+            if($id){
+                $petty_details = PettyCashStatementDetail::where('petty_cash_statement_id', $id)->get();
+                if($petty_details){
+                    $flag = false;
+                    foreach ($petty_details as $petty_detail) {
+                        if($petty_detail['status'] != 1) {
+                            PettyCashStatementDetail::where('id', $petty_detail['id'])->update([
+                                'status' => 2,
+                                'updated_by' => Auth::id()
+                            ]);
+                            $flag = true;
+                        }
+                    }
+                    if($flag = false){
+                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
+                    }
+                    else {
+                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                    }
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
                 }
-
-            }else{
-                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Detail ID not found!']);
             }
         }
         else{
-            return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Detail ID not found!']);
-        }
+            if($id){
+                $petty_details = PettyCashStatementDetail::find($id);
+                if($petty_details){
+                    if($petty_details->status == 0 || $petty_details->status == 1){
+                        $petty_details->status = 2;
+                        $petty_details->updated_by = Auth::id();
+                        $petty_details->save();
+                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                    }else if($petty_details->status == 2){
+                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
+                    }
 
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
+                }
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Detail ID not found!']);
+            }
+        }
     }
 
     public function edit_petty_cash_statements_reject(Request $request){
