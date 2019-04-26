@@ -81,9 +81,11 @@
                         <div class="">
                             <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" disabled>Update Details</button>
                         </div>
-                        <div class="ml-1">
-                            <button id="statement_approve" type="button"  class="btn btn-primary btn-block">Approve</button>
-                        </div>
+                        @if(session('role_id') == 1 || ($petty_statement_details->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
+                            <div class="ml-1">
+                                <button id="statement_approve" type="button"  class="btn btn-primary btn-block">Approve</button>
+                            </div>
+                        @endif
                     </div>
                 </form>
             </div>
