@@ -429,6 +429,10 @@
                         '<option value="1">Shipper</option>' +
                         '<option value="2">Shipper Substitute User</option>' +
                         '</select>';
+                    var tagging_type = '<select name="tagging_type" id="tagging_type" class="select2 form-control">' +
+                        '<option value="1">Department</option>' +
+                        '<option value="2">Admin</option>' +
+                        '</select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -463,6 +467,12 @@
                         }
                         else if ($(header).is('.added_by')) {
                             $(added_by).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                        else if ($(header).is('.tagged')) {
+                            $(tagging_type).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -560,6 +570,12 @@
 
                     $('#added_by').prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Launched By Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $('#tagging_type').prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Admin/Department",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

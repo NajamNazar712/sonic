@@ -221,7 +221,12 @@
 
                                                                     <div class="chat-avatar">
                                                                         <div class="badge block badge-info">
-                                                                            <i class="la la-user font-medium-2"></i>{{$shipper}}
+                                                                            <i class="la la-user font-medium-2"></i>
+                                                                            @if($shipper != null)
+                                                                                {{$shipper}}
+                                                                            @else
+                                                                                Shipper
+                                                                            @endif
                                                                         </div>
                                                                     </div>
 
@@ -237,7 +242,12 @@
 
                                                                     <div class="chat-avatar">
                                                                         <div class="badge block badge-substitute-user">
-                                                                            <i class="la la-user font-medium-2"></i>{{$shipper}}
+                                                                            <i class="la la-user font-medium-2"></i>
+                                                                            @if($shipper != null)
+                                                                                {{$shipper}}
+                                                                            @else
+                                                                                Shipper
+                                                                            @endif
                                                                         </div>
                                                                     </div>
 
@@ -678,6 +688,15 @@
                     var tag = parseInt($('#tag_admin').val());
                 }
                 if (tag) {
+                    $('#tag_adminSubmit').attr('disabled', true);
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Request is being tagged.',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
                     $.ajax({
                         url: '{!! route('admin.crm.tag') !!}',
                         method: 'POST',
@@ -706,6 +725,8 @@
                                     containerId: 'toast-top-center'
                                 });
                             }
+                            swal.close();
+                            $('#tag_adminSubmit').attr('disabled', false);
                         });
                 }
                 else {
