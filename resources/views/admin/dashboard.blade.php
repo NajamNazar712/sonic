@@ -1303,6 +1303,7 @@
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                     if(nature_flag){
+                        $('#add_request_form').attr('disabled',true);
                         $.ajax({
                             url: '{!! route('admin.crm.request.add') !!}',
                             method: 'POST',
@@ -1360,6 +1361,7 @@
                                 table.button('.shipper_recall').disable();
                                 table.button('.print').disable();
                                 table.button('.request_add').disable();
+                                table.button('.feedback_add').enable();
 
                                 selected_rows = [];
 
@@ -1368,6 +1370,7 @@
                                 table.draw('false');
 
                                 $('#AddRequestModal').modal('hide');
+                                $('#add_request_form').attr('disabled',false);
                             });
                     }
 
@@ -1397,6 +1400,7 @@
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                     if(nature_flag){
+                        $('#add_request_form').attr('disabled',true);
                         $.ajax({
                             url: '{!! route('admin.crm.request.add') !!}',
                             method: 'POST',
@@ -1454,6 +1458,7 @@
                                 table.button('.shipper_recall').disable();
                                 table.button('.print').disable();
                                 table.button('.request_add').disable();
+                                table.button('.feedback_add').enable();
 
                                 selected_rows = [];
 
@@ -1463,6 +1468,7 @@
 
                                 
                                 $('#AddRequestModal').modal('hide');
+                                $('#add_request_form').attr('disabled',false);
                             });
                     }
                 }else if(case_nature_id == 3) {
@@ -1494,6 +1500,7 @@
                         });
                     }
                     if (feedback_flag) {
+                        $('#add_request_form').attr('disabled',true);
                         $.ajax({
                             url: '{!! route('admin.crm.feedback.add') !!}',
                             method: 'POST',
@@ -1549,6 +1556,7 @@
                                 table.button('.shipper_recall').disable();
                                 table.button('.print').disable();
                                 table.button('.request_add').disable();
+                                table.button('.feedback_add').enable();
 
                                 selected_rows = [];
 
@@ -1557,6 +1565,7 @@
                                 table.draw('false');
 
                                 $('#AddRequestModal').modal('hide');
+                                $('#add_request_form').attr('disabled',false);
                             });
                     }
                 }
@@ -1594,6 +1603,7 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
                 if(feedback_flag){
+                    $('#add_feedback_form').attr('disabled',true);
                     $.ajax({
                         url: '{!! route('admin.crm.feedback.add') !!}',
                         method: 'POST',
@@ -1611,6 +1621,7 @@
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
                             $('#AddFeedbackModal').modal('hide');
+                            $('#add_feedback_form').attr('disabled',false);
                         });
                 }
 

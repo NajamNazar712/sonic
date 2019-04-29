@@ -138,8 +138,14 @@ class AdminCRMController extends Controller
 
     public function request_details(Request $request,$id){
         $crm_request = CrmRequest::find($id);
-        $shipment_status = Shipment::find($crm_request->shipment_id);
-        $shipment_status = $shipment_status->status_shipper->name;
+        $shipment_status = null;
+        $shipper = null;
+        if($crm_request->shipment_id != null) {
+            $shipment_status = Shipment::find($crm_request->shipment_id);
+            $shipment_status = $shipment_status->status_shipper->name;
+            $shipper = User::find($crm_request->shipper_id);
+            $shipper = $shipper->name;
+        }
         $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
             ->select('a.id as id', 'a.name as name')
             ->whereNotIn('admin_roles.department_id', [1,3])->get();
@@ -192,7 +198,7 @@ class AdminCRMController extends Controller
         $crm_status_history = CrmRequestStatusHistory::where('crm_request_id', $id)->get();
         $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -256,7 +262,7 @@ class AdminCRMController extends Controller
 
 
     public function launched_re_open_index(){
-        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();
+        $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $status = CrmRequestStatus::whereIn('id', [1,5])->select('id', 'name')->get();
@@ -402,10 +408,10 @@ class AdminCRMController extends Controller
         return $datatables->make(true);
     }
     public function in_process_index(){
-        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();
+        $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
-        $channels = CrmRequestChannel::where('id', '>', 2)->select('id', 'channel')->get();
+        $channels = CrmRequestChannel::select('id', 'channel')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
         return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status]);
@@ -575,9 +581,9 @@ class AdminCRMController extends Controller
     }
 
     public function resolved_index(){
-        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();
+        $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
-        $channels = CrmRequestChannel::where('id', '>', 2)->select('id', 'channel')->get();
+        $channels = CrmRequestChannel::select('id', 'channel')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();

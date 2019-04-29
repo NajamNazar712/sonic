@@ -30,7 +30,7 @@
                                         <th class="border-primary border-darken-1">Case Nature Type</th>
                                         <th class="border-primary border-darken-1">Description</th>
                                         <th class="border-primary border-darken-1">Channel</th>
-                                        <th class="border-primary border-darken-1">Status</th>
+                                        <th class="border-primary border-darken-1">Request Status</th>
                                         {{--<th class="border-primary border-darken-1">Agent</th>--}}
                                         <th class="border-primary border-darken-1">Launched By</th>
                                         {{--<th class="border-primary border-darken-1">Launched By Type</th>--}}
@@ -130,7 +130,7 @@
                 serverSide: true,
                 ajax: '{{ route('cod.crm.request.list') }}',
                 rowId: 'id',
-                    order: [[9, 'desc']],
+                    order: [[10, 'desc']],
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

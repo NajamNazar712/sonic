@@ -127,8 +127,8 @@
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
-                                row.push(values.resolved_by);
                                 row.push(values.created_at);
+                                row.push(values.resolved_by);
                                 row.push(values.in_process_resolved_tat);
 
                                 body.push(row);

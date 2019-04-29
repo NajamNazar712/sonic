@@ -1137,6 +1137,7 @@
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                         if(feedback_flag){
+                            $('#add_request_form').attr('disabled',true);
                             $.ajax({
                                 url: '{!! route('cod.crm.feedback.add') !!}',
                                 method: 'POST',
@@ -1200,10 +1201,12 @@
                                     table.draw('false');
 
                                     $('#AddRequestModal').modal('hide');
+                                    $('#add_request_form').attr('disabled',false);
                                 });
                         }
                     }
                     else {
+                        $('#add_request_form').attr('disabled',true);
                         $.ajax({
                             url: '{!! route('cod.crm.request.add') !!}',
                             method: 'POST',
@@ -1273,6 +1276,7 @@
                                 table.draw('false');
 
                                 $('#AddRequestModal').modal('hide');
+                                $('#add_request_form').attr('disabled',false);
                             });
                     }
                 }
@@ -1302,6 +1306,7 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
                 if(feedback_flag){
+                    $('#add_feedback_form').attr('disabled',true);
                     $.ajax({
                         url: '{!! route('cod.crm.feedback.add') !!}',
                         method: 'POST',
@@ -1319,6 +1324,7 @@
                             }
 
                             $('#AddFeedbackModal').modal('hide');
+                            $('#add_feedback_form').attr('disabled',false);
                         });
                 }
 

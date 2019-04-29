@@ -39,14 +39,14 @@
                                                         <h5 class="mb-0">{{$crm_details->nature->name}}</h5>
                                                     </td>
                                                 </tr>
+                                                @if(!empty($crm_details->case_nature_type_id))
                                                 <tr>
                                                     <th scope="row">Case Nature Type</th>
                                                     <td class="name">
-                                                        @if(!empty($crm_details->case_nature_type_id))
                                                             <h5 class="mb-0">{{$crm_details->nature_type->type}}</h5>
-                                                        @endif
                                                     </td>
                                                 </tr>
+                                                @endif
                                                 <tr>
                                                     <th scope="row">Channel</th>
                                                     <td class="name">

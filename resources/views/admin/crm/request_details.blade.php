@@ -41,35 +41,36 @@
                                     <div class="col-5">
                                         <table class="table table-bordered table-lg">
                                             <tbody class="list">
+                                            @if(!empty($crm_details->shipment_id))
                                             <tr>
                                                 <th scope="row">Tracking Number</th>
                                                 <td class="name">
-
-                                                    @if(!empty($crm_details->shipment_id))
                                                         <h5 class="mb-0"><u><a href='{{route('admin.tracking.index')}}?tracking_number={{$crm_details->shipment->tracking_number}}' class='tracking' target='_blank'>{{$crm_details->shipment->tracking_number}}</a></u></h5>
-                                                    @endif
                                                 </td>
                                             </tr>
+                                            @endif
+                                            @if(!empty($shipment_status))
                                             <tr>
                                                 <th scope="row">Shipment Status</th>
                                                 <td class="name">
                                                     <h5 class="mb-0">{{$shipment_status}}</h5>
                                                 </td>
                                             </tr>
+                                            @endif
                                             <tr>
                                                 <th scope="row">Case Nature</th>
                                                 <td class="name">
                                                     <h5 class="mb-0">{{$crm_details->nature->name}}</h5>
                                                 </td>
                                             </tr>
+                                            @if(!empty($crm_details->case_nature_type_id))
                                             <tr>
                                                 <th scope="row">Case Nature Type</th>
                                                 <td class="name">
-                                                    @if(!empty($crm_details->case_nature_type_id))
                                                         <h5 class="mb-0">{{$crm_details->nature_type->type}}</h5>
-                                                    @endif
                                                 </td>
                                             </tr>
+                                            @endif
                                             <tr>
                                                 <th scope="row">Channel</th>
                                                 <td class="name">
@@ -97,14 +98,22 @@
                                             <tr>
                                                 <th scope="row">Agent</th>
                                                 <td class="name">
-                                                    <h5 class="mb-0">{{$agent}}</h5>
+                                                    @if($agent != null)
+                                                        <h5 class="mb-0">{{$agent}}</h5>
+                                                    @else
+                                                        <h5 class="mb-0">-</h5>
+                                                    @endif
                                                 </td>
                                             </tr>
                                             @if($crm_details['status_id'] == 2 || $crm_details['status_id'] == 3)
                                                 <tr>
                                                     <th scope="row">Tagged To</th>
                                                     <td class="name">
-                                                        <h5 class="mb-0">{{$tagged_name}}</h5>
+                                                        @if($tagged_name != null)
+                                                            <h5 class="mb-0">{{$tagged_name}}</h5>
+                                                        @else
+                                                            <h5 class="mb-0">-</h5>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endif
@@ -212,7 +221,7 @@
 
                                                                     <div class="chat-avatar">
                                                                         <div class="badge block badge-info">
-                                                                            <i class="la la-user font-medium-2"></i>Shipper
+                                                                            <i class="la la-user font-medium-2"></i>{{$shipper}}
                                                                         </div>
                                                                     </div>
 
@@ -228,7 +237,7 @@
 
                                                                     <div class="chat-avatar">
                                                                         <div class="badge block badge-substitute-user">
-                                                                            <i class="la la-user font-medium-2"></i>Shipper
+                                                                            <i class="la la-user font-medium-2"></i>{{$shipper}}
                                                                         </div>
                                                                     </div>
 
