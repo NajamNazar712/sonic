@@ -652,6 +652,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@quick_tracking_index')->name('index');
         Route::post('info', 'Admins\AdminTrackingController@quick_tracking_shipment_info')->name('info');
     });
+    Route::prefix('cx_quick_tracking')->name('cx_quick_tracking.')->group(function() {
+        Route::get('', 'Admins\AdminTrackingController@cx_quick_tracking_index')->name('cx_index');
+        Route::get('list', 'Admins\AdminTrackingController@cx_quick_tracking_list')->name('cx_list');
+    });
         Route::prefix('user_management')->name('user_management.')->group(function() {
         Route::prefix('users')->name('users.')->group(function() {
             Route::get('', 'Admins\UserManagementController@user_index')->name('index');
@@ -1057,8 +1061,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print_air_waybill', 'Admins\AdminWalkInBookShipmentController@print_air_waybill')->name('print_air_waybill');
             Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
         });
-    });
-    Route::prefix('quick_tracking')->name('quick_tracking.')->group(function () {
-        Route::get('', 'Admins\AdminQuickTrackingController@index')->name('index');
     });
 });

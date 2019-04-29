@@ -11,6 +11,10 @@
 
             <li class=" nav-item"><a href="{{ route('admin.quick_tracking.index') }}"><span class="menu-title">Quick Tracking</span></a>
             </li>
+            @if(session('role_id') == 1 || session('department_id') == 3)
+                <li class=" nav-item"><a href="{{ route('admin.cx_quick_tracking.cx_index') }}"><span class="menu-title">CX Quick Tracking</span></a>
+                </li>
+            @endif
 
             @if (session('role_id') == 1 || in_array(1, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a>
