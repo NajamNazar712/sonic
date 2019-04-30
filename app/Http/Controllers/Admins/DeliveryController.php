@@ -4035,7 +4035,7 @@ class DeliveryController extends Controller
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'sj.shipper_status_id')
             ->leftjoin('cities as h', 'h.id', '=', 'dn.hub_id')
             ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
-            ->select('delivery_note_shipments.delivery_note_id as delivery_note_id', 'delivery_note_shipments.shipment_id as shipment_id', 'dn.id as delivery_note', 'dn.received_cod_amount as amount', 'h.name as hub', 'r.name as rider', 'ss.name as status', 'dn.created_at as created_at')
+            ->select('delivery_note_shipments.delivery_note_id as delivery_note_id', 'delivery_note_shipments.shipment_id as shipment_id', 'dn.id as delivery_note', 's.amount as amount', 'h.name as hub', 'r.name as rider', 'ss.name as status', 'dn.created_at as created_at')
             ->where('delivery_note_shipments.fake_status', 1);
 
         $datatables = Datatables::of($fake_status)
