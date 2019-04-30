@@ -210,7 +210,7 @@
                                                                     <div class="chat-body">
                                                                         <div class="chat-content">
                                                                             <p>{{$comment->comment}}</p>
-                                                                            <small>{{$comment->created_at}}</small>
+                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}}</small>
                                                                         </div>
                                                                     </div>
 
@@ -233,7 +233,7 @@
                                                                     <div class="chat-body">
                                                                         <div class="chat-content">
                                                                             <p>{{$comment->comment}}</p>
-                                                                            <small>{{$comment->created_at}}</small>
+                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}}</small>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -254,7 +254,7 @@
                                                                     <div class="chat-body">
                                                                         <div class="chat-content">
                                                                             <p>{{$comment->comment}}</p>
-                                                                            <small>{{$comment->created_at}}</small>
+                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}}</small>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -788,9 +788,9 @@
                             //     $('div.chat:last-child').find('.chat-body').append(html);
                             // }else{
                             if (internal_switch) {
-                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p></div></div></div>';
+                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p><small>just now</small></div></div></div>';
                             } else {
-                                var html = '<div class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p></div></div></div>';
+                                var html = '<div class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p><small>just now</small></div></div></div>';
                             }
                             $('section.chat-app-window .chats').append(html);
 
