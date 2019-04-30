@@ -376,6 +376,8 @@ class Permission
             'management.rider.edit' => 98,
             'management.rider.status' => 99,
 
+            'management.city_list' => 205,
+
             'notifications.index' => 100,
             'notifications.list' => 100,
             'notifications.send_custom_email' => 103,

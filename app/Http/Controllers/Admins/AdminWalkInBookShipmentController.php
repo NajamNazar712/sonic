@@ -827,4 +827,25 @@ class AdminWalkInBookShipmentController extends Controller
             return $html;
         }
     }
+    public function check_min_charges(Request $request){
+        if($request->pickup_city != null && $request->consignee_city != null) {
+            $min_charges = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
+            if ($request->pickup_city == $request->consignee_city) {
+                $min_charges = $min_charges['chargeable_weight_local'];
+            } else {
+                $city = City::where('id', $request->consignee_city)->first();
+                $zone_class = ZoneClassCity::where(['zone_id' => $city['zone_id'], 'city_id' => $request->consignee_city])->first();
+                if ($zone_class['class'] == 1) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_1'];
+                } elseif ($zone_class['class'] == 2) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_2'];
+                } elseif ($zone_class['class'] == 3) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_3'];
+                } else {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_0'];
+                }
+            }
+            return ['status' => 1, 'min_charges' => $min_charges];
+        }
+    }
 }
