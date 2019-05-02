@@ -282,6 +282,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.cargo_returns_shipment.list') }}',
@@ -317,10 +320,6 @@
                     {data: 'shipment_destination_hub_name', name: 'shipment_destination_hub.name', class: 'align-middle origin_hub'},
                     {data: 'shipment_origin_hub_name', name: 'shipment_origin_hub.name', class: 'align-middle destination_hub'},
                 ],
-                drawCallback: function (settings) {
-                    blockPagePermanently();
-                    UnblockPagePermanently();
-                },
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

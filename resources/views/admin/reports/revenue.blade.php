@@ -408,6 +408,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax:{
                     url: '{{ route('admin.reports.revenue.list') }}',
@@ -462,10 +465,6 @@
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'}
                 ],
-                drawCallback: function (settings) {
-                    blockPagePermanently();
-                    UnblockPagePermanently();
-                },
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

@@ -307,6 +307,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.qsr.list') }}',
@@ -341,10 +344,6 @@
                     {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false}
 
                 ],
-                drawCallback: function (settings) {
-                    blockPagePermanently();
-                    UnblockPagePermanently();
-                },
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

@@ -420,6 +420,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax:{
                     url: '{{ route('admin.reports.overall_sales.list') }}',
@@ -478,10 +481,6 @@
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
                     { data: 'sales_person' ,name: 'dr.created_at', class: 'align-middle sales_person'}
                 ],
-                drawCallback: function (settings) {
-                    blockPagePermanently();
-                    UnblockPagePermanently();
-                },
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

@@ -298,6 +298,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.outstanding_shipments.list') }}',
@@ -333,10 +336,6 @@
                     {data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false}
 
                 ],
-                drawCallback: function (settings) {
-                    blockPagePermanently();
-                    UnblockPagePermanently();
-                },
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

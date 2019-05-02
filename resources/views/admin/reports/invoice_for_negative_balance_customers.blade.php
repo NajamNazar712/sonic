@@ -156,6 +156,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: '{{ route('admin.reports.negative_balance_customers.list') }}',
                 columns: [
@@ -168,10 +171,6 @@
                     { data:'payable' ,name: 'pending_payment_shipments.payable', class: 'align-middle payable'}
 
                 ],
-                drawCallback: function (settings) {
-                    blockPagePermanently();
-                    UnblockPagePermanently();
-                },
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

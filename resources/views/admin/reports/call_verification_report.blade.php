@@ -156,6 +156,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: '{{ route('admin.reports.call_verification.list') }}',
                 order: [[5, 'desc']],
@@ -169,10 +172,6 @@
                     { data:'call_verification_status' ,name: 'dns.call_verification', class: 'align-middle call_verification_status'}
 
                 ],
-                drawCallback: function (settings) {
-                    blockPagePermanently();
-                    UnblockPagePermanently();
-                },
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
