@@ -121,8 +121,11 @@ class ShipperCRMController extends Controller
 
     public function request_details(Request $request, $id){
         $crm_request = CrmRequest::find($id);
-        $shipment_status = Shipment::find($crm_request->shipment_id);
-        $shipment_status = $shipment_status->status_shipper->name;
+        $shipment_status = null;
+        if($crm_request->shipment_id != null) {
+            $shipment_status = Shipment::find($crm_request->shipment_id);
+            $shipment_status = $shipment_status->status_shipper->name;
+        }
         $crm_comments = array();
         $last_comment = null;
         $crm_comments = CrmComments::where('crm_request_id', $id)->where('comment_type',0);

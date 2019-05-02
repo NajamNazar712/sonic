@@ -27,12 +27,14 @@
                                                         @endif
                                                     </td>
                                                 </tr>
+                                                @if(!empty($shipment_status))
                                                 <tr>
                                                     <th scope="row">Shipment Status</th>
                                                     <td class="name">
                                                         <h5 class="mb-0">{{$shipment_status}}</h5>
                                                     </td>
                                                 </tr>
+                                                @endif
                                                 <tr>
                                                     <th scope="row">Case Nature</th>
                                                     <td class="name">

@@ -433,11 +433,12 @@ class AdminCRMController extends Controller
             ->leftjoin('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
             ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
             ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crt.tagged_id')
+            ->leftjoin('admins as at', 'at.id', '=', 'crt.tagged_id')
             ->leftjoin('sale_person_tags as spt', function($join) {
                 $join->on('spt.user_id', '=', 's.user_id')
                     ->where('spt.status', '=', 0);
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'crt.tagged_id as tagged_to', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'crt.crm_request_tagging_type_id as tagged_type')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'crt.crm_request_tagging_type_id as tagged_type')
             ->where('crm_requests.status_id', 2);
         if (!in_array(session('role_id'), [1, 4, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $in_process_request = $in_process_request->where(function ($query) {
@@ -501,15 +502,25 @@ class AdminCRMController extends Controller
             })
             ->editColumn('tagged_to', function($requests){
                 if($requests->crm_request_tagging_type_id == 1) {
-                    $name = AdminDepartment::find($requests->tagged_to)->name;
-                    return $name;
+                    return $requests->tagged_department;
                 }
                 else if($requests->crm_request_tagging_type_id == 2) {
-                    $name = Admin::find($requests->tagged_to)->name;
-                    return $name;
+                    return $requests->tagged_admin;
                 }
                 else{
                     return '-';
+                }
+            })
+            ->filterColumn('tagged_to',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where(function($sub_query) use ($keyword) {
+                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 1)
+                            ->where('adp.name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function($sub_query) use ($keyword) {
+                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 2)
+                            ->where('at.name', 'like', '%' . $keyword . '%');
+                    });
                 }
             })
             ->editColumn('agent', function ($requests){
