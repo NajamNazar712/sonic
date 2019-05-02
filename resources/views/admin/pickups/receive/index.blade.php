@@ -18,7 +18,7 @@
 							@include('admin.inc.messages')
 
 							@if (session('role_id') == 1 || in_array(24, session('permissions')))
-								<form id="receive_pickup_note_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.pickups.receive.pickup_note') }}">
+								<form id="receive_pickup_note_form" class="form-inline mb-1 justify-content-center" target="_blank" novalidate="novalidate" method="POST" action="{{ route('admin.pickups.receive.pickup_note') }}">
 									{{ csrf_field() }}
 
 									<input type="hidden" name="type" class="form-control type" value="0">
@@ -345,6 +345,7 @@
                     submitHandler: function(form) {
                         scan_sound(1);
                         form.submit();
+                        $('#receive_pickup_note_form input.pickup_note_no').val('');
                     }
 				});
 
