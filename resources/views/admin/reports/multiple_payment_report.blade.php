@@ -119,6 +119,7 @@
         $(document).ready(function () {
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
 
                     var jsonResult = $.ajax({
@@ -167,6 +168,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -211,6 +213,10 @@
                     {data: 'gst', name: 'done_payment_shipments.gst', class: 'align-middle gst'},
                     {data: 'total_payable', name: 'done_payment_shipments.payable', class: 'align-middle total_payable'}
                 ],
+                drawCallback: function (settings) {
+                    blockPagePermanently();
+                    UnblockPagePermanently();
+                },
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

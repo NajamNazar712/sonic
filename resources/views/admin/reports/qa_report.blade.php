@@ -155,6 +155,7 @@
             });
 
             $('#search_filter_btn').on('click',function () {
+                    blockPagePermanently();
                 // var table = '';
 
                 var search_date_from = $('input[name="qa_date_from_formatted"]').val();
@@ -440,7 +441,9 @@
                         });
 
                     });
+                    UnblockPagePermanently();
                 }else{
+                    UnblockPagePermanently();
                     var error = "Select all dates!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }

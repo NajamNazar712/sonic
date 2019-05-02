@@ -295,6 +295,7 @@
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
 
                     var jsonResult = $.ajax({
@@ -400,6 +401,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header:head};
                 }
@@ -476,6 +478,10 @@
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
                     { data: 'sales_person' ,name: 'dr.created_at', class: 'align-middle sales_person'}
                 ],
+                drawCallback: function (settings) {
+                    blockPagePermanently();
+                    UnblockPagePermanently();
+                },
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

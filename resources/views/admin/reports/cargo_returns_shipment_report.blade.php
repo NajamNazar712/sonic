@@ -213,6 +213,7 @@
             });
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
+                    blockPagePermanently();
                     body = [];
 
                     var jsonResult = $.ajax({
@@ -260,6 +261,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -315,6 +317,10 @@
                     {data: 'shipment_destination_hub_name', name: 'shipment_destination_hub.name', class: 'align-middle origin_hub'},
                     {data: 'shipment_origin_hub_name', name: 'shipment_origin_hub.name', class: 'align-middle destination_hub'},
                 ],
+                drawCallback: function (settings) {
+                    blockPagePermanently();
+                    UnblockPagePermanently();
+                },
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

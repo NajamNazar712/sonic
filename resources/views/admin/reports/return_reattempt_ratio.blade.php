@@ -184,6 +184,7 @@
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
 
                     var jsonResult = $.ajax({
@@ -239,6 +240,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -289,6 +291,10 @@
                     {data: 'reversion_aging', name: 'reversion_aging', class: 'align-middle reversion_aging'},
                     {data: 'aging_current_status', name: 'aging_current_status', class: 'align-middle aging_current_status'},
                 ],
+                drawCallback: function (settings) {
+                    blockPagePermanently();
+                    UnblockPagePermanently();
+                },
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

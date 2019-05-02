@@ -339,6 +339,7 @@
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
 
                     var jsonResult = $.ajax({
@@ -402,6 +403,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -459,6 +461,10 @@
                     {data: 'received_at', name: 'cargo_consignments.updated_at', class: 'align-middle received_at'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false},
                 ],
+                drawCallback: function (settings) {
+                    blockPagePermanently();
+                    UnblockPagePermanently();
+                },
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

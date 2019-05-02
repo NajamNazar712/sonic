@@ -283,6 +283,7 @@
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.lead_time.list') }}',
@@ -400,6 +401,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -484,6 +486,10 @@
                     {data: 'total_tat', name: 'total_tat', class: 'align-middle total_tat', orderable: false, searchable: false}
 
                 ],
+                drawCallback: function (settings) {
+                    blockPagePermanently();
+                    UnblockPagePermanently();
+                },
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

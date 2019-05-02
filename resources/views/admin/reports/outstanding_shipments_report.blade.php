@@ -213,6 +213,7 @@
             // });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.outstanding_shipments.list') }}',
@@ -276,6 +277,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -331,6 +333,10 @@
                     {data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false}
 
                 ],
+                drawCallback: function (settings) {
+                    blockPagePermanently();
+                    UnblockPagePermanently();
+                },
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
