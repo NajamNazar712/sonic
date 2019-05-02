@@ -295,6 +295,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/city/status', 'Admins\AdminDashboardController@CityStatus')->name('city.status');
         Route::get('/city/{id}/status/ajax', 'Admins\AdminDashboardController@CityStatusCheck')->name('city.status.ajax');
         Route::get('', 'Admins\AdminDashboardController@walk_in_city_list')->name('city_list');
+        Route::post('', 'Admins\AdminDashboardController@check_min_charges')->name('min_charges');
 
         //Route
         Route::prefix('route')->name('route.')->group(function () {

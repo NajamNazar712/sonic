@@ -9,10 +9,12 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\DeliveryType;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\Rates\HistoryBookingTypeCharges;
 use App\Http\Models\Rates\HistoryCashHandlingCharge;
@@ -30,6 +32,7 @@ use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\WalkInCities;
+use App\Http\Models\ZoneClassCity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
@@ -6810,7 +6813,32 @@ class AdminDashboardController extends Controller
     public function walk_in_city_list(){
         $cities = City::select('id', 'name')->get();
         $walk_in_cities = WalkInCities::all();
-        return view('admin.management.walk_in_city_list')->with(['cities' => $cities, 'walk_in_cities' => $walk_in_cities]);
+        $shipping_modes = ShippingMode::where('id', '<', 4)->get();
+        $pickup_cities = City::select('id', 'name')->where('pickup', 1)->get();
+        $delivery_types = DeliveryType::get();
+        return view('admin.management.walk_in_city_list')->with(['cities' => $cities, 'walk_in_cities' => $walk_in_cities, 'shipping_modes' => $shipping_modes, 'pickup_cities' => $pickup_cities, 'delivery_types' => $delivery_types]);
+    }
+
+    public function check_min_charges(Request $request){
+        if($request->pickup_city != null && $request->consignee_city != null) {
+            $min_charges = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
+            if ($request->pickup_city == $request->consignee_city) {
+                $min_charges = $min_charges['chargeable_weight_local'];
+            } else {
+                $city = City::where('id', $request->consignee_city)->first();
+                $zone_class = ZoneClassCity::where(['zone_id' => $city['zone_id'], 'city_id' => $request->consignee_city])->first();
+                if ($zone_class['class'] == 1) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_1'];
+                } elseif ($zone_class['class'] == 2) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_2'];
+                } elseif ($zone_class['class'] == 3) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_3'];
+                } else {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_0'];
+                }
+            }
+            return ['status' => 1, 'min_charges' => $min_charges];
+        }
     }
 }
 
