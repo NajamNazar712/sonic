@@ -312,7 +312,7 @@
                     { data:'status' ,name: 'ss.name', class: 'align-middle text-center status'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'r.name', class: 'align-middle rider'},
-                    { data:'amount' ,name: 'dn.received_cod_amount', class: 'align-middle amount'},
+                    { data:'amount' ,name: 's.amount', class: 'align-middle amount'},
                     { data:'created_at' ,name: 'dn.created_at', class: 'align-middle created_at'},
                 ],
                 rowCallback: function(row, data, index) {
