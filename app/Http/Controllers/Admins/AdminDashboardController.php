@@ -247,7 +247,7 @@ class AdminDashboardController extends Controller
         $case_nature = CrmRequestCaseNature::get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
-        $case_nature_channels = CrmRequestChannel::where('id', '>', 2)->get();
+        $case_nature_channels = CrmRequestChannel::get();
         return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels]);
     }
     public function statistics_search(Request $request){

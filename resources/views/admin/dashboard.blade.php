@@ -694,7 +694,6 @@
 
                             table.button('.shipper_recall').disable();
                             table.button('.print').disable();
-                            table.button('.request_add').disable();
 
                             selected_rows = [];
 
@@ -710,7 +709,6 @@
                 {
                     text: '<i class="la la-plus"></i> Add Request',
                     className: 'btn btn-primary request_add',
-                    enabled: false,
                     action: function (e, dt, node, config) {
                         if(selected_rows.length > 0){
                             $('#AddRequestModal').modal('show');
@@ -727,14 +725,9 @@
                             });
                             $('#requested_shipments').html(html_rows);
                         }
-                    }
-                },
-                {
-                    text: '<i class="la la-plus"></i> Add Feedback',
-                    className: 'btn btn-primary feedback_add',
-                    enabled: true,
-                    action: function (e, dt, node, config) {
+                        else{
                             $('#AddFeedbackModal').modal('show');
+                        }
                     }
                 },
                  {
@@ -746,7 +739,6 @@
 
                       table.button('.shipper_recall').disable();
                       table.button('.print').disable();
-                      table.button('.request_add').disable();
 
                       selected_rows = [];
 
@@ -778,8 +770,6 @@
 
                         table.button('.shipper_recall').enable();
                         table.button('.print').enable();
-                        table.button('.request_add').enable();
-                        table.button('.feedback_add').disable();
 
                       }
                     });
@@ -808,8 +798,6 @@
                         if (selected_rows.length == 0) {
                           table.button('.shipper_recall').disable();
                           table.button('.print').disable();
-                          table.button('.request_add').disable();
-                          table.button('.feedback_add').enable();
 
                         }
                       }
@@ -999,14 +987,10 @@
                 if (selected_rows.length > 0) {
                     table.button('.shipper_recall').enable();
                     table.button('.print').enable();
-                    table.button('.request_add').enable();
-                    table.button('.feedback_add').disable();
                 }
                 else {
                     table.button('.shipper_recall').disable();
                     table.button('.print').disable();
-                    table.button('.request_add').disable();
-                    table.button('.feedback_add').enable();
                 }
             });
 
@@ -1303,7 +1287,7 @@
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                     if(nature_flag){
-                        $('#add_request_form').attr('disabled',true);
+                        $('#AddNewRequest').attr('disabled',true);
                         $.ajax({
                             url: '{!! route('admin.crm.request.add') !!}',
                             method: 'POST',
@@ -1360,8 +1344,6 @@
 
                                 table.button('.shipper_recall').disable();
                                 table.button('.print').disable();
-                                table.button('.request_add').disable();
-                                table.button('.feedback_add').enable();
 
                                 selected_rows = [];
 
@@ -1370,7 +1352,7 @@
                                 table.draw('false');
 
                                 $('#AddRequestModal').modal('hide');
-                                $('#add_request_form').attr('disabled',false);
+                                $('#AddNewRequest').attr('disabled',false);
                             });
                     }
 
@@ -1400,7 +1382,7 @@
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                     if(nature_flag){
-                        $('#add_request_form').attr('disabled',true);
+                        $('#AddNewRequest').attr('disabled',true);
                         $.ajax({
                             url: '{!! route('admin.crm.request.add') !!}',
                             method: 'POST',
@@ -1457,8 +1439,6 @@
 
                                 table.button('.shipper_recall').disable();
                                 table.button('.print').disable();
-                                table.button('.request_add').disable();
-                                table.button('.feedback_add').enable();
 
                                 selected_rows = [];
 
@@ -1468,7 +1448,7 @@
 
                                 
                                 $('#AddRequestModal').modal('hide');
-                                $('#add_request_form').attr('disabled',false);
+                                $('#AddNewRequest').attr('disabled',false);
                             });
                     }
                 }else if(case_nature_id == 3) {
@@ -1500,7 +1480,7 @@
                         });
                     }
                     if (feedback_flag) {
-                        $('#add_request_form').attr('disabled',true);
+                        $('#AddNewRequest').attr('disabled',true);
                         $.ajax({
                             url: '{!! route('admin.crm.feedback.add') !!}',
                             method: 'POST',
@@ -1555,8 +1535,6 @@
                                 }
                                 table.button('.shipper_recall').disable();
                                 table.button('.print').disable();
-                                table.button('.request_add').disable();
-                                table.button('.feedback_add').enable();
 
                                 selected_rows = [];
 
@@ -1565,7 +1543,7 @@
                                 table.draw('false');
 
                                 $('#AddRequestModal').modal('hide');
-                                $('#add_request_form').attr('disabled',false);
+                                $('#AddNewRequest').attr('disabled',false);
                             });
                     }
                 }
@@ -1603,7 +1581,7 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
                 if(feedback_flag){
-                    $('#add_feedback_form').attr('disabled',true);
+                    $('#AddNewFeedback').attr('disabled',true);
                     $.ajax({
                         url: '{!! route('admin.crm.feedback.add') !!}',
                         method: 'POST',
@@ -1621,7 +1599,7 @@
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
                             $('#AddFeedbackModal').modal('hide');
-                            $('#add_feedback_form').attr('disabled',false);
+                            $('#AddNewFeedback').attr('disabled',false);
                         });
                 }
 

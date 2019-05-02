@@ -445,7 +445,6 @@
                     action: function (e, dt, node, config) {
                         table.button(0).disable();
                         table.button(1).disable();
-                        table.button(2).disable();
                         print(selected_rows);
                         table.rows().deselect();
                         selected_rows = [];
@@ -457,7 +456,6 @@
                     action: function (e, dt, node, config) {
                         table.button(0).disable();
                         table.button(1).disable();
-                        table.button(2).disable();
                         cancel(selected_rows);
                         table.rows().deselect();
                         selected_rows = [];
@@ -466,7 +464,6 @@
                     {
                         text: '<i class="la la-plus"></i> Add Request',
                         className: 'btn btn-primary request_add',
-                        enabled: false,
                         action: function (e, dt, node, config) {
                             if (selected_rows.length > 0) {
                                 $('#AddRequestModal').modal('show');
@@ -483,14 +480,9 @@
                                 });
                                 $('#requested_shipments').html(html_rows);
                             }
-                        }
-                    },
-                    {
-                        text: '<i class="la la-plus"></i> Add Feedback',
-                        className: 'btn btn-primary feedback_add',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#AddFeedbackModal').modal('show');
+                            else{
+                                $('#AddFeedbackModal').modal('show');
+                            }
                         }
                     },
                     {
@@ -516,8 +508,6 @@
 
                                     table.button('.print').enable();
                                     table.button('.cancel').enable();
-                                    table.button(2).enable();
-                                    table.button(3).disable();
 
                                 }
                             });
@@ -546,8 +536,6 @@
                                     if (selected_rows.length == 0) {
                                         table.button('.print').disable();
                                         table.button('.cancel').disable();
-                                        table.button(2).disable();
-                                        table.button(3).enable();
 
                                     }
                                 }
@@ -813,15 +801,11 @@
                 if (selected_rows.length > 0) {
                     table.button(0).enable();
                     table.button(1).enable();
-                    table.button(2).enable();
-                    table.button(3).disable();
 
                 }
                 else {
                     table.button(0).disable();
                     table.button(1).disable();
-                    table.button(2).disable();
-                    table.button(3).enable();
                 }
             });
 
@@ -1137,7 +1121,7 @@
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                         if(feedback_flag){
-                            $('#add_request_form').attr('disabled',true);
+                            $('#AddNewRequest').attr('disabled',true);
                             $.ajax({
                                 url: '{!! route('cod.crm.feedback.add') !!}',
                                 method: 'POST',
@@ -1192,7 +1176,6 @@
 
                                     table.button('.print').disable();
                                     table.button('.cancel').disable();
-                                    table.button('.request_add').disable();
 
                                     selected_rows = [];
 
@@ -1201,12 +1184,12 @@
                                     table.draw('false');
 
                                     $('#AddRequestModal').modal('hide');
-                                    $('#add_request_form').attr('disabled',false);
+                                    $('#AddNewRequest').attr('disabled',false);
                                 });
                         }
                     }
                     else {
-                        $('#add_request_form').attr('disabled',true);
+                        $('#AddNewRequest').attr('disabled',true);
                         $.ajax({
                             url: '{!! route('cod.crm.request.add') !!}',
                             method: 'POST',
@@ -1267,7 +1250,6 @@
 
                                 table.button('.print').disable();
                                 table.button('.cancel').disable();
-                                table.button('.request_add').disable();
 
                                 selected_rows = [];
 
@@ -1276,7 +1258,7 @@
                                 table.draw('false');
 
                                 $('#AddRequestModal').modal('hide');
-                                $('#add_request_form').attr('disabled',false);
+                                $('#AddNewRequest').attr('disabled',false);
                             });
                     }
                 }
@@ -1306,7 +1288,7 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
                 if(feedback_flag){
-                    $('#add_feedback_form').attr('disabled',true);
+                    $('#AddNewFeedback').attr('disabled',true);
                     $.ajax({
                         url: '{!! route('cod.crm.feedback.add') !!}',
                         method: 'POST',
@@ -1324,7 +1306,7 @@
                             }
 
                             $('#AddFeedbackModal').modal('hide');
-                            $('#add_feedback_form').attr('disabled',false);
+                            $('#AddNewFeedback').attr('disabled',false);
                         });
                 }
 
