@@ -31,6 +31,8 @@ use App\Http\Models\PaymentMode;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Shipper\SubstituteUser;
 
 use Auth;
 
@@ -535,6 +537,28 @@ class ShipperShipmentBookController extends Controller
     public static function air_waybill($user_type, $user_id, $ids, $twice = FALSE) {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
+        if ($user_type == 3) {
+            $user_name = Admin::find($user_id)->name . ' (Admin)';
+        }
+        else if ($user_type == 1) {
+            $user_name = User::find($user_id)->name . ' (Shipper)';
+        }
+        else if ($user_type == 2) {
+            $user_name = SubstituteUser::find($user_id)->name . ' (Sub-Shipper)';
+        }
+        else if ($user_type == 4) {
+            $user_name = User::find($user_id)->name . ' (API)';
+        }
+        else {
+            $user_name = 'Unknown';
+        }
+
+        $user_name .= ' #' . $user_id;
+
+        $print_details = '
+            <div class="small mt-1">Printed By: ' . $user_name . '</div>
+        ';
+
         $html = '
                 <!doctype html>
                 <html lang="en">
@@ -651,12 +675,12 @@ class ShipperShipmentBookController extends Controller
 
                 if ($user_type != 4) {
                     $table_start .= '
-                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto">' . $print_details . '</td>
                     ';
                 }
                 else {
                     $table_start .= '
-                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo.png') . '" width="150" class="d-block mx-auto">' . $print_details . '</td>
                     ';
                 }
 
