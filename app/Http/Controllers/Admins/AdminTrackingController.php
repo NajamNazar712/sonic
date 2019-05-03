@@ -329,7 +329,7 @@ class AdminTrackingController extends Controller
             $datatable->where('shipments.consignee_phone_number_1', 'LIKE', '%'. $phone_no . '%');
         }
         if($order_id = $request->get('search_order_id')){
-            $datatable->whereLike('shipments.order_id', 'LIKE', '%'. $order_id . '%');
+            $datatable->where('shipments.order_id', 'LIKE', '%'. $order_id . '%');
         }
             return $datatable->make(true);
     }
