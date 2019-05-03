@@ -320,16 +320,16 @@ class AdminTrackingController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             });
         if($tracking = $request->get('search_tracking')){
-            $datatable->where('shipments.tracking_number', '=', $tracking);
+            $datatable->whereLike('shipments.tracking_number', $tracking);
         }
         if($shipper = $request->get('search_shipper')){
-            $datatable->where('u.id', '=', $shipper);
+            $datatable->whereLike('u.id', $shipper);
         }
         if($phone_no = $request->get('search_phone_no')){
-            $datatable->where('shipments.consignee_phone_number_1', '=', $phone_no);
+            $datatable->whereLike('shipments.consignee_phone_number_1', $phone_no);
         }
         if($order_id = $request->get('search_order_id')){
-            $datatable->where('shipments.order_id', '=', $order_id);
+            $datatable->whereLike('shipments.order_id', $order_id);
         }
             return $datatable->make(true);
     }
