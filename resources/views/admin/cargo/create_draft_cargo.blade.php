@@ -212,6 +212,9 @@
                 paging:false,
                 ajax: '{{ route('admin.cargo.draft.edit.list', ['draft' => $draft['id']]) }}',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: false,
                 rowId:'shipment_id',
                 columns: [

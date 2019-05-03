@@ -81,6 +81,11 @@
                         <div class="">
                             <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" disabled>Update Details</button>
                         </div>
+                        @if(session('role_id') == 1 || ($petty_statement_details->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
+                            <div class="ml-1">
+                                <button id="statement_approve" type="button"  class="btn btn-primary btn-block">Approve</button>
+                            </div>
+                        @endif
                     </div>
                 </form>
             </div>
@@ -210,6 +215,9 @@
                 scrollX: true, scrollY:'200px',
                 ajax: '{{ route('admin.petty_cash.statements.edit.list',['id'=>$petty_statement_details->id]) }}',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: false,
                 rowId: 'statement_detail_id',
                 paging:false,
@@ -557,6 +565,43 @@
 
                 });
                 $('#statements_total_amount').text(total_amount);
+            });
+            $('#statement_approve').on('click', function (e) {
+                e.preventDefault();
+                var current = $(this);
+                var id = {{$petty_statement_details->id}};
+                var status = parseInt({{$petty_statement_details->status}});
+                if(status == 0 || status == 1) {
+                    $('#statement_approve').attr('disabled', true);
+                    $.ajax({
+                        url: '{!! route('admin.petty_cash.statements.edit.approve') !!}',
+                        method: 'POST',
+                        data: {
+                            'detail_id': id,
+                            'approve_all': 1,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status) {
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            setTimeout(function() {
+                                window.location = '{{ route('admin.petty_cash.statements.edit',['id' => $petty_statement_details->id]) }}';
+                            }, 2500);
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }else{
+                    var error = 'Current Petty Cash Statement Detail already Approved!';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
             });
             {{--$('#reference_no').on('change',function () {--}}
             {{--var reference_handle = $(this);--}}

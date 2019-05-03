@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -300,5 +301,36 @@ class AdminTrackingController extends Controller
                 return response()->json(['status' => 0, 'error' => 'Tracking Number not found!']);
             }
         }
+    }
+
+    public function cx_quick_tracking_index(){
+        $shippers = User::select('id', 'name')->get();
+        return view('admin.tracking.cx_quick_tracking')->with('shippers', $shippers);
+    }
+    public function cx_quick_tracking_list(Request $request){
+        $quick_tracking = Shipment::leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->select('shipments.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no');
+        $datatable = Datatables::of($quick_tracking)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            });
+        if($tracking = $request->get('search_tracking')){
+            $datatable->where('shipments.tracking_number', '=', $tracking);
+        }
+        if($shipper = $request->get('search_shipper')){
+            $datatable->where('u.id', '=', $shipper);
+        }
+        if($phone_no = $request->get('search_phone_no')){
+            $datatable->where('shipments.consignee_phone_number_1', '=', $phone_no);
+        }
+        if($order_id = $request->get('search_order_id')){
+            $datatable->where('shipments.order_id', '=', $order_id);
+        }
+            return $datatable->make(true);
     }
 }

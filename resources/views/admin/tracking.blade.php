@@ -94,9 +94,16 @@
 
 	<script>
 		$(document).ready(function() {
-			function print(id) {
+			function print(id, booking_type_id) {
+				if (booking_type_id != 4) {
+					var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+				}
+				else {
+					var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
+				}
+
 				$.ajax({
-					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+					url: url,
 					method: 'POST',
 					data: {
 						'ids[]': id,
@@ -152,7 +159,7 @@
 							shipment += '<div class="mt-4 border-primary">';
 							shipment += '<div class="d-flex align-items-center bg-primary">';
 							shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.tracking_number + '</div>';
-							shipment += '<button class="btn btn-secondary ml-auto print" id=' + id + '>Print</button>';
+							shipment += '<button class="btn btn-secondary ml-auto print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
 							shipment += '</div>';
 
 							shipment += '<div class="p-1">';
@@ -543,7 +550,9 @@
 			$('#tracking').on('click', '.print', function() {
 				id = $(this).attr('id');
 
-				print(id);
+				booking_type_id = $(this).attr('data-booking-type-id');
+
+				print(id, booking_type_id);
 			});
 
 			$('#tracking').on('click', '.rider_information', function() {

@@ -294,6 +294,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
         Route::put('/city/status', 'Admins\AdminDashboardController@CityStatus')->name('city.status');
         Route::get('/city/{id}/status/ajax', 'Admins\AdminDashboardController@CityStatusCheck')->name('city.status.ajax');
+        Route::get('', 'Admins\AdminDashboardController@walk_in_city_list')->name('city_list');
+        Route::post('', 'Admins\AdminDashboardController@check_min_charges')->name('min_charges');
 
         //Route
         Route::prefix('route')->name('route.')->group(function () {
@@ -517,6 +519,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('fake_status')->name('fake_status.')->group(function () {
+            Route::get('', 'Admins\DeliveryController@fake_status_remove_index')->name('index');
+            Route::get('list', 'Admins\DeliveryController@fake_status_remove_list')->name('list');
+            Route::post('remove', 'Admins\DeliveryController@fake_status_remove')->name('remove');
+        });
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
@@ -646,6 +653,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('quick_tracking')->name('quick_tracking.')->group(function() {
         Route::get('', 'Admins\AdminTrackingController@quick_tracking_index')->name('index');
         Route::post('info', 'Admins\AdminTrackingController@quick_tracking_shipment_info')->name('info');
+    });
+    Route::prefix('cx_quick_tracking')->name('cx_quick_tracking.')->group(function() {
+        Route::get('', 'Admins\AdminTrackingController@cx_quick_tracking_index')->name('cx_index');
+        Route::get('list', 'Admins\AdminTrackingController@cx_quick_tracking_list')->name('cx_list');
     });
         Route::prefix('user_management')->name('user_management.')->group(function() {
         Route::prefix('users')->name('users.')->group(function() {
@@ -1051,6 +1062,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add_fuel_surcharge_gst_total', 'Admins\AdminWalkInBookShipmentController@add_fuel_surcharge_gst_total')->name('add_fuel_surcharge_gst_total');
             Route::post('print_air_waybill', 'Admins\AdminWalkInBookShipmentController@print_air_waybill')->name('print_air_waybill');
             Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
+            Route::post('check_min_charges', 'Admins\AdminWalkInBookShipmentController@check_min_charges')->name('check_min_charges');
         });
     });
 });

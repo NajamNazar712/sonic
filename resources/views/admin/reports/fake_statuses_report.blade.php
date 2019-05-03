@@ -13,6 +13,9 @@
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                        <div class="form-group">
+                                <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                        </div>
                         <div class="form-group ml-1">
                             <select name="riders" class="select2" id="riders">
                                 @foreach($riders as $rider)
@@ -51,7 +54,7 @@
                             </div>
 
 
-                        <div class="form-group ml-1">
+                        <div class="col-2 mt-2">
                             <button type="button" id="search_filter_btn" class="btn btn-primary"><i class="la la-search"></i> Search</button>
                         </div>
                     </form>
@@ -205,6 +208,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_form #search_tracking_no').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             $('#search_form #riders').prepend('<option value="" selected="selected"></option>').select2({
                 width: '200px',
                 placeholder: 'Select Rider',
@@ -250,6 +258,7 @@
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
 
                     var jsonResult = $.ajax({
@@ -258,6 +267,7 @@
                             'page': 'all',
                             'rider': $('#riders').val(),
                             'hub': $('#hubs').val(),
+                            'search_tracking_no': $('#search_tracking_no').val(),
                             'search_date_from': $('input[name="search_date_from_formatted"]').val(),
                             'search_date_to': $('input[name="search_date_to_formatted"]').val(),
                         },
@@ -291,6 +301,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -311,12 +322,16 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.fake_status.list') }}',
                     data: function (d) {
                         d.rider = $('#riders').val();
                         d.hub = $('#hubs').val();
+                        d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
@@ -339,6 +354,7 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
+                    // blockPagePermanently();
                     this.api().table().columns.adjust();
                 }
             });

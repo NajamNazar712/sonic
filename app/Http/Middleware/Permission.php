@@ -171,6 +171,8 @@ class Permission
             'delivery.intercept.approve' => 194,
             'delivery.intercept.reject' => 195,
             'delivery.intercept.history.index' => 196,
+            'delivery.fake_status.index' => 203,
+            'delivery.fake_status.list' => 203,
 
             'return.index' => 44,
             'return.list' => 44,
@@ -373,6 +375,8 @@ class Permission
             'management.rider.add' => 97,
             'management.rider.edit' => 98,
             'management.rider.status' => 99,
+
+            'management.city_list' => 205,
 
             'notifications.index' => 100,
             'notifications.list' => 100,

@@ -449,6 +449,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: '{{ route('cod.return.pending.list') }}',
                 rowId: 'shId',

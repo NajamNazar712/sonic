@@ -63,6 +63,14 @@
                                             </div>
 
                                             <div class="form-group">
+                                                <select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
+                                                    @foreach($cities as $city)
+                                                        <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
                                                 <input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters">
                                             </div>
 
@@ -72,14 +80,6 @@
 
                                             <div class="form-group">
                                                 <input type="email" name="new_pickup_email_address" class="form-control" placeholder="Email Address*" data-rule-required="true" data-msg-required="Email Address is required">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
-                                                    @foreach($cities as $city)
-                                                        <option value="{{ $city->id }}">{{ $city->name }}</option>
-                                                    @endforeach
-                                                </select>
                                             </div>
                                         </div>
 

@@ -109,6 +109,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.receive.update.list',['note'=>$delivery_note_id]) }}',
                 rowId: 'shId',
