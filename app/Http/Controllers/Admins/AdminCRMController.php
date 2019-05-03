@@ -324,6 +324,15 @@ class AdminCRMController extends Controller
                     return $requests->agent;
                 }
             })
+            ->filterColumn('shipment_status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn('launched_by_name', function ($requests){
                 $name = '';
                 if($requests->launched_added_by == 0){
@@ -511,6 +520,15 @@ class AdminCRMController extends Controller
                     return '-';
                 }
             })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->filterColumn('tagged_to',function ($query,$keyword){
                 if ($keyword != '') {
                     $query->where(function($sub_query) use ($keyword) {
@@ -671,6 +689,15 @@ class AdminCRMController extends Controller
                 }
                 return $name;
             })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->filterColumn('launched_by_name', function($query, $keyword) {
                 $keyword = strtolower($keyword);
 
@@ -801,6 +828,15 @@ class AdminCRMController extends Controller
                     $name = $requests->sub_shipper;
                 }
                 return $name;
+            })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
             })
             ->filterColumn('launched_by_name', function($query, $keyword) {
                 $keyword = strtolower($keyword);

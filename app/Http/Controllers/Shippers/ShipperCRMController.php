@@ -91,6 +91,15 @@ class ShipperCRMController extends Controller
                     }
                 }
             })
+            ->filterColumn('shipment_status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->filterColumn('case_nature_type',function ($query,$keyword){
 
                 if ($keyword != '') {

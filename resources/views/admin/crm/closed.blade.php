@@ -141,7 +141,7 @@
                     {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'status', name: 'ss.id', class: 'align-middle shipment_status'},
+                    {data: 'status', name: 'status', class: 'align-middle shipment_status'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
