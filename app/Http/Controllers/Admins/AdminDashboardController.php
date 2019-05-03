@@ -6294,14 +6294,15 @@ class AdminDashboardController extends Controller
                 'zone_id'=>City::find($request->hubs)->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0
             ]);
-
             WalkInCities::where('city_id',$id)->delete();
-            foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
-                WalkInCities::create([
-                    'city_id' => $id,
-                    'pickup' => ($request->has('pickup'))? 1:0,
-                    'delivery' => $index,
-                ]);
+            if(!empty($request->walk_in_delivery)) {
+                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                    WalkInCities::create([
+                        'city_id' => $id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'delivery' => $index,
+                    ]);
+                }
             }
 
             CityDelivery::where('city_id',$id)->delete();
@@ -6327,12 +6328,14 @@ class AdminDashboardController extends Controller
             ]);
 
             WalkInCities::where('city_id',$id)->delete();
-            foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
-                WalkInCities::create([
-                    'city_id' => $id,
-                    'pickup' => ($request->has('pickup'))? 1:0,
-                    'delivery' => $index,
-                ]);
+            if(!empty($request->walk_in_delivery)) {
+                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                    WalkInCities::create([
+                        'city_id' => $id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'delivery' => $index,
+                    ]);
+                }
             }
 
             CityDelivery::where('city_id',$id)->delete();
@@ -6364,11 +6367,15 @@ class AdminDashboardController extends Controller
                 'status'=>1
             ]);
 
-            $walk_in_city = WalkInCities::create([
-                'city_id'=>$city->id,
-                'pickup'=>($request->has('walk_in_pickup'))? 1:0,
-                'delivery'=>($request->has('walk_in_delivery'))? 1:0,
-            ]);
+            if(!empty($request->walk_in_delivery)) {
+                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                    WalkInCities::create([
+                        'city_id' => $city->id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'delivery' => $index,
+                    ]);
+                }
+            }
 
             foreach ($request->delivery as $booking_type_id => $shipping_modes) {
                 foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
@@ -6390,11 +6397,15 @@ class AdminDashboardController extends Controller
                 'status'=>1
             ]);
 
-            $walk_in_city = WalkInCities::create([
-                'city_id'=>$city->id,
-                'pickup'=>($request->has('walk_in_pickup'))? 1:0,
-                'delivery'=>($request->has('walk_in_delivery'))? 1:0,
-            ]);
+            if(!empty($request->walk_in_delivery)) {
+                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                    WalkInCities::create([
+                        'city_id' => $city->id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'delivery' => $index,
+                    ]);
+                }
+            }
 
             City::where('id',$city->id)->update(['hub_id'=>$city->id]);
 

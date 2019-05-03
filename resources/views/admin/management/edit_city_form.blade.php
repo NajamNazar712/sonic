@@ -98,24 +98,7 @@
                 </div>
 
             @endforeach
-        {{--<div class="input-group">--}}
-            {{--<div class="col-3">--}}
-                {{--<h4 class="card-title font-weight-bold">Pickup</h4>--}}
-            {{--</div>--}}
-            {{--<div class="col">--}}
-                {{--<fieldset class="">--}}
-                            {{--<input type="checkbox" name="walk_in_pickup" class="icheckbox" {{(isset($walk_in_pickup) && $walk_in_pickup->pickup == 1)? 'checked':''}}>--}}
-                            {{--<label for="walk_in_pickup" class="">Pickup</label>--}}
-                {{--</fieldset>--}}
-            {{--</div>--}}
-        {{--</div>--}}
             <div class="input-group">
-                {{--<div class="col">--}}
-                    {{--<fieldset class="">--}}
-                        {{--<input type="checkbox" name="walk_in_delivery" class="icheckbox" {{(isset($walk_in_city) && $walk_in_city->delivery == 1)? 'checked':''}}>--}}
-                        {{--<label for="walk_in_delivery" class="">Delivery</label>--}}
-                    {{--</fieldset>--}}
-                {{--</div>--}}
                 <div class="bs-callout-primary callout-border-left callout-square p-1">
                         <strong>Walk-In</strong>
                     <div class="mt-1 form-group">
