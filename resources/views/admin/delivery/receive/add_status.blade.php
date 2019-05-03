@@ -420,6 +420,9 @@
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: false,
                 paging: false,
                 ajax: '{{ route('admin.delivery.receive.add.list',['id'=>$delivery_note_id]) }}',

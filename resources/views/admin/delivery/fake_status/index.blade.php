@@ -296,6 +296,9 @@
                 pagingType: 'full_numbers',
                 paging: false,
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: {
                     url:'{{ route('admin.delivery.fake_status.list') }}',

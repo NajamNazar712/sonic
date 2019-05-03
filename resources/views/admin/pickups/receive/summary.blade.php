@@ -182,6 +182,9 @@
 				scrollX: true, scrollY: '350px',
                 paging:false,
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
 				serverSide: true,
 				ajax: {
 					url: '{{ route('admin.pickups.receive.summary.list') }}',
