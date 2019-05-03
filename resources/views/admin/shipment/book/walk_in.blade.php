@@ -267,6 +267,34 @@
                         $('#total_receivable').val(data.receivable);
                 });
             });
+            $('#new_pickup_city, #pickup_address, #consignee_city, #shipping_mode, #delivery_type, #charges_per_kg').change(function(){
+                if ($('#pickup_address').val() == 0) {
+                    var pickup_city_id = $('#new_pickup_city').val();
+                }
+                else {
+                    var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
+                }
+                $.ajax({
+                    url:'{!! route('admin.shipment.book.check_min_charges') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'pickup_city': pickup_city_id,
+                        'consignee_city': $('#consignee_city').val(),
+                        'delivery_type': $('#delivery_type').val(),
+                        'shipping_mode': $('#shipping_mode').val()
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        $('#span_charges').remove();
+                        if(data.min_charges < $('#charges_per_kg').val()) {
+                            var span_charges = '<span id="span_charges" style="color: blue">Minimum charges per kg will be ' + data.min_charges + '</span>';
+                            $('#charges_per_kg').parent('div').append(span_charges);
+                        }
+                    }
+                });
+
+            });
 
             $('#actual_weight, #charges_per_kg').change(function(){
                 $('#span').remove();

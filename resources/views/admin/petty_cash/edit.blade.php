@@ -215,6 +215,9 @@
                 scrollX: true, scrollY:'200px',
                 ajax: '{{ route('admin.petty_cash.statements.edit.list',['id'=>$petty_statement_details->id]) }}',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: false,
                 rowId: 'statement_detail_id',
                 paging:false,

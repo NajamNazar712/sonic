@@ -294,6 +294,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
         Route::put('/city/status', 'Admins\AdminDashboardController@CityStatus')->name('city.status');
         Route::get('/city/{id}/status/ajax', 'Admins\AdminDashboardController@CityStatusCheck')->name('city.status.ajax');
+        Route::get('', 'Admins\AdminDashboardController@walk_in_city_list')->name('city_list');
+        Route::post('', 'Admins\AdminDashboardController@check_min_charges')->name('min_charges');
 
         //Route
         Route::prefix('route')->name('route.')->group(function () {
@@ -1060,6 +1062,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add_fuel_surcharge_gst_total', 'Admins\AdminWalkInBookShipmentController@add_fuel_surcharge_gst_total')->name('add_fuel_surcharge_gst_total');
             Route::post('print_air_waybill', 'Admins\AdminWalkInBookShipmentController@print_air_waybill')->name('print_air_waybill');
             Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
+            Route::post('check_min_charges', 'Admins\AdminWalkInBookShipmentController@check_min_charges')->name('check_min_charges');
         });
     });
 });

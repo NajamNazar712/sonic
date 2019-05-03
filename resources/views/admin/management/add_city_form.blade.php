@@ -87,40 +87,24 @@
 
                 </div>
             @endforeach
+            <div class="input-group">
+                <div class="bs-callout-primary callout-border-left callout-square p-1">
+                    <strong>Walk-In</strong>
+                    <div class="mt-1 form-group">
+                        @foreach($shippingMode as $sindex => $shipping)
+                            @if($shipping->id != 4)
+                                <fieldset class="checkbox-inline mr-1">
+                                    <input type="checkbox" id="walk_in_delivery[{{$shipping->id}}]" name="walk_in_delivery[{{$shipping->id}}]" class="icheckbox">
+                                    <label for="walk_in_delivery[{{$shipping->id}}]" class="">{{ucfirst($shipping->mode)}}</label>
+                                </fieldset>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            </div>
 
         </div>
     </div>
-
-    <div class="row">
-        <div class="col">
-            <h2 class="card-title"><U>Walk-In</U></h2>
-        </div>
-    </div>
-    <div class="row">
-        <div class="input-group">
-            <div class="col-3">
-                <h4 class="card-title font-weight-bold">Pickup</h4>
-            </div>
-            <div class="col">
-                <fieldset class="">
-                    <input type="checkbox" name="walk_in_pickup" class="icheckbox">
-                    <label for="walk_in_pickup" class="">Pickup</label>
-                </fieldset>
-            </div>
-        </div>
-        <div class="input-group">
-            <div class="col-3">
-                <h4 class="card-title font-weight-bold">Delivery</h4>
-            </div>
-            <div class="col">
-                <fieldset class="">
-                    <input type="checkbox" name="walk_in_delivery" class="icheckbox">
-                    <label for="walk_in_delivery" class="">Delivery</label>
-                </fieldset>
-            </div>
-        </div>
-    </div>
-
 
     <div class="modal-footer">
         <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Add City</button>

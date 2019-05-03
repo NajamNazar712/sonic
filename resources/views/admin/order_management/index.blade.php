@@ -338,6 +338,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.orders.list') }}',
@@ -368,7 +371,7 @@
 
                 ],
                 rowCallback: function(row, data, index) {
-                    if (data.shipper_status_id === 1 || data.shipper_status_id === 2) {
+                    if (data.booking_type_id != 4 && (data.shipper_status_id === 1 || data.shipper_status_id === 2)) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shipment_id, selected_rows) !== -1) {
