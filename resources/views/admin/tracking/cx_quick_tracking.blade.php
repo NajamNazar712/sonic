@@ -1,6 +1,6 @@
 
 @extends('admin.layout.master')
-@section('title','Quick Tracking')
+@section('title','CX Quick Tracking')
 
 @section('content')
     <div class="app-content content">
@@ -44,7 +44,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="tracking_info" class="d-none">
+                            <div id="tracking_info" class="d-none mb-3 ml-1 mr-1">
                                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                     <thead>
                                     <tr role="row" class="bg-primary white">
@@ -81,16 +81,7 @@
         table.dataTable {
             font-size: 12px;
         }
-        #single_div p.status{
-            font-weight: bold;
-        }
-        #single_div{
-            font-size: 20px;
-        }
-        #single_div h4{
-            font-weight: bolder;
-            font-size: 18px;
-        }
+
         table.dataTable thead tr th {
             padding-left: 0.5em;
             white-space: normal;
@@ -132,25 +123,6 @@
             width: auto !important;
             text-align: left;
         }
-        .datatable tbody tr{
-            /*font-size: 18px;*/
-            /*font-weight: bold;*/
-        }
-
-        .goldClass{
-            background-color: gold;
-        }
-        .yellowClass{
-            background-color: #86cd7c;
-        }
-        .greenClass{
-            background-color: springgreen;
-        }
-        .redClass{
-            background-color: red;
-            color:#fff;
-        }
-
     </style>
 @endsection
 
