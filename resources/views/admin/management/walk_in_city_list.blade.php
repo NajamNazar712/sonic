@@ -88,7 +88,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="col-4">
+                                <div class="col-5">
                                     <form id="city_min_chargeable_info"
                                           class="form-inline" novalidate="novalidate">
                                         <div class="card-bordered">
@@ -161,19 +161,19 @@
         $(document).ready(function () {
             $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Shipping Mode',
+                placeholder: 'Shipping Mode',
             });
             $('#delivery_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Delivery Type',
+                placeholder: 'Delivery Type',
             });
             $('#pickup_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Pickup City',
+                placeholder: 'Pickup City',
             });
             $('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Consignee City',
+                placeholder: 'Consignee City',
             });
 
             $('#shipping_mode').on('change', function () {
