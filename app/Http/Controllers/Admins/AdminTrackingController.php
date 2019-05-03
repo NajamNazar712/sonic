@@ -313,7 +313,7 @@ class AdminTrackingController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->select('shipments.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no');
+            ->select('shipments.tracking_number as tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no');
         $datatable = Datatables::of($quick_tracking)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');

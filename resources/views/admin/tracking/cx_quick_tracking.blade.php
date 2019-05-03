@@ -50,6 +50,7 @@
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Tracking Number</th>
+                                        <th class="border-primary border-darken-1">Order ID</th>
                                         <th class="border-primary border-darken-1">Origin</th>
                                         <th class="border-primary border-darken-1">Destination</th>
                                         <th class="border-primary border-darken-1">Address</th>
