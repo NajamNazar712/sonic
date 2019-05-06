@@ -604,7 +604,7 @@ class DeliveryController extends Controller
                     $cod = $cod - $parcel->amount;
                 }
                 if ($count == 0) {
-                    DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod, 'status' => 4]);
+                    DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
                 } else {
                     DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                 }
