@@ -569,8 +569,7 @@ class DeliveryController extends Controller
 
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
-                return "<a href='javascript:void(0);' class='deliverynoterow'>Remove</a>";
-
+                return "<a href='javascript:void(0);' class='deliverynoterow'><button type='button' class='btn btn-sm btn-danger'>Remove</button></a>";
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
