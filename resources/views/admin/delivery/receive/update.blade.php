@@ -189,26 +189,49 @@
             $('body').on('click','a.deliverynoterow',function () {
                 var shipment_id = $(this).parents('tr').attr('id');
                 var delivery_note = $('#delivery_note').val();
-                blockPagePermanently();
-                $.ajax({
-                    url:'{{route('admin.delivery.receive.update.remove')}}',
-                    type:'POST',
-                    data: {
-                        'shipment_id':shipment_id,
-                        'delivery_note_id':delivery_note,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    if(data.status == 0){
-                        UnblockPagePermanently();
-                        table.row( $(this).parents('tr') ).remove().draw();
-                    }else{
-                        UnblockPagePermanently();
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to remove the shipment!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        blockPagePermanently();
+                        $.ajax({
+                            url:'{{route('admin.delivery.receive.update.remove')}}',
+                            type:'POST',
+                            data: {
+                                'shipment_id':shipment_id,
+                                'delivery_note_id':delivery_note,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status == 0){
+                                UnblockPagePermanently();
+                                table.row( $(this).parents('tr') ).remove().draw();
+                            }else{
+                                UnblockPagePermanently();
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
                     }
                 });
-
-
             });
 
 

@@ -569,8 +569,7 @@ class DeliveryController extends Controller
 
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
-                return "<a href='javascript:void(0);' class='deliverynoterow'>Remove</a>";
-
+                return "<a href='javascript:void(0);' class='deliverynoterow'><button type='button' class='btn btn-sm btn-danger'>Remove</button></a>";
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
@@ -591,24 +590,21 @@ class DeliveryController extends Controller
     {
         $shipment = DeliveryNoteShipment::where('shipment_id', $request->shipment_id)->where('delivery_note_id', $request->delivery_note_id);
         if ($shipment->exists()) {
-            $shipment = $shipment->first();
-            $delivery_note = $shipment->delivery_note_id;
+            $delivery_note = $request->delivery_note_id;
             $delivery = DeliveryNote::where('id', $delivery_note);
             if ($delivery->exists()) {
-                $parcel = Shipment::where('id', $request->shipment_id);
-                $parcel = $parcel->first();
+                $parcel = Shipment::where('id', $request->shipment_id)->first();
                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
                 $delivery = $delivery->first();
                 $count = $delivery->shipments_count;
                 $cod = $delivery->total_cod_amount;
-                $count = $count - 1;
+                $count-=1;
                 if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                     $cod = $cod - $parcel->amount;
                 }
                 if ($count == 0) {
-                    DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod, 'status' => 4]);
+                    DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
                 } else {
-
                     DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                 }
                 Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 6]);
