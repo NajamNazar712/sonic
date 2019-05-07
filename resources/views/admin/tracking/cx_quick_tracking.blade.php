@@ -17,12 +17,12 @@
                                 <div class="row justify-content-center mb-2">
                                     <div class="col-3">
                                         <fieldset>
-                                            <input type="text" class="form-control" placeholder="Search Tracking Number" id="search_tracking_number">
+                                            <input type="text" class="form-control" placeholder="Tracking Number" id="search_tracking_number">
                                         </fieldset>
                                     </div>
                                     <div class="col-3">
                                         <fieldset>
-                                            <input type="text" class="form-control" placeholder="Search Consignee Phone Number" id="search_consignee_phone_number">
+                                            <input type="text" class="form-control" placeholder="Consignee Phone Number" id="search_consignee_phone_number">
                                         </fieldset>
                                     </div>
                                     <div class="col-3">
@@ -36,7 +36,7 @@
                                     </div>
                                     <div class="col-3">
                                         <fieldset>
-                                            <input type="text" class="form-control" placeholder="Search Order ID" id="search_order_id">
+                                            <input type="text" class="form-control" placeholder="Order ID" id="search_order_id">
                                         </fieldset>
                                     </div>
                                     <div class="col-2">
@@ -156,7 +156,7 @@
                 'allowPlus': false
             });
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Search Shipper',
+                placeholder: 'Shipper',
                 width: '100%',
                 allowClear: true
             });
