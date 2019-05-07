@@ -168,8 +168,8 @@
 												</div>
 											</div>
 											<div class="modal-footer text-center justify-content-around">
-												<button type="submit" name="submit" class="btn btn-primary" value="submit">Submit</button>
-												<button type="submit" name="submit_and_print" class="btn btn-primary" value="submit_and_print">Submit &amp; Print</button>
+												<button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>
+												<button type="submit" name="submit_and_print_form" class="btn btn-primary" value="submit_and_print_form">Submit &amp; Print</button>
 											</div>
 										</form>
 								</div>
@@ -362,24 +362,45 @@
 					$('#cargo_consignment form .destination_hub_id').val(data.destination.id);
 					$('#cargo_consignment form .destination').html(data.destination.name);
 
+					$('#cargo_consignment form .actual_weight').val(data.actual_weight);
+
 					$.each(data.junctions, function(index, junction) {
 						$('#cargo_consignment form .junction_1').append('<option value="' + junction.id + '">' + junction.name + '</option>');
-
 						$('#cargo_consignment form .junction_2').append('<option value="' + junction.id + '">' + junction.name + '</option>');
 					});
 
-					$('#cargo_consignment form .junction_1').prepend('<option value="" selected="selected"></option>').select2({
-						width: '100%',
-						placeholder: 'Junction 1*'
-					}).bind('change', function() {
-						$(this).valid();
-					});
-
-					$('#cargo_consignment form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
-						width: '100%',
-						placeholder: 'Junction 2',
-						allowClear: true
-					});
+					if(data.junction_1) {
+						$('#cargo_consignment form .junction_1').val(data.junction_1);
+						$('#cargo_consignment form .junction_1').select2({
+							width: '100%',
+							placeholder: 'Junction 1*'
+						}).bind('change', function() {
+							$(this).valid();
+						});
+					}
+					else{
+						$('#cargo_consignment form .junction_1').prepend('<option value="" selected="selected"></option>').select2({
+							width: '100%',
+							placeholder: 'Junction 1*'
+						}).bind('change', function() {
+							$(this).valid();
+						});
+					}
+					if(data.junction_2) {
+						$('#cargo_consignment form .junction_2').val(data.junction_2);
+						$('#cargo_consignment form .junction_2').select2({
+							width: '100%',
+							placeholder: 'Junction 2',
+							allowClear: true
+						});
+					}
+					else{
+						$('#cargo_consignment form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
+							width: '100%',
+							placeholder: 'Junction 2',
+							allowClear: true
+						})
+					}
 
 					$('#cargo_consignment form input.seal_number').inputmask({
 						'alias': 'integer',
@@ -450,13 +471,25 @@
 						$('#cargo_consignment form .receiver_id').append('<option value="' + receiver.id + '">' + receiver.name + '</option>');
 					});
 
-					$('#cargo_consignment form .receiver_id').prepend('<option value="" selected="selected"></option>').select2({
-						width: '100%',
-						placeholder: 'Receiver Name',
-						allowClear: true
-					}).bind('change', function() {
-						$(this).valid();
-					});
+					if(data.receiver){
+						$('#cargo_consignment form .receiver_id').val(data.receiver);
+						$('#cargo_consignment form .receiver_id').select2({
+							width: '100%',
+							placeholder: 'Receiver Name',
+							allowClear: true
+						}).bind('change', function() {
+							$(this).valid();
+						});
+					}
+					else{
+						$('#cargo_consignment form .receiver_id').prepend('<option value="" selected="selected"></option>').select2({
+							width: '100%',
+							placeholder: 'Receiver Name',
+							allowClear: true
+						}).bind('change', function() {
+							$(this).valid();
+						});
+					}
                     UnblockPagePermanently();
 					$('#cargo_consignment form').validate({
 						errorClass: 'danger',

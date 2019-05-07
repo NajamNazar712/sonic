@@ -9,13 +9,12 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\CRM\CrmRequestCaseNature;
-use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\DeliveryType;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\Rates\HistoryBookingTypeCharges;
 use App\Http\Models\Rates\HistoryCashHandlingCharge;
@@ -33,6 +32,7 @@ use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\WalkInCities;
+use App\Http\Models\ZoneClassCity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
@@ -170,85 +170,12 @@ class AdminDashboardController extends Controller
 
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
-        for ($counter = 29; $counter >= 0; $counter--) {
-            $date = Carbon::now()->subDays($counter);
-            $comparison_date = $date->toDateString();
-            $graph['dates'][] = $date->format('d M');
 
-            $booked = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',1);
-            $received = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[2,3,4]);
-            $cancelled = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',17);
-            $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
-            $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19]);
-            $return = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46]);
-
-            if (session('role_id') != 1) {
-                $booked = $booked->where(function($query) {
-                    $query->whereHas('pickup_address.city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    })->orWhereHas('consignee_city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    });
-                });
-
-                $received = $received->where(function($query) {
-                    $query->whereHas('pickup_address.city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    })->orWhereHas('consignee_city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    });
-                });
-                $cancelled = $cancelled->where(function($query) {
-                    $query->whereHas('pickup_address.city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    })->orWhereHas('consignee_city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    });
-                });
-
-                $delivered = $delivered->where(function($query) {
-                    $query->whereHas('pickup_address.city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    })->orWhereHas('consignee_city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    });
-                });
-
-                $return = $return->where(function($query) {
-                    $query->whereHas('pickup_address.city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    })->orWhereHas('consignee_city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    });
-                });
-
-                $pending = $pending->where(function($query) {
-                    $query->whereHas('pickup_address.city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    })->orWhereHas('consignee_city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    });
-                });
-            }
-
-            $graph['booked'][] = $booked->count();
-            $graph['received'][] = $received->count();
-            $graph['cancelled'][] = $cancelled->count();
-            $graph['delivered'][] = $delivered->count();
-            $graph['pending'][] = $pending->count();
-            $graph['return'][] = $return->count();
-        }
         $shippers = User::where('status',3)->where('blacklist',0)->select('id','name')->get();
         $cities = City::where('status',1)->select('id','name')->get();
-        $shipment_status = ShipmentStatus::select('id','name')->get();
-        $service_type = BookingType::all();
-        $products = Product::select('id','product_name')->get();
-        $payment_status = ShipmentPaymentStatus::all();
-        $case_nature = CrmRequestCaseNature::get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
-        $case_nature_channels = CrmRequestChannel::get();
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels]);
+
+        // return $cities;
+        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers]);
     }
     public function statistics_search(Request $request){
 //        return $request;
@@ -542,161 +469,161 @@ class AdminDashboardController extends Controller
 
         return response()->json(['status'=>1,'graph'=>$graph]);
     }
-    public function orders_list(Request $request)
-    {
-        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->leftJoin('shipments_journey', function ($join) {
-                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                    ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
-            })
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
-            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-            ->leftjoin('shipment_items as si', function ($join) {
-                $join->on('si.shipment_id', '=', 'shipments.id')
-                    ->where('si.type','=',0);
-            })
-            ->leftjoin('products as p','p.id','=','si.product_type_id')
-            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->select(['shipments_journey.remarks as cancellation_remarks', 'si.description as product_description','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.id as account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments.booking_type_id', 'usi.poc','shipments_journey.shipper_status_id as status_id'])
-            ->groupBy('shipments.id');
-
-        if (session('role_id') != 1) {
-            $shipments = $shipments->where(function ($query) {
-                $query->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
-            });
-        }
-
-        $datatable = Datatables::of($shipments)
-            ->editColumn('tracking_number', function ($shipments) {
-                $route = route('admin.tracking.index');
-                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
-            })
-            ->editColumn('account_no', function ($shipment) {
-                return str_pad($shipment->account_no, 6, '0', STR_PAD_LEFT);
-            })
-            ->editColumn('shipper', function ($shipment) {
-                if ($shipment->booking_type_id == 4) {
-                    return $shipment->shipper .' (' . $shipment->poc . ')';
-                }
-                else {
-                    return $shipment->shipper;
-                }
-            })
-            ->filterColumn('u.name', function ($query, $keyword) {
-                $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('shipments.booking_type_id', '!=', 4)
-                        ->where('u.name', 'like', '%' . $keyword . '%');
-                })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.booking_type_id', '=', 4)
-                            ->where('usi.poc', 'like', '%' . $keyword . '%');
-                    });
-            })
-            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
-            ->filterColumn('u.id', function ($query, $keyword) {
-                return $query->where('u.id', '=', $keyword);
-            })
-            ->editColumn('amount', function($shipment){
-                return number_format($shipment->amount);
-            })
-            ->editColumn('phone',function ($shipments){
-                return $shipments->phone1."<br>".$shipments->phone2;
-            })
-            ->editColumn('cancellation_remarks',function ($shipments){
-                if($shipments->cancellation_remarks != null && $shipments->status_id == 17){
-                    return $shipments->cancellation_remarks;
-                }
-                else{
-                    return '-';
-                }
-            })
-            ->filterColumn('phone', function ($query, $keyword) {
-                $keyword = strtolower($keyword);
-
-                $keyword = str_replace('-', '', $keyword);
-
-                if ($keyword != '') {
-                    $query->where(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')
-                            ->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
-                    });
-                }
-
-                else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
-            ->filterColumn('status',function ($query,$keyword){
-
-                if ($keyword != '') {
-                    $query->where('ss.id',$keyword);
-                }
-                else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->filterColumn('service_type',function ($query,$keyword){
-
-                if ($keyword != '') {
-                    $query->where('bt.id',$keyword);
-                }
-                else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->filterColumn('payment_status',function ($query,$keyword){
-
-                if ($keyword != '') {
-                    $query->where('sps.id',$keyword);
-                }
-                else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->filterColumn('product_type',function ($query,$keyword){
-
-                if ($keyword != '') {
-                    $query->where('p.id',$keyword);
-                }
-                else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->addColumn('action',function ($shipments) {
-                if ($shipments->shipper_status_id != 17 && $shipments->shipper_status_id > 1) {
-                    $dropdown = '
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                            <div class="dropdown-menu dropdown-menu-sm">
-                                <button type="button" class="dropdown-item view_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Charges</div></button>
-                            </div>
-                        </div>
-                    ';
-
-                    return $dropdown;
-                }
-                else {
-                    return '';
-                }
-            });
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-        }
-        if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
-            $from = $request->get('booking_from_date');
-            $to = $request->get('booking_to_date');
-            $datatable->whereBetween('shipments.created_at', [$from,$to]);
-        }
-        return $datatable->make(true);
-    }
+//    public function orders_list(Request $request)
+//    {
+//        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+//            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+//            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+//            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+//            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+//            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+//            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+//            ->leftJoin('shipments_journey', function ($join) {
+//                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+//                    ->where('shipments_journey.id', '=',
+//                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+//            })
+//            ->join('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
+//            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+//            ->leftjoin('shipment_items as si', function ($join) {
+//                $join->on('si.shipment_id', '=', 'shipments.id')
+//                    ->where('si.type','=',0);
+//            })
+//            ->leftjoin('products as p','p.id','=','si.product_type_id')
+//            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
+//            ->select(['shipments_journey.remarks as cancellation_remarks', 'si.description as product_description','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.id as account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments.booking_type_id', 'usi.poc','shipments_journey.shipper_status_id as status_id'])
+//            ->groupBy('shipments.id');
+//
+//        if (session('role_id') != 1) {
+//            $shipments = $shipments->where(function ($query) {
+//                $query->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
+//            });
+//        }
+//
+//        $datatable = Datatables::of($shipments)
+//            ->editColumn('tracking_number', function ($shipments) {
+//                $route = route('admin.tracking.index');
+//                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+//            })
+//            ->editColumn('account_no', function ($shipment) {
+//                return str_pad($shipment->account_no, 6, '0', STR_PAD_LEFT);
+//            })
+//            ->editColumn('shipper', function ($shipment) {
+//                if ($shipment->booking_type_id == 4) {
+//                    return $shipment->shipper .' (' . $shipment->poc . ')';
+//                }
+//                else {
+//                    return $shipment->shipper;
+//                }
+//            })
+//            ->filterColumn('u.name', function ($query, $keyword) {
+//                $query->where(function ($sub_query) use ($keyword) {
+//                    $sub_query->where('shipments.booking_type_id', '!=', 4)
+//                        ->where('u.name', 'like', '%' . $keyword . '%');
+//                })
+//                    ->orWhere(function ($sub_query) use ($keyword) {
+//                        $sub_query->where('shipments.booking_type_id', '=', 4)
+//                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+//                    });
+//            })
+//            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
+//            ->filterColumn('u.id', function ($query, $keyword) {
+//                return $query->where('u.id', '=', $keyword);
+//            })
+//            ->editColumn('amount', function($shipment){
+//                return number_format($shipment->amount);
+//            })
+//            ->editColumn('phone',function ($shipments){
+//                return $shipments->phone1."<br>".$shipments->phone2;
+//            })
+//            ->editColumn('cancellation_remarks',function ($shipments){
+//                if($shipments->cancellation_remarks != null && $shipments->status_id == 17){
+//                    return $shipments->cancellation_remarks;
+//                }
+//                else{
+//                    return '-';
+//                }
+//            })
+//            ->filterColumn('phone', function ($query, $keyword) {
+//                $keyword = strtolower($keyword);
+//
+//                $keyword = str_replace('-', '', $keyword);
+//
+//                if ($keyword != '') {
+//                    $query->where(function ($sub_query) use ($keyword) {
+//                        $sub_query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')
+//                            ->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
+//                    });
+//                }
+//
+//                else {
+//                    $query->whereRaw('false');
+//                }
+//            })
+//            ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
+//            ->filterColumn('status',function ($query,$keyword){
+//
+//                if ($keyword != '') {
+//                    $query->where('ss.id',$keyword);
+//                }
+//                else {
+//                    $query->whereRaw('false');
+//                }
+//            })
+//            ->filterColumn('service_type',function ($query,$keyword){
+//
+//                if ($keyword != '') {
+//                    $query->where('bt.id',$keyword);
+//                }
+//                else {
+//                    $query->whereRaw('false');
+//                }
+//            })
+//            ->filterColumn('payment_status',function ($query,$keyword){
+//
+//                if ($keyword != '') {
+//                    $query->where('sps.id',$keyword);
+//                }
+//                else {
+//                    $query->whereRaw('false');
+//                }
+//            })
+//            ->filterColumn('product_type',function ($query,$keyword){
+//
+//                if ($keyword != '') {
+//                    $query->where('p.id',$keyword);
+//                }
+//                else {
+//                    $query->whereRaw('false');
+//                }
+//            })
+//            ->addColumn('action',function ($shipments) {
+//                if ($shipments->shipper_status_id != 17 && $shipments->shipper_status_id > 1) {
+//                    $dropdown = '
+//                        <div class="btn-group">
+//                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+//                            <div class="dropdown-menu dropdown-menu-sm">
+//                                <button type="button" class="dropdown-item view_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Charges</div></button>
+//                            </div>
+//                        </div>
+//                    ';
+//
+//                    return $dropdown;
+//                }
+//                else {
+//                    return '';
+//                }
+//            });
+//        if ($tracking_numbers = $request->get('tracking_numbers')) {
+//            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+//        }
+//        if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
+//            $from = $request->get('booking_from_date');
+//            $to = $request->get('booking_to_date');
+//            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+//        }
+//        return $datatable->make(true);
+//    }
     public function ecommerce(){
         return view('admin.ecommerce');
     }
@@ -837,53 +764,7 @@ class AdminDashboardController extends Controller
             return response()->json(['status'=>0,'error'=>"User doesn\'t exist!"]);
         }
     }
-    public function get_shipment_charges(Request $request){
-        $shipment_id = $request->shipment_id;
-        $shipment = Shipment::find($shipment_id);
-        $returnHTML = view('admin/components/shipment_charges')->with(['shipment'=>$shipment])->render();
-        return response()->json($returnHTML);
-    }
-    public function shipper_recall(Request $request) {
-        $shipment_ids = $request->shipment_ids;
 
-        if (!empty($shipment_ids)) {
-            $valid = FALSE;
-
-            foreach ($shipment_ids as $shipment_id) {
-                $shipment = Shipment::find($shipment_id);
-
-                if ($shipment && $shipment->shipper_status_id == 2 && !$shipment->packaging_material_request) {
-                    $valid = TRUE;
-
-                    $shipment->shipper_status_id = 20;
-                    $shipment->consignee_status_id = 20;
-
-                    $shipment->save();
-
-                    ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
-
-                    ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
-
-                    NotificationsController::send(15, 0, $shipment_id);
-                    NotificationsController::send(16, 0, $shipment_id);
-
-                    ShipmentChargesController::return($shipment_id);
-
-                    AdminFinanceController::add_payment($shipment_id, 1);
-                }
-            }
-
-            if ($valid) {
-                return ['status' => 0, 'success' => 'Shipment(s) has been marked as Return Confirm due to Shipper Recall'];
-            }
-            else {
-                return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];
-            }
-        }
-        else {
-            return ['status' => 1, 'error' => 'No Shipment Selected'];
-        }
-    }
 
     /**
      * @return \Illuminate\Http\JsonResponse
@@ -924,6 +805,7 @@ class AdminDashboardController extends Controller
     public function addRatesView($id){
         $user = User::find($id);
         if(!RateStatus::where('user_id', $user->id)->exists()) {
+            $sale_person = SalePersonTag::where('user_id',$id)->first();
             $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
             $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
             $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
@@ -931,7 +813,7 @@ class AdminDashboardController extends Controller
             $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
             $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
             $packaging = StandardPackagingCharge::all()->groupBy('shipping_mode_id');
-            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging]);
+            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'sale_person' => $sale_person]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }
@@ -955,14 +837,16 @@ class AdminDashboardController extends Controller
         $fuel = FuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $packaging = PackagingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $sale_person = SalePersonTag::where('user_id',$id)->first();
 //        return $discount;
-        return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount]);
+        return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person]);
 
     }
 
 
     public function editRatesView($id){
         $user = User::find($id);
+        $sale_person = SalePersonTag::where('user_id',$id)->first();
         if ((($user['rate_status']>=0) && $user['status']==1)||(($user['rate_status']==0) && $user['status']==3)) {
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
@@ -997,7 +881,7 @@ class AdminDashboardController extends Controller
             return redirect(route('admin.accounts.pending'));
         }
 //        return $discount;
-        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'rate_status'=>$rate_status]);
+        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person]);
 
     }
 
@@ -1414,7 +1298,6 @@ class AdminDashboardController extends Controller
                     ->withInput();
             }
 
-
             if ($request->on_rate_record != null) {
                 RateStatus::where('id', $request->on_rate_record)
                     ->update([
@@ -1514,6 +1397,13 @@ class AdminDashboardController extends Controller
 
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
+
+                if($request->has('on_default') && $request->on_default == 'on'){
+                    $default_shipping_mode = User::where('id', $id)->update([
+                        'default_shipping_mode' => 1
+                    ]);
+                }
+
                 $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
@@ -1779,6 +1669,13 @@ class AdminDashboardController extends Controller
 
             //overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
+
+                if($request->has('ol_default') && $request->ol_default == 'on'){
+                    $default_shipping_mode = User::where('id', $id)->update([
+                        'default_shipping_mode' => 2
+                    ]);
+                }
+
                 $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 2])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
@@ -2043,6 +1940,12 @@ class AdminDashboardController extends Controller
 
             //detain
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
+
+                if($request->has('det_default') && $request->det_default == 'on'){
+                    $default_shipping_mode = User::where('id', $id)->update([
+                        'default_shipping_mode' => 3
+                    ]);
+                }
                 $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
@@ -2307,6 +2210,13 @@ class AdminDashboardController extends Controller
 
             //sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
+
+                if($request->has('sameday_default') && $request->sameday_default == 'on'){
+                    $default_shipping_mode = User::where('id', $id)->update([
+                        'default_shipping_mode' => 4
+                    ]);
+                }
+
                 $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
@@ -2986,6 +2896,27 @@ class AdminDashboardController extends Controller
                 return redirect()->back()
                     ->withErrors($validate)
                     ->withInput();
+            }
+
+            if($request->has('on_default') && $request->on_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 1
+                ]);
+            }
+            if($request->has('ol_default') && $request->ol_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 2
+                ]);
+            }
+            if($request->has('det_default') && $request->det_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 3
+                ]);
+            }
+            if($request->has('sameday_default') && $request->sameday_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 4
+                ]);
             }
 
             PendingRateStatus::where('user_id', $id)->delete();
@@ -5012,6 +4943,11 @@ class AdminDashboardController extends Controller
         }
 
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
+            if($request->has('on_default') && $request->on_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 1
+                ]);
+            }
             $ONRateAlready = RateStatus::where('user_id',$id)->where('shipping_mode_id',1)->get();
 
             if($ONRateAlready->isEmpty()) {
@@ -5177,6 +5113,11 @@ class AdminDashboardController extends Controller
         }
         //Overland
         if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
+            if($request->has('ol_default') && $request->ol_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 2
+                ]);
+            }
 
             $OLRatePresent = RateStatus::where('user_id',$id)->where('shipping_mode_id',2)->get();
 
@@ -5342,6 +5283,11 @@ class AdminDashboardController extends Controller
         }
         //Detain
         if($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
+            if($request->has('det_default') && $request->det_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 3
+                ]);
+            }
 
             $DetainRatePresent = RateStatus::where('user_id', $id)->where('shipping_mode_id', 3)->get();
 
@@ -5507,6 +5453,11 @@ class AdminDashboardController extends Controller
         }
         //Sameday
         if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
+            if($request->has('sameday_default') && $request->sameday_default == 'on'){
+                $default_shipping_mode = User::where('id', $id)->update([
+                    'default_shipping_mode' => 4
+                ]);
+            }
 
             $SamedayRatePresent = RateStatus::where('user_id',$id)->where('shipping_mode_id',4)->get();
             if($SamedayRatePresent->isEmpty()) {
@@ -5909,8 +5860,6 @@ class AdminDashboardController extends Controller
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
                             if($result->status != 2) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
-
-
                             }
                         } else {
                             if (session('role_id') == 1 || in_array(6, session('permissions'))) {
@@ -5921,7 +5870,6 @@ class AdminDashboardController extends Controller
                         if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
                             if($result->status != 2) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
-
                             }
                         } else {
                             if (session('role_id') == 1 || in_array(6, session('permissions'))) {
@@ -5934,11 +5882,15 @@ class AdminDashboardController extends Controller
                 }
                 if($result->account_type_id == 1){
                     if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions')))) {
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                        if($result->status != 0) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                        }
                     }
                 }else{
-                    if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions')))) {
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.view.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                    if($result->status != 0) {
+                        if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions')))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.view.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                        }
                     }
                 }
                 if($result->blacklist == 0 && (session('role_id') == 1 || in_array(10, session('permissions')))) {
@@ -6256,8 +6208,12 @@ class AdminDashboardController extends Controller
         $zones = Zone::all();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::where('id','!=',4)->get();
-        $walk_in_city = WalkInCities::where('city_id',$city['id'])->first();
-        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs, 'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub, 'walk_in_city' => $walk_in_city]);
+        $walk_in_city = WalkInCities::where('city_id',$city['id'])->get();
+        $walk_in_delivery = array();
+        foreach ($walk_in_city as $walk_in_detail){
+            $walk_in_delivery[$walk_in_detail['delivery']] = $walk_in_detail['delivery'];
+        }
+        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs, 'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub, 'walk_in_city' => $walk_in_delivery]);
 
     }
 
@@ -6269,14 +6225,18 @@ class AdminDashboardController extends Controller
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
                 'zone_id'=>City::find($request->hubs)->zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0,
-                'status'=>1
+                'pickup'=>($request->has('pickup'))? 1:0
             ]);
-
-            $walk_in_city = WalkInCities::where('city_id',$id)->update([
-                'pickup'=>($request->has('walk_in_pickup'))? 1:0,
-                'delivery'=>($request->has('walk_in_delivery'))? 1:0,
-            ]);
+            WalkInCities::where('city_id',$id)->delete();
+            if(!empty($request->walk_in_delivery)) {
+                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                    WalkInCities::create([
+                        'city_id' => $id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'delivery' => $index,
+                    ]);
+                }
+            }
 
             CityDelivery::where('city_id',$id)->delete();
 
@@ -6297,14 +6257,19 @@ class AdminDashboardController extends Controller
                 'hub'=>1,
                 'hub_id'=>$id,
                 'zone_id'=>$request->zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0,
-                'status'=>1
+                'pickup'=>($request->has('pickup'))? 1:0
             ]);
 
-            $walk_in_city = WalkInCities::where('city_id',$id)->update([
-                'pickup'=>($request->has('walk_in_pickup'))? 1:0,
-                'delivery'=>($request->has('walk_in_delivery'))? 1:0,
-            ]);
+            WalkInCities::where('city_id',$id)->delete();
+            if(!empty($request->walk_in_delivery)) {
+                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                    WalkInCities::create([
+                        'city_id' => $id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'delivery' => $index,
+                    ]);
+                }
+            }
 
             CityDelivery::where('city_id',$id)->delete();
 
@@ -6335,11 +6300,15 @@ class AdminDashboardController extends Controller
                 'status'=>1
             ]);
 
-            $walk_in_city = WalkInCities::create([
-                'city_id'=>$city->id,
-                'pickup'=>($request->has('walk_in_pickup'))? 1:0,
-                'delivery'=>($request->has('walk_in_delivery'))? 1:0,
-            ]);
+            if(!empty($request->walk_in_delivery)) {
+                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                    WalkInCities::create([
+                        'city_id' => $city->id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'delivery' => $index,
+                    ]);
+                }
+            }
 
             foreach ($request->delivery as $booking_type_id => $shipping_modes) {
                 foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
@@ -6361,11 +6330,15 @@ class AdminDashboardController extends Controller
                 'status'=>1
             ]);
 
-            $walk_in_city = WalkInCities::create([
-                'city_id'=>$city->id,
-                'pickup'=>($request->has('walk_in_pickup'))? 1:0,
-                'delivery'=>($request->has('walk_in_delivery'))? 1:0,
-            ]);
+            if(!empty($request->walk_in_delivery)) {
+                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                    WalkInCities::create([
+                        'city_id' => $city->id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'delivery' => $index,
+                    ]);
+                }
+            }
 
             City::where('id',$city->id)->update(['hub_id'=>$city->id]);
 
@@ -6778,6 +6751,37 @@ class AdminDashboardController extends Controller
         }
         else{
             return back()->with('danger', 'There is no email selected!');
+        }
+    }
+
+    public function walk_in_city_list(){
+        $cities = City::select('id', 'name')->get();
+        $walk_in_cities = WalkInCities::all();
+        $shipping_modes = ShippingMode::where('id', '<', 4)->get();
+        $pickup_cities = City::select('id', 'name')->where('pickup', 1)->get();
+        $delivery_types = DeliveryType::get();
+        return view('admin.management.walk_in_city_list')->with(['cities' => $cities, 'walk_in_cities' => $walk_in_cities, 'shipping_modes' => $shipping_modes, 'pickup_cities' => $pickup_cities, 'delivery_types' => $delivery_types]);
+    }
+
+    public function check_min_charges(Request $request){
+        if($request->pickup_city != null && $request->consignee_city != null) {
+            $min_charges = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
+            if ($request->pickup_city == $request->consignee_city) {
+                $min_charges = $min_charges['chargeable_weight_local'];
+            } else {
+                $city = City::where('id', $request->consignee_city)->first();
+                $zone_class = ZoneClassCity::where(['zone_id' => $city['zone_id'], 'city_id' => $request->consignee_city])->first();
+                if ($zone_class['class'] == 1) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_1'];
+                } elseif ($zone_class['class'] == 2) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_2'];
+                } elseif ($zone_class['class'] == 3) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_3'];
+                } else {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_0'];
+                }
+            }
+            return ['status' => 1, 'min_charges' => $min_charges];
         }
     }
 }

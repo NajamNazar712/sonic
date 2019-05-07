@@ -2529,144 +2529,171 @@ class NotificationsController extends Controller
 
             self::email($subject, $body, $to, $cc);
           }
-          else if($id == 31){
-              $possible_fields = ['tracking_number', 'shipper_name', 'email', 'phone', 'destination', 'channel', 'case_nature', 'case_nature_type', 'details'];
+			else if($id == 31){
+	              $possible_fields = ['tracking_number', 'shipper_name', 'email', 'phone', 'destination', 'channel', 'case_nature', 'case_nature_type', 'details'];
 
-            $crm_request = CrmRequest::find($reference_1_id);
-            if($crm_request) {
-                $tagging = CrmRequestTagging::where('crm_request_id', $crm_request->id)->first();
-                if ($crm_request->status_id != 1) {
-                    if ($tagging) {
+	            $crm_request = CrmRequest::find($reference_1_id);
+	            if($crm_request) {
+	                $tagging = CrmRequestTagging::where('crm_request_id', $crm_request->id)->first();
+	                if ($crm_request->status_id != 1) {
+	                    if ($tagging) {
 
-                        if ($tagging->crm_request_tagging_type_id == 1) {
-                            $roles = AdminRole::where('department_id', $tagging->tagged_id)->pluck('id');
-                            $admin_department = Admin::whereIn('role_id', $roles)->where('status', 1);
-                            if ($admin_department->exists()) {
-                                $to = $admin_department->pluck('email');
-                            }
-                        } else if ($tagging->crm_request_tagging_type_id == 2) {
-                            $admin_department = Admin::find($tagging->tagged_id)->email;
-                            $to = $admin_department;
-                        }
-                    }
-                }
-                else{
-                    $to = 'complaints@trax.pk';
-                }
+	                        if ($tagging->crm_request_tagging_type_id == 1) {
+	                            $roles = AdminRole::where('department_id', $tagging->tagged_id)->pluck('id');
+	                            $admin_department = Admin::whereIn('role_id', $roles)->where('status', 1);
+	                            if ($admin_department->exists()) {
+	                                $to = $admin_department->pluck('email');
+	                            }
+	                        } else if ($tagging->crm_request_tagging_type_id == 2) {
+	                            $admin_department = Admin::find($tagging->tagged_id)->email;
+	                            $to = $admin_department;
+	                        }
+	                    }
+	                }
+	                else{
+	                    $to = 'complaints@trax.pk';
+	                }
 
-                    $table_details = '';
+	                    $table_details = '';
 
-                    if($crm_request->shipment_id){
-                        $shipment = Shipment::find($crm_request->shipment_id);
-                        if($shipment){
-                            if (strpos($subject, '[tracking_number]') !== FALSE) {
-                                $subject = str_replace('[tracking_number]', $shipment->tracking_number, $subject);
-                            }
-                            if (strpos($subject, '[shipper_name]') !== FALSE) {
-                                $subject = str_replace('[shipper_name]', $shipment->user->name, $subject);
-                            }
-                            if (strpos($subject, '[email]') !== FALSE) {
-                                $subject = str_replace('[email]', $shipment->user->email, $subject);
-                            }
-                            if (strpos($subject, '[phone]') !== FALSE) {
-                                $subject = str_replace('[phone]', $shipment->user->phone, $subject);
-                            }
-                            if (strpos($subject, '[destination]') !== FALSE) {
-                                $subject = str_replace('[destination]', $shipment->consignee_city->name, $subject);
-                            }
+	                    if($crm_request->shipment_id){
+	                        $shipment = Shipment::find($crm_request->shipment_id);
+	                        if($shipment){
+	                            if (strpos($subject, '[tracking_number]') !== FALSE) {
+	                                $subject = str_replace('[tracking_number]', $shipment->tracking_number, $subject);
+	                            }
+	                            if (strpos($subject, '[shipper_name]') !== FALSE) {
+	                                $subject = str_replace('[shipper_name]', $shipment->user->name, $subject);
+	                            }
+	                            if (strpos($subject, '[email]') !== FALSE) {
+	                                $subject = str_replace('[email]', $shipment->user->email, $subject);
+	                            }
+	                            if (strpos($subject, '[phone]') !== FALSE) {
+	                                $subject = str_replace('[phone]', $shipment->user->phone, $subject);
+	                            }
+	                            if (strpos($subject, '[destination]') !== FALSE) {
+	                                $subject = str_replace('[destination]', $shipment->consignee_city->name, $subject);
+	                            }
 
 
-                            if (strpos($body, '[tracking_number]') !== FALSE) {
-                                $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Tracking Number</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->tracking_number .'</td></tr>';
-                            }
-                            if (strpos($body, '[shipper_name]') !== FALSE) {
-                                $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Shipper Name</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->user->name .'</td></tr>';
-                            }
-                            if (strpos($body, '[email]') !== FALSE) {
-                                $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Shipper Email</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->user->email .'</td></tr>';
-                            }
-                            if (strpos($body, '[phone]') !== FALSE) {
-                                $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Shipper Phone</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->user->phone .'</td></tr>';
-                            }
-                            if (strpos($body, '[destination]') !== FALSE) {
-                                $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Destination</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->consignee_city->name .'</td></tr>';
-                            }
+	                            if (strpos($body, '[tracking_number]') !== FALSE) {
+	                                $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Tracking Number</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->tracking_number .'</td></tr>';
+	                            }
+	                            if (strpos($body, '[shipper_name]') !== FALSE) {
+	                                $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Shipper Name</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->user->name .'</td></tr>';
+	                            }
+	                            if (strpos($body, '[email]') !== FALSE) {
+	                                $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Shipper Email</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->user->email .'</td></tr>';
+	                            }
+	                            if (strpos($body, '[phone]') !== FALSE) {
+	                                $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Shipper Phone</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->user->phone .'</td></tr>';
+	                            }
+	                            if (strpos($body, '[destination]') !== FALSE) {
+	                                $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Destination</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->consignee_city->name .'</td></tr>';
+	                            }
 
-                        }else{
-                            if (strpos($body, '[tracking_number]') !== FALSE) {
-                                $body = str_replace('[tracking_number]', '', $body);
-                            }
-                            if (strpos($body, '[shipper_name]') !== FALSE) {
-                                $body = str_replace('[shipper_name]', '', $body);
-                            }
-                            if (strpos($body, '[email]') !== FALSE) {
-                                $body = str_replace('[email]', '', $body);
-                            }
-                            if (strpos($body, '[phone]') !== FALSE) {
-                                $body = str_replace('[phone]', '', $body);
-                            }
-                            if (strpos($body, '[destination]') !== FALSE) {
-                                $body = str_replace('[destination]', '', $body);
-                            }
-                        }
-                    }
+	                        }else{
+	                            if (strpos($body, '[tracking_number]') !== FALSE) {
+	                                $body = str_replace('[tracking_number]', '', $body);
+	                            }
+	                            if (strpos($body, '[shipper_name]') !== FALSE) {
+	                                $body = str_replace('[shipper_name]', '', $body);
+	                            }
+	                            if (strpos($body, '[email]') !== FALSE) {
+	                                $body = str_replace('[email]', '', $body);
+	                            }
+	                            if (strpos($body, '[phone]') !== FALSE) {
+	                                $body = str_replace('[phone]', '', $body);
+	                            }
+	                            if (strpos($body, '[destination]') !== FALSE) {
+	                                $body = str_replace('[destination]', '', $body);
+	                            }
+	                        }
+	                    }
 
-                    if (strpos($subject, '[request_id]') !== FALSE) {
-                        $subject = str_replace('[request_id]', $crm_request->id, $subject);
-                    }
-                    if (strpos($subject, '[channel]') !== FALSE) {
-                        $subject = str_replace('[channel]', $crm_request->channel->channel, $subject);
-                    }
-                    if (strpos($subject, '[case_nature]') !== FALSE) {
-                        $subject = str_replace('[case_nature]', $crm_request->nature->name, $subject);
-                    }
-                    if (strpos($subject, '[case_nature_type]') !== FALSE) {
-                        $subject = str_replace('[case_nature_type]', $crm_request->nature->type, $subject);
-                    }
-                    if (strpos($subject, '[details]') !== FALSE) {
-                        $subject = str_replace('[details]', $crm_request->description, $subject);
-                    }
+	                    if (strpos($subject, '[request_id]') !== FALSE) {
+	                        $subject = str_replace('[request_id]', $crm_request->id, $subject);
+	                    }
+	                    if (strpos($subject, '[channel]') !== FALSE) {
+	                        $subject = str_replace('[channel]', $crm_request->channel->channel, $subject);
+	                    }
+	                    if (strpos($subject, '[case_nature]') !== FALSE) {
+	                        $subject = str_replace('[case_nature]', $crm_request->nature->name, $subject);
+	                    }
+	                    if (strpos($subject, '[case_nature_type]') !== FALSE) {
+	                        $subject = str_replace('[case_nature_type]', $crm_request->nature->type, $subject);
+	                    }
+	                    if (strpos($subject, '[details]') !== FALSE) {
+	                        $subject = str_replace('[details]', $crm_request->description, $subject);
+	                    }
 
-                    if (strpos($body, '[channel]') !== FALSE) {
-                        $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Channel</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $crm_request->channel->channel .'</td></tr>';
-                    }
-                    if (strpos($body, '[case_nature]') !== FALSE) {
-                        $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Case Nature</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $crm_request->nature->name .'</td></tr>';
-                    }
-                    if($crm_request->case_nature_id != 3){
-                        if (strpos($body, '[case_nature_type]') !== FALSE) {
-                            $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Case Nature Type</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $crm_request->nature_type->type .'</td></tr>';
-                        }
-                    }
-                    if (strpos($body, '[details]') !== FALSE) {
-                        $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Description</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $crm_request->description .'</td></tr>';
-                    }
+	                    if (strpos($body, '[channel]') !== FALSE) {
+	                        $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Channel</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $crm_request->channel->channel .'</td></tr>';
+	                    }
+	                    if (strpos($body, '[case_nature]') !== FALSE) {
+	                        $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Case Nature</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $crm_request->nature->name .'</td></tr>';
+	                    }
+	                    if($crm_request->case_nature_id != 3){
+	                        if (strpos($body, '[case_nature_type]') !== FALSE) {
+	                            $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Case Nature Type</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $crm_request->nature_type->type .'</td></tr>';
+	                        }
+	                    }
+	                    if (strpos($body, '[details]') !== FALSE) {
+	                        $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Description</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $crm_request->description .'</td></tr>';
+	                    }
 
-                    $table_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody>' . $table_details . '</tbody></table>';
+	                    $table_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody>' . $table_details . '</tbody></table>';
 
-                    $first = TRUE;
+	                    $first = TRUE;
 
-                    foreach ($possible_fields as $possible_field) {
-                        if (strpos($body, '[' . $possible_field . ']') !== FALSE) {
-                            if ($first) {
-                                $body = str_replace('[' . $possible_field . ']', $table_details, $body);
+	                    foreach ($possible_fields as $possible_field) {
+	                        if (strpos($body, '[' . $possible_field . ']') !== FALSE) {
+	                            if ($first) {
+	                                $body = str_replace('[' . $possible_field . ']', $table_details, $body);
 
-                                $first = FALSE;
-                            }
-                            else {
-                                $body = str_replace('[' . $possible_field . ']', '', $body);
-                            }
-                        }
-                    }
+	                                $first = FALSE;
+	                            }
+	                            else {
+	                                $body = str_replace('[' . $possible_field . ']', '', $body);
+	                            }
+	                        }
+	                    }
 
-                    if($crm_request->status_id != 1) {
-                        $cc = 'complaints@trax.pk';
-                        self::email($subject, $body, $to, $cc);
-                    }
-                    else{
-                        self::email($subject, $body, $to);
-                    }
-            }
+	                    if($crm_request->status_id != 1) {
+	                        $cc = 'complaints@trax.pk';
+	                        self::email($subject, $body, $to, $cc);
+	                    }
+	                    else{
+	                        self::email($subject, $body, $to);
+	                    }
+	            }
+	          }
+        else if ($id == 32) {
+              $nsa_shipment = Shipment::find($reference_1_id);
+
+              if (strpos($subject, '[nsa]') !== FALSE) {
+                  $subject = str_replace('[nsa]', $reference_2_id, $subject);
+              }
+
+              if (strpos($body, '[nsa]') !== FALSE) {
+                  $body = str_replace('[nsa]', $reference_2_id, $body);
+              }
+
+              if (strpos($subject, '[tracking_number]') !== FALSE) {
+                  $subject = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $subject);
+              }
+
+              if (strpos($body, '[tracking_number]') !== FALSE) {
+                  $body = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $body);
+              }
+
+              if(ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->exists()){
+                  $to = ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->pluck('email')->toArray();
+              }else{
+                  $to = $nsa_shipment->user->email;
+              }
+
+              self::email($subject, $body, $to);
           }
         }
       }

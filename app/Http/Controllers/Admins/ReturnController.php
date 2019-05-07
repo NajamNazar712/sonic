@@ -7,11 +7,14 @@ use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
+use App\Http\Models\PendingPayment;
+use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
@@ -231,7 +234,7 @@ class ReturnController extends Controller
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
                 $remark_inp = "remark.$shipment";
-                if($parcel->shipper_status_id != 20){
+                if($parcel->shipper_status_id != 20 && $parcel->shipper_status_id != 54 && $parcel->shipper_status_id != 55){
                     if (!$parcel->packaging_material_request) {
 
                         $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
@@ -299,7 +302,7 @@ class ReturnController extends Controller
         $remark = $request->remark;
         if($request->action == 'confirm'){
             $parcel = Shipment::find($request->shipment_id);
-            if($parcel->shipper_status_id != 20){
+            if($parcel->shipper_status_id != 20 && $parcel->shipper_status_id != 54 && $parcel->shipper_status_id != 55){
                 if (!$parcel->packaging_material_request) {
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
                     $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
@@ -335,7 +338,7 @@ class ReturnController extends Controller
                 }
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
             }
-            return ['status'=>0,'error'=>"Something went wrong, try again later!"];
+            return ['status'=>0,'error'=>"Shipment is already updated, Please refresh your page!"];
 
 
         }elseif($request->action == 'reattempt'){
@@ -349,9 +352,9 @@ class ReturnController extends Controller
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Re-Attempt"];
             }
-            return ['status'=>0,'error'=>"Something went wrong, try again later!"];
+            return ['status'=>0,'error'=>"Shipment is already updated, Please refresh your page!"];
         }
-        return ['status'=>0,'error'=>"Something went wrong, try again later!"];
+        return ['status'=>0,'error'=>"Shipment is already updated, Please refresh your page!"];
 
     }
 
@@ -583,6 +586,10 @@ class ReturnController extends Controller
                     return " - ";
                 }
             })
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = '<input class="form-control form-control-sm" placeholder="Remarks here.." value="'.$shipments->remarks.'" />';
+                return $remark;
+            })
             ->filterColumn('status',function ($query,$keyword){
 
                 if ($keyword != '') {
@@ -660,6 +667,7 @@ class ReturnController extends Controller
 //            $shipment_not_arrived = array(20,24,27,29,33,35,42,44,45,46);
 //            $shipment_arrived = array(22,24,27,29,30,33,35,44,45,46);
             $allowed_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48);
+            $return_note_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48);
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id',$allowed_statuses);
             $status = '';
             if($shipment->exists()) {
@@ -670,7 +678,7 @@ class ReturnController extends Controller
                 if(session('role_id') == 1 || in_array($destination_id, session('hubs'))){
                     $origin = $shipment->consignee_city->hub_id;//let's suppose consignee city is origin now
                     if(!$request->has('hub_id')){
-                        if ($destination_id == $origin && ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 30 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
+                        if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $return_note_statuses))) {
                             $destination_city_id = $shipment->pickup_address->city_id;
                             $destination_city = City::find($destination_city_id);
                             if ($destination_city->id == $destination_city->hub_id) {
@@ -695,6 +703,33 @@ class ReturnController extends Controller
                                     $status = ' - ';
                                 }
                             }
+                            if($shipment->booking_type_id != 4) {
+                                $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+
+                                if ($settings->exists()) {
+                                    $settings = $settings->first();
+                                    $role_ids = array_map('intval', explode(',', $settings->text));
+                                    if (!in_array(session('role_id'), $role_ids)) {
+                                        $shipper_payable = 0;
+                                        $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                                        if ($pending_payment->exists()) {
+                                            $pending_payment = $pending_payment->first();
+
+                                            $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                                            if ($pending_payment_shipments->exists()) {
+                                                $pending_payment_shipments = $pending_payment_shipments->get();
+                                                foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                                                    $shipper_payable += $pending_payment_shipment->payable;
+                                                }
+                                            }
+                                        }
+                                        if ($shipper_payable < 0) {
+                                            return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                        }
+                                    }
+                                }
+                            }
+
                             return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status]);
 
                         } else
@@ -722,6 +757,32 @@ class ReturnController extends Controller
                                         $status = $status_name->name;
                                     } else {
                                         $status = ' - ';
+                                    }
+                                }
+                                if($shipment->booking_type_id != 4) {
+                                    $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+
+                                    if ($settings->exists()) {
+                                        $settings = $settings->first();
+                                        $role_ids = array_map('intval', explode(',', $settings->text));
+                                        if (!in_array(session('role_id'), $role_ids)) {
+                                            $shipper_payable = 0;
+                                            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                                            if ($pending_payment->exists()) {
+                                                $pending_payment = $pending_payment->first();
+
+                                                $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                                                if ($pending_payment_shipments->exists()) {
+                                                    $pending_payment_shipments = $pending_payment_shipments->get();
+                                                    foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                                                        $shipper_payable += $pending_payment_shipment->payable;
+                                                    }
+                                                }
+                                            }
+                                            if ($shipper_payable < 0) {
+                                                return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                            }
+                                        }
                                     }
                                 }
                                 return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status]);
@@ -757,6 +818,32 @@ class ReturnController extends Controller
                                         $status = ' - ';
                                     }
                                 }
+                                if($shipment->booking_type_id != 4) {
+                                    $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+
+                                    if ($settings->exists()) {
+                                        $settings = $settings->first();
+                                        $role_ids = array_map('intval', explode(',', $settings->text));
+                                        if (!in_array(session('role_id'), $role_ids)) {
+                                            $shipper_payable = 0;
+                                            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                                            if ($pending_payment->exists()) {
+                                                $pending_payment = $pending_payment->first();
+
+                                                $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                                                if ($pending_payment_shipments->exists()) {
+                                                    $pending_payment_shipments = $pending_payment_shipments->get();
+                                                    foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                                                        $shipper_payable += $pending_payment_shipment->payable;
+                                                    }
+                                                }
+                                            }
+                                            if ($shipper_payable < 0) {
+                                                return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                            }
+                                        }
+                                    }
+                                }
                                 return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status]);
 
                             } else
@@ -784,6 +871,32 @@ class ReturnController extends Controller
                                             $status = $status_name->name;
                                         } else {
                                             $status = ' - ';
+                                        }
+                                    }
+                                    if($shipment->booking_type_id != 4) {
+                                        $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+
+                                        if ($settings->exists()) {
+                                            $settings = $settings->first();
+                                            $role_ids = array_map('intval', explode(',', $settings->text));
+                                            if (!in_array(session('role_id'), $role_ids)) {
+                                                $shipper_payable = 0;
+                                                $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                                                if ($pending_payment->exists()) {
+                                                    $pending_payment = $pending_payment->first();
+
+                                                    $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                                                    if ($pending_payment_shipments->exists()) {
+                                                        $pending_payment_shipments = $pending_payment_shipments->get();
+                                                        foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                                                            $shipper_payable += $pending_payment_shipment->payable;
+                                                        }
+                                                    }
+                                                }
+                                                if ($shipper_payable < 0) {
+                                                    return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                                }
+                                            }
                                         }
                                     }
                                     return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status]);
@@ -835,17 +948,14 @@ class ReturnController extends Controller
                         $shipment = Shipment::where('id', $tracking);
 
                         $shipment = $shipment->first();
-
-                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) { //attempt failed and arrived at origin center
-
+                        if(in_array($shipment->booking_type_id, [1,4,5])){
                             ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
                             $shipment->shipper_status_id = 23;
                             $shipment->consignee_status_id = 23;
                             $shipment->save();
                             ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
-
-
-                        } else if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
+                        }else
+                        if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
 
                             ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
                             $shipment->shipper_status_id = 28;
@@ -863,6 +973,12 @@ class ReturnController extends Controller
                             ShipmentsJourneyController::add($shipment->id, 34, 34, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
 
 
+                        }else{
+                            ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
+                            $shipment->shipper_status_id = 23;
+                            $shipment->consignee_status_id = 23;
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
                         }
 
 
@@ -1082,7 +1198,7 @@ class ReturnController extends Controller
                 if(in_array($deliveries->shipper_status_id,$delivered_array)){
                     return $deliveries->current_status_name;
                 }else{
-                    if($deliveries->booking_type_id == 1 || $deliveries->booking_type_id == 4){
+                    if(in_array($deliveries->booking_type_id,[1,4,5])){
                         $where = array(24,47,48);
                     }else if($deliveries->booking_type_id == 2){
                         $where = array(29,47,48);
@@ -1214,7 +1330,7 @@ class ReturnController extends Controller
         if(!empty($request->shipment_ids)){
             foreach ($request->shipment_ids as $shipment){
                 $parcel = Shipment::where('id',$shipment)->first();
-                if($parcel->booking_type_id == 1 || $parcel->booking_type_id == 4){
+                if($parcel->booking_type_id == 1 || $parcel->booking_type_id == 4 || $parcel->booking_type_id == 5){
                     ShipmentsJourneyController::add($shipment, 25, 25, NULL, NULL, NULL, Auth::id(),$request->return_note_id,NULL,1,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment]:null));
 
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
@@ -1232,6 +1348,11 @@ class ReturnController extends Controller
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>38,'consignee_status_id'=>38]);
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
 
+                }else{
+                    ShipmentsJourneyController::add($shipment, 25, 25, NULL, NULL, NULL, Auth::id(),$request->return_note_id,NULL,1,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment]:null));
+
+                    Shipment::where('id',$shipment)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
+                    ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
                 }
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
@@ -1458,7 +1579,7 @@ class ReturnController extends Controller
             }
 
 
-            ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
+            ShipmentsJourneyController::add($request->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
 
             AdminFinanceController::return_confirmed_revert($request->id);
 

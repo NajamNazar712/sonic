@@ -147,6 +147,9 @@
                 scrollX: true,
                 paging:false,
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: false,
                 ajax: '{{ route('admin.delivery.receive.verify.status.list',['id'=>$delivery_note_id]) }}',
                 rowId: 'shId',

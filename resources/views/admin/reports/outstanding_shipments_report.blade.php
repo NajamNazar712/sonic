@@ -66,6 +66,7 @@
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Amount</th>
@@ -212,6 +213,7 @@
             // });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.outstanding_shipments.list') }}',
@@ -231,6 +233,7 @@
                             head.push('Address');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Account No.');
                             head.push('Shipper');
                             head.push('Service Type');
                             head.push('Amount');
@@ -253,6 +256,7 @@
                                 row.push(values.address);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.account_no);
                                 row.push(values.shipper);
                                 row.push(values.service_type);
                                 row.push(values.amount);
@@ -273,6 +277,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -293,6 +298,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.outstanding_shipments.list') }}',
@@ -304,7 +312,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[12, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'tracking_number', name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -312,6 +320,7 @@
                     {data:'address', name: 's.consignee_address', class: 'align-middle text-center address'},
                     {data:'destination', name: 'dc.name', class: 'align-middle text-center destination'},
                     {data:'hub', name: 'hc.name', class: 'align-middle text-center hub'},
+                    {data:'account_no', name: 'u.id', class: 'align-middle text-center account_no'},
                     {data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
                     {data:'service_type', name: 'bt.booking_type', class: 'align-middle text-center service_type'},
                     {data:'amount', name: 's.amount', class: 'align-middle text-center amount'},

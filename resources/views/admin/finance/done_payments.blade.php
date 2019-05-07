@@ -16,12 +16,54 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
-
-							<form id="tracking_number_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-								<div class="form-group">
-									<input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
+							<div class="row">
+								<div class="col-3">
+									<form id="tracking_number_search_form"
+										  class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+										<div class="form-group">
+											<input type="text" name="tracking_number"
+												   class="form-control tracking_number" id="tracking_number"
+												   placeholder="Tracking Number">
+										</div>
+									</form>
 								</div>
-							</form>
+								<div class="col-3">
+
+									<div class="form-group input-group ml">
+										<div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+										</div>
+
+										<input type="text" name="search_from"
+											   class="form-control pickadate bg-primary border-primary white rounded-right"
+											   id="search_date_from" placeholder="From">
+									</div>
+								</div>
+								<div class="col-3 ">
+									<div class="form-group input-group ml">
+										<div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+										</div>
+
+										<input type="text" name="search_to"
+											   class="form-control pickadate bg-primary border-primary white rounded-right"
+											   id="search_date_to" placeholder="To">
+									</div>
+
+								</div>
+								<div class="col-2">
+									<button type="button" id="search_filter_btn"
+											class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i
+												class="la la-search"></i> Search
+									</button>
+								</div>
+							</div>
+
+
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
@@ -155,6 +197,8 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 @endsection
 
 @section('js')
@@ -162,6 +206,10 @@
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
@@ -173,6 +221,32 @@
 					$(this).valid();
 				}
 			});
+            $('#search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
 
 			var selected_rows = [];
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -183,7 +257,9 @@
                         url: '{{ route('admin.finance.done_payments.list') }}',
                         data: {
                             'page': 'all',
-                            'tracking_number': $('#tracking_number_search_form #tracking_number').val()
+                            'tracking_number': $('#tracking_number_search_form #tracking_number').val(),
+                            'search_from': $('input[name="search_from_formatted"]').val(),
+                            'search_to': $('input[name="search_to_formatted"]').val(),
                         },
                         success: function (result) {
                             head = [];
@@ -400,11 +476,16 @@
 				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
+                language: {
+                    processing: data_table_loader
+                },
 				serverSide: true,
 				ajax: {
 					url: '{{ route('admin.finance.done_payments.list') }}',
 					data: function (d) {
 						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
+                        d.search_from = $('input[name="search_from_formatted"]').val();
+                        d.search_to = $('input[name="search_to_formatted"]').val();
 					}
 				},
 				rowId: 'id',
@@ -801,6 +882,9 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                 }
+            });
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
             });
 		});
 	</script>

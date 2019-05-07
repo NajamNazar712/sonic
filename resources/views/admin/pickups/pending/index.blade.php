@@ -22,6 +22,7 @@
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1"></th>
 										<th class="border-primary border-darken-1">S. No.</th>
+										<th class="border-primary border-darken-1">Pickup Request ID</th>
 										<th class="border-primary border-darken-1">Pickup Date</th>
 										<th class="border-primary border-darken-1">Requested Datetime</th>
 										<th class="border-primary border-darken-1">Shipper</th>
@@ -145,6 +146,8 @@
                             head = [];
 
                             head.push('S.No');
+                            head.push('Pickup Request ID');
+                            head.push('Pickup Date');
                             head.push('Requested Datetime');
                             head.push('Shipper');
                             head.push('Contact Person');
@@ -161,6 +164,8 @@
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.id);
+                                row.push(values.pickup_date);
                                 row.push(values.requested_at);
                                 row.push(values.shipper);
                                 row.push(values.contact_person);
@@ -343,6 +348,9 @@
 				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
+                language: {
+                    processing: data_table_loader
+                },
 				serverSide: true,
 				ajax: '{{ route('admin.pickups.pending.list') }}',
 				rowId: 'id',
@@ -350,6 +358,7 @@
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_requests.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data: 'pickup_request_id', name: 'pickup_requests.id', class: 'align-middle pickup_request_id'},
 					{data: 'pickup_date', name: 'pickup_requests.pickup_date', class: 'align-middle pickup_date'},
 					{data: 'requested_at', name: 'pickup_requests.created_at', class: 'align-middle requested_at'},
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},

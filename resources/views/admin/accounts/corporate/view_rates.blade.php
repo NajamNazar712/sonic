@@ -28,7 +28,15 @@
                                     <div id="" class="card-header border-success">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <h3 class="card-title lead success">Overnight</h3>
+                                                <h3 class="display-inline card-title lead success">Overnight</h3>
+                                                @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                                    <label class="display-inline ml-1"> Default</label>
+                                                    @if($shipper['default_shipping_mode'] == 1)
+                                                        <input type="checkbox" name="on_default" id="on_default" class="switchery on_default" checked data-size="xs" data-switchery="true" disabled>
+                                                    @else
+                                                        <input type="checkbox" name="on_default" id="on_default" class="switchery on_default" data-size="xs" data-switchery="true" disabled>
+                                                    @endif
+                                                @endif
                                             </div>
                                             <div class="col-md-6">
                                                 <a href="javascript:void(0);" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox"  class="switchery on-main-switch" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->status == 1) ? 'checked' : '') }} disabled/></a>
@@ -833,7 +841,15 @@
                                     <div id="" class="card-header mt-1 border-success">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <h3 class="card-title lead success">Overland</h3>
+                                                <h3 class="display-inline card-title lead success">Overland</h3>
+                                                @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                                    <label class="display-inline ml-1"> Default</label>
+                                                    @if($shipper['default_shipping_mode'] == 2)
+                                                        <input type="checkbox" name="ol_default" id="ol_default" class="switchery ol_default" checked data-size="xs" data-switchery="true" disabled>
+                                                    @else
+                                                        <input type="checkbox" name="ol_default" id="ol_default" class="switchery ol_default" data-size="xs" data-switchery="true" disabled>
+                                                    @endif
+                                                @endif
                                             </div>
                                             <div class="col-md-6">
                                                 <a id="ol_main_switch" href="javascript:void(0);" class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? 'checked' : '') }} disabled/></a>
@@ -1403,6 +1419,46 @@
                                                 </div>
 
                                                 <hr>
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <h3 class="card-title">Fuel Surcharge</h3>
+                                                    </div>
+                                                    @php
+                                                        $ol_fuel_sw = '';
+                                                        $ol_fuel_switch = '';
+                                                    if((isset($switches[2][0]) && $switches[2][0]->fuel_charges == 1)){
+                                                    $ol_fuel_sw = '';
+                                                    $ol_fuel_switch = 'checked';
+                                                     }else{
+                                                    $ol_fuel_sw = 'disabled';
+                                                    $ol_fuel_switch = '';
+                                                    }
+                                                    @endphp
+                                                    <div class="col-md-2">
+                                                        <div class="form-group ">
+                                                            <input type="checkbox" name="overland_fuel_switch" class="switchery fuelSurchargeOverland" data-color="success" data-size="sm" {{$ol_fuel_switch}} disabled/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row fuel-surcharge-div-overland">
+                                                    <input type="hidden" name="ol_fuel_record" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->id != '')? $fuelCharges[2][0]->id : ''}}">
+
+                                                    <div class="col-md-2 text-center">
+                                                        <label class="card-title">Charges</label>
+                                                        <fieldset>
+                                                            <div class="input-group form-group">
+                                                                <input type="text"  class="form-control " name="overland_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->fuel_surcharge != '')? $fuelCharges[2][0]->fuel_surcharge : ''}}" {{$ol_fuel_sw}} disabled>
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text">%</span>
+                                                                </div>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div>
+
+                                                </div>
+
+                                                <hr>
                                                 <div class="">
                                                     <h3 class="card-title">Discount Rates</h3>
                                                 </div>
@@ -1592,7 +1648,15 @@
                                     <div id="" class="card-header mt-1 border-success">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <h3 class="card-title lead success">Detain</h3>
+                                                <h3 class="display-inline card-title lead success">Detain</h3>
+                                                @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                                    <label class="display-inline ml-1"> Default</label>
+                                                    @if($shipper['default_shipping_mode'] == 3)
+                                                        <input type="checkbox" name="det_default" id="det_default" class="switchery det_default" checked data-size="xs" data-switchery="true" disabled>
+                                                    @else
+                                                        <input type="checkbox" name="det_default" id="det_default" class="switchery det_default" data-size="xs" data-switchery="true" disabled>
+                                                    @endif
+                                                @endif
                                             </div>
                                             <div class="col-md-6">
                                                 <a id="detain_main_switch" href="javascript:void(0);" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->status == 1) ? 'checked' : '') }} disabled/></a>
@@ -2399,7 +2463,15 @@
                                     <div id="" class="card-header mt-1 border-success">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <h3 class="card-title lead success">Sameday</h3>
+                                                <h3 class="display-inline card-title lead success">Sameday</h3>
+                                                @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                                    <label class="display-inline ml-1"> Default</label>
+                                                    @if($shipper['default_shipping_mode'] == 4)
+                                                        <input type="checkbox" name="sameday_default" id="sameday_default" class="switchery sameday_default" checked data-size="xs" data-switchery="true" disabled>
+                                                    @else
+                                                        <input type="checkbox" name="sameday_default" id="sameday_default" class="switchery sameday_default" data-size="xs" data-switchery="true" disabled>
+                                                    @endif
+                                                @endif
                                             </div>
                                             <div class="col-md-6">
                                                 <a id="sameday_main_switch" href="javascript:void(0);" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->status == 1) ? 'checked' : '') }} disabled/></a>

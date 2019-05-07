@@ -94,9 +94,16 @@
 
 	<script>
 		$(document).ready(function() {
-			function print(id) {
+			function print(id, booking_type_id) {
+				if (booking_type_id != 4) {
+					var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+				}
+				else {
+					var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
+				}
+
 				$.ajax({
-					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+					url: url,
 					method: 'POST',
 					data: {
 						'ids[]': id,
@@ -152,7 +159,7 @@
 							shipment += '<div class="mt-4 border-primary">';
 							shipment += '<div class="d-flex align-items-center bg-primary">';
 							shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.tracking_number + '</div>';
-							shipment += '<button class="btn btn-secondary ml-auto print" id=' + id + '>Print</button>';
+							shipment += '<button class="btn btn-secondary ml-auto print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
 							shipment += '</div>';
 
 							shipment += '<div class="p-1">';
@@ -183,6 +190,15 @@
 							shipment += '<td>' + details.shipper.origin + '</td>';
 							shipment += '</tr>';
 							shipment += '<tr>';
+							shipment += '<td><strong>Email</strong></td>';
+							if (details.shipper.email) {
+								shipment += '<td colspan="3">' + details.shipper.email + '</td>';
+							}
+							else{
+								shipment += '<td colspan="3"></td>'
+							}
+							shipment += '</tr>';
+							shipment += '<tr>';
 							shipment += '<td><strong>Address</strong></td>';
 							shipment += '<td colspan="3">' + details.shipper.address + '</td>';
 							shipment += '</tr>';
@@ -203,6 +219,7 @@
 							shipment += '<td>' + details.consignee.destination + '</td>';
 							shipment += '</tr>';
 							shipment += '<tr>';
+							shipment += '<tr>';
 							shipment += '<td><strong>Phone No(s).</strong></td>';
 
 							if (!details.consignee.phone_number_2) {
@@ -214,6 +231,14 @@
 
 							shipment += '<td colspan="2"></td>';
 							shipment += '</tr>';
+                            shipment += '<td><strong>Email</strong></td>';
+                            if (details.consignee.email) {
+                                shipment += '<td colspan="3">' + details.consignee.email + '</td>';
+                            }
+                            else{
+                                shipment += '<td colspan="3"></td>'
+                            }
+                            shipment += '</tr>';
 							shipment += '<tr>';
 							shipment += '<td><strong>Address</strong></td>';
 							shipment += '<td colspan="3">' + details.consignee.address + '</td>';
@@ -254,7 +279,7 @@
                             shipment += '<td>' + ((details.order_information.order_id) ? details.order_information.order_id : '-') + '</td>';
                             shipment += '<td><strong>Instructions</strong></td>';
 
-                        	if (details.order_information.account_type_id == 2 || details.order_information.booking_type_id == 4) {
+                        	if (details.order_information.charges_mode_id) {
                         		shipment += '<td>' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
                         		shipment += '<td><strong>Charges Mode</strong></td>';
                         		shipment += '<td>' + details.order_information.charges_mode + '</td>';
@@ -370,6 +395,70 @@
 								shipment += '</div>';
 							}
 
+                            if ('amount_history' in details) {
+                                shipment += '<div class="col-12 mt-2">';
+                                shipment += '<h4><u>Amount History</u></h4>';
+                                shipment += '<div class="border">';
+
+                                shipment += '<table class="table table-sm table-borderless datatable amount_history">';
+                                shipment += '<thead>';
+                                shipment += '<tr role="row">';
+                                shipment += '<th><strong>Date / Time</strong></th>';
+                                shipment += '<th><strong>Old Amount</strong></th>';
+                                shipment += '<th><strong>New Amount</strong></th>';
+                                shipment += '<th><strong>User</strong></th>';
+                                shipment += '</tr>';
+                                shipment += '</thead>';
+                                shipment += '<tbody>';
+
+                                $.each(details.amount_history, function(index, history) {
+                                    shipment += '<tr>';
+                                    shipment += '<td>' + history.date_time + '</td>';
+                                    shipment += '<td>' + history.old_amount + '</td>';
+                                    shipment += '<td>' + history.new_amount + '</td>';
+                                    shipment += '<td>' + history.user + '</td>';
+                                    shipment += '</tr>';
+                                });
+
+                                shipment += '</tbody>';
+                                shipment += '</table>';
+
+                                shipment += '</div>';
+                                shipment += '</div>';
+                            }
+
+                            if ('weight_history' in details) {
+                                shipment += '<div class="col-12 mt-2">';
+                                shipment += '<h4><u>Weight History</u></h4>';
+                                shipment += '<div class="border">';
+
+                                shipment += '<table class="table table-sm table-borderless datatable weight_history">';
+                                shipment += '<thead>';
+                                shipment += '<tr role="row">';
+                                shipment += '<th><strong>Date / Time</strong></th>';
+                                shipment += '<th><strong>Old Weight</strong></th>';
+                                shipment += '<th><strong>New Weight</strong></th>';
+                                shipment += '<th><strong>User</strong></th>';
+                                shipment += '</tr>';
+                                shipment += '</thead>';
+                                shipment += '<tbody>';
+
+                                $.each(details.weight_history, function(index, history) {
+                                    shipment += '<tr>';
+                                    shipment += '<td>' + history.date_time + '</td>';
+                                    shipment += '<td>' + history.old_weight + '</td>';
+                                    shipment += '<td>' + history.new_weight + '</td>';
+                                    shipment += '<td>' + history.user + '</td>';
+                                    shipment += '</tr>';
+                                });
+
+                                shipment += '</tbody>';
+                                shipment += '</table>';
+
+                                shipment += '</div>';
+                                shipment += '</div>';
+                            }
+
 							shipment += '</div>';
 							shipment += '</div>';
 
@@ -391,6 +480,7 @@
 								{name: 'remarks', class: 'align-middle remarks'},
 								{name: 'user', class: 'align-middle user'},
 								{name: 'city', class: 'align-middle city'},
+								{name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
 								{name: 'ip', class: 'align-middle ip'}
 							]
 						});
@@ -402,7 +492,8 @@
 							columns: [
 								{name: 'date_time', class: 'align-middle date_time'},
 								{name: 'status', class: 'align-middle status'},
-								{name: 'user', class: 'align-middle user'}
+								{name: 'user', class: 'align-middle user'},
+								{name: 'remarks', class: 'align-middle remarks'}
 							]
 						});
 					}
@@ -459,7 +550,9 @@
 			$('#tracking').on('click', '.print', function() {
 				id = $(this).attr('id');
 
-				print(id);
+				booking_type_id = $(this).attr('data-booking-type-id');
+
+				print(id, booking_type_id);
 			});
 
 			$('#tracking').on('click', '.rider_information', function() {

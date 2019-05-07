@@ -161,9 +161,9 @@ class AdminPickupsController extends Controller
               PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request->id)->delete();
             }
 
-            $pickup_note_requests = $pickup_note->pickup_note_requests;
+            $pickup_note_requests = PickupNoteRequest::where('pickup_note_id', $pickup_note->id);
 
-            if ($pickup_note_requests) {
+            if ($pickup_note_requests->exists()) {
               if ($bookings == 0) {
                 $pickup_note->pickups = $pickup_note->pickups - 1;
               }
@@ -172,7 +172,7 @@ class AdminPickupsController extends Controller
 
               $shipment = Shipment::find($shipment_id);
 
-              $weight = $pickup_request->total_estimated_weight - $shipment->estimated_weight;
+              $weight = $pickup_note->total_estimated_weight - $shipment->estimated_weight;
 
               $pickup_note->total_estimated_weight = $weight;
 
@@ -233,6 +233,27 @@ class AdminPickupsController extends Controller
           }
 
           $pickup_request->save();
+
+          $pickup_note_request = $pickup_request->pickup_note_request;
+
+          if ($pickup_note_request) {
+            $pickup_note = $pickup_note_request->pickup_note;
+
+            $pickup_note->bookings = $pickup_note->bookings - 1;
+
+            $weight = $pickup_note->total_estimated_weight - $shipment->estimated_weight;
+
+            $pickup_note->total_estimated_weight = $weight;
+
+            if ($weight < $defined_pickup_weight) {
+              $pickup_note->pickup_type = 0;
+            }
+            else {
+              $pickup_note->pickup_type = 1;
+            }
+
+            $pickup_note->save();
+          }
         }
       }
     }
@@ -255,7 +276,7 @@ class AdminPickupsController extends Controller
           $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
           ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
           ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
-          ->select('pickup_requests.id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
+          ->select('pickup_requests.id','pickup_requests.id as pickup_request_id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
           ->where('pickup_requests.status', 0);
 
           if (session('role_id') != 1) {
@@ -267,6 +288,10 @@ class AdminPickupsController extends Controller
             }
         }
       $datatables = Datatables::of($pickup_requests)
+          ->editColumn('pickup_request_id', function ($pickup_requests) {
+              return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
+          })
+
       ->editColumn('total_estimated_weight', '{{ floatval($total_estimated_weight) }}')
       ->editColumn('pickup_type', function($pickup_request) {
         return ($pickup_request->pickup_type == 0) ? 'Light' : 'Heavy';
@@ -1257,7 +1282,7 @@ class AdminPickupsController extends Controller
           ShipmentChargesController::insurance($shipment_id);
           ShipmentChargesController::fuel_surcharge($shipment_id);
 
-          if ($shipment->user->account_type_id == 2 && $shipment->charges_mode_id == 2) {
+          if ($shipment->charges_mode_id == 2) {
             $shipment = Shipment::find($shipment_id);
 
             $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;

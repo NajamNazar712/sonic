@@ -54,6 +54,7 @@
 										<th class="border-primary border-darken-1">Total GST</th>
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
+										<th class="border-primary border-darken-1">Total Adjustments</th>
 										<th class="border-primary border-darken-1">Bank</th>
 										<th class="border-primary border-darken-1">Bank Branch</th>
 										<th class="border-primary border-darken-1">Account No.</th>
@@ -289,6 +290,7 @@
                             head.push('City');
                             head.push('Phone No(s).');
                             head.push('Address');
+                            head.push('Created Datetime');
                             head.push('Total Shipments');
                             head.push('Total Pending Shipments');
                             head.push('Delivered Shipments');
@@ -299,6 +301,7 @@
                             head.push('Total GST');
                             head.push('Total Deductable');
                             head.push('Total Payable');
+                            head.push('Total Adjustments');
                             head.push('Bank');
                             head.push('Bank Branch');
                             head.push('Account No.');
@@ -320,6 +323,7 @@
                                 row.push(values.city);
                                 row.push(values.phone_numbers);
                                 row.push(values.address);
+                                row.push(values.created_at);
                                 row.push(values.total_shipments);
                                 row.push(values.total_pending_shipments);
                                 row.push(values.delivered_shipments_count);
@@ -330,6 +334,7 @@
                                 row.push(values.total_gst);
                                 row.push(values.total_deductable);
                                 row.push(values.total_payable);
+                                row.push(values.total_adjustments);
                                 row.push(values.bank);
                                 row.push(values.bank_branch);
                                 row.push(values.account_no);
@@ -454,6 +459,9 @@
 				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
+                language: {
+                    processing: data_table_loader
+                },
 				serverSide: true,
 				ajax: {
 					url: '{{ route('admin.finance.make_payments.list') }}',
@@ -482,6 +490,7 @@
 					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable', orderable: false},
+					{data:'total_adjustments', name: 'total_adjustments', class: 'align-middle text-center total_adjustments', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
 					{data:'bank_branch', name: 'ubi.bank_branch', class: 'align-middle text-center bank_branch'},
 					{data:'account_no', name: 'ubi.account_no', class: 'align-middle text-center account_no'},
@@ -524,7 +533,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_pending_shipments')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.total_adjustments') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_pending_shipments')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))
@@ -610,6 +619,16 @@
 			var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
 				dom: '<"pull-right"B>tr',
 				buttons: [{
+					text: 'Export Selected',
+					className: 'export_selected',
+					action: function(e) {
+						e.preventDefault();
+
+						if (selected_rows_shipments.length != 0) {
+							window.open('{!! route('admin.finance.make_payments.shipment_export_selected') !!}?ids=' + selected_rows_shipments, '_blank');
+						}
+					}
+				}, {
 					extend: 'selectAll',
                     text: 'Select All',
                     className: 'select_all',
@@ -657,6 +676,9 @@
 					className: 'selected bg-primary bg-lighten-5 primary'
 				},
 				processing: true,
+                language: {
+                    processing: data_table_loader
+                },
 				serverSide: true,
 				ajax: {
 					url: '{{ route('admin.finance.make_payments.shipment_list') }}',

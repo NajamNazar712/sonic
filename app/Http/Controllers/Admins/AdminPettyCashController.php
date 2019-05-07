@@ -170,15 +170,15 @@ class AdminPettyCashController extends Controller
                 return $expense;
             })
             ->editColumn('amount', function ($petty_details){
-                $amount = '<input class="form-control" disabled value="' .$petty_details->amount. '" name="amount['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Amount is required">';
+                $amount = '<input class="form-control form-control-sm" disabled value="' .$petty_details->amount. '" name="amount['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Amount is required">';
                 return $amount;
             })
             ->editColumn('reference_no', function ($petty_details){
-                $reference = '<input class="form-control" disabled value="' .$petty_details->reference_no. '" name="reference['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Reference No. is required">';
+                $reference = '<input class="form-control form-control-sm" disabled value="' .$petty_details->reference_no. '" name="reference['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Reference No. is required">';
                 return $reference;
             })
             ->editColumn('remarks', function ($petty_details){
-                $remarks = '<textarea class="form-control" disabled name="remarks['.$petty_details->statement_detail_id.']">'.$petty_details->remarks.'</textarea>';
+                $remarks = '<textarea class="form-control form-control-sm" disabled name="remarks['.$petty_details->statement_detail_id.']">'.$petty_details->remarks.'</textarea>';
                 return $remarks;
             })
             ->editColumn('status', function ($petty_details){
@@ -275,7 +275,7 @@ class AdminPettyCashController extends Controller
                 $dropdown .= '<a href="'.$route.'" class="dropdown-item" ><i class="ft-eye"></i> View Details</a>';
 
 //                if((session('role_id') == 1) || ($petty->status == 0 && (session('role_id') == 9) || session('role_id') == 10) || ($petty->status == 1 && (session('role_id') == 3) || session('role_id') == 8 || session('role_id') == 20) || ($petty->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
-                if((session('role_id') == 1) || in_array(173, session('permissions'))){
+                if((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions'))){
                     if((session('role_id') == 1) || ($petty->status == 0 && session('department_id') == 6) || ($petty->status == 1 && (session('department_id') == 6)) || ($petty->status == 2 && session('department_id') == 4)) {
                         $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div>Approve</button>';
                     }
@@ -301,20 +301,33 @@ class AdminPettyCashController extends Controller
         $petty = PettyCashStatement::find($statement_id);
         if($petty){
             if($petty->station_approved_by == null){
-                $petty->station_approved_by = Auth::id();
-                $petty->station_approved_at = Carbon::now();
-                $petty->status = 1;
-                $petty->save();
+                if(session('role_id') == 1 || in_array(190, session('permissions'))){
+                    $petty->station_approved_by = Auth::id();
+                    $petty->station_approved_at = Carbon::now();
+                    $petty->status = 1;
+                    $petty->save();
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
+                }
+
             }else if($petty->operation_approved_by == null){
+                if(session('role_id') == 1 || in_array(191, session('permissions'))){
                 $petty->operation_approved_by = Auth::id();
                 $petty->operation_approved_at = Carbon::now();
                 $petty->status = 2;
                 $petty->save();
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
+                }
             }else if($petty->finance_approved_by == null){
+                if(session('role_id') == 1 || in_array(173, session('permissions'))){
                 $petty->finance_approved_by = Auth::id();
                 $petty->finance_approved_at = Carbon::now();
                 $petty->status = 3;
                 $petty->save();
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
+                }
             }
             return response()->json(['status' => 1, 'success' => 'Petty Cash Request Successfully Approved!']);
         }else{
@@ -326,26 +339,55 @@ class AdminPettyCashController extends Controller
 
     public function edit_petty_cash_statements_approve(Request $request){
         $id = $request->detail_id;
-        if($id){
-            $petty_details = PettyCashStatementDetail::find($id);
-            if($petty_details){
-                if($petty_details->status == 0 || $petty_details->status == 1){
-                    $petty_details->status = 2;
-                    $petty_details->updated_by = Auth::id();
-                    $petty_details->save();
-                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
-                }else if($petty_details->status == 2){
-                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
+        if($request->has('approve_all')){
+            if($id){
+                $petty_details = PettyCashStatementDetail::where('petty_cash_statement_id', $id)->get();
+                if($petty_details){
+                    $flag = false;
+                    foreach ($petty_details as $petty_detail) {
+                        if($petty_detail['status'] != 1) {
+                            PettyCashStatementDetail::where('id', $petty_detail['id'])->update([
+                                'status' => 2,
+                                'updated_by' => Auth::id()
+                            ]);
+                            $flag = true;
+                        }
+                    }
+                    if($flag = false){
+                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
+                    }
+                    else {
+                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                    }
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
                 }
-
-            }else{
-                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Detail ID not found!']);
             }
         }
         else{
-            return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Detail ID not found!']);
-        }
+            if($id){
+                $petty_details = PettyCashStatementDetail::find($id);
+                if($petty_details){
+                    if($petty_details->status == 0 || $petty_details->status == 1){
+                        $petty_details->status = 2;
+                        $petty_details->updated_by = Auth::id();
+                        $petty_details->save();
+                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                    }else if($petty_details->status == 2){
+                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
+                    }
 
+                }else{
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
+                }
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Detail ID not found!']);
+            }
+        }
     }
 
     public function edit_petty_cash_statements_reject(Request $request){

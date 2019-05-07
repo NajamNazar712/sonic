@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -46,6 +47,7 @@ class AdminTrackingController extends Controller
     			$details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
     			$details['shipper']['phone_number_1'] = $shipper->phone;
     			$details['shipper']['phone_number_2'] = $shipper->phone2;
+    			$details['shipper']['email'] = $shipper->email;
     			$details['shipper']['origin'] = $shipper->city->name;
     			$details['shipper']['address'] = $shipper->address;
 
@@ -54,6 +56,7 @@ class AdminTrackingController extends Controller
     			$details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
     			$details['consignee']['destination'] = $shipment->consignee_city->name;
     			$details['consignee']['address'] = $shipment->consignee_address;
+                $details['consignee']['email'] = $shipment->consignee_email;
 
     			foreach ($shipment->items as $item) {
     				$item_details = array();
@@ -85,7 +88,9 @@ class AdminTrackingController extends Controller
 
                 $details['order_information']['account_type_id'] = $shipment->user->account_type_id;
 
-                if ($shipment->user->account_type_id == 2 || $shipment->booking_type_id == 4) {
+                $details['order_information']['charges_mode_id'] = $shipment->charges_mode_id;
+
+                if ($shipment->charges_mode_id) {
                     $details['order_information']['charges_mode'] = $shipment->charges_mode->charges_mode;
                 }
 
@@ -183,6 +188,37 @@ class AdminTrackingController extends Controller
                     }
                 }
 
+                $shipment_amount_log = $shipment->amount_change_log;
+
+                if ($shipment_amount_log) {
+                    foreach ($shipment_amount_log as $journey) {
+                        $journey_details = array();
+
+                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                        $journey_details['old_amount'] = number_format($journey->old_amount);
+                        $journey_details['new_amount'] = number_format($journey->new_amount);
+                        $journey_details['user'] = $journey->admin->name;
+
+                        $details['amount_history'][] = $journey_details;
+                    }
+                }
+
+                $shipment_weight_log = $shipment->weight_change_log;
+
+                if ($shipment_weight_log) {
+                    foreach ($shipment_weight_log as $journey) {
+                        $journey_details = array();
+
+                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                        $journey_details['old_weight'] = number_format($journey->old_weight);
+                        $journey_details['new_weight'] = number_format($journey->new_weight);
+                        $journey_details['user'] = $journey->admin->name;
+
+                        $details['weight_history'][] = $journey_details;
+                    }
+                }
+
+
     			$tracking['shipments'][$shipment->id] = $details;
     		}
     		else {
@@ -246,7 +282,7 @@ class AdminTrackingController extends Controller
                 $details = array();
 
                 $details['tracking_number'] = $tracking_no;
-                $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
                 $details['status'] = $journey->shipment_status_shipper->name;
                 if($journey->status_reason_id != null){
 
@@ -265,5 +301,36 @@ class AdminTrackingController extends Controller
                 return response()->json(['status' => 0, 'error' => 'Tracking Number not found!']);
             }
         }
+    }
+
+    public function cx_quick_tracking_index(){
+        $shippers = User::select('id', 'name')->get();
+        return view('admin.tracking.cx_quick_tracking')->with('shippers', $shippers);
+    }
+    public function cx_quick_tracking_list(Request $request){
+        $quick_tracking = Shipment::leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->select('shipments.tracking_number as tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no');
+        $datatable = Datatables::of($quick_tracking)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            });
+        if($tracking = $request->get('search_tracking')){
+            $datatable->where('shipments.tracking_number', 'LIKE', '%'. $tracking . '%');
+        }
+        if($shipper = $request->get('search_shipper')){
+            $datatable->where('u.id', 'LIKE', '%'. $shipper . '%');
+        }
+        if($phone_no = $request->get('search_phone_no')){
+            $datatable->where('shipments.consignee_phone_number_1', 'LIKE', '%'. $phone_no . '%');
+        }
+        if($order_id = $request->get('search_order_id')){
+            $datatable->where('shipments.order_id', 'LIKE', '%'. $order_id . '%');
+        }
+            return $datatable->make(true);
     }
 }

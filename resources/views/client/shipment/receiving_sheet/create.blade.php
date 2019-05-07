@@ -331,23 +331,22 @@
                                     }
                                 })
                                     .done(function(data) {
+                                        $('#create_receiving_sheet_form button[type="submit"]').attr('disabled', false);
+
+                                        swal.close();
+
                                         if (data.status == 0) {
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                            $('#pickup_address_id').val('');
+
+                                            table.clear().draw('false');
 
                                             print(data.receiving_sheet_id);
                                         }
                                         else {
                                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                         }
-
-
-
-                                        selected_rows = [];
-
-
-
-                                        swal.close();
-                                        window.location.href = "{{ route('cod.shipment.receiving_sheet.index') }}";
                                     });
                             }
                         });

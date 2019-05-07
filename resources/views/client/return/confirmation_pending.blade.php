@@ -449,6 +449,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: '{{ route('cod.return.pending.list') }}',
                 rowId: 'shId',
@@ -726,6 +729,16 @@
                     });
 
 
+                }
+            });
+
+            $('body').on('click','.intercept',function () {
+                var row_id = $(this).parents('tr').attr('id');
+
+                if(row_id != ''){
+                    var redirect = '{!! route('cod.intercept.index', ':id') !!}';
+                    var url = redirect.replace(':id', row_id);
+                    window.location = url;
                 }
             });
         });

@@ -71,6 +71,7 @@
 									<th class="border-primary border-darken-1">Transport Mode</th>
 									<th class="border-primary border-darken-1">Vendor</th>
 									<th class="border-primary border-darken-1">Builty No.</th>
+									<th class="border-primary border-darken-1">Seal No.</th>
 									<th class="border-primary border-darken-1">Shipments Weight</th>
 									<th class="border-primary border-darken-1">Chargeable Weight</th>
 									<th class="border-primary border-darken-1">Actual Weight</th>
@@ -404,6 +405,7 @@
 							head.push('Transport Mode');
 							head.push('Vendor');
 							head.push('Builty No.');
+							head.push('Seal No.');
 							head.push('Shipments Weight');
 							head.push('Chargeable Weight');
 							head.push('Actual Weight');
@@ -429,6 +431,7 @@
 								row.push(values.transport_mode);
 								row.push(values.vendor);
 								row.push(values.builty_number);
+								row.push(values.seal_number);
 								row.push(values.shipments_weight);
 								row.push(values.chargeable_weight);
 								row.push(values.actual_weight);
@@ -492,6 +495,9 @@
 				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
+                language: {
+                    processing: data_table_loader
+                },
 				serverSide: true,
 				ajax: {
 					url: '{{ route('admin.cargo.in_transit.list') }}',
@@ -502,7 +508,7 @@
 					}
 				},
 				rowId: 'id',
-				order: [[16, 'desc']],
+				order: [[17, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'id_padded_link', name: 'cargo_consignments.id', class: 'align-middle cargo_number'},
@@ -516,6 +522,7 @@
 					{data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
 					{data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},
 					{data: 'builty_number', name: 'cargo_consignments.builty_number', class: 'align-middle builty_number'},
+					{data: 'seal_number', name: 'cargo_consignments.seal_number', class: 'align-middle seal_number'},
 					{data: 'shipments_weight', name: 'cargo_consignments.shipments_weight', class: 'align-middle shipments_weight'},
 					{data: 'chargeable_weight', name: 'cargo_consignments.chargeable_weight', class: 'align-middle chargeable_weight', orderable: false, searchable: false},
 					{data: 'actual_weight', name: 'cargo_consignments.actual_weight', class: 'align-middle actual_weight'},

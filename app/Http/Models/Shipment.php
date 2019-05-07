@@ -62,6 +62,7 @@ class Shipment extends Model
     public function payment_status() {
     	return $this->belongsTo('App\Http\Models\ShipmentPaymentStatus', 'payment_status_id', 'id');
     }
+
     public function misrouted_history(){
         return $this->hasMany('App\Http\Models\MisroutedHistory');
     }
@@ -73,4 +74,16 @@ class Shipment extends Model
     public function charges_mode() {
 		return $this->belongsTo('App\Http\Models\ChargesMode');
 	}
+
+	public function intercept_history(){
+        return $this->hasOne('App\Http\Models\InterceptReBookRequestHistory');
+    }
+
+    public function weight_change_log() {
+        return $this->hasMany('App\Http\Models\Admin\ChangeShipmentWeightLog')->orderBy('id', 'DESC');
+    }
+
+    public function amount_change_log() {
+        return $this->hasMany('App\Http\Models\Admin\ChangeShipmentAmountLog')->orderBy('id', 'DESC');
+    }
 }

@@ -50,7 +50,7 @@ class ShipperReturnController extends Controller
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','shipments_journey.remarks as remarks','ssr.name as reason','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival')
+            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','shipments_journey.remarks as remarks','ssr.name as reason','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.shipper_status_id as shipper_status_id', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted')
             ->where('shipments.shipper_status_id', 12)
             ->where('shipments.user_id', session('user_id'))
             ->groupBy('shipments.id');
@@ -82,17 +82,6 @@ class ShipperReturnController extends Controller
                 return $remark;
             })
             ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
-            ->editColumn('status_date',function ($shipments){
-                if($shipments->status_date) {
-                    if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
-                        return "<span class='danger font-weight-bold'>" . $shipments->status_date . "</span>";
-                    } else {
-                        return $shipments->status_date;
-                    }
-                }else{
-                    return " - ";
-                }
-            })
             ->editColumn('arrival',function($shipments){
                 if($shipments->arrival){
                     return $shipments->arrival;
@@ -110,8 +99,9 @@ class ShipperReturnController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';
-                $reattempt_button = '<a href="javascript:void(0);" class="dropdown-item returnReattemptStatus"><i class="ft-plus-circle primary"></i> Re-Attempt Request</a>';
+                $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i>Confirm</a>';
+                $reattempt_button = '<a href="javascript:void(0);" class="dropdown-item returnReattemptStatus"><i class="ft-plus-circle primary"></i>Re-Attempt Request</a>';
+                $intercept = '<button type="button" class="dropdown-item intercept"><div class="row no-gutters align-items-center"><a href=""><i class="ft-plus-circle"></i></a>  Intercept/Re-Book</div></button>';
 
 
                     $dropdown = "
@@ -121,6 +111,10 @@ class ShipperReturnController extends Controller
                             <div class='dropdown-menu open-left arrow'>";
                         $dropdown .= $confirm_button;
                         $dropdown .= $reattempt_button;
+
+                        if ($result->shipper_status_id == 12 && $result->journey_shipper_status_id != 53 && $result->pickup == 1 && $result->intercepted == 0) {
+                            $dropdown .= $intercept;
+                        }
 
                     $dropdown .= "
                             </div>
@@ -244,7 +238,7 @@ class ShipperReturnController extends Controller
                     return ['status'=>0,'error'=>"Shipment is already updated for Re-attempt!"];
                 }
             }
-            return ['status'=>0,'error'=>"Shipment is already requested for Re-attempt!"];
+            return ['status'=>0,'error'=>"Shipment is already updated, Please check tracking!"];
 
         }
         return ['status'=>0,'error'=>"Something went wrong, try again later!"];

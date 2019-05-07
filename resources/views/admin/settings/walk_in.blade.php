@@ -31,21 +31,71 @@
                                                             <span class="input-group-text">Actual Weight</span>
                                                         </div>
                                                         <input type="text" name="walk_in_hub_on_a" class="form-control numeric" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_on->actual_weight }}">
-                                                        <div class="input-group-append" style="width: 30px">
+                                                        <div class="input-group-append">
                                                             <span class="input-group-text">KG</span>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col">
+                                            </div>
+                                            <label class="text-bold-600">Charges Per KG</label>
+                                            <div class="row">
+                                                <div class="col-12">
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
-                                                            <span class="input-group-text">Charges Per KG</span>
+                                                            <span class="input-group-text">Local</span>
                                                         </div>
-                                                        <input type="text" name="walk_in_hub_on_c" class="form-control numeric" required data-rule-required="true" data-msg-required="Charges Per KG is required" value="{{ $walk_in_hub_on->chargeable_weight }}">
+                                                        <input type="text" name="walk_in_hub_on_chargeable_weight_local" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_hub_on->chargeable_weight_local }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <label class="text-bold-600">Return Charges</label>
+                                                <div class="col-6">
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Class A</span>
+                                                        </div>
+                                                        <input type="text" name="walk_in_hub_on_chargeable_weight_class_0_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class A Rate is required" value="{{ $walk_in_hub_on->chargeable_weight_charges_class_0 }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="input-group form-group">
+                                                       <div class="input-group-prepend">
+                                                            <span class="input-group-text">Class B</span>
+                                                        </div>
+                                                        <input type="text" name="walk_in_hub_on_chargeable_weight_class_1_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class B Rate is required" value="{{ $walk_in_hub_on->chargeable_weight_charges_class_1 }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Class C</span>
+                                                        </div>
+                                                        <input type="text" name="walk_in_hub_on_chargeable_weight_class_2_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class C Rate is required" value="{{ $walk_in_hub_on->chargeable_weight_charges_class_2 }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Class D</span>
+                                                        </div>
+                                                        <input type="text" name="walk_in_hub_on_chargeable_weight_class_3_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class D Rate is required" value="{{ $walk_in_hub_on->chargeable_weight_charges_class_3 }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
+                                                </div>
+
+                                            </div><label class="text-bold-600">Return Charges</label>
                                             <div class="row">
                                                 <div class="col-12">
                                                     <div class="input-group form-group">
@@ -114,17 +164,67 @@
                                                             <span class="input-group-text">Actual Weight</span>
                                                         </div>
                                                         <input type="text" name="walk_in_door_on_a" class="form-control numeric" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_on->actual_weight }}">
-                                                        <div class="input-group-append" style="width: 30px">
+                                                        <div class="input-group-append">
                                                             <span class="input-group-text">KG</span>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col">
+                                            </div>
+                                            <label class="text-bold-600">Charges Per KG</label>
+                                            <div class="row">
+                                                <div class="col-12">
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
-                                                            <span class="input-group-text">Charges Per KG</span>
+                                                            <span class="input-group-text">Local</span>
                                                         </div>
-                                                        <input type="text" name="walk_in_door_on_c" class="form-control numeric" required data-rule-required="true" data-msg-required="Charges Per KG is required" value="{{ $walk_in_door_on->chargeable_weight }}">
+                                                        <input type="text" name="walk_in_door_on_chargeable_weight_local" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_on->chargeable_weight_local }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Class A</span>
+                                                        </div>
+                                                        <input type="text" name="walk_in_door_on_chargeable_weight_class_0_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class A Rate is required" value="{{ $walk_in_door_on->chargeable_weight_charges_class_0 }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Class B</span>
+                                                        </div>
+                                                        <input type="text" name="walk_in_door_on_chargeable_weight_class_1_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class B Rate is required" value="{{ $walk_in_door_on->chargeable_weight_charges_class_1 }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Class C</span>
+                                                        </div>
+                                                        <input type="text" name="walk_in_door_on_chargeable_weight_class_2_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class C Rate is required" value="{{ $walk_in_door_on->chargeable_weight_charges_class_2 }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Class D</span>
+                                                        </div>
+                                                        <input type="text" name="walk_in_door_on_chargeable_weight_class_3_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class D Rate is required" value="{{ $walk_in_door_on->chargeable_weight_charges_class_3 }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -197,17 +297,67 @@
                                                             <span class="input-group-text">Actual Weight</span>
                                                         </div>
                                                                 <input type="text" name="walk_in_hub_ol_a" class="form-control numeric" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_ol->actual_weight }}">
-                                                                <div class="input-group-append" style="width: 30px">
+                                                                <div class="input-group-append">
                                                                     <span class="input-group-text">KG</span>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="col">
+                                                    </div>
+                                                    <label class="text-bold-600">Charges Per KG</label>
+                                                    <div class="row">
+                                                        <div class="col-12">
                                                             <div class="input-group form-group">
                                                                 <div class="input-group-prepend">
-                                                            <span class="input-group-text">Charges Per KG</span>
+                                                                    <span class="input-group-text">Local</span>
+                                                                </div>
+                                                                <input type="text" name="walk_in_hub_ol_chargeable_weight_local" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_hub_ol->chargeable_weight_local }}">
+                                                                {{--<div class="input-group-append">--}}
+                                                                    {{--<span class="input-group-text">%</span>--}}
+                                                                {{--</div>--}}
+                                                            </div>
                                                         </div>
-                                                                <input type="text" name="walk_in_hub_ol_c" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="Charges Per KG is required" value="{{ $walk_in_hub_ol->chargeable_weight }}">
+                                                        <div class="col-6">
+                                                            <div class="input-group form-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text">Class A</span>
+                                                                </div>
+                                                                <input type="text" name="walk_in_hub_ol_chargeable_weight_class_0_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class A Rate is required" value="{{ $walk_in_hub_ol->chargeable_weight_charges_class_0 }}">
+                                                                {{--<div class="input-group-append">--}}
+                                                                    {{--<span class="input-group-text">%</span>--}}
+                                                                {{--</div>--}}
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="input-group form-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text">Class B</span>
+                                                                </div>
+                                                                <input type="text" name="walk_in_hub_ol_chargeable_weight_class_1_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class B Rate is required" value="{{ $walk_in_hub_ol->chargeable_weight_charges_class_1 }}">
+                                                                {{--<div class="input-group-append">--}}
+                                                                    {{--<span class="input-group-text">%</span>--}}
+                                                                {{--</div>--}}
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="input-group form-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text">Class C</span>
+                                                                </div>
+                                                                <input type="text" name="walk_in_hub_ol_chargeable_weight_class_2_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class C Rate is required" value="{{ $walk_in_hub_ol->chargeable_weight_charges_class_2 }}">
+                                                                {{--<div class="input-group-append">--}}
+                                                                    {{--<span class="input-group-text">%</span>--}}
+                                                                {{--</div>--}}
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="input-group form-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text">Class D</span>
+                                                                </div>
+                                                                <input type="text" name="walk_in_hub_ol_chargeable_weight_class_3_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class D Rate is required" value="{{ $walk_in_hub_ol->chargeable_weight_charges_class_3 }}">
+                                                                {{--<div class="input-group-append">--}}
+                                                                    {{--<span class="input-group-text">%</span>--}}
+                                                                {{--</div>--}}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -284,18 +434,68 @@
                                                             <span class="input-group-text">Actual Weight</span>
                                                         </div>
                                                             <input type="text" name="walk_in_door_ol_a" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_ol->actual_weight }}">
-                                                        <div class="input-group-append" style="width: 30px">
+                                                        <div class="input-group-append">
                                                             <span class="input-group-text">KG</span>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col">
+                                            </div>
+                                            <label class="text-bold-600">Charges Per KG</label>
+                                            <div class="row">
+                                                <div class="col-12">
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
-                                                            <span class="input-group-text">Charges Per KG</span>
+                                                            <span class="input-group-text">Local</span>
                                                         </div>
-                                                                <input type="text" name="walk_in_door_ol_c" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="Charges Per KG is required" value="{{ $walk_in_door_ol->chargeable_weight }}">
-                                                            </div>
+                                                        <input type="text" name="walk_in_door_ol_chargeable_weight_local" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_ol->chargeable_weight_local }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Class A</span>
+                                                        </div>
+                                                        <input type="text" name="walk_in_door_ol_chargeable_weight_class_0_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class A Rate is required" value="{{ $walk_in_door_ol->chargeable_weight_charges_class_0 }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Class B</span>
+                                                        </div>
+                                                        <input type="text" name="walk_in_door_ol_chargeable_weight_class_1_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class B Rate is required" value="{{ $walk_in_door_ol->chargeable_weight_charges_class_1 }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Class C</span>
+                                                        </div>
+                                                        <input type="text" name="walk_in_door_ol_chargeable_weight_class_2_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class C Rate is required" value="{{ $walk_in_door_ol->chargeable_weight_charges_class_2 }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Class D</span>
+                                                        </div>
+                                                        <input type="text" name="walk_in_door_ol_chargeable_weight_class_3_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class D Rate is required" value="{{ $walk_in_door_ol->chargeable_weight_charges_class_3 }}">
+                                                        {{--<div class="input-group-append">--}}
+                                                            {{--<span class="input-group-text">%</span>--}}
+                                                        {{--</div>--}}
+                                                    </div>
                                                 </div>
                                             </div>
                                                 <label class="text-bold-600">Return Charges</label>
@@ -373,17 +573,67 @@
                                                             <span class="input-group-text">Actual Weight</span>
                                                         </div>
                                                     <input type="text" name="walk_in_hub_dn_a" class="form-control numeric" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_dn->actual_weight }}">
-                                                            <div class="input-group-append" style="width: 30px">
+                                                            <div class="input-group-append">
                                                                 <span class="input-group-text">KG</span>
                                                             </div>
                                                 </div>
                                                     </div>
-                                                    <div class="col">
+                                                </div>
+                                                <label class="text-bold-600">Charges Per KG</label>
+                                                <div class="row">
+                                                    <div class="col-12">
                                                         <div class="input-group form-group">
                                                             <div class="input-group-prepend">
-                                                            <span class="input-group-text">Charges Per KG</span>
+                                                                <span class="input-group-text">Local</span>
+                                                            </div>
+                                                            <input type="text" name="walk_in_hub_dn_chargeable_weight_local" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_hub_dn->chargeable_weight_local }}">
+                                                            {{--<div class="input-group-append">--}}
+                                                                {{--<span class="input-group-text">%</span>--}}
+                                                            {{--</div>--}}
                                                         </div>
-                                                            <input type="text" name="walk_in_hub_dn_c" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="Charges Per KG is required" value="{{ $walk_in_hub_dn->chargeable_weight }}">
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="input-group form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">Class A</span>
+                                                            </div>
+                                                            <input type="text" name="walk_in_hub_dn_chargeable_weight_class_0_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class A Rate is required" value="{{ $walk_in_hub_dn->chargeable_weight_charges_class_0 }}">
+                                                            {{--<div class="input-group-append">--}}
+                                                                {{--<span class="input-group-text">%</span>--}}
+                                                            {{--</div>--}}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="input-group form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">Class B</span>
+                                                            </div>
+                                                            <input type="text" name="walk_in_hub_dn_chargeable_weight_class_1_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class B Rate is required" value="{{ $walk_in_hub_dn->chargeable_weight_charges_class_1 }}">
+                                                            {{--<div class="input-group-append">--}}
+                                                                {{--<span class="input-group-text">%</span>--}}
+                                                            {{--</div>--}}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="input-group form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">Class C</span>
+                                                            </div>
+                                                            <input type="text" name="walk_in_hub_dn_chargeable_weight_class_2_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class C Rate is required" value="{{ $walk_in_hub_dn->chargeable_weight_charges_class_2 }}">
+                                                            {{--<div class="input-group-append">--}}
+                                                                {{--<span class="input-group-text">%</span>--}}
+                                                            {{--</div>--}}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="input-group form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">Class D</span>
+                                                            </div>
+                                                            <input type="text" name="walk_in_hub_dn_chargeable_weight_class_3_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class D Rate is required" value="{{ $walk_in_hub_dn->chargeable_weight_charges_class_3 }}">
+                                                            {{--<div class="input-group-append">--}}
+                                                                {{--<span class="input-group-text">%</span>--}}
+                                                            {{--</div>--}}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -456,19 +706,69 @@
                                                             <span class="input-group-text">Actual Weight</span>
                                                         </div>
                                                     <input type="text" name="walk_in_door_dn_a" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_dn->actual_weight }}">
-                                                            <div class="input-group-append" style="width: 30px">
+                                                            <div class="input-group-append">
                                                                 <span class="input-group-text">KG</span>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                        <div class="col">
-                                                            <div class="input-group form-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text">Charges Per KG</span>
-                                                        </div>
-                                                        <input type="text" name="walk_in_door_dn_c" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="Charges Per KG is required" value="{{ $walk_in_door_dn->chargeable_weight }}">
-                                                        </div>
+                                                </div>
+                                                <label class="text-bold-600">Charges Per KG</label>
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <div class="input-group form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">Local</span>
                                                             </div>
+                                                            <input type="text" name="walk_in_door_dn_chargeable_weight_local" class="form-control local" placeholder="" required data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_dn->chargeable_weight_local }}">
+                                                            {{--<div class="input-group-append">--}}
+                                                                {{--<span class="input-group-text">%</span>--}}
+                                                            {{--</div>--}}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="input-group form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">Class A</span>
+                                                            </div>
+                                                            <input type="text" name="walk_in_door_dn_chargeable_weight_class_0_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class A Rate is required" value="{{ $walk_in_door_dn->chargeable_weight_charges_class_0 }}">
+                                                            {{--<div class="input-group-append">--}}
+                                                                {{--<span class="input-group-text">%</span>--}}
+                                                            {{--</div>--}}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="input-group form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">Class B</span>
+                                                            </div>
+                                                            <input type="text" name="walk_in_door_dn_chargeable_weight_class_1_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class B Rate is required" value="{{ $walk_in_door_dn->chargeable_weight_charges_class_1 }}">
+                                                            {{--<div class="input-group-append">--}}
+                                                                {{--<span class="input-group-text">%</span>--}}
+                                                            {{--</div>--}}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="input-group form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">Class C</span>
+                                                            </div>
+                                                            <input type="text" name="walk_in_door_dn_chargeable_weight_class_2_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class C Rate is required" value="{{ $walk_in_door_dn->chargeable_weight_charges_class_2 }}">
+                                                            {{--<div class="input-group-append">--}}
+                                                                {{--<span class="input-group-text">%</span>--}}
+                                                            {{--</div>--}}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="input-group form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">Class D</span>
+                                                            </div>
+                                                            <input type="text" name="walk_in_door_dn_chargeable_weight_class_3_charges" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Class D Rate is required" value="{{ $walk_in_door_dn->chargeable_weight_charges_class_3 }}">
+                                                            {{--<div class="input-group-append">--}}
+                                                                {{--<span class="input-group-text">%</span>--}}
+                                                            {{--</div>--}}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <label class="text-bold-600">Return Charges</label>
                                                 <div class="row">

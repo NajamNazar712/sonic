@@ -17,6 +17,8 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\InterceptReBookRequest;
+use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\MisroutedHistory;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
@@ -25,6 +27,7 @@ use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -56,7 +59,7 @@ class DeliveryController extends Controller
 
     public function pending_list(Request $request)
     {
-        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49); //for pending deliveries
+        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55); //for pending deliveries
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -76,9 +79,10 @@ class DeliveryController extends Controller
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+            ->leftjoin('intercept_re_book_request_histories as irrh', 'irrh.shipment_id', '=', 'shipments.id')
             ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc')
-            ->whereRaw('IF (shipments.shipper_status_id = 2, (oc.hub_id = dc.hub_id), TRUE)')
-            ->whereRaw('IF (shipments.shipper_status_id = 49, (oc.hub_id = dc.hub_id), TRUE)')
+            ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
+            ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
 
         if (session('role_id') != 1) {
@@ -201,7 +205,7 @@ class DeliveryController extends Controller
 
     public function get_shipment_details(Request $request)
     {
-        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49);
+        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55);
         if ($request->tracking != '') {
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
             $remarks = '';
@@ -221,10 +225,35 @@ class DeliveryController extends Controller
                         $is_updateable = 0;
                     }
 
+
                     if ($is_updateable == 0) {
-                        if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && ($shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 49)) {
+                        if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && $shipment->shipper_status_id == 2) {
                             return ['status' => 1, 'error' => 'Cargo not arrived at destination center!'];
+                        }else if($shipment->shipper_status_id == 49){
+                            $misroute_history = MisroutedHistory::where('shipment_id', $shipment->id);
+                            if($misroute_history->exists()){
+                                $misroute_history = $misroute_history->latest()->first();
+                                if ($misroute_history->old_consignee_city_id != $misroute_history->new_consignee_city_id){
+                                    return ['status' => 1, 'error' => 'Shipment needs to be moved through cargo!'];
+                                }
+                            }else{
+                                return ['status' => 1, 'error' => 'Shipment Not found!'];
+                            }
+
                         }
+                        else if($shipment->shipper_status_id == 55){
+                            $request_history = InterceptReBookRequestHistory::where('shipment_id', $shipment->id);
+                            if($request_history->exists()){
+                                $request_history = $request_history->first();
+                                if ($request_history->old_consignee_city_id != $request_history->new_consignee_city_id){
+                                    return ['status' => 1, 'error' => 'Shipment needs to be moved through cargo!'];
+                                }
+                            }else{
+                                return ['status' => 1, 'error' => 'Shipment Not found!'];
+                            }
+
+                        }
+
                         if ($request->has('hub_id')) {
                             $hub_id = $shipment->consignee_city->hub_id;
                             if ($request->hub_id == $hub_id) {
@@ -292,7 +321,7 @@ class DeliveryController extends Controller
 
         $admin = Auth::id();
 
-        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15,49);
+        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15, 49, 55);
 
         $valid_shipments = array();
 
@@ -340,7 +369,7 @@ class DeliveryController extends Controller
                         if(DeliveryNote::where('id', $old_delivery_note_id->delivery_note_id)->where('status',0)->exists()){
                             $journey = ShipmentsJourney::where('shipment_id',$shipment)->where('verification',0)->latest()->first();
                             if($journey->count() > 0){
-                                ShipmentsJourneyController::add($journey->shipment_id,$journey->shipper_status_id,$journey->consignee_status_id,$journey->status_reason_id,$journey->remarks,$journey->user_id,Auth::id(),$journey->reference_1_id,NULL,1);
+                                ShipmentsJourneyController::add($journey->shipment_id,$journey->shipper_status_id,$journey->consignee_status_id,$journey->status_reason_id,$journey->remarks,$journey->user_id,Auth::id(),$journey->reference_1_id,NULL,1,$journey->received_or_refused_by);
                             }
                         }
 
@@ -540,8 +569,7 @@ class DeliveryController extends Controller
 
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
-                return "<a href='javascript:void(0);' class='deliverynoterow'>Remove</a>";
-
+                return "<a href='javascript:void(0);' class='deliverynoterow'><button type='button' class='btn btn-sm btn-danger'>Remove</button></a>";
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
@@ -562,24 +590,21 @@ class DeliveryController extends Controller
     {
         $shipment = DeliveryNoteShipment::where('shipment_id', $request->shipment_id)->where('delivery_note_id', $request->delivery_note_id);
         if ($shipment->exists()) {
-            $shipment = $shipment->first();
-            $delivery_note = $shipment->delivery_note_id;
+            $delivery_note = $request->delivery_note_id;
             $delivery = DeliveryNote::where('id', $delivery_note);
             if ($delivery->exists()) {
-                $parcel = Shipment::where('id', $request->shipment_id);
-                $parcel = $parcel->first();
+                $parcel = Shipment::where('id', $request->shipment_id)->first();
                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
                 $delivery = $delivery->first();
                 $count = $delivery->shipments_count;
                 $cod = $delivery->total_cod_amount;
-                $count = $count - 1;
+                $count-=1;
                 if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                     $cod = $cod - $parcel->amount;
                 }
                 if ($count == 0) {
-                    DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod, 'status' => 4]);
+                    DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
                 } else {
-
                     DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                 }
                 Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 6]);
@@ -1380,7 +1405,7 @@ class DeliveryController extends Controller
             ->leftJoin('shipments_journey as rrb', function ($join) {
                 $join->on('rrb.shipment_id', '=', 'shipments.id')
                     ->where('rrb.created_at', '=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
             ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','rrb.received_or_refused_by'])
             ->where('delivery_notes.id', $id);
@@ -1397,15 +1422,8 @@ class DeliveryController extends Controller
                 return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('status', function ($deliveries) {
-                if ($deliveries->booking_type_id == 1) {
-                    $where = array(7, 8, 9, 10, 11, 12, 15, 18, 20);
-                } else if ($deliveries->booking_type_id == 2) {
-                    $where = array(7, 8, 9, 10, 11, 12, 15, 18, 20);
-                } else if ($deliveries->booking_type_id == 3) {
-                    $where = array(7, 8, 9, 10, 11, 12, 15, 18, 20);
-                } else if ($deliveries->booking_type_id == 4) {
-                    $where = array(7, 8, 9, 10, 11, 12, 15, 18, 20);
-                }
+                $where = array(7, 8, 9, 10, 11, 12, 15, 18, 20);
+
 //                $where = array(7,8,9,10,11,12,14,15,16,18,20,30,35,36,37);
                 $delivered_statuses = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
@@ -2746,11 +2764,13 @@ class DeliveryController extends Controller
                 ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
                 ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
                 ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
+                ->where('s.tracking_number', '=', $tracking_number)
+                ->groupBy('station_deposit_notes.id');
         }
         if ($dncc = $request->get('scan_dncc')) {
             $datatable->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
-                ->where('dnsdns.delivery_note_id', '=', $dncc);
+                ->where('dnsdns.delivery_note_id', '=', $dncc)
+                ->groupBy('station_deposit_notes.id');
         }
         return $datatable->make(true);
     }
@@ -3784,5 +3804,270 @@ class DeliveryController extends Controller
 
             $writer->save('php://output');
         }
+    }
+    public function intercept_request_index()
+    {
+        $shipping_mode = ShippingMode::all();
+        $service_type = BookingType::all();
+//        $city =  City::where('status', 1)->whereNotNull('zone_id')->where('pickup', 1)->orderBy('name')->get();
+        return view('admin.delivery.intercept.index')->with(['shipping_mode' => $shipping_mode, 'service_type' => $service_type]);
+    }
+
+    public function intercept_request_list(Request $request)
+    {
+
+        $shipments = Shipment::leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftjoin('intercept_re_book_requests as irbr', 'irbr.shipment_id', '=', 'shipments.id')
+            ->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftjoin('cities AS odc', 'irbr.consignee_city_id', '=', 'odc.id')
+            ->leftjoin('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftjoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+//            ->join('delivery_note_shipments as dns','dns.shipment_id','=','shipments.id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.created_at', '=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.created_at', '=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->select('shipments.id as shId','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id')
+            ->where('shipments.shipper_status_id', 54)
+        ->groupBy('shipments.id');
+
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->editColumn('order_id', function($shipment){
+                if($shipment->order_id == null) {
+                    return '-';
+                }
+                else{
+                    return $shipment->order_id;
+                }
+            })
+            ->editColumn('arrival', function ($shipments) {
+                if ($shipments->arrival) {
+                    return $shipments->arrival;
+                } else {
+                    return " - ";
+                }
+            })
+            ->filterColumn('shipping_mode', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('sm.id', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('service_type', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('bt.id', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->make(true);
+    }
+
+    public function approve(Request $request){
+        $shipment_ids = $request->ids;
+        $print = array();
+        if (!empty($shipment_ids)) {
+            $valid = FALSE;
+
+            foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+
+                if ($shipment && $shipment->shipper_status_id == 54) {
+                    $valid = TRUE;
+
+                    $intercept = InterceptReBookRequest::where('shipment_id',$shipment_id)->first();
+
+                    $previous_consignee_city_id = $shipment->consignee_city_id;
+                    $new_consignee_city_id = $intercept->consignee_city_id;
+
+                    InterceptReBookRequestHistory::create([
+                        'shipment_id' => $shipment->id,
+                        'old_consignee_city_id' => $shipment->consignee_city_id,
+                        'new_consignee_city_id' => $intercept->consignee_city_id,
+                        'old_consignee_name' => $shipment->consignee_name,
+                        'new_consignee_name' => $intercept->consignee_name,
+                        'old_consignee_address' => $shipment->consignee_address,
+                        'new_consignee_address' => $intercept->consignee_address,
+                        'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                        'new_consignee_phone_number_1' => $intercept->consignee_phone_number_1,
+                        'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                        'new_consignee_phone_number_2' => $intercept->consignee_phone_number_2,
+                        'old_consignee_email' => $shipment->consignee_email,
+                        'new_consignee_email' => $intercept->consignee_email,
+                        'old_amount' => $shipment->amount,
+                        'new_amount' => $intercept->amount,
+                        'shipper_id' => $intercept->shipper_id
+                    ]);
+
+                    $shipment->consignee_city_id = $intercept['consignee_city_id'];
+                    $shipment->consignee_name = $intercept['consignee_name'];
+                    $shipment->consignee_address = $intercept['consignee_address'];
+                    $shipment->consignee_phone_number_1 = $intercept['consignee_phone_number_1'];
+                    $shipment->consignee_phone_number_2 = $intercept['consignee_phone_number_2'];
+                    $shipment->consignee_email = $intercept['consignee_email'];
+                    $shipment->amount = $intercept['amount'];
+                    $shipment->shipper_status_id = 55;
+                    $shipment->consignee_status_id = 55;
+
+                    $shipment->save();
+
+
+                    InterceptReBookRequest::where('shipment_id',$shipment_id)->update([
+                        'status' => 1,
+                        'updated_by' => Auth::id(),
+                        'updated_by_date' => Carbon::now()
+                    ]);
+
+                    ShipmentChargesController::cash_handling($shipment_id);
+                    ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
+
+                    ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
+                    $print[] = $shipment_id;
+                }
+            }
+
+            if ($valid) {
+                return ['status' => 0, 'success' => 'Shipment(s) has been marked as Intercept Approved', 'print' => $print];
+            }
+            else {
+                return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipment Selected'];
+        }
+    }
+
+    public function reject(Request $request){
+        $shipment_ids = $request->ids;
+
+        if (!empty($shipment_ids)) {
+            $valid = FALSE;
+
+            foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+
+                if ($shipment && $shipment->shipper_status_id == 54) {
+                    $valid = TRUE;
+
+                    NotificationsController::send(15, 0, $shipment_id);
+                    NotificationsController::send(16, 0, $shipment_id);
+
+                    if ($shipment->booking_type_id != 4) {
+                        ShipmentChargesController::return($shipment_id);
+
+                        AdminFinanceController::add_payment($shipment_id, 1);
+                    }
+                    else {
+                        ShipmentChargesController::walk_in_return($shipment_id);
+
+                        $shipment->walk_in_status = 2;
+
+                        $shipment->save();
+
+                        AdminFinanceController::done_payment($shipment_id, 1);
+                    }
+
+
+                    $shipment->shipper_status_id = 20;
+                    $shipment->consignee_status_id = 20;
+
+                    $shipment->save();
+
+                    $new_intercept_request = InterceptReBookRequest::where('shipment_id',$shipment_id)->update([
+                        'status' => 2,
+                        'updated_by' => Auth::id(),
+                        'updated_by_date' => Carbon::now()
+                    ]);
+
+                    ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+                }
+            }
+
+            if ($valid) {
+                return ['status' => 0, 'success' => 'Shipment(s) has been marked as Return Confirm'];
+            }
+            else {
+                return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipment Selected'];
+        }
+    }
+
+    public function fake_status_remove_index(){
+        return view('admin.delivery.fake_status.index');
+    }
+    public function fake_status_remove_list(Request $request){
+        $fake_status = DeliveryNoteShipment::leftjoin('delivery_notes as dn', 'dn.id', '=', 'delivery_note_shipments.delivery_note_id')
+            ->leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
+            ->leftjoin('shipments_journey as sj', function($join) {
+                $join->on('sj.shipment_id', '=', 'delivery_note_shipments.shipment_id')
+                    ->where('sj.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and shipments_journey.reference_1_id = delivery_note_shipments.delivery_note_id)'));
+                    })
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'sj.shipper_status_id')
+            ->leftjoin('cities as h', 'h.id', '=', 'dn.hub_id')
+            ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
+            ->select('delivery_note_shipments.delivery_note_id as delivery_note_id', 'delivery_note_shipments.shipment_id as shipment_id', 'dn.id as delivery_note', 's.amount as amount', 'h.name as hub', 'r.name as rider', 'ss.name as status', 'dn.created_at as created_at')
+            ->where('delivery_note_shipments.fake_status', 1);
+
+        $datatables = Datatables::of($fake_status)
+            ->editColumn('tracking_number_link', function ($fake_status) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$fake_status->tracking_number' class='tracking' target='_blank'>$fake_status->tracking_number</a></u>";
+            })
+            ->editColumn('delivery_note', function ($fake_status) {
+                return str_pad($fake_status->delivery_note, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            });
+            if ($request->has('search_tracking_no')) {
+                $tracking_number = $request->get('search_tracking_no');
+            }
+            else{
+                $tracking_number = null;
+            }
+            $datatables->where('s.tracking_number', '=', $tracking_number);
+
+            return $datatables->make(true);
+    }
+    public function fake_status_remove(Request $request){
+        if($request->has('ids')){
+            $shipment = Shipment::where('tracking_number',$request->tracking_number)->first();
+            foreach($request->ids as $delivery_note_id)
+            {
+                DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment['id']])->update([
+                    'fake_status' => 0
+                ]);
+            }
+            return ['status' => 1, 'success' => 'Fake Status has been removed'];
+        }
+        return ['status' => 0, 'error' => 'Something went wrong'];
     }
 }

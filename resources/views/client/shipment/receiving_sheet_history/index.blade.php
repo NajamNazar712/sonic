@@ -166,6 +166,9 @@
 				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
+                language: {
+                    processing: data_table_loader
+                },
 				serverSide: true,
 				ajax: '{{ route('cod.shipment.receiving_sheet_history.short_received_list') }}',
 				rowId: 'pickup_address_id',
@@ -323,6 +326,9 @@
 				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
+                language: {
+                    processing: data_table_loader
+                },
 				serverSide: true,
 				ajax: '{{ route('cod.shipment.receiving_sheet_history.receiving_sheet_list') }}',
 				rowId: 'id',

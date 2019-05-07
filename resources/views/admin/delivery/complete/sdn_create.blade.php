@@ -184,6 +184,9 @@
                 scrollX: true,
                 paging:false,
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.completed.dncc.list') }}',
                 rowId: 'delivery_note_id',

@@ -95,6 +95,11 @@ class Permission
             'cargo.history.list' => 124,
             'cargo.history.shipments.' => 124,
             'cargo.history.print.' => 124,
+            'cargo.mapping.index' => 198,
+            'cargo.mapping.list' => 198,
+            'cargo.mapping.store' => 198,
+            'cargo.mapping.edit' => 198,
+            'cargo.mapping.update' => 198,
             'sameday.index' => 32,
             'sameday.list' => 32,
 
@@ -113,7 +118,6 @@ class Permission
             'delivery.receive.status' => 37,
             'delivery.receive.add.status' => 37,
             'delivery.receive.add.list' => 37,
-            'delivery.receive.reason' => 37,
             'delivery.receive.delivered' => 37,
             'delivery.receive.shipmentstatuscheck' => 37,
             'delivery.receive.replacements' => 37,
@@ -163,6 +167,12 @@ class Permission
             'delivery.lost.add.index' => 130,
             'delivery.lost.add.shipment.info' => 130,
             'delivery.lost.add.shipments.store' => 130,
+            'delivery.intercept.index' => 193,
+            'delivery.intercept.approve' => 194,
+            'delivery.intercept.reject' => 195,
+            'delivery.intercept.history.index' => 196,
+            'delivery.fake_status.index' => 203,
+            'delivery.fake_status.list' => 203,
 
             'return.index' => 44,
             'return.list' => 44,
@@ -313,8 +323,9 @@ class Permission
             'reports.multiple_payment_report.list' => 176,
 			'reports.revenue.index' => 177,
             'reports.revenue.list' => 177,
-            'reports.crm.index' => 200,
-            'reports.crm.list' => 200,
+			'reports.crm.index' => 200,
+            'reports.crm.list' => 200,            'reports.gst.index' => 199,
+            'reports.gst.list' => 199,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -368,6 +379,8 @@ class Permission
             'management.rider.edit' => 98,
             'management.rider.status' => 99,
 
+            'management.city_list' => 205,
+
             'notifications.index' => 100,
             'notifications.list' => 100,
             'notifications.send_custom_email' => 103,
@@ -399,7 +412,8 @@ class Permission
             'settings.ticker.store' => 152,
 
             'settings.walk_in.store' => 154,
-			'settings.petty_cash.heads.index' => 157,            'settings.petty_cash.heads.list' => 157,
+			'settings.petty_cash.heads.index' => 157,
+            'settings.petty_cash.heads.list' => 157,
             'settings.petty_cash.heads.add' => 159,
             'settings.petty_cash.heads.edit' => 160,
             'settings.petty_cash.heads.active' => 161,
@@ -415,6 +429,13 @@ class Permission
             'settings.auto_invoice_generation_and_due_date.store' => 171,
 			'settings.debriefing_report_cut_off_time.index' => 175,
             'settings.debriefing_report_cut_off_time.store' => 175,
+            'settings.return_note_restriction_bypass.index' => 192,
+
+            'settings.cod_cap_zones.index' => 197,
+            'settings.cod_cap_zones.update' => 197,
+
+
+
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118,
@@ -457,6 +478,8 @@ class Permission
             'return.pending.list' => 9,
             'return.pending.marked.status' => 9,
             'return.pending.marked.status.single' => 9,
+
+            'intercept.index' => 9,
 
             'packaging.requests.index' => 4,
             'packaging.requests.submit' => 4,

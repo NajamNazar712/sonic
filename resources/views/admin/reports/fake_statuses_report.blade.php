@@ -13,6 +13,9 @@
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                        <div class="form-group">
+                                <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Tracking Number">
+                        </div>
                         <div class="form-group ml-1">
                             <select name="riders" class="select2" id="riders">
                                 @foreach($riders as $rider)
@@ -36,9 +39,22 @@
                             </span>
                                 </div>
 
-                                <input type="text" name="search_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date" placeholder="Date (Creation Date)">
+                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)">
                             </div>
-                        <div class="form-group ml-1">
+
+
+                            <div class="form-group input-group ml-1">
+                                <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                                </div>
+
+                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Search Date (To)" disabled>
+                            </div>
+
+
+                        <div class="col-2 mt-2">
                             <button type="button" id="search_filter_btn" class="btn btn-primary"><i class="la la-search"></i> Search</button>
                         </div>
                     </form>
@@ -192,6 +208,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_form #search_tracking_no').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             $('#search_form #riders').prepend('<option value="" selected="selected"></option>').select2({
                 width: '200px',
                 placeholder: 'Select Rider',
@@ -203,27 +224,52 @@
                 allowClear:true
             });
 
-            $('#search_form #search_date').pickadate({
+            var future_date = new Date();
+            future_date.setDate(future_date.getDate()-7);
+            $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                min:future_date,
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    $('#search_date_to').pickadate('picker').clear({muted: true});
+                    if (context.select) {
+                        var selected_date = new Date(context.select);
+                        $('#search_date_to').attr('disabled', false);
+                        $('#search_form #search_date_to').pickadate('picker').set({'min':selected_date},{muted: true});
+                    }
+                }
+            });
+            $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
+                    if (context.select) {
+                        // $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
                 }
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
 
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.fake_status.list') }}',
                         data: {
                             'page': 'all',
-                            'search_date': $('input[name="search_date_formatted"]').val(),
                             'rider': $('#riders').val(),
-                            'hub': $('#hubs').val()
+                            'hub': $('#hubs').val(),
+                            'search_tracking_no': $('#search_tracking_no').val(),
+                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
+                            'search_date_to': $('input[name="search_date_to_formatted"]').val(),
                         },
                         success: function (result) {
                             head = [];
@@ -255,6 +301,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -275,13 +322,18 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.fake_status.list') }}',
                     data: function (d) {
-                        d.search_date = $('input[name="search_date_formatted"]').val(),
                         d.rider = $('#riders').val();
-                        d.hub = $('#hubs').val()
+                        d.hub = $('#hubs').val();
+                        d.search_tracking_no = $('#search_tracking_no').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 order: [[5, 'desc']],
@@ -302,6 +354,7 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
+                    // blockPagePermanently();
                     this.api().table().columns.adjust();
                 }
             });
@@ -344,7 +397,6 @@
             var id = parseInt($(this).parents('tr').attr('id'));
             $('#undelivered_shipments_modal .modal-body').html('');
             $('#undelivered_shipments_modal').modal('show');
-            console.log(id);
             $.ajax({
                 url: '{!! route('admin.reports.fake_status.shipments.undelivered') !!}',
                 method: 'POST',

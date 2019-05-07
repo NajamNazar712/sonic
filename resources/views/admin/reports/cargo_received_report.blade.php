@@ -20,6 +20,11 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
                                 @foreach($cities as $city)
                                     <option value="{{$city->id}}">{{$city->name}}</option>
@@ -57,18 +62,6 @@
                             </div>
 
                     </div>
-                    <div class="col-4">
-
-                            <div class="form-group input-group">
-                                <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                                </div>
-                            <input type="text" name="received_date" class="form-control bg-primary border-primary white rounded-right" id="received_date" placeholder="Received Date" data-value="">
-                            </div>
-
-                    </div>
                     <div class="col-3 ">
                         <div class="form-group">
                             <select name="cargo_type" class="select2" id="cargo_type">
@@ -80,9 +73,22 @@
                         </div>
 
                     </div>
+                    <div class="col-3">
+
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                                </div>
+                            <input type="text" name="received_date" class="form-control bg-primary border-primary white rounded-right" id="received_date" placeholder="Received Date" data-value="">
+                            </div>
+
+                    </div>
+
                     <div class="col-3 ">
 
-                        <div class="form-group input-group ml-1">
+                        <div class="form-group input-group ">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -93,7 +99,7 @@
                         </div>
                     </div>
                     <div class="col-3 ">
-                        <div class="form-group input-group ml-1">
+                        <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -116,6 +122,7 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Cargo No.</th>
+                        <th class="border-primary border-darken-1">Seal No.</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Shipment(s)</th>
@@ -332,6 +339,7 @@
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
 
                     var jsonResult = $.ajax({
@@ -339,6 +347,7 @@
                         data: {
                             'page': 'all',
                             'search_cargo_no': $('#search_cargo_no').val(),
+                            'search_tracking': $('#search_tracking_no').val(),
                             'search_origin': $('#search_origin').val(),
                             'search_destination': $('#search_destination').val(),
                             'search_shippimg_modes': $('#search_shippimg_modes').val(),
@@ -353,6 +362,7 @@
 
                             head.push('S. No');
                             head.push('Cargo No.');
+                            head.push('Seal No.');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Shipment(s)');
@@ -372,6 +382,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.cargo_id);
+                                row.push(values.seal_number);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.shipments);
@@ -392,6 +403,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -412,11 +424,15 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.cargo_received.list') }}',
                     data: function (d) {
                         d.search_cargo_no = $('#search_cargo_no').val();
+                        d.search_tracking = $('#search_tracking_no').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_shippimg_modes = $('#search_shippimg_modes').val();
@@ -428,10 +444,11 @@
                     }
                 },
                 rowId: 'cargo_id',
-                order: [[12, 'asc']],
+                order: [[13, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'cargo_id_link', name: 'cargo_consignments.id', class: 'align-middle cargo_id_link'},
+                    {data: 'seal_number', name: 'cargo_consignments.seal_number', class: 'align-middle seal_number'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'h.name', class: 'align-middle destination'},
                     {data: 'shipments_link', name: 'cargo_consignments.shipments', class: 'align-middle text-center shipments_link'},

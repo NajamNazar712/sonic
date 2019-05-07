@@ -111,7 +111,7 @@
                                         <h4 class="form-section mb-2 text-center">Order Information</h4>
 
                                         <div class="form-group">
-                                            <input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ route('admin.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
+                                            <input name="order_id" class="form-control" placeholder="Order ID" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
                                         </div>
 
                                         <div id="regular">
@@ -267,8 +267,44 @@
                         $('#total_receivable').val(data.receivable);
                 });
             });
+            $('#new_pickup_city, #pickup_address, #consignee_city, #shipping_mode, #delivery_type, #charges_per_kg').change(function(){
+                if ($('#pickup_address').val() == 0) {
+                    var pickup_city_id = $('#new_pickup_city').val();
+                }
+                else {
+                    var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
+                }
+                $.ajax({
+                    url:'{!! route('admin.shipment.book.check_min_charges') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'pickup_city': pickup_city_id,
+                        'consignee_city': $('#consignee_city').val(),
+                        'delivery_type': $('#delivery_type').val(),
+                        'shipping_mode': $('#shipping_mode').val()
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        $('#span_charges').remove();
+                        if(data.min_charges < $('#charges_per_kg').val()) {
+                            var span_charges = '<span id="span_charges" style="color: blue">Minimum charges per kg will be ' + data.min_charges + '</span>';
+                            $('#charges_per_kg').parent('div').append(span_charges);
+                        }
+                    }
+                });
+
+            });
 
             $('#actual_weight, #charges_per_kg').change(function(){
+                $('#span').remove();
+                var pickup;
+                if ($('#pickup_address').val() == 0) {
+                    var pickup_city_id = $('#new_pickup_city').val();
+                }
+                else {
+                    var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
+                }
 
                 $.ajax({
                     url:'{!! route('admin.shipment.book.check_standard_weight') !!}',
@@ -277,6 +313,9 @@
                         '_token': '{{ csrf_token() }}',
                         'actual_weight': $('#actual_weight').val(),
                         'charges_per_kg': $('#charges_per_kg').val(),
+                        'pickup_city': pickup_city_id,
+                        'pickup': pickup,
+                        'consignee_city': $('#consignee_city').val(),
                         'delivery_type': $('#delivery_type').val(),
                         'shipping_mode': $('#shipping_mode').val()
                     }
@@ -296,11 +335,53 @@
                             $('#sub_book').prop('disabled', true);
                             $('#sub_book_print').prop('disabled', true);
                         }
-                    if(data.status === 2) {
-                        $('#span').remove();
-                        $('#sub_book').prop('disabled', false);
-                        $('#sub_book_print').prop('disabled', false);
-                    }
+                        if(data.status === 3) {
+                            $('#span').remove();
+                            if ($('#pickup_address').val() == "") {
+                                var span = '<span id="span" style="color: red">Pickup address is required</span>';
+                                $('#pickup_address').parent('div').append(span);
+                            }
+                            else{
+                                var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                                $('#new_pickup_city').parent('div').append(span);
+                            }
+                            $('#actual_weight').val('');
+                            $('#charges_per_kg').val('');
+                            $('#sub_book').prop('disabled', true);
+                            $('#sub_book_print').prop('disabled', true);
+                        }
+                        if(data.status === 4) {
+                            $('#span').remove();
+                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                            $('#delivery_type').parent('div').append(span);
+                            $('#actual_weight').val('');
+                            $('#charges_per_kg').val('');
+                            $('#sub_book').prop('disabled', true);
+                            $('#sub_book_print').prop('disabled', true);
+                        }
+                        if(data.status === 5) {
+                            $('#span').remove();
+                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                            $('#consignee_city').parent('div').append(span);
+                            $('#actual_weight').val('');
+                            $('#charges_per_kg').val('');
+                            $('#sub_book').prop('disabled', true);
+                            $('#sub_book_print').prop('disabled', true);
+                        }
+                        if(data.status === 6) {
+                            $('#span').remove();
+                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                            $('#shipping_mode').parent('div').append(span);
+                            $('#actual_weight').val('');
+                            $('#charges_per_kg').val('');
+                            $('#sub_book').prop('disabled', true);
+                            $('#sub_book_print').prop('disabled', true);
+                        }
+                        if(data.status === 2) {
+                            $('#span').remove();
+                            $('#sub_book').prop('disabled', false);
+                            $('#sub_book_print').prop('disabled', false);
+                        }
                 });
             });
 
@@ -319,8 +400,7 @@
                 method: 'POST',
                 data: {
                     '_token': '{{ csrf_token() }}',
-                    'ids': '{{ session('print') }}',
-                    'twice': true
+                    'ids': '{{ session('print') }}'
                 }
             })
                 .done(function(data) {

@@ -226,6 +226,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 {{--ajax: '{{ route('admin.petty_cash.statements.list') }}',--}}
                 ajax: {
@@ -309,18 +312,44 @@
             $('body').on('click','button.approve',function () {
                 var id = $(this).parents('tr').attr('id');
                 if(id){
-                    $.ajax({
-                        url: '{!! route('admin.petty_cash.statements.approve') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'statement_id': id
-                        }
-                    }).done(function(data){
-                        if(data.status){
-                            table.draw(true);
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to approve petty cash statement!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.petty_cash.statements.approve') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'statement_id': id
+                                }
+                            }).done(function(data){
+                                if(data.status){
+                                    table.draw(true);
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
                         }
                     });
                 }else{

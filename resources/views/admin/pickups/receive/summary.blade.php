@@ -149,7 +149,7 @@
 		$(document).ready(function() {
 			@if (session('print_shipment_ids'))
 				$.ajax({
-					url: '{!! route('cod.shipment.book.corporate_invoice') !!}',
+					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
 					method: 'POST',
 					data: {
 						'ids': {!! json_encode(session('print_shipment_ids')) !!},
@@ -182,6 +182,9 @@
 				scrollX: true, scrollY: '350px',
                 paging:false,
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
 				serverSide: true,
 				ajax: {
 					url: '{{ route('admin.pickups.receive.summary.list') }}',

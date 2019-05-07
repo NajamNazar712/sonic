@@ -14,7 +14,7 @@
                 <div class="row mb-2 justify-content-center">
                     <div class="col-12">
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="post" action="{{route('admin.reports.sales_person_performance.export_to_excel')}}">
-                            <div class="col-2">
+                            <div class="col-4 mb-1">
                                 <div class="form-group">
                                     <select name="city" class="select2" id="city">
                                         @foreach($hubs as $city)
@@ -23,16 +23,27 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-2">
-                                <div class="form-group ml-1">
+                            <div class="col-4 mb-1">
+                                <div class="form-group">
                                     <select name="sales_person" class="select2" id="sales_person_select">
                                         @foreach($sales_persons as $sales)
                                             <option value="{{ $sales->id }}">{{ $sales->name }}</option>
                                         @endforeach
                                     </select>
-                                </div></div>
-                            <div class="col-3">
-                                <div class="form-group input-group ml-1">
+                                </div>
+                            </div>
+
+                            <div class="col-4 mb-1">
+                                <div class="form-group">
+                                    <select name="account" class="select2" id="account_select">
+                                            <option value="3">Active (enable)</option>
+                                            <option value="4">Active (disabled)</option>
+                                            <option value="5">Blocked</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-4 mb-1">
+                                <div class="form-group input-group">
 
                                     <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -41,9 +52,10 @@
                                     </div>
                                     <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required">
 
-                                </div></div>
-                            <div class="col-3">
-                                <div class="form-group input-group ml-1">
+                                </div>
+                            </div>
+                            <div class="col-4 mb-1">
+                                <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -54,7 +66,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-2">
+                            <div class="col mb-1">
                                 <div class="form-group ml-1">
                                     <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
                                 </div>
@@ -137,15 +149,20 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var city_select = $('#search_form #city').prepend('<option value="" selected="selected"></option>').select2({
-                width: '200px',
+            $('#search_form #city').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
                 placeholder: 'Select Hub',
                 allowClear:true
             });
-            var sales_select = $('#search_form #sales_person_select').prepend('<option value="" selected="selected"></option>').select2({
-                width: '200px',
+            $('#search_form #sales_person_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
                 placeholder: 'Select Sales Person',
                 allowClear:true
+            });
+            $('#search_form #account_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Account Status',
+                allowClear: true
             });
 
             var from_max = '{{ Carbon\Carbon::now() }}';
@@ -194,10 +211,12 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
+                        blockPagePermanently();
                     var from_date = $('#search_form input[name="from_date_formatted"]').val();
                     var to_date = $('#search_form input[name="to_date_formatted"]').val();
                     var city = $('#city').val();
                     var sales_person = $('#sales_person_select').val();
+                    var account = $('#account_select').val();
                     $.ajax({
                         url: '{!! route('admin.reports.sales_person_performance.export_to_excel') !!}',
                         method: 'post',
@@ -207,6 +226,7 @@
                             'to_date': to_date,
                             'city': city,
                             'sales_person': sales_person,
+                            'account': account
                         }
                     }).done(function (data) {
                         if(data.success == 1){
@@ -215,6 +235,7 @@
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                         }
+                        UnblockPagePermanently();
                     });
                     return false;
                 }

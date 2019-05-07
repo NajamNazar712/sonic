@@ -75,3 +75,4 @@ function UnblockPagePermanently() {
 
     $.unblockUI({ fadeOut: 200 });
 }
+var data_table_loader = '<div class="blockUI blockOverlay" style="z-index: 1000; border: none; margin: 0px; padding: 0px; width: 100%; height: 100%; top: 0px; left: 0px; background-color: rgb(255, 255, 255); opacity: 0.8; cursor: wait; position: fixed;"></div><div class="blockUI blockMsg blockPage" style="z-index: 1011; position: fixed; padding: 0px; margin: 0px; width: 30%; top: 40%; left: 35%; text-align: center; color: rgb(0, 0, 0); border: 0px; background-color: transparent; cursor: wait;"><div class="ft-refresh-cw icon-spin font-medium-2"></div></div>';

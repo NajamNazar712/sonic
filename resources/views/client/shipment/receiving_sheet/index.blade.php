@@ -30,6 +30,7 @@
 										<th class="border-primary border-darken-1">Destination</th>
 										<th class="border-primary border-darken-1">Booking Date</th>
 										<th class="border-primary border-darken-1">Receiving Sheet</th>
+										<th class="border-primary border-darken-1">Amount</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -141,6 +142,7 @@
                             head.push('Destination');
                             head.push('Booking Date');
                             head.push('Receiving Sheet');
+                            head.push('Amount');
 
 
                             $.each(result.data, function(index, values) {
@@ -155,6 +157,7 @@
                                 row.push(values.destination_city);
                                 row.push(values.booking_date);
                                 row.push(values.receiving_sheet_no);
+                                row.push(values.amount);
 
 
                                 body.push(row);
@@ -284,6 +287,9 @@
 				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
+                language: {
+                    processing: data_table_loader
+                },
 				serverSide: true,
 				ajax: '{{ route('cod.shipment.receiving_sheet.list') }}',
 				rowId: 'id',
@@ -299,6 +305,7 @@
 					{data: 'destination_city', name: 'dc.name', class: 'align-middle destination_city'},
 					{data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
 					{data: 'receiving_sheet', name: 'receiving_sheet', class: 'text-center align-middle receiving_sheet p-1'},
+					{data: 'amount', name: 'shipments.amount', class: 'text-center align-middle amount'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {

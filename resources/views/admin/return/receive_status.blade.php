@@ -275,6 +275,9 @@
                 scrollX: true,
                 paging:false,
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: false,
                 ajax: '{{ route('admin.return.receive.status.list',['id'=>$return_note_id]) }}',
                 rowId: 'shId',

@@ -25,7 +25,15 @@ Route::middleware('APIToken')->name('api.')->group(function () {
 		Route::get('charges', 'APIController@shipment_charges')->name('charges');
 		Route::get('payment_status', 'APIController@shipment_payment_status')->name('payment_status');
 		Route::get('payments', 'APIController@shipment_payments')->name('payments');
+		Route::post('cancel', 'APIController@shipment_cancel')->name('cancel');
+	});
+
+	Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function() {
+		Route::post('create', 'APIController@receiving_sheet_create')->name('create');
+		Route::get('view', 'APIController@receiving_sheet_view')->name('view');
 	});
 
 	Route::get('cities', 'APIController@cities')->name('cities');
+
+	Route::post('charges_calculate', 'APIController@charges_calculate')->name('charges_calculate');
 });

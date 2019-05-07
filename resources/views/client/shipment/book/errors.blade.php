@@ -45,6 +45,7 @@
                                 <th>Same Day Timing ID</th>
                                 <th>Amount</th>
                                 <th>Mode of Payment ID</th>
+                                <th>Charges Mode ID</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -195,6 +196,11 @@
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][payment_mode_id]', $ro['payment_mode_id'],['class' => 'form-control','style'=>'width:40px','readonly' => 'readonly']) !!}</td>
                                 @endif
+                                @if(isset($errors[$no]['charges_mode_id']))
+                                    <td>{!! Form::select('form[' . $no . '][charges_mode_id]',$charges_modes,null, ['class' => 'form-control is-invalid charges_mode_id select2','id'=>'charges_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['charges_mode_id']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][charges_mode_id]', $ro['charges_mode_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                @endif
                             </tr>
 
                             @endforeach
@@ -232,46 +238,50 @@
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
-        $('.datepicker').pickadate({
-            closeOnSelect: false,
-            closeOnClear: false
+            $('.datepicker').pickadate({
+                closeOnSelect: false,
+                closeOnClear: false
+            });
+            $('.service_type_id').select2({
+                width: '100%',
+                placeholder: 'Service Type'
+            });
+            $('.information_display').select2({
+                width: '100%',
+                placeholder: 'Air Waybill'
+            });
+            $('.consignee_city_name').select2({
+                width: '100%',
+                placeholder: 'City Name'
+            });
+            $('.item_product_type_id').select2({
+                width: '100%',
+                placeholder: 'Product Type'
+            });
+            $('.item_insurance').select2({
+                width: '100%',
+                placeholder: 'Insurance'
+            });
+            $('.replacement_item_product_type_id').select2({
+                width: '100%',
+                placeholder: 'Product Type'
+            });
+            $('.shipping_mode_id').select2({
+                width: '100%',
+                placeholder: 'Shipping Mode'
+            });
+            $('.same_day_timing_id').select2({
+                width: '100%',
+                placeholder: 'Same Day Timing'
+            });
+            $('.payment_mode_id').select2({
+                width: '100%',
+                placeholder: 'Payment Mode'
+            });
+            $('.charges_mode_id').select2({
+                width: '100%',
+                placeholder: 'Charges Mode'
+            });
         });
-        $('.service_type_id').select2({
-            width: '100%',
-            placeholder: 'Service Type'
-        });
-        $('.information_display').select2({
-            width: '100%',
-            placeholder: 'Air Waybill'
-        });
-        $('.consignee_city_name').select2({
-            width: '100%',
-            placeholder: 'City Name'
-        });
-        $('.item_product_type_id').select2({
-            width: '100%',
-            placeholder: 'Product Type'
-        });
-        $('.item_insurance').select2({
-            width: '100%',
-            placeholder: 'Insurance'
-        });
-        $('.replacement_item_product_type_id').select2({
-            width: '100%',
-            placeholder: 'Product Type'
-        });
-        $('.shipping_mode_id').select2({
-            width: '100%',
-            placeholder: 'Shipping Mode'
-        });
-        $('.same_day_timing_id').select2({
-            width: '100%',
-            placeholder: 'Same Day Timing'
-        });
-        $('.payment_mode_id').select2({
-            width: '100%',
-            placeholder: 'Payment Mode'
-        });
-        });
-        </script>
+    </script>
 @endsection

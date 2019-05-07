@@ -169,8 +169,8 @@
                                                 </div>
                                             </div>
                                             <div class="modal-footer text-center justify-content-around">
-                                                <button type="submit" name="submit" class="btn btn-primary" value="submit">Submit</button>
-                                                <button type="submit" name="submit_and_print" class="btn btn-primary" value="submit_and_print">Submit &amp; Print</button>
+                                                <button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>
+                                                <button type="submit" name="submit_and_print_form" class="btn btn-primary" value="submit_and_print_form">Submit &amp; Print</button>
                                             </div>
                                         </form>
                                     </div>
@@ -212,6 +212,9 @@
                 paging:false,
                 ajax: '{{ route('admin.cargo.draft.edit.list', ['draft' => $draft['id']]) }}',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: false,
                 rowId:'shipment_id',
                 columns: [

@@ -6,7 +6,9 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignmentStatus;
 use App\Http\Models\DraftCargo;
 use App\Http\Models\DraftCargoShipment;
+use App\Http\Models\JunctionMapping;
 use App\Http\Models\ShipmentStatus;
+use http\Env\Response;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -49,10 +51,6 @@ class AdminCargoController extends Controller
             ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities as dc', function($join) {
-                $join->on('shipments.consignee_city_id', '=', 'dc.id')
-                    ->on('oc.hub_id', '!=', 'dc.hub_id');
-            })
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
@@ -70,7 +68,29 @@ class AdminCargoController extends Controller
                         DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
             })
             ->leftjoin('cities as olddc', 'olddc.id', '=', 'mh.old_consignee_city_id')
-            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc','csj.created_at as current_status', 'olddc.name as old_destination');
+            ->leftjoin('intercept_re_book_request_histories as irbrh', function ($join) {
+                $join->on('irbrh.shipment_id', '=', 'shipments.id')
+                    ->on('shipments.shipper_status_id', '=', DB::raw(55));
+            })
+            ->leftjoin('cities as olddci', 'olddci.id', '=', 'irbrh.old_consignee_city_id')
+            ->join('cities as dc', function($join) {
+                $join->on('shipments.consignee_city_id', '=', 'dc.id')
+                    ->where(function ($query) {
+                        $query->where(function ($sub_query) {
+                            $sub_query->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37])
+                                ->where('oc.hub_id', '!=', DB::raw('dc.hub_id'));
+                        })
+                        ->orWhere(function ($sub_query) {
+                            $sub_query->where('shipments.shipper_status_id', '=', 49)
+                                ->where('mh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                        })
+                        ->orWhere(function ($sub_query) {
+                            $sub_query->where('shipments.shipper_status_id', '=', 55)
+                                ->where('irbrh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                        });
+                    });
+            })
+            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc','csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept');
 
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
@@ -84,7 +104,11 @@ class AdminCargoController extends Controller
                 })
                 ->orWhere(function ($sub_query) {
                     $sub_query->where('shipments.shipper_status_id', 49)
-                        ->whereIn('mh.old_consignee_city_id', session('hubs'));
+                        ->whereIn('olddc.hub_id', session('hubs'));
+                })
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('shipments.shipper_status_id', 55)
+                        ->whereIn('olddci.hub_id', session('hubs'));
                 });
             });
         }
@@ -100,6 +124,9 @@ class AdminCargoController extends Controller
                 }
                 else if ($shipments->shipper_status_id == 49) {
                     return $shipments->old_destination;
+                }
+                else if ($shipments->shipper_status_id == 55) {
+                    return $shipments->old_destination_intercept;
                 }
                 else {
                     return $shipments->origin;
@@ -176,6 +203,10 @@ class AdminCargoController extends Controller
                 ->orWhere(function ($sub_query) use ($keyword) {
                     $sub_query->where('shipments.shipper_status_id', 49)
                         ->where('olddc.name', 'like', '%' . $keyword . '%');
+                })
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->where('shipments.shipper_status_id', 55)
+                        ->where('olddci.name', 'like', '%' . $keyword . '%');
                 });
             })
             ->filterColumn('dc.name', function ($query, $keyword) {
@@ -185,27 +216,27 @@ class AdminCargoController extends Controller
                     $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
                         ->where('oc.name', 'like', '%' . $keyword . '%');
                 })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->whereIn('shipments.shipper_status_id', [2, 49])
-                            ->where('dc.name', 'like', '%' . $keyword . '%');
-                    });
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->whereIn('shipments.shipper_status_id', [2, 49, 55])
+                        ->where('dc.name', 'like', '%' . $keyword . '%');
+                });
             })
-            ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), dc.name, IF (shipments.shipper_status_id = 49, olddc.name, oc.name))') . ' $1')
+            ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), dc.name, IF (shipments.shipper_status_id = 49, olddc.name, IF (shipments.shipper_status_id = 55, olddci.name, oc.name)))') . ' $1')
             ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), oc.name, dc.name)') . ' $1');
 
         if ($shipment_type = $request->get('shipment_type')) {
             if ($shipment_type == 0) {
-                $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37, 49]);
+                $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37, 49, 55]);
             }
             else if ($shipment_type == 1) {
-                $datatables->whereIn('shipments.shipper_status_id', [2, 49]);
+                $datatables->whereIn('shipments.shipper_status_id', [2, 49, 55]);
             }
             else if ($shipment_type == 2) {
                 $datatables->whereIn('shipments.shipper_status_id', [20, 30, 36, 37]);
             }
         }
         else {
-            $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37, 49]);
+            $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37, 49, 55]);
         }
 
         return $datatables->make(true);
@@ -221,31 +252,30 @@ class AdminCargoController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37, 49])) {
+            if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37, 49, 55])) {
                 if ($shipment->shipper_status_id == 2) {
                     $hub_id = $shipment->pickup_address->city->hub_id;
                 }
-                else if($shipment->shipper_status_id == 49){
+                else if ($shipment->shipper_status_id == 49) {
                     $shipment_details = $shipment->misrouted_history()->latest()->first();
-//            if($shipment_details->old_consignee_city_id != $shipment_details->new_consignee_city_id){
                     $city_details = City::find($shipment_details->old_consignee_city_id);
                     $hub_id = $city_details->hub_id;
-//            }else{
-//                $city_details = City::find($shipment_details->new_consignee_city_id);
-//                $hub_id = $city_details->hub_id;
-//            }
+                }
+                else if ($shipment->shipper_status_id == 55) {
+                    $shipment_details = $shipment->intercept_history;
+                    $city_details = City::find($shipment_details->old_consignee_city_id);
+                    $hub_id = $city_details->hub_id;
                 }
                 else {
                     $hub_id = $shipment->consignee_city->hub_id;
 
                 }
 
-
                 if (session('role_id') == 1 || (in_array($hub_id, session('hubs')))) {
 
-                    if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (($shipment->shipper_status_id == 49) && ($shipment->consignee_city->hub_id != $hub_id) )) {
+                    if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id) )) {
                         if ($request->cargo_type != 0) {
-                            if ($shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 49) {
+                            if (in_array($shipment->shipper_status_id, [2, 49, 55])) {
                                 $hub_id = $shipment->consignee_city->hub_id;
                             }
                             else {
@@ -262,7 +292,7 @@ class AdminCargoController extends Controller
 
                                 if ($request->cargo_type != 0) {
                                     if ($request->cargo_type == 1) {
-                                        if (!in_array($shipment->shipper_status_id, [2, 49])) {
+                                        if (!in_array($shipment->shipper_status_id, [2, 49, 55])) {
                                             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
                                         }
 
@@ -277,7 +307,7 @@ class AdminCargoController extends Controller
                                     }
                                 }
                                 else {
-                                    if ($shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 49) {
+                                    if (in_array($shipment->shipper_status_id, [2, 49, 55])) {
                                         $details['cargo_type'] = 1;
 
                                         $cargo_type = 1;
@@ -326,7 +356,7 @@ class AdminCargoController extends Controller
                                             })
                                             ->select(DB::raw('count(shipments.id) as count'))
                                             ->where('dc.hub_id', $hub->id)
-                                            ->where('shipments.shipper_status_id', 2)
+                                            ->whereIn('shipments.shipper_status_id', [2, 49, 55])
                                             ->where('shipments.shipping_mode_id', $shipping_mode_id);
                                     }
                                     else {
@@ -382,14 +412,18 @@ class AdminCargoController extends Controller
 
         $shipment = Shipment::find(current($request->shipment_ids));
 
-        if ($shipment->shipper_status_id != 49) {
-            $origin = $shipment->pickup_address->city->hub_city;
-        }
-        else {
-            ///Old City
+        if ($shipment->shipper_status_id == 49) {
             $shipment_details = $shipment->misrouted_history()->latest()->first();
             $city_details = City::find($shipment_details->old_consignee_city_id);
             $origin = $city_details->hub_city;
+        }
+        else if ($shipment->shipper_status_id == 55) {
+            $shipment_details = $shipment->intercept_history;
+            $city_details = City::find($shipment_details->old_consignee_city_id);
+            $origin = $city_details->hub_city;
+        }
+        else {
+            $origin = $shipment->pickup_address->city->hub_city;
         }
 
         $origin_details = array();
@@ -429,6 +463,18 @@ class AdminCargoController extends Controller
             $details['origin'] = $destination_details;
             $details['destination'] = $origin_details;
         }
+        $mapping = JunctionMapping::where(['origin_id' => $origin_details['id'], 'destination_id' => $destination_details['id']])->first();
+        if($mapping){
+            $details['junction_1'] = $mapping['junction_1'];
+            $details['junction_2'] = $mapping['junction_2'];
+            $details['receiver'] = $mapping['receiver'];
+        }
+        $details['actual_weight'] = 0;
+
+        foreach ($request->shipment_ids as $shipment_id){
+            $shipment_actual_weight = Shipment::find($shipment_id);
+            $details['actual_weight'] = $details['actual_weight'] + $shipment_actual_weight->actual_weight;
+        }
 
         return $details;
     }
@@ -462,7 +508,7 @@ class AdminCargoController extends Controller
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
-            if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37, 49])) {
+            if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37, 49, 55])) {
                 $shipments++;
                 $shipments_weight += $shipment->actual_weight;
             }
@@ -536,7 +582,7 @@ class AdminCargoController extends Controller
                     $consignee_status_id = 21;
 
                     if ($shipment->shipper_status_id != 20) {
-                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
+                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
                             $shipper_status_id = 21;
                             $consignee_status_id = 21;
                         }
@@ -544,9 +590,13 @@ class AdminCargoController extends Controller
                             $shipper_status_id = 26;
                             $consignee_status_id = 26;
                         }
-                        else {
+                        else if ($shipment->booking_type_id == 3) {
                             $shipper_status_id = 32;
                             $consignee_status_id = 32;
+                        }
+                        else {
+                            $shipper_status_id = 21;
+                            $consignee_status_id = 21;
                         }
                     }
                 }
@@ -567,7 +617,7 @@ class AdminCargoController extends Controller
 
             NotificationsController::send(9, $id);
 
-            if ($request->filled('submit_and_print')) {
+            if ($request->filled('submit_and_print_form')) {
                 $print = $id;
             }
             else {
@@ -599,7 +649,7 @@ class AdminCargoController extends Controller
             ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
             ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_consignments.type as cargo_type')
+            ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_consignments.type as cargo_type','cargo_consignments.seal_number')
             ->whereIn('cargo_consignments.status_id', [1, 2, 4, 6, 7]);
 
         if (session('role_id') != 1) {
@@ -1384,7 +1434,7 @@ class AdminCargoController extends Controller
             ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
             ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status','cargo_consignments.type as cargo_type','ri.name as received_by','cargo_consignments.updated_at as received_at');
+            ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status','cargo_consignments.type as cargo_type','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.seal_number');
 
         if (session('role_id') != 1) {
             $cargo_consignments = $cargo_consignments->where(function ($query) {
@@ -1711,14 +1761,21 @@ class AdminCargoController extends Controller
             }
         }
 
-        if ($shipment->shipper_status_id != 49) {
-            $origin = $shipment->pickup_address->city->hub_city;
-        }
-        else {
+        if ($shipment->shipper_status_id == 49) {
             $shipment_details = $shipment->misrouted_history()->latest()->first();
             $city_details = City::find($shipment_details->old_consignee_city_id);
             $origin = $city_details->hub_city;
         }
+        else if ($shipment->shipper_status_id == 55) {
+            $shipment_details = $shipment->intercept_history;
+            $city_details = City::find($shipment_details->old_consignee_city_id);
+            $origin = $city_details->hub_city;
+        }
+        else {
+            $origin = $shipment->pickup_address->city->hub_city;
+        }
+
+
         $draftcargo = new DraftCargo();
         $draftcargo->origin_id = $origin->id;
         $draftcargo->destination_id = $destination_id;
@@ -1804,7 +1861,7 @@ class AdminCargoController extends Controller
                     })
                     ->select(DB::raw('count(shipments.id) as count'))
                     ->where('dc.hub_id', $draft->destination_id)
-                    ->where('shipments.shipper_status_id', 2)
+                    ->whereIn('shipments.shipper_status_id', [2, 49, 55])
                     ->where('shipments.shipping_mode_id', $draft->shipping_mode_id);
             } else {
                 $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -1837,20 +1894,97 @@ class AdminCargoController extends Controller
             ->join('cities as oc','oc.id', '=', 'drc.origin_id')
             ->join('cities as dc','dc.id', '=', 'drc.destination_id')
             ->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
-            ->select('shipments.id as shipment_id','shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type as service_type', 'oc.name as origin','dc.name as destination', 'shipments.amount')->where('drc.id', $draft);
+            ->leftjoin('misrouted_history as mh', function ($join) {
+                $join->on('mh.shipment_id', '=', 'shipments.id')
+                    ->on('shipments.shipper_status_id', '=', DB::raw(49))
+                    ->where('mh.id', '=',
+                        DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('cities as olddc', 'olddc.id', '=', 'mh.old_consignee_city_id')
+            ->leftjoin('intercept_re_book_request_histories as irbrh', function ($join) {
+                $join->on('irbrh.shipment_id', '=', 'shipments.id')
+                    ->on('shipments.shipper_status_id', '=', DB::raw(55));
+            })
+            ->leftjoin('cities as olddci', 'olddci.id', '=', 'irbrh.old_consignee_city_id')
+            ->select('shipments.id as shipment_id','shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type as service_type', 'oc.name as origin','dc.name as destination', 'shipments.amount', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept')
+            ->where('drc.id', $draft);
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
                 $query->where(function ($sub_query) {
                     $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
                         ->whereIn('dc.hub_id', session('hubs'));
                 })
-                    ->orWhere(function ($sub_query) {
-                        $sub_query->whereIn('shipments.shipper_status_id', [2,49])
-                            ->whereIn('oc.hub_id', session('hubs'));
-                    });
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('shipments.shipper_status_id', 2)
+                        ->whereIn('oc.hub_id', session('hubs'));
+                })
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('shipments.shipper_status_id', 49)
+                        ->whereIn('olddc.hub_id', session('hubs'));
+                })
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('shipments.shipper_status_id', 55)
+                        ->whereIn('olddci.hub_id', session('hubs'));
+                });
             });
         }
         return Datatables::of($shipments)
+            ->editColumn('origin', function ($shipments) {
+                if (in_array($shipments->shipper_status_id, [20, 30, 36, 37])) {
+                    return $shipments->destination;
+                }
+                else if ($shipments->shipper_status_id == 49) {
+                    return $shipments->old_destination;
+                }
+                else if ($shipments->shipper_status_id == 55) {
+                    return $shipments->old_destination_intercept;
+                }
+                else {
+                    return $shipments->origin;
+                }
+            })
+            ->editColumn('destination', function ($shipments) {
+                if (in_array($shipments->shipper_status_id, [20, 30, 36, 37])) {
+                    return $shipments->origin;
+                }
+                else {
+                    return $shipments->destination;
+                }
+            })
+            ->filterColumn('oc.name', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
+                        ->where('dc.name', 'like', '%' . $keyword . '%');
+                })
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->where('shipments.shipper_status_id', 2)
+                        ->where('oc.name', 'like', '%' . $keyword . '%');
+                })
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->where('shipments.shipper_status_id', 49)
+                        ->where('olddc.name', 'like', '%' . $keyword . '%');
+                })
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->where('shipments.shipper_status_id', 55)
+                        ->where('olddci.name', 'like', '%' . $keyword . '%');
+                });
+            })
+            ->filterColumn('dc.name', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
+                        ->where('oc.name', 'like', '%' . $keyword . '%');
+                })
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->whereIn('shipments.shipper_status_id', [2, 49, 55])
+                        ->where('dc.name', 'like', '%' . $keyword . '%');
+                });
+            })
+            ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), dc.name, IF (shipments.shipper_status_id = 49, olddc.name, IF (shipments.shipper_status_id = 55, olddci.name, oc.name)))') . ' $1')
+            ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), oc.name, dc.name)') . ' $1')
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
             })
@@ -1923,5 +2057,102 @@ class AdminCargoController extends Controller
         }
 
         return response()->json(['status' => 1, 'success' => 'Shipments Added to Draft # '.$draft_cargo_id]);
+    }
+
+    public function mapping_index()
+    {
+        $junctions = City::select(['id', 'name'])->where('hub', 1)->where('status', 1)->get();
+        $cities = City::all();
+        $admins = Admin::where('status', 1)->select(['id', 'name'])->get();
+        return view('admin.cargo.mapping')->with(['cities' => $cities, 'junctions' => $junctions, 'admins' => $admins]);
+    }
+
+    public function mapping_list()
+    {
+        $mapping =  JunctionMapping::join('cities as oc','oc.id', '=', 'junction_mappings.origin_id')
+            ->join('cities as dc','dc.id', '=', 'junction_mappings.destination_id')
+            ->join('cities as jc1','jc1.id', '=', 'junction_mappings.junction_1')
+            ->leftjoin('cities as jc2','jc2.id', '=', 'junction_mappings.junction_2')
+            ->join('admins as a','a.id', '=', 'junction_mappings.updated_by')
+            ->leftjoin('admins as ar','ar.id', '=', 'junction_mappings.receiver')
+            ->select('junction_mappings.id as id', 'junction_mappings.updated_at as updated_at','oc.name as origin','dc.name as destination','jc1.name as junction_1', 'jc2.name as junction_2', 'ar.name as receiver', 'a.name as updated_by');
+
+        return Datatables::of($mapping)
+            ->editColumn('junction_2',function ($mapping){
+                if($mapping->junction_2 != null){
+                    return $mapping->junction_2;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('receiver',function ($mapping){
+                if($mapping->receiver != null){
+                    return $mapping->receiver;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->addColumn('action',function ($mapping) {
+                    $dropdown = '
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                                <button type="button" class="dropdown-item edit_mapping"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></div></button>
+                            </div>
+                        </div>
+                    ';
+
+                    return $dropdown;
+            })
+            ->make(true);
+    }
+
+    public function mapping_store(Request $request){
+        $check = JunctionMapping::where(['origin_id' => $request->origin, 'destination_id' => $request->destiination_id])->first();
+        if(!$check) {
+            $mapping = new JunctionMapping();
+
+            $mapping->origin_id = $request->origin;
+            $mapping->destination_id = $request->destination;
+            $mapping->junction_1 = $request->junction_1;
+            $mapping->junction_2 = $request->junction_2;
+            $mapping->receiver = $request->receiver_id;
+            $mapping->updated_by = Auth::id();
+
+            $mapping->save();
+
+            return redirect()->back()->with('success', 'Mapping added successfully.');
+        }
+        else{
+            return redirect()->back()->with('error', 'Mapping against these hubs already exists!');
+        }
+    }
+
+    public function mapping_edit(Request $request){
+        $mapping = JunctionMapping::where('id', $request->mapping_id)->first();
+        $origin = City::where('id', $mapping['origin_id'])->first();
+        $destination = City::where('id', $mapping['destination_id'])->first();
+        return response()->json(['details' => $mapping, 'origin' => $origin, 'destination' => $destination]);
+    }
+
+    public function mapping_edit_update(Request $request){
+        $mapping = JunctionMapping::where('id', $request->mapping_id);
+        if($mapping) {
+            $mapping = $mapping->first();
+
+            $mapping->junction_1 = $request->junction_1;
+            $mapping->junction_2 = $request->junction_2;
+            $mapping->receiver = $request->receiver_id;
+            $mapping->updated_by = Auth::id();
+
+            $mapping->save();
+
+            return redirect()->back()->with('success', 'Mapping added successfully.');
+        }
+        else{
+            return redirect()->back()->with('error', 'Mapping against these hubs already exists!');
+        }
     }
 }
