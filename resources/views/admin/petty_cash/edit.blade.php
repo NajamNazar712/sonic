@@ -81,8 +81,8 @@
                         <div class="">
                             <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" disabled>Update Details</button>
                         </div>
-                            @if((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions'))){
-                                @if((session('role_id') == 1) || ($petty_statement_details->status == 0 && session('department_id') == 6) || ($petty_statement_details->status == 1 && (session('department_id') == 6)) || ($petty_statement_details->status == 2 && session('department_id') == 4)) {
+                            @if((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions')))
+                                @if((session('role_id') == 1) || ($petty_statement_details->status == 0 && session('department_id') == 6) || ($petty_statement_details->status == 1 && (session('department_id') == 6)) || ($petty_statement_details->status == 2 && session('department_id') == 4))
                                 <div class="ml-1">
                                     <button id="statement_approve" type="button"  class="btn btn-primary btn-block">Approve</button>
                                 </div>
