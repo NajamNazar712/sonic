@@ -409,27 +409,44 @@
             }
 
             function cancel(selected_rows) {
-                $.ajax({
-                    url: '{!! route('cod.orders.cancel_all') !!}',
-                    method: 'POST',
-                    data: {
-                        'ids[]': selected_rows,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function (data) {
-                        if (data.status === 1) {
-                            table.draw('false');
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
-                            });
-
-                        } else {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
+                    swal({
+                        text: 'Are you sure, you want to cancel these Shipment(s)?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('cod.orders.cancel_all') !!}',
+                                method: 'POST',
+                                data: {
+                                    'ids[]': selected_rows,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                                .done(function (data) {
+                                    if(data.status === 1){
+                                        table.draw('false');
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                });
                         }
                     });
             }
@@ -554,6 +571,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: {
                     url: '{{ route('cod.orders.list') }}',
