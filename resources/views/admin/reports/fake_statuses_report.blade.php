@@ -14,7 +14,7 @@
                 <div class="row mb-2 justify-content-center">
                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                         <div class="form-group">
-                                <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                                <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Tracking Number">
                         </div>
                         <div class="form-group ml-1">
                             <select name="riders" class="select2" id="riders">
