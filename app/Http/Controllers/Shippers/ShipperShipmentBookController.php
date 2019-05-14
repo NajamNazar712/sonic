@@ -558,6 +558,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public static function air_waybill($user_type, $user_id, $ids, $twice = FALSE) {
+
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         if ($user_type == 3) {
@@ -567,7 +568,7 @@ class ShipperShipmentBookController extends Controller
             $user_name = User::find($user_id)->name . ' (Shipper)';
         }
         else if ($user_type == 2) {
-            $user_name = SubstituteUser::find($user_id)->name . ' (Sub-Shipper)';
+            $user_name = SubstituteUser::where('user_id',$user_id)->select('name')->first() . ' (Sub-Shipper)';
         }
         else if ($user_type == 4) {
             $user_name = User::find($user_id)->name . ' (API)';
@@ -1007,6 +1008,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function print_air_waybill(Request $request) {
+
         $user_type = NULL;
         $user_id = NULL;
 
