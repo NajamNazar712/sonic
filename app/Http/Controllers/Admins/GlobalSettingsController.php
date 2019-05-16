@@ -749,22 +749,25 @@ class GlobalSettingsController extends Controller
     }
 
     public function return_note_restriction_bypass_store(Request $request){
-        $roles = implode(',', $request->roles);
-        $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+        if($request->has('roles')){
+            $roles = implode(',', $request->roles);
+            $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
 
-        if ($settings->exists()) {
-            $settings = $settings->first();
-        }
-        else {
-            $settings = new GlobalSettings();
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            }
+            else {
+                $settings = new GlobalSettings();
 
-            $settings->type = 'return_note_restriction_bypass';
-            $settings->setting_value = 0;
+                $settings->type = 'return_note_restriction_bypass';
+                $settings->setting_value = 0;
+                $settings->text = $roles;
+            }
             $settings->text = $roles;
+            $settings->save();
+        }else{
+            GlobalSettings::where('type', 'return_note_restriction_bypass')->delete();
         }
-        $settings->text = $roles;
-
-        $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }

@@ -73,13 +73,13 @@
                 var ids = @json($role_ids);
                 $('#roles_select').val(ids).trigger('change');
             @endif
-            $('#settings_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                }
-            });
+            // $('#settings_form').validate({
+            //     errorClass: 'danger',
+            //     successClass: 'success',
+            //     errorPlacement: function(error, element) {
+            //         error.addClass('w-100').appendTo(element.parent('.form-group'));
+            //     }
+            // });
         });
     </script>
 @endsection
