@@ -2124,7 +2124,7 @@ class AdminFinanceController extends Controller
             $detail['amount'] = number_format($pending_payment_shipment->amount);
             $detail['charges'] = number_format($pending_payment_shipment->charges);
             $detail['gst'] = number_format($pending_payment_shipment->gst, 2);
-            $detail['deductable'] = number_format(($pending_payment_shipment->charges + $pending_payment_shipment->gst, 2));
+            $detail['deductable'] = number_format(($pending_payment_shipment->charges + $pending_payment_shipment->gst), 2);
             $detail['payable'] = number_format($pending_payment_shipment->payable, 2);
 
             $details[] = $detail;
