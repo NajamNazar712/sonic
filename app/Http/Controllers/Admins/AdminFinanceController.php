@@ -1942,10 +1942,10 @@ class AdminFinanceController extends Controller
                 return number_format($pending_payment->total_charges);
             })
             ->editColumn('total_gst', function($pending_payment) {
-                return number_format(ROUND($pending_payments->total_gst, 0, PHP_ROUND_HALF_DOWN));
+                return number_format(ROUND($pending_payment->total_gst, 0, PHP_ROUND_HALF_DOWN));
             })
             ->editColumn('total_payable', function($pending_payment) {
-                return number_format(ROUND($pending_payments->total_payable, 0, PHP_ROUND_HALF_DOWN));
+                return number_format(ROUND($pending_payment->total_payable, 0, PHP_ROUND_HALF_DOWN));
             })
             ->editColumn('total_adjustments', function($pending_payment) {
                 if ($pending_payment->total_adjustments) {
