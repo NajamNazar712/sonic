@@ -757,7 +757,7 @@
 				drawCallback: function() {
 					if (selected_rows_shipments.length == 0) {
 						initial_total_hold = this.api().column('.payable').data().reduce(function (a, b) {
-							return parseFloat(a.toString().replace(/,/g, '')).toFixed(2) + parseFloat(b.toString().replace(/,/g, '')).toFixed(2);
+							return parseFloat(a.toString().replace(/,/g, '')) + parseFloat(b.toString().replace(/,/g, ''));
 						}, 0);
 
 						$('#make_payments #make_payments_form .total_hold').val(parseFloat(initial_total_hold).toFixed(2));
@@ -956,20 +956,20 @@
 
 					var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector.val()) : 0) + ((parent.children('td.amount').html() != '') ? parseInt(parent.children('td.amount').html().replace(/,/g, '')) : 0);
 					var total_charges = ((total_charges_selector.val() != '') ? parseInt(total_charges_selector.val()) : 0) + ((parent.children('td.charges').html() != '') ? parseInt(parent.children('td.charges').html().replace(/,/g, '')) : 0);
-					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()).toFixed(2) : 0) + ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html().replace(/,/g, '')).toFixed(2) : 0);
-					var total_deductable = ((total_deductable_selector.val() != '') ? parseFloat(total_deductable_selector.val()).toFixed(2) : 0) + ((parent.children('td.deductable').html() != '') ? parseFloat(parent.children('td.deductable').html().replace(/,/g, '')).toFixed(2) : 0);
-					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()).toFixed(2) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')).toFixed(2) : 0);
-					var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()).toFixed(2) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')).toFixed(2) : 0);
+					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) + ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html().replace(/,/g, '')) : 0);
+					var total_deductable = ((total_deductable_selector.val() != '') ? parseFloat(total_deductable_selector.val()) : 0) + ((parent.children('td.deductable').html() != '') ? parseFloat(parent.children('td.deductable').html().replace(/,/g, '')) : 0);
+					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')) : 0);
+					var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')) : 0);
 				}
 				else {
 					selected_rows_shipments.splice(index, 1);
 
 					var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector.val()) : 0) - ((parent.children('td.amount').html() != '') ? parseInt(parent.children('td.amount').html().replace(/,/g, '')) : 0);
 					var total_charges = ((total_charges_selector.val() != '') ? parseInt(total_charges_selector.val()) : 0) - ((parent.children('td.charges').html() != '') ? parseInt(parent.children('td.charges').html().replace(/,/g, '')) : 0);
-					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()).toFixed(2) : 0) - ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html().replace(/,/g, '')).toFixed(2) : 0);
-					var total_deductable = ((total_deductable_selector.val() != '') ? parseFloat(total_deductable_selector.val()).toFixed(2) : 0) - ((parent.children('td.deductable').html() != '') ? parseFloat(parent.children('td.deductable').html().replace(/,/g, '')).toFixed(2) : 0);
-					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()).toFixed(2) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')).toFixed(2) : 0);
-					var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()).toFixed(2) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')).toFixed(2) : 0);
+					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) - ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html().replace(/,/g, '')) : 0);
+					var total_deductable = ((total_deductable_selector.val() != '') ? parseFloat(total_deductable_selector.val()) : 0) - ((parent.children('td.deductable').html() != '') ? parseFloat(parent.children('td.deductable').html().replace(/,/g, '')) : 0);
+					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')) : 0);
+					var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')) : 0);
 				}
 
 				if (selected_rows_shipments.length > 0) {
