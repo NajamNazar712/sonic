@@ -2123,9 +2123,9 @@ class AdminFinanceController extends Controller
 
             $detail['amount'] = number_format($pending_payment_shipment->amount);
             $detail['charges'] = number_format($pending_payment_shipment->charges);
-            $detail['gst'] = number_format($pending_payment_shipment->gst);
-            $detail['deductable'] = number_format($pending_payment_shipment->charges + $pending_payment_shipment->gst);
-            $detail['payable'] = number_format($pending_payment_shipment->payable);
+            $detail['gst'] = number_format($pending_payment_shipment->gst, 2);
+            $detail['deductable'] = number_format(($pending_payment_shipment->charges + $pending_payment_shipment->gst), 2);
+            $detail['payable'] = number_format($pending_payment_shipment->payable, 2);
 
             $details[] = $detail;
         }
@@ -2250,12 +2250,12 @@ class AdminFinanceController extends Controller
 
         $spreadsheet = new Spreadsheet();
 
-        $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('G')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('C')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0.00');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
