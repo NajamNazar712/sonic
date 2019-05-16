@@ -1942,10 +1942,10 @@ class AdminFinanceController extends Controller
                 return number_format($pending_payment->total_charges);
             })
             ->editColumn('total_gst', function($pending_payment) {
-                return number_format(ROUND($pending_payments->total_gst, 0, PHP_ROUND_HALF_DOWN));
+                return number_format(ROUND($pending_payment->total_gst, 0, PHP_ROUND_HALF_DOWN));
             })
             ->editColumn('total_payable', function($pending_payment) {
-                return number_format(ROUND($pending_payments->total_payable, 0, PHP_ROUND_HALF_DOWN));
+                return number_format(ROUND($pending_payment->total_payable, 0, PHP_ROUND_HALF_DOWN));
             })
             ->editColumn('total_adjustments', function($pending_payment) {
                 if ($pending_payment->total_adjustments) {
@@ -2148,7 +2148,7 @@ class AdminFinanceController extends Controller
 
         $datatables = Datatables::of($pending_payment_shipments)
             ->addColumn('deductable', function($pending_payment_shipments) {
-                return number_format($pending_payment_shipments->charges + $pending_payment_shipments->gst);
+                return number_format(($pending_payment_shipments->charges + $pending_payment_shipments->gst), 2);
             })
             ->addColumn('aging', function($pending_payment_shipments) {
                 $now = Carbon::now()->startOfDay();
@@ -2164,10 +2164,10 @@ class AdminFinanceController extends Controller
                 return number_format($pending_payment_shipment->charges);
             })
             ->editColumn('gst', function($pending_payment_shipment) {
-                return number_format($pending_payment_shipment->gst);
+                return number_format($pending_payment_shipment->gst, 2);
             })
             ->editColumn('payable', function($pending_payment_shipment) {
-                return number_format($pending_payment_shipment->payable);
+                return number_format($pending_payment_shipment->payable, 2);
             })
             ->editColumn('type', function($pending_payment_shipment) {
                 if ($pending_payment_shipment->type == 0) {
