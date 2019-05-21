@@ -1174,7 +1174,7 @@ class ShipperShipmentBookController extends Controller
 
             foreach ($spreadsheet[0] as $index => $header_value) {
                 if ($index == 25) {}
-                elseif ($header_value != $header[$index]) {
+                elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                     $header_correct = FALSE;
                     break;
                 }
