@@ -252,6 +252,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\OrderManagementController@orders_list')->name('list');
         Route::post('shipment_charges','Admins\OrderManagementController@get_shipment_charges')->name('charges');
         Route::post('shipper_recall','Admins\OrderManagementController@shipper_recall')->name('shipper_recall');
+        Route::get('shipment_print_status', 'Admins\OrderManagementController@shipment_print_status')->name('shipment_print_status');
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){

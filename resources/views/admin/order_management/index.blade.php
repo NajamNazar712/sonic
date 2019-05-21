@@ -394,32 +394,45 @@
 
             function print(selected_rows) {
                 $.ajax({
-                    url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
-                    method: 'POST',
+                    url: '{!! route('admin.orders.shipment_print_status') !!}',
                     data: {
-                        'ids[]': selected_rows,
-                        'admin': {!! Auth::id() !!},
-                        '_token': '{{ csrf_token() }}'
+                        'shipment_ids': selected_rows
                     }
                 })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
+                .done(function(data) {
+                    if (data.status == 0) {
+                        $.ajax({
+                            url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                            method: 'POST',
+                            data: {
+                                'ids[]': data.valid_ids,
+                                'admin': {!! Auth::id() !!},
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                        .done(function(data) {
+                            var tab = window.open('', '_blank');
 
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
+                            if(!tab) {
+                                swal({
+                                    title: 'Popup Blocker Enabled!',
+                                    text: 'Please add this site to your exception list.',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            }
+                            else {
+                                tab.document.write(data);
+                                tab.document.close();
+                                tab.focus();
+                            }
+                        });
+                    }
+                    else {
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
             }
 
             var selected_rows = [];
@@ -624,7 +637,7 @@
 
                 ],
                 rowCallback: function(row, data, index) {
-                    if (data.booking_type_id != 4 && (data.shipper_status_id === 1 || data.shipper_status_id === 2)) {
+                    if (data.booking_type_id != 4 && data.shipper_status_id != 17) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shipment_id, selected_rows) !== -1) {
