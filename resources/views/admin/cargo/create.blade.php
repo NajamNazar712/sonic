@@ -198,6 +198,35 @@
 
 	<script>
 		$(document).ready(function() {
+			@if (session('print'))
+				$.ajax({
+					url: '{!! route('admin.cargo.in_transit.print') !!}',
+					method: 'POST',
+					data: {
+						'id': '{{ session('print') }}',
+						'_token': '{{ csrf_token() }}'
+					}
+				})
+				.done(function(data) {
+					var tab = window.open('', '_blank');
+
+					if(!tab) {
+						swal({
+							title: 'Popup Blocker Enabled!',
+							text: 'Please add this site to your exception list.',
+							icon: 'error',
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+					}
+					else {
+						tab.document.write(data);
+						tab.document.close();
+						tab.focus();
+					}
+				});
+			@endif
+
 			var shipment_ids = [];
 
 			var hub_id = 0;
