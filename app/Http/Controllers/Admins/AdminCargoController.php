@@ -843,7 +843,7 @@ class AdminCargoController extends Controller
                             <tr>
                               <td class="color secondary"><strong>Destination Hub</strong></td>
                               <td>' . $cargo_consignment->destination_hub->name . '</td>
-                              <td rowspan="8" class="text-center align-middle">
+                              <td rowspan="9" class="text-center align-middle">
                                 <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                 <span><strong>' . str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                               </td>
@@ -867,6 +867,10 @@ class AdminCargoController extends Controller
                             <tr>
                               <td class="color secondary"><strong>Builty Number</strong></td>
                               <td>' . $cargo_consignment->builty_number . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Seal Number</strong></td>
+                              <td>' . $cargo_consignment->seal_number . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Expected Arrival Date</strong></td>
