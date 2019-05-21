@@ -311,7 +311,7 @@
                                                     @endif
                                             @endforeach
                                                 @else
-                                                <div class="row" id="on_hub_weight_row0">
+                                                <div class="row on_hub_weight_row" id="on_hub_weight_row0">
                                                     <input type="hidden" name="on_hub_weight_record[0]" value="">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
