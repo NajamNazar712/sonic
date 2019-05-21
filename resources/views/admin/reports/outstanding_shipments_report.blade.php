@@ -352,7 +352,7 @@
 
             function printDNCC(id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.outstanding_shipments.dncc.print') !!}',
+                    url: '{!! route('admin.delivery.receive.dncc.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -386,7 +386,7 @@
 
             function printSDN(id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.outstanding_shipments.sdn.print') !!}',
+                    url: '{!! route('admin.delivery.sdn.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,

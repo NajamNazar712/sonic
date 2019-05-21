@@ -392,7 +392,7 @@
             });
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.pickup_note.print') !!}',
+                    url: '{!! route('admin.pickups.assigned.print') !!}',
                     method: 'POST',
                     data: {
                         'ids': [id],

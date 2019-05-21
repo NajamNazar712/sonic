@@ -859,20 +859,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('return_note')->name('return_note.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@return_note_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@return_note_list')->name('list');
-            Route::post('print', 'Admins\AdminReportsController@return_note_print')->name('print');
             Route::post('shipments', 'Admins\AdminReportsController@return_note_shipments')->name('shipments');
         });
         Route::prefix('pickup_note')->name('pickup_note.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@pickup_note_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@pickup_note_list')->name('list');
-            Route::post('print', 'Admins\AdminReportsController@pickup_note_assigned_print')->name('print');
             Route::post('bookings','Admins\AdminReportsController@pickup_note_bookings')->name('bookings');
         });
         Route::prefix('cargo_received')->name('cargo_received.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@cargo_received_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@cargo_received_list')->name('list');
             Route::post('shipments','Admins\AdminReportsController@cargo_shipments')->name('shipments');
-            Route::post('print', 'Admins\AdminReportsController@cargo_print')->name('print');
         });
         Route::prefix('lead_time')->name('lead_time.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@lead_time_index')->name('index');
@@ -885,9 +882,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('outstanding_shipments')->name('outstanding_shipments.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@outstanding_shipments_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@outstanding_shipments_list')->name('list');
-            Route::post('dncc/print', 'Admins\AdminReportsController@dncc_print')->name('dncc.print');
-            Route::post('sdn/print', 'Admins\AdminReportsController@sdn_print')->name('sdn.print');
-
         });
         Route::prefix('daily_pickup_sales')->name('daily_pickup_sales.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@daily_pickup_sales_index')->name('index');
@@ -904,7 +898,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list','Admins\AdminReportsController@completed_delivery_notes_list')->name('list');
             Route::post('shipments','Admins\AdminReportsController@completed_shipments')->name('shipments');
             Route::post('shipments/delivered','Admins\AdminReportsController@completed_shipments_delivered')->name('shipments.delivered');
-            Route::post('print','Admins\AdminReportsController@completed_delivery_note_print')->name('print');
         });
         Route::prefix('customer_retention')->name('customer_retention.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@customer_retention_index')->name('index');
