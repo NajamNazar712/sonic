@@ -6,6 +6,7 @@ use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\PettyCashStatement;
+use App\Http\Models\Admin\PettyCashStatementAmountLog;
 use App\Http\Models\Admin\PettyCashStatementDetail;
 use App\Http\Models\City;
 use Carbon\Carbon;
@@ -435,9 +436,16 @@ class AdminPettyCashController extends Controller
                 }
 
                 $petty_detail->expense_details = $request->expense[$selected_id];
-                $petty_detail->amount = $request->amount[$selected_id];
                 $petty_detail->reference_no = $request->reference[$selected_id];
                 $petty_detail->remarks = $request->remarks[$selected_id];
+                if($petty_detail->amount != $request->amount[$selected_id]){
+                    $amount_log = new PettyCashStatementAmountLog();
+                    $amount_log->petty_cash_statement_detail_id = $petty_detail->id;
+                    $amount_log->admin_id = Auth::id();
+                    $amount_log->old_amount = $petty_detail->amount;
+                    $amount_log->new_amount = $request->amount[$selected_id];
+                    $amount_log->save();
+                }
                 $petty_detail->save();
             }
             $petty_cash->total_amount = $total_amount;

@@ -457,26 +457,51 @@
                 var id = parseInt($(this).parents('tr').attr('id'));
                 var status = parseInt($(this).parents('tr').attr('status'));
                 if(status == 0 || status == 1) {
-                    $.ajax({
-                        url: '{!! route('admin.petty_cash.statements.edit.approve') !!}',
-                        method: 'POST',
-                        data: {
-                            'detail_id': id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if (data.status) {
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            current.parents('td').prev('td').text('Approved');
-                            current.parents('tr').attr('status',2);
-                        }
-                        else{
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
+                    swal({
+                        text: 'Are you sure, you want to approve this statement?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.petty_cash.statements.edit.approve') !!}',
+                                method: 'POST',
+                                data: {
+                                    'detail_id': id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                if (data.status) {
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    current.parents('td').prev('td').text('Approved');
+                                    current.parents('tr').attr('status',2);
+                                }
+                                else{
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
                             });
                         }
                     });
+
                 }else{
                     var error = 'Current Petty Cash Statement Detail already Approved!';
                     toastr.error(error, 'Error!', {
@@ -490,26 +515,51 @@
                 var id = parseInt($(this).parents('tr').attr('id'));
                 var status = parseInt($(this).parents('tr').attr('status'));
                 if(status == 0 || status == 2) {
-                    $.ajax({
-                        url: '{!! route('admin.petty_cash.statements.edit.reject') !!}',
-                        method: 'POST',
-                        data: {
-                            'detail_id': id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if (data.status) {
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            current.parents('td').prev('td').text('Rejected');
-                            current.parents('tr').attr('status',1);
-                        }
-                        else{
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
+                    swal({
+                        text: 'Are you sure, you want to reject this statement?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.petty_cash.statements.edit.reject') !!}',
+                                method: 'POST',
+                                data: {
+                                    'detail_id': id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                if (data.status) {
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    current.parents('td').prev('td').text('Rejected');
+                                    current.parents('tr').attr('status',1);
+                                }
+                                else{
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
                             });
                         }
                     });
+
                 }
                 else{
                     var error = 'Current Petty Cash Statement Detail already rejected!';
@@ -575,6 +625,7 @@
                 var status = parseInt({{$petty_statement_details->status}});
                 if(status == 0 || status == 1) {
                     $('#statement_approve').attr('disabled', true);
+
                     $.ajax({
                         url: '{!! route('admin.petty_cash.statements.edit.approve') !!}',
                         method: 'POST',
