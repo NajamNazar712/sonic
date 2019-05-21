@@ -624,7 +624,7 @@ class AdminCargoController extends Controller
                 $print = FALSE;
             }
 
-            return redirect()->route('admin.cargo.in_transit.index')->with(['success' => 'Cargo Booked with Number: ' . $id, 'print' => $print]);
+            return redirect()->route('admin.cargo.create.index')->with(['success' => 'Cargo Booked with Number: ' . $id, 'print' => $print]);
         }
         else {
             return back()->withErrors('All Shipments have already been added to another Cargo!');
