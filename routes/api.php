@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 */
 
 Route::middleware('APIToken')->name('api.')->group(function () {
-	Route::post('validate', 'APIController@verify')->name('verify');
+	Route::post('verify', 'APIController@verify')->name('verify');
 
 	Route::get('pickup_addresses', 'APIController@pickup_addresses')->name('pickup_addresses');
 	Route::post('pickup_address/add', 'APIController@pickup_address_add')->name('pickup_address.add');
