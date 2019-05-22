@@ -111,7 +111,7 @@ class APIController extends Controller
       'distinct' => ':attribute must not be Repeated.'
     ];
 
-    public function validate(Request $request) {
+    public function verify(Request $request) {
       return response()->json(['status' => 0, 'message' => 'API Key is Valid']);
     }
 
