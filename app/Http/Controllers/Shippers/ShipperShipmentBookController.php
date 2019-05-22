@@ -294,6 +294,8 @@ class ShipperShipmentBookController extends Controller
                             $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE);
 
                             $pickup_city_id = $request->input('consignee_city');
+
+                            $pickup_address_id_for_delivery = $request->input('pickup_address');
                         }
                     }
                     if ($service_type_id != 5) {
@@ -331,7 +333,7 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                     else {
-                        $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+                        $user_shipping_info = UserShippingInfo::find($pickup_address_id_for_delivery);
 
                         $consignee_city_id = $user_shipping_info->city_id;
                         $consignee_name = $user_shipping_info->poc;
