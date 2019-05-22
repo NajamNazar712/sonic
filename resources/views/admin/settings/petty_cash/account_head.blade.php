@@ -118,6 +118,9 @@
                 dom: 'ltipr',
                 @endif
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 scrollX: true, scrollY:'300px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],

@@ -82,10 +82,10 @@ class ShipperFinanceController extends Controller
             return number_format($done_payment->total_charges);
         })
         ->editColumn('total_gst', function($done_payment) {
-            return number_format($done_payment->total_gst);
+            return number_format(ROUND($done_payment->total_gst, 0, PHP_ROUND_HALF_DOWN));
         })
         ->editColumn('total_payable', function($done_payment) {
-            return number_format($done_payment->total_payable);
+            return number_format(ROUND($done_payment->total_payable, 0, PHP_ROUND_HALF_DOWN));
         })
         ->addColumn('phone_numbers', function($done_payment) {
             $phone_numbers = $done_payment->phone;
@@ -533,7 +533,7 @@ class ShipperFinanceController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total GST</strong></td>
-                                        <td>' . number_format($total_gst) . '</td>
+                                        <td>' . number_format(ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Packaging Material Charges</strong></td>
@@ -545,7 +545,7 @@ class ShipperFinanceController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format($total_charges + $total_gst - $total_adjustments) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(ROUND(($total_charges + $total_gst - $total_adjustments), 0, PHP_ROUND_HALF_DOWN)) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
@@ -677,7 +677,7 @@ class ShipperFinanceController extends Controller
 
         $total_columns = count($details[0]);
 
-        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments)];
+        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN), 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ROUND(($total_charges + $total_gst - $total_adjustments), 0, PHP_ROUND_HALF_DOWN)];
 
         $details[] = [];
 

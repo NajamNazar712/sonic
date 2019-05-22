@@ -11,6 +11,10 @@
 
             <li class=" nav-item"><a href="{{ route('admin.quick_tracking.index') }}"><span class="menu-title">Quick Tracking</span></a>
             </li>
+            @if(session('role_id') == 1 || in_array(204, session('permissions')))
+                <li class=" nav-item"><a href="{{ route('admin.cx_quick_tracking.cx_index') }}"><span class="menu-title">CX Quick Tracking</span></a>
+                </li>
+            @endif
 
             @if (session('role_id') == 1 || in_array(1, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a>
@@ -19,6 +23,28 @@
                     </ul>
                 </li>
             @endif
+            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">CRM</span></a>
+                <ul class="menu-content">
+                    <li class=" nav-item"><a href="#"><span class="menu-title">Requests</span></a>
+
+                        <ul class="menu-content">
+                            @if (session('role_id') == 1 || session('department_id') == 3)
+                                <li><a class="menu-item" href="{{route('admin.crm.launched_re_open.index')}}">Launched/Re-Open</a></li>
+                            @endif
+                            <li><a class="menu-item" href="{{route('admin.crm.in_process.index')}}">In-Process</a></li>
+                            @if (session('role_id') == 1 || Auth::user()->role->department_id == 3)
+                                <li><a class="menu-item" href="{{route('admin.crm.resolved.index')}}">Resolved</a></li>
+                            @endif
+                            @if (session('role_id') == 1 || Auth::user()->role->department_id == 3)
+                                <li><a class="menu-item" href="{{route('admin.crm.closed.index')}}">Closed</a></li>
+                            @endif
+                        </ul>
+                    </li>
+                    @if (session('role_id') == 1 || session('role_id') == 6 || in_array(188, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.crm.permissions') }}">Permissions</a></li>
+                    @endif
+                </ul>
+            </li>
 
             @if (session('role_id') == 1 || count(array_intersect([155], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"
@@ -323,7 +349,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 138, 148, 153, 156, 169, 170, 172, 176], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 138, 148, 153, 156, 169, 170, 172, 176, 200], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title">Reports</span></a>
 
                     <ul class="menu-content">
@@ -437,6 +463,9 @@
                         @if (session('role_id') == 1 || in_array(199, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.gst.index') }}">GST</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(200, session('permissions')))
+                             <li><a class="menu-item" href="{{ route('admin.reports.crm.index') }}">CRM</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -468,6 +497,7 @@
                             <li><a class="menu-item" href="{{ route('admin.user_management.roles.index') }}">Roles</a>
                             </li>
                         @endif
+
                     </ul>
                 </li>
             @endif
@@ -494,6 +524,10 @@
                         @if (session('role_id') == 1 || in_array(96, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.management.rider.index')}}">Rider
                                     Management</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(205, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.management.city_list')}}">Walk-In Cities List</a></li>
                         @endif
 
                     </ul>

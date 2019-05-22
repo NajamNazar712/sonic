@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\ModulePermission;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -307,7 +308,6 @@ class UserManagementController extends Controller
         $modules = Module::with('permissions')->get();
         $role = AdminRole::find($id);
         $permissions = $role->module_permissions->pluck('permission_id')->toArray();
-
         if ($role->id != 1) {
             return view('admin.user_management.role.update.index')->with(['departments' => $departments, 'modules' => $modules, 'role' => $role, 'permissions' => $permissions]);
         }
@@ -328,10 +328,11 @@ class UserManagementController extends Controller
         if ($request->has('permission_ids')) {
             $current_permission_ids = AdminRoleModulePermission::where('role_id', $id)->pluck('permission_id')->toArray();
 
+            $crm_module_permission = ModulePermission::where('module_id', '=', 18)->pluck('id');
             $delete_permission_ids = array_diff($current_permission_ids, $request->input('permission_ids'));
             $new_permission_ids = array_diff($request->input('permission_ids'), $current_permission_ids);
 
-            AdminRoleModulePermission::where('role_id', $id)->whereIn('permission_id', $delete_permission_ids)->delete();
+            AdminRoleModulePermission::where('role_id', $id)->whereNotIn('permission_id', $crm_module_permission)->whereIn('permission_id', $delete_permission_ids)->delete();
 
             foreach($new_permission_ids as $permission_id) {
                 $admin_role_module_permission = new AdminRoleModulePermission();
@@ -348,5 +349,4 @@ class UserManagementController extends Controller
 
         return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Role: ' . $request->input('name') . ' has been updated!']);
     }
-
 }

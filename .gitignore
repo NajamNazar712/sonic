@@ -4,6 +4,7 @@
 /public/reports
 /storage/*.key
 /vendor
+/.phpintel
 /.idea
 /.vscode
 /.vagrant

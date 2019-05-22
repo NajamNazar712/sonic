@@ -228,6 +228,9 @@
 				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
+                language: {
+                    processing: data_table_loader
+                },
 				serverSide: true,
 				ajax: '{{ route('admin.finance.outstanding_sdn.list') }}',
 				rowId: 'id',
@@ -365,6 +368,9 @@
 					className: 'selected bg-primary bg-lighten-5 primary'
 				},
 				processing: true,
+                language: {
+                    processing: data_table_loader
+                },
 				serverSide: true,
 				ajax: {
 					url: '{{ route('admin.finance.outstanding_sdn.delivery_notes_list') }}',

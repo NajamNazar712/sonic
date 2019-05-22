@@ -229,6 +229,7 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
+                    blockPagePermanently();
 
 
                     var from_date = $('#search_form input[name="from_date_formatted"]').val();
@@ -253,6 +254,7 @@
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                         }
+                        UnblockPagePermanently();
                     });
                     return false;
                 }

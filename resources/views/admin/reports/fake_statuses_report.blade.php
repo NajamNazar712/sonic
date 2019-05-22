@@ -14,7 +14,7 @@
                 <div class="row mb-2 justify-content-center">
                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                         <div class="form-group">
-                                <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                                <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Tracking Number">
                         </div>
                         <div class="form-group ml-1">
                             <select name="riders" class="select2" id="riders">
@@ -258,6 +258,7 @@
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
 
                     var jsonResult = $.ajax({
@@ -300,6 +301,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -320,6 +322,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.fake_status.list') }}',
@@ -349,6 +354,7 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
+                    // blockPagePermanently();
                     this.api().table().columns.adjust();
                 }
             });

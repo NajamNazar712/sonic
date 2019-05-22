@@ -10,6 +10,7 @@ use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 
 use Validator;
@@ -242,8 +243,8 @@ class APIController extends Controller
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
-            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
-                $query->whereIn('id', [2, 4]);
+            'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+                $query->whereIn('id', [4]);
             })],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
@@ -293,7 +294,7 @@ class APIController extends Controller
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
-            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
+            'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [2, 3]);
             })],
 
@@ -393,8 +394,20 @@ class APIController extends Controller
         $pickup_address_id = $request->input('pickup_address_id');
         $information_display = $request->input('information_display');
         $consignee_city_id = $request->input('consignee_city_id');
+
+        if ($request->filled('charges_mode_id')) {
+          $charges_mode_id = $request->input('charges_mode_id');
+        }
+        else {
+          if($user_type['account_type_id'] == 1) {
+            $charges_mode_id = 4;
+          }
+          else {
+            $charges_mode_id = 3;
+          }
+        }
+
         if($user_type['account_type_id'] == 2) {
-            $charges_mode_id = $request->input('charges_mode_id');
             $delivery_type_id = $request->input('delivery_type_id');
             $consignee_city_name = City::where('id', $consignee_city_id)->first();
             if($delivery_type_id == 2){
@@ -406,7 +419,6 @@ class APIController extends Controller
         }
         else{
             $consignee_address = $request->input('consignee_address');
-            $charges_mode_id = $request->input('charges_mode_id');
         }
 
         $consignee_name = $request->input('consignee_name');

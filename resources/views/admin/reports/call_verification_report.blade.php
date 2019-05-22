@@ -99,11 +99,13 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    {{--<script src="{{asset('js/main-1.0.js')}}" type="text/javascript"></script>--}}
 
     <script type="text/javascript">
         $(document).ready(function () {
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
 
                     var jsonResult = $.ajax({
@@ -134,6 +136,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header:head};
                 }
@@ -153,6 +156,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: '{{ route('admin.reports.call_verification.list') }}',
                 order: [[5, 'desc']],

@@ -410,17 +410,20 @@ class AdminWalkInBookShipmentController extends Controller
 
         if (Auth::guard('admin')->check()) {
             $user_type = 3;
-        }
-        else if (Auth::guard('web')->check()) {
-            $user_type = 1;
-        }
-        else if (Auth::guard('substitute_users')->check()) {
-            $user_type = 2;
-        }
 
-        if ($user_type) {
             $user_id = Auth::id();
 
+            $user_name = Auth::user()->name . ' (Admin) #' . $user_id;
+        }
+        else {
+            $user_name = 'Unknown';
+        }
+
+        $print_details = '
+            <div class="small mt-1">Printed By: ' . $user_name . '</div>
+        ';
+
+        if ($user_type) {
             $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
             $html = '
@@ -528,7 +531,7 @@ class AdminWalkInBookShipmentController extends Controller
                       <table class="table table-sm table-bordered border twice">
                         <tbody>
                           <tr>
-                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto">' . $print_details . '</td>
                             <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
@@ -712,7 +715,7 @@ class AdminWalkInBookShipmentController extends Controller
                         <div class="col-6">
                             <table class="table table-sm table-bordered border invoice">
                               <tbody>
-                                <tr class="color secondary">
+                                <tr class="color primary">
                                     <td colspan="4"><strong>Shipment Details</strong></td>
                                 </tr>
                                 <tr>
@@ -825,6 +828,27 @@ class AdminWalkInBookShipmentController extends Controller
             ';
 
             return $html;
+        }
+    }
+    public function check_min_charges(Request $request){
+        if($request->pickup_city != null && $request->consignee_city != null) {
+            $min_charges = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
+            if ($request->pickup_city == $request->consignee_city) {
+                $min_charges = $min_charges['chargeable_weight_local'];
+            } else {
+                $city = City::where('id', $request->consignee_city)->first();
+                $zone_class = ZoneClassCity::where(['zone_id' => $city['zone_id'], 'city_id' => $request->consignee_city])->first();
+                if ($zone_class['class'] == 1) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_1'];
+                } elseif ($zone_class['class'] == 2) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_2'];
+                } elseif ($zone_class['class'] == 3) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_3'];
+                } else {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_0'];
+                }
+            }
+            return ['status' => 1, 'min_charges' => $min_charges];
         }
     }
 }

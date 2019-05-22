@@ -47,9 +47,9 @@
 														@if ($shipping_information['default_address'] == 1)
 															@php ($default_pickup_address = TRUE)
 
-															<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" selected >{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+															<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}" selected >{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
 														@else
-															<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+															<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
 														@endif
 													@endif
 												@endforeach
@@ -57,18 +57,14 @@
 											</select>
 										</div>
 
+										<div class="form-group">
+											<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="pickup_city_name"></p>
+										</div>
+
 										<div id="new_pickup_address" class="d-none">
 											<div class="form-group">
 												<textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
 												<input type="checkbox" name="make_default_address" value="1">Make default address<br>
-											</div>
-
-											<div class="form-group">
-												<select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
-													@foreach($cities as $city)
-														<option value="{{ $city->id }}">{{ $city->name }}</option>
-													@endforeach
-												</select>
 											</div>
 
 											<div class="form-group">
@@ -81,6 +77,14 @@
 
 											<div class="form-group">
 												<input type="email" name="new_pickup_email_address" class="form-control" placeholder="Email Address*" data-rule-required="true" data-msg-required="Email Address is required">
+											</div>
+
+											<div class="form-group">
+												<select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
+													@foreach($cities as $city)
+														<option value="{{ $city->id }}">{{ $city->name }}</option>
+													@endforeach
+												</select>
 											</div>
 
 										</div>
@@ -308,7 +312,11 @@
 										<div id="charges_mode_div" class="form-group">
                                             <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
                                                 @foreach($charges_modes as $charges_mode)
-                                                    <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
+                                                	@if ($charges_mode->id == 4)
+                                                        <option value="{{ $charges_mode->id }}" selected="selected">{{ $charges_mode->charges_mode }}</option>
+                                                    @else
+                                                        <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
+                                                    @endif
                                                 @endforeach
                                             </select>
                                         </div>
@@ -503,7 +511,7 @@
 				});
 			}
 
-			$('#charges_mode').prepend('<option value="" selected="selected"></option>').select2({
+			$('#charges_mode').select2({
                 width: '100%',
                 placeholder: 'Charges Mode*'
             }).bind('change', function() {
@@ -515,9 +523,13 @@
 			function shipping_modes() {
 				if ($('#pickup_address').val() == 0) {
 					var pickup_city_id = $('#new_pickup_city').val();
+					$('#pickup_city_name').addClass('d-none');
 				}
 				else {
 					var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
+					var pickup_city_name = $('#pickup_address').find(':selected').data('city-name');
+					$('#pickup_city_name').removeClass('d-none');
+					$('#pickup_city_name').html('City : ' + pickup_city_name);
 				}
 
 				consignee_city_id = $('#consignee_city').val();
@@ -887,7 +899,7 @@
 					$('#pickup_date').valid();
                 }
 			});
-            $('#pickup_date').pickadate('picker').set({'select': new Date(current_date),'min': new Date(current_date)},{muted: true});
+            $('#pickup_date').pickadate('picker').set({'select': new Date(current_date)},{muted: true});
 
             $('#replacement_product_type').select2({
 				width: '100%',

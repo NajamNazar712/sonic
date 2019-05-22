@@ -9,10 +9,12 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\DeliveryType;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\Rates\HistoryBookingTypeCharges;
 use App\Http\Models\Rates\HistoryCashHandlingCharge;
@@ -30,6 +32,7 @@ use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\WalkInCities;
+use App\Http\Models\ZoneClassCity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
@@ -167,74 +170,7 @@ class AdminDashboardController extends Controller
 
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
-        for ($counter = 29; $counter >= 0; $counter--) {
-            $date = Carbon::now()->subDays($counter);
-            $comparison_date = $date->toDateString();
-            $graph['dates'][] = $date->format('d M');
 
-            $booked = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',1);
-            $received = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[2,3,4]);
-            $cancelled = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',17);
-            $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
-            $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19]);
-            $return = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46]);
-
-            if (session('role_id') != 1) {
-                $booked = $booked->where(function($query) {
-                    $query->whereHas('pickup_address.city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    })->orWhereHas('consignee_city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    });
-                });
-
-                $received = $received->where(function($query) {
-                    $query->whereHas('pickup_address.city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    })->orWhereHas('consignee_city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    });
-                });
-                $cancelled = $cancelled->where(function($query) {
-                    $query->whereHas('pickup_address.city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    })->orWhereHas('consignee_city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    });
-                });
-
-                $delivered = $delivered->where(function($query) {
-                    $query->whereHas('pickup_address.city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    })->orWhereHas('consignee_city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    });
-                });
-
-                $return = $return->where(function($query) {
-                    $query->whereHas('pickup_address.city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    })->orWhereHas('consignee_city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    });
-                });
-
-                $pending = $pending->where(function($query) {
-                    $query->whereHas('pickup_address.city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    })->orWhereHas('consignee_city', function ($sub_query) {
-                        $sub_query->whereIn('hub_id', session('hubs'));
-                    });
-                });
-            }
-
-            $graph['booked'][] = $booked->count();
-            $graph['received'][] = $received->count();
-            $graph['cancelled'][] = $cancelled->count();
-            $graph['delivered'][] = $delivered->count();
-            $graph['pending'][] = $pending->count();
-            $graph['return'][] = $return->count();
-        }
         $shippers = User::where('status',3)->where('blacklist',0)->select('id','name')->get();
         $cities = City::where('status',1)->select('id','name')->get();
 
@@ -6272,8 +6208,12 @@ class AdminDashboardController extends Controller
         $zones = Zone::all();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::where('id','!=',4)->get();
-        $walk_in_city = WalkInCities::where('city_id',$city['id'])->first();
-        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs, 'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub, 'walk_in_city' => $walk_in_city]);
+        $walk_in_city = WalkInCities::where('city_id',$city['id'])->get();
+        $walk_in_delivery = array();
+        foreach ($walk_in_city as $walk_in_detail){
+            $walk_in_delivery[$walk_in_detail['delivery']] = $walk_in_detail['delivery'];
+        }
+        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs, 'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub, 'walk_in_city' => $walk_in_delivery]);
 
     }
 
@@ -6287,11 +6227,16 @@ class AdminDashboardController extends Controller
                 'zone_id'=>City::find($request->hubs)->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0
             ]);
-
-            $walk_in_city = WalkInCities::where('city_id',$id)->update([
-                'pickup'=>($request->has('walk_in_pickup'))? 1:0,
-                'delivery'=>($request->has('walk_in_delivery'))? 1:0,
-            ]);
+            WalkInCities::where('city_id',$id)->delete();
+            if(!empty($request->walk_in_delivery)) {
+                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                    WalkInCities::create([
+                        'city_id' => $id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'delivery' => $index,
+                    ]);
+                }
+            }
 
             CityDelivery::where('city_id',$id)->delete();
 
@@ -6315,10 +6260,16 @@ class AdminDashboardController extends Controller
                 'pickup'=>($request->has('pickup'))? 1:0
             ]);
 
-            $walk_in_city = WalkInCities::where('city_id',$id)->update([
-                'pickup'=>($request->has('walk_in_pickup'))? 1:0,
-                'delivery'=>($request->has('walk_in_delivery'))? 1:0,
-            ]);
+            WalkInCities::where('city_id',$id)->delete();
+            if(!empty($request->walk_in_delivery)) {
+                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                    WalkInCities::create([
+                        'city_id' => $id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'delivery' => $index,
+                    ]);
+                }
+            }
 
             CityDelivery::where('city_id',$id)->delete();
 
@@ -6349,11 +6300,15 @@ class AdminDashboardController extends Controller
                 'status'=>1
             ]);
 
-            $walk_in_city = WalkInCities::create([
-                'city_id'=>$city->id,
-                'pickup'=>($request->has('walk_in_pickup'))? 1:0,
-                'delivery'=>($request->has('walk_in_delivery'))? 1:0,
-            ]);
+            if(!empty($request->walk_in_delivery)) {
+                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                    WalkInCities::create([
+                        'city_id' => $city->id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'delivery' => $index,
+                    ]);
+                }
+            }
 
             foreach ($request->delivery as $booking_type_id => $shipping_modes) {
                 foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
@@ -6375,11 +6330,15 @@ class AdminDashboardController extends Controller
                 'status'=>1
             ]);
 
-            $walk_in_city = WalkInCities::create([
-                'city_id'=>$city->id,
-                'pickup'=>($request->has('walk_in_pickup'))? 1:0,
-                'delivery'=>($request->has('walk_in_delivery'))? 1:0,
-            ]);
+            if(!empty($request->walk_in_delivery)) {
+                foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                    WalkInCities::create([
+                        'city_id' => $city->id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'delivery' => $index,
+                    ]);
+                }
+            }
 
             City::where('id',$city->id)->update(['hub_id'=>$city->id]);
 
@@ -6792,6 +6751,37 @@ class AdminDashboardController extends Controller
         }
         else{
             return back()->with('danger', 'There is no email selected!');
+        }
+    }
+
+    public function walk_in_city_list(){
+        $cities = City::select('id', 'name')->get();
+        $walk_in_cities = WalkInCities::all();
+        $shipping_modes = ShippingMode::where('id', '<', 4)->get();
+        $pickup_cities = City::select('id', 'name')->where('pickup', 1)->get();
+        $delivery_types = DeliveryType::get();
+        return view('admin.management.walk_in_city_list')->with(['cities' => $cities, 'walk_in_cities' => $walk_in_cities, 'shipping_modes' => $shipping_modes, 'pickup_cities' => $pickup_cities, 'delivery_types' => $delivery_types]);
+    }
+
+    public function check_min_charges(Request $request){
+        if($request->pickup_city != null && $request->consignee_city != null) {
+            $min_charges = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
+            if ($request->pickup_city == $request->consignee_city) {
+                $min_charges = $min_charges['chargeable_weight_local'];
+            } else {
+                $city = City::where('id', $request->consignee_city)->first();
+                $zone_class = ZoneClassCity::where(['zone_id' => $city['zone_id'], 'city_id' => $request->consignee_city])->first();
+                if ($zone_class['class'] == 1) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_1'];
+                } elseif ($zone_class['class'] == 2) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_2'];
+                } elseif ($zone_class['class'] == 3) {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_3'];
+                } else {
+                    $min_charges = $min_charges['chargeable_weight_charges_class_0'];
+                }
+            }
+            return ['status' => 1, 'min_charges' => $min_charges];
         }
     }
 }

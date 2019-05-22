@@ -771,6 +771,9 @@
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 ajax: '{{route('admin.accounts.get.pickups',['user_id'=>$user->id])}}',

@@ -136,7 +136,7 @@
               <div class="card col-12">
                   <div class="card-content collapse show">
                       <div class="card-body">
-                          <div id="shipment_statistics_chart" class="height-300 echart-container"></div>
+                          <div id="shipment_statistics_chart" class="height-300 echart-container d-none"></div>
                           <div class="row">
                               <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
                                   <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}">
@@ -159,7 +159,7 @@
                                   </select>
                               </div>
                               <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">
-                                  <button type="button" class="btn round btn-primary mr-1 btn-glow statistics_search">Search <i class="ft-bar-chart"></i></button>
+                                  <button type="button" class="btn round btn-primary btn-glow statistics_search">Search <i class="ft-bar-chart"></i></button>
                               </div>
                           </div>
 
@@ -271,81 +271,8 @@
                 allowClear:true
             });
 
-            var myChart = echarts.init(document.getElementById('shipment_statistics_chart'));
+            var myChart;
 
-            chartOptions = {
-
-                // Setup grid
-                grid: {
-                    x: 60,
-                    x2: 40
-                },
-
-                // Add tooltip
-                tooltip: {
-                    trigger: 'axis'
-                },
-
-                // Add legend
-                legend: {
-                    data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)','Cancelled Shipment(s)']
-                },
-
-                // Add custom colors
-                color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a','#FF0000'],
-
-                // Hirozontal axis
-                xAxis: [{
-                    type: 'category',
-                    boundaryGap: false,
-                    axisLabel: {
-                        rotate: 45
-                    },
-                    data: @json($graph['dates'])
-                }
-                ],
-                // Vertical axis
-
-                yAxis: [{
-                    type: 'value'
-                }],
-                // Add series
-                series: [
-                    {
-                        name: 'Pending Shipment(s)',
-                        type: 'line',
-                        data: @json($graph['booked'])
-                    },
-                    {
-                        name: 'Received Shipment(s)',
-                        type: 'line',
-                        data: @json($graph['received'])
-                    },
-                    {
-                        name: 'Delivered Shipment(s)',
-                        type: 'line',
-                        data: @json($graph['delivered'])
-                    },
-                    {
-                        name: 'Returned Shipment(s)',
-                        type: 'line',
-                        data: @json($graph['return'])
-                    },
-                    {
-                        name: 'In Process Shipment(s)',
-                        type: 'line',
-                        data: @json($graph['pending'])
-                    },
-                    {
-                        name: 'Cancelled Shipment(s)',
-                        type: 'line',
-                        data: @json($graph['cancelled'])
-                    }
-                ]
-            };
-
-
-            myChart.setOption(chartOptions);
             $('.statistics_search').on('click',function(){
                 var search_btn = $(this);
                 search_btn.prop('disabled',true);
@@ -365,6 +292,12 @@
                     }
                 }).done(function(data){
                     if(data.status == 1){
+                        $('#shipment_statistics_chart').removeClass('d-none');
+
+                        if (!myChart) {
+                          myChart = echarts.init(document.getElementById('shipment_statistics_chart'));
+                        }
+
                         myChart.clear();
                         updateChartOptions = {
 

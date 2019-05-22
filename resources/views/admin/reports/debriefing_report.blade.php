@@ -137,6 +137,7 @@
             var types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'on_hold', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];
 
             function list() {
+                blockPagePermanently();
                 $('#search_filter_btn').prop('disabled', true);
                 $('#export_btn').prop('disabled', true);
 
@@ -174,6 +175,7 @@
 
                     $('#search_filter_btn').prop('disabled', false);
                     $('#export_btn').prop('disabled', false);
+                    UnblockPagePermanently();
                 });
             }
 

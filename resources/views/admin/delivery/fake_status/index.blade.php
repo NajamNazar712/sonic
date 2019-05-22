@@ -14,15 +14,13 @@
 
                 <div class="row mb-2 justify-content-center">
 
-                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Tracking Number" style="height: 43px">
                         </div>
 
                         <div class="col-2">
-                            <button type="button" id="search_filter_btn" class="btn btn-primary"><i class="la la-search"></i> Search</button>
+                            <button type="button" id="search_filter_btn" class="btn btn-outline-primary"><i class="la la-search"></i> Search</button>
                         </div>
-                    </form>
 
 
                 </div>
@@ -110,6 +108,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_tracking_no').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -128,6 +131,7 @@
                             head.push('Last Status');
                             head.push('Hub');
                             head.push('Rider');
+                            head.push('Amount');
                             head.push('Created At');
 
                             $.each(result.data, function(index, values) {
@@ -139,6 +143,7 @@
                                 row.push(values.status);
                                 row.push(values.hub);
                                 row.push(values.rider);
+                                row.push(values.amount);
                                 row.push(values.created_at);
 
                                 body.push(row);
@@ -266,7 +271,7 @@
                     }
                 },{
                     extend: 'excel',
-                    title: 'Fake Status',
+                    title: 'Remove Fake Status',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 }],
@@ -285,10 +290,15 @@
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
                 scrollX: true, scrollY: '350px',
+                "autoWidth": false,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
+                paging: false,
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
                 ajax: {
                     url:'{{ route('admin.delivery.fake_status.list') }}',
@@ -305,7 +315,7 @@
                     { data:'status' ,name: 'ss.name', class: 'align-middle text-center status'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'r.name', class: 'align-middle rider'},
-                    { data:'amount' ,name: 'dn.received_cod_amount', class: 'align-middle amount'},
+                    { data:'amount' ,name: 's.amount', class: 'align-middle amount'},
                     { data:'created_at' ,name: 'dn.created_at', class: 'align-middle created_at'},
                 ],
                 rowCallback: function(row, data, index) {

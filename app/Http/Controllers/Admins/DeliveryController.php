@@ -369,7 +369,7 @@ class DeliveryController extends Controller
                         if(DeliveryNote::where('id', $old_delivery_note_id->delivery_note_id)->where('status',0)->exists()){
                             $journey = ShipmentsJourney::where('shipment_id',$shipment)->where('verification',0)->latest()->first();
                             if($journey->count() > 0){
-                                ShipmentsJourneyController::add($journey->shipment_id,$journey->shipper_status_id,$journey->consignee_status_id,$journey->status_reason_id,$journey->remarks,$journey->user_id,Auth::id(),$journey->reference_1_id,NULL,1);
+                                ShipmentsJourneyController::add($journey->shipment_id,$journey->shipper_status_id,$journey->consignee_status_id,$journey->status_reason_id,$journey->remarks,$journey->user_id,Auth::id(),$journey->reference_1_id,NULL,1,$journey->received_or_refused_by);
                             }
                         }
 
@@ -569,8 +569,7 @@ class DeliveryController extends Controller
 
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
-                return "<a href='javascript:void(0);' class='deliverynoterow'>Remove</a>";
-
+                return "<a href='javascript:void(0);' class='deliverynoterow'><button type='button' class='btn btn-sm btn-danger'>Remove</button></a>";
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
@@ -591,24 +590,21 @@ class DeliveryController extends Controller
     {
         $shipment = DeliveryNoteShipment::where('shipment_id', $request->shipment_id)->where('delivery_note_id', $request->delivery_note_id);
         if ($shipment->exists()) {
-            $shipment = $shipment->first();
-            $delivery_note = $shipment->delivery_note_id;
+            $delivery_note = $request->delivery_note_id;
             $delivery = DeliveryNote::where('id', $delivery_note);
             if ($delivery->exists()) {
-                $parcel = Shipment::where('id', $request->shipment_id);
-                $parcel = $parcel->first();
+                $parcel = Shipment::where('id', $request->shipment_id)->first();
                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
                 $delivery = $delivery->first();
                 $count = $delivery->shipments_count;
                 $cod = $delivery->total_cod_amount;
-                $count = $count - 1;
+                $count-=1;
                 if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                     $cod = $cod - $parcel->amount;
                 }
                 if ($count == 0) {
-                    DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod, 'status' => 4]);
+                    DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
                 } else {
-
                     DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                 }
                 Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 6]);
@@ -1409,7 +1405,7 @@ class DeliveryController extends Controller
             ->leftJoin('shipments_journey as rrb', function ($join) {
                 $join->on('rrb.shipment_id', '=', 'shipments.id')
                     ->where('rrb.created_at', '=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
             ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','rrb.received_or_refused_by'])
             ->where('delivery_notes.id', $id);
@@ -2768,11 +2764,13 @@ class DeliveryController extends Controller
                 ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
                 ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
                 ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
+                ->where('s.tracking_number', '=', $tracking_number)
+                ->groupBy('station_deposit_notes.id');
         }
         if ($dncc = $request->get('scan_dncc')) {
             $datatable->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
-                ->where('dnsdns.delivery_note_id', '=', $dncc);
+                ->where('dnsdns.delivery_note_id', '=', $dncc)
+                ->groupBy('station_deposit_notes.id');
         }
         return $datatable->make(true);
     }
@@ -4035,7 +4033,7 @@ class DeliveryController extends Controller
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'sj.shipper_status_id')
             ->leftjoin('cities as h', 'h.id', '=', 'dn.hub_id')
             ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
-            ->select('delivery_note_shipments.delivery_note_id as delivery_note_id', 'delivery_note_shipments.shipment_id as shipment_id', 'dn.id as delivery_note', 'dn.received_cod_amount as amount', 'h.name as hub', 'r.name as rider', 'ss.name as status', 'dn.created_at as created_at')
+            ->select('delivery_note_shipments.delivery_note_id as delivery_note_id', 'delivery_note_shipments.shipment_id as shipment_id', 'dn.id as delivery_note', 's.amount as amount', 'h.name as hub', 'r.name as rider', 'ss.name as status', 'dn.created_at as created_at')
             ->where('delivery_note_shipments.fake_status', 1);
 
         $datatables = Datatables::of($fake_status)
