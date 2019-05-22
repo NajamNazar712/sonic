@@ -94,6 +94,41 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="AmountLogModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AmountLogModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Petty Cash Statement Detail Log</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body  text-center">
+
+                        <table class="table table-bordered datatable" id="amountlogtable" style="z-index: 3;">
+                            <thead>
+
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Tracking No.</th>
+                                <th class="border-primary border-darken-1">Service Type</th>
+                                <th class="border-primary border-darken-1">Weight Of Shipment</th>
+
+                            </tr>
+                            </thead>
+                        </table>
+
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button type="submit" class="btn btn-primary">Close</button>
+                            </div>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -309,7 +344,7 @@
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    error.addClass('w-100').appendTo(element.parents('td.form-group'));
                 },
                 submitHandler: function(form) {
                     // table.rows().nodes().each(function(index) {
@@ -549,6 +584,7 @@
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     current.parents('td').prev('td').text('Rejected');
                                     current.parents('tr').attr('status',1);
+                                    current.parents('td').html('');
                                 }
                                 else{
                                     toastr.error(data.error, 'Error!', {
@@ -656,23 +692,30 @@
                     });
                 }
             });
-            {{--$('#reference_no').on('change',function () {--}}
-            {{--var reference_handle = $(this);--}}
-            {{--var reference = $(this).val();--}}
-            {{--$.ajax({--}}
-            {{--url: '{!! route('admin.petty_cash.make.reference') !!}',--}}
-            {{--method: 'POST',--}}
-            {{--data: {--}}
-            {{--'reference_id': reference,--}}
-            {{--'_token': '{{ csrf_token() }}'--}}
-            {{--}--}}
-            {{--}).done(function (data) {--}}
-            {{--if(data.status){--}}
-            {{--reference_handle.val('');--}}
-            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--}--}}
-            {{--})--}}
-            {{--});--}}
+
+            $('#datatable').on('click', 'td .amount_log', function(){
+                var id = $(this).parents('tr').attr('id');
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.petty_cash.statements.edit.log') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status){
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }else{
+                            AmountLogModal
+                        }
+                    });
+                }
+            });
+
         });
     </script>
 @endsection

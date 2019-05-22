@@ -171,7 +171,7 @@ class AdminPettyCashController extends Controller
                 return $expense;
             })
             ->editColumn('amount', function ($petty_details){
-                $amount = '<input class="form-control form-control-sm" disabled value="' .$petty_details->amount. '" name="amount['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Amount is required">';
+                $amount = '<div class="input-group amount_log"><input type="text" class="form-control form-control-sm" disabled value="' .$petty_details->amount. '" name="amount['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Amount is required"><div class="input-group-append"><span class="input-group-text p-0 pl-sm-1 pr-sm-1"><i class="ft-align-justify font-medium-4"></i></span></div></div>';
                 return $amount;
             })
             ->editColumn('reference_no', function ($petty_details){
@@ -194,7 +194,7 @@ class AdminPettyCashController extends Controller
             })
             ->addColumn('action',function ($petty){
                 $dropdown = '';
-                if(session('role_id') == 1 || ($petty->petty_status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
+                if((session('role_id') == 1 || ($petty->petty_status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)) || (($petty->petty_status == 0 || $petty->petty_status == 2) && (session('role_id') == 8 || session('role_id') == 10))) && ($petty->status != 1)){
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -372,13 +372,15 @@ class AdminPettyCashController extends Controller
             if($id){
                 $petty_details = PettyCashStatementDetail::find($id);
                 if($petty_details){
-                    if($petty_details->status == 0 || $petty_details->status == 1){
+                    if($petty_details->status == 0){
                         $petty_details->status = 2;
                         $petty_details->updated_by = Auth::id();
                         $petty_details->save();
                         return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
                     }else if($petty_details->status == 2){
                         return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
+                    }else{
+                        return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details rejected so it can\'t be changed!']);
                     }
 
                 }else{
@@ -756,5 +758,19 @@ class AdminPettyCashController extends Controller
       ';
 
         return $html;
+    }
+    public function edit_petty_cash_statements_amount_log(Request $request){
+        $id = $request->id;
+        if($id){
+            $log = PettyCashStatementAmountLog::find($id);
+            if($log){
+                return response()->json(['status' => 0, 'log' => $log]);
+            }else{
+                return response()->json(['status' => 1, 'error' => 'No logs found!']);
+            }
+        }else{
+            return response()->json(['status' => 1, 'error' => 'No Petty Cash Statement Detail ID selected!']);
+
+        }
     }
 }
