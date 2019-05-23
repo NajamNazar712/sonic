@@ -21,8 +21,8 @@ class CreateReplacementToRegularLogsTable extends Migration
             $table->integer('product_type_id');
             $table->string('item_description');
             $table->integer('item_quantity');
-            $table->integer('item_price');
-            $table->tinyInteger('insurance');
+            $table->integer('item_price')->nullable();
+            $table->tinyInteger('insurance')->nullable();
             $table->tinyInteger('type');
             $table->timestamps();
         });

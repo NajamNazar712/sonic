@@ -524,6 +524,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\DeliveryController@fake_status_remove_list')->name('list');
             Route::post('remove', 'Admins\DeliveryController@fake_status_remove')->name('remove');
         });
+        Route::prefix('replacement')->name('replacement.')->group(function () {
+            Route::prefix('not_collected')->name('not_collected.')->group(function () {
+                Route::get('', 'Admins\DeliveryController@replacement_not_collected_index')->name('index');
+                Route::get('list', 'Admins\DeliveryController@replacement_not_collected_list')->name('list');
+                Route::post('reason', 'Admins\DeliveryController@replacement_not_collected_reason_update')->name('reason');
+                Route::post('amount', 'Admins\DeliveryController@replacement_not_collected_amount_update')->name('amount');
+                Route::post('re_attempt', 'Admins\DeliveryController@replacement_not_collected_re_attempt')->name('re_attempt');
+                Route::post('regular_re_attempt', 'Admins\DeliveryController@replacement_not_collected_regular_re_attempt')->name('regular_re_attempt');
+            });
+            Route::prefix('collected')->name('collected.')->group(function () {
+                Route::get('', 'Admins\DeliveryController@replacement_collected_index')->name('index');
+                Route::post('list', 'Admins\DeliveryController@change_shipment_booking_type_shipment_details')->name('shipment_details');
+                Route::post('change_booking_type', 'Admins\DeliveryController@change_shipment_booking_type')->name('change_booking_type');
+            });
+            Route::prefix('logs')->name('logs.')->group(function () {
+                Route::get('', 'Admins\DeliveryController@replacement_to_regular_logs_index')->name('index');
+                Route::get('list', 'Admins\DeliveryController@replacement_to_regular_logs_list')->name('list');
+            });
+        });
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');

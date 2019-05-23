@@ -114,7 +114,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([33, 35, 36, 40, 42, 105, 107, 108, 119, 125, 127, 130, 193, 196, 203], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([33, 35, 36, 40, 42, 105, 107, 108, 119, 125, 127, 130, 193, 196, 203, 206, 207, 208], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Delivery</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(33, session('permissions')))
@@ -204,6 +204,26 @@
                         @if (session('role_id') == 1 || in_array(203, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.delivery.fake_status.index') }}">Remove Fake Status</a></li>
                         @endif
+
+                            @if (session('role_id') == 1 || count(array_intersect([206,207,208], session('permissions'))) !== 0)
+                                <li class=" nav-item"><a href="#"><span class="menu-title">Replacement To Regular</span></a>
+
+                                    <ul class="menu-content">
+                                        @if (session('role_id') == 1 || in_array(206, session('permissions')))
+                                            <li><a class="menu-item" href="{{route('admin.delivery.replacement.not_collected.index')}}">Not Collected</a>
+                                            </li>
+                                        @endif
+                                        @if (session('role_id') == 1 || in_array(207, session('permissions')))
+                                            <li><a class="menu-item" href="{{route('admin.delivery.replacement.collected.index')}}">Collected</a>
+                                            </li>
+                                        @endif
+                                        @if (session('role_id') == 1 || in_array(208, session('permissions')))
+                                            <li><a class="menu-item" href="{{route('admin.delivery.replacement.logs.index')}}">Logs</a>
+                                            </li>
+                                        @endif
+                                    </ul>
+                                </li>
+                            @endif
                     </ul>
                 </li>
             @endif
