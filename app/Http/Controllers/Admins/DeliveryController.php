@@ -4204,6 +4204,12 @@ class DeliveryController extends Controller
                 'insurance' => $insurance,
                 'type' => $type,
             ]);
+
+            $shipment->replacement_charges = NULL;
+
+            $shipment->save();
+
+            ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1])->delete();
         }
             return ['status' => 1, 'success' => 'Shipment Service type is changed to Regular and has been marked as Re-Attempt'];
     }
@@ -4279,10 +4285,13 @@ class DeliveryController extends Controller
                         'consignee_status_id' => 13
                     ]);
                     ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+
+                    $replacement_charges = $shipment->replacement_charges;
+
                     ReplacementToRegularLog::create([
                         'shipment_id' => $shipment->id,
                         'updated_by' => Auth::id(),
-                        'replacement_charges' => $shipment->replacement_charges,
+                        'replacement_charges' => $replacement_charges,
                         'product_type_id' => $product_type_id,
                         'item_description' => $item_description,
                         'item_quantity' => $item_quantity,
@@ -4290,6 +4299,15 @@ class DeliveryController extends Controller
                         'insurance' => $insurance,
                         'type' => $type,
                     ]);
+
+                    AdminFinanceController::add_adjustment($shipment->id, $replacement_charges);
+
+                    $shipment->replacement_charges = NULL;
+
+                    $shipment->save();
+
+                    ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1])->delete();
+
                     return redirect()->back()->with('success', 'Shipment Service type has been updated to Regular');
                 }
                 else{
