@@ -11,6 +11,9 @@ use App\Http\Models\Product;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\CRM\CrmRequestChannel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +33,11 @@ class OrderManagementController extends Controller
         $service_type = BookingType::all();
         $products = Product::select('id','product_name')->get();
         $payment_status = ShipmentPaymentStatus::all();
-        return view('admin.order_management.index')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status]);
+        $case_nature = CrmRequestCaseNature::get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
+        return view('admin.order_management.index')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels]);
     }
     public function orders_list(Request $request)
     {
@@ -212,6 +219,32 @@ class OrderManagementController extends Controller
 
             if ($valid) {
                 return ['status' => 0, 'success' => 'Shipment(s) has been marked as Return Confirm due to Shipper Recall'];
+            }
+            else {
+                return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipment Selected'];
+        }
+    }
+
+    public function shipment_print_status(Request $request) {
+        $shipment_ids = $request->shipment_ids;
+
+        if (!empty($shipment_ids)) {
+            $valid_ids = array();
+
+            foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+
+                if ($shipment && ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2) && !$shipment->packaging_material_request) {
+                    $valid_ids[] = $shipment_id;
+                }
+            }
+
+            if (!empty($valid_ids)) {
+                return ['status' => 0, 'success' => 'Valid Shipment(s) Found', 'valid_ids' => $valid_ids];
             }
             else {
                 return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];

@@ -75,6 +75,169 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Request</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_request_form" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+                            <div class="row">
+                                <h2 class="heading">Tracking Number(s)</h2>
+                            </div>
+
+                            <input type="hidden" id="requested_shipment_ids">
+                            <div class="row old_scroll" id="requested_shipments">
+
+                            </div>
+                            <hr>
+                            <div class="row justify-content-center">
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <select name="case_nature_select" id="case_nature_select" class="form-control select2">
+                                            @foreach($case_nature as $nature)
+                                                <option value="{{$nature->id}}">{{$nature->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="complaints d-none" id="request_complaints">
+                                <div class="row justify-content-center">
+                                    <div class="col-6">
+                                        <fieldset class="form-group">
+                                            <select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2">
+                                                @foreach($case_nature_complaints as $complaints)
+                                                    <option value="{{$complaints->id}}">{{$complaints->type}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-6">
+                                        <fieldset class="form-group">
+                                            <select name="complaint_channel" id="complaint_channels" class="form-control select2">
+                                                @foreach($case_nature_channels as $channel1)
+                                                    <option value="{{$channel1->id}}">{{$channel1->channel}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-6">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="service d-none" id="request_service">
+                                <div class="row justify-content-center">
+                                    <div class="col-6">
+                                        <fieldset class="form-group">
+                                            <select name="case_nature_request" id="case_nature_requests" class="form-control select2">
+                                                @foreach($case_nature_service_requests as $service)
+                                                    <option value="{{$service->id}}">{{$service->type}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-6">
+                                        <fieldset class="form-group">
+                                            <select name="request_channel" id="request_channels" class="form-control select2">
+                                                @foreach($case_nature_channels as $channel2)
+                                                    <option value="{{$channel2->id}}">{{$channel2->channel}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-6">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="feedback d-none" id="request_feedback">
+                                <div class="row justify-content-center">
+                                    <div class="col-8">
+                                        <fieldset class="form-group">
+                                            <select name="feedback_channel_request" id="feedback_channel_request" class="form-control select2">
+                                                @foreach($case_nature_channels as $channel1)
+                                                    <option value="{{$channel1->id}}">{{$channel1->channel}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-8">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="feedback_description_request" id="feedback_description_request" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block d-none">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="AddFeedbackModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddFeedbackModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Feedback</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_feedback_form" action="{{route('admin.crm.feedback.add')}}" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+
+                            <div class="row justify-content-center">
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <select name="feedback_channel" id="feedback_channel" class="form-control select2">
+                                            @foreach($case_nature_channels as $channel1)
+                                                <option value="{{$channel1->id}}">{{$channel1->channel}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <textarea class="form-control" name="feedback_description" id="feedback_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                    </fieldset>
+                                </div>
+                            </div>
+
+
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="AddNewFeedback" type="submit" class="btn btn-primary btn-block">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ////////////////////////////////////////////////////////////////////////////-->
 
@@ -163,34 +326,113 @@
                 }
             });
 
+            $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Case Nature",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id === 1){
+                    $('#request_service').addClass('d-none');
+                    $('#request_complaints').removeClass('d-none');
+                    $('#request_feedback').addClass('d-none');
+                    $('#AddNewRequest').removeClass('d-none');
+                }else if(id === 2){
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').removeClass('d-none');
+                    $('#request_feedback').addClass('d-none');
+                    $('#AddNewRequest').removeClass('d-none');
+                }
+                else if(id === 3){
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').addClass('d-none');
+                    $('#request_feedback').removeClass('d-none');
+                    $('#AddNewRequest').removeClass('d-none');
+                }else{
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').addClass('d-none');
+                    $('#AddNewRequest').addClass('d-none');
+                }
+            });
+            $('#case_nature_complaints').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Complaint Type",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            });
+            $('#complaint_channels').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Channel",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            });
+            $('#case_nature_requests').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Request Type",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            });
+            $('#request_channels').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Channel",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            });
+            $('#feedback_channel').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Channel",
+                allowClear:true,
+                dropdownParent:$('#add_feedback_form')
+            });
+            $('#feedback_channel_request').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Channel",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            });
+
             function print(selected_rows) {
                 $.ajax({
-                    url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
-                    method: 'POST',
+                    url: '{!! route('admin.orders.shipment_print_status') !!}',
                     data: {
-                        'ids[]': selected_rows,
-                        'admin': {!! Auth::id() !!},
-                        '_token': '{{ csrf_token() }}'
+                        'shipment_ids': selected_rows
                     }
                 })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
+                .done(function(data) {
+                    if (data.status == 0) {
+                        $.ajax({
+                            url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                            method: 'POST',
+                            data: {
+                                'ids[]': data.valid_ids,
+                                'admin': {!! Auth::id() !!},
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                        .done(function(data) {
+                            var tab = window.open('', '_blank');
 
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
+                            if(!tab) {
+                                swal({
+                                    title: 'Popup Blocker Enabled!',
+                                    text: 'Please add this site to your exception list.',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            }
+                            else {
+                                tab.document.write(data);
+                                tab.document.close();
+                                tab.focus();
+                            }
+                        });
+                    }
+                    else {
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
             }
 
             var selected_rows = [];
@@ -256,6 +498,30 @@
                         }
                     },
                         @endif
+                    {
+                        text: '<i class="la la-plus"></i> Add Request',
+                        className: 'btn btn-primary request_add',
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                $('#AddRequestModal').modal('show');
+                                $('#requested_shipment_ids').val(selected_rows);
+                                var html_rows = '';
+                                var count = 1;
+                                table.rows().nodes().each(function(index) {
+                                    var row = table.row(index);
+                                    if ($(row.node()).hasClass('selected')) {
+                                        var tracking = $(row.node()).find('td.tracking_number').text();
+                                        html_rows += '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking +'</b></span></div>';
+                                        count++;
+                                    }
+                                });
+                                $('#requested_shipments').html(html_rows);
+                            }
+                            else{
+                                $('#AddFeedbackModal').modal('show');
+                            }
+                        }
+                    },
                     {
                         text: '<i class="la la-print"></i> Print',
                         className: 'btn btn-primary print',
@@ -371,7 +637,7 @@
 
                 ],
                 rowCallback: function(row, data, index) {
-                    if (data.booking_type_id != 4 && (data.shipper_status_id === 1 || data.shipper_status_id === 2)) {
+                    if (data.booking_type_id != 4 && data.shipper_status_id != 17) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shipment_id, selected_rows) !== -1) {
@@ -553,7 +819,384 @@
                 }
 
             });
+            var max_char = 245;
+            $('#feedback_description').on('keypress copy paste',function (e) {
+                if ($(this).val().length == max_char) {
+                    e.preventDefault();
+                } else if ($(this).val().length > max_char) {
+                    // Maximum exceeded
+                    this.value = this.value.substring(0, max_char);
+                }
+            });
+            $('#service_description').on('keypress copy paste',function (e) {
+                if ($(this).val().length == max_char) {
+                    e.preventDefault();
+                } else if ($(this).val().length > max_char) {
+                    // Maximum exceeded
+                    this.value = this.value.substring(0, max_char);
+                }
+            });
+            $('#complaint_description').on('keypress copy paste',function (e) {
+                if ($(this).val().length == max_char) {
+                    e.preventDefault();
+                } else if ($(this).val().length > max_char) {
+                    // Maximum exceeded
+                    this.value = this.value.substring(0, max_char);
+                }
+            });
+            $('body').on('change','#add_request_form textarea, #add_feedback_form textarea',function() {
+                $(this).val($(this).val().trim());
+            });
+            $( "#add_request_form" ).bind('submit', function (e) {
+                e.preventDefault();
+                var case_nature_id = parseInt($('#case_nature_select').val());
+                if(case_nature_id === 1){
+                    var nature_flag = true;
+                    var case_nature_complaint_id = $('#case_nature_complaints').val();
+                    var case_nature_channel_id = $('#complaint_channels').val();
+                    var complaint_description = $('#complaint_description').val();
+                    if(!case_nature_complaint_id){
+                        nature_flag = false;
+                        var error = "Please select Complaint type!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(!case_nature_channel_id){
+                        nature_flag = false;
+                        var error = "Please select Channel!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(!complaint_description){
+                        nature_flag = false;
+                        var error = "Please select Description!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(selected_rows.length == 0){
+                        nature_flag = false;
+                        var error = "Please select atleast one tracking number!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(nature_flag){
+                        $('#AddNewRequest').attr('disabled',true);
+                        $.ajax({
+                            url: '{!! route('admin.crm.request.add') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'shipment_ids': selected_rows,
+                                'case_nature_id' : case_nature_id,
+                                'complaint_id' : case_nature_complaint_id,
+                                'channel_id': case_nature_channel_id,
+                                'description' : complaint_description
+                            }
+                        })
+                            .done(function(data) {
+                                if (data.status) {
+                                    if(data.flag){
+                                        var html = '';
 
+                                        $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                            html += tracking_number + '<br/>';
+                                        });
+
+                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+
+                                        swal({
+                                            title: 'Request / Complaint Already Lodged!',
+                                            content: content,
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+                                    }else{
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    }
+                                    // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+
+                                table.button('.shipper_recall').disable();
+                                table.button('.print').disable();
+
+                                selected_rows = [];
+
+                                table.rows().deselect();
+
+                                table.draw('false');
+
+                                $('#AddRequestModal').modal('hide');
+                                $('#AddNewRequest').attr('disabled',false);
+                            });
+                    }
+
+                }else if(case_nature_id == 2){
+                    var nature_flag = true;
+                    var case_nature_complaint_id = $('#case_nature_requests').val();
+                    var case_nature_channel_id = $('#request_channels').val();
+                    var service_description = $('#service_description').val();
+                    if(!case_nature_complaint_id){
+                        nature_flag = false;
+                        var error = "Please select Complaint type!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(!case_nature_channel_id){
+                        nature_flag = false;
+                        var error = "Please select Channel!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(!service_description){
+                        nature_flag = false;
+                        var error = "Please select Description!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(selected_rows.length == 0){
+                        nature_flag = false;
+                        var error = "Please select atleast one tracking number!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(nature_flag){
+                        $('#AddNewRequest').attr('disabled',true);
+                        $.ajax({
+                            url: '{!! route('admin.crm.request.add') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'shipment_ids': selected_rows,
+                                'case_nature_id' : case_nature_id,
+                                'complaint_id' : case_nature_complaint_id,
+                                'channel_id': case_nature_channel_id,
+                                'description' : service_description
+                            }
+                        })
+                            .done(function(data) {
+                                if (data.status) {
+                                    if(data.flag){
+                                        var html = '';
+
+                                        $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                            html += tracking_number + '<br/>';
+                                        });
+
+                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+
+                                        swal({
+                                            title: 'Request / Complaint Already Lodged!',
+                                            content: content,
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+                                    }else{
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    }
+                                    // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                                else {
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+
+                                table.button('.shipper_recall').disable();
+                                table.button('.print').disable();
+
+                                selected_rows = [];
+
+                                table.rows().deselect();
+
+                                table.draw('false');
+
+
+                                $('#AddRequestModal').modal('hide');
+                                $('#AddNewRequest').attr('disabled',false);
+                            });
+                    }
+                }else if(case_nature_id == 3) {
+                    var feedback_flag = true;
+                    var feedback_channel = $('#feedback_channel_request').val();
+                    var feedback_description = $('#feedback_description_request').val();
+                    if (!feedback_description) {
+                        feedback_flag = false;
+                        var error = "Please select Description!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (!feedback_channel) {
+                        feedback_flag = false;
+                        var error = "Please select Channel!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (selected_rows.length == 0) {
+                        nature_flag = false;
+                        var error = "Please select at least one tracking number!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (feedback_flag) {
+                        $('#AddNewRequest').attr('disabled',true);
+                        $.ajax({
+                            url: '{!! route('admin.crm.feedback.add') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'channel_id': $('#feedback_channel_request').val(),
+                                'shipment_ids': selected_rows,
+                                'description': feedback_description
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status) {
+                                    if(data.flag){
+                                        var html = '';
+
+                                        $.each(data.already_existed_shipments, function(index, tracking_number) {
+                                            html += tracking_number + '<br/>';
+                                        });
+
+                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s) !';
+
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+
+                                        swal({
+                                            title: 'Request / Complaint Already Lodged!',
+                                            content: content,
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+                                    }else{
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    }
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                table.button('.shipper_recall').disable();
+                                table.button('.print').disable();
+
+                                selected_rows = [];
+
+                                table.rows().deselect();
+
+                                table.draw('false');
+
+                                $('#AddRequestModal').modal('hide');
+                                $('#AddNewRequest').attr('disabled',false);
+                            });
+                    }
+                }
+            });
+            $('#AddRequestModal').on('hide.bs.modal', function (e) {
+                $('#add_request_form')[0].reset();
+                $('#case_nature_complaints').val('').trigger('change');
+                $('#case_nature_select').val('').trigger('change');
+                $('#case_nature_requests').val('').trigger('change');
+                $('#complaint_channels').val('').trigger('change');
+                $('#request_channels').val('').trigger('change');
+                $('#feedback_channel_request').val('').trigger('change');
+                $('#complaint_description').val('');
+                $('#service_description').val('');
+                $('#feedback_description_request').val('');
+                $('#request_complaints').addClass('d-none');
+                $('#request_service').addClass('d-none');
+                $('#request_feedback').addClass('d-none');
+
+            });
+
+            $('#add_feedback_form').bind('submit', function (e) {
+                e.preventDefault();
+                var feedback_flag = true;
+                var feedback_chennel = $('#feedback_channel').val();
+                var feedback_description = $('#feedback_description').val();
+                if(!feedback_description){
+                    feedback_flag = false;
+                    var error = "Please Enter Description!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(!feedback_chennel){
+                    feedback_flag = false;
+                    var error = "Please select Channel!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(feedback_flag){
+                    $('#AddNewFeedback').attr('disabled',true);
+                    $.ajax({
+                        url: '{!! route('admin.crm.feedback.add') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'channel_id': feedback_chennel,
+                            'description' : feedback_description
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status) {
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            $('#AddFeedbackModal').modal('hide');
+                            $('#AddNewFeedback').attr('disabled',false);
+                        });
+                }
+
+            });
+            $('#AddFeedbackModal').on('hide.bs.modal', function (e) {
+                $('#feedback_channel').val('').trigger('change');
+                $('#feedback_description').val('');
+            });
 
         });
     </script>

@@ -10,6 +10,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 
 use App\Http\Models\SMS;
 
+use App\Mail\Notifications;
+
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
@@ -40,29 +42,39 @@ class ProcessSMS implements ShouldQueue
     {
         if ($this->sms->status < 2) {
             try {
-                $client = new Client(['base_uri' => 'http://sms.its.com.pk/api/', 'http_errors' => FALSE, 'connect_timeout' => 15, 'timeout' => 30]);
+                $client = new Client(['base_uri' => 'https://bsms.telecard.com.pk/SMSPortal/Customer/ProcessSMS.aspx', 'http_errors' => FALSE, 'connect_timeout' => 15, 'timeout' => 30]);
 
                 $response = $client->get('', [
                     'query' => [
-                        'username' => 'trax',
-                        'password' => '123456',
-                        'receiver' => $this->sms->to,
-                        'msgdata' => $this->sms->body
+                        'userid' => 'trax',
+                        'pwd' => 'trax123',
+                        'mobileno' => $this->sms->to,
+                        'msg' => $this->sms->body
                     ]
                 ]);
 
-                $response = simplexml_load_string($response->getBody());
-                $response = (array)$response;
+                $response = $response->getBody()->getContents();
 
-                if ($response['errorno'] == 0) {
+                if (substr($response, 0, 2) == 'OK') {
                     $this->sms->status = 3;
 
                     $this->sms->save();
                 }
-                else {
-                    $this->sms->status = 1;
+                else if ($response == 'Invalid Mobile Number Entered.') {
+                    $this->sms->status = 2;
 
                     $this->sms->save();
+                }
+                else {
+                    $this->sms->status = 2;
+
+                    $this->sms->save();
+
+                    $to = 'yousuf.fazal@trax.pk';
+                    $subject = '[Error] SMS API';
+                    $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $this->sms->id . '<br/>Response Received: ' . json_encode($response);
+
+                    $mail = Mail::to($to)->send(new Notifications($subject, $body));
                 }
             } catch (RequestException $e) {
                 $this->sms->status = 1;

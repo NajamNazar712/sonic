@@ -334,7 +334,8 @@ class Permission
             'reports.multiple_payment_report.list' => 176,
 			'reports.revenue.index' => 177,
             'reports.revenue.list' => 177,
-            'reports.gst.index' => 199,
+			'reports.crm.index' => 200,
+            'reports.crm.list' => 200,            'reports.gst.index' => 199,
             'reports.gst.list' => 199,
 
             'packaging.index' => 76,
@@ -358,6 +359,8 @@ class Permission
             'user_management.roles.add.store' => 86,
             'user_management.roles.update.index' => 87,
             'user_management.roles.update.store' => 87,
+            'user_management.crm.index' => 188,
+            'user_management.crm.list' => 188,
 
             'management.zonal.index' => 131,
             'management.zonal.list' => 131,
@@ -395,6 +398,11 @@ class Permission
             'notifications.details' => 101,
             'notifications.status' => 102,
             'notifications.edit' => 101,
+
+            'crm.permissions' => 188,
+            'crm.list' => 188,
+            'crm.update.index' => 188,
+            'crm.update.list' => 188,
 
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,
@@ -509,7 +517,10 @@ class Permission
             'reports.qsr.index' => 8,
             'reports.qsr.list' => 8,
             'reports.sales.index' => 8,
-            'reports.sales.list' => 8
+            'reports.sales.list' => 8,
+
+            'crm.request.index' => 10,
+
         ]
     ];
 
@@ -524,7 +535,7 @@ class Permission
         if (Auth::guard('admin')->check()) {
             $action = str_replace('admin.', '', $request->route()->getName());
 
-            if (session('role_id') == 1 || !isset($this->actions['admin'][$action]) || in_array($this->actions['admin'][$action], session('permissions'))) {
+            if (session('role_id') == 1 || !isset($this->actions['admin'][$action]) || in_array($this->actions['admin'][$action], session('permissions')) || (substr($action, 0, 4) == 'crm.' && session('role_id') == 6)) {
                 return $next($request);
             }
             else {

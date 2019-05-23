@@ -78,6 +78,21 @@ return [
             'prefix' => '',
         ],
 
+        'reports' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST_REPORTS', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DB_PORT_REPORTS', env('DB_PORT', '3306')),
+            'database' => env('DB_DATABASE_REPORTS', env('DB_DATABASE', 'forge')),
+            'username' => env('DB_USERNAME_REPORTS', env('DB_USERNAME', 'forge')),
+            'password' => env('DB_PASSWORD_REPORTS', env('DB_PASSWORD', '')),
+            'unix_socket' => env('DB_SOCKET_REPORTS', env('DB_SOCKET', '')),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+
     ],
 
     /*

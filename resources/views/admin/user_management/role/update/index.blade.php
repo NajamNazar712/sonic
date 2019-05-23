@@ -62,27 +62,31 @@
 												@if ($loop->first)
 													<div class="tab-pane fade show active" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
 														@foreach($module->permissions as $permission)
-															<fieldset class="d-inline-block m-1">
-																@if (in_array($permission->id, $permissions))
-																	<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}" checked="checked">
-																@else
-																	<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}">
-																@endif
-																<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
-															</fieldset>
+															@if($permission->id != 183 && $permission->id != 184 && $permission->id != 185 && $permission->id != 186 && $permission->id != 187)
+																<fieldset class="d-inline-block m-1">
+																	@if (in_array($permission->id, $permissions))
+																		<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}" checked="checked">
+																	@else
+																		<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}">
+																	@endif
+																	<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
+																</fieldset>
+															@endif
 														@endforeach
 													</div>
 												@else
 													<div class="tab-pane fade" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
 														@foreach($module->permissions as $permission)
-															<fieldset class="d-inline-block m-1">
-																@if (in_array($permission->id, $permissions))
-																	<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}" checked="checked">
-																@else
-																	<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}">
-																@endif
-																<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
-															</fieldset>
+															@if($permission->id != 179 && $permission->id != 180 && $permission->id != 181 && $permission->id != 182 && $permission->id != 183 && $permission->id != 184 && $permission->id != 185 && $permission->id != 186 && $permission->id != 187)
+																<fieldset class="d-inline-block m-1">
+																	@if (in_array($permission->id, $permissions))
+																		<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}" checked="checked">
+																	@else
+																		<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}">
+																	@endif
+																	<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
+																</fieldset>
+															@endif
 														@endforeach
 													</div>
 												@endif

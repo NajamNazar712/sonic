@@ -532,6 +532,30 @@ class ShipperShipmentBookController extends Controller
 //            return 'false';
 //        }
 //    }
+    public function shipment_check(Request $request){
+        $shipment_ids = array();
+        if($request->ids){
+            $i = 0;
+            foreach ($request->ids as $id){
+                $shipment_id = Shipment::find($id);
+                if($shipment_id){
+                    if($shipment_id->shipper_status_id == 1){
+                        $shipment_ids[$i] = $id;
+                        $i++;
+                    }
+                }
+            }
+            if($i > 0) {
+                return ['status' => 1, 'ids' => $shipment_ids];
+            }
+            else{
+                return ['status' => 2];
+            }
+        }
+        else{
+            return ['status' => 2];
+        }
+    }
 
     public static function air_waybill($user_type, $user_id, $ids, $twice = FALSE) {
 
@@ -552,9 +576,6 @@ class ShipperShipmentBookController extends Controller
         else {
             $user_name = 'Unknown';
         }
-
-        $user_name .= ' #' . $user_id;
-
         $print_details = '
             <div class="small mt-1">Printed By: ' . $user_name . '</div>
         ';
