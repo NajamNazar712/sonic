@@ -4108,7 +4108,7 @@ class DeliveryController extends Controller
             })
             ->leftjoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sj.status_reason_id')
             ->select('shipments.tracking_number as tracking_number','shipments.id as shipment_id','shipments.consignee_name as consignee_name','shipments.consignee_address as consignee_address','shipments.consignee_phone_number_1 as phone','shipments.amount as amount', 'shipments.amount as cod_amount', 'dc.name as destination', 'sj.status_reason_id as reason', 'sj.status_reason_id as reason_id', 'ssr.name as reason_name')
-            ->where('shipments.shipper_status_id', 56)->groupBy('shipments.id');
+            ->where('shipments.shipper_status_id', 56)->where('sj.verification', 1)->groupBy('shipments.id');
 
         $datatables = Datatables::of($shipment)
             ->editColumn('tracking_number_link', function ($shipment) {
