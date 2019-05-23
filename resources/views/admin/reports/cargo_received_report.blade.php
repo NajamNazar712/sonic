@@ -231,7 +231,7 @@
         $(document).ready(function () {
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.cargo_received.print') !!}',
+                    url: '{!! route('admin.cargo.in_transit.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
