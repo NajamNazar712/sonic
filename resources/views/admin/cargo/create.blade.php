@@ -572,6 +572,8 @@
 								}
 								else {
 									$(form).find('button[type=submit]').prop('disabled', false);
+
+									UnblockPagePermanently();
 								}
 							});
 						}
