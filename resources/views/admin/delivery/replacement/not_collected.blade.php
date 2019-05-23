@@ -141,8 +141,8 @@
                                 row.push(values.consignee_name);
                                 row.push(values.phone);
                                 row.push(values.consignee_address);
-                                row.push(values.reason);
-                                row.push(values.amount);
+                                row.push(values.reason_name);
+                                row.push(values.cod_amount);
 
                                 body.push(row);
                             });
