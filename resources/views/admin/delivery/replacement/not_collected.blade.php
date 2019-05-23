@@ -373,6 +373,12 @@
                         placeholder: "Select Reason",
                         width:'100%'
                     });
+                    $('.col_amount').inputmask({
+                        'alias': 'integer',
+                        'allowMinus': false,
+                        'allowPlus': false,
+                        'rightAlign': false,
+                    });
                     var api = new $.fn.dataTable.Api( settings );
                     var data = api.rows( {page:'current'} ).data();
                     $.each(data,function (key,value) {
@@ -403,7 +409,6 @@
                         }
                     });
                     $('body').on('change','td.amount input', function () {
-                        table.columns.adjust().draw();
                         var rowid = parseInt($(this).parents('tr').attr('id'));
                         var collection_amount = 0;
                         table.rows().nodes().each(function(index) {
