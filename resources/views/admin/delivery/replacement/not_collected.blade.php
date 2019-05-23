@@ -341,6 +341,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                autoWidth: false,
                 language: {
                     processing: data_table_loader
                 },
@@ -368,9 +369,14 @@
 
                 },
                 drawCallback: function (settings) {
-                    $(".reason_select").select2({
+                    $(".reason_select").prepend('<option value="" selected="selected"></option>').select2({
                         placeholder: "Select Reason",
                         width:'100%'
+                    });
+                    var api = new $.fn.dataTable.Api( settings );
+                    var data = api.rows( {page:'current'} ).data();
+                    $.each(data,function (key,value) {
+                            $('select[name="reason['+value.shipment_id+']"]').val(value.reason_id).trigger('change');
                     });
                 },
                 initComplete: function() {
@@ -397,6 +403,7 @@
                         }
                     });
                     $('body').on('change','td.amount input', function () {
+                        table.columns.adjust().draw();
                         var rowid = parseInt($(this).parents('tr').attr('id'));
                         var collection_amount = 0;
                         table.rows().nodes().each(function(index) {
@@ -426,9 +433,11 @@
                     });
 
                     $('body').on('select2:select','.reason', '.reason_select',function () {
+                        table.columns.adjust().draw();
                         var rowid = parseInt($(this).parents('tr').attr('id'));
                         var selected_reason = $(this).find(':selected');
                         var reason = parseInt(selected_reason.val());
+                        console.log(rowid);
                         if(rowid != null && reason != null){
                             $.ajax({
                                 url:'{!! route('admin.delivery.replacement.not_collected.reason') !!}',
