@@ -720,11 +720,13 @@ class AdminReportsController extends Controller
                 })
                 ->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
-                })->join('shipments_journey', function($query) use ($from,$to) {
-                    $query->where('shipper_status_id', '=', 2)
-                        ->whereBetween('created_at', [$from,$to]);
+                })->whereExists(function ($query) use ($from, $to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$from, $to])
+                    ->where('shipper_status_id', 2);
                 })->count();
             $qa_data[$hub->name]['cargo_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
@@ -737,11 +739,13 @@ class AdminReportsController extends Controller
                 })
                 ->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
-                })->join('shipments_journey', function($query) use ($from,$to) {
-                    $query->where('shipper_status_id', '=', 3)
-                        ->whereBetween('created_at',[$from,$to]);
+                })->whereExists(function ($query) use ($from, $to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$from, $to])
+                    ->where('shipper_status_id', 3);
                 })->count();
             $qa_data[$hub->name]['cargo_transit_pending'] = DB::connection('reports')->table('cargo_consignments')->whereBetween('created_at',[$from,$to])->where('status_id','!=',3)->where('origin_hub_id',$hub->id)->count();
             $qa_data[$hub->name]['cargo_transit_resolved'] = DB::connection('reports')->table('cargo_consignments')->whereBetween('updated_at',[$from,$to])->where('status_id','=',3)->where('origin_hub_id',$hub->id)->count();
@@ -749,7 +753,7 @@ class AdminReportsController extends Controller
             $not_pending_status = array(1, 3, 5, 10, 11,12,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47); //for pending deliveries
             $qa_data[$hub->name]['deliveries_pending'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
                 ->whereDoesntHave('shipment_journey', function($query) use ($from,$to,$not_pending_status) {
@@ -760,51 +764,61 @@ class AdminReportsController extends Controller
 
             $qa_data[$hub->name]['deliveries_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
-                ->join('shipments_journey', function($query) use ($from,$to) {
-                    $query->whereBetween('created_at',[$from,$to])
-                        ->where('shipper_status_id', 5);
+                ->whereExists(function ($query) use ($from, $to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$from, $to])
+                    ->where('shipper_status_id', 5);
                 })
                 ->count();
             $qa_data[$hub->name]['receive_deliveries_pending'] = DB::connection('reports')->table('delivery_notes')->whereBetween('created_at',[$from,$to])->where('status',0)->count();
             $qa_data[$hub->name]['receive_deliveries_resolved'] = DB::connection('reports')->table('delivery_notes')->whereBetween('created_at',[$from,$to])->where('status',1)->count();
             $qa_data[$hub->name]['return_marked_pending'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
-                ->join('shipments_journey',function ($query) use ($from,$to){
-                    $query->whereBetween('created_at',[$from,$to])
-                        ->where('shipper_status_id', 12);
+                ->whereExists(function ($query) use ($from, $to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$from, $to])
+                    ->where('shipper_status_id', 12);
                 })->count();
             $qa_data[$hub->name]['return_marked_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
-                ->join('shipments_journey',function ($query) use ($from,$to){
-                    $query->whereBetween('created_at',[$from,$to])
-                        ->whereIn('shipper_status_id', [13,20]);
+                ->whereExists(function ($query) use ($from, $to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$from, $to])
+                    ->whereIn('shipper_status_id', [13, 20]);
                 })->count();
             $qa_data[$hub->name]['return_confirmed_pending'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
-                ->join('shipments_journey',function ($query) use ($from,$to){
-                    $query->whereBetween('created_at',[$from,$to])
-                        ->where('shipper_status_id', 20);
+                ->whereExists(function ($query) use ($from, $to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$from, $to])
+                    ->where('shipper_status_id', 20);
                 })->count();
             $qa_data[$hub->name]['return_confirmed_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
-                ->join('shipments_journey',function ($query) use ($from,$to){
-                    $query->whereBetween('created_at',[$from,$to])
-                        ->whereIn('shipper_status_id', [21,23]);
+                ->whereExists(function ($query) use ($from, $to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$from, $to])
+                    ->whereIn('shipper_status_id', [21, 23]);
                 })->count();
             $qa_data[$hub->name]['return_cargo_pending'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
@@ -815,9 +829,11 @@ class AdminReportsController extends Controller
                         ->where('cities.id', $hub->id);
                     });
                 })
-                ->join('shipments_journey',function ($query) use ($from,$to){
-                    $query->whereBetween('created_at',[$from,$to])
-                        ->whereIn('shipper_status_id', [21,26,32]);
+                ->whereExists(function ($query) use ($from, $to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$from, $to])
+                    ->whereIn('shipper_status_id', [21, 26, 32]);
                 })->count();
             $qa_data[$hub->name]['return_cargo_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
@@ -828,9 +844,11 @@ class AdminReportsController extends Controller
                         ->where('cities.id', $hub->id);
                     });
                 })
-                ->join('shipments_journey',function ($query) use ($from,$to){
-                    $query->whereBetween('created_at',[$from,$to])
-                        ->whereIn('shipper_status_id', [22,27,33]);
+                ->whereExists(function ($query) use ($from, $to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$from, $to])
+                    ->whereIn('shipper_status_id', [22, 27, 33]);
                 })->count();
             $qa_data[$hub->name]['return_delivery_pending'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
@@ -841,9 +859,11 @@ class AdminReportsController extends Controller
                         ->where('cities.id', $hub->id);
                     });
                 })
-                ->join('shipments_journey',function ($query) use ($from,$to){
-                    $query->whereBetween('created_at',[$from,$to])
-                        ->whereIn('shipper_status_id', [22,24,27,29,33,35]);
+                ->whereExists(function ($query) use ($from, $to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$from, $to])
+                    ->whereIn('shipper_status_id', [22, 24, 27, 29, 33, 35]);
                 })->count();
             $qa_data[$hub->name]['return_delivery_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
@@ -854,9 +874,11 @@ class AdminReportsController extends Controller
                         ->where('cities.id', $hub->id);
                     });
                 })
-                ->join('shipments_journey',function ($query) use ($from,$to){
-                    $query->whereBetween('created_at',[$from,$to])
-                        ->whereIn('shipper_status_id', [22,24,27,29,33,35]);
+                ->whereExists(function ($query) use ($from, $to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$from, $to])
+                    ->whereIn('shipper_status_id', [22, 24, 27, 29, 33, 35]);
                 })->count();
             $qa_data[$hub->name]['return_receive_pending'] = DB::connection('reports')->table('return_notes')->whereBetween('created_at',[$from,$to])->where('hub_id',$hub->id)->where('status',0)->count();
             $qa_data[$hub->name]['return_receive_resolved'] = DB::connection('reports')->table('return_notes')->whereBetween('updated_at',[$from,$to])->where('hub_id',$hub->id)->where('status',1)->count();
@@ -1160,9 +1182,11 @@ class AdminReportsController extends Controller
                             ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                             ->where('cities.id', $hub->id);
                         });
-                    })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                        $query->whereBetween('created_at',[$date_from,$date_to])
-                            ->where('shipper_status_id', 2);
+                    })->whereExists(function ($query) use ($date_from, $date_to) {
+                        $query->from('shipments_journey')
+                        ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                        ->whereBetween('created_at', [$date_from, $date_to])
+                        ->where('shipper_status_id', 2);
                     })->where('shipments.packaging_material_request', 0)->count();
                     $cod_collection = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                         $query->from('user_shipping_infos')
@@ -1172,9 +1196,11 @@ class AdminReportsController extends Controller
                             ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                             ->where('cities.id', $hub->id);
                         });
-                    })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                        $query->whereBetween('created_at',[$date_from,$date_to])
-                            ->where('shipper_status_id', 2);
+                    })->whereExists(function ($query) use ($date_from, $date_to) {
+                        $query->from('shipments_journey')
+                        ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                        ->whereBetween('created_at', [$date_from, $date_to])
+                        ->where('shipper_status_id', 2);
                     })->where('shipments.packaging_material_request', 0)->sum('amount');
                     $actual_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                         $query->from('user_shipping_infos')
@@ -1184,9 +1210,11 @@ class AdminReportsController extends Controller
                             ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                             ->where('cities.id', $hub->id);
                         });
-                    })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                        $query->whereBetween('created_at',[$date_from,$date_to])
-                            ->where('shipper_status_id', 2);
+                    })->whereExists(function ($query) use ($date_from, $date_to) {
+                        $query->from('shipments_journey')
+                        ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                        ->whereBetween('created_at', [$date_from, $date_to])
+                        ->where('shipper_status_id', 2);
                     })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
                     $chargeable_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                         $query->from('user_shipping_infos')
@@ -1196,9 +1224,11 @@ class AdminReportsController extends Controller
                             ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                             ->where('cities.id', $hub->id);
                         });
-                    })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                        $query->whereBetween('created_at',[$date_from,$date_to])
-                            ->where('shipper_status_id', 2);
+                    })->whereExists(function ($query) use ($date_from, $date_to) {
+                        $query->from('shipments_journey')
+                        ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                        ->whereBetween('created_at', [$date_from, $date_to])
+                        ->where('shipper_status_id', 2);
                     })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
                     $revenue_wo_gst = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                         $query->from('user_shipping_infos')
@@ -1208,9 +1238,11 @@ class AdminReportsController extends Controller
                             ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                             ->where('cities.id', $hub->id);
                         });
-                    })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                        $query->whereBetween('created_at',[$date_from,$date_to])
-                            ->where('shipper_status_id', 2);
+                    })->whereExists(function ($query) use ($date_from, $date_to) {
+                        $query->from('shipments_journey')
+                        ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                        ->whereBetween('created_at', [$date_from, $date_to])
+                        ->where('shipper_status_id', 2);
                     })->where('shipments.packaging_material_request', 0)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                 }else{
@@ -1232,9 +1264,11 @@ class AdminReportsController extends Controller
                                 ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                 ->where('cities.id', $hub->id);
                             });
-                        })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                            $query->whereBetween('created_at',[$date_from,$date_to])
-                                ->where('shipper_status_id', 2);
+                        })->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
+                            ->where('shipper_status_id', 2);
                         })->where('shipments.packaging_material_request', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->count();
                         $cod_collection = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                             $query->from('user_shipping_infos')
@@ -1244,9 +1278,11 @@ class AdminReportsController extends Controller
                                 ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                 ->where('cities.id', $hub->id);
                             });
-                        })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                            $query->whereBetween('created_at',[$date_from,$date_to])
-                                ->where('shipper_status_id', 2);
+                        })->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
+                            ->where('shipper_status_id', 2);
                         })->where('shipments.packaging_material_request', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('amount');
                         $actual_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                             $query->from('user_shipping_infos')
@@ -1256,9 +1292,11 @@ class AdminReportsController extends Controller
                                 ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                 ->where('cities.id', $hub->id);
                             });
-                        })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                            $query->whereBetween('created_at',[$date_from,$date_to])
-                                ->where('shipper_status_id', 2);
+                        })->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
+                            ->where('shipper_status_id', 2);
                         })->where('shipments.packaging_material_request', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('actual_weight');
                         $chargeable_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                             $query->from('user_shipping_infos')
@@ -1268,9 +1306,11 @@ class AdminReportsController extends Controller
                                 ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                 ->where('cities.id', $hub->id);
                             });
-                        })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                            $query->whereBetween('created_at',[$date_from,$date_to])
-                                ->where('shipper_status_id', 2);
+                        })->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
+                            ->where('shipper_status_id', 2);
                         })->where('shipments.packaging_material_request', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('chargeable_weight');
                         $revenue_wo_gst = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                             $query->from('user_shipping_infos')
@@ -1280,9 +1320,11 @@ class AdminReportsController extends Controller
                                 ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                 ->where('cities.id', $hub->id);
                             });
-                        })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                            $query->whereBetween('created_at',[$date_from,$date_to])
-                                ->where('shipper_status_id', 2);
+                        })->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
+                            ->where('shipper_status_id', 2);
                         })->where('shipments.packaging_material_request', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                     }else{
                         if($sales_person != null){
@@ -1306,9 +1348,11 @@ class AdminReportsController extends Controller
                                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                     ->where('cities.id', $hub->id);
                                 });
-                            })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at',[$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            })->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->whereIn('user_id', $tagged_shippers)->count();
                             $cod_collection = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
@@ -1318,9 +1362,11 @@ class AdminReportsController extends Controller
                                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                     ->where('cities.id', $hub->id);
                                 });
-                            })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at',[$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            })->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->whereIn('user_id', $tagged_shippers)->sum('amount');
                             $actual_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
@@ -1330,9 +1376,11 @@ class AdminReportsController extends Controller
                                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                     ->where('cities.id', $hub->id);
                                 });
-                            })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at',[$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            })->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->whereIn('user_id', $tagged_shippers)->sum('actual_weight');
                             $chargeable_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
@@ -1342,9 +1390,11 @@ class AdminReportsController extends Controller
                                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                     ->where('cities.id', $hub->id);
                                 });
-                            })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at',[$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            })->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->whereIn('user_id', $tagged_shippers)->sum('chargeable_weight');
                             $revenue_wo_gst = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
@@ -1354,9 +1404,11 @@ class AdminReportsController extends Controller
                                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                     ->where('cities.id', $hub->id);
                                 });
-                            })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at',[$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            })->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->whereIn('user_id', $tagged_shippers)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                         }else{
@@ -1378,9 +1430,11 @@ class AdminReportsController extends Controller
                                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                     ->where('cities.id', $hub->id);
                                 });
-                            })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at',[$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            })->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->count();
                             $cod_collection = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
@@ -1390,9 +1444,11 @@ class AdminReportsController extends Controller
                                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                     ->where('cities.id', $hub->id);
                                 });
-                            })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at',[$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            })->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->sum('amount');
                             $actual_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
@@ -1402,9 +1458,11 @@ class AdminReportsController extends Controller
                                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                     ->where('cities.id', $hub->id);
                                 });
-                            })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at',[$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            })->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
                             $chargeable_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
@@ -1414,9 +1472,11 @@ class AdminReportsController extends Controller
                                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                     ->where('cities.id', $hub->id);
                                 });
-                            })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at',[$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            })->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
                             $revenue_wo_gst = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
@@ -1426,9 +1486,11 @@ class AdminReportsController extends Controller
                                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                                     ->where('cities.id', $hub->id);
                                 });
-                            })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at',[$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            })->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                         }
@@ -1453,9 +1515,11 @@ class AdminReportsController extends Controller
                         ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                         ->where('cities.id', $hub->id);
                     });
-                })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                    $query->whereBetween('created_at',[$date_from,$date_to])
-                        ->where('shipper_status_id', 2);
+                })->whereExists(function ($query) use ($date_from, $date_to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$date_from, $date_to])
+                    ->where('shipper_status_id', 2);
                 })->where('shipments.packaging_material_request', 0)->count();
                 $cod_collection = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
@@ -1465,9 +1529,11 @@ class AdminReportsController extends Controller
                         ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                         ->where('cities.id', $hub->id);
                     });
-                })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                    $query->whereBetween('created_at',[$date_from,$date_to])
-                        ->where('shipper_status_id', 2);
+                })->whereExists(function ($query) use ($date_from, $date_to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$date_from, $date_to])
+                    ->where('shipper_status_id', 2);
                 })->where('shipments.packaging_material_request', 0)->sum('amount');
                 $actual_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
@@ -1477,9 +1543,11 @@ class AdminReportsController extends Controller
                         ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                         ->where('cities.id', $hub->id);
                     });
-                })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                    $query->whereBetween('created_at',[$date_from,$date_to])
-                        ->where('shipper_status_id', 2);
+                })->whereExists(function ($query) use ($date_from, $date_to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$date_from, $date_to])
+                    ->where('shipper_status_id', 2);
                 })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
                 $chargeable_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
@@ -1489,9 +1557,11 @@ class AdminReportsController extends Controller
                         ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                         ->where('cities.id', $hub->id);
                     });
-                })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                    $query->whereBetween('created_at',[$date_from,$date_to])
-                        ->where('shipper_status_id', 2);
+                })->whereExists(function ($query) use ($date_from, $date_to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$date_from, $date_to])
+                    ->where('shipper_status_id', 2);
                 })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
                 $revenue_wo_gst = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
@@ -1501,9 +1571,11 @@ class AdminReportsController extends Controller
                         ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                         ->where('cities.id', $hub->id);
                     });
-                })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                    $query->whereBetween('created_at',[$date_from,$date_to])
-                        ->where('shipper_status_id', 2);
+                })->whereExists(function ($query) use ($date_from, $date_to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$date_from, $date_to])
+                    ->where('shipper_status_id', 2);
                 })->where('shipments.packaging_material_request', 0)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
             }
             if($booked > 0 || $received > 0){
@@ -1589,9 +1661,11 @@ class AdminReportsController extends Controller
                         ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                         ->where('cities.id', $search_city_hub);
                     });
-                })->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                    $query->whereBetween('created_at',[$date_from,$date_to])
-                        ->where('shipper_status_id', 2);
+                })->whereExists(function ($query) use ($date_from, $date_to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$date_from, $date_to])
+                    ->where('shipper_status_id', 2);
                 });
 
                 if($pickup_request_shippers->exists()){
@@ -1609,9 +1683,11 @@ class AdminReportsController extends Controller
 
                 }
             }else{
-                $pickup_request_shippers = DB::connection('reports')->table('shipments')->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                    $query->whereBetween('created_at',[$date_from,$date_to])
-                        ->where('shipper_status_id', 2);
+                $pickup_request_shippers = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date_from, $date_to) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$date_from, $date_to])
+                    ->where('shipper_status_id', 2);
                 });
                 if($pickup_request_shippers->exists()) {
                     $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
@@ -1657,9 +1733,11 @@ class AdminReportsController extends Controller
             }
         }
         else{
-            $pickup_request_shippers = DB::connection('reports')->table('shipments')->join('shipments_journey', function($query) use ($date_from, $date_to) {
-                $query->whereBetween('created_at',[$date_from,$date_to])
-                    ->where('shipper_status_id', 2);
+            $pickup_request_shippers = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date_from, $date_to) {
+                $query->from('shipments_journey')
+                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                ->whereBetween('created_at', [$date_from, $date_to])
+                ->where('shipper_status_id', 2);
             });
 
             if($pickup_request_shippers->exists()){
@@ -1722,9 +1800,11 @@ class AdminReportsController extends Controller
                                     ->where('cities.id', $hubs[0]->id);
                                 });
                             })
-                            ->join('shipments_journey', function ($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at', [$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            ->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->count();
                         $shipper_rev_wo_gst = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)
                             ->whereExists(function($query) use ($hubs) {
@@ -1736,9 +1816,11 @@ class AdminReportsController extends Controller
                                     ->where('cities.id', $hubs[0]->id);
                                 });
                             })
-                            ->join('shipments_journey', function ($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at', [$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            ->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                         $shipper_cod = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)
                             ->whereExists(function($query) use ($hubs) {
@@ -1750,9 +1832,11 @@ class AdminReportsController extends Controller
                                     ->where('cities.id', $hubs[0]->id);
                                 });
                             })
-                            ->join('shipments_journey', function ($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at', [$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            ->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->sum('amount');
                         $shipper_actual_weight = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)
                             ->whereExists(function($query) use ($hubs) {
@@ -1764,9 +1848,11 @@ class AdminReportsController extends Controller
                                     ->where('cities.id', $hubs[0]->id);
                                 });
                             })
-                            ->join('shipments_journey', function ($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at', [$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            ->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
                         $shipper_chargeable_weight = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)
                             ->whereExists(function($query) use ($hubs) {
@@ -1778,32 +1864,44 @@ class AdminReportsController extends Controller
                                     ->where('cities.id', $hubs[0]->id);
                                 });
                             })
-                            ->join('shipments_journey', function ($query) use ($date_from, $date_to) {
-                                $query->whereBetween('created_at', [$date_from,$date_to])
-                                    ->where('shipper_status_id', 2);
+                            ->whereExists(function ($query) use ($date_from, $date_to) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereBetween('created_at', [$date_from, $date_to])
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
 
                     } else {
                         $shipper_booked = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->whereBetween('created_at', [$date_from,$date_to])->where('shipments.packaging_material_request', 0)->count();
-                        $shipper_received = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->join('shipments_journey', function ($query) use ($date_from,$date_to) {
-                            $query->whereBetween('created_at', [$date_from,$date_to])
-                                ->where('shipper_status_id', 2);
+                        $shipper_received = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
+                            ->where('shipper_status_id', 2);
                         })->where('shipments.packaging_material_request', 0)->count();
-                        $shipper_rev_wo_gst = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->join('shipments_journey', function ($query) use ($date_from,$date_to) {
-                            $query->whereBetween('created_at', [$date_from,$date_to])
-                                ->where('shipper_status_id', 2);
+                        $shipper_rev_wo_gst = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
+                            ->where('shipper_status_id', 2);
                         })->where('shipments.packaging_material_request', 0)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
-                        $shipper_cod = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->join('shipments_journey', function ($query) use ($date_from,$date_to) {
-                            $query->whereBetween('created_at', [$date_from,$date_to])
-                                ->where('shipper_status_id', 2);
+                        $shipper_cod = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
+                            ->where('shipper_status_id', 2);
                         })->where('shipments.packaging_material_request', 0)->sum('amount');
-                        $shipper_actual_weight = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->join('shipments_journey', function ($query) use ($date_from,$date_to) {
-                            $query->whereBetween('created_at', [$date_from,$date_to])
-                                ->where('shipper_status_id', 2);
+                        $shipper_actual_weight = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
+                            ->where('shipper_status_id', 2);
                         })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
-                        $shipper_chargeable_weight = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->join('shipments_journey', function ($query) use ($date_from,$date_to) {
-                            $query->whereBetween('created_at', [$date_from,$date_to])
-                                ->where('shipper_status_id', 2);
+                        $shipper_chargeable_weight = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
+                            ->where('shipper_status_id', 2);
                         })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
 
                     }
@@ -1811,26 +1909,36 @@ class AdminReportsController extends Controller
                 }
                 else{
                     $shipper_booked = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->whereBetween('created_at', [$date_from,$date_to])->where('shipments.packaging_material_request', 0)->count();
-                    $shipper_received = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->join('shipments_journey', function ($query) use ($date_from,$date_to) {
-                        $query->whereBetween('created_at', [$date_from,$date_to])
+                    $shipper_received = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
                             ->where('shipper_status_id', 2);
-                    })->where('shipments.packaging_material_request', 0)->count();
-                    $shipper_rev_wo_gst = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->join('shipments_journey', function ($query) use ($date_from,$date_to) {
-                        $query->whereBetween('created_at', [$date_from,$date_to])
+                        })->where('shipments.packaging_material_request', 0)->count();
+                    $shipper_rev_wo_gst = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
                             ->where('shipper_status_id', 2);
-                    })->where('shipments.packaging_material_request', 0)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
-                    $shipper_cod = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->join('shipments_journey', function ($query) use ($date_from,$date_to) {
-                        $query->whereBetween('created_at', [$date_from,$date_to])
+                        })->where('shipments.packaging_material_request', 0)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                    $shipper_cod = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
                             ->where('shipper_status_id', 2);
-                    })->where('shipments.packaging_material_request', 0)->sum('amount');
-                    $shipper_actual_weight = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->join('shipments_journey', function ($query) use ($date_from,$date_to) {
-                        $query->whereBetween('created_at', [$date_from,$date_to])
+                        })->where('shipments.packaging_material_request', 0)->sum('amount');
+                    $shipper_actual_weight = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
                             ->where('shipper_status_id', 2);
-                    })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
-                    $shipper_chargeable_weight = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->join('shipments_journey', function ($query) use ($date_from,$date_to) {
-                        $query->whereBetween('created_at', [$date_from,$date_to])
+                        })->where('shipments.packaging_material_request', 0)->sum('actual_weight');
+                    $shipper_chargeable_weight = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)->whereExists(function ($query) use ($date_from, $date_to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
                             ->where('shipper_status_id', 2);
-                    })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
+                        })->where('shipments.packaging_material_request', 0)->sum('chargeable_weight');
                 }
 
                 $shipper_avg_revenue = ($shipper_received != 0) ? $shipper_rev_wo_gst / $shipper_received : 0;
@@ -2099,10 +2207,11 @@ class AdminReportsController extends Controller
         foreach ($city as $c) {
             $details['hubs'][$c->id] = $c->name;
             if ($shipper_filter != '') {
-                $shippers = DB::connection('reports')->table('users')->where('id', $shipper_filter)->join('cities', function ($query) use ($c) {
-                    $query->where('users.city_id', '=', 'cities.id')
-                    ->where('hub_id', '=', $c->id);
-                });
+                $shippers = DB::connection('reports')->table('users')->where('id', $shipper_filter)->whereExists(function ($query) use ($c) {
+                        $query->from('cities')
+                        ->where('users.city_id', '=', DB::raw('`cities`.`id`'))
+                        ->where('hub_id', '=', $c->id);
+                    });
             } else {
                 if(session('department_id') != 7){
                     $shippers = DB::connection('reports')->table('users')->whereExists(function ($query) use ($c) {
