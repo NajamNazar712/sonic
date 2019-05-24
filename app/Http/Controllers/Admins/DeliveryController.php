@@ -4148,12 +4148,14 @@ class DeliveryController extends Controller
                 'consignee_status_id' => 13,
                 'amount' => $request->shipment_amount[$shipment_id],
             ]);
-            ChangeShipmentAmountLog::create([
-                'shipment_id' => $shipment_id,
-                'old_amount' => $shipment->amount,
-                'new_amount' => $request->shipment_amount[$shipment_id],
-                'admin_id' => Auth::id()
-            ]);
+            if($shipment->amount != $request->shipment_amount[$shipment_id]){
+                ChangeShipmentAmountLog::create([
+                    'shipment_id' => $shipment_id,
+                    'old_amount' => $shipment->amount,
+                    'new_amount' => $request->shipment_amount[$shipment_id],
+                    'admin_id' => Auth::id()
+                ]);
+            }
             ShipmentsJourneyController::add($shipment_id, 13, 13, $request->shipment_reason[$shipment_id], NULL, NULL, Auth::id());
         }
             return ['status' => 1, 'success' => 'Shipment has been marked as Re-Attempt'];
@@ -4174,12 +4176,15 @@ class DeliveryController extends Controller
                 'consignee_status_id' => 13,
                 'amount' => $request->shipment_amount[$shipment_id],
             ]);
-            ChangeShipmentAmountLog::create([
-                'shipment_id' => $shipment_id,
-                'old_amount' => $shipment->amount,
-                'new_amount' => $request->shipment_amount[$shipment_id],
-                'admin_id' => Auth::id()
-            ]);
+            if($shipment->amount != $request->shipment_amount[$shipment_id]){
+                ChangeShipmentAmountLog::create([
+                    'shipment_id' => $shipment_id,
+                    'old_amount' => $shipment->amount,
+                    'new_amount' => $request->shipment_amount[$shipment_id],
+                    'admin_id' => Auth::id()
+                ]);
+            }
+
             ShipmentsJourneyController::add($shipment_id, 13, 13, $request->shipment_reason[$shipment_id], NULL, NULL, Auth::id());
             ReplacementToRegularLog::create([
                 'shipment_id' => $shipment->id,
