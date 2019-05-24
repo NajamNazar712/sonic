@@ -1825,24 +1825,24 @@ class AdminReportsController extends Controller
             if ($shipper_filter != '') {
                 $shippers = DB::connection('reports')->table('users')->where('id', $shipper_filter)->join('cities', function ($join) use ($city_id) {
                     $join->on('users.city_id', '=', 'cities.id')
-                    ->where('cities.hub_id', '=', $c->id);
+                    ->where('cities.hub_id', '=', $city_id);
                 });
             } else {
                 if(session('department_id') != 7){
                     $shippers = DB::connection('reports')->table('users')->join('cities', function ($join) use ($city_id) {
                     $join->on('users.city_id', '=', 'cities.id')
-                    ->where('cities.hub_id', '=', $c->id);
+                    ->where('cities.hub_id', '=', $city_id);
                 });
                 }else{
                     if(session('role_id') != 4){
                         $shippers = DB::connection('reports')->table('users')->join('cities', function ($join) use ($city_id) {
                             $join->on('users.city_id', '=', 'cities.id')
-                            ->where('cities.hub_id', '=', $c->id);
+                            ->where('cities.hub_id', '=', $city_id);
                         })->whereIn('users.id', session('tagged_shippers'));
                     }else{
                         $shippers = DB::connection('reports')->table('users')->join('cities', function ($join) use ($city_id) {
                             $join->on('users.city_id', '=', 'cities.id')
-                            ->where('cities.hub_id', '=', $c->id);
+                            ->where('cities.hub_id', '=', $city_id);
                         });
                     }
                 }
