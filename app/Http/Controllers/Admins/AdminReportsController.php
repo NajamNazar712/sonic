@@ -2962,8 +2962,10 @@ class AdminReportsController extends Controller
             foreach ($tagged_shippers as $shipper){
                 if($hub != null){
 
-                    $user = DB::connection('reports')->table('users')->join('cities',function($query) use($hub){
-                        $query->where('hub_id',$hub);
+                    $user = DB::connection('reports')->table('users')->whereExists(function ($query) use ($hub) {
+                        $query->from('cities')
+                        ->where('users.city_id', '=', DB::raw('`cities`.`id`'))
+                        ->where('hub_id', '=', $hub);
                     })->where('id', $shipper->user_id)->whereIn('status',$account_status)->first();
                 }else{
 
@@ -2975,9 +2977,11 @@ class AdminReportsController extends Controller
 //                    $sales_persons_data[$person->id]['account'][$user->id] = str_pad($user->id, 6, '0', STR_PAD_LEFT);
                     foreach ($dates as $date){
                         if($hub != null){
-                            $sum = DB::connection('reports')->table('shipments')->join('shipments_journey', function($query) use ($date) {
-                                $query->whereDate('created_at',$date)
-                                    ->where('shipper_status_id', 2);
+                            $sum = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereDate('created_at', $date)
+                                ->where('shipper_status_id', 2);
                             })->whereExists(function($query) use ($hub) {
                                 $query->from('user_shipping_infos')
                                 ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -2988,9 +2992,11 @@ class AdminReportsController extends Controller
                                 });
                             })->where('shipments.user_id', $user->id)->count();
                         }else{
-                            $sum = DB::connection('reports')->table('shipments')->join('shipments_journey', function($query) use ($date) {
-                                $query->whereDate('created_at',$date)
-                                    ->where('shipper_status_id', 2);
+                            $sum = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date) {
+                                $query->from('shipments_journey')
+                                ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->whereDate('created_at', $date)
+                                ->where('shipper_status_id', 2);
                             })->where('shipments.user_id', $user->id)->count();
                         }
 
