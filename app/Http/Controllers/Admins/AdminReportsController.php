@@ -708,20 +708,37 @@ class AdminReportsController extends Controller
             $stations = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         }
         foreach ($stations as $hub) {
-            $qa_data[$hub->name]['cargo_pending'] = DB::connection('reports')->table('shipments')->whereHas('pickup_address.city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })
-                ->whereHas('consignee_city', function($query) use ($hub) {
-                    $query->where('hub_id', '!=', $hub->id);
+            $qa_data[$hub->name]['cargo_pending'] = DB::connection('reports')->table('shipments')
+                ->whereExists(function($query) use ($hub) {
+                    $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function($sub_query) use ($hub) {
+                        $sub_query->from('cities')
+                        ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                        ->where('cities.id', $hub->id);
+                    });
+                })
+                ->whereExists(function ($query) use ($hub) {
+                    $query->from('cities')
+                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('hub_id', '=', $hub->id);
                 })->join('shipments_journey', function($query) use ($from,$to) {
                     $query->where('shipper_status_id', '=', 2)
                         ->whereBetween('created_at', [$from,$to]);
                 })->count();
-            $qa_data[$hub->name]['cargo_resolved'] = DB::connection('reports')->table('shipments')->whereHas('pickup_address.city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })
-                ->whereHas('consignee_city', function($query) use ($hub) {
-                    $query->where('hub_id', '!=', $hub->id);
+            $qa_data[$hub->name]['cargo_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
+                    $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function($sub_query) use ($hub) {
+                        $sub_query->from('cities')
+                        ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                        ->where('cities.id', $hub->id);
+                    });
+                })
+                ->whereExists(function ($query) use ($hub) {
+                    $query->from('cities')
+                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('hub_id', '=', $hub->id);
                 })->join('shipments_journey', function($query) use ($from,$to) {
                     $query->where('shipper_status_id', '=', 3)
                         ->whereBetween('created_at',[$from,$to]);
@@ -730,18 +747,22 @@ class AdminReportsController extends Controller
             $qa_data[$hub->name]['cargo_transit_resolved'] = DB::connection('reports')->table('cargo_consignments')->whereBetween('updated_at',[$from,$to])->where('status_id','=',3)->where('origin_hub_id',$hub->id)->count();
             $pending_status = array(2, 4, 6, 7, 8, 9, 13, 15); //for pending deliveries
             $not_pending_status = array(1, 3, 5, 10, 11,12,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47); //for pending deliveries
-            $qa_data[$hub->name]['deliveries_pending'] = DB::connection('reports')->table('shipments')->whereHas('consignee_city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })
+            $qa_data[$hub->name]['deliveries_pending'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
+                    $query->from('cities')
+                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('hub_id', '=', $hub->id);
+                })
                 ->whereDoesntHave('shipment_journey', function($query) use ($from,$to,$not_pending_status) {
                     $query->whereBetween('created_at', [$from,$to])
                         ->whereIn('shipper_status_id', $not_pending_status);
                 })
                 ->count();
 
-            $qa_data[$hub->name]['deliveries_resolved'] = DB::connection('reports')->table('shipments')->whereHas('consignee_city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })
+            $qa_data[$hub->name]['deliveries_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
+                    $query->from('cities')
+                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('hub_id', '=', $hub->id);
+                })
                 ->join('shipments_journey', function($query) use ($from,$to) {
                     $query->whereBetween('created_at',[$from,$to])
                         ->where('shipper_status_id', 5);
@@ -749,58 +770,90 @@ class AdminReportsController extends Controller
                 ->count();
             $qa_data[$hub->name]['receive_deliveries_pending'] = DB::connection('reports')->table('delivery_notes')->whereBetween('created_at',[$from,$to])->where('status',0)->count();
             $qa_data[$hub->name]['receive_deliveries_resolved'] = DB::connection('reports')->table('delivery_notes')->whereBetween('created_at',[$from,$to])->where('status',1)->count();
-            $qa_data[$hub->name]['return_marked_pending'] = DB::connection('reports')->table('shipments')->whereHas('consignee_city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })
+            $qa_data[$hub->name]['return_marked_pending'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
+                    $query->from('cities')
+                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('hub_id', '=', $hub->id);
+                })
                 ->join('shipments_journey',function ($query) use ($from,$to){
                     $query->whereBetween('created_at',[$from,$to])
                         ->where('shipper_status_id', 12);
                 })->count();
-            $qa_data[$hub->name]['return_marked_resolved'] = DB::connection('reports')->table('shipments')->whereHas('consignee_city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })
+            $qa_data[$hub->name]['return_marked_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
+                    $query->from('cities')
+                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('hub_id', '=', $hub->id);
+                })
                 ->join('shipments_journey',function ($query) use ($from,$to){
                     $query->whereBetween('created_at',[$from,$to])
                         ->whereIn('shipper_status_id', [13,20]);
                 })->count();
-            $qa_data[$hub->name]['return_confirmed_pending'] = DB::connection('reports')->table('shipments')->whereHas('consignee_city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })
+            $qa_data[$hub->name]['return_confirmed_pending'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
+                    $query->from('cities')
+                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('hub_id', '=', $hub->id);
+                })
                 ->join('shipments_journey',function ($query) use ($from,$to){
                     $query->whereBetween('created_at',[$from,$to])
                         ->where('shipper_status_id', 20);
                 })->count();
-            $qa_data[$hub->name]['return_confirmed_resolved'] = DB::connection('reports')->table('shipments')->whereHas('consignee_city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })
+            $qa_data[$hub->name]['return_confirmed_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
+                    $query->from('cities')
+                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('hub_id', '=', $hub->id);
+                })
                 ->join('shipments_journey',function ($query) use ($from,$to){
                     $query->whereBetween('created_at',[$from,$to])
                         ->whereIn('shipper_status_id', [21,23]);
                 })->count();
-            $qa_data[$hub->name]['return_cargo_pending'] = DB::connection('reports')->table('shipments')->whereHas('pickup_address.city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })
+            $qa_data[$hub->name]['return_cargo_pending'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
+                    $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function($sub_query) use ($hub) {
+                        $sub_query->from('cities')
+                        ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                        ->where('cities.id', $hub->id);
+                    });
+                })
                 ->join('shipments_journey',function ($query) use ($from,$to){
                     $query->whereBetween('created_at',[$from,$to])
                         ->whereIn('shipper_status_id', [21,26,32]);
                 })->count();
-            $qa_data[$hub->name]['return_cargo_resolved'] = DB::connection('reports')->table('shipments')->whereHas('pickup_address.city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })
+            $qa_data[$hub->name]['return_cargo_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
+                    $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function($sub_query) use ($hub) {
+                        $sub_query->from('cities')
+                        ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                        ->where('cities.id', $hub->id);
+                    });
+                })
                 ->join('shipments_journey',function ($query) use ($from,$to){
                     $query->whereBetween('created_at',[$from,$to])
                         ->whereIn('shipper_status_id', [22,27,33]);
                 })->count();
-            $qa_data[$hub->name]['return_delivery_pending'] = DB::connection('reports')->table('shipments')->whereHas('pickup_address.city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })
+            $qa_data[$hub->name]['return_delivery_pending'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
+                    $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function($sub_query) use ($hub) {
+                        $sub_query->from('cities')
+                        ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                        ->where('cities.id', $hub->id);
+                    });
+                })
                 ->join('shipments_journey',function ($query) use ($from,$to){
                     $query->whereBetween('created_at',[$from,$to])
                         ->whereIn('shipper_status_id', [22,24,27,29,33,35]);
                 })->count();
-            $qa_data[$hub->name]['return_delivery_resolved'] = DB::connection('reports')->table('shipments')->whereHas('pickup_address.city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })
+            $qa_data[$hub->name]['return_delivery_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
+                    $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function($sub_query) use ($hub) {
+                        $sub_query->from('cities')
+                        ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                        ->where('cities.id', $hub->id);
+                    });
+                })
                 ->join('shipments_journey',function ($query) use ($from,$to){
                     $query->whereBetween('created_at',[$from,$to])
                         ->whereIn('shipper_status_id', [22,24,27,29,33,35]);
