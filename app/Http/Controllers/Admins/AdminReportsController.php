@@ -1861,17 +1861,17 @@ class AdminReportsController extends Controller
                                     ->whereYear('shipments_journey.created_at', $thisYear)
                                     ->where('shipments_journey.shipper_status_id', 2);
                             })->count();
-                        $details['weight'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('shipments.user_id', $s->id)->join('shipment_journey', function($join) use ($thisMonth,$thisYear) {
+                        $details['weight'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('shipments.user_id', $s->id)->join('shipments_journey', function($join) use ($thisMonth,$thisYear) {
                             $join->whereMonth('shipments_journey.created_at', $thisMonth)
                                 ->whereYear('shipments_journey.created_at', $thisYear)
                                 ->where('shipments_journey.shipper_status_id', 2);
                         })->sum('actual_weight');
-                        $details['amount'][$s->id][$month] = number_format(DB::connection('reports')->table('shipments')->where('shipments.user_id', $s->id)->join('shipment_journey', function($join) use ($thisMonth,$thisYear) {
+                        $details['amount'][$s->id][$month] = number_format(DB::connection('reports')->table('shipments')->where('shipments.user_id', $s->id)->join('shipments_journey', function($join) use ($thisMonth,$thisYear) {
                             $join->whereMonth('shipments_journey.created_at', $thisMonth)
                                 ->whereYear('shipments_journey.created_at', $thisYear)
                                 ->where('shipments_journey.shipper_status_id', 2);
                         })->sum('amount'));
-                        $details['revenue'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('shipments.user_id', $s->id)->join('shipment_journey', function($join) use ($thisMonth,$thisYear) {
+                        $details['revenue'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('shipments.user_id', $s->id)->join('shipments_journey', function($join) use ($thisMonth,$thisYear) {
                             $join->whereMonth('shipments_journey.created_at', $thisMonth)
                                 ->whereYear('shipments_journey.created_at', $thisYear)
                                 ->where('shipments_journey.shipper_status_id', 2);
