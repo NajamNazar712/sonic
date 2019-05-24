@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use SebastianBergmann\Environment\Console;
 use Yajra\Datatables\Datatables;
 
 class DeliveryController extends Controller
@@ -4211,39 +4212,41 @@ class DeliveryController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-
+            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'DESC')->first();
             if ($shipment->shipper_status_id == 30) {
+                if ($shipment_journey->verification == 1){
+                    $details = array();
+                    $shipper = $shipment->user;
+                    $details['id'] = $shipment->id;
 
-                        $details = array();
+                    $details['tracking_number'] = $shipment->tracking_number;
+                    $details['status'] = $shipment->status_shipper->name;
 
-                        $shipper = $shipment->user;
+                    $details['service_type'] = $shipment->booking_type->booking_type;
+                    $details['shipping_mode'] = $shipment->shipping_mode->mode;
+                    $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
 
-                        $details['id'] = $shipment->id;
+                    $details['payment_mode'] = $shipment->payment_mode->mode;
+                    $details['amount'] = number_format($shipment->amount);
 
-                        $details['tracking_number'] = $shipment->tracking_number;
-                        $details['status'] = $shipment->status_shipper->name;
+                    $details['shipper']['name'] = $shipper->name;
+                    $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
+                    $details['shipper']['phone_number_1'] = $shipper->phone;
+                    $details['shipper']['phone_number_2'] = $shipper->phone2;
+                    $details['shipper']['origin'] = $shipper->city->name;
+                    $details['shipper']['address'] = $shipper->address;
 
-                        $details['service_type'] = $shipment->booking_type->booking_type;
-                        $details['shipping_mode'] = $shipment->shipping_mode->mode;
-                        $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                    $details['consignee']['name'] = $shipment->consignee_name;
+                    $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                    $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                    $details['consignee']['destination'] = $shipment->consignee_city->name;
+                    $details['consignee']['address'] = $shipment->consignee_address;
 
-                        $details['payment_mode'] = $shipment->payment_mode->mode;
-                        $details['amount'] = number_format($shipment->amount);
-
-                        $details['shipper']['name'] = $shipper->name;
-                        $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
-                        $details['shipper']['phone_number_1'] = $shipper->phone;
-                        $details['shipper']['phone_number_2'] = $shipper->phone2;
-                        $details['shipper']['origin'] = $shipper->city->name;
-                        $details['shipper']['address'] = $shipper->address;
-
-                        $details['consignee']['name'] = $shipment->consignee_name;
-                        $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
-                        $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
-                        $details['consignee']['destination'] = $shipment->consignee_city->name;
-                        $details['consignee']['address'] = $shipment->consignee_address;
-
-                        return ['status' => 0, 'success' => 'Shipment\'s service type can be changed', 'details' => $details];
+                    return ['status' => 0, 'success' => 'Shipment\'s service type can be changed', 'details' => $details];
+                }
+                else {
+                return ['status' => 1, 'error' => 'Shipment Status is Not Verified yet'];
+                }
             }
             else {
                 return ['status' => 1, 'error' => 'Shipment Status is Not Replacement - Collected'];
