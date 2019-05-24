@@ -124,21 +124,21 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style type="text/css">
-        .custom-col-width{
-            min-width: 100px;
-        }
-        th.expense_amount, th.reference_no{
-            width: 80px;
-        }
-        .custom-hub-col-width{
-            min-width: 80px;
-        }
-        .date-col-width{
-            min-width: 190px;
-        }
-        .date-col-width{
-            min-width: 200px;
-        }
+        /*.custom-col-width{*/
+            /*min-width: 100px;*/
+        /*}*/
+        /*th.expense_amount, th.reference_no{*/
+            /*width: 80px;*/
+        /*}*/
+        /*.custom-hub-col-width{*/
+            /*min-width: 80px;*/
+        /*}*/
+        /*.date-col-width{*/
+            /*min-width: 190px;*/
+        /*}*/
+        /*.date-col-width{*/
+            /*min-width: 200px;*/
+        /*}*/
         .total_amount_span{
             font-size: 24px;
             color: #64a0d2;
@@ -370,10 +370,10 @@
                 var hub_select = '<select class="form-control hub_select select2" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
                 var date_input = '<div class="form-group input-group mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date (From) is required"></div>';
 
-                var expense_detail_input = '<input class="form-control" name="expense['+rows_count+']" placeholder="Enter Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required">';
-                var amount_input = '<input class="form-control amount" name="amount['+rows_count+']" placeholder="Enter Amount">';
-                var reference_input = '<input class="form-control reference_row" name="reference['+rows_count+']" placeholder="Enter Reference No" data-rule-required="true" data-msg-required="Amount is required">';
-                var remarks_input = '<input class="form-control" name="remarks['+rows_count+']" placeholder="Enter Remarks">';
+                var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" name="expense['+rows_count+']" placeholder="Enter Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
+                var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Enter Amount">';
+                var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Enter Reference No" data-rule-required="true" data-msg-required="Amount is required">';
+                var remarks_input = '<input class="form-control form-control-sm" name="remarks['+rows_count+']" placeholder="Enter Remarks">';
                 var heads = $.map({!! $heads !!}, function (obj) {
                     obj.id = obj.id;
                     obj.text = obj.name;
@@ -390,16 +390,19 @@
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
                     placeholder:'Select Account Head',
-                    allowClear:true
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
                 $('select[name="title['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     placeholder:'Select Account Title',
-                    allowClear:true
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
                 $('select[name="hub['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data: hubs_select,
                     placeholder:'Select Hub',
-                    allowClear:true
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
                 $('.reference_row').inputmask({
                     'alias': 'integer',
