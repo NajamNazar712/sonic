@@ -544,8 +544,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('not_collected')->name('not_collected.')->group(function () {
                 Route::get('', 'Admins\DeliveryController@replacement_not_collected_index')->name('index');
                 Route::get('list', 'Admins\DeliveryController@replacement_not_collected_list')->name('list');
-                Route::post('reason', 'Admins\DeliveryController@replacement_not_collected_reason_update')->name('reason');
-                Route::post('amount', 'Admins\DeliveryController@replacement_not_collected_amount_update')->name('amount');
                 Route::post('re_attempt', 'Admins\DeliveryController@replacement_not_collected_re_attempt')->name('re_attempt');
                 Route::post('regular_re_attempt', 'Admins\DeliveryController@replacement_not_collected_regular_re_attempt')->name('regular_re_attempt');
             });

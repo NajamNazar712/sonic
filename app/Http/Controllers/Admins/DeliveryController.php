@@ -4109,7 +4109,7 @@ class DeliveryController extends Controller
             ->leftjoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sj.status_reason_id')
             ->select('shipments.tracking_number as tracking_number','shipments.id as shipment_id','shipments.consignee_name as consignee_name','shipments.consignee_address as consignee_address','shipments.consignee_phone_number_1 as phone','shipments.amount as amount', 'shipments.amount as cod_amount', 'dc.name as destination', 'sj.status_reason_id as reason', 'sj.status_reason_id as reason_id', 'ssr.name as reason_name')
             ->where('shipments.shipper_status_id', 56)
-            ->where('shipments.shipper_status_id', DB::raw('`sj.shipper_status_id`'))
+            ->where('shipments.shipper_status_id', DB::raw('sj.shipper_status_id'))
             ->groupBy('shipments.id');
 
         $datatables = Datatables::of($shipment)
@@ -4140,42 +4140,21 @@ class DeliveryController extends Controller
 
         return $datatables->make(true);
     }
-    public function replacement_not_collected_amount_update(Request $request){
-        $shipment = Shipment::where('id', $request->shipment_id);
-        if($shipment->exists()){
-            $shipment = $shipment->first();
-            ChangeShipmentAmountLog::create([
-                'shipment_id' => $request->shipment_id,
-                'old_amount' => $shipment->amount,
-                'new_amount' => $request->amount,
-                'admin_id' => Auth::id()
-            ]);
-            Shipment::where('id', $request->shipment_id)->update([
-                'amount' => $request->amount
-            ]);
-            return ['status' => 1, 'success' => 'Collection Amount has been updated against Tracking Number: ' . $shipment->tracking_number. ''];
-        }
-        else{
-            return ['status' => 0, 'error' => 'Collection Amount can\'t be update'];
-        }
-    }
-    public function replacement_not_collected_reason_update(Request $request){
-        $shipment = Shipment::where('id', $request->shipment_id)->first();
-        if($shipment->exists()){
-            ShipmentsJourneyController::add($request->shipment_id, 56, 56, $request->reason, NULL, NULL, Auth::id());
-            return ['status' => 1, 'success' => 'Reason has been updated against Tracking Number: ' . $shipment->tracking_number. ''];
-        }
-        else{
-            return ['status' => 0, 'error' => 'Reason can\'t be update against Tracking Number: ' . $shipment->tracking_number. ''];
-        }
-    }
     public function replacement_not_collected_re_attempt(Request $request){
         foreach ($request->shipment_ids as $shipment_id){
+            $shipment = Shipment::where('id', $shipment_id)->first();
             Shipment::where('id', $shipment_id)->update([
                 'shipper_status_id' => 13,
-                'consignee_status_id' => 13
+                'consignee_status_id' => 13,
+                'amount' => $request->shipment_amount[$shipment_id],
             ]);
-            ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
+            ChangeShipmentAmountLog::create([
+                'shipment_id' => $shipment_id,
+                'old_amount' => $shipment->amount,
+                'new_amount' => $request->shipment_amount[$shipment_id],
+                'admin_id' => Auth::id()
+            ]);
+            ShipmentsJourneyController::add($shipment_id, 13, 13, $request->shipment_reason[$shipment_id], NULL, NULL, Auth::id());
         }
             return ['status' => 1, 'success' => 'Shipment has been marked as Re-Attempt'];
     }
@@ -4192,9 +4171,16 @@ class DeliveryController extends Controller
             Shipment::where('id', $shipment_id)->update([
                 'booking_type_id' => 1,
                 'shipper_status_id' => 13,
-                'consignee_status_id' => 13
+                'consignee_status_id' => 13,
+                'amount' => $request->shipment_amount[$shipment_id],
             ]);
-            ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
+            ChangeShipmentAmountLog::create([
+                'shipment_id' => $shipment_id,
+                'old_amount' => $shipment->amount,
+                'new_amount' => $request->shipment_amount[$shipment_id],
+                'admin_id' => Auth::id()
+            ]);
+            ShipmentsJourneyController::add($shipment_id, 13, 13, $request->shipment_reason[$shipment_id], NULL, NULL, Auth::id());
             ReplacementToRegularLog::create([
                 'shipment_id' => $shipment->id,
                 'updated_by' => Auth::id(),

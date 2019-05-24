@@ -175,8 +175,6 @@ class Permission
             'delivery.fake_status.list' => 203,
             'delivery.replacement.not_collected.index' => 206,
             'delivery.replacement.not_collected.list' => 206,
-            'delivery.replacement.not_collected.reason' => 206,
-            'delivery.replacement.not_collected.amount' => 206,
             'delivery.replacement.not_collected.re_attempt' => 206,
             'delivery.replacement.not_collected.regular_re_attempt' => 206,
             'delivery.replacement.collected.index' => 207,
