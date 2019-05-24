@@ -154,6 +154,8 @@
                 }
             } );
             var selected_rows = [];
+            var shipment_amount= {};
+            var shipment_reason= {};
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -185,12 +187,25 @@
                                 dangerMode: true
                             }).then(function(confirm) {
                                 if (confirm) {
+                                    table.rows().nodes().each(function(index) {
+                                        var row = table.row(index);
+                                        if ($(row.node()).hasClass('selected')) {
+                                            var id = parseInt(row.id());
+                                            var amount = $(row.node()).find('td.amount input').val();
+                                            var selected_reason = $(row.node('.reason')).find(':selected');
+                                            var reason = parseInt(selected_reason.val());
+                                            shipment_amount[id] = amount;
+                                            shipment_reason[id] = reason;
+                                        }
+                                    });
                                     $.ajax({
                                         url: '{!! route('admin.delivery.replacement.not_collected.re_attempt') !!}',
                                         method: 'POST',
                                         data: {
                                             '_token': '{{ csrf_token() }}',
-                                            'shipment_ids': selected_rows
+                                            'shipment_ids': selected_rows,
+                                            'shipment_amount': shipment_amount,
+                                            'shipment_reason': shipment_reason
                                         }
                                     })
                                         .done(function(data) {
@@ -205,6 +220,8 @@
                                             table.button('.regular_re_attempt').disable();
 
                                             selected_rows = [];
+                                            amounts = [];
+                                            reasons = [];
 
                                             table.rows().deselect();
 
@@ -240,12 +257,25 @@
                                 dangerMode: true
                             }).then(function(confirm) {
                                 if (confirm) {
+                                    table.rows().nodes().each(function(index) {
+                                    var row = table.row(index);
+                                    if ($(row.node()).hasClass('selected')) {
+                                        var id = parseInt(row.id());
+                                        var amount = $(row.node()).find('td.amount input').val();
+                                        var selected_reason = $(row.node('.reason')).find(':selected');
+                                        var reason = parseInt(selected_reason.val());
+                                        shipment_amount[id] = amount;
+                                        shipment_reason[id] = reason;
+                                    }
+                                });
                                     $.ajax({
                                         url: '{!! route('admin.delivery.replacement.not_collected.regular_re_attempt') !!}',
                                         method: 'POST',
                                         data: {
                                             '_token': '{{ csrf_token() }}',
-                                            'shipment_ids': selected_rows
+                                            'shipment_ids': selected_rows,
+                                            'shipment_amount': shipment_amount,
+                                            'shipment_reason': shipment_reason
                                         }
                                     })
                                         .done(function(data) {
@@ -260,6 +290,8 @@
                                             table.button('.regular_re_attempt').disable();
 
                                             selected_rows = [];
+                                            amounts = [];
+                                            reasons = [];
 
                                             table.rows().deselect();
 
@@ -408,60 +440,6 @@
                             }
                         }
                     });
-                    $('body').on('change','td.amount input', function () {
-                        var rowid = parseInt($(this).parents('tr').attr('id'));
-                        var collection_amount = 0;
-                        table.rows().nodes().each(function(index) {
-                            var row = table.row(index);
-                            if($(row.node()).find('td.amount input').val() != ''){
-                                collection_amount += parseInt($(row.node()).find('td.amount input').val());
-                            }
-                        });
-                        if(rowid != null && collection_amount != null){
-                            $.ajax({
-                                url:'{!! route('admin.delivery.replacement.not_collected.amount') !!}',
-                                type:'POST',
-                                data: {
-                                    'shipment_id':rowid,
-                                    'amount':collection_amount,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            }).done(function (data) {
-                                if (data.status === 1) {
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                }
-                                else{
-                                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            });
-                        }
-                    });
-
-                    $('body').on('select2:select','.reason', '.reason_select',function () {
-                        table.columns.adjust().draw();
-                        var rowid = parseInt($(this).parents('tr').attr('id'));
-                        var selected_reason = $(this).find(':selected');
-                        var reason = parseInt(selected_reason.val());
-                        console.log(rowid);
-                        if(rowid != null && reason != null){
-                            $.ajax({
-                                url:'{!! route('admin.delivery.replacement.not_collected.reason') !!}',
-                                type:'POST',
-                                data: {
-                                    'shipment_id':rowid,
-                                    'reason':reason,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            }).done(function (data) {
-                                if (data.status === 1) {
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                }
-                                else{
-                                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            });
-                        }
-                    });
                     $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 
                         var id = parseInt($(this).parent('tr').attr('id'));
@@ -484,18 +462,6 @@
                         }
 
                     });
-                    // table.rows().nodes().each(function(index) {
-                    //     var row = table.row(index);
-                    //     var id = parseInt(row.id());
-                    //     // if($(row.node()).attr('status') == 0 || $(row.node()).attr('status') == 2){
-                    //         $(row.node()).find('td.amount textarea').attr('disabled',false);
-                    //         // $(row.node()).find('td.expense_amount input').attr('disabled',false);
-                    //         // $(row.node()).find('td.reference_no input').attr('disabled',false);
-                    //         // $(row.node()).find('td.remarks textarea').attr('disabled',false);
-                    //         selected_rows.push(id);
-                    //     // }
-                    //
-                    // });
                     this.api().table().columns.adjust();
                 }
             });
