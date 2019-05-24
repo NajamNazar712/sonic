@@ -27,7 +27,7 @@ class AdminReportsController extends Controller
     }
     public function qsr_index(Request $request){
         $shippers = DB::connection('reports')->table('users')->whereIn('status',[3,4])->select('id','name')->get();
-        $cities = DB::connection('reports')->table('cities')->get('id','name');
+        $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         return view('admin.reports.qsr_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs]);
     }
@@ -1995,10 +1995,10 @@ class AdminReportsController extends Controller
                 return number_format($shipment->amount);
             })
             ->addColumn('aging_update_verified',function ($deliveries){
-                return ($deliveries->updated_at && $deliveries->verified_time)? Carbon::parse($deliveries->verified_time)->diffInDays($deliveries->updated_at) :'-';
+                return ($deliveries->updated_at && $deliveries->status_verified)? Carbon::parse($deliveries->status_verified)->diffInDays($deliveries->updated_at) :'-';
             })
             ->addColumn('aging_create_verified',function ($deliveries){
-                return ($deliveries->created_at && $deliveries->verified_time)? Carbon::parse($deliveries->verified_time)->diffInDays($deliveries->created_at) :'-';
+                return ($deliveries->created_at && $deliveries->status_verified)? Carbon::parse($deliveries->status_verified)->diffInDays($deliveries->created_at) :'-';
             })
             ->editColumn('delivery_note', function ($deliveries) {
                 return str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT);
@@ -2339,7 +2339,7 @@ class AdminReportsController extends Controller
     }
     public function overall_sales_index(){
         $shippers = DB::connection('reports')->table('users')->whereIn('status',[3,4])->select('id','name')->get();
-        $cities = DB::connection('reports')->table('cities')->get('id','name');
+        $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
         return view('admin.reports.overall_sales')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses]);
@@ -3680,7 +3680,7 @@ class AdminReportsController extends Controller
     }
 public function revenue_index(){
         $shippers = DB::connection('reports')->table('users')->whereIn('status',[3,4])->select('id','name')->get();
-        $cities = DB::connection('reports')->table('cities')->get('id','name');
+        $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
         return view('admin.reports.revenue')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses]);
@@ -3920,7 +3920,7 @@ public function revenue_index(){
 
     public function crm_index(){
         $shippers = DB::connection('reports')->table('users')->where('status', 3)->select('id','name')->get();
-        $cities = DB::connection('reports')->table('cities')->get('id','name');
+        $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $agents = DB::connection('reports')->table('admin_roles')->leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
