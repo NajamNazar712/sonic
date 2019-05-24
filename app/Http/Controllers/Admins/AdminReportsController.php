@@ -720,7 +720,7 @@ class AdminReportsController extends Controller
                 })
                 ->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })->join('shipments_journey', function($query) use ($from,$to) {
                     $query->where('shipper_status_id', '=', 2)
@@ -737,7 +737,7 @@ class AdminReportsController extends Controller
                 })
                 ->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })->join('shipments_journey', function($query) use ($from,$to) {
                     $query->where('shipper_status_id', '=', 3)
@@ -749,7 +749,7 @@ class AdminReportsController extends Controller
             $not_pending_status = array(1, 3, 5, 10, 11,12,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47); //for pending deliveries
             $qa_data[$hub->name]['deliveries_pending'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
                 ->whereDoesntHave('shipment_journey', function($query) use ($from,$to,$not_pending_status) {
@@ -760,7 +760,7 @@ class AdminReportsController extends Controller
 
             $qa_data[$hub->name]['deliveries_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
                 ->join('shipments_journey', function($query) use ($from,$to) {
@@ -772,7 +772,7 @@ class AdminReportsController extends Controller
             $qa_data[$hub->name]['receive_deliveries_resolved'] = DB::connection('reports')->table('delivery_notes')->whereBetween('created_at',[$from,$to])->where('status',1)->count();
             $qa_data[$hub->name]['return_marked_pending'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
                 ->join('shipments_journey',function ($query) use ($from,$to){
@@ -781,7 +781,7 @@ class AdminReportsController extends Controller
                 })->count();
             $qa_data[$hub->name]['return_marked_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
                 ->join('shipments_journey',function ($query) use ($from,$to){
@@ -790,7 +790,7 @@ class AdminReportsController extends Controller
                 })->count();
             $qa_data[$hub->name]['return_confirmed_pending'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
                 ->join('shipments_journey',function ($query) use ($from,$to){
@@ -799,7 +799,7 @@ class AdminReportsController extends Controller
                 })->count();
             $qa_data[$hub->name]['return_confirmed_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
-                    ->where('shipments.consignee_city', '=', DB::raw('`cities`.`id`'))
+                    ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
                 ->join('shipments_journey',function ($query) use ($from,$to){
