@@ -1736,21 +1736,26 @@ class AdminReportsController extends Controller
             $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
         }else{
             $hubs = DB::connection('reports')->table('cities')->select('id','name')->whereIn('id',session('hubs'))->get();
+
+            $session_hubs = session('hubs');
+
             if(session('department_id') != 7){
-                $shippers = DB::connection('reports')->table('users')->where('status',3)->whereHas('city', function($query) {
-                    $query->whereIn('hub_id', session('hubs'));
-                })->get();
+                $shippers = DB::connection('reports')->table('users')->where('status',3)->join('cities', function ($join) use ($session_hubs) {
+                        $join->on('users.city_id', '=', 'cities.id')
+                        ->whereIn('cities.hub_id', $session_hubs);
+                    })->get();
 
             }else{
                 if(session('role_id') != 4){
-                    $shippers = DB::connection('reports')->table('users')->where('status',3)->whereIn('id', session('tagged_shippers'))->whereHas('city', function($query) {
-                        $query->whereIn('hub_id', session('hubs'));
+                    $shippers = DB::connection('reports')->table('users')->where('status',3)->whereIn('id', session('tagged_shippers'))->join('cities', function ($join) use ($session_hubs) {
+                        $join->on('users.city_id', '=', 'cities.id')
+                        ->whereIn('cities.hub_id', $session_hubs);
                     })->get();
                 }else{
-                    $shippers = DB::connection('reports')->table('users')->where('status',3)->whereHas('city', function($query) {
-                        $query->whereIn('hub_id', session('hubs'));
+                    $shippers = DB::connection('reports')->table('users')->where('status',3)->join('cities', function ($join) use ($session_hubs) {
+                        $join->on('users.city_id', '=', 'cities.id')
+                        ->whereIn('cities.hub_id', $session_hubs);
                     })->get();
-
                 }
             }
         }
@@ -1814,24 +1819,30 @@ class AdminReportsController extends Controller
         $hubs = array();
         $users = array();
         foreach ($city as $c) {
+            $city_id = $c->id;
+
             $details['hubs'][$c->id] = $c->name;
             if ($shipper_filter != '') {
-                $shippers = DB::connection('reports')->table('users')->where('id', $shipper_filter)->whereHas('city', function ($query) use ($c) {
-                    $query->where('hub_id', '=', $c->id);
+                $shippers = DB::connection('reports')->table('users')->where('id', $shipper_filter)->join('cities', function ($join) use ($city_id) {
+                    $join->on('users.city_id', '=', 'cities.id')
+                    ->where('cities.hub_id', '=', $city_id);
                 });
             } else {
                 if(session('department_id') != 7){
-                    $shippers = DB::connection('reports')->table('users')->whereHas('city', function ($query) use ($c) {
-                        $query->where('hub_id', '=', $c->id);
-                    });
+                    $shippers = DB::connection('reports')->table('users')->join('cities', function ($join) use ($city_id) {
+                    $join->on('users.city_id', '=', 'cities.id')
+                    ->where('cities.hub_id', '=', $city_id);
+                });
                 }else{
                     if(session('role_id') != 4){
-                        $shippers = DB::connection('reports')->table('users')->whereHas('city', function ($query) use ($c) {
-                            $query->where('hub_id', '=', $c->id);
+                        $shippers = DB::connection('reports')->table('users')->join('cities', function ($join) use ($city_id) {
+                            $join->on('users.city_id', '=', 'cities.id')
+                            ->where('cities.hub_id', '=', $city_id);
                         })->whereIn('users.id', session('tagged_shippers'));
                     }else{
-                        $shippers = DB::connection('reports')->table('users')->whereHas('city', function ($query) use ($c) {
-                            $query->where('hub_id', '=', $c->id);
+                        $shippers = DB::connection('reports')->table('users')->join('cities', function ($join) use ($city_id) {
+                            $join->on('users.city_id', '=', 'cities.id')
+                            ->where('cities.hub_id', '=', $city_id);
                         });
                     }
                 }
@@ -1844,26 +1855,26 @@ class AdminReportsController extends Controller
                     foreach ($months_array as $month) {
                         $thisMonth = Carbon::parse($month)->month;
                         $thisYear = Carbon::parse($month)->year;
-                        $details['parcels'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('user_id', $s->id)
-                            ->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
-                                $query->whereMonth('created_at', $thisMonth)
-                                    ->whereYear('created_at', $thisYear)
-                                    ->where('shipper_status_id', 2);
+                        $details['parcels'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('shipments.user_id', $s->id)
+                            ->join('shipments_journey', function($join) use ($thisMonth,$thisYear) {
+                                $join->whereMonth('shipments_journey.created_at', $thisMonth)
+                                    ->whereYear('shipments_journey.created_at', $thisYear)
+                                    ->where('shipments_journey.shipper_status_id', 2);
                             })->count();
-                        $details['weight'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
-                            $query->whereMonth('created_at', $thisMonth)
-                                ->whereYear('created_at', $thisYear)
-                                ->where('shipper_status_id', 2);
+                        $details['weight'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('shipments.user_id', $s->id)->join('shipments_journey', function($join) use ($thisMonth,$thisYear) {
+                            $join->whereMonth('shipments_journey.created_at', $thisMonth)
+                                ->whereYear('shipments_journey.created_at', $thisYear)
+                                ->where('shipments_journey.shipper_status_id', 2);
                         })->sum('actual_weight');
-                        $details['amount'][$s->id][$month] = number_format(DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
-                            $query->whereMonth('created_at', $thisMonth)
-                                ->whereYear('created_at', $thisYear)
-                                ->where('shipper_status_id', 2);
+                        $details['amount'][$s->id][$month] = number_format(DB::connection('reports')->table('shipments')->where('shipments.user_id', $s->id)->join('shipments_journey', function($join) use ($thisMonth,$thisYear) {
+                            $join->whereMonth('shipments_journey.created_at', $thisMonth)
+                                ->whereYear('shipments_journey.created_at', $thisYear)
+                                ->where('shipments_journey.shipper_status_id', 2);
                         })->sum('amount'));
-                        $details['revenue'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
-                            $query->whereMonth('created_at', $thisMonth)
-                                ->whereYear('created_at', $thisYear)
-                                ->where('shipper_status_id', 2);
+                        $details['revenue'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('shipments.user_id', $s->id)->join('shipments_journey', function($join) use ($thisMonth,$thisYear) {
+                            $join->whereMonth('shipments_journey.created_at', $thisMonth)
+                                ->whereYear('shipments_journey.created_at', $thisYear)
+                                ->where('shipments_journey.shipper_status_id', 2);
                         })->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                     }
