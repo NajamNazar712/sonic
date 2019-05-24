@@ -111,7 +111,7 @@
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color touchspin-preloaded input-sm spkg" value="{{$onweight->spkg}}" {{ ($onweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
+                                                                <input type="text" class="touchspin-color input-sm spkg" value="{{$onweight->spkg}}" {{ ($onweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
                                                                        data-bts-button-up-class="btn btn-success" name="on_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
@@ -3087,8 +3087,6 @@
             o.style.height = "1px";
             o.style.height = (25+o.scrollHeight)+"px";
         }
-
-        // $(".touchspin-color").trigger("touchspin.updatesettings", {min: 0.5,step: 0.5, decimals: 2});
         $(document).ready(function () {
 
                 $("#on_default").on('change', function () {
@@ -3151,7 +3149,7 @@
                 }
             });
 
-            $(".touchspin-preloaded").trigger("touchspin.updatesettings", {min: 0.5,step: 0.5, decimals: 2});
+            $(".touchspin-color").trigger("touchspin.updatesettings", {min: 0.5,step: 0.5, decimals: 2});
 
             // var on_main_switch = document.querySelector('#on_main_switch');
             $('#on_main_switch').on('change',function(){
