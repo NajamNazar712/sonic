@@ -4196,7 +4196,7 @@ class DeliveryController extends Controller
             ReplacementToRegularLog::create([
                 'shipment_id' => $shipment->id,
                 'updated_by' => Auth::id(),
-                'replacement_charges' => $shipment->replacement_charges,
+                'replacement_charges' => 0,
                 'product_type_id' => $product_type_id,
                 'item_description' => $item_description,
                 'item_quantity' => $item_quantity,
@@ -4204,10 +4204,6 @@ class DeliveryController extends Controller
                 'insurance' => $insurance,
                 'type' => $type,
             ]);
-
-            $shipment->replacement_charges = NULL;
-
-            $shipment->save();
 
             ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1])->delete();
         }
