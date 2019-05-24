@@ -7,8 +7,6 @@ use function foo\func;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-use App\Http\Models\Shipper\User;
-
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
@@ -2125,7 +2123,7 @@ class AdminReportsController extends Controller
             $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
         }else{
             if(session('department_id') != 7){
-                $shippers = DB::connection('reports')->table('users')->whereExists(function ($query) use ($c) {
+                $shippers = DB::connection('reports')->table('users')->whereExists(function ($query) {
                     $query->from('cities')
                     ->where('users.city_id', '=', DB::raw('`cities`.`id`'))
                     ->whereIn('hub_id', session('hubs'));
@@ -2136,7 +2134,7 @@ class AdminReportsController extends Controller
                     $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->where('status','>=',3)->get();
                     $hubs = DB::connection('reports')->table('cities')->select('id','name')->whereIn('id',session('hubs'))->get();
                 }else{
-                    $shippers = DB::connection('reports')->table('users')->whereExists(function ($query) use ($c) {
+                    $shippers = DB::connection('reports')->table('users')->whereExists(function ($query) {
                         $query->from('cities')
                         ->where('users.city_id', '=', DB::raw('`cities`.`id`'))
                         ->whereIn('hub_id', session('hubs'));
