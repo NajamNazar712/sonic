@@ -2867,7 +2867,7 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as sub', 'sub.id', '=', 'petty_cash_statement_details.updated_by')
             ->leftjoin('petty_cash_account_heads as pch', 'pch.id','=','petty_cash_statement_details.account_head_id')
             ->leftjoin('petty_cash_account_titles as pct', 'pct.id','=','petty_cash_statement_details.account_title_id')
-            ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at');
+            ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount');
 //            ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {

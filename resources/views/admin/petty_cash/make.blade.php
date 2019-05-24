@@ -150,6 +150,7 @@
                 allowClear:true
             });
 
+            var all_max_date = '';
 
             $('#make_statement_form #select_date_from').pickadate({
                 firstDay: 1,
@@ -165,14 +166,15 @@
                         // $('#make_statement_form #select_date_to').pickadate('picker').set({'min': current_date},{muted: true});
                         var future = future_date(current_date);
                         var d = new Date(current_date);
+                        all_max_date = future;
                         $('#make_statement_form #select_date_to').pickadate('picker').set({'select': future,'min': d, 'max':future},{muted: true});
+                        $('#make_statement_form #expense_date_1').pickadate('picker').set({'max':future},{muted: true});
                     }
                 }
             });
 
             function future_date(from_date) {
                 var today = new Date(from_date);
-                // var tomorrow = new Date();
                 today.setDate(today.getDate()+32);
                 return today
             }
@@ -185,7 +187,12 @@
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-
+                    if (context.select) {
+                        var current_date = $('input[name="select_date_to_formatted"]').val();
+                        var d = new Date(current_date);
+                       all_max_date = d;
+                        $('#make_statement_form #expense_date_1').pickadate('picker').set({'max':d},{muted: true});
+                    }
                 }
             });
             var selected_rows = [];
@@ -354,6 +361,7 @@
                 $('#expense_date_' + rows_count).pickadate({
                     firstDay: 1,
                     today: '',
+                    max: all_max_date,
                     clear: '',
                     close: '',
                     weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
