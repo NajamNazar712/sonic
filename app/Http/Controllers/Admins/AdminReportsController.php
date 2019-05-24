@@ -1261,7 +1261,7 @@ class AdminReportsController extends Controller
                             ->where('shipments.id', DB::raw('`shipments_journey`.`id`'))
                             ->whereBetween('created_at', [$date_from, $date_to])
                             ->where('shipper_status_id', 2);
-                        })where('shipments.packaging_material_request', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('amount');
+                        })->where('shipments.packaging_material_request', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum('amount');
                         $actual_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                             $query->from('user_shipping_infos')
                             ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
