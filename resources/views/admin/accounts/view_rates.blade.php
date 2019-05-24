@@ -2981,7 +2981,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $(".touchspin-color").trigger("touchspin.updatesettings", {min: 1});
+            $(".touchspin-preloaded").trigger("touchspin.updatesettings", {min: 0.5,step: 0.5, decimals: 2});
+
             // var on_main_switch = document.querySelector('#on_main_switch');
             $('#on_main_switch').on('change',function(){
 
