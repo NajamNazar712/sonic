@@ -4320,7 +4320,7 @@ class DeliveryController extends Controller
         $replacement_to_regular_logs = ReplacementToRegularLog::leftjoin('shipments as s', 's.id', '=', 'replacement_to_regular_logs.shipment_id')
             ->leftjoin('products as p', 'p.id', '=', 'replacement_to_regular_logs.product_type_id')
             ->leftjoin('admins as a', 'a.id', '=', 'replacement_to_regular_logs.updated_by')
-            ->select('s.tracking_number as tracking_number', 'p.product_name as product_type', 'replacement_to_regular_logs.replacement_charges as replacement_charges', 'replacement_to_regular_logs.item_description as item_description', 'replacement_to_regular_logs.item_quantity as item_quantity', 'replacement_to_regular_logs.item_price as item_price', 'replacement_to_regular_logs.insurance as insurance', 'replacement_to_regular_logs.type as type', 'replacement_to_regular_logs.created_at as created_at');
+            ->select('s.tracking_number as tracking_number', 'p.product_name as product_type', 'replacement_to_regular_logs.replacement_charges as replacement_charges', 'replacement_to_regular_logs.item_description as item_description', 'replacement_to_regular_logs.item_quantity as item_quantity', 'replacement_to_regular_logs.item_price as item_price', 'replacement_to_regular_logs.insurance as insurance', 'replacement_to_regular_logs.created_at as created_at');
 
         $datatables = Datatables::of($replacement_to_regular_logs)
             ->editColumn('tracking_number_link', function ($shipment) {

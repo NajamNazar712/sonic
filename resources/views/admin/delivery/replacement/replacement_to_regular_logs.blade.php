@@ -24,7 +24,6 @@
                         <th class="border-primary border-darken-1">Item Quantity</th>
                         <th class="border-primary border-darken-1">Item Price</th>
                         <th class="border-primary border-darken-1">Insurance</th>
-                        <th class="border-primary border-darken-1">Type</th>
                         <th class="border-primary border-darken-1">Created At</th>
                     </tr>
                     </thead>
@@ -132,7 +131,6 @@
                             head.push('Item Quantity');
                             head.push('Item Price');
                             head.push('Insurance');
-                            head.push('Type');
                             head.push('Created At');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -143,7 +141,6 @@
                                 row.push(values.item_quantity);
                                 row.push(values.item_price);
                                 row.push(values.insurance);
-                                row.push(values.type);
                                 row.push(values.created_at);
 
                                 body.push(row);
@@ -177,7 +174,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.replacement.logs.list') }}',
                 // rowId: 'shId',
-                order: [[9, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
@@ -187,7 +184,6 @@
                     {data: 'item_quantity', name: 'replacement_to_regular_logs.item_quantity', class: 'align-middle item_quantity'},
                     {data: 'item_price', name: 'replacement_to_regular_logs.item_price', class: 'align-middle item_price'},
                     {data: 'insurance', name: 'replacement_to_regular_logs.insurance', class: 'align-middle insurance'},
-                    {data: 'type', name: 'replacement_to_regular_logs.type', class: 'align-middle type'},
                     {data: 'created_at', name: 'replacement_to_regular_logs.created_at', class: 'align-middle created_at'},
                 ],
                 rowCallback: function(row, data, index) {
