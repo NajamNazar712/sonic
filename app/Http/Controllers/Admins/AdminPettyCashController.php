@@ -165,24 +165,21 @@ class AdminPettyCashController extends Controller
                 return Carbon::parse($petty_details->date)->toDateString();
             })
             ->editColumn('expense_details', function ($petty_details){
-                $expense = '<textarea class="form-control" disabled name="expense['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Expense Detail is required">'.$petty_details->expense_details.'</textarea>';
+                $expense = '<textarea class="form-control form-control-sm" disabled name="expense['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Expense Detail is required">'.$petty_details->expense_details.'</textarea>';
                 return $expense;
             })
             ->editColumn('amount', function ($petty_details){
-                $selected_amount = $petty_details->amount;
-                if($petty_details->petty_status == 0 && $petty_details->station_amount != null){
+                $selected_amount = '';
+                if($petty_details->finance_amount != null){
                     $selected_amount = $petty_details->station_amount;
-                }
-                if($petty_details->petty_status == 1 && $petty_details->operation_amount != null){
-                    $selected_amount = $petty_details->operation_amount;
-                }else if($petty_details->petty_status == 1 && $petty_details->operation_amount == null){
+                }else if($petty_details->operation_amount != null){
                     $selected_amount = $petty_details->station_amount;
-                }
-                if($petty_details->petty_status == 2 && $petty_details->finance_amount != null){
-                    $selected_amount = $petty_details->finance_amount;
-                }else if($petty_details->petty_status == 2 && $petty_details->finance_amount == null){
+                }else if($petty_details->station_amount != null){
                     $selected_amount = $petty_details->station_amount;
+                }else{
+                    $selected_amount = $petty_details->amount;
                 }
+
                 $amount = '<div class="input-group"><input type="text" class="form-control form-control-sm" disabled value="' .$selected_amount. '" name="amount['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Amount is required"><div class="input-group-append amount_log"><span class="input-group-text p-0 pl-sm-1 pr-sm-1"><i class="ft-align-justify font-medium-4"></i></span></div></div>';
                 return $amount;
             })
