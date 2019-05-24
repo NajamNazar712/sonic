@@ -1860,24 +1860,28 @@ class AdminReportsController extends Controller
                         $details['parcels'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('user_id', $s->id)
                             ->whereExists(function($query) use ($thisMonth,$thisYear) {
                                 $query->from('shipments_journey')
+                                ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
                                 ->whereMonth('created_at', $thisMonth)
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
                             })->count();
                         $details['weight'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereExists(function($query) use ($thisMonth,$thisYear) {
                             $query->from('shipments_journey')
+                                ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
                                 ->whereMonth('created_at', $thisMonth)
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
                         })->sum('actual_weight');
                         $details['amount'][$s->id][$month] = number_format(DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereExists(function($query) use ($thisMonth,$thisYear) {
                             $query->from('shipments_journey')
+                                ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
                                 ->whereMonth('created_at', $thisMonth)
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
                         })->sum('amount'));
                         $details['revenue'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereExists(function($query) use ($thisMonth,$thisYear) {
                             $query->from('shipments_journey')
+                                ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
                                 ->whereMonth('created_at', $thisMonth)
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
@@ -2287,6 +2291,7 @@ class AdminReportsController extends Controller
                     $shippers['parcels'][$client->id][$month] = DB::connection('reports')->table('shipments')->where('user_id', $client->id)
                         ->whereExists(function($query) use ($thisMonth,$thisYear) {
                             $query->from('shipments_journey')
+                            ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
                             ->whereMonth('created_at', $thisMonth)
                             ->whereYear('created_at', $thisYear)
                             ->where('shipper_status_id', 2);
