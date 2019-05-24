@@ -57,7 +57,7 @@ function scan_sound(type) {
 function blockPagePermanently() {
 
     $.blockUI({
-        message: '<div class="ft-refresh-cw icon-spin font-medium-2"></div>',
+        message: '<div class="ft-loader icon-spin font-medium-2"></div>',
         timeout: 0, //unblock after 2 seconds
         overlayCSS: {
             backgroundColor: '#FFF',
@@ -76,4 +76,4 @@ function UnblockPagePermanently() {
     $.unblockUI({ fadeOut: 200 });
 }
 // var data_table_loader = '<div class="blockUI blockOverlay" style="z-index: 1000; border: none; margin: 0px; padding: 0px; width: 5%; height: 5%; background-color: transparent; opacity: 0; cursor: wait; position: fixed;"></div><div class="blockUI blockMsg blockPage" style="z-index: 1011; position: fixed; padding: 10px; margin: 0px; width: 30%; top: 40%; left: 35%; height:10%; text-align: center; color: rgb(0, 0, 0); border: 0px; background-color: red; cursor: wait;"><div class="ft-refresh-cw icon-spin font-medium-2" style=""></div></div>';
-var data_table_loader = '<div class="blockUI blockOverlay" style="z-index: 1000; border: none; margin: 0px; padding: 0px; width: 5%; height: 5%; background-color: transparent; opacity: 0; cursor: wait; position: fixed;"></div><div class="blockUI blockMsg blockPage" style="z-index: 1011; position: fixed; padding: 10px; margin: 0px; width: 20%; top: 40%; left: 40%; height:90px; text-align: center; color: rgb(0, 0, 0); border-radius: 5px; background-color: #64a0d2; cursor: wait; -webkit-box-shadow: 3px 3px 12px -2px rgba(0,0,0,0.75); -moz-box-shadow: 3px 3px 12px -2px rgba(0,0,0,0.75); box-shadow: 3px 3px 12px -2px rgba(0,0,0,0.75); "><div class="ft-refresh-cw icon-spin font-medium-2 white" style="text-shadow: 0px 2px 2px #06060638;"></div><div class="white" style="font-size:2em; text-shadow: 0px 2px 2px #06060638;">Data Loading</div></div>';
+var data_table_loader = '<div class="blockUI blockOverlay" style="z-index: 1000; border: none; margin: 0px; padding: 0px; width: 5%; height: 5%; background-color: transparent; opacity: 0; cursor: wait; position: fixed;"></div><div class="blockUI blockMsg blockPage" style="z-index: 1011; position: fixed; padding: 10px; margin: 0px; width: 20%; top: 40%; left: 40%; text-align: center; border-radius: 5px; background-color: white; cursor: wait; -webkit-box-shadow: 0px 0px 10px -5px rgba(0,0,0,0.75); -moz-box-shadow: 0px 0px 10px -5px rgba(0,0,0,0.75); box-shadow: 0px 0px 10px -5px rgba(0,0,0,0.75); "><div class="ft-loader icon-spin font-medium-2 align-middle"></div><div class="d-inline-block ml-1 align-middle">Data Loading</div></div>';
