@@ -8,9 +8,11 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
+use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\BanksList;
 use App\Http\Models\BookingType;
@@ -865,7 +867,7 @@ class DeliveryController extends Controller
             }
 
             if($note_data->status == 0){
-                $where = array(7, 8, 9, 10, 11, 12, 14, 15, 18);
+                $where = array(7, 8, 9, 10, 11, 12, 14, 15, 18, 56);
                 $statuses = ShipmentStatus::whereIn('id', $where)->select('id','name')->get();
 
                 return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->pending_status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed, 'shipment_statuses' => $statuses]);
@@ -951,7 +953,7 @@ class DeliveryController extends Controller
                 return $attempt_counts;
             })
             ->addColumn('status', function ($deliveries) {
-                $where = array(7, 8, 9, 10, 11, 12, 15, 18);
+                $where = array(7, 8, 9, 10, 11, 12, 15, 18, 56);
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
                 $drops = '';
                 foreach ($statuses as $status) {
@@ -1052,9 +1054,19 @@ class DeliveryController extends Controller
                             Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                         }
+                    }else if($selected_status == 56){
+                        if($shipment_details->booking_type_id == 2){
+                            if ($shipment_details->shipper_status_id != $selected_status) {
+                                ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, NULL, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                            }
+                            Shipment::where('id', $shipment)->update(['received_amount' => null, 'shipper_status_id' => $selected_status, 'consignee_status_id' => $selected_status]);
+
+                            DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
+                        }
                     }
                     else{
                         if ($shipment_details->shipper_status_id != $selected_status) {
+
                             ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, NULL, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
 
                         }
@@ -1123,8 +1135,7 @@ class DeliveryController extends Controller
 
                         if ($shipment_status->booking_type_id != 4) {
                             Shipment::where('id', $shipment)->update(['received_amount' => null, 'shipper_status_id' => $request->status_drop[$shipment]]);
-                        }
-                        else {
+                        } else {
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                         }
 
@@ -1160,6 +1171,14 @@ class DeliveryController extends Controller
 //                            Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>$request->status_drop[$shipment],'consignee_status_id'=>$request->status_drop[$shipment]]);
 //                            DeliveryNoteShipment::where(['delivery_note_id'=>$delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>6]);
 //                        }
+
+                    }else if($request->status_drop[$shipment] == 56){
+                        if($shipment_status->booking_type_id == 2 ){
+                            if($shipment_status->shipper_status_id != $request->status_drop[$shipment]){
+                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                            }
+                            Shipment::where('id', $shipment)->update(['received_amount' => null, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
+                        }
 
                     } else {
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
@@ -1422,7 +1441,7 @@ class DeliveryController extends Controller
                 return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('status', function ($deliveries) {
-                $where = array(7, 8, 9, 10, 11, 12, 15, 18, 20);
+                $where = array(7, 8, 9, 10, 11, 12, 15, 18, 20, 56);
 
 //                $where = array(7,8,9,10,11,12,14,15,16,18,20,30,35,36,37);
                 $delivered_statuses = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);
@@ -1445,8 +1464,6 @@ class DeliveryController extends Controller
 
                     }
                 }
-
-
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
@@ -1625,6 +1642,14 @@ class DeliveryController extends Controller
                                                     NotificationsController::send(16, 0, $shipment);
                                                 }
                                             }
+                                        }else if($request->status_drop[$shipment] == 56){
+                                            $parcel = Shipment::find($shipment);
+                                            if($parcel->booking_type_id == 2){
+                                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+                                                Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 56, 'consignee_status_id' => 56]);
+                                                DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
+                                            }
+
                                         } else if (in_array($request->status_drop[$shipment], $delivered_status_array)) {
                                             $parcel = Shipment::where('id', $shipment)->first();
                                             if ($parcel->booking_type_id == 2) {
@@ -4069,5 +4094,254 @@ class DeliveryController extends Controller
             return ['status' => 1, 'success' => 'Fake Status has been removed'];
         }
         return ['status' => 0, 'error' => 'Something went wrong'];
+    }
+
+    public function replacement_not_collected_index(){
+        return view('admin.delivery.replacement.not_collected');
+    }
+
+    public function replacement_not_collected_list(Request $request){
+        $shipment = Shipment::leftjoin('cities as dc', 'dc.id', '=', 'shipments.consignee_city_id')
+            ->leftjoin('shipments_journey as sj', function($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sj.status_reason_id')
+            ->select('shipments.tracking_number as tracking_number','shipments.id as shipment_id','shipments.consignee_name as consignee_name','shipments.consignee_address as consignee_address','shipments.consignee_phone_number_1 as phone','shipments.amount as amount', 'shipments.amount as cod_amount', 'dc.name as destination', 'sj.status_reason_id as reason', 'sj.status_reason_id as reason_id', 'ssr.name as reason_name')
+            ->where('shipments.shipper_status_id', 56)->groupBy('shipments.id');
+
+        $datatables = Datatables::of($shipment)
+            ->editColumn('tracking_number_link', function ($shipment) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
+            })
+            ->addColumn('reason',function ($shipment){
+                $reasons = ShipmentStatus::find(56)->reasons()->select('id', 'name')->orderBy('name')->get();
+                $drops = '';
+                $selected = '';
+                foreach ($reasons as $reason) {
+                    if($reason->id == $shipment->reason){
+                        $selected = 'selected';
+                    }else{
+                        $selected = '';
+                    }
+                    $drops .= '<option value="' . $reason->id . '" ' . $selected . '>' . $reason->name . '</option>';
+                }
+                $select = '<select class="form-control form-control-sm select2 reason_select" name="reason[' . $shipment->shipment_id . ']">' . $drops . '</select>';
+                return $select;
+
+            })
+            ->editColumn('amount', function ($shipment){
+                $amount = '<input class="form-control form-control-sm col_amount" value="' .number_format($shipment->amount). '" name="amount['.$shipment->shipment_id.']" data-rule-required="true" data-msg-required="Amount is required">';
+                return $amount;
+            });
+
+        return $datatables->make(true);
+    }
+    public function replacement_not_collected_amount_update(Request $request){
+        $shipment = Shipment::where('id', $request->shipment_id);
+        if($shipment->exists()){
+            $shipment = $shipment->first();
+            ChangeShipmentAmountLog::create([
+                'shipment_id' => $request->shipment_id,
+                'old_amount' => $shipment->amount,
+                'new_amount' => $request->amount,
+                'admin_id' => Auth::id()
+            ]);
+            Shipment::where('id', $request->shipment_id)->update([
+                'amount' => $request->amount
+            ]);
+            return ['status' => 1, 'success' => 'Collection Amount has been updated against Tracking Number: ' . $shipment->tracking_number. ''];
+        }
+        else{
+            return ['status' => 0, 'error' => 'Collection Amount can\'t be update'];
+        }
+    }
+    public function replacement_not_collected_reason_update(Request $request){
+        $shipment = Shipment::where('id', $request->shipment_id)->first();
+        if($shipment->exists()){
+            ShipmentsJourneyController::add($request->shipment_id, 56, 56, $request->reason, NULL, NULL, Auth::id());
+            return ['status' => 1, 'success' => 'Reason has been updated against Tracking Number: ' . $shipment->tracking_number. ''];
+        }
+        else{
+            return ['status' => 0, 'error' => 'Reason can\'t be update against Tracking Number: ' . $shipment->tracking_number. ''];
+        }
+    }
+    public function replacement_not_collected_re_attempt(Request $request){
+        foreach ($request->shipment_ids as $shipment_id){
+            Shipment::where('id', $shipment_id)->update([
+                'shipper_status_id' => 13,
+                'consignee_status_id' => 13
+            ]);
+            ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
+        }
+            return ['status' => 1, 'success' => 'Shipment has been marked as Re-Attempt'];
+    }
+    public function replacement_not_collected_regular_re_attempt(Request $request){
+        foreach ($request->shipment_ids as $shipment_id){
+            $shipment = Shipment::where('id', $shipment_id)->first();
+            $product_type = ShipmentItem::where(['shipment_id' => $shipment_id, 'type' => 1])->first();
+            $insurance = $product_type->insuarance;
+            $type = $product_type->type;
+            $product_type_id = $product_type->product_type_id;
+            $item_description = $product_type->description;
+            $item_quantity = $product_type->quantity;
+            $item_price = $product_type->price;
+            Shipment::where('id', $shipment_id)->update([
+                'booking_type_id' => 1,
+                'shipper_status_id' => 13,
+                'consignee_status_id' => 13
+            ]);
+            ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
+            ReplacementToRegularLog::create([
+                'shipment_id' => $shipment->id,
+                'updated_by' => Auth::id(),
+                'replacement_charges' => $shipment->replacement_charges,
+                'product_type_id' => $product_type_id,
+                'item_description' => $item_description,
+                'item_quantity' => $item_quantity,
+                'item_price' => $item_price,
+                'insurance' => $insurance,
+                'type' => $type,
+            ]);
+
+            $shipment->replacement_charges = NULL;
+
+            $shipment->save();
+
+            ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1])->delete();
+        }
+            return ['status' => 1, 'success' => 'Shipment Service type is changed to Regular and has been marked as Re-Attempt'];
+    }
+    public function replacement_collected_index(){
+        return view('admin.delivery.replacement.collected');
+    }
+
+    public function change_shipment_booking_type_shipment_details(Request $request) {
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+
+            if ($shipment->shipper_status_id == 30) {
+
+                        $details = array();
+
+                        $shipper = $shipment->user;
+
+                        $details['id'] = $shipment->id;
+
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['status'] = $shipment->status_shipper->name;
+
+                        $details['service_type'] = $shipment->booking_type->booking_type;
+                        $details['shipping_mode'] = $shipment->shipping_mode->mode;
+                        $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+
+                        $details['payment_mode'] = $shipment->payment_mode->mode;
+                        $details['amount'] = number_format($shipment->amount);
+
+                        $details['shipper']['name'] = $shipper->name;
+                        $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
+                        $details['shipper']['phone_number_1'] = $shipper->phone;
+                        $details['shipper']['phone_number_2'] = $shipper->phone2;
+                        $details['shipper']['origin'] = $shipper->city->name;
+                        $details['shipper']['address'] = $shipper->address;
+
+                        $details['consignee']['name'] = $shipment->consignee_name;
+                        $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                        $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                        $details['consignee']['destination'] = $shipment->consignee_city->name;
+                        $details['consignee']['address'] = $shipment->consignee_address;
+
+                        return ['status' => 0, 'success' => 'Shipment\'s service type can be changed', 'details' => $details];
+            }
+            else {
+                return ['status' => 1, 'error' => 'Shipment Status is Not Replacement - Collected'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipment exists with given Tracking Number'];
+        }
+    }
+
+    public function change_shipment_booking_type(Request $request){
+        $shipment = Shipment::where('id', $request->shipment_id);
+        if($shipment->exists()){
+            $shipment = $shipment->first();
+            $product_type = ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1]);
+            if($shipment->booking_type_id == 2){
+                if($product_type->exists()){
+                    $product_type = $product_type->first();
+                    $insurance = $product_type->insuarance;
+                    $type = $product_type->type;
+                    $product_type_id = $product_type->product_type_id;
+                    $item_description = $product_type->description;
+                    $item_quantity = $product_type->quantity;
+                    $item_price = $product_type->price;
+                    Shipment::where('id', $request->shipment_id)->update([
+                        'booking_type_id' => 1,
+                        'shipper_status_id' => 13,
+                        'consignee_status_id' => 13
+                    ]);
+                    ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+
+                    $replacement_charges = $shipment->replacement_charges;
+
+                    ReplacementToRegularLog::create([
+                        'shipment_id' => $shipment->id,
+                        'updated_by' => Auth::id(),
+                        'replacement_charges' => $replacement_charges,
+                        'product_type_id' => $product_type_id,
+                        'item_description' => $item_description,
+                        'item_quantity' => $item_quantity,
+                        'item_price' => $item_price,
+                        'insurance' => $insurance,
+                        'type' => $type,
+                    ]);
+
+                    AdminFinanceController::add_adjustment($shipment->id, $replacement_charges);
+
+                    $shipment->replacement_charges = NULL;
+
+                    $shipment->save();
+
+                    ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1])->delete();
+
+                    return redirect()->back()->with('success', 'Shipment Service type has been updated to Regular');
+                }
+                else{
+                    return redirect()->back()->with('error', 'Shipment Service type can\'nt be update to Regular');
+                }
+            }
+            else{
+                return redirect()->back()->with('error', 'Shipment Service type can\'nt be update to Regular');
+            }
+        }
+        else{
+            return redirect()->back()->with('error', 'Shipment Service type can\'nt be update to Regular');
+        }
+    }
+
+    public function replacement_to_regular_logs_index(){
+        return view('admin.delivery.replacement.replacement_to_regular_logs');
+    }
+
+    public function replacement_to_regular_logs_list(Request $request){
+        $replacement_to_regular_logs = ReplacementToRegularLog::leftjoin('shipments as s', 's.id', '=', 'replacement_to_regular_logs.shipment_id')
+            ->leftjoin('products as p', 'p.id', '=', 'replacement_to_regular_logs.product_type_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'replacement_to_regular_logs.updated_by')
+            ->select('s.tracking_number as tracking_number', 'p.product_name as product_type', 'replacement_to_regular_logs.replacement_charges as replacement_charges', 'replacement_to_regular_logs.item_description as item_description', 'replacement_to_regular_logs.item_quantity as item_quantity', 'replacement_to_regular_logs.item_price as item_price', 'replacement_to_regular_logs.insurance as insurance', 'replacement_to_regular_logs.type as type', 'replacement_to_regular_logs.created_at as created_at');
+
+        $datatables = Datatables::of($replacement_to_regular_logs)
+            ->editColumn('tracking_number_link', function ($shipment) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            });
+
+        return $datatables->make(true);
     }
 }
