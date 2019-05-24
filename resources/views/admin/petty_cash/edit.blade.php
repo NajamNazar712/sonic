@@ -99,7 +99,7 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Petty Cash Statement Detail Log</h4>
+                    <h4 class="modal-title white">Petty Cash Statement Detail Amount</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
@@ -695,16 +695,20 @@
                             });
                         }else{
                             var log_table = '';
-                            log_table += '<table class="table table-sm datatable">';
-                            log_table += '<thead>';
-                            log_table += '<tr role="row">';
-                            log_table += '<th><strong>Station Amount</strong></th>';
-                            log_table += '<th><strong>Operation Amount</strong></th>';
-                            log_table += '<th><strong>Finance Amount</strong></th>';
+                            if(data.amount.station == '' || data.amount.operation || data.amount.finance){
+                                log_table = '<p>No Data Found</p>';
+                            }else{
 
-                            log_table += '</tr>';
-                            log_table += '</thead>';
-                            log_table += '<tbody>';
+                                log_table += '<table class="table table-sm datatable">';
+                                log_table += '<thead>';
+                                log_table += '<tr role="row">';
+                                log_table += '<th><strong>Station Amount</strong></th>';
+                                log_table += '<th><strong>Operation Amount</strong></th>';
+                                log_table += '<th><strong>Finance Amount</strong></th>';
+
+                                log_table += '</tr>';
+                                log_table += '</thead>';
+                                log_table += '<tbody>';
 
                                 log_table += '<tr>';
                                 log_table += '<td>' + data.amount.station + '</td>';
@@ -712,8 +716,10 @@
                                 log_table += '<td>' + data.amount.finance + '</td>';
                                 log_table += '</tr>';
 
-                            log_table += '</tbody>';
-                            log_table += '</table>';
+                                log_table += '</tbody>';
+                                log_table += '</table>';
+                            }
+
 
                             $('#amount_log_table').html(log_table);
                             $('#AmountLogModal').modal('show');
