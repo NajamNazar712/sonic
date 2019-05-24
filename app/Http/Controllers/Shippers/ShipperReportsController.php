@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers\Shippers;
 
-use App\Http\Models\City;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -24,7 +21,7 @@ class ShipperReportsController extends Controller
     }
     public function qsr_list(Request $request){
 
-        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -38,7 +35,7 @@ class ShipperReportsController extends Controller
             })
             ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','shipments.amount'])
             ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47])
-        ->where('shipments.user_id',Auth::id());
+        ->where('shipments.user_id', session('user_id'));
         $datatable = Datatables::of($shipments)
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
@@ -73,12 +70,12 @@ class ShipperReportsController extends Controller
         return $datatable->make(true);
     }
     public function sales_index(){
-        $cities = City::all('id','name');
-        $statuses = ShipmentStatus::whereNotIn('id',[1,17])->get();
+        $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
+        $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
         return view('client.reports.sales_report')->with(['cities'=>$cities,'statuses'=>$statuses]);
     }
     public function sales_list(Request $request){
-            $sales = Shipment::join('users as u','u.id','=','shipments.user_id')
+            $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
                 ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
                 ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
                 ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -159,13 +156,13 @@ class ShipperReportsController extends Controller
         $stats = array();
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
-        $stats['total'] = Shipment::whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['booked'] = Shipment::where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['canceled'] = Shipment::where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['received'] = Shipment::whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['in_process'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
         $stats['total'] = number_format($stats['total']->count());
         $stats['booked'] = number_format($stats['booked']->count());
         $stats['canceled'] = number_format($stats['canceled']->count());
@@ -173,12 +170,12 @@ class ShipperReportsController extends Controller
         $stats['delivered'] = number_format($stats['delivered']->count());
         $stats['return'] = number_format($stats['return']->count());
         $stats['in_process'] = number_format($stats['in_process']->count());
-        $cities = City::all(['id','name']);
+        $cities = DB::connection('reports')->table('cities')->select(['id','name'])->get();
         return view('client.reports.summary')->with(['stats' => $stats, 'cities' => $cities, 'today' => $today, 'thirtyday' => $thirtyDays]);
     }
 
     public function summary_list(Request $request){
-        $shipments = Shipment::join('users as u','u.id','=','shipments.user_id')
+        $shipments = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
