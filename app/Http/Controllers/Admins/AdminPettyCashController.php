@@ -6,6 +6,7 @@ use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\PettyCashStatement;
+use App\Http\Models\Admin\PettyCashStatementAmountLog;
 use App\Http\Models\Admin\PettyCashStatementDetail;
 use App\Http\Models\City;
 use Carbon\Carbon;
@@ -63,12 +64,10 @@ class AdminPettyCashController extends Controller
         $petty_cash->save();
         foreach ($selected_ids as $selected_id) {
             $total_amount += $request->amount[$selected_id];
-            //$hubId = "hub.$selected_id";
             $petty_detail = new PettyCashStatementDetail();
             $petty_detail->petty_cash_statement_id = $petty_cash->id;
             $petty_detail->account_head_id = $request->head[$selected_id];
             $petty_detail->account_title_id = $request->title[$selected_id];
-//            $petty_detail->hub_id = ($request->has($hubId)? $request->hub[$selected_id]:null);
             $petty_detail->hub_id = $request->hub[$selected_id];
             $petty_detail->date = $request->date[$selected_id];
             $petty_detail->expense_details = $request->expense[$selected_id];
@@ -92,7 +91,7 @@ class AdminPettyCashController extends Controller
     public function edit_petty_cash_statement_list(Request $request, $id){
         $petty_details = PettyCashStatementDetail::leftjoin('cities as h','h.id','=','petty_cash_statement_details.hub_id')
             ->join('petty_cash_statements as pcs','pcs.id', '=', 'petty_cash_statement_details.petty_cash_statement_id')
-            ->select('petty_cash_statement_details.id as statement_detail_id','h.name as hub','petty_cash_statement_details.hub_id','petty_cash_statement_details.account_head_id','petty_cash_statement_details.account_title_id','petty_cash_statement_details.date','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.status as petty_status')
+            ->select('petty_cash_statement_details.id as statement_detail_id','h.name as hub','petty_cash_statement_details.hub_id','petty_cash_statement_details.account_head_id','petty_cash_statement_details.account_title_id','petty_cash_statement_details.date','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.status as petty_status','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount')
             ->where('petty_cash_statement_details.petty_cash_statement_id',$id);
         return Datatables::of($petty_details)
             ->setRowAttr([
@@ -170,7 +169,21 @@ class AdminPettyCashController extends Controller
                 return $expense;
             })
             ->editColumn('amount', function ($petty_details){
-                $amount = '<input class="form-control form-control-sm" disabled value="' .$petty_details->amount. '" name="amount['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Amount is required">';
+                $selected_amount = $petty_details->amount;
+                if($petty_details->petty_status == 0 && $petty_details->station_amount != null){
+                    $selected_amount = $petty_details->station_amount;
+                }
+                if($petty_details->petty_status == 1 && $petty_details->operation_amount != null){
+                    $selected_amount = $petty_details->operation_amount;
+                }else if($petty_details->petty_status == 1 && $petty_details->operation_amount == null){
+                    $selected_amount = $petty_details->station_amount;
+                }
+                if($petty_details->petty_status == 2 && $petty_details->finance_amount != null){
+                    $selected_amount = $petty_details->finance_amount;
+                }else if($petty_details->petty_status == 2 && $petty_details->finance_amount == null){
+                    $selected_amount = $petty_details->station_amount;
+                }
+                $amount = '<div class="input-group"><input type="text" class="form-control form-control-sm" disabled value="' .$selected_amount. '" name="amount['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Amount is required"><div class="input-group-append amount_log"><span class="input-group-text p-0 pl-sm-1 pr-sm-1"><i class="ft-align-justify font-medium-4"></i></span></div></div>';
                 return $amount;
             })
             ->editColumn('reference_no', function ($petty_details){
@@ -193,7 +206,7 @@ class AdminPettyCashController extends Controller
             })
             ->addColumn('action',function ($petty){
                 $dropdown = '';
-                if(session('role_id') == 1 || ($petty->petty_status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
+                if((session('role_id') == 1 || ($petty->petty_status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)) || (($petty->petty_status == 0 || $petty->petty_status == 2) && (session('role_id') == 8 || session('role_id') == 10))) && ($petty->status != 1)){
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -306,6 +319,7 @@ class AdminPettyCashController extends Controller
                     $petty->station_approved_at = Carbon::now();
                     $petty->status = 1;
                     $petty->save();
+                    $this->petty_cash_statement_details_auto_approve($request->statement_id);
                 }else{
                     return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
                 }
@@ -316,6 +330,7 @@ class AdminPettyCashController extends Controller
                 $petty->operation_approved_at = Carbon::now();
                 $petty->status = 2;
                 $petty->save();
+                $this->petty_cash_statement_details_auto_approve($request->statement_id);
                 }else{
                     return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
                 }
@@ -325,6 +340,7 @@ class AdminPettyCashController extends Controller
                 $petty->finance_approved_at = Carbon::now();
                 $petty->status = 3;
                 $petty->save();
+                $this->petty_cash_statement_details_auto_approve($request->statement_id);
                 }else{
                     return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
                 }
@@ -335,6 +351,17 @@ class AdminPettyCashController extends Controller
 
         }
 
+    }
+
+    public function petty_cash_statement_details_auto_approve($id){
+       $details = PettyCashStatementDetail::where('petty_cash_statement_id', $id)->where('status',0);
+       if($details->exists()){
+           $details = $details->get();
+           foreach ($details as $row){
+               $row->status = 2;
+               $row->save();
+           }
+       }
     }
 
     public function edit_petty_cash_statements_approve(Request $request){
@@ -371,13 +398,15 @@ class AdminPettyCashController extends Controller
             if($id){
                 $petty_details = PettyCashStatementDetail::find($id);
                 if($petty_details){
-                    if($petty_details->status == 0 || $petty_details->status == 1){
+                    if($petty_details->status == 0){
                         $petty_details->status = 2;
                         $petty_details->updated_by = Auth::id();
                         $petty_details->save();
                         return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
                     }else if($petty_details->status == 2){
                         return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
+                    }else{
+                        return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details rejected so it can\'t be changed!']);
                     }
 
                 }else{
@@ -415,10 +444,11 @@ class AdminPettyCashController extends Controller
     }
 
     public function edit_petty_cash_statements_submit(Request $request){
-//        return $request;
+
         $selected_ids = explode(',', $request->input('selected_rows'));
         $statement_id = $request->petty_statement_id;
         $petty_cash = PettyCashStatement::find($statement_id);
+//        dd($petty_cash);
         $total_amount = 0;
         if($petty_cash){
             foreach ($selected_ids as $selected_id) {
@@ -435,9 +465,22 @@ class AdminPettyCashController extends Controller
                 }
 
                 $petty_detail->expense_details = $request->expense[$selected_id];
-                $petty_detail->amount = $request->amount[$selected_id];
                 $petty_detail->reference_no = $request->reference[$selected_id];
                 $petty_detail->remarks = $request->remarks[$selected_id];
+                if($petty_cash->status == 0){
+                    $petty_detail->station_amount = $request->amount[$selected_id];
+                }else if($petty_cash->status == 1){
+                    $petty_detail->operation_amount = $request->amount[$selected_id];
+                }else{
+                    $petty_detail->finance_amount = $request->amount[$selected_id];
+                }
+                if($petty_detail->amount != $request->amount[$selected_id]){
+                    $amount_log = new PettyCashStatementAmountLog();
+                    $amount_log->petty_cash_statement_detail_id = $petty_detail->id;
+                    $amount_log->admin_id = Auth::id();
+                    $amount_log->changed_amount = $request->amount[$selected_id];
+                    $amount_log->save();
+                }
                 $petty_detail->save();
             }
             $petty_cash->total_amount = $total_amount;
@@ -748,5 +791,25 @@ class AdminPettyCashController extends Controller
       ';
 
         return $html;
+    }
+    public function edit_petty_cash_statements_amount(Request $request){
+        $id = $request->id;
+        if($id){
+            $detail = PettyCashStatementDetail::find($id);
+
+            if($detail){
+                $log_data = array();
+                    $log_data['station'] = ($detail->station_amount != null)? $detail->station_amount: '' ;
+                    $log_data['operation'] = ($detail->operation_amount != null)? $detail->operation_amount: '' ;
+                    $log_data['finance'] = ($detail->finance_amount != null)? $detail->finance_amount: '' ;
+
+                return response()->json(['status' => 0, 'amount' => $log_data]);
+            }else{
+                return response()->json(['status' => 1, 'error' => 'No Details found!']);
+            }
+        }else{
+            return response()->json(['status' => 1, 'error' => 'No Petty Cash Statement Detail ID selected!']);
+
+        }
     }
 }

@@ -4104,11 +4104,13 @@ class DeliveryController extends Controller
         $shipment = Shipment::leftjoin('cities as dc', 'dc.id', '=', 'shipments.consignee_city_id')
             ->leftjoin('shipments_journey as sj', function($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                    ->where('sj.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
             })
             ->leftjoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sj.status_reason_id')
             ->select('shipments.tracking_number as tracking_number','shipments.id as shipment_id','shipments.consignee_name as consignee_name','shipments.consignee_address as consignee_address','shipments.consignee_phone_number_1 as phone','shipments.amount as amount', 'shipments.amount as cod_amount', 'dc.name as destination', 'sj.status_reason_id as reason', 'sj.status_reason_id as reason_id', 'ssr.name as reason_name')
-            ->where('shipments.shipper_status_id', 56)->groupBy('shipments.id');
+            ->where('shipments.shipper_status_id', 56)
+            ->where('shipments.shipper_status_id', DB::raw('`sj.shipper_status_id`'))
+            ->groupBy('shipments.id');
 
         $datatables = Datatables::of($shipment)
             ->editColumn('tracking_number_link', function ($shipment) {
@@ -4196,7 +4198,7 @@ class DeliveryController extends Controller
             ReplacementToRegularLog::create([
                 'shipment_id' => $shipment->id,
                 'updated_by' => Auth::id(),
-                'replacement_charges' => $shipment->replacement_charges,
+                'replacement_charges' => 0,
                 'product_type_id' => $product_type_id,
                 'item_description' => $item_description,
                 'item_quantity' => $item_quantity,
@@ -4204,6 +4206,8 @@ class DeliveryController extends Controller
                 'insurance' => $insurance,
                 'type' => $type,
             ]);
+
+            ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1])->delete();
         }
             return ['status' => 1, 'success' => 'Shipment Service type is changed to Regular and has been marked as Re-Attempt'];
     }
@@ -4279,10 +4283,13 @@ class DeliveryController extends Controller
                         'consignee_status_id' => 13
                     ]);
                     ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+
+                    $replacement_charges = $shipment->replacement_charges;
+
                     ReplacementToRegularLog::create([
                         'shipment_id' => $shipment->id,
                         'updated_by' => Auth::id(),
-                        'replacement_charges' => $shipment->replacement_charges,
+                        'replacement_charges' => $replacement_charges,
                         'product_type_id' => $product_type_id,
                         'item_description' => $item_description,
                         'item_quantity' => $item_quantity,
@@ -4290,6 +4297,15 @@ class DeliveryController extends Controller
                         'insurance' => $insurance,
                         'type' => $type,
                     ]);
+
+                    AdminFinanceController::add_adjustment($shipment->id, $replacement_charges);
+
+                    $shipment->replacement_charges = NULL;
+
+                    $shipment->save();
+
+                    ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1])->delete();
+
                     return redirect()->back()->with('success', 'Shipment Service type has been updated to Regular');
                 }
                 else{
