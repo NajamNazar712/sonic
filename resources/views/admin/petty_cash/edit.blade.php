@@ -96,7 +96,7 @@
 
     <div class="modal fade text-left" id="AmountLogModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AmountLogModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Petty Cash Statement Detail Log</h4>
@@ -104,28 +104,13 @@
                     <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body  text-center">
-
-                        <table class="table table-bordered datatable" id="amountlogtable" style="z-index: 3;">
-                            <thead>
-
-                            <tr role="row" class="bg-primary white">
-                                <th class="border-primary border-darken-1">S. No.</th>
-                                <th class="border-primary border-darken-1">Tracking No.</th>
-                                <th class="border-primary border-darken-1">Service Type</th>
-                                <th class="border-primary border-darken-1">Weight Of Shipment</th>
-
-                            </tr>
-                            </thead>
-                        </table>
-
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button type="submit" class="btn btn-primary">Close</button>
-                            </div>
-                        </div>
+                <div class="modal-body  text-center" id="amount_log_table">
 
                 </div>
+                <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -347,13 +332,8 @@
                     error.addClass('w-100').appendTo(element.parents('td.form-group'));
                 },
                 submitHandler: function(form) {
-                    // table.rows().nodes().each(function(index) {
-                    //     var row = table.row(index);
-                    //     console.log(row.id())
-                    //     var id = parseInt(row.id());
-                    //         // selected_rows.push(parseInt(row.id()));
-                    //     console.log(id)
-                    // });
+
+
                     $('#selected_rows').val(selected_rows);
                     form.submit();
                 }
@@ -697,20 +677,43 @@
                 var id = $(this).parents('tr').attr('id');
                 if(id){
                     $.ajax({
-                        url: '{!! route('admin.petty_cash.statements.edit.log') !!}',
+                        url: '{!! route('admin.petty_cash.statements.view.amount') !!}',
                         method: 'POST',
                         data: {
                             'id': id,
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
+
                         if(data.status){
                             toastr.error(data.error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
                             });
                         }else{
-                            AmountLogModal
+                            var log_table = '';
+                            log_table += '<table class="table table-sm datatable">';
+                            log_table += '<thead>';
+                            log_table += '<tr role="row">';
+                            log_table += '<th><strong>Station Amount</strong></th>';
+                            log_table += '<th><strong>Operation Amount</strong></th>';
+                            log_table += '<th><strong>Finance Amount</strong></th>';
+
+                            log_table += '</tr>';
+                            log_table += '</thead>';
+                            log_table += '<tbody>';
+
+                                log_table += '<tr>';
+                                log_table += '<td>' + data.amount.station + '</td>';
+                                log_table += '<td>' + data.amount.operation + '</td>';
+                                log_table += '<td>' + data.amount.finance + '</td>';
+                                log_table += '</tr>';
+
+                            log_table += '</tbody>';
+                            log_table += '</table>';
+
+                            $('#amount_log_table').html(log_table);
+                            $('#AmountLogModal').modal('show');
                         }
                     });
                 }

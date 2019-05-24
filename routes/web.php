@@ -805,7 +805,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit/approve', 'Admins\AdminPettyCashController@edit_petty_cash_statements_approve')->name('edit.approve');
             Route::post('edit/reject', 'Admins\AdminPettyCashController@edit_petty_cash_statements_reject')->name('edit.reject');
             Route::put('edit/submit', 'Admins\AdminPettyCashController@edit_petty_cash_statements_submit')->name('edit.submit');
-            Route::post('edit/log', 'Admins\AdminPettyCashController@edit_petty_cash_statements_amount_log')->name('edit.log');
+            Route::post('view/amount', 'Admins\AdminPettyCashController@edit_petty_cash_statements_amount')->name('view.amount');
 
 
         });

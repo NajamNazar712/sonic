@@ -17,8 +17,7 @@ class CreatePettyCashStatementAmountLogsTable extends Migration
             $table->increments('id');
             $table->integer('petty_cash_statement_detail_id');
             $table->integer('admin_id');
-            $table->double('old_amount');
-            $table->double('new_amount');
+            $table->double('changed_amount');
             $table->timestamps();
         });
     }
