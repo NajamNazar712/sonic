@@ -756,9 +756,11 @@ class AdminReportsController extends Controller
                     ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
                     ->where('hub_id', '=', $hub->id);
                 })
-                ->whereDoesntHave('shipment_journey', function($query) use ($from,$to,$not_pending_status) {
-                    $query->whereBetween('created_at', [$from,$to])
-                        ->whereIn('shipper_status_id', $not_pending_status);
+                ->whereNotExists(function ($query) use ($from, $to, $not_pending_status) {
+                    $query->from('shipments_journey')
+                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                    ->whereBetween('created_at', [$from, $to])
+                    ->whereIn('shipper_status_id', $not_pending_status);
                 })
                 ->count();
 
