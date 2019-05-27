@@ -289,7 +289,12 @@ class AdminCRMController extends Controller
             ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination')
+            ->leftJoin('crm_request_agent_histories as res', function ($join) {
+                $join->on('res.crm_request_id', '=', 'crm_requests.id')
+                    ->where('res.created_at','=',
+                        DB::raw('(select max(created_at) from crm_request_agent_histories where crm_request_agent_histories.crm_request_id = crm_requests.id and crm_request_agent_histories.agent_id = crm_requests.agent_id)'));
+            })
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date')
             ->whereIn('crm_requests.status_id', [1, 5]);
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
@@ -450,7 +455,12 @@ class AdminCRMController extends Controller
                 $join->on('spt.user_id', '=', 's.user_id')
                     ->where('spt.status', '=', 0);
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'crt.crm_request_tagging_type_id as tagged_type')
+            ->leftJoin('crm_request_status_histories as res', function ($join) {
+                $join->on('res.crm_request_id', '=', 'crm_requests.id')
+                    ->where('res.created_at','=',
+                        DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 2)'));
+            })
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date')
             ->where('crm_requests.status_id', 2);
         if (!in_array(session('role_id'), [1, 4, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $in_process_request = $in_process_request->where(function ($query) {
@@ -650,7 +660,7 @@ class AdminCRMController extends Controller
                         DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 3)'));
             })
             ->leftjoin('admins as ra', 'ra.id', '=', 'res.agent_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'ra.name as resolved_by')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'ra.name as resolved_by')
             ->where('crm_requests.status_id', 3);
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
@@ -793,7 +803,7 @@ class AdminCRMController extends Controller
                     ->where('res.created_at','=',
                         DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 4)'));
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination')
             ->where('crm_requests.status_id', 4);
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {

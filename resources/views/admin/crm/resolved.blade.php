@@ -38,6 +38,7 @@
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1">Resolved By</th>
+                                    <th class="border-primary border-darken-1">Resolved Date</th>
                                     <th class="border-primary border-darken-1">In-Process To Resolved (TAT)</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -108,6 +109,7 @@
                             head.push('Launched By Type');
                             head.push('Launched Date');
                             head.push('Resolved By');
+                            head.push('Resolved Date');
                             head.push('In-Process To Resolved (TAT)');
 
                             $.each(result.data, function(index, values) {
@@ -129,6 +131,7 @@
                                 row.push(values.added_by);
                                 row.push(values.created_at);
                                 row.push(values.resolved_by);
+                                row.push(values.resolved_date);
                                 row.push(values.in_process_resolved_tat);
 
                                 body.push(row);
@@ -318,6 +321,7 @@
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'resolved_by', name: 'ra.name', class: 'align-middle resolved_by'},
+                    {data: 'resolved_date', name: 'res.created_at', class: 'align-middle resolved_date'},
                     {data: 'in_process_resolved_tat', name: 'in_process_resolved_tat', class: 'align-middle in_process_resolved_tat', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 

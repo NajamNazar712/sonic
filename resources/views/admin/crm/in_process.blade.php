@@ -38,6 +38,7 @@
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
                                     <th class="border-primary border-darken-1">Tagged To</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Valid Date</th>
                                     <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -109,6 +110,7 @@
                             head.push('Tagged (Admin/Department)');
                             head.push('Tagged To');
                             head.push('Launched Date');
+                            head.push('Valid Date');
                             head.push('Launched To Today (TAT)');
 
                             $.each(result.data, function(index, values) {
@@ -131,6 +133,7 @@
                                 row.push(values.tagged);
                                 row.push(values.tagged_to);
                                 row.push(values.created_at);
+                                row.push(values.valid_date);
                                 row.push(values.current_tat);
 
                                 body.push(row);
@@ -399,6 +402,7 @@
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'valid_date', name: 'res.created_at', class: 'align-middle valid_date'},
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 

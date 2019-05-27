@@ -35,6 +35,7 @@
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Closed Date Date</th>
                                     <th class="border-primary border-darken-1">Launched To Closed (TAT)</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -82,6 +83,7 @@
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Launched Date');
+                            head.push('Closed Date');
                             head.push('Launched To Closed (TAT)');
 
                             $.each(result.data, function(index, values) {
@@ -102,6 +104,7 @@
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.created_at);
+                                row.push(values.closed_date);
                                 row.push(values.total_tat);
 
                                 body.push(row);
@@ -150,6 +153,7 @@
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'closed_date', name: 'res.created_at', class: 'align-middle closed_date'},
                     {data: 'total_tat', name: 'total_tat', class: 'align-middle total_tat', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
