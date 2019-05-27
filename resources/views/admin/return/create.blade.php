@@ -265,8 +265,9 @@
                             } else {
                                 var rowNo = table.rows().count();
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
-                                table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
+                                var row = table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
                                 table.draw(false);
+                                $('tr#'+row).attr('class',data.class);
                                 scan_sound(1);
                                 UnblockPagePermanently();
                                 shipment_ids.push(data.shId);
@@ -300,8 +301,9 @@
                                 } else {
                                     var rowNo = table.rows().count();
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
-                                    table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
+                                    var row = table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
                                     table.draw(false);
+                                    $('tr#'+row).attr('class',data.class);
                                     scan_sound(1);
                                     UnblockPagePermanently();
                                     shipment_ids.push(data.shId);

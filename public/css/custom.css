@@ -256,6 +256,9 @@ p.comment {
   margin-left: -480px;
 }
 
+.complaint_row{
+	background-color: var(--light);
+}
 .marquee3k {
 	margin: 0 15px;
 	padding: 5px 0;
