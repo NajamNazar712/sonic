@@ -57,6 +57,14 @@
                                                 </td>
                                             </tr>
                                             @endif
+                                            @if(!empty($shipper))
+                                            <tr>
+                                                <th scope="row">Shipper Name</th>
+                                                <td class="name">
+                                                    <h5 class="mb-0">{{$shipper}}</h5>
+                                                </td>
+                                            </tr>
+                                            @endif
                                             <tr>
                                                 <th scope="row">Case Nature</th>
                                                 <td class="name">
@@ -208,9 +216,9 @@
                                                                     </div>
 
                                                                     <div class="chat-body">
-                                                                        <div class="chat-content">
-                                                                            <p>{{$comment->comment}}</p>
-                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}}</small>
+                                                                        <div class="chat-content text-left">
+                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
                                                                         </div>
                                                                     </div>
 
@@ -231,9 +239,9 @@
                                                                     </div>
 
                                                                     <div class="chat-body">
-                                                                        <div class="chat-content">
-                                                                            <p>{{$comment->comment}}</p>
-                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}}</small>
+                                                                        <div class="chat-content text-left">
+                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -252,9 +260,9 @@
                                                                     </div>
 
                                                                     <div class="chat-body">
-                                                                        <div class="chat-content">
-                                                                            <p>{{$comment->comment}}</p>
-                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}}</small>
+                                                                        <div class="chat-content text-left">
+                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -268,64 +276,70 @@
 
                                             @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))
                                                 <section class="chat-app-form">
-                                                    <form class="chat-app-input d-flex" id="chat_form">
+                                                    <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
-                                                                class="form-group position-relative has-icon-left col-8 m-0">
+                                                                class="form-group position-relative has-icon-left col-10 m-0">
                                                             <input type="hidden" id="last_comment_id"
                                                                    value="{{$last_comment_id}}">
                                                             <div class="form-control-position">
                                                                 <i class="la la-chevron-right"></i>
                                                             </div>
-                                                            <input type="text" class="form-control" id="chat_input"
-                                                                   placeholder="Type your message">
+                                                            {{--<input type="text" class="form-control" id="chat_input"--}}
+                                                                   {{--placeholder="Type your message">--}}
+                                                            <textarea id="chat_input" class="form-control height-100" placeholder="Type your message" row="4"></textarea>
                                                         </fieldset>
-                                                        <fieldset
-                                                                class="form-group position-relative has-icon-left col-2 m-0">
-                                                            <button id="chat_send" type="button"
-                                                                    class="btn btn-block btn-purple chat_send" to="1"><i
-                                                                        class="la la-paper-plane-o d-lg-none"></i>
-                                                                <span class="">Internal</span>
-                                                            </button>
-                                                        </fieldset>
-                                                        <fieldset
-                                                                class="form-group position-relative has-icon-left col-2 m-0">
-                                                            <button id="chat_send" type="button"
-                                                                    class="btn btn-block btn-default chat_send" to="0">
-                                                                <i class="la la-paper-plane-o d-lg-none"></i>
-                                                                <span class="">Shipper</span>
-                                                            </button>
-                                                        </fieldset>
+                                                        <div class="display-inline-block col">
+                                                            <fieldset
+                                                                    class="form-group position-relative has-icon-left m-0 mb-1">
+                                                                <button id="chat_send" type="button"
+                                                                        class="btn btn-block btn-purple chat_send" to="1"><i
+                                                                            class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="">Internal</span>
+                                                                </button>
+                                                            </fieldset>
+                                                            <fieldset
+                                                                    class="form-group position-relative has-icon-left m-0">
+                                                                <button id="chat_send" type="button"
+                                                                        class="btn btn-block btn-default chat_send" to="0">
+                                                                    <i class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="">Shipper</span>
+                                                                </button>
+                                                            </fieldset>
+                                                        </div>
                                                     </form>
                                                 </section>
                                             @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ))))
                                                 <section class="chat-app-form">
-                                                    <form class="chat-app-input d-flex" id="chat_form">
+                                                    <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
-                                                                class="form-group position-relative has-icon-left col-8 m-0">
+                                                                class="form-group position-relative has-icon-left col-10 m-0">
                                                             <input type="hidden" id="last_comment_id"
                                                                    value="{{$last_comment_id}}">
                                                             <div class="form-control-position">
                                                                 <i class="la la-chevron-right"></i>
                                                             </div>
-                                                            <input type="text" class="form-control" id="chat_input"
-                                                                   placeholder="Type your message">
+                                                            {{--<input type="text" class="form-control" id="chat_input"--}}
+                                                                   {{--placeholder="Type your message">--}}
+                                                            <textarea id="chat_input" class="form-control height-100" placeholder="Type your message"></textarea>
                                                         </fieldset>
-                                                        <fieldset
-                                                                class="form-group position-relative has-icon-left col-2 m-0">
-                                                            <button id="chat_send" type="button"
-                                                                    class="btn btn-block btn-purple chat_send" to="1"><i
-                                                                        class="la la-paper-plane-o d-lg-none"></i>
-                                                                <span class="">Internal</span>
-                                                            </button>
-                                                        </fieldset>
-                                                        <fieldset
-                                                                class="form-group position-relative has-icon-left col-2 m-0">
-                                                            <button id="chat_send" type="button"
-                                                                    class="btn btn-block btn-default chat_send" to="0">
-                                                                <i class="la la-paper-plane-o d-lg-none"></i>
-                                                                <span class="">Shipper</span>
-                                                            </button>
-                                                        </fieldset>
+                                                        <div class="display-inline-block col">
+                                                            <fieldset
+                                                                    class="form-group position-relative has-icon-left m-0 mb-1">
+                                                                <button id="chat_send" type="button"
+                                                                        class="btn btn-block btn-purple chat_send" to="1"><i
+                                                                            class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="">Internal</span>
+                                                                </button>
+                                                            </fieldset>
+                                                            <fieldset
+                                                                    class="form-group position-relative has-icon-left col-2 m-0">
+                                                                <button id="chat_send" type="button"
+                                                                        class="btn btn-block btn-default chat_send" to="0">
+                                                                    <i class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="">Shipper</span>
+                                                                </button>
+                                                            </fieldset>
+                                                        </div>
                                                     </form>
                                                 </section>
                                             @endif
@@ -752,7 +766,7 @@
             });
             $('.chat_send').on('click', function () {
                 var flag = true;
-                var comment = $('#chat_input').val();
+                var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br/>');
                 $('#chat_input').val('');
                 var request_id = '{{$crm_details->id}}';
                 var internal_switch = parseInt($(this).attr('to'));
@@ -788,9 +802,9 @@
                             //     $('div.chat:last-child').find('.chat-body').append(html);
                             // }else{
                             if (internal_switch) {
-                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p><small>just now</small></div></div></div>';
+                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             } else {
-                                var html = '<div class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p><small>just now</small></div></div></div>';
+                                var html = '<div class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             }
                             $('section.chat-app-window .chats').append(html);
 
@@ -828,26 +842,26 @@
                             if (user == 0) {
                                 if (data.comment.comment_type == 0) {
 
-                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p><small>just now</small></div></div></div>';
+                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 } else {
-                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p><small>just now</small></div></div></div>';
+                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 }
                                 $('section.chat-app-window .chats').append(html);
 
                             } else if (user == 1) {
                                 if ($('div.chat:last-child').hasClass('shipper')) {
-                                    var html = '<div class="chat-content"><p>' + data.comment.comment + '</p><small>just now</small></div>';
+                                    var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now  ({{Carbon\Carbon::now()}})</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 } else {
-                                    var html = '<div class="chat chat-left shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p><small>just now</small></div></div></div>';
+                                    var html = '<div class="chat chat-left shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
                             } else {
                                 if ($('div.chat:last-child').hasClass('substitute-user')) {
-                                    var html = '<div class="chat-content"><p>' + data.comment.comment + '</p><small>just now</small></div>';
+                                    var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 } else {
-                                    var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p><small>just now</small></div></div></div>';
+                                    var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
 

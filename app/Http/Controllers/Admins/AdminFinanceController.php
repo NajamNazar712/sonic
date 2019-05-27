@@ -2581,10 +2581,12 @@ class AdminFinanceController extends Controller
     }
 
     public function done_payments_index() {
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+
         $banks = BanksList::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
 
-        return view('admin.finance.done_payments')->with(['banks'=>$banks,'company_banks'=>$company_banks]);
+        return view('admin.finance.done_payments')->with(['banks'=>$banks,'company_banks'=>$company_banks, 'shippers'=>$shippers]);
     }
 
     public function done_payments_list(Request $request) {
@@ -2785,6 +2787,10 @@ class AdminFinanceController extends Controller
         if ($tracking_number = $request->get('tracking_number')) {
             $datatables->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
                 ->where('ss.tracking_number', '=', $tracking_number);
+        }
+
+        if ($shipper = $request->get('search_shipper')) {
+            $datatables->where('u.id', '=', $shipper);
         }
 
         if ($request->get('search_from') && $request->get('search_to')) {
