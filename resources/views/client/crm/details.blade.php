@@ -170,7 +170,8 @@
                                                             <div class="form-control-position">
                                                                 <i class="la la-chevron-right"></i>
                                                             </div>
-                                                            <input type="text" class="form-control" id="chat_input" placeholder="Type your message">
+                                                            {{--<input type="text" class="form-control" id="chat_input" placeholder="Type your message">--}}
+                                                            <textarea id="chat_input" class="form-control width-500 height-75" placeholder="Type your message"></textarea>
                                                         </fieldset>
                                                         <fieldset class="form-group position-relative has-icon-left col-2 m-0">
                                                             <button id="chat_send" type="button" class="btn btn-block btn-info" ><i class="la la-paper-plane-o d-lg-none"></i>
@@ -240,14 +241,9 @@
             $('body').on('change', '#chat_form input', function () {
                 $(this).val($(this).val().trim());
             });
-            $('#chat_form').keypress(function (e) {
-                if (e.keyCode == 13) {
-                    $('#chat_send').trigger('click');
-                }
-            });
             $('#chat_send').on('click', function () {
                 var flag = true;
-                var comment = $('#chat_input').val();
+                var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br>');
                 $('#chat_input').val('');
                 var request_id = '{{$crm_details->id}}';
                 if(comment == ''){
