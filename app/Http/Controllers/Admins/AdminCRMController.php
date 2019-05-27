@@ -313,6 +313,9 @@ class AdminCRMController extends Controller
             ->addColumn('id_padded', function ($requests) {
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
             })
+            ->addColumn('id_padded_link', function ($requests) {
+                return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . '>' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
+            })
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
             })
@@ -475,6 +478,9 @@ class AdminCRMController extends Controller
         $datatables = Datatables::of($in_process_request)
             ->addColumn('id_padded', function ($requests) {
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('id_padded_link', function ($requests) {
+                return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . '>' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
             })
             ->addColumn('tagged', function ($requests) {
                 if($requests->tagged_type == 1){
@@ -655,6 +661,9 @@ class AdminCRMController extends Controller
             ->addColumn('id_padded', function ($requests) {
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
             })
+            ->addColumn('id_padded_link', function ($requests) {
+                return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . '>' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
+            })
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
             })
@@ -794,6 +803,9 @@ class AdminCRMController extends Controller
         $datatables = Datatables::of($closed_request)
             ->addColumn('id_padded', function ($requests) {
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('id_padded_link', function ($requests) {
+                return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . '>' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
             })
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';

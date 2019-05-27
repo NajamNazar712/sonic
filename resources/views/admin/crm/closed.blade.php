@@ -136,7 +136,7 @@
                 order: [[14, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'id_padded', name: 'crm_requests.id', class: 'align-middle request_id'},
+                    {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle id_padded_link'},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
