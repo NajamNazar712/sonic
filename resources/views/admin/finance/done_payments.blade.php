@@ -16,26 +16,33 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
-							<div class="row">
-								<div class="col-3">
+							<div class="row justify-content-center">
+								{{--<div class="col-3">--}}
 									<form id="tracking_number_search_form"
-										  class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+										  class="form-inline mb-1 mr-1" novalidate="novalidate">
 										<div class="form-group">
 											<input type="text" name="tracking_number"
 												   class="form-control tracking_number" id="tracking_number"
 												   placeholder="Tracking Number">
 										</div>
 									</form>
+								{{--</div>--}}
+								<div class="col-3">
+									<fieldset class="form-group">
+										<select name="search_shipper" id="search_shipper" class="form-control select2">
+											@foreach($shippers as $shipper)
+												<option value="{{$shipper->id}}">{{$shipper->name}}</option>
+											@endforeach
+										</select>
+									</fieldset>
 								</div>
 								<div class="col-3">
-
 									<div class="form-group input-group ml">
 										<div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
+											<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+												<span class="la la-calendar-o"></span>
+											</span>
 										</div>
-
 										<input type="text" name="search_from"
 											   class="form-control pickadate bg-primary border-primary white rounded-right"
 											   id="search_date_from" placeholder="From">
@@ -44,18 +51,16 @@
 								<div class="col-3 ">
 									<div class="form-group input-group ml">
 										<div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
+											<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+												<span class="la la-calendar-o"></span>
+											</span>
 										</div>
-
 										<input type="text" name="search_to"
 											   class="form-control pickadate bg-primary border-primary white rounded-right"
 											   id="search_date_to" placeholder="To">
 									</div>
-
 								</div>
-								<div class="col-2">
+								<div class="col-2 text-center">
 									<button type="button" id="search_filter_btn"
 											class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i
 												class="la la-search"></i> Search
@@ -213,6 +218,11 @@
 
 	<script>
 		$(document).ready(function() {
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Shipper',
+                width:'100%',
+                allowClear:true
+            });
 			$('#update_details .company_bank').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'Company Bank*'
@@ -258,6 +268,7 @@
                         data: {
                             'page': 'all',
                             'tracking_number': $('#tracking_number_search_form #tracking_number').val(),
+                            'search_shipper': $('#search_shipper').val(),
                             'search_from': $('input[name="search_from_formatted"]').val(),
                             'search_to': $('input[name="search_to_formatted"]').val(),
                         },
@@ -484,6 +495,7 @@
 					url: '{{ route('admin.finance.done_payments.list') }}',
 					data: function (d) {
 						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
+                        d.search_shipper = $('#search_shipper').val();
                         d.search_from = $('input[name="search_from_formatted"]').val();
                         d.search_to = $('input[name="search_to_formatted"]').val();
 					}
