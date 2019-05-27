@@ -51,6 +51,10 @@
 			up = $this.data('bts-button-up-class');
 		}
 		$this.TouchSpin({
+            min: 0.5,
+            max: 100,
+            step: 0.5,
+            decimals: 2,
 			mousewheel: false,
 			buttondown_class: down,
 			buttonup_class: up,
