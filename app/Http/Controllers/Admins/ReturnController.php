@@ -1703,6 +1703,11 @@ class ReturnController extends Controller
                     $query->where('return_notes.status',2);
                 }
             });
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('return_notes.created_at', [$from,$to]);
+        }
 
         return $datatables->make(true);
     }

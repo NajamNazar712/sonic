@@ -3661,6 +3661,11 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             });
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('delivery_notes.created_at', [$from,$to]);
+        }
         return $datatable->make(true);
 
     }
