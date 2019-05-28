@@ -178,6 +178,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('summary')->name('summary.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@summary_index')->name('index');
             Route::get('list','Shippers\ShipperReportsController@summary_list')->name('list');
+            Route::post('data','Shippers\ShipperReportsController@summary_data')->name('data');
         });
     });
 
@@ -1102,6 +1103,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print_air_waybill', 'Admins\AdminWalkInBookShipmentController@print_air_waybill')->name('print_air_waybill');
             Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
             Route::post('check_min_charges', 'Admins\AdminWalkInBookShipmentController@check_min_charges')->name('check_min_charges');
+        });
+        Route::prefix('history')->name('history.')->group(function () {
+            Route::get('', 'Admins\AdminWalkInBookShipmentController@history_index')->name('walk_in_history');
+            Route::get('list', 'Admins\AdminWalkInBookShipmentController@history_list')->name('walk_in_history_list');
         });
     });
 

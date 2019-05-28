@@ -250,7 +250,7 @@
                         @endif
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(202, session('permissions')))
                     {
-                        text: 'Close',
+                        text: 'Close Requests',
                         className: 'btn btn-danger close_request',
                         enabled: false,
                         action: function (e, dt, node, config) {
