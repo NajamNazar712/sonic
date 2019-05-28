@@ -111,6 +111,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Channel</th>
                         <th class="border-primary border-darken-1">Agent</th>
+                        <th class="border-primary border-darken-1">Request Status</th>
                         <th class="border-primary border-darken-1">Launched By</th>
                         <th class="border-primary border-darken-1">Launched By User Type</th>
                         <th class="border-primary border-darken-1">Launched Date</th>
@@ -282,6 +283,7 @@
                             head.push('Hub');
                             head.push('Channel');
                             head.push('Agent');
+                            head.push('Request Status');
                             head.push('Launched By');
                             head.push('Launched By User Type');
                             head.push('Launched Date');
@@ -304,6 +306,7 @@
                                 row.push(values.hub);
                                 row.push(values.channel);
                                 row.push(values.agent);
+                                row.push(values.request_status);
                                 row.push(values.launched_by_name);
                                 row.push(values.launched_by_type);
                                 row.push(values.launched_date);
@@ -356,7 +359,7 @@
                     }
                 },
                 // rowId: 'shipment_id',
-                order: [[14, 'desc']],
+                order: [[15, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'request_number', name: 'crm_requests.id', class: 'align-middle request_number'},
@@ -370,6 +373,7 @@
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'agent', name: 'a.name', class: 'align-middle agent'},
+                    {data: 'request_status', name: 'crs.name', class: 'align-middle request_status'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle launched_by_name'},
                     {data: 'launched_by_type', name: 'crm_requests.launched_by', class: 'align-middle launched_by_type'},
                     {data: 'launched_date', name: 'crm_requests.created_at', class: 'align-middle launched_date'},

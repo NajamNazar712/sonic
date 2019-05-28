@@ -2161,6 +2161,12 @@ class AdminPickupsController extends Controller
                     return 0;
                 }
             });
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $pickup_note->whereBetween('pickup_notes.created_at', [$from,$to]);
+        }
         return $pickup_note->make(true);
     }
     public function history_bookings(Request $request){

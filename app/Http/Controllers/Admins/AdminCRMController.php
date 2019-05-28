@@ -139,12 +139,15 @@ class AdminCRMController extends Controller
     public function request_details(Request $request,$id){
         $crm_request = CrmRequest::find($id);
         $shipment_status = null;
+        $shipper = null;
         if($crm_request->shipment_id != null) {
             $shipment_status = Shipment::find($crm_request->shipment_id);
             $shipment_status = $shipment_status->status_shipper->name;
         }
-        $shipper = User::find($crm_request->shipper_id);
-        $shipper = $shipper->name;
+        if($crm_request->shipper_id != null){
+            $shipper = User::find($crm_request->shipper_id);
+            $shipper = $shipper->name;
+        }
         $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
             ->select('a.id as id', 'a.name as name')
             ->whereNotIn('admin_roles.department_id', [1,3])->get();

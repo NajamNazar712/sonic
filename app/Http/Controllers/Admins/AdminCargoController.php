@@ -1502,7 +1502,11 @@ class AdminCargoController extends Controller
                     $query->whereRaw('false');
                 }
             });
-
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('cargo_consignments.created_at', [$from,$to]);
+        }
 
         return $datatables->make(true);
     }

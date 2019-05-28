@@ -134,10 +134,13 @@ class AdminReportsController extends Controller
     public function return_note_index(Request $request){
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
-        return view('admin.reports.return_notes_report')->with(['riders'=>$riders,'admins'=>$admins]);
+        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->where('status',1)->select('id','name')->get();
+        return view('admin.reports.return_notes_report')->with(['riders' => $riders, 'admins' => $admins, 'hubs' => $hubs]);
     }
     public function return_note_list(Request $request){
-        $return_note = DB::connection('reports')->table('return_notes')->join('riders','riders.id','=','return_notes.rider_id')
+        $return_note = DB::connection('reports')->table('return_notes')
+            ->join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
+            ->join('riders','riders.id','=','return_notes.rider_id')
             ->leftjoin('return_note_shipments as rns','rns.return_note_id', '=', 'return_notes.id')
             ->leftjoin('shipments','shipments.id', '=', 'rns.shipment_id')
             ->join('admins as cr','cr.id','=','return_notes.admin_id')
@@ -180,6 +183,9 @@ class AdminReportsController extends Controller
         }
         if($rider = $request->get('search_rider')){
             $return->where('riders.id','=',$rider);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $return->where('oc.id', '=', $hub);
         }
         if($created_by = $request->get('search_created_by')){
             $return->where('cr.id','=',$created_by);
@@ -2374,7 +2380,8 @@ class AdminReportsController extends Controller
     public function completed_delivery_notes_index(){
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
-        return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins]);
+        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->where('status',1)->select('id','name')->get();
+        return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins, 'hubs' => $hubs]);
     }
     public function completed_delivery_notes_list(Request $request){
         $deliveries = DB::connection('reports')->table('delivery_notes')->
@@ -2460,6 +2467,9 @@ class AdminReportsController extends Controller
         }
         if($submitted_by = $request->get('search_updated_by')){
             $datatable->where('ub.id','=',$submitted_by);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $datatable->where('oc.id', '=', $hub);
         }
         if($submission_date = $request->get('search_submission')){
             $datatable->whereDate('delivery_notes.updated_at',$submission_date);
@@ -4367,6 +4377,7 @@ public function revenue_index(){
 
     public function crm_list(Request $request){
         $crm = DB::connection('reports')->table('crm_requests')->leftjoin('shipments as s','s.id','=','crm_requests.shipment_id')
+            ->leftjoin('crm_request_statuses as crs', 'crs.id' , '=', 'crm_requests.status_id')
             ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('users as u', 'u.id', '=', 'crm_requests.shipper_id')
@@ -4395,7 +4406,7 @@ public function revenue_index(){
                 $join->on('crshc.crm_request_id', '=', 'crm_requests.id')
                     ->where('crshc.created_at', '=', DB::connection('reports')->raw('(select max(created_at) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 4)'));
             })
-            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crsh.created_at as valid_invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id')
+            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crsh.created_at as valid_invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status')
         ->groupBy('crm_requests.id');
         $datatable = Datatables::of($crm)
             ->editColumn('tracking_number_link', function ($crm_request) {
