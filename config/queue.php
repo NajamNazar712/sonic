@@ -65,6 +65,14 @@ return [
             'block_for' => null,
         ],
 
+        'shipment_booking' => [
+            'driver' => 'sqs',
+            'key' => env('SQS_KEY', 'your-public-key'),
+            'secret' => env('SQS_SECRET', 'your-secret-key'),
+            'prefix' => env('SQS_PREFIX_SHIPMENT_BOOKING', 'https://sqs.us-east-1.amazonaws.com/your-account-id'),
+            'queue' => env('SQS_QUEUE_SHIPMENT_BOOKING', 'your-queue-name'),
+            'region' => env('SQS_REGION', 'us-east-1'),
+        ]
     ],
 
     /*

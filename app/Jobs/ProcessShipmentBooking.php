@@ -27,6 +27,7 @@ class ProcessShipmentBooking implements ShouldQueue
      */
     public function __construct(array $booking)
     {
+        $this->connection = 'shipment_booking';
         $this->queue = 'booking';
         $this->booking = $booking;
     }
