@@ -35,7 +35,7 @@
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
-                                    <th class="border-primary border-darken-1">Closed Date Date</th>
+                                    <th class="border-primary border-darken-1">Closed Date</th>
                                     <th class="border-primary border-darken-1">Launched To Closed (TAT)</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -136,7 +136,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.crm.closed.list') }}',
                 rowId: 'id',
-                order: [[14, 'desc']],
+                order: [[15, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle id_padded_link'},

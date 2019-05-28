@@ -1097,6 +1097,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
             Route::post('check_min_charges', 'Admins\AdminWalkInBookShipmentController@check_min_charges')->name('check_min_charges');
         });
+        Route::prefix('history')->name('history.')->group(function () {
+            Route::get('', 'Admins\AdminWalkInBookShipmentController@history_index')->name('walk_in_history');
+            Route::get('list', 'Admins\AdminWalkInBookShipmentController@history_list')->name('walk_in_history_list');
+        });
     });
 
     //CMC Routes

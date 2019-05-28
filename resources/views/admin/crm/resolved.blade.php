@@ -233,7 +233,7 @@
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(182, session('permissions')))
                     {
                         text: 'Close Requests',
-                        className: 'btn btn-primary close_requests',
+                        className: 'btn btn-danger close_requests',
                         enabled: false,
                         action: function (e, dt, node, config) {
                                 swal({
@@ -363,7 +363,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.crm.resolved.list') }}',
                 rowId: 'id',
-                order: [[15, 'desc']],
+                order: [[17, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

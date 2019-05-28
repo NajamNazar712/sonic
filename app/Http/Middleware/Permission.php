@@ -450,7 +450,10 @@ class Permission
             'cancelled_shipments.revert' => 118,
 
             'shipment.book.walk_in' => 155,
-            'shipment.book.store' => 155
+            'shipment.book.store' => 155,
+
+            'shipment.history.walk_in_history' => 206,
+            'shipment.history.walk_in_history_list' => 206,
         ],
 
         'shipper' => [

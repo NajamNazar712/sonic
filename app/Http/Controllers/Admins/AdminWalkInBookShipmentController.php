@@ -7,6 +7,7 @@ use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
@@ -25,13 +26,14 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\PaymentMode;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 
 use Auth;
 
 use Validator;
 use Illuminate\Validation\Rule;
-
+use Yajra\Datatables\Datatables;
 
 
 class AdminWalkInBookShipmentController extends Controller
@@ -850,5 +852,81 @@ class AdminWalkInBookShipmentController extends Controller
             }
             return ['status' => 1, 'min_charges' => $min_charges];
         }
+    }
+
+    public function history_index(){
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        $charges_mode = ChargesModes::select('id','charges_mode')->get();
+        return view('admin.shipment.history.walk_in_history')->with(['shipment_status' => $shipment_status, 'charges_mode' => $charges_mode]);
+    }
+
+    public function history_list(Request $request){
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->join('admins as a', 'a.id', '=' , 'sj.admin_id')
+            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftjoin('charges_modes as cm', 'cm.id', '=', 'shipments.charges_mode_id')
+            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
+            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','ss.name as status', 'a.name as booked_by', 'oc.name as origin','dc.name as destination', 'h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_address','shipments.weight_charges','shipments.fuel_surcharge','shipments.return_charges','shipments.gst','shipments.created_at as arrival_date','shipments.amount', 'shipments.received_amount', 'shipments.charges_mode_id', 'cm.charges_mode as charges_mode'])
+            ->where('shipments.booking_type_id', 4)
+            ->groupBy('shipments.id');
+            $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('aging',function ($shipments){
+                $days = Carbon::now()->diffInDays($shipments->arrival_date);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            })
+            ->addColumn('total_charges', function($shipment){
+                if ($shipment->charges_mode_id == 1) {
+                    return (($shipment->received_amount) ? number_format($shipment->received_amount) : '0');
+                }
+                else if ($shipment->charges_mode_id == 2) {
+                    return (($shipment->amount) ? number_format($shipment->amount) : '0');
+                }
+                else {
+                    return '0';
+                }
+            })
+            ->editColumn('return_charges', function ($shipment){
+                if($shipment->return_charges != null){
+                    return $shipment->return_charges;
+                }
+                else{
+                    return "-";
+                }
+            })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            });
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+        }
+        return $datatable->make(true);
     }
 }
