@@ -26,6 +26,15 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <select name="search_hub" id="search_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="search_rider" id="search_rider" class="form-control select2">
                                 @foreach($riders as $rider)
                                     <option value="{{$rider->id}}">{{$rider->name}}</option>
@@ -255,6 +264,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Hub',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_dn_no,#search_tracking_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
