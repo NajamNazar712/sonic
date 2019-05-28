@@ -878,6 +878,9 @@ class AdminWalkInBookShipmentController extends Controller
             ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','ss.name as status', 'a.name as booked_by', 'oc.name as origin','dc.name as destination', 'h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_address','shipments.weight_charges','shipments.fuel_surcharge','shipments.return_charges','shipments.gst','shipments.created_at as arrival_date','shipments.amount', 'shipments.received_amount', 'shipments.charges_mode_id', 'cm.charges_mode as charges_mode'])
             ->where('shipments.booking_type_id', 4)
             ->groupBy('shipments.id');
+        if (!in_array(session('role_id'), [1, 2, 3, 4, 5, 6]) && in_array(206, session('permissions'))){
+            $shipments = $shipments->where('sj.admin_id', Auth::id());
+        }
             $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('admin.tracking.index');
