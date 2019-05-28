@@ -4518,7 +4518,6 @@ public function revenue_index(){
     }
 
     public function summary_data(Request $request){
-
         $stats = array();
         $shipper = $request->shipper;
         $from = $request->from_date;

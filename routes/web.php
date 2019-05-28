@@ -178,6 +178,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('summary')->name('summary.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@summary_index')->name('index');
             Route::get('list','Shippers\ShipperReportsController@summary_list')->name('list');
+            Route::post('data','Shippers\ShipperReportsController@summary_data')->name('data');
         });
     });
 

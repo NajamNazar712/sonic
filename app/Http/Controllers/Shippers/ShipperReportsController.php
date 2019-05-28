@@ -151,7 +151,114 @@ class ShipperReportsController extends Controller
             }
             return $datatable->make(true);
     }
+    public function summary_data(Request $request){
+        $stats = array();
+        $from = $request->from_date;
+        $to = $request->to_date;
+        $origin = $request->origin;
+        $destination = $request->destination;
+        if($from == null || $to == null){
+            $today = Carbon::now()->endOfDay();
+            $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
+        }else{
+            $thirtyDays = $from;
+            $today = $to;
+        }
+        $today = Carbon::now()->endOfDay();
+        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
+        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
 
+        if ($origin) {
+            $stats['total'] = $stats['total']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['booked'] = $stats['booked']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['canceled'] = $stats['canceled']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['received'] = $stats['received']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['delivered'] = $stats['delivered']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['return'] = $stats['return']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['in_process'] = $stats['in_process']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+        }
+
+        if ($destination) {
+            $stats['total'] = $stats['total']->where('consignee_city_id', $destination);
+            $stats['booked'] = $stats['booked']->where('consignee_city_id', $destination);
+            $stats['received'] = $stats['received']->where('consignee_city_id', $destination);
+            $stats['canceled'] = $stats['canceled']->where('consignee_city_id', $destination);
+            $stats['delivered'] = $stats['delivered']->where('consignee_city_id', $destination);
+            $stats['return'] = $stats['return']->where('consignee_city_id', $destination);
+            $stats['in_process'] = $stats['in_process']->where('consignee_city_id', $destination);
+        }
+
+        $stats['total'] = number_format($stats['total']->count());
+        $stats['booked'] = number_format($stats['booked']->count());
+        $stats['canceled'] = number_format($stats['canceled']->count());
+        $stats['received'] = number_format($stats['received']->count());
+        $stats['delivered'] = number_format($stats['delivered']->count());
+        $stats['return'] = number_format($stats['return']->count());
+        $stats['in_process'] = number_format($stats['in_process']->count());
+        return response()->json(['status' => 1, 'stats' => $stats]);
+    }
     public function summary_index(){
         $stats = array();
         $today = Carbon::now()->endOfDay();
