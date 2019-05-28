@@ -28,8 +28,7 @@ class ProcessShipmentBooking implements ShouldQueue
      */
     public function __construct(array $booking)
     {
-        $this->connection = 'shipment_booking';
-        $this->queue = 'SonicShipmentBooking.fifo';
+        $this->connection = 'sqs-fifo';
         $this->messageGroupId = 'shipment_booking';
         $this->booking = $booking;
     }

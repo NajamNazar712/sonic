@@ -65,7 +65,7 @@ return [
             'block_for' => null,
         ],
 
-        'shipment_booking' => [
+        'sqs-fifo' => [
             'driver' => 'sqs-fifo',
             'key' => env('SQS_KEY', 'your-public-key'),
             'secret' => env('SQS_SECRET', 'your-secret-key'),
