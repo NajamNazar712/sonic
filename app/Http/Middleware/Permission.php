@@ -333,8 +333,12 @@ class Permission
 			'reports.revenue.index' => 177,
             'reports.revenue.list' => 177,
 			'reports.crm.index' => 200,
-            'reports.crm.list' => 200,            'reports.gst.index' => 199,
+            'reports.crm.list' => 200,
+            'reports.gst.index' => 199,
             'reports.gst.list' => 199,
+            'reports.summary.index' => 206,
+            'reports.summary.data' => 206,
+            'reports.summary.list' => 206,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

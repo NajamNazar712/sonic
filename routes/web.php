@@ -989,6 +989,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@gst_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@gst_list')->name('list');
         });
+
+		Route::prefix('summary')->name('summary.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@summary_index')->name('index');
+            Route::post('data', 'Admins\AdminReportsController@summary_data')->name('data');
+            Route::get('list', 'Admins\AdminReportsController@summary_list')->name('list');
+        });
     });
 
     //Reports end

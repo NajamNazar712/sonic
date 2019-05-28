@@ -4507,5 +4507,131 @@ public function revenue_index(){
 
         return $datatable->make(true);
     }
+
+    public function summary_index(Request $request){
+        $today = Carbon::now()->endOfDay();
+        $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
+        $shippers = DB::connection('reports')->table('users')->where('status','>=',3)->get();
+        $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
+
+        return view('admin.reports.summary')->with(['hubs'=>$hubs,'shippers'=>$shippers,'today' => $today, 'thirtyday' => $thirtyDays]);
+    }
+
+    public function summary_data(Request $request){
+
+        $stats = array();
+        $shipper = $request->shipper;
+        $from = $request->from_date;
+        $to = $request->to_date;
+        $origin = $request->origin;
+        $destination = $request->destination;
+        if($from == null || $to == null){
+            $toDays = Carbon::now()->endOfDay();
+            $fromDays = Carbon::now()->subDays(30)->startOfDay();
+        }else{
+            $fromDays = $from;
+            $toDays = $to;
+        }
+
+        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['total'] = number_format($stats['total']->count());
+        $stats['booked'] = number_format($stats['booked']->count());
+        $stats['canceled'] = number_format($stats['canceled']->count());
+        $stats['received'] = number_format($stats['received']->count());
+        $stats['delivered'] = number_format($stats['delivered']->count());
+        $stats['return'] = number_format($stats['return']->count());
+        $stats['in_process'] = number_format($stats['in_process']->count());
+
+
+        return response()->json(['status' => 1, 'stats' => $stats]);
+
+    }
+    public function summary_list(Request $request){
+        $shipments = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftjoin('shipment_items as si', function ($join) {
+                $join->on('si.shipment_id', '=', 'shipments.id')
+                    ->where('si.type','=',0);
+            })
+            ->leftjoin('products as p','p.id','=','si.product_type_id')
+            ->select(['shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','p.product_name','si.description','sj.created_at as arrival_date','oc.name as origin','dc.name as destination']);
+        if( $request->get('search_shipper')){
+            $shipments->where('shipments.user_id', '=',$request->get('search_shipper'));
+        }else{
+            $shipments->where('shipments.user_id', '=', null);
+        }
+
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments = $shipments->whereBetween('shipments.created_at', [$from,$to]);
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('collection_amount', function ($shipments){
+                return number_format($shipments->collection_amount);
+            });
+//        if($shipper = $request->get('search_shipper')){
+//            $datatable->where('shipments.user_id','=', $shipper);
+//        }
+        if($origin = $request->get('search_origin')){
+            $datatable->where('oc.id', '=', $origin);
+        }
+        if($destination = $request->get('search_destination')){
+            $datatable->where('dc.id', '=', $destination);
+        }
+        if($card = $request->get('cards_filter')){
+            switch ($card) {
+                case 'total':
+                    $today = Carbon::now()->endOfDay();
+                    $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
+                    $datatable->whereBetween('shipments.created_at',[$thirtyDays,$today]);
+                    break;
+                case 'booked':
+                    $datatable->where('shipments.shipper_status_id',1);
+                    break;
+                case 'received':
+                    $datatable->whereIn('shipments.shipper_status_id',[2,3,4]);
+                    break;
+                case 'delivered':
+                    $datatable->whereIn('shipments.shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
+                    break;
+                case 'returned':
+                    $datatable->whereIn('shipments.shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50]);
+                    break;
+                case 'in_process':
+                    $datatable->whereIn('shipments.shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52]);
+                    break;
+                case 'cancelled':
+                    $datatable->where('shipments.shipper_status_id',17);
+                    break;
+            }
+        }
+        return $datatable->make(true);
+
+    }
+
+
 }
 
