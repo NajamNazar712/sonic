@@ -29,6 +29,7 @@ class ProcessShipmentBooking implements ShouldQueue
     {
         $this->connection = 'shipment_booking';
         $this->queue = 'SonicShipmentBooking.fifo';
+        $this->group = 'shipment_booking';
         $this->booking = $booking;
     }
 
