@@ -12,19 +12,19 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
-                    <div class="col-12">
+                    <div class="col-12 ">
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="post" action="{{route('admin.reports.customer_sales.export_to_excel')}}">
 
-                            <div class="col">
-                                <div class="form-group">
+                            <div class="col-4">
+                                <div class="form-group pb-1">
                                     <select name="shipper" class="select2" id="shipper" data-rule-required="true" data-msg-required="Shipper is required">
                                         @foreach($shippers as $shipper)
                                             <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
                                         @endforeach
                                     </select>
                                 </div></div>
-                            <div class="col">
-                                <div class="form-group">
+                            <div class="col-4">
+                                <div class="form-group pb-1">
                                     <select name="origin" class="select2" id="origin">
                                         @foreach($hubs as $city)
                                             <option value="{{ $city->id }}">{{ $city->name }}</option>
@@ -32,8 +32,8 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="form-group">
+                            <div class="col-4">
+                                <div class="form-group pb-1">
                                     <select name="destination" class="select2" id="destination">
                                         @foreach($hubs as $city)
                                             <option value="{{ $city->id }}">{{ $city->name }}</option>
@@ -41,7 +41,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col">
+                            <div class="col-4">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -51,7 +51,7 @@
                                     <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" data-value="{{$thirtyday}}">
                                 </div>
                             </div>
-                            <div class="col">
+                            <div class="col-4">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -62,9 +62,9 @@
                                 </div>
                             </div>
 
-                            <div class="col">
-                                <div class="form-group ml-1">
-                                    <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
                             </div>
                         </form>
