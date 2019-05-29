@@ -1146,3 +1146,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 });
+
+Route::prefix('shopify')->name('shopify.')->group(function (){
+   Route::get('', 'ShopifyController@access');
+    Route::get('/callback', 'ShopifyController@callback');
+    Route::get('/app', 'ShopifyController@app');
+    Route::get('/orders', 'ShopifyController@orders');
+
+});
