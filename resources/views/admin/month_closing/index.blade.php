@@ -637,8 +637,9 @@
                                     '_token': '{{ csrf_token() }}'
                                 }
                             }).done(function(data){
+                                console.log(data);
                                 UnblockPagePermanently();
-                               if(data.status) {
+                               if(data.status == 1) {
 
                                    var html = '';
                                    html += 'Errors in following Shipment(s) !<br/>';
