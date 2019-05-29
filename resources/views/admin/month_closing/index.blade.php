@@ -642,7 +642,7 @@
                                if(data.status == 1) {
 
                                    var html = '';
-                                   html += 'No Shipment was added due to:<br/>';
+                                   html += 'The following Shipment(s) could not be added:<br/>';
                                    $.each(data.errors, function (index, message) {
                                        html += index + ': ' + message + '<br/>';
                                    });
@@ -669,7 +669,7 @@
                                    table.draw(true);
 
                                }else if(data.status == 2){
-                                   var success = "Shipment(s) has been successfully added!";
+                                   var success = "Shipment(s) has been successfully added";
                                    toastr.success(success, 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                                    scan_sound(2);
@@ -679,7 +679,7 @@
                                    var html = '';
                                    html += 'Some Shipment(s) has been successfully added!<br/>';
 
-                                   html += 'The following Shipment(s) could not be added due to:<br/>';
+                                   html += 'The following Shipment(s) could not be added:<br/>';
 
                                    $.each(data.errors, function (index, message) {
                                        html += index + ': ' + message + '<br/>';
