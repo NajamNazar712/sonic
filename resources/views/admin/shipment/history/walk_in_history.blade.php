@@ -302,7 +302,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.aging')) {
+                        if ($(header).is('.serial_number') || $(header).is('.total_charges') || $(header).is('.aging')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.status')){
