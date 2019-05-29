@@ -200,7 +200,6 @@ class AdminReportsController extends Controller
     //Return Note Print
     public function return_note_shipments(Request $request){
         $return_note_id = $request->input('return_note_id');
-        $return_note_details = DB::connection('reports')->table('return_notes')->find($return_note_id);
         $return_note_shipments = DB::connection('reports')->table('return_note_shipments')->where('return_note_id', $return_note_id)->get();
         $shipments = array();
         if($return_note_shipments->count() != 0){
@@ -287,7 +286,6 @@ class AdminReportsController extends Controller
     public function pickup_note_bookings(Request $request){
         $pickup_note_id = $request->input('pickup_note_id');
 
-        $pickup_note = DB::connection('reports')->table('pickup_notes')->find($pickup_note_id);
         $pickup_note_requests = DB::connection('reports')->table('pickup_note_requests')->where('pickup_note_id', $pickup_note_id)->get();
 
         if ($pickup_note_requests->count() != 0){
@@ -1109,10 +1107,8 @@ class AdminReportsController extends Controller
             if (session('role_id') == 1) {
                 if ($search_city != null) {
 
-                    $city = DB::connection('reports')->table('cities')->find($search_city);
+                    $city = DB::connection('reports')->table('cities')->where('id', $search_city)->select('id', 'name')->first();
                     $search_city_hub = $city->id;
-                    $city['id'] = $city->id;
-                    $city['name'] = $city->name;
                     $hubs[] = $city;
                 } else {
                     $search_city_hub = '';
@@ -1121,10 +1117,8 @@ class AdminReportsController extends Controller
             } else {
                 if ($search_city != null) {
 
-                    $city = DB::connection('reports')->table('cities')->find($search_city);
+                    $city = DB::connection('reports')->table('cities')->where('id', $search_city)->select('id', 'name')->first();
                     $search_city_hub = $city->id;
-                    $city['id'] = $city->id;
-                    $city['name'] = $city->name;
                     $hubs[] = $city;
                 } else {
                     $search_city_hub = '';
@@ -1655,7 +1649,7 @@ class AdminReportsController extends Controller
 
         if($sales_tagging == TRUE){
             if($search_city != null){
-                $pickup_request_shippers = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
+                $pickup_request_shippers = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($search_city_hub) {
                     $query->from('user_shipping_infos')
                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
                     ->whereExists(function($sub_query) use ($search_city_hub) {
@@ -2092,7 +2086,7 @@ class AdminReportsController extends Controller
         $city_name = '';
         $file_name_without_path = '';
         if($search_city != null){
-            $city_name = $city['name'];
+            $city_name = $city->name;
         }
         if($sales_tagging == TRUE){
             $file_name_without_path = "reports/daily_pickup_sales_report_".$date_file_name.'_'.$city_name.$time_string.".xlsx";
@@ -2480,7 +2474,6 @@ class AdminReportsController extends Controller
     //completed_delivery_note
     public function completed_shipments(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
-        $delivery_note_details = DB::connection('reports')->table('delivery_notes')->find($delivery_note_id);
         $delivery_note_shipments = DB::connection('reports')->table('delivery_note_shipments')->where('delivery_note_id', $delivery_note_id)->get();
         $shipments = array();
         if($delivery_note_shipments->count() != 0){
@@ -2495,7 +2488,6 @@ class AdminReportsController extends Controller
     }
     public function completed_shipments_delivered(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
-        $delivery_note_details = DB::connection('reports')->table('delivery_notes')->find($delivery_note_id);
         $delivery_note_shipments = DB::connection('reports')->table('delivery_note_shipments')->where('delivery_note_id', $delivery_note_id)->where('status', '>', 1)->get();
         $shipments = array();
         if($delivery_note_shipments->count() != 0){
@@ -3410,7 +3402,6 @@ class AdminReportsController extends Controller
 
     public function fake_status_shipments_total(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
-        $delivery_note_details = DB::connection('reports')->table('delivery_notes')->find($delivery_note_id);
         $delivery_note_shipments = DB::connection('reports')->table('delivery_note_shipments')->where('delivery_note_id', $delivery_note_id)->get();
         $shipments = array();
         if($delivery_note_shipments->count() != 0){
@@ -3425,7 +3416,6 @@ class AdminReportsController extends Controller
     }
     public function fake_status_shipments_undelivered(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
-        $delivery_note_details = DB::connection('reports')->table('delivery_notes')->find($delivery_note_id);
         $delivery_note_shipments = DB::connection('reports')->table('delivery_note_shipments')->where('delivery_note_id', $delivery_note_id)->where('status', '=', 1)->get();
         $shipments = array();
         if($delivery_note_shipments->count() != 0){
@@ -3441,7 +3431,6 @@ class AdminReportsController extends Controller
 
     public function fake_status_shipments(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
-        $delivery_note_details = DB::connection('reports')->table('delivery_notes')->find($delivery_note_id);
         $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->where('fake_status','=',1)->get();
         $shipments = array();
         if($delivery_note_shipments->count() != 0){
