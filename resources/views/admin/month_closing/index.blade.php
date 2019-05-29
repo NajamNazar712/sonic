@@ -695,7 +695,7 @@
                                    scan_sound(2);
                                    table.draw(true);
                                }else if(data.status == 3){
-                                   console.log(data)
+                                   
                                    var html = '';
                                    html += 'Errors in following Shipment(s) !<br/>';
 
