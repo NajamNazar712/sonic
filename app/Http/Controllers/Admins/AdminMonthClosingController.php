@@ -252,7 +252,6 @@ class AdminMonthClosingController extends Controller
         $status = 0;
         if(!empty($errors) && empty($success)) {
             $status = 1;
-
         }
         if(!empty($success)  && empty($errors)){
             $status = 2;
