@@ -94,6 +94,26 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="AmountLogModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AmountLogModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Petty Cash Statement Detail Amount</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body  text-center" id="amount_log_table">
+
+                </div>
+                <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -104,21 +124,21 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style type="text/css">
-        .custom-col-width{
-            min-width: 100px;
-        }
-        th.expense_amount, th.reference_no{
-            width: 80px;
-        }
-        .custom-hub-col-width{
-            min-width: 80px;
-        }
-        .date-col-width{
-            min-width: 190px;
-        }
-        .date-col-width{
-            min-width: 200px;
-        }
+        /*.custom-col-width{*/
+            /*min-width: 100px;*/
+        /*}*/
+        /*th.expense_amount, th.reference_no{*/
+            /*width: 80px;*/
+        /*}*/
+        /*.custom-hub-col-width{*/
+            /*min-width: 80px;*/
+        /*}*/
+        /*.date-col-width{*/
+            /*min-width: 190px;*/
+        /*}*/
+        /*.date-col-width{*/
+            /*min-width: 200px;*/
+        /*}*/
         .total_amount_span{
             font-size: 24px;
             color: #64a0d2;
@@ -309,16 +329,11 @@
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    error.addClass('w-100').appendTo(element.parents('td.form-group'));
                 },
                 submitHandler: function(form) {
-                    // table.rows().nodes().each(function(index) {
-                    //     var row = table.row(index);
-                    //     console.log(row.id())
-                    //     var id = parseInt(row.id());
-                    //         // selected_rows.push(parseInt(row.id()));
-                    //     console.log(id)
-                    // });
+
+
                     $('#selected_rows').val(selected_rows);
                     form.submit();
                 }
@@ -355,10 +370,10 @@
                 var hub_select = '<select class="form-control hub_select select2" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
                 var date_input = '<div class="form-group input-group mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date (From) is required"></div>';
 
-                var expense_detail_input = '<input class="form-control" name="expense['+rows_count+']" placeholder="Enter Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required">';
-                var amount_input = '<input class="form-control amount" name="amount['+rows_count+']" placeholder="Enter Amount">';
-                var reference_input = '<input class="form-control reference_row" name="reference['+rows_count+']" placeholder="Enter Reference No" data-rule-required="true" data-msg-required="Amount is required">';
-                var remarks_input = '<input class="form-control" name="remarks['+rows_count+']" placeholder="Enter Remarks">';
+                var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" name="expense['+rows_count+']" placeholder="Enter Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
+                var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Enter Amount">';
+                var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Enter Reference No" data-rule-required="true" data-msg-required="Amount is required">';
+                var remarks_input = '<input class="form-control form-control-sm" name="remarks['+rows_count+']" placeholder="Enter Remarks">';
                 var heads = $.map({!! $heads !!}, function (obj) {
                     obj.id = obj.id;
                     obj.text = obj.name;
@@ -375,16 +390,19 @@
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
                     placeholder:'Select Account Head',
-                    allowClear:true
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
                 $('select[name="title['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     placeholder:'Select Account Title',
-                    allowClear:true
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
                 $('select[name="hub['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data: hubs_select,
                     placeholder:'Select Hub',
-                    allowClear:true
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
                 $('.reference_row').inputmask({
                     'alias': 'integer',
@@ -457,26 +475,51 @@
                 var id = parseInt($(this).parents('tr').attr('id'));
                 var status = parseInt($(this).parents('tr').attr('status'));
                 if(status == 0 || status == 1) {
-                    $.ajax({
-                        url: '{!! route('admin.petty_cash.statements.edit.approve') !!}',
-                        method: 'POST',
-                        data: {
-                            'detail_id': id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if (data.status) {
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            current.parents('td').prev('td').text('Approved');
-                            current.parents('tr').attr('status',2);
-                        }
-                        else{
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
+                    swal({
+                        text: 'Are you sure, you want to approve this statement?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.petty_cash.statements.edit.approve') !!}',
+                                method: 'POST',
+                                data: {
+                                    'detail_id': id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                if (data.status) {
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    current.parents('td').prev('td').text('Approved');
+                                    current.parents('tr').attr('status',2);
+                                }
+                                else{
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
                             });
                         }
                     });
+
                 }else{
                     var error = 'Current Petty Cash Statement Detail already Approved!';
                     toastr.error(error, 'Error!', {
@@ -490,26 +533,52 @@
                 var id = parseInt($(this).parents('tr').attr('id'));
                 var status = parseInt($(this).parents('tr').attr('status'));
                 if(status == 0 || status == 2) {
-                    $.ajax({
-                        url: '{!! route('admin.petty_cash.statements.edit.reject') !!}',
-                        method: 'POST',
-                        data: {
-                            'detail_id': id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if (data.status) {
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            current.parents('td').prev('td').text('Rejected');
-                            current.parents('tr').attr('status',1);
-                        }
-                        else{
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
+                    swal({
+                        text: 'Are you sure, you want to reject this statement?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.petty_cash.statements.edit.reject') !!}',
+                                method: 'POST',
+                                data: {
+                                    'detail_id': id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                if (data.status) {
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    current.parents('td').prev('td').text('Rejected');
+                                    current.parents('tr').attr('status',1);
+                                    current.parents('td').html('');
+                                }
+                                else{
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
                             });
                         }
                     });
+
                 }
                 else{
                     var error = 'Current Petty Cash Statement Detail already rejected!';
@@ -575,6 +644,7 @@
                 var status = parseInt({{$petty_statement_details->status}});
                 if(status == 0 || status == 1) {
                     $('#statement_approve').attr('disabled', true);
+
                     $.ajax({
                         url: '{!! route('admin.petty_cash.statements.edit.approve') !!}',
                         method: 'POST',
@@ -605,23 +675,59 @@
                     });
                 }
             });
-            {{--$('#reference_no').on('change',function () {--}}
-            {{--var reference_handle = $(this);--}}
-            {{--var reference = $(this).val();--}}
-            {{--$.ajax({--}}
-            {{--url: '{!! route('admin.petty_cash.make.reference') !!}',--}}
-            {{--method: 'POST',--}}
-            {{--data: {--}}
-            {{--'reference_id': reference,--}}
-            {{--'_token': '{{ csrf_token() }}'--}}
-            {{--}--}}
-            {{--}).done(function (data) {--}}
-            {{--if(data.status){--}}
-            {{--reference_handle.val('');--}}
-            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--}--}}
-            {{--})--}}
-            {{--});--}}
+
+            $('#datatable').on('click', 'td .amount_log', function(){
+                var id = $(this).parents('tr').attr('id');
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.petty_cash.statements.view.amount') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+
+                        if(data.status){
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }else{
+                            var log_table = '';
+                            if(data.amount.station == '' || data.amount.operation || data.amount.finance){
+                                log_table = '<p>No Data Found</p>';
+                            }else{
+
+                                log_table += '<table class="table table-sm datatable">';
+                                log_table += '<thead>';
+                                log_table += '<tr role="row">';
+                                log_table += '<th><strong>Station Amount</strong></th>';
+                                log_table += '<th><strong>Operation Amount</strong></th>';
+                                log_table += '<th><strong>Finance Amount</strong></th>';
+
+                                log_table += '</tr>';
+                                log_table += '</thead>';
+                                log_table += '<tbody>';
+
+                                log_table += '<tr>';
+                                log_table += '<td>' + data.amount.station + '</td>';
+                                log_table += '<td>' + data.amount.operation + '</td>';
+                                log_table += '<td>' + data.amount.finance + '</td>';
+                                log_table += '</tr>';
+
+                                log_table += '</tbody>';
+                                log_table += '</table>';
+                            }
+
+
+                            $('#amount_log_table').html(log_table);
+                            $('#AmountLogModal').modal('show');
+                        }
+                    });
+                }
+            });
+
         });
     </script>
 @endsection

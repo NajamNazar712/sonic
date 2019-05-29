@@ -34,6 +34,8 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Shipper\SubstituteUser;
 
+use App\Jobs\ProcessShipmentBooking;
+
 use Auth;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -1353,165 +1355,16 @@ class ShipperShipmentBookController extends Controller
 
                 if (empty($errors)) {
                     if (empty($nsa_error)) {
-                        $tracking_numbers = array();
-
                         foreach ($rows as $key => $row) {
-                            $row_id = $key + 2;
-                            $service_type_id = $row['service_type_id'];
-                            $pickup_address_id = $row['pickup_address_id'];
-                            $pickup_city_id = $user_shipping_info->city_id;
+                            $row['user_id'] = $user_id;
+                            $row['account_type_id'] = 1;
+                            $row['nsas'] = $check;
+                            $row['nsa'] = $request->excel_nsa;
 
-                            if (strtolower($row['information_display']) == 'yes') {
-                                $information_display = TRUE;
-                            } else {
-                                $information_display = FALSE;
-                            }
-
-                            $consignee_city_id = City::where('name', $row['consignee_city_name'])->first()->id;
-                            $consignee_name = $row['consignee_name'];
-                            $consignee_address = $row['consignee_address'];
-                            $consignee_phone_number_1 = substr_replace($row['consignee_phone_number_1'], '-', 4, 0);
-
-                            if (!empty(trim($row['consignee_phone_number_2']))) {
-                                $consignee_phone_number_2 = substr_replace($row['consignee_phone_number_2'], '-', 4, 0);
-                            } else {
-                                $consignee_phone_number_2 = NULL;
-                            }
-
-                            if (!empty(trim($row['consignee_email_address']))) {
-                                $consignee_email_address = $row['consignee_email_address'];
-                            } else {
-                                $consignee_email_address = NULL;
-                            }
-
-                            if (!empty(trim($row['order_id']))) {
-                                $order_id = $row['order_id'];
-                            } else {
-                                $order_id = NULL;
-                            }
-
-                            $pickup_date = $row['pickup_date'];
-
-                            if (!empty(trim($row['special_instructions']))) {
-                                $special_instructions = $row['special_instructions'];
-                            } else {
-                                $special_instructions = NULL;
-                            }
-
-                            $estimated_weight = $row['estimated_weight'];
-                            $shipping_mode_id = $row['shipping_mode_id'];
-
-                            if ($shipping_mode_id == 4) {
-                                $same_day_timing_id = $row['same_day_timing_id'];
-                            } else {
-                                $same_day_timing_id = NULL;
-                            }
-
-                            $amount = $row['amount'];
-                            $payment_mode_id = $row['payment_mode_id'];
-
-                            $charges_mode_id = $row['charges_mode_id'];
-
-                            $package_type = TRUE;
-
-                            $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id);
-
-                            $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
-
-                            if ($service_type_id == 1 || $service_type_id == 5) {
-                                $item_product_type_id = $row['item_product_type_id'];
-
-                                if (!empty(trim($row['item_description']))) {
-                                    $item_description = $row['item_description'];
-                                } else {
-                                    $item_description = NULL;
-                                }
-
-                                $item_quantity = $row['item_quantity'];
-
-                                if (strtolower($row['item_insurance']) == 'yes') {
-                                    $item_price = str_replace(',', '', $row['item_price']);
-                                    $item_insurance = TRUE;
-                                } else {
-                                    $item_price = NULL;
-                                    $item_insurance = FALSE;
-                                }
-
-                                $item_type = 0;
-
-                                $this->add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
-                            } else if ($service_type_id == 2) {
-                                $item_product_type_id = $row['item_product_type_id'];
-
-                                if (!empty(trim($row['item_description']))) {
-                                    $item_description = $row['item_description'];
-                                } else {
-                                    $item_description = NULL;
-                                }
-
-                                $item_quantity = $row['item_quantity'];
-
-                                if (strtolower($row['item_insurance']) == 'yes') {
-                                    $item_price = str_replace(',', '', $row['item_price']);
-                                    $item_insurance = TRUE;
-                                } else {
-                                    $item_price = NULL;
-                                    $item_insurance = FALSE;
-                                }
-
-                                $item_type = 0;
-
-                                $this->add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
-
-                                $replacement_item_product_type_id = $row['replacement_item_product_type_id'];
-
-                                if (!empty(trim($row['replacement_item_description']))) {
-                                    $replacement_item_description = $row['replacement_item_description'];
-                                } else {
-                                    $replacement_item_description = NULL;
-                                }
-
-                                $replacement_item_quantity = $row['replacement_item_quantity'];
-
-                                $replacement_item_price = NULL;
-                                $replacement_item_insurance = NULL;
-                                $replacement_item_type = 1;
-
-                                $this->add_item($shipment_id, $replacement_item_product_type_id, $replacement_item_description, $replacement_item_quantity, $replacement_item_price, $replacement_item_insurance, $replacement_item_type);
-                            }
-
-                            $tracking_numbers['Row #' . $row_id] = $tracking_number;
-                            if($request->excel_nsa) {
-                                $con_nsa = array();
-                                $msg_string = '';
-                                $str_arr = null;
-                                $str_arr = preg_split("/[ ,]+/", $row['consignee_address']);
-                                foreach ($check as $nsa) {
-                                    foreach ($str_arr as $arr_value) {
-                                        if (strtolower($nsa) == strtolower($arr_value)) {
-                                            $con_nsa[$row_id] = $arr_value;
-                                            if ($msg_string != null) {
-                                                $msg_string = $msg_string . ', ' . $arr_value;
-                                            } else {
-                                                $msg_string = $arr_value;
-                                            }
-                                        }
-                                    }
-                                }
-                                if (isset($con_nsa[$row_id])) {
-                                    NotificationsController::send(32, $shipment_id, $msg_string);
-                                    $nsa_error[$row_id]['msg'] = $msg_string . " Detected!";
-                                }
-                            }
-
-                            NotificationsController::send(2, $shipment_id);
+                            dispatch(new ProcessShipmentBooking($row));
                         }
 
-                        $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                            return $row . ': ' . $tracking_number;
-                        }, array_keys($tracking_numbers), $tracking_numbers));
-
-                        return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Booked with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                        return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
                     }
                     else {
                         return view('client.shipment.book.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error]);
@@ -2637,181 +2490,15 @@ class ShipperShipmentBookController extends Controller
                 $tracking_numbers = array();
 
                 foreach ($rows as $key => $row) {
-                    $row_id = $key + 2;
+                    $row['user_id'] = $user_id;
+                    $row['account_type_id'] = 2;
+                    $row['nsas'] = $check;
+                    $row['nsa'] = $request->excel_nsa;
 
-                    $service_type_id = $row['service_type_id'];
-                    $pickup_address_id = $row['pickup_address_id'];
-                    $delivery_type_id = $row['delivery_type_id'];
-
-                    $charges_mode_id = $row['charges_mode_id'];
-
-                    if (strtolower($row['information_display']) == 'yes') {
-                        $information_display = TRUE;
-                    }
-                    else {
-                        $information_display = FALSE;
-                    }
-
-                    $consignee_city_id = City::where('name', $row['consignee_city_name'])->first()->id;
-                    $consignee_name = $row['consignee_name'];
-                    if($delivery_type_id == 2){
-                        $consignee_address = 'TRAX Office ' . $row['consignee_city_name'];
-                    }
-                    else {
-                        $consignee_address = $row['consignee_address'];
-                    }
-                    $consignee_phone_number_1 = substr_replace($row['consignee_phone_number_1'], '-', 4, 0);
-
-                    if (!empty(trim($row['consignee_phone_number_2']))) {
-                        $consignee_phone_number_2 = substr_replace($row['consignee_phone_number_2'], '-', 4, 0);
-                    }
-                    else {
-                        $consignee_phone_number_2 = NULL;
-                    }
-
-                    if (!empty(trim($row['consignee_email_address']))) {
-                        $consignee_email_address = $row['consignee_email_address'];
-                    }
-                    else {
-                        $consignee_email_address = NULL;
-                    }
-
-                    if (!empty(trim($row['order_id']))) {
-                        $order_id = $row['order_id'];
-                    }
-                    else {
-                        $order_id = NULL;
-                    }
-
-                    $pickup_date = $row['pickup_date'];
-
-                    if (!empty(trim($row['special_instructions']))) {
-                        $special_instructions = $row['special_instructions'];
-                    }
-                    else {
-                        $special_instructions = NULL;
-                    }
-
-                    $estimated_weight = $row['estimated_weight'];
-                    $shipping_mode_id = $row['shipping_mode_id'];
-
-                    if ($shipping_mode_id == 4) {
-                        $same_day_timing_id = $row['same_day_timing_id'];
-                    }
-                    else {
-                        $same_day_timing_id = NULL;
-                    }
-
-                    $amount = $row['amount'];
-                    $payment_mode_id = $row['payment_mode_id'];
-
-                    $package_type = TRUE;
-
-                    $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id);
-
-                    $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
-
-                    if ($service_type_id == 1 || $service_type_id == 5) {
-                        $item_product_type_id = $row['item_product_type_id'];
-
-                        if (!empty(trim($row['item_description']))) {
-                            $item_description = $row['item_description'];
-                        }
-                        else {
-                            $item_description = NULL;
-                        }
-
-                        $item_quantity = $row['item_quantity'];
-
-                        if (strtolower($row['item_insurance']) == 'yes') {
-                            $item_price = str_replace(',', '', $row['item_price']);
-                            $item_insurance = TRUE;
-                        }
-                        else {
-                            $item_price = NULL;
-                            $item_insurance = FALSE;
-                        }
-
-                        $item_type = 0;
-
-                        $this->add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
-                    }
-                    else if ($service_type_id == 2) {
-                        $item_product_type_id = $row['item_product_type_id'];
-
-                        if (!empty(trim($row['item_description']))) {
-                            $item_description = $row['item_description'];
-                        }
-                        else {
-                            $item_description = NULL;
-                        }
-
-                        $item_quantity = $row['item_quantity'];
-
-                        if (strtolower($row['item_insurance']) == 'yes') {
-                            $item_price = str_replace(',', '', $row['item_price']);
-                            $item_insurance = TRUE;
-                        }
-                        else {
-                            $item_price = NULL;
-                            $item_insurance = FALSE;
-                        }
-
-                        $item_type = 0;
-
-                        $this->add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
-
-                        $replacement_item_product_type_id = $row['replacement_item_product_type_id'];
-
-                        if (!empty(trim($row['replacement_item_description']))) {
-                            $replacement_item_description = $row['replacement_item_description'];
-                        }
-                        else {
-                            $replacement_item_description = NULL;
-                        }
-
-                        $replacement_item_quantity = $row['replacement_item_quantity'];
-
-                        $replacement_item_price = NULL;
-                        $replacement_item_insurance = NULL;
-                        $replacement_item_type = 1;
-
-                        $this->add_item($shipment_id, $replacement_item_product_type_id, $replacement_item_description, $replacement_item_quantity, $replacement_item_price, $replacement_item_insurance, $replacement_item_type);
-                    }
-
-                    $tracking_numbers['Row #' . $row_id] = $tracking_number;
-
-                    if($request->excel_nsa) {
-                        $con_nsa = array();
-                        $msg_string = '';
-                        $str_arr = null;
-                        $str_arr = preg_split("/[ ,]+/", $row['consignee_address']);
-                        foreach ($check as $nsa) {
-                            foreach ($str_arr as $arr_value) {
-                                if (strtolower($nsa) == strtolower($arr_value)) {
-                                    $con_nsa[$row_id] = $arr_value;
-                                    if ($msg_string != null) {
-                                        $msg_string = $msg_string . ', ' . $arr_value;
-                                    } else {
-                                        $msg_string = $arr_value;
-                                    }
-                                }
-                            }
-                        }
-                        if (isset($con_nsa[$row_id])) {
-                            NotificationsController::send(32, $shipment_id, $msg_string);
-                            $nsa_error[$row_id]['msg'] = $msg_string . " Detected!";
-                        }
-                    }
-
-                    NotificationsController::send(2, $shipment_id);
+                    dispatch(new ProcessShipmentBooking($row));
                 }
 
-                $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                    return $row . ': ' . $tracking_number;
-                }, array_keys($tracking_numbers), $tracking_numbers));
-
-                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Booked with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
             }
                 else{
                     return view('client.shipment.book.corporate.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error]);
