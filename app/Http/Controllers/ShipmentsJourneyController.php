@@ -5,90 +5,37 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\Shipment;
-use App\Http\Models\CargoConsignment;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\ReturnNote;
 use Vectorface\Whip\Whip;
-use Auth;
+
+use App\Jobs\ProcessShipmentsJourney;
 
 class ShipmentsJourneyController extends Controller
 {
-    static public function add($shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, $admin_id, $reference_1_id = NULL, $reference_2_id = NULL,$verification = 1, $received_or_refused_by = NULL) {
-      $shipment_journey = new ShipmentsJourney();
+    static public function add($shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, $admin_id, $reference_1_id = NULL, $reference_2_id = NULL, $verification = 1, $received_or_refused_by = NULL) {
+      $entry = array();
 
-      $shipment_journey->shipment_id = $shipment_id;
-      $shipment_journey->verification = $verification;
-      $shipment_journey->shipper_status_id = $shipper_status_id;
-      $shipment_journey->consignee_status_id = $consignee_status_id;
-      $shipment_journey->status_reason_id = $status_reason_id;
-      $shipment_journey->remarks = $remarks;
-      $shipment_journey->user_id = $user_id;
-      $shipment_journey->admin_id = $admin_id;
-      $shipment_journey->reference_1_id = $reference_1_id;
-      $shipment_journey->reference_2_id = $reference_2_id;
-      $shipment_journey->received_or_refused_by = $received_or_refused_by;
-
-      if (in_array($shipper_status_id, [1, 2, 17, 19, 39, 40, 41, 42, 43, 47, 50])) {
-        $shipment = Shipment::find($shipment_id);
-
-        if ($shipment) {
-          $shipment_journey->city_id = $shipment->pickup_address->city_id;
-        }
-      }
-      else if (in_array($shipper_status_id, [3, 21, 26, 32])) {
-        $cargo_consignment = CargoConsignment::find($shipment_journey->reference_1_id);
-
-        if ($cargo_consignment) {
-          $shipment_journey->city_id = $cargo_consignment->origin_hub_id;
-        }
-      }
-      else if (in_array($shipper_status_id, [4, 22, 27, 33])) {
-        $cargo_consignment = CargoConsignment::find($shipment_journey->reference_1_id);
-
-        if ($cargo_consignment) {
-          $shipment_journey->city_id = $cargo_consignment->destination_hub_id;
-        }
-      }
-      else if (in_array($shipper_status_id, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18])) {
-        if ($shipment_journey->reference_1_id) {
-          $delivery_note = DeliveryNote::find($shipment_journey->reference_1_id);
-
-          if ($delivery_note) {
-            $shipment_journey->city_id = $delivery_note->hub_id;
-          }
-          else if ($shipper_status_id == 13) {
-            $shipment = Shipment::find($shipment_id);
-
-            if ($shipment) {
-              $shipment_journey->city_id = $shipment->consignee_city_id;
-            }
-          }
-        }
-      }
-      else if (in_array($shipper_status_id, [23, 24, 25, 28, 29, 30, 31, 34, 35, 36, 37, 38, 44, 45, 46, 47, 48])) {
-        $return_note = ReturnNote::find($shipment_journey->reference_1_id);
-
-        if ($return_note) {
-          $shipment_journey->city_id = $return_note->hub_id;
-        }
-      }
-      else if ($shipper_status_id == 20) {
-        $shipment = Shipment::find($shipment_id);
-
-        if ($shipment) {
-          $shipment_journey->city_id = $shipment->consignee_city_id;
-        }
-      }
+      $entry['shipment_id'] = $shipment_id;
+      $entry['verification'] = $verification;
+      $entry['shipper_status_id'] = $shipper_status_id;
+      $entry['consignee_status_id'] = $consignee_status_id;
+      $entry['status_reason_id'] = $status_reason_id;
+      $entry['remarks'] = $remarks;
+      $entry['user_id'] = $user_id;
+      $entry['admin_id'] = $admin_id;
+      $entry['reference_1_id'] = $reference_1_id;
+      $entry['reference_2_id'] = $reference_2_id;
+      $entry['received_or_refused_by'] = $received_or_refused_by;
 
       $whip = new Whip();
       $client_address = $whip->getValidIpAddress();
 
       if ($client_address != '') {
-        $shipment_journey->ip_address = $client_address;
+        $entry['ip_address'] = $client_address;
+      }
+      else {
+        $entry['ip_address'] = NULL;
       }
 
-      $shipment_journey->save();
+      dispatch(new ProcessShipmentsJourney($entry));
     }
 }
