@@ -668,6 +668,10 @@ class ShipperReceivingSheetController extends Controller
             if($shipment->exists()){
                 $shipment = $shipment->first();
                 $pickup_id = $shipment->pickup_address_id;
+                
+                if ($shipment->shipper_status_id != 1) {
+                    return ['status' => 1, 'error' => $shipment->tracking_number . ' can no longer be added to a Receiving Sheet'];
+                }
 
                 if ($shipment->user_id != session('user_id')) {
                     return ['status' => 1, 'error' => $shipment->tracking_number . ' doesn\'t belong to you'];
