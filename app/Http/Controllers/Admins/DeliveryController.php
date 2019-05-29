@@ -935,9 +935,10 @@ class DeliveryController extends Controller
                         if (in_array($deliveries->current_status_id, $delivered_statuses)) {
                             return 'statusDelivered';
                         }
-                        else if($deliveries->current_status_id==12)
-                        {
+                        else if($deliveries->current_status_id==12) {
                             return 'statusReturn';
+                        }else if($deliveries->current_status_id == 5){
+                            return 'complaint_row';
                         }else {
                             return 'statusUpdated';
                         }
