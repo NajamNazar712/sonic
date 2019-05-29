@@ -7,6 +7,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use ShiftOneLabs\LaravelSqsFifoQueue\Bus\SqsFifoQueueable;
 
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Controllers\NotificationsController;
@@ -16,7 +17,7 @@ use App\Http\Models\City;
 
 class ProcessShipmentBooking implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SqsFifoQueueable, SerializesModels;
 
     protected $booking;
 
@@ -27,7 +28,8 @@ class ProcessShipmentBooking implements ShouldQueue
      */
     public function __construct(array $booking)
     {
-        $this->queue = 'booking';
+        $this->connection = 'sqs-fifo';
+        $this->messageGroupId = 'shipment_booking';
         $this->booking = $booking;
     }
 
