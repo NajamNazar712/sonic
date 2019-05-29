@@ -1044,7 +1044,7 @@ class AdminReportsController extends Controller
         $sales = '';
         if(session('department_id') == 7){
             $sales = DB::connection('reports')->table('admins')->whereExists(function($query) {
-                $query->from('roles')
+                $query->from('admin_roles')
                 ->where('admins.role_id', '=', DB::raw('`roles`.`id`'))
                 ->where('department_id', '=', 7);
             })->select('id', 'name')->get();
