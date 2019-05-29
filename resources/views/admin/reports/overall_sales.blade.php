@@ -108,7 +108,7 @@
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
-                        <th class="border-primary border-darken-1">Payment Number</th>
+                        <th class="border-primary border-darken-1">Payment ID</th>
                         <th class="border-primary border-darken-1">SDN Number</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
@@ -325,7 +325,7 @@
                             head.push('Order ID');
                             head.push('Status');
                             head.push('Payment Status');
-                            head.push('Payment Number');
+                            head.push('Payment ID');
                             head.push('SDN Number');
                             head.push('Service Type');
                             head.push('Arrival Date');
