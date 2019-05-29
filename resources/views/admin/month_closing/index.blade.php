@@ -642,10 +642,14 @@
                                if(data.status == 1) {
 
                                    var html = '';
+
                                    html += 'The following Shipment(s) could not be added:<br/>';
+
                                    $.each(data.errors, function (index, message) {
-                                       html += index + ': ' + message + '<br/>';
+                                       html += index + ', ';
                                    });
+
+                                   html = html.slice(0, -2);
 
                                    content = document.createElement('div');
                                    content.innerHTML = html;
@@ -675,17 +679,17 @@
                                    scan_sound(2);
                                    table.draw(true);
                                }else if(data.status == 3){
-                                   
                                    var html = '';
-                                   html += 'Some Shipment(s) has been successfully added!<br/>';
+
+                                   html += 'Some Shipment(s) has been successfully added!<br/><br/>';
 
                                    html += 'The following Shipment(s) could not be added:<br/>';
 
                                    $.each(data.errors, function (index, message) {
-                                       html += index + ': ' + message + '<br/>';
+                                       html += index + ', ';
                                    });
 
-
+                                   html = html.slice(0, -2);
 
                                    content = document.createElement('div');
                                    content.innerHTML = html;
