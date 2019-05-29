@@ -6124,7 +6124,11 @@ class AdminDashboardController extends Controller
     }
     public function cityListAjax(){
         $cities = City::join('cities as h' ,'cities.hub_id', '=' , 'h.id')
-            ->leftjoin('city_histories as ch', 'ch.city_id', '=', 'cities.id')
+            ->leftjoin('city_histories as ch',function($join){
+                $join->on('ch.city_id', '=', 'cities.id')
+                    ->where('ch.created_at','=',
+                        DB::raw('(select max(created_at) from city_histories where city_histories.city_id = cities.id)'));
+            })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
             ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by']);
