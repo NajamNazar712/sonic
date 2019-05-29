@@ -26,6 +26,8 @@
                                     <th class="border-primary border-darken-1">Hub Code</th>
                                     <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Updated By</th>
+                                    <th class="border-primary border-darken-1">Updated At</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -85,6 +87,8 @@
                             head.push('Hub Code');
                             head.push('Zone');
                             head.push('Status');
+                            head.push('Updated By');
+                            head.push('Updated At');
 
 
                             $.each(result.data, function(index, values) {
@@ -97,6 +101,8 @@
                                 row.push(values.hub_id);
                                 row.push(values.zone);
                                 row.push(values.status);
+                                row.push(values.updated_by);
+                                row.push(values.updated_at);
 
                                 body.push(row);
                             });
@@ -160,6 +166,8 @@
                     {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'status', name: 'cities.status', class: 'align-middle status'},
+                    {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
+                    {data: 'updated_at', name: 'ch.created_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                rowCallback: function(row, data, index) {

@@ -13,6 +13,7 @@ use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
+use App\Http\Models\CityHistory;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\InvoicingCycle;
@@ -6123,8 +6124,10 @@ class AdminDashboardController extends Controller
     }
     public function cityListAjax(){
         $cities = City::join('cities as h' ,'cities.hub_id', '=' , 'h.id')
+            ->leftjoin('city_histories as ch', 'ch.city_id', '=', 'cities.id')
+            ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status']);
+            ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -6218,14 +6221,23 @@ class AdminDashboardController extends Controller
     }
 
     public function updateCity(Request $request,$id){
+        $city_id = City::where('id',$id)->first();
         if($request->postType == 'city'){
-
             City::where('id',$id)->update([
                 'name'=>$request->cityName,
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
                 'zone_id'=>City::find($request->hubs)->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0
+            ]);
+            CityHistory::create([
+                'city_id'=> $id,
+                'hub' => 0,
+                'hub_id'=> $request->hubs,
+                'zone_id'=> City::find($request->hubs)->zone_id,
+                'pickup'=> ($request->has('pickup'))? 1:0,
+                'status' => $city_id->status,
+                'updated_by' => Auth::id()
             ]);
             WalkInCities::where('city_id',$id)->delete();
             if(!empty($request->walk_in_delivery)) {
@@ -6259,7 +6271,15 @@ class AdminDashboardController extends Controller
                 'zone_id'=>$request->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0
             ]);
-
+            CityHistory::create([
+                'city_id'=> $id,
+                'hub'=>1,
+                'hub_id'=>$id,
+                'zone_id'=>$request->zone_id,
+                'pickup'=>($request->has('pickup'))? 1:0,
+                'status' => $city_id->status,
+                'updated_by' => Auth::id()
+            ]);
             WalkInCities::where('city_id',$id)->delete();
             if(!empty($request->walk_in_delivery)) {
                 foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
@@ -6300,6 +6320,16 @@ class AdminDashboardController extends Controller
                 'status'=>1
             ]);
 
+            CityHistory::create([
+                'city_id'=> $city->id,
+                'hub'=>0,
+                'hub_id'=>$request->hubs,
+                'zone_id'=>$request->zone_id,
+                'pickup'=>($request->has('pickup'))? 1:0,
+                'status'=>1,
+                'updated_by' => Auth::id()
+            ]);
+
             if(!empty($request->walk_in_delivery)) {
                 foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
                     WalkInCities::create([
@@ -6328,6 +6358,15 @@ class AdminDashboardController extends Controller
                 'zone_id'=>$request->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status'=>1
+            ]);
+
+            CityHistory::create([
+                'city_id'=> $city->id,
+                'hub'=>1,
+                'zone_id'=>$request->zone_id,
+                'pickup'=>($request->has('pickup'))? 1:0,
+                'status'=>1,
+                'updated_by' => Auth::id()
             ]);
 
             if(!empty($request->walk_in_delivery)) {
