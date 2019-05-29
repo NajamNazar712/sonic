@@ -923,7 +923,7 @@ class AdminWalkInBookShipmentController extends Controller
                 }
             });
         if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+            $datatable->where('shipments.tracking_number', $tracking_numbers);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');

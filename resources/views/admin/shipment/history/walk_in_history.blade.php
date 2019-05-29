@@ -173,7 +173,7 @@
                         url: '{{ route('admin.shipment.history.walk_in_history_list') }}',
                         data: {
                             'page': 'all',
-                            'tracking_numbers' : $('#track_form .tracking_numbers').val(),
+                            'tracking_numbers' : $('#search_tracking_no').val(),
                             'search_date_from': $('input[name="search_date_from_formatted"]').val(),
                             'search_date_to': $('input[name="search_date_to_formatted"]').val()
                         },
@@ -251,7 +251,7 @@
                 ajax:{
                     url: '{{ route('admin.shipment.history.walk_in_history_list') }}',
                     data: function (d) {
-                        d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                        d.tracking_numbers = $('#search_tracking_no').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
