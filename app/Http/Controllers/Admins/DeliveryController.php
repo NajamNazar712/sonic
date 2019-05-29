@@ -3718,30 +3718,36 @@ class DeliveryController extends Controller
             if ($shipment->exists()) {
                 $data = array();
                 $shipment = $shipment->first();
-                if(in_array($shipment->shipper_status_id, $passing_delivery_status_array)){
-                    $delivery_note_shipments = DeliveryNoteShipment::where('shipment_id',$shipment->id)->max('delivery_note_id');
-                    $delivery_note = DeliveryNote::find($delivery_note_shipments);
-                    if($delivery_note){
-                        if($delivery_note->status == 0){
-                            return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                if ($shipment->shipper_status_id != 3) {
+                    if(in_array($shipment->shipper_status_id, $passing_delivery_status_array)){
+                        $delivery_note_shipments = DeliveryNoteShipment::where('shipment_id',$shipment->id)->max('delivery_note_id');
+                        $delivery_note = DeliveryNote::find($delivery_note_shipments);
+                        if($delivery_note){
+                            if($delivery_note->status == 0){
+                                return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                            }
                         }
+
                     }
 
+
+                    $data['id'] = $shipment->id;
+                    $data['tracking_number'] = $shipment->tracking_number;
+                    $data['consignee_city_id'] = $shipment->consignee_city->id;
+//                $data['consignee_city_name'] = $shipment->consignee_city->name;
+                    $data['consignee_name'] = $shipment->consignee_name;
+                    $data['consignee_address'] = $shipment->consignee_address;
+                    $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
+                    $data['consignee_phone2'] = ($shipment->consignee_phone_number_2 != '')? $shipment->consignee_phone_number_2:'';
+                    $data['consignee_email'] = ($shipment->consignee_email != '')? $shipment->consignee_email:'';
+                    $data['amount'] = number_format($shipment->amount);
+
+                    return response()->json(['status' => 1, 'details' => $data]);
+                }
+                else{
+                    return response()->json(['status' => 0, 'error' => 'This shipment is currently in transit, please receive its cargo first to update it as Misroute!']);
                 }
 
-
-                $data['id'] = $shipment->id;
-                $data['tracking_number'] = $shipment->tracking_number;
-                $data['consignee_city_id'] = $shipment->consignee_city->id;
-//                $data['consignee_city_name'] = $shipment->consignee_city->name;
-                $data['consignee_name'] = $shipment->consignee_name;
-                $data['consignee_address'] = $shipment->consignee_address;
-                $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
-                $data['consignee_phone2'] = ($shipment->consignee_phone_number_2 != '')? $shipment->consignee_phone_number_2:'';
-                $data['consignee_email'] = ($shipment->consignee_email != '')? $shipment->consignee_email:'';
-                $data['amount'] = number_format($shipment->amount);
-
-                return response()->json(['status' => 1, 'details' => $data]);
 
             } else {
                 return response()->json(['status' => 0, 'error' => 'Shipment is not ready for misrouted!']);
