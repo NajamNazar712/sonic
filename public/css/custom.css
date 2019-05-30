@@ -259,6 +259,10 @@ p.comment {
 .complaint_row{
 	background-color: var(--light);
 }
+.nsa_osa_reason{
+	background-color: #fd8282;
+	color: #ffffff;
+}
 .marquee3k {
 	margin: 0 15px;
 	padding: 5px 0;

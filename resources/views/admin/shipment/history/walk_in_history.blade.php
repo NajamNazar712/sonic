@@ -257,7 +257,7 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[15, 'desc']],
+                order: [[16, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number text-center'},
@@ -272,7 +272,7 @@
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
                     { data:'return_charges' ,name: 'shipments.return_charges', class: 'align-middle return_charges'},
-                    { data:'gst' ,name: 'shipments.gst', class: 'align-middle gst'},
+                    { data:'gst' ,name: 'shipments.gst', class: 'align-middle gst', orderable: false, searchable: false},
                     { data:'total_charges' ,name: 'total_charges', class: 'align-middle total_charges', orderable: false, searchable: false},
                     { data:'charges_mode' ,name: 'cm.id', class: 'align-middle charges_mode'},
                     { data:'arrival_date' ,name: 'shipments.created_at', class: 'align-middle arrival_date'},
@@ -302,7 +302,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.aging')) {
+                        if ($(header).is('.serial_number') || $(header).is('.total_charges') || $(header).is('.aging') || $(header).is('.gst')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.status')){

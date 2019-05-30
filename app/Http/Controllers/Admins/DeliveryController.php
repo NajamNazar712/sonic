@@ -900,7 +900,7 @@ class DeliveryController extends Controller
 
             if($note_data->status == 0){
                 $where = array(7, 8, 9, 10, 11, 12, 14, 15, 18, 56);
-                $statuses = ShipmentStatus::whereIn('id', $where)->select('id','name')->get();
+                $statuses = ShipmentStatus::whereIn('id', $where)->select('id','name')->where('status', 1)->get();
 
                 return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->pending_status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed, 'shipment_statuses' => $statuses]);
             }else{
@@ -990,7 +990,7 @@ class DeliveryController extends Controller
                 return $attempt_counts;
             })
             ->addColumn('status', function ($deliveries) {
-                $where = array(7, 8, 9, 10, 11, 12, 15, 18, 56);
+                $where = array(7, 8, 9, 11, 12, 15, 18, 56);
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
                 $drops = '';
                 foreach ($statuses as $status) {
@@ -1021,7 +1021,12 @@ class DeliveryController extends Controller
     public function receive_delivery_reason(Request $request)
     {
         $status_id = $request->status;
-        $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+        $shipment_id = $request->shipment_id;
+        if(Shipment::where('nsa_osa_status',1)->exists()){
+            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [12, 34])->orderBy('name')->get();
+        }else{
+            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+        }
 
         if (!$statuses->isEmpty()) {
             return response()->json(['status' => 0, 'reasons' => $statuses]);
@@ -1229,8 +1234,12 @@ class DeliveryController extends Controller
                         else {
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
                         }
+                        if(($request->reason_drop[$shipment] == 12 || $request->reason_drop[$shipment] == 34) && $shipment_status->booking_type_id != 4) {
+                            DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 9]);
+                        }else{
+                            DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
+                        }
 
-                        DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                     }
                 }
 
@@ -1329,26 +1338,52 @@ class DeliveryController extends Controller
         $shipments = DeliveryNoteShipment::where(['delivery_note_id' => $note_id])->count();
         if ($shipments > 0) {
             $replacements = DeliveryNoteShipment::where(['delivery_note_id' => $note_id, 'status' => 2])->get();
-            foreach ($replacements as $shipment) {
-                $shipment_data = Shipment::where('id', $shipment->shipment_id);
-                $data = $shipment_data->first();
-                if ($data->booking_type_id == 2) {
-                    $replacement_ids[] = $data->id;
-                }
-            }
-            $trybuy = DeliveryNoteShipment::where(['delivery_note_id' => $note_id, 'status' => 3])->get();
-            foreach ($trybuy as $try) {
-                $try_data = Shipment::where('id', $try->shipment_id);
-                $trydata = $try_data->first();
-                if ($trydata->booking_type_id == 3) {
-                    if (!isset($trybuy_id)) {
-                        $trybuy_id = $trydata->id;
+            if($replacements){
+                foreach ($replacements as $shipment) {
+                    $shipment_data = Shipment::where('id', $shipment->shipment_id);
+                    if($shipment_data->exists()){
+                        $data = $shipment_data->first();
+                        if ($data->booking_type_id == 2) {
+                            $replacement_ids[] = $data->id;
+                        }
                     }
                 }
             }
+
+            $trybuy = DeliveryNoteShipment::where(['delivery_note_id' => $note_id, 'status' => 3])->get();
+            if($trybuy){
+                $trybuy_id = null;
+                foreach ($trybuy as $try) {
+                    $try_data = Shipment::where('id', $try->shipment_id);
+                    if($try_data->exists()){
+                        $trydata = $try_data->first();
+                        if ($trydata->booking_type_id == 3) {
+                                $trybuy_id = $trydata->id;
+                        }
+                    }
+                }
+            }
+
+            $non_service_areas = DeliveryNoteShipment::where(['delivery_note_id' => $note_id, 'status' => 9])->get();
+            if($non_service_areas){
+                $non_service_area_shipments = array();
+                foreach ($non_service_areas as $non_service_area) {
+                    $nsa_data = Shipment::where('id', $non_service_area->shipment_id);
+                    if($nsa_data->exists()){
+                        $nsa_data = $nsa_data->first();
+                        if ($nsa_data->booking_type_id != 4) {
+                            $non_service_area_shipments[] = $nsa_data->id;
+                        }
+                    }
+                }
+            }
+
             if (!empty($replacement_ids)) {
                 return ['status' => 2, 'success' => 'Shipment is replacement!', 'booking_type' => 2, 'replacement' => $replacement_ids];
-            } elseif (!empty($trybuy_id)) {
+            }
+            else if(!empty($non_service_area_shipments)){
+                return ['status' => 9, 'success' => 'Shipment is Non Service Area!', 'non_service_area_shipments' => $non_service_area_shipments];
+            }elseif ($trybuy_id != null) {
                 return ['status' => 3, 'success' => 'Shipment is try and buy!', 'booking_type' => 3, 'try' => $trybuy_id];
             }
         } else {
@@ -1384,6 +1419,44 @@ class DeliveryController extends Controller
         $delivery_note_data->status_updated_at = Carbon::now();
         $delivery_note_data->save();
         return redirect()->back()->with(['success' => 'Selected Replacement\'s weight updated!']);
+    }
+
+    //NSA Shipments DATA
+    public function nsa_shipments_data(Request $request){
+        $shipments = $request->nsa_shipments;
+        $delivery_note_id = $request->delivery_note_id;
+        $shipments_data = array();
+        foreach ($shipments as $shipment){
+            $remark = '';
+            $shipments_data[$shipment] = Shipment::select('id', 'tracking_number', 'consignee_address','consignee_city_id','user_id')->where('id', $shipment)->first();
+            $remark = ShipmentsJourney::where('reference_1_id', $delivery_note_id)->where('shipment_id', $shipment)->latest()->first();
+            $shipments_data[$shipment]['remarks'] = ($remark->remarks != null) ? $remark->remarks:'';
+            foreach ($shipments_data as $data){
+                $data['consignee_city_id'] = $data->consignee_city->name;
+                $data['user_id'] = $data->user->name;
+
+            }
+
+        }
+        return response()->json(['status' => 0, 'shipments' => $shipments_data]);
+    }
+
+    public function nsa_shipments_submit(Request $request){
+
+        $delivery_note_id = $request->delivery_note_id;
+        $shipments = explode(',', $request->nsa_shipment_ids);
+        foreach ($shipments as $shipment) {
+            if ($request->charges[$shipment] != '' && $request->remarks[$shipment] != '') {
+                Shipment::where('id', $shipment)->update(['nsa_osa_estimated_charges' => $request->charges[$shipment]]);
+                DeliveryNoteShipment::where(['shipment_id'=> $shipment, 'delivery_note_id' => $delivery_note_id])->update(['status' => 10]);
+                ShipmentsJourney::where('reference_1_id', $delivery_note_id)->where('shipment_id', $shipment)->update(['remarks' => $request->remarks[$shipment]]);
+            }
+        }
+        $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
+        $delivery_note_data->last_updated_at = Carbon::now();
+        $delivery_note_data->status_updated_at = Carbon::now();
+        $delivery_note_data->save();
+        return redirect()->back()->with(['success' => 'Selected NSA Shipment(s) charges updated!']);
     }
 
     //try buy modal
@@ -1479,7 +1552,7 @@ class DeliveryController extends Controller
                 return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('status', function ($deliveries) {
-                $where = array(7, 8, 9, 10, 11, 12, 15, 18, 20, 56);
+                $where = array(7, 8, 9, 11, 12, 15, 18, 20, 56);
 
 //                $where = array(7,8,9,10,11,12,14,15,16,18,20,30,35,36,37);
                 $delivered_statuses = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);
@@ -3718,30 +3791,36 @@ class DeliveryController extends Controller
             if ($shipment->exists()) {
                 $data = array();
                 $shipment = $shipment->first();
-                if(in_array($shipment->shipper_status_id, $passing_delivery_status_array)){
-                    $delivery_note_shipments = DeliveryNoteShipment::where('shipment_id',$shipment->id)->max('delivery_note_id');
-                    $delivery_note = DeliveryNote::find($delivery_note_shipments);
-                    if($delivery_note){
-                        if($delivery_note->status == 0){
-                            return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                if ($shipment->shipper_status_id != 3) {
+                    if(in_array($shipment->shipper_status_id, $passing_delivery_status_array)){
+                        $delivery_note_shipments = DeliveryNoteShipment::where('shipment_id',$shipment->id)->max('delivery_note_id');
+                        $delivery_note = DeliveryNote::find($delivery_note_shipments);
+                        if($delivery_note){
+                            if($delivery_note->status == 0){
+                                return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                            }
                         }
+
                     }
 
+
+                    $data['id'] = $shipment->id;
+                    $data['tracking_number'] = $shipment->tracking_number;
+                    $data['consignee_city_id'] = $shipment->consignee_city->id;
+//                $data['consignee_city_name'] = $shipment->consignee_city->name;
+                    $data['consignee_name'] = $shipment->consignee_name;
+                    $data['consignee_address'] = $shipment->consignee_address;
+                    $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
+                    $data['consignee_phone2'] = ($shipment->consignee_phone_number_2 != '')? $shipment->consignee_phone_number_2:'';
+                    $data['consignee_email'] = ($shipment->consignee_email != '')? $shipment->consignee_email:'';
+                    $data['amount'] = number_format($shipment->amount);
+
+                    return response()->json(['status' => 1, 'details' => $data]);
+                }
+                else{
+                    return response()->json(['status' => 0, 'error' => 'This shipment is currently in transit, please receive its cargo first to update it as Misroute!']);
                 }
 
-
-                $data['id'] = $shipment->id;
-                $data['tracking_number'] = $shipment->tracking_number;
-                $data['consignee_city_id'] = $shipment->consignee_city->id;
-//                $data['consignee_city_name'] = $shipment->consignee_city->name;
-                $data['consignee_name'] = $shipment->consignee_name;
-                $data['consignee_address'] = $shipment->consignee_address;
-                $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
-                $data['consignee_phone2'] = ($shipment->consignee_phone_number_2 != '')? $shipment->consignee_phone_number_2:'';
-                $data['consignee_email'] = ($shipment->consignee_email != '')? $shipment->consignee_email:'';
-                $data['amount'] = number_format($shipment->amount);
-
-                return response()->json(['status' => 1, 'details' => $data]);
 
             } else {
                 return response()->json(['status' => 0, 'error' => 'Shipment is not ready for misrouted!']);

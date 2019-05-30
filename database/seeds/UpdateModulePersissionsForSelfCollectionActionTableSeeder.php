@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class UpdateModulePermissionWalkinBookingHistoryTableSeeder extends Seeder
+class UpdateModulePersissionsForSelfCollectionActionTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,7 +12,7 @@ class UpdateModulePermissionWalkinBookingHistoryTableSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 209, 'name' => 'Walk-In Booking History - View', 'module_id' => 17),
+            array('id' => 211, 'name' => 'Mark for Self Collection Action', 'module_id' => 7)
         ));
     }
 }
