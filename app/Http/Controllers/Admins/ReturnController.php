@@ -1253,7 +1253,12 @@ class ReturnController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges'])
+            ->leftjoin('crm_requests as crm', function ($join) {
+                $join->on('crm.shipment_id', '=', 'shipments.id')
+                    ->whereIn('crm.status_id', [2, 3, 5])
+                    ->where('crm.case_nature_id', 1);
+            })
+            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges','crm.id as complaint'])
             ->where('return_notes.id',$request->id);
 
         if (session('role_id') != 1) {
@@ -1261,6 +1266,15 @@ class ReturnController extends Controller
         }
 
         return Datatables::of($deliveries)
+            ->setRowAttr([
+                'class' => function ($deliveries) {
+                    if($deliveries->complaint != null){
+                        return 'complaint_row';
+                    } else {
+                        return '';
+                    }
+                }
+            ])
             ->addColumn('shipment_id_padded', function ($deliveries) {
                 return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
             })
