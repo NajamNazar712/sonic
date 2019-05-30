@@ -92,7 +92,7 @@
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Update Replacement Shipment Weight</h4>
+                    <h4 class="modal-title white">Update Replacement Shipment(s) Weight</h4>
                     {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
                     {{--<span aria-hidden="true">&times;</span>--}}
                     {{--</button>--}}
@@ -178,7 +178,50 @@
         </div>
     </div>
     <!--Try&Buy Modal -->
+    <!--Non Service Modal -->
+    <div class="modal fade text-left" id="NonServiceModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="NonServiceModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Update Non Service Area Shipment(s) Charges</h4>
+                    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+                    {{--<span aria-hidden="true">&times;</span>--}}
+                    {{--</button>--}}
+                </div>
+                <div class="modal-body  text-center">
+                    <form id="nsa_form" action="{{route('admin.delivery.receive.nsa_shipments.submit')}}" method="post">
+                        <table class="table table-bordered datatable" id="nsatable" style="z-index: 3;">
+                            <thead>
+                            @csrf
+                            @method('PUT')
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Tracking No.</th>
+                                <th class="border-primary border-darken-1">Consignee Address</th>
+                                <th class="border-primary border-darken-1">Destination</th>
+                                <th class="border-primary border-darken-1">Shipper Name</th>
+                                <th class="border-primary border-darken-1">Estimated Charges</th>
+                                <th class="border-primary border-darken-1">Remarks</th>
 
+                            </tr>
+                            </thead>
+                        </table>
+
+                        <input type="hidden" name="nsa_shipment_ids" id="nsa_shipment_ids">
+                        <input type="hidden" name="delivery_note_id" value="{{$delivery_note_id}}">
+
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="NsaUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Non Service Modal -->
 @endsection
 
 @section('css')
@@ -554,6 +597,7 @@
                     dataType:'json',
                     data: {
                         'status':status,
+                        'shipment_id': rowid,
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
@@ -662,15 +706,34 @@
 
                             var repl = $('#replacementtable').DataTable({
                                 dom: 'ltipr',
-                                paging:false,
+                                paging: false,
                                 columns: [
-                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                                    {name: 'tracking_number', class: 'align-middle tracking_number',orderable: false, searchable: false},
-                                    {name: 'service_type', class: 'align-middle service_type',orderable: false, searchable: false},
-                                    {name: 'weight', class: 'align-middle weight',orderable: false, searchable: false},
+                                    {
+                                        orderable: false,
+                                        searchable: false,
+                                        name: 'serial_number',
+                                        class: 'align-middle serial_number',
+                                        targets: 1,
+                                        render: function (data, type, row) {
+                                            return '';
+                                        }
+                                    },
+                                    {
+                                        name: 'tracking_number',
+                                        class: 'align-middle tracking_number',
+                                        orderable: false,
+                                        searchable: false
+                                    },
+                                    {
+                                        name: 'service_type',
+                                        class: 'align-middle service_type',
+                                        orderable: false,
+                                        searchable: false
+                                    },
+                                    {name: 'weight', class: 'align-middle weight', orderable: false, searchable: false},
 
                                 ],
-                                rowCallback: function(row, data, index) {
+                                rowCallback: function (row, data, index) {
                                     var info = repl.page.info();
 
                                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
@@ -679,21 +742,21 @@
                             });
 
                             $.ajax({
-                                url:'{!! route('admin.delivery.receive.replacements') !!}',
-                                type:'POST',
-                                dataType:'json',
+                                url: '{!! route('admin.delivery.receive.replacements') !!}',
+                                type: 'POST',
+                                dataType: 'json',
                                 data: {
                                     'delivery_note_id': delivery_note,
-                                    'replacements':data.replacement,
+                                    'replacements': data.replacement,
                                     '_token': '{{ csrf_token() }}'
                                 }
                             }).done(function (data) {
-                                if(data.status == 0){
+                                if (data.status == 0) {
                                     var rowNo = repl.rows().count();
-                                    $.each(data.data,function (key,value) {
-                                        var inp = "<div class='form-group mb-0'><input class='form-control decimal' name='weight["+value.id+"]' placeholder='Enter Weight'  data-rule-required='true' data-msg-required='Weight is required!'></div>";
+                                    $.each(data.data, function (key, value) {
+                                        var inp = "<div class='form-group mb-0'><input class='form-control decimal' name='weight[" + value.id + "]' placeholder='Enter Weight'  data-rule-required='true' data-msg-required='Weight is required!'></div>";
                                         // console.log(value.tracking_number)
-                                        repl.row.add([rowNo+1,value.tracking_number,value.booking_type_id,inp]).node().id = value.id;
+                                        repl.row.add([rowNo + 1, value.tracking_number, value.booking_type_id, inp]).node().id = value.id;
                                         repl.draw(false);
                                         shipment_id_list.push(value.id);
                                         $('.decimal').inputmask({
@@ -707,7 +770,77 @@
                                         });
                                     });
 
-                                }else{
+                                } else {
+                                    //toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                            });
+
+
+                        }else if (data.status == 9){
+                            console.log(data.non_service_area_shipments)
+                            $('#NonServiceModal').modal('show');
+
+                            var nsatable = $('#nsatable').DataTable({
+                                dom: 'ltipr',
+                                paging: false,
+                                columns: [
+                                    {
+                                        orderable: false,
+                                        searchable: false,
+                                        name: 'serial_number',
+                                        class: 'align-middle serial_number',
+                                        targets: 1,
+                                        render: function (data, type, row) {
+                                            return '';
+                                        }
+                                    },
+                                    { name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false  },
+                                    { name: 'address', class: 'align-middle address', orderable: false, searchable: false },
+                                    { name: 'destinatoin', class: 'align-middle destinatoin', orderable: false, searchable: false},
+                                    { name: 'shipper', class: 'align-middle shipper', orderable: false, searchable: false},
+                                    { name: 'charges', class: 'align-middle charges', orderable: false, searchable: false},
+                                    { name: 'remarks', class: 'align-middle remarks', orderable: false, searchable: false},
+
+                                ],
+                                rowCallback: function (row, data, index) {
+                                    var info = nsatable.page.info();
+
+                                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                                },
+                            });
+
+                            $.ajax({
+                                url: '{!! route('admin.delivery.receive.nsa_shipments_data') !!}',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    'delivery_note_id': delivery_note,
+                                    'nsa_shipments': data.non_service_area_shipments,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                if (data.status == 0) {
+                                    var rowNo = nsatable.rows().count();
+                                    $.each(data.shipments, function (key, value) {
+                                        var charges = "<div class='form-group mb-0'><input class='form-control decimal' name='charges[" + value.id + "]' placeholder='Enter Estimated Charges'  data-rule-required='true' data-msg-required='Estimated Charges is required!'></div>";
+                                        var remarks = "<div class='form-group mb-0'><input class='form-control' name='remarks[" + value.id + "]' placeholder='Enter Remarks'  data-rule-required='true' data-msg-required='Remark is required!' value='" + value.remarks + "'></div>";
+                                        // console.log(value.tracking_number)
+                                        nsatable.row.add([rowNo + 1, value.tracking_number, value.consignee_address, value.consignee_city_id, value.user_id, charges, remarks]).node().id = value.id;
+                                        nsatable.draw(false);
+                                        shipment_id_list.push(value.id);
+                                        $('.decimal').inputmask({
+                                            'alias': 'decimal',
+                                            'allowMinus': false,
+                                            'allowPlus': false,
+                                            'rightAlign': false,
+                                            'digits': 3,
+                                            'min': 0,
+                                            'max': 100000
+                                        });
+                                    });
+
+                                } else {
                                     //toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }
                             });
@@ -1065,6 +1198,28 @@
                 }
 
             });
+
+            $('#nsatable').on('change', 'td.remarks input', function () {
+                $(this).val($(this).val().trim());
+            });
+            //nsa modal bind
+            $('#nsa_form').bind('submit',function (e) {
+                e.preventDefault();
+            });
+            $( "#nsa_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $('#nsa_shipment_ids').val(shipment_id_list);
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    form.submit();
+
+                }
+            });
+
+
         });
     </script>
 @endsection
