@@ -56,7 +56,7 @@
                 <div class="modal-body">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Submit</button>
+                    <button type="button" name="submit_nsa" id="submit_nsa" class="btn btn-primary" data-dismiss="modal">Submit</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -198,6 +198,7 @@
             } );
             var shipment_remarks = {};
             var selected_rows = [];
+            var selected_rows_nsa = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -319,7 +320,6 @@
                                                 }
                                             }).done(function (data) {
                                                 if(data.status == 1){
-                                                    console.log(1);
                                                     $('#nsa_shipments_modal .modal-body').html('');
                                                     $('#nsa_shipments_modal').modal('show');
                                                     var html = '';
@@ -330,12 +330,12 @@
                                                         '</thead>';
                                                     html += '<tbody>';
                                                     if (data.nsa_shipments) {
-                                                        console.log(data.nsa_shipments);
+                                                        selected_rows_nsa = data.nsa_shipments_ids;
                                                         $.each(data.nsa_shipments, function(index) {
-                                                            console.log(index);
+                                                            // console.log(index);
                                                             html += '<tr role="row">' +
                                                                 '<td class="text-center"><u><a href='+route+'?tracking_number='+data.nsa_shipments[index]+' target="_blank">'+data.nsa_shipments[index]+'</a></u></td>';
-                                                            html += '<td class="text-center">0</td>';
+                                                            html += '<td class="text-center">'+ data.estimated_charges[index] +'</td>';
                                                             html += '<td class="text-center"><div class="d-inline-block custom-control custom-checkbox mr-1">\n' +
                                                                 '<input type="checkbox" class="custom-control-input bg-success" name="confirm['+index+']" id="confirm['+index+']">\n' +
                                                                 '<label class="custom-control-label" for="confirm['+index+']">Re-Attempt</label>\n' +
@@ -349,65 +349,65 @@
                                                     }
                                                     $('#nsa_shipments_modal .modal-body').html(html);
                                                 }
-                                                {{--else{--}}
-                                                    {{--$.ajax({--}}
-                                                        {{--url: "{{route('cod.return.pending.reattempt.status')}}",--}}
-                                                        {{--method: 'POST',--}}
-                                                        {{--data: {--}}
-                                                            {{--'shipment_ids': selected_rows,--}}
-                                                            {{--'_token': '{{ csrf_token() }}',--}}
-                                                            {{--'remark': shipment_remarks--}}
-                                                        {{--}--}}
-                                                    {{--}).done(function (data) {--}}
-                                                        {{--table.rows().deselect();--}}
-                                                        {{--selected_rows = [];--}}
-                                                        {{--shipment_remarks = {};--}}
-                                                        {{--table.button('.reattempt').disable();--}}
-                                                        {{--table.draw('false');--}}
-                                                        {{--if (data.not_updated_shipments.length > 0) {--}}
-                                                            {{--var alert_icon = 'warning';--}}
-                                                            {{--var html = '';--}}
-                                                            {{--if (data.updated_shipments.length > 0) {--}}
-                                                                {{--alert_icon = 'success';--}}
-                                                                {{--$.each(data.updated_shipments, function (index, tracking_number) {--}}
-                                                                    {{--html += tracking_number + '<br/>';--}}
-                                                                {{--});--}}
-                                                                {{--html += '<br/>Shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';--}}
+                                                else{
+                                                    $.ajax({
+                                                        url: "{{route('cod.return.pending.reattempt.status')}}",
+                                                        method: 'POST',
+                                                        data: {
+                                                            'shipment_ids': selected_rows,
+                                                            '_token': '{{ csrf_token() }}',
+                                                            'remark': shipment_remarks
+                                                        }
+                                                    }).done(function (data) {
+                                                        table.rows().deselect();
+                                                        selected_rows = [];
+                                                        shipment_remarks = {};
+                                                        table.button('.reattempt').disable();
+                                                        table.draw('false');
+                                                        if (data.not_updated_shipments.length > 0) {
+                                                            var alert_icon = 'warning';
+                                                            var html = '';
+                                                            if (data.updated_shipments.length > 0) {
+                                                                alert_icon = 'success';
+                                                                $.each(data.updated_shipments, function (index, tracking_number) {
+                                                                    html += tracking_number + '<br/>';
+                                                                });
+                                                                html += '<br/>Shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';
 
-                                                            {{--}--}}
-                                                            {{--$.each(data.not_updated_shipments, function (index, tracking_number) {--}}
-                                                                {{--html += tracking_number + '<br/>';--}}
-                                                            {{--});--}}
-                                                            {{--html += '<br/>Shipment(s) are already updated';--}}
-                                                            {{--content = document.createElement('div');--}}
-                                                            {{--content.innerHTML = html;--}}
-                                                            {{--swal({--}}
-                                                                {{--title: 'Shipments Re-Attempt Requested',--}}
-                                                                {{--content: content,--}}
-                                                                {{--icon: alert_icon,--}}
-                                                                {{--buttons: {--}}
-                                                                    {{--cancel: {--}}
-                                                                        {{--text: 'Close',--}}
-                                                                        {{--value: null,--}}
-                                                                        {{--visible: true,--}}
-                                                                        {{--closeModal: true,--}}
-                                                                    {{--}--}}
-                                                                {{--},--}}
-                                                                {{--closeOnClickOutside: true,--}}
-                                                                {{--closeOnEsc: false,--}}
-                                                                {{--dangerMode: true--}}
-                                                            {{--});--}}
-                                                        {{--} else {--}}
-                                                            {{--toastr.success(data.success, 'Success!', {--}}
-                                                                {{--positionClass: 'toast-bottom-center',--}}
-                                                                {{--containerId: 'toast-bottom-center'--}}
-                                                            {{--});--}}
+                                                            }
+                                                            $.each(data.not_updated_shipments, function (index, tracking_number) {
+                                                                html += tracking_number + '<br/>';
+                                                            });
+                                                            html += '<br/>Shipment(s) are already updated';
+                                                            content = document.createElement('div');
+                                                            content.innerHTML = html;
+                                                            swal({
+                                                                title: 'Shipments Re-Attempt Requested',
+                                                                content: content,
+                                                                icon: alert_icon,
+                                                                buttons: {
+                                                                    cancel: {
+                                                                        text: 'Close',
+                                                                        value: null,
+                                                                        visible: true,
+                                                                        closeModal: true,
+                                                                    }
+                                                                },
+                                                                closeOnClickOutside: true,
+                                                                closeOnEsc: false,
+                                                                dangerMode: true
+                                                            });
+                                                        } else {
+                                                            toastr.success(data.success, 'Success!', {
+                                                                positionClass: 'toast-bottom-center',
+                                                                containerId: 'toast-bottom-center'
+                                                            });
 
-                                                        {{--}--}}
+                                                        }
 
 
-                                                    {{--});--}}
-                                                {{--}--}}
+                                                    });
+                                                }
                                             });
 
                                         }else{
@@ -636,6 +636,89 @@
                 }
             });
             var hub_ids = [];
+
+            $('#submit_nsa').on('click', function () {
+                var new_selected_rows = selected_rows;
+                var nsa = null;
+                selected_rows_nsa.forEach(function (index) {
+                    if($('input[name="confirm['+index+']"]').prop('checked') === false){
+                        var key = $.inArray(index, new_selected_rows);
+                            new_selected_rows.splice(key, 1);
+                    }
+                    else{
+                        nsa = 1;
+                    }
+                });
+                table.rows().nodes().each(function (index) {
+                    var row = table.row(index);
+                    if ($(row.node()).hasClass('selected')) {
+                        var id = parseInt(row.id());
+                        var remarks = $(row.node()).find('td.shipment_remarks input').val();
+                        shipment_remarks[id] = remarks;
+                    }
+
+                });
+                // console.log(shipment_remarks);
+                $.ajax({
+                    url: "{{route('cod.return.pending.reattempt.status')}}",
+                    method: 'POST',
+                    data: {
+                        'shipment_ids': new_selected_rows,
+                        '_token': '{{ csrf_token() }}',
+                        'remark': shipment_remarks,
+                        'nsa': nsa
+                    }
+                }).done(function (data) {
+                    table.rows().deselect();
+                    selected_rows = [];
+                    new_selected_rows = [];
+                    shipment_remarks = {};
+                    table.button('.reattempt').disable();
+                    table.draw('false');
+                    if (data.not_updated_shipments.length > 0) {
+                        var alert_icon = 'warning';
+                        var html = '';
+                        if (data.updated_shipments.length > 0) {
+                            alert_icon = 'success';
+                            $.each(data.updated_shipments, function (index, tracking_number) {
+                                html += tracking_number + '<br/>';
+                            });
+                            html += '<br/>Shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';
+
+                        }
+                        $.each(data.not_updated_shipments, function (index, tracking_number) {
+                            html += tracking_number + '<br/>';
+                        });
+                        html += '<br/>Shipment(s) are already updated';
+                        content = document.createElement('div');
+                        content.innerHTML = html;
+                        swal({
+                            title: 'Shipments Re-Attempt Requested',
+                            content: content,
+                            icon: alert_icon,
+                            buttons: {
+                                cancel: {
+                                    text: 'Close',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                }
+                            },
+                            closeOnClickOutside: true,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        });
+                    } else {
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-bottom-center',
+                            containerId: 'toast-bottom-center'
+                        });
+
+                    }
+
+
+                });
+            });
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 
