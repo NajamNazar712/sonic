@@ -133,6 +133,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('marked/status','Shippers\ShipperReturnController@return_marked_status')->name('marked.status');
             Route::post('marked/status/single','Shippers\ShipperReturnController@return_marked_single_status')->name('marked.status.single');
             Route::post('reattempt/status','Shippers\ShipperReturnController@return_reattempt_status')->name('reattempt.status');
+            Route::post('reattempt/nsa','Shippers\ShipperReturnController@return_reattempt_nsa')->name('reattempt.nsa');
             Route::post('reattempt/status/single','Shippers\ShipperReturnController@return_reattempt_single_status')->name('reattempt.status.single');
         });
     });
