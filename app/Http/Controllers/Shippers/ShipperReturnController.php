@@ -139,8 +139,34 @@ class ShipperReturnController extends Controller
             })
             ->make(true);
     }
-
-    public function change_status_to_self_collection(Request $request){
+public function return_reattempt_nsa(Request $request){
+        $shipment_ids = $request->shipment_ids;
+        $estimated_charges = array();
+        $nsa_shipments = array();
+        foreach ($shipment_ids as $shipment_id){
+            $shipment = Shipment::where('id', $shipment_id)->first();
+            if($shipment['shipper_status_id'] == 12){
+                $shipment_journey = ShipmentsJourney::where(['shipment_id' => $shipment_id, 'shipper_status_id' => 12])->first();
+                if($shipment_journey['status_reason_id'] == 34){
+                    $nsa_shipments[$shipment_id] = $shipment->tracking_number;
+                    $nsa_shipments_ids[] = (int)$shipment_id;
+                    if($shipment->nsa_osa_estimated_charges){
+                        $estimated_charges[$shipment_id] = $shipment->nsa_osa_estimated_charges;
+                    }
+                    else{
+                        $estimated_charges[$shipment_id] = '-';
+                    }
+                }
+            }
+        }
+        if($nsa_shipments != null){
+            return ['status' => 1, 'nsa_shipments' => $nsa_shipments, 'estimated_charges' => $estimated_charges, 'nsa_shipments_ids' => $nsa_shipments_ids];
+        }
+        else{
+            return ['status' => 0];
+        }
+    }
+public function change_status_to_self_collection(Request $request){
         $shipmentId = $request->shipment_id;
         if($shipmentId){
             if(Shipment::where('id', $shipmentId)->exists()){
@@ -243,6 +269,9 @@ class ShipperReturnController extends Controller
 
                     Shipment::where('id', $shipment)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
                     ShipmentsJourneyController::add($shipment, 52, 52, NULL, $remarks, session('user_id'), NULL);
+                    if($request->get('nsa') != null){
+                        NotificationsController::send(33, null, $shipment);
+                    }
                     $updated_shipments[] = $parcel->tracking_number;
                 } else {
                     $not_updated_shipments[] = $parcel->tracking_number;
