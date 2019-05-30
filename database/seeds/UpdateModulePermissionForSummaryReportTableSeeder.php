@@ -12,7 +12,7 @@ class UpdateModulePermissionForSummaryReportTableSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 206, 'name' => 'Summary Report', 'module_id' => 9),
+            array('id' => 210, 'name' => 'Summary Report', 'module_id' => 9),
         ));
     }
 }
