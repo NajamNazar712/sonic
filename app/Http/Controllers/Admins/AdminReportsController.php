@@ -4365,24 +4365,33 @@ public function revenue_index(){
             ->leftjoin('cities as h' ,'h.id', '=' , 'dc.hub_id')
             ->leftjoin('crm_request_channels as crc' ,'crc.id', '=' , 'crm_requests.channel_id')
             ->leftjoin('admins as a' ,'a.id', '=' , 'crm_requests.agent_id')
-            ->leftjoin('admins as al', 'al.id', '=', 'crm_requests.launched_by_id')
-            ->leftjoin('users as us', 'us.id', '=', 'crm_requests.launched_by_id')
-            ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
+            ->leftJoin('admins as al', function ($join) {
+                $join->on('al.id', '=', 'crm_requests.launched_by_id')
+                    ->where('crm_requests.launched_by', '=', DB::raw(0));
+            })
+            ->leftJoin('users as us', function ($join) {
+                $join->on('us.id', '=', 'crm_requests.launched_by_id')
+                    ->where('crm_requests.launched_by', '=', DB::raw(1));
+            })
+            ->leftJoin('substitute_users as su', function ($join) {
+                $join->on('su.id', '=', 'crm_requests.launched_by_id')
+                    ->where('crm_requests.launched_by', '=', DB::raw(2));
+            })
             ->leftjoin('crm_request_agent_histories as crah', function ($join){
                 $join->on('crah.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crah.created_at', '=', DB::connection('reports')->raw('(select max(created_at) from crm_request_agent_histories where crm_request_id = crm_requests.id and agent_id = crm_requests.agent_id)'));
+                    ->where('crah.id', '=', DB::connection('reports')->raw('(select max(id) from crm_request_agent_histories where crm_request_id = crm_requests.id and agent_id = crm_requests.agent_id)'));
             })
             ->leftjoin('crm_request_status_histories as crsh', function ($join){
                 $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crsh.created_at', '=', DB::connection('reports')->raw('(select min(created_at) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 2)'));
+                    ->where('crsh.id', '=', DB::connection('reports')->raw('(select min(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 2)'));
             })
             ->leftjoin('crm_request_status_histories as crshr', function ($join){
                 $join->on('crshr.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crshr.created_at', '=', DB::connection('reports')->raw('(select max(created_at) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 3)'));
+                    ->where('crshr.id', '=', DB::connection('reports')->raw('(select max(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 3)'));
             })
             ->leftjoin('crm_request_status_histories as crshc', function ($join){
                 $join->on('crshc.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crshc.created_at', '=', DB::connection('reports')->raw('(select max(created_at) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 4)'));
+                    ->where('crshc.id', '=', DB::connection('reports')->raw('(select max(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 4)'));
             })
             ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crsh.created_at as valid_invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id')
         ->groupBy('crm_requests.id');
