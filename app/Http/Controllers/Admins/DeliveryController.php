@@ -920,7 +920,12 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id'])
+            ->leftjoin('crm_requests as crm', function ($join) {
+                $join->on('crm.shipment_id', '=', 'shipments.id')
+                    ->whereIn('crm.status_id', [2, 3, 5])
+                    ->where('crm.case_nature_id', 1);
+            })
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint'])
             ->where('delivery_notes.id', $id);
 
         if (session('role_id') != 1) {
@@ -934,14 +939,13 @@ class DeliveryController extends Controller
                         $delivered_statuses = array(14, 30, 36);
                         if (in_array($deliveries->current_status_id, $delivered_statuses)) {
                             return 'statusDelivered';
-                        }
-                        else if($deliveries->current_status_id==12) {
+                        } else if ($deliveries->current_status_id == 12) {
                             return 'statusReturn';
-                        }else if($deliveries->current_status_id == 5){
-                            return 'complaint_row';
-                        }else {
+                        } else {
                             return 'statusUpdated';
                         }
+                    }else if($deliveries->complaint != null){
+                        return 'complaint_row';
                     } else {
                         return '';
                     }
@@ -3787,30 +3791,36 @@ class DeliveryController extends Controller
             if ($shipment->exists()) {
                 $data = array();
                 $shipment = $shipment->first();
-                if(in_array($shipment->shipper_status_id, $passing_delivery_status_array)){
-                    $delivery_note_shipments = DeliveryNoteShipment::where('shipment_id',$shipment->id)->max('delivery_note_id');
-                    $delivery_note = DeliveryNote::find($delivery_note_shipments);
-                    if($delivery_note){
-                        if($delivery_note->status == 0){
-                            return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                if ($shipment->shipper_status_id != 3) {
+                    if(in_array($shipment->shipper_status_id, $passing_delivery_status_array)){
+                        $delivery_note_shipments = DeliveryNoteShipment::where('shipment_id',$shipment->id)->max('delivery_note_id');
+                        $delivery_note = DeliveryNote::find($delivery_note_shipments);
+                        if($delivery_note){
+                            if($delivery_note->status == 0){
+                                return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                            }
                         }
+
                     }
 
+
+                    $data['id'] = $shipment->id;
+                    $data['tracking_number'] = $shipment->tracking_number;
+                    $data['consignee_city_id'] = $shipment->consignee_city->id;
+//                $data['consignee_city_name'] = $shipment->consignee_city->name;
+                    $data['consignee_name'] = $shipment->consignee_name;
+                    $data['consignee_address'] = $shipment->consignee_address;
+                    $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
+                    $data['consignee_phone2'] = ($shipment->consignee_phone_number_2 != '')? $shipment->consignee_phone_number_2:'';
+                    $data['consignee_email'] = ($shipment->consignee_email != '')? $shipment->consignee_email:'';
+                    $data['amount'] = number_format($shipment->amount);
+
+                    return response()->json(['status' => 1, 'details' => $data]);
+                }
+                else{
+                    return response()->json(['status' => 0, 'error' => 'This shipment is currently in transit, please receive its cargo first to update it as Misroute!']);
                 }
 
-
-                $data['id'] = $shipment->id;
-                $data['tracking_number'] = $shipment->tracking_number;
-                $data['consignee_city_id'] = $shipment->consignee_city->id;
-//                $data['consignee_city_name'] = $shipment->consignee_city->name;
-                $data['consignee_name'] = $shipment->consignee_name;
-                $data['consignee_address'] = $shipment->consignee_address;
-                $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
-                $data['consignee_phone2'] = ($shipment->consignee_phone_number_2 != '')? $shipment->consignee_phone_number_2:'';
-                $data['consignee_email'] = ($shipment->consignee_email != '')? $shipment->consignee_email:'';
-                $data['amount'] = number_format($shipment->amount);
-
-                return response()->json(['status' => 1, 'details' => $data]);
 
             } else {
                 return response()->json(['status' => 0, 'error' => 'Shipment is not ready for misrouted!']);

@@ -40,7 +40,7 @@
 									</div>
 
 									<div class="col-12 col-lg-6 mt-2 mt-lg-0">
-										<h3 class="form-section mb-2">Reimburse Account</h3>
+										<h3 class="form-section mb-2">Overnight/Same-day</h3>
 
 										@foreach($cities as $city)
 											<div class="form-group">
@@ -78,7 +78,7 @@
 									</div>
 
 									<div class="col-12 col-lg-6 mt-2 mt-lg-0" style="margin-top: 100px">
-										<h3 class="form-section mb-2">Corporate Account</h3>
+										<h3 class="form-section mb-2">Overland/Detain</h3>
 
 										@foreach($cities as $city)
 											<div class="form-group">

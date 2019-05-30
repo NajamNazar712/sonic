@@ -637,19 +637,24 @@
                                     '_token': '{{ csrf_token() }}'
                                 }
                             }).done(function(data){
+                                console.log(data);
                                 UnblockPagePermanently();
-                               if(data.status) {
+                               if(data.status == 1) {
 
                                    var html = '';
-                                   html += 'Errors in following Shipment(s) !<br/>';
+
+                                   html += 'The following Shipment(s) could not be added:<br/>';
+
                                    $.each(data.errors, function (index, message) {
-                                       html += index + ':' + message + '<br/>';
+                                       html += index + ', ';
                                    });
+
+                                   html = html.slice(0, -2);
 
                                    content = document.createElement('div');
                                    content.innerHTML = html;
                                    swal({
-                                       title: 'Month Closing!',
+                                       // title: 'Month Closing!',
                                        content: content,
                                        icon: 'warning',
                                        buttons: {
@@ -668,50 +673,28 @@
                                    table.draw(true);
 
                                }else if(data.status == 2){
-                                   var html = '';
-                                   html += 'Successfully added following Shipment(s) to Month Closing!<br/>';
-                                   $.each(data.success, function (index, message) {
-                                       html += index + ':' + message + '<br/>';
-                                   });
+                                   var success = "Shipment(s) has been successfully added";
+                                   toastr.success(success, 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
-                                   content = document.createElement('div');
-                                   content.innerHTML = html;
-                                   swal({
-                                       title: 'Month Closing!',
-                                       content: content,
-                                       icon: 'warning',
-                                       buttons: {
-                                           cancel: {
-                                               text: 'Close',
-                                               value: null,
-                                               visible: true,
-                                               closeModal: true,
-                                           },
-                                       },
-                                       closeOnClickOutside: false,
-                                       closeOnEsc: false,
-                                       dangerMode: true
-                                   });
                                    scan_sound(2);
                                    table.draw(true);
                                }else if(data.status == 3){
-                                   
                                    var html = '';
-                                   html += 'Errors in following Shipment(s) !<br/>';
+
+                                   html += 'Some Shipment(s) has been successfully added!<br/><br/>';
+
+                                   html += 'The following Shipment(s) could not be added:<br/>';
 
                                    $.each(data.errors, function (index, message) {
-                                       html += index + ':' + message + '<br/>';
+                                       html += index + ', ';
                                    });
 
-                                   html += 'Successfully added following Shipment(s) to Month Closing!<br/>';
-                                   $.each(data.success, function (index, message) {
-                                       html += index + ':' + message + '<br/>';
-                                   });
+                                   html = html.slice(0, -2);
 
                                    content = document.createElement('div');
                                    content.innerHTML = html;
                                    swal({
-                                       title: 'Month Closing!',
+                                       // title: 'Month Closing!',
                                        content: content,
                                        icon: 'warning',
                                        buttons: {
@@ -726,7 +709,7 @@
                                        closeOnEsc: false,
                                        dangerMode: true
                                    });
-
+                                   scan_sound(1);
                                    table.draw(true);
                                }
                                 select[0].selectize.clear();

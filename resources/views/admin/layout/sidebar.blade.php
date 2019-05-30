@@ -46,7 +46,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([155, 206], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([155, 209], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"
                                                         data-i18n="nav.dash.main">Book Shipments</span></a>
                     <ul class="menu-content">
@@ -54,7 +54,7 @@
                             <li><a class="menu-item" href="{{route('admin.shipment.book.walk_in')}}">Walk In</a></li>
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(206, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(209, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.shipment.history.walk_in_history')}}">Walk In History</a></li>
                         @endif
                     </ul>
