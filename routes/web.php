@@ -452,9 +452,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('delivered','Admins\DeliveryController@receive_delivery_status_delivered')->name('delivered');
             Route::post('shipmentstatuscheck','Admins\DeliveryController@receive_delivery_status_check')->name('shipmentstatuscheck');
             Route::post('replacements','Admins\DeliveryController@receive_delivery_get_replacements')->name('replacements');
-            Route::put('replacements.submit','Admins\DeliveryController@receive_delivery_replacements_submit')->name('replacements.submit');
+            Route::put('replacements/submit','Admins\DeliveryController@receive_delivery_replacements_submit')->name('replacements.submit');
             Route::post('trybuys','Admins\DeliveryController@receive_delivery_get_trybuys')->name('trybuys');
             Route::put('trybuys.submit','Admins\DeliveryController@receive_delivery_trybuys_submit')->name('trybuys.submit');
+            //Non Service Area Routes
+            Route::post('nsa_shipments_data','Admins\DeliveryController@nsa_shipments_data')->name('nsa_shipments_data');
+            Route::put('nsa_shipments/submit','Admins\DeliveryController@nsa_shipments_submit')->name('nsa_shipments.submit');
+            //Non Service Area Routes
+
             Route::get('{id}/status/verify','Admins\DeliveryController@receive_delivery_note_verify_view')->name('status.verify');
             Route::get('{id}/verify/status/list','Admins\DeliveryController@receive_delivery_verify_status_list')->name('verify.status.list');
             Route::put('verify/status/submit','Admins\DeliveryController@receive_delivery_verify_status_submit')->name('verify.status.submit');

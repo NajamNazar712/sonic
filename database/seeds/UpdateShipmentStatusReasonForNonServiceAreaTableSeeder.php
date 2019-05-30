@@ -11,15 +11,16 @@ class UpdateShipmentStatusReasonForNonServiceAreaTableSeeder extends Seeder
      */
     public function run()
     {
-
+        $status = \App\Http\Models\ShipmentStatus::find(10);
+        if($status){
+            $status->status = 0;
+            $status->save();
+        }
         DB::table('shipment_status_reason')->insert(array(
-            array('id' => 34, 'name' => ''),
-
+            array('id' => 34, 'name' => 'Non-Service Area')
         ));
         DB::table('shipment_status_shipment_status_reason')->insert(array(
-            array('shipment_status_id' => 56, 'shipment_status_reason_id' => 31),
-            array('shipment_status_id' => 56, 'shipment_status_reason_id' => 32),
-            array('shipment_status_id' => 56, 'shipment_status_reason_id' => 33),
+            array('shipment_status_id' => 12, 'shipment_status_reason_id' => 34)
         ));
     }
 }
