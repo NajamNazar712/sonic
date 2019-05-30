@@ -22,7 +22,7 @@ class ProcessShipmentsPickupJourney implements ShouldQueue
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(array $entry)
     {
         $this->connection = 'sqs-fifo';
         $this->messageGroupId = 'shipments_pickup_journey';
