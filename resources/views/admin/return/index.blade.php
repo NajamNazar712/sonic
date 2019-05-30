@@ -96,6 +96,38 @@
         </div>
     </div>
 
+
+    <div class="modal fade" id="EditEstimateChargesModal" role="dialog" aria-labelledby="EditEstimateChargesModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Estimate Charges</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="update_charges_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                            <input type="text" name="estimate_charges" id="estimated_charges_input" class="form-control decimal" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
+
+                        </div>
+                        <input type="hidden" id="eec_shipment_id">
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary update_charges" value="Add">Update Charges</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -860,6 +892,91 @@
                     });
                 }
             });
+
+
+            $('.decimal').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 3,
+                'min': 0,
+                'max': 100000
+            });
+
+
+            $('#datatable').on('click', '.editEstimateCharges', function () {
+               var id =  $(this).parents('tr').attr('id');
+               if(id){
+                   $('#EditEstimateChargesModal').modal('show');
+                   $('#eec_shipment_id').val(id);
+               }
+
+            });
+            $('#update_charges_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    // $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to update Estimated Charges!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            var charges = $('#estimated_charges_input').val();
+                            var shipment_id = $('#eec_shipment_id').val();
+                            $.ajax({
+                                url: '{!! route('admin.return.edit.estimated_charges') !!}',
+                                method: 'POST',
+                                data: {
+                                    'charges': charges,
+                                    'shipment_id': shipment_id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                UnblockPagePermanently();
+                                $('#EditEstimateChargesModal').modal('hide');
+
+                                if(data.status){
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }else{
+                                    table.draw(false);
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                                $('#estimated_charges_input').val('');
+                                $('#eec_shipment_id').val('');
+                            });
+
+                        }
+                    });
+                }
+            });
+
 
         });
     </script>

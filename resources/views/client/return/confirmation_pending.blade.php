@@ -745,6 +745,54 @@
                     window.location = url;
                 }
             });
+
+            $('#datatable').on('click', '.selfCollection', function () {
+                var row_id = $(this).parents('tr').attr('id');
+                if(row_id){
+                    swal({
+                        title: 'Are You Sure you want to mark shipment for self collection',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            $.ajax({
+                                url:"{{route('cod.return.pending.marked.self_collection')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_id':row_id,
+                                    '_token':'{{ csrf_token() }}',
+                                }
+                            }).done(function (data) {
+                                UnblockPagePermanently();
+                                if(data.status == 1){
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }else{
+                                    table.draw(false);
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
         });
     </script>
 @endsection

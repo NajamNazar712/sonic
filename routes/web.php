@@ -134,6 +134,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('marked/status/single','Shippers\ShipperReturnController@return_marked_single_status')->name('marked.status.single');
             Route::post('reattempt/status','Shippers\ShipperReturnController@return_reattempt_status')->name('reattempt.status');
             Route::post('reattempt/status/single','Shippers\ShipperReturnController@return_reattempt_single_status')->name('reattempt.status.single');
+            Route::post('marked/self_collection','Shippers\ShipperReturnController@change_status_to_self_collection')->name('marked.self_collection');
         });
     });
 
@@ -576,6 +577,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('excel/store','Admins\ReturnController@excel_store')->name('excel.store');
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
+        Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');
 
         Route::prefix('confirmed')->name('confirmed.')->group(function (){
             Route::post('revert','Admins\ReturnController@return_confirmed_revert')->name('revert');

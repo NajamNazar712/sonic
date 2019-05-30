@@ -205,6 +205,7 @@ class ReturnController extends Controller
                 $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';
                 $re_attempt_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';
                 $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
+                $edit_estimate_charges = '<a href="javascript:void(0);" class="dropdown-item editEstimateCharges" data-action="editEstimateCharges"><i class="ft-plus-circle primary"></i> Edit Estimate Charges</a>';
 
                 if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0) {
                     $dropdown = "
@@ -227,7 +228,11 @@ class ReturnController extends Controller
                         }
                     }
 
-
+                    if (session('role_id') == 1 || in_array(212, session('permissions'))) {
+                        if($result->reason_id == 12 || $result->reason_id == 34){
+                            $dropdown .= $edit_estimate_charges;
+                        }
+                    }
 
                     $dropdown .= "
                             </div>
@@ -391,6 +396,25 @@ class ReturnController extends Controller
 
         }else{
             return response()->json(['status' => 1, 'error' => 'Shipment ID Not selected!']);
+        }
+    }
+
+    public function update_estimated_charges(Request $request){
+        $shipment_id = $request->shipment_id;
+        $charges = $request->charges;
+        if($shipment_id){
+            if($charges != null){
+                $shipment = Shipment::find($shipment_id);
+                $shipment->nsa_osa_estimated_charges = $charges;
+                $shipment->save();
+
+                return response()->json(['status' => 0, 'success' => 'Charges Updated!']);
+            }else{
+                return response()->json(['status' => 1, 'error' => 'Charges not entered!']);
+            }
+
+        }else{
+            return response()->json(['status' => 1, 'error' => 'Shipment Not found!']);
         }
     }
 

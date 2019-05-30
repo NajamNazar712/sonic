@@ -109,6 +109,7 @@ class ShipperReturnController extends Controller
                 $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i>Confirm</a>';
                 $reattempt_button = '<a href="javascript:void(0);" class="dropdown-item returnReattemptStatus"><i class="ft-plus-circle primary"></i>Re-Attempt Request</a>';
                 $intercept = '<button type="button" class="dropdown-item intercept"><div class="row no-gutters align-items-center"><a href=""><i class="ft-plus-circle"></i></a>  Intercept/Re-Book</div></button>';
+                $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
 
 
                     $dropdown = "
@@ -123,6 +124,11 @@ class ShipperReturnController extends Controller
                             $dropdown .= $intercept;
                         }
 
+                        if($result->reason_id == 12 || $result->reason_id == 34){
+                            $dropdown .= $self_collection_button;
+                        }
+
+
                     $dropdown .= "
                             </div>
                         </span>
@@ -132,6 +138,23 @@ class ShipperReturnController extends Controller
 
             })
             ->make(true);
+    }
+
+    public function change_status_to_self_collection(Request $request){
+        $shipmentId = $request->shipment_id;
+        if($shipmentId){
+            if(Shipment::where('id', $shipmentId)->exists()){
+                Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>15,'consignee_status_id'=>15]);
+                ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, null,  Auth::id(), NULL);
+
+                return ['status'=>0, 'success'=>"Shipment status successfully updated to Shipment - On Hold for Self Collection"];
+            }else{
+                return response()->json(['status' => 1, 'error' => 'Shipment Not found!']);
+            }
+
+        }else{
+            return response()->json(['status' => 1, 'error' => 'Shipment ID Not selected!']);
+        }
     }
 
     public function return_marked_single_status(Request $request){

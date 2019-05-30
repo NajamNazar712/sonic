@@ -66,10 +66,6 @@
 
                 </div>
 
-                {{--<div class="modal-footer">--}}
-                    {{--<button type="submit" class="btn btn-primary" id="add_shipment_submit_btn">Submit</button>--}}
-                    {{--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>--}}
-                {{--</div>--}}
             </div>
         </div>
     </div>
