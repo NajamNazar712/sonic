@@ -31,6 +31,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">NSA/OSA Estimated Charges</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Action</th>
@@ -159,6 +160,7 @@
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remarks');
+                            head.push('NSA/OSA Estimated Charges');
                             head.push('Arrival Date');
                             head.push('Status Date');
 
@@ -181,6 +183,7 @@
                                 row.push(values.status);
                                 row.push(values.reason);
                                 row.push(values.remarks);
+                                row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
 
@@ -536,6 +539,7 @@
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipment_remarks', orderable: false, searchable: false},
+                    {data: 'nsa_osa_estimated_charges', name: 'sj.created_at', class: 'align-middle nsa_osa_estimated_charges'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

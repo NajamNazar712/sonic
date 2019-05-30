@@ -81,7 +81,7 @@ class ReturnController extends Controller
                     ->whereIn('crm.status_id', [2, 3, 5])
                     ->where('crm.case_nature_id', 1);
             })
-            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id','crm.id as complaint')
+            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges')
             ->whereIn('shipments.shipper_status_id', [12,52])
             ->groupBy('shipments.id');
 
@@ -94,6 +94,9 @@ class ReturnController extends Controller
                 'class' => function ($shipments) {
                     if ($shipments->complaint != null) {
                         return 'complaint_row';
+                    }
+                    if($shipments->reason_id == 12 || $shipments->reason_id == 34){
+                        return 'nsa_osa_reason';
                     }
                     if ($shipments->current_status_id == 52) {
                         return 'goldClass';
@@ -201,6 +204,7 @@ class ReturnController extends Controller
             ->addColumn("action", function ($result) {
                 $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';
                 $re_attempt_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';
+                $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
 
                 if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0) {
                     $dropdown = "
@@ -216,6 +220,14 @@ class ReturnController extends Controller
                     if (session('role_id') == 1 || in_array(46, session('permissions'))) {
                         $dropdown .= $re_attempt_button;
                     }
+
+                    if (session('role_id') == 1 || in_array(211, session('permissions'))) {
+                        if($result->reason_id == 12 || $result->reason_id == 34){
+                            $dropdown .= $self_collection_button;
+                        }
+                    }
+
+
 
                     $dropdown .= "
                             </div>
@@ -363,6 +375,23 @@ class ReturnController extends Controller
         }
         return ['status'=>0,'error'=>"Shipment is already updated, Please refresh your page!"];
 
+    }
+
+    public function change_status_to_self_collection(Request $request){
+        $shipmentId = $request->shipment_id;
+        if($shipmentId){
+            if(Shipment::where('id', $shipmentId)->exists()){
+                Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>15,'consignee_status_id'=>15]);
+                ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, null, NULL, Auth::id());
+
+                return ['status'=>0, 'success'=>"Shipment status successfully updated to Shipment - On Hold for Self Collection"];
+            }else{
+                return response()->json(['status' => 1, 'error' => 'Shipment Not found!']);
+            }
+
+        }else{
+            return response()->json(['status' => 1, 'error' => 'Shipment ID Not selected!']);
+        }
     }
 
     public function excel_store(Request $request){

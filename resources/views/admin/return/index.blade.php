@@ -44,6 +44,7 @@
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Shipper Remarks</th>
+                        <th class="border-primary border-darken-1">NSA/OSA Estimated Charges</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Re-Attempt Count</th>
@@ -196,6 +197,7 @@
                             head.push('Reason');
                             head.push('Remarks');
                             head.push('Shipper Remarks');
+                            head.push('NSA/OSA Estimated Charges');
                             head.push('Arrival Date');
                             head.push('Status Date');
                             head.push('Re-Attempt Count');
@@ -222,6 +224,7 @@
                                 row.push(values.reason);
                                 row.push(values.remarks);
                                 row.push(values.shipper_remarks);
+                                row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
                                 row.push(values.reattempts);
@@ -519,6 +522,7 @@
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'shipment_remarks', name: 'admin_journey.remarks', class: 'align-middle shipment_remarks'},
                     {data: 'shipper_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipper_remarks'},
+                    {data: 'nsa_osa_estimated_charges', name: 'sj.created_at', class: 'align-middle nsa_osa_estimated_charges'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
@@ -809,6 +813,54 @@
                 }
 
             });
+
+            $('#datatable').on('click', '.selfCollection', function () {
+                var row_id = $(this).parents('tr').attr('id');
+                if(row_id){
+                    swal({
+                        title: 'Are You Sure you want to mark shipment for self collection',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            $.ajax({
+                                url:"{{route('admin.return.marked.self_collection')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_id':row_id,
+                                    '_token':'{{ csrf_token() }}',
+                                }
+                            }).done(function (data) {
+                                UnblockPagePermanently();
+                                if(data.status == 1){
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }else{
+                                    table.draw(false);
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
         });
     </script>
 @endsection
