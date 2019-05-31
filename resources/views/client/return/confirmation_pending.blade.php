@@ -338,7 +338,7 @@
                                                                 '<td class="text-center"><u><a href='+route+'?tracking_number='+data.nsa_shipments[index]+' target="_blank">'+data.nsa_shipments[index]+'</a></u></td>';
                                                             html += '<td class="text-center">'+ data.estimated_charges[index] +'</td>';
                                                             html += '<td class="text-center"><div class="d-inline-block custom-control custom-checkbox mr-1">\n' +
-                                                                '<input type="checkbox" class="custom-control-input bg-success" name="confirm['+index+']" id="confirm['+index+']">\n' +
+                                                                '<input type="checkbox" class="custom-control-input" name="confirm['+index+']" id="confirm['+index+']">\n' +
                                                                 '<label class="custom-control-label" for="confirm['+index+']">Re-Attempt</label>\n' +
                                                                 '</div></td></tr>';
                                                         });
@@ -862,7 +862,7 @@
                             }).done(function (data) {
                                 if(data.status == 1){
                                     var html = '';
-                                    html += 'OSA/NSA Shipment Status against Tracking Number: '+ data.nsa_shipment +'<br/>';
+                                    html += 'OSA/NSA Status Shipment against Tracking Number: '+ data.nsa_shipment +'<br/>';
                                     html += 'Estimated Charges will be: '+ data.estimated_charge +'<br/>';
                                     html += 'Select Yes for the approval to deliver shipment with additional charges ';
                                     content = document.createElement('div');
