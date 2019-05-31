@@ -533,7 +533,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[20, 'asc'], [21, 'asc']],
+                order: [[21, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -850,7 +850,7 @@
                 var row_id = $(this).parents('tr').attr('id');
                 if(row_id){
                     swal({
-                        title: 'Are You Sure you want to mark shipment for self collection',
+                        text: 'Are You Sure you want to mark shipment for self collection?',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -895,11 +895,10 @@
 
 
             $('.decimal').inputmask({
-                'alias': 'decimal',
+                'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false,
                 'rightAlign': false,
-                'digits': 3,
                 'min': 0,
                 'max': 100000
             });
