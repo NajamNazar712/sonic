@@ -48,7 +48,7 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Re-Attempt Count</th>
-                        <th class="border-primary border-darken-1">Action</th>
+                        <th class="border-primary border-darken-1">Actions</th>
                     </tr>
                     </thead>
                 </table>
@@ -850,8 +850,8 @@
                 var row_id = $(this).parents('tr').attr('id');
                 if(row_id){
                     swal({
-                        text: 'Are You Sure you want to mark shipment for self collection?',
-                        icon: 'warning',
+                        text: 'Are you sure you want to mark shipment for Self-Collection?',
+                        icon: 'info',
                         buttons: {
                             cancel: {
                                 text: 'No',
