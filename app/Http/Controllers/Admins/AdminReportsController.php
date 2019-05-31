@@ -1161,7 +1161,7 @@ class AdminReportsController extends Controller
             if($sales_tagging == TRUE){
 
                 if (session('department_id') != 7){
-                    $booked = DB::connection('reports')->table('shipments')->join('users','users.id','=', 'shipments.user_id')->where('users.status', '=', 3)->whereExists(function($query) use ($hub) {
+                    $booked = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                         $query->from('user_shipping_infos')
                         ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
                         ->whereExists(function($sub_query) use ($hub) {
