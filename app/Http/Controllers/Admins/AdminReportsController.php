@@ -1669,12 +1669,12 @@ class AdminReportsController extends Controller
                     $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
 
                     if(session('department_id') != 7){
-                        $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->where('status',3)->get();
+                        $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
                     }else{
                         if(session('role_id') != 4){
-                            $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->where('status',3)->whereIn('id', session('tagged_shippers'))->get();
+                            $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->whereIn('id', session('tagged_shippers'))->get();
                         }else{
-                            $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->where('status',3)->get();
+                            $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
                         }
                     }
 
@@ -1683,8 +1683,7 @@ class AdminReportsController extends Controller
                 $pickup_request_shippers = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date_from, $date_to) {
                     $query->from('shipments_journey')
                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
-                    ->whereBetween('created_at', [$date_from, $date_to])
-                    ->where('shipper_status_id', 2);
+                    ->whereBetween('created_at', [$date_from, $date_to]);
                 });
                 if($pickup_request_shippers->exists()) {
                     $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
@@ -1730,26 +1729,25 @@ class AdminReportsController extends Controller
             }
         }
         else{
-//            $pickup_request_shippers = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date_from, $date_to) {
-//                $query->from('shipments_journey')
-//                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
-//                ->whereBetween('created_at', [$date_from, $date_to])
-//                ->where('shipper_status_id', 1);
-//            });
+            $pickup_request_shippers = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date_from, $date_to) {
+                $query->from('shipments_journey')
+                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                ->whereBetween('created_at', [$date_from, $date_to])
+                ->where('shipper_status_id', 2);
+            });
 
-//            if($pickup_request_shippers->exists()){
-//                $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
+            if($pickup_request_shippers->exists()){
+                $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
 
 //                $pickup_request_shippers_ids = DB::connection('reports')->table('shipments')->whereIn('id', $pickup_request_shippers)->groupBy('user_id');
 //                if($pickup_request_shippers_ids->exists()){
 //                    $pickup_request_shippers_ids = $pickup_request_shippers_ids->get();
 //                    if($pickup_request_shippers_ids->ixists()){
 //                        $pickup_request_shippers_ids = $pickup_request_shippers_ids->get();
-//                $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
-                $shippers = DB::connection('reports')->table('users')->select('id','name')->get();
+                $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
 //                    }
 //                }
-//            }
+            }
         }
         $shipper_sort_support_array = array();
         $total_shipper_booked = 0;
@@ -1773,7 +1771,6 @@ class AdminReportsController extends Controller
         $shipper_actual_weight = 0;
         $shipper_chargeable_weight = 0;
         if(count($shippers) > 0) {
-
             foreach ($shippers as $shipper) {
 
                 if($sales_tagging == TRUE){
