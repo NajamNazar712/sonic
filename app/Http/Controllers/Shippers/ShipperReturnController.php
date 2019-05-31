@@ -294,7 +294,7 @@ public function change_status_to_self_collection(Request $request){
 
                     Shipment::where('id', $shipment)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
                     ShipmentsJourneyController::add($shipment, 52, 52, NULL, $remarks, session('user_id'), NULL);
-                    if($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)){
+                    if($parcel->shipper_status_id == 12 && ($journey['status_reason_id'] == 12 || $journey['status_reason_id'] == 34)){
                         NotificationsController::send(33, $shipment);
                     }
                     $updated_shipments[] = $parcel->tracking_number;
