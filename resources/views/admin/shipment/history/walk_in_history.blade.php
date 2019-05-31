@@ -14,7 +14,7 @@
                 <div id="search_form" class="row mb-2 justify-content-center">
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Tracking Number">
                         </fieldset>
                     </div>
                     <div class="col-4">
@@ -24,7 +24,7 @@
                                     <span class="la la-calendar-o"></span>
                                 </span>
                             </div>
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Update Date (From)">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
                         </div>
                     </div>
                     <div class="col-4 ">
@@ -34,7 +34,7 @@
                                     <span class="la la-calendar-o"></span>
                                 </span>
                             </div>
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Update Date (To)">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
                         </div>
                     </div>
                     <div class="col-2">
