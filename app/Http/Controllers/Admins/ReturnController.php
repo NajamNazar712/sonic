@@ -318,7 +318,16 @@ class ReturnController extends Controller
                     NotificationsController::send(16, 0, $shipment);
 
                     if($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)){
+                        ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+
                         NotificationsController::send(33, $request->shipment_id);
+                    }
+                    else if ($parcel->shipper_status_id == 52) {
+                        $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
+
+                        if ($journey->shipper_stauts_id == 12 && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)) {
+                            ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+                        }
                     }
                 }
 
