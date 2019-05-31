@@ -140,29 +140,53 @@ class ShipperReturnController extends Controller
     }
 public function return_reattempt_nsa(Request $request){
         $shipment_ids = $request->shipment_ids;
-        $estimated_charges = array();
-        $nsa_shipments = array();
-        foreach ($shipment_ids as $shipment_id){
-            $shipment = Shipment::where('id', $shipment_id)->first();
+        if($request->single == 1){
+            $shipment = Shipment::where('id', $shipment_ids)->first();
             if($shipment['shipper_status_id'] == 12){
-                $shipment_journey = ShipmentsJourney::where(['shipment_id' => $shipment_id, 'shipper_status_id' => 12])->first();
+                $shipment_journey = ShipmentsJourney::where(['shipment_id' => $shipment_ids, 'shipper_status_id' => 12])->first();
                 if($shipment_journey['status_reason_id'] == 34 || $shipment_journey['status_reason_id'] == 12){
-                    $nsa_shipments[$shipment_id] = $shipment->tracking_number;
-                    $nsa_shipments_ids[] = (int)$shipment_id;
+                    $nsa_shipment = $shipment->tracking_number;
+                    $nsa_shipments_id = (int)$shipment_ids;
                     if($shipment->nsa_osa_estimated_charges){
-                        $estimated_charges[$shipment_id] = $shipment->nsa_osa_estimated_charges;
+                        $estimated_charge = $shipment->nsa_osa_estimated_charges;
                     }
                     else{
-                        $estimated_charges[$shipment_id] = '-';
+                        $estimated_charge = '-';
                     }
                 }
             }
-        }
-        if($nsa_shipments != null){
-            return ['status' => 1, 'nsa_shipments' => $nsa_shipments, 'estimated_charges' => $estimated_charges, 'nsa_shipments_ids' => $nsa_shipments_ids];
+            if($nsa_shipment != null){
+                return ['status' => 1, 'nsa_shipment' => $nsa_shipment, 'estimated_charge' => $estimated_charge, 'nsa_shipments_id' => $nsa_shipments_id];
+            }
+            else{
+                return ['status' => 0];
+            }
         }
         else{
-            return ['status' => 0];
+            $estimated_charges = array();
+            $nsa_shipments = array();
+            foreach ($shipment_ids as $shipment_id){
+                $shipment = Shipment::where('id', $shipment_id)->first();
+                if($shipment['shipper_status_id'] == 12){
+                    $shipment_journey = ShipmentsJourney::where(['shipment_id' => $shipment_id, 'shipper_status_id' => 12])->first();
+                    if($shipment_journey['status_reason_id'] == 34 || $shipment_journey['status_reason_id'] == 12){
+                        $nsa_shipments[$shipment_id] = $shipment->tracking_number;
+                        $nsa_shipments_ids[] = (int)$shipment_id;
+                        if($shipment->nsa_osa_estimated_charges){
+                            $estimated_charges[$shipment_id] = $shipment->nsa_osa_estimated_charges;
+                        }
+                        else{
+                            $estimated_charges[$shipment_id] = '-';
+                        }
+                    }
+                }
+            }
+            if($nsa_shipments != null){
+                return ['status' => 1, 'nsa_shipments' => $nsa_shipments, 'estimated_charges' => $estimated_charges, 'nsa_shipments_ids' => $nsa_shipments_ids];
+            }
+            else{
+                return ['status' => 0];
+            }
         }
     }
 public function change_status_to_self_collection(Request $request){
