@@ -892,8 +892,8 @@
                 var row_id = $(this).parents('tr').attr('id');
                 if(row_id){
                     swal({
-                        title: 'Are You Sure you want to mark shipment for self collection?',
-                        icon: 'warning',
+                        text: 'Are you sure you want to mark shipment for Self-Collection?',
+                        icon: 'info',
                         buttons: {
                             cancel: {
                                 text: 'No',

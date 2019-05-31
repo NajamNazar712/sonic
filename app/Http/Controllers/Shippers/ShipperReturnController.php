@@ -113,10 +113,9 @@ class ShipperReturnController extends Controller
 
 
                     $dropdown = "
-                        <span class='dropdown'>
-                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                            <div class='dropdown-menu open-left arrow'>";
+                        <div class='btn-group'>
+                            <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
+                            <div class='dropdown-menu dropdown-menu-sm'>";
                         $dropdown .= $confirm_button;
                         $dropdown .= $reattempt_button;
 
@@ -131,7 +130,7 @@ class ShipperReturnController extends Controller
 
                     $dropdown .= "
                             </div>
-                        </span>
+                        </div>
                     ";
 
                     return $dropdown;
