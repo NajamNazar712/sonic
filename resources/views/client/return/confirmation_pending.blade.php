@@ -277,7 +277,7 @@
                         enabled: false,
                         action: function (e, dt, node, config) {
                             if(selected_rows !== ''){
-                                var route = '{!! route('admin.tracking.index') !!}';
+                                var route = '{!! route('cod.tracking.index') !!}';
                                 swal({
                                     title: 'Are You Sure?',
                                     text: 'Select Yes to request shipment for Re-Attempt!',
