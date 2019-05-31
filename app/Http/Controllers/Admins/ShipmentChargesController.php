@@ -52,6 +52,8 @@ class ShipmentChargesController extends Controller
                 if ($min_chargeable_weight->exists()) {
                     $min_chargeable_weight = $min_chargeable_weight->first();
 
+                    $min_chargeable_weight = $min_chargeable_weight->min_chargeable_weight;
+
                     if ($weight < $min_chargeable_weight) {
                         $weight = $min_chargeable_weight;
                     }
