@@ -171,7 +171,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="align-middle text-center">Rs. {{ floatval($shipment->intercept_charges) }}</td>
+                        <td class="align-middle text-center">Rs. {{ floatval($shipment->nsa_osa_charges) }}</td>
                     </tr>
                 </tbody>
             </table>
