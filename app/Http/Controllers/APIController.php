@@ -850,6 +850,14 @@ class APIController extends Controller
           if ($shipment->try_and_buy_charges) {
             $charges['try_and_buy_charges'] = $shipment->try_and_buy_charges;
           }
+
+          if ($shipment->intercept_charges) {
+            $charges['intercept_charges'] = $shipment->intercept_charges;
+          }
+
+          if ($shipment->nsa_osa_charges) {
+            $charges['nsa_osa_charges'] = $shipment->nsa_osa_charges;
+          }
         }
         else if (in_array($current_status_id, [20, 21, 22, 23, 24, 25, 44])) {
           if ($shipment->weight_charges) {
@@ -866,6 +874,10 @@ class APIController extends Controller
 
           if ($shipment->return_charges) {
             $charges['return_charges'] = $shipment->return_charges;
+          }
+
+          if ($shipment->intercept_charges) {
+            $charges['intercept_charges'] = $shipment->intercept_charges;
           }
         }
         else {
@@ -987,6 +999,14 @@ class APIController extends Controller
             if ($shipment->try_and_buy_charges) {
               $charges['try_and_buy_charges'] = $shipment->try_and_buy_charges;
             }
+
+            if ($shipment->intercept_charges) {
+              $charges['intercept_charges'] = $shipment->intercept_charges;
+            }
+
+            if ($shipment->nsa_osa_charges) {
+              $charges['nsa_osa_charges'] = $shipment->nsa_osa_charges;
+            }
           }
           else if (in_array($current_status_id, [20, 21, 22, 23, 24, 25, 44])) {
             if ($shipment->weight_charges) {
@@ -1003,6 +1023,10 @@ class APIController extends Controller
 
             if ($shipment->return_charges) {
               $charges['return_charges'] = $shipment->return_charges;
+            }
+
+            if ($shipment->intercept_charges) {
+              $charges['intercept_charges'] = $shipment->intercept_charges;
             }
           }
           else {
