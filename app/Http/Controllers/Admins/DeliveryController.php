@@ -1234,11 +1234,16 @@ class DeliveryController extends Controller
                         else {
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
                         }
-                        if(($request->reason_drop[$shipment] == 12 || $request->reason_drop[$shipment] == 34) && $shipment_status->booking_type_id != 4) {
-                            DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 9]);
+                        if($request->has($statusId)){
+                            if(($request->reason_drop[$shipment] == 12 || $request->reason_drop[$shipment] == 34) && $shipment_status->booking_type_id != 4) {
+                                DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 9]);
+                            }else{
+                                DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
+                            }
                         }else{
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                         }
+
 
                     }
                 }
