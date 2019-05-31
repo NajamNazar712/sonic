@@ -309,23 +309,33 @@ class ReturnController extends Controller
                     $remark_inp = "remark.$shipment";
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
-                    $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->whereIn('status_reason_id',[12, 34])->latest('id')->first();
+                    $journey = ShipmentsJourney::where('shipment_id', $shipment)->where('shipper_status_id', 12)->whereIn('status_reason_id',[12, 34])->latest('id')->first();
 
                     ShipmentsJourneyController::add($shipment, 13, 13, NULL, $remarks, NULL, Auth::id());
 
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
 
-                    if($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)){
-                        ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+                    if ($journey) {
+                        if ($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)) {
+                            $parcel->nsa_osa_status = 1;
 
-                        NotificationsController::send(33, $request->shipment_id);
-                    }
-                    else if ($parcel->shipper_status_id == 52) {
-                        $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
+                            $parcel->save();
 
-                        if ($journey->shipper_stauts_id == 12 && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)) {
                             ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+
+                            NotificationsController::send(33, $request->shipment_id);
+                        }
+                        else if ($parcel->shipper_status_id == 52) {
+                            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
+
+                            if ($journey && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)) {
+                                $parcel->nsa_osa_status = 1;
+
+                                $parcel->save();
+
+                                ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+                            }
                         }
                     }
                 }
@@ -390,8 +400,27 @@ class ReturnController extends Controller
                 NotificationsController::send(15, 0, $request->shipment_id);
                 NotificationsController::send(16, 0, $request->shipment_id);
 
-                if($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)){
-                    NotificationsController::send(33, $request->shipment_id);
+                if ($journey) {
+                    if ($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)) {
+                        $parcel->nsa_osa_status = 1;
+
+                        $parcel->save();
+
+                        ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+
+                        NotificationsController::send(33, $request->shipment_id);
+                    }
+                    else if ($parcel->shipper_status_id == 52) {
+                        $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
+
+                        if ($journey && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)) {
+                            $parcel->nsa_osa_status = 1;
+
+                            $parcel->save();
+
+                            ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+                        }
+                    }
                 }
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Re-Attempt"];

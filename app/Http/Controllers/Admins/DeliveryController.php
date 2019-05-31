@@ -1022,7 +1022,7 @@ class DeliveryController extends Controller
     {
         $status_id = $request->status;
         $shipment_id = $request->shipment_id;
-        if(Shipment::where('nsa_osa_status',1)->exists()){
+        if(Shipment::where('id', $shipment_id)->where('nsa_osa_status', 1)->exists()){
             $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [12, 34])->orderBy('name')->get();
         }else{
             $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
