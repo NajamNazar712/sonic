@@ -161,7 +161,12 @@ class ShipmentChargesController extends Controller
                     return $result;
                 }
                 else {
-                    $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
+                    if ((int)$weight_charge->spkg == $weight_charge->spkg) {
+                        $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
+                    }
+                    else {
+                        $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg);
+                    }
 
                     if ($type_of_charges == 0) {
                         $charges = ($weight_charge->local_or_6hr * $multiplier);
@@ -198,7 +203,12 @@ class ShipmentChargesController extends Controller
 
                     $result = array();
 
-                    $result['chargeable_weight'] = $weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1);
+                    if ((int)$weight_charge->spkg == $weight_charge->spkg) {
+                        $result['chargeable_weight'] = $weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1);
+                    }
+                    else {
+                        $result['chargeable_weight'] = $weight_charge->spkg * intval($weight / $weight_charge->spkg);
+                    }
 
                     $previous = TRUE;
 
