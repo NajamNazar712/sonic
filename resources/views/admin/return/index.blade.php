@@ -533,7 +533,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[20, 'asc'], [19, 'asc']],
+                order: [[20, 'asc'], [21, 'asc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -554,7 +554,7 @@
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'shipment_remarks', name: 'admin_journey.remarks', class: 'align-middle shipment_remarks'},
                     {data: 'shipper_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipper_remarks'},
-                    {data: 'nsa_osa_estimated_charges', name: 'sj.created_at', class: 'align-middle nsa_osa_estimated_charges'},
+                    {data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
