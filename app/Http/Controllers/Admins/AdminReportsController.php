@@ -1168,7 +1168,7 @@ class AdminReportsController extends Controller
                             $sub_query->from('cities')
                             ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
                             ->where('cities.id', $hub->id);
-                        })->where('shipper_status_id','!=',17);
+                        });
                     })->whereBetween('created_at',[$date_from,$date_to])->where('shipments.packaging_material_request', 0)->count();
                     $received = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                         $query->from('user_shipping_infos')
