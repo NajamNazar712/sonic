@@ -106,9 +106,9 @@ class ShipperReturnController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i>Confirm</a>';
-                $reattempt_button = '<a href="javascript:void(0);" class="dropdown-item returnReattemptStatus"><i class="ft-plus-circle primary"></i>Re-Attempt Request</a>';
-                $intercept = '<button type="button" class="dropdown-item intercept"><div class="row no-gutters align-items-center"><a href=""><i class="ft-plus-circle"></i></a>  Intercept/Re-Book</div></button>';
+                $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';
+                $reattempt_button = '<a href="javascript:void(0);" class="dropdown-item returnReattemptStatus"><i class="ft-plus-circle primary"></i> Re-Attempt Request</a>';
+                $intercept = '<a href="javascript:void(0);" class="dropdown-item intercept"><i class="ft-plus-circle primary"></i> Intercept/Re-Book</a>';
                 $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
 
 
