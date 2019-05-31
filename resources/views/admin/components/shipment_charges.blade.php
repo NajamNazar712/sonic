@@ -160,6 +160,23 @@
         </table>
         </div>
     @endif
+    @if ($shipment->nsa_osa_charges != null)
+        <div style="margin-top:15px">
+            <h6 style="text-align: left"><b>NSA/OSA</b></h6>
+            <table class="table table-sm table-bordered">
+                <thead>
+                <tr role="row" class="bg-primary white">
+                    <th class="border-primary border-darken-1 align-middle text-center">Charges</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="align-middle text-center">Rs. {{ floatval($shipment->intercept_charges) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    @endif
 @else
     <div style="margin-top:15px">
     <h6 style="text-align: left"><b>Packaging Material</b></h6>
