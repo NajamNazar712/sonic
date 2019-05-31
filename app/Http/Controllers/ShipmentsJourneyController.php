@@ -36,6 +36,6 @@ class ShipmentsJourneyController extends Controller
         $entry['ip_address'] = NULL;
       }
 
-//      dispatch(new ProcessShipmentsJourney($entry));
+      dispatch(new ProcessShipmentsJourney($entry));
     }
 }
