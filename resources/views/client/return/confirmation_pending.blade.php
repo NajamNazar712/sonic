@@ -521,7 +521,7 @@
                 serverSide: true,
                 ajax: '{{ route('cod.return.pending.list') }}',
                 rowId: 'shId',
-                order: [[16, 'asc'], [17, 'asc']],
+                order: [[17, 'asc'], [18, 'asc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -539,7 +539,7 @@
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipment_remarks', orderable: false, searchable: false},
-                    {data: 'nsa_osa_estimated_charges', name: 'sj.created_at', class: 'align-middle nsa_osa_estimated_charges'},
+                    {data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
