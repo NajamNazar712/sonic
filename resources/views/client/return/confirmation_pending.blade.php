@@ -645,9 +645,6 @@
                         var key = $.inArray(index, new_selected_rows);
                             new_selected_rows.splice(key, 1);
                     }
-                    else{
-                        nsa = 1;
-                    }
                 });
                 table.rows().nodes().each(function (index) {
                     var row = table.row(index);
@@ -665,8 +662,7 @@
                     data: {
                         'shipment_ids': new_selected_rows,
                         '_token': '{{ csrf_token() }}',
-                        'remark': shipment_remarks,
-                        'nsa': nsa
+                        'remark': shipment_remarks
                     }
                 }).done(function (data) {
                     table.rows().deselect();
