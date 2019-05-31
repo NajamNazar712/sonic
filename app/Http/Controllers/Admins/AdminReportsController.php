@@ -1734,7 +1734,7 @@ class AdminReportsController extends Controller
                 $query->from('shipments_journey')
                 ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                 ->whereBetween('created_at', [$date_from, $date_to])
-                ->where('shipper_status_id', 2);
+                ->where('shipper_status_id', 1);
             });
 
             if($pickup_request_shippers->exists()){
@@ -1745,7 +1745,7 @@ class AdminReportsController extends Controller
 //                    $pickup_request_shippers_ids = $pickup_request_shippers_ids->get();
 //                    if($pickup_request_shippers_ids->ixists()){
 //                        $pickup_request_shippers_ids = $pickup_request_shippers_ids->get();
-                $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id', $pickup_request_shippers_ids)->where('status',3)->get();
+                $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
 //                    }
 //                }
             }
