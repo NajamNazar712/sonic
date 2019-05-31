@@ -317,6 +317,7 @@
                                                 data: {
                                                     'shipment_ids': selected_rows,
                                                     '_token': '{{ csrf_token() }}',
+                                                    'single' : 0
                                                 }
                                             }).done(function (data) {
                                                 if(data.status == 1){
@@ -822,7 +823,6 @@
 
                 }
             });
-
             $('body').on('click','.returnReattemptStatus',function () {
                 var row_id = $(this).parents('tr').attr('id');
                 var remark = $(this).parents('tr').find('td.shipment_remarks input').val();
@@ -852,31 +852,100 @@
                     }).then(function (confirm) {
                         if (confirm) {
                             $.ajax({
-                                url:"{{route('cod.return.pending.reattempt.status.single')}}",
-                                method:'POST',
-                                data:{
-                                    'shipment_id':row_id,
-                                    '_token':'{{ csrf_token() }}',
-                                    'remark':remark
+                                url: "{{route('cod.return.pending.reattempt.nsa')}}",
+                                method: 'POST',
+                                data: {
+                                    'shipment_ids': row_id,
+                                    '_token': '{{ csrf_token() }}',
+                                    'single' : 1
                                 }
                             }).done(function (data) {
                                 if(data.status == 1){
-                                    table.draw('false');
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    var html = '';
+                                    html += 'OSA/NSA Shipment Status against Tracking Number: '+ data.nsa_shipment +'<br/>';
+                                    html += 'Estimated Charges will be: '+ data.estimated_charge +'<br/>';
+                                    html += 'Select Yes for the approval to deliver shipment with additional charges ';
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
+                                    swal({
+                                        title: 'Are You Sure?',
+                                        content: content,
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'No',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Yes',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    }).then(function (confirm) {
+                                        if(confirm){
+                                            $.ajax({
+                                                url:"{{route('cod.return.pending.reattempt.status.single')}}",
+                                                method:'POST',
+                                                data:{
+                                                    'shipment_id':row_id,
+                                                    '_token':'{{ csrf_token() }}',
+                                                    'remark':remark
+                                                }
+                                            }).done(function (data) {
+                                                if(data.status == 1){
+                                                    table.draw('false');
+                                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                                }else{
-                                    table.draw('false');
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                                }else{
+                                                    table.draw('false');
+                                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
+                                                }
+
+                                            });
+                                        }
+                                    })
                                 }
+                                else{
+                                    $.ajax({
+                                        url:"{{route('cod.return.pending.reattempt.status.single')}}",
+                                        method:'POST',
+                                        data:{
+                                            'shipment_id':row_id,
+                                            '_token':'{{ csrf_token() }}',
+                                            'remark':remark
+                                        }
+                                    }).done(function (data) {
+                                        if(data.status == 1){
+                                            table.draw('false');
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                                        }else{
+                                            table.draw('false');
+                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                        }
+
+                                    });
+                                }
                             });
                         }
+                        {{--if (confirm) {--}}
+
+                        {{--}--}}
                     });
 
 
                 }
             });
+
 
             $('body').on('click','.intercept',function () {
                 var row_id = $(this).parents('tr').attr('id');
