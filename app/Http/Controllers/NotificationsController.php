@@ -2716,7 +2716,7 @@ class NotificationsController extends Controller
                 $body = str_replace('[nsa_osa_estimated_charges]', $nsa_shipment->nsa_osa_estimated_charges, $body);
             }
 
-            $journey = ShipmentsJourney::where('shipment_id', $reference_1_id)->whereIn('status_reason_id',[12, 34])->where('verification', 0)->latest()->first();
+            $journey = ShipmentsJourney::where('shipment_id', $reference_1_id)->where('shipper_status_id', 12)->whereIn('status_reason_id',[12, 34])->latest('id')->first();
             if (strpos($subject, '[remarks]') !== FALSE) {
                 $subject = str_replace('[remarks]', $journey->remarks, $subject);
             }
