@@ -309,7 +309,7 @@ class ReturnController extends Controller
                     $remark_inp = "remark.$shipment";
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
-                    $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->whereIn('status_reason_id',[12, 34])->latest('id')->first();
+                    $journey = ShipmentsJourney::where('shipment_id', $shipment)->where('shipper_status_id', 12)->whereIn('status_reason_id',[12, 34])->latest('id')->first();
 
                     ShipmentsJourneyController::add($shipment, 13, 13, NULL, $remarks, NULL, Auth::id());
 
