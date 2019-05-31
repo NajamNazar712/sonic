@@ -521,7 +521,7 @@
                 serverSide: true,
                 ajax: '{{ route('cod.return.pending.list') }}',
                 rowId: 'shId',
-                order: [[17, 'asc'], [18, 'asc']],
+                order: [[18, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -892,8 +892,8 @@
                 var row_id = $(this).parents('tr').attr('id');
                 if(row_id){
                     swal({
-                        title: 'Are You Sure you want to mark shipment for self collection',
-                        icon: 'warning',
+                        text: 'Are you sure you want to mark shipment for Self-Collection?',
+                        icon: 'info',
                         buttons: {
                             cancel: {
                                 text: 'No',

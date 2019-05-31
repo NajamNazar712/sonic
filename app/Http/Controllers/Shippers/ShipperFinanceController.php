@@ -366,6 +366,7 @@ class ShipperFinanceController extends Controller
       $total_packaging_material_charges = 0;
       $total_fuel_surcharge = 0;
       $total_intercept_charges = 0;
+      $total_nsa_osa_charges = 0;
       $total_gst = 0;
       $total_charges = 0;
       $total_adjustments = 0;
@@ -410,6 +411,7 @@ class ShipperFinanceController extends Controller
                       $total_cash_handling_charges += $shipment->cash_handling_charges;
                       $total_replacement_charges += $shipment->replacement_charges;
                       // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                      $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                   }
                   else {
                       $total_return_charges += $shipment->return_charges;
@@ -528,6 +530,10 @@ class ShipperFinanceController extends Controller
                                         <td>' . number_format($total_intercept_charges) . '</td>
                                     </tr>
                                     <tr>
+                                        <td class="color secondary"><strong>Total NSA/OSA Charges</strong></td>
+                                        <td>' . number_format($total_nsa_osa_charges) . '</td>
+                                    </tr>
+                                    <tr>
                                         <td class="color secondary"><strong>Total Charges (w/o GST)</strong></td>
                                         <td>' . number_format($total_charges - $total_packaging_material_charges) . '</td>
                                     </tr>
@@ -589,6 +595,7 @@ class ShipperFinanceController extends Controller
         $total_packaging_material_charges = 0;
         $total_fuel_surcharge = 0;
         $total_intercept_charges = 0;
+        $total_nsa_osa_charges = 0;
         $total_gst = 0;
         $total_charges = 0;
         $total_adjustments = 0;
@@ -636,6 +643,7 @@ class ShipperFinanceController extends Controller
                             $total_cash_handling_charges += $shipment->cash_handling_charges;
                             $total_replacement_charges += $shipment->replacement_charges;
                             // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                            $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                         }
                         else {
                             $total_return_charges += $shipment->return_charges;
@@ -677,7 +685,7 @@ class ShipperFinanceController extends Controller
 
         $total_columns = count($details[0]);
 
-        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN), 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ROUND(($total_charges + $total_gst - $total_adjustments), 0, PHP_ROUND_HALF_DOWN)];
+        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total NSA/OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN), 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ROUND(($total_charges + $total_gst - $total_adjustments), 0, PHP_ROUND_HALF_DOWN)];
 
         $details[] = [];
 

@@ -209,10 +209,9 @@ class ReturnController extends Controller
 
                 if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0) {
                     $dropdown = "
-                        <span class='dropdown'>
-                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                            <div class='dropdown-menu open-left arrow'>";
+                        <div class='btn-group'>
+                           <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
+                            <div class='dropdown-menu dropdown-menu-sm'>";
 
                     if (session('role_id') == 1 || in_array(45, session('permissions'))) {
                         $dropdown .= $confirm_button;
@@ -236,7 +235,7 @@ class ReturnController extends Controller
 
                     $dropdown .= "
                             </div>
-                        </span>
+                        </div>
                     ";
 
                     return $dropdown;
@@ -318,7 +317,16 @@ class ReturnController extends Controller
                     NotificationsController::send(16, 0, $shipment);
 
                     if($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)){
+                        ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+
                         NotificationsController::send(33, $request->shipment_id);
+                    }
+                    else if ($parcel->shipper_status_id == 52) {
+                        $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
+
+                        if ($journey->shipper_stauts_id == 12 && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)) {
+                            ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+                        }
                     }
                 }
 

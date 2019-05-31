@@ -830,11 +830,10 @@
                                         nsatable.draw(false);
                                         shipment_id_list.push(value.id);
                                         $('.decimal').inputmask({
-                                            'alias': 'decimal',
+                                            'alias': 'integer',
                                             'allowMinus': false,
                                             'allowPlus': false,
                                             'rightAlign': false,
-                                            'digits': 3,
                                             'min': 0,
                                             'max': 100000
                                         });
