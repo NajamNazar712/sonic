@@ -1661,8 +1661,7 @@ class AdminReportsController extends Controller
                 })->whereExists(function ($query) use ($date_from, $date_to) {
                     $query->from('shipments_journey')
                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
-                    ->whereBetween('created_at', [$date_from, $date_to])
-                    ->where('shipper_status_id', 2);
+                    ->whereBetween('created_at', [$date_from, $date_to]);
                 });
 
                 if($pickup_request_shippers->exists()){
@@ -1732,8 +1731,7 @@ class AdminReportsController extends Controller
             $pickup_request_shippers = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date_from, $date_to) {
                 $query->from('shipments_journey')
                 ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
-                ->whereBetween('created_at', [$date_from, $date_to])
-                ->where('shipper_status_id', 2);
+                ->whereBetween('created_at', [$date_from, $date_to]);
             });
 
             if($pickup_request_shippers->exists()){
