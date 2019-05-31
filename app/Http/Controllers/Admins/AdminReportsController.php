@@ -1730,25 +1730,26 @@ class AdminReportsController extends Controller
             }
         }
         else{
-            $pickup_request_shippers = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date_from, $date_to) {
-                $query->from('shipments_journey')
-                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
-                ->whereBetween('created_at', [$date_from, $date_to])
-                ->where('shipper_status_id', 1);
-            });
+//            $pickup_request_shippers = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date_from, $date_to) {
+//                $query->from('shipments_journey')
+//                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+//                ->whereBetween('created_at', [$date_from, $date_to])
+//                ->where('shipper_status_id', 1);
+//            });
 
-            if($pickup_request_shippers->exists()){
-                $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
+//            if($pickup_request_shippers->exists()){
+//                $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
 
 //                $pickup_request_shippers_ids = DB::connection('reports')->table('shipments')->whereIn('id', $pickup_request_shippers)->groupBy('user_id');
 //                if($pickup_request_shippers_ids->exists()){
 //                    $pickup_request_shippers_ids = $pickup_request_shippers_ids->get();
 //                    if($pickup_request_shippers_ids->ixists()){
 //                        $pickup_request_shippers_ids = $pickup_request_shippers_ids->get();
-                $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
+//                $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
+                $shippers = DB::connection('reports')->table('users')->select('id','name')->get();
 //                    }
 //                }
-            }
+//            }
         }
         $shipper_sort_support_array = array();
         $total_shipper_booked = 0;
