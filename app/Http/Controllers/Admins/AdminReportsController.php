@@ -4332,6 +4332,15 @@ public function revenue_index(){
                 else{
                     return "-";
                 }
+            })
+            ->editColumn('total_charges', function ($gst) {
+                return number_format($gst->total_charges);
+            })
+            ->editColumn('w_o_gst', function ($gst) {
+                return number_format($gst->w_o_gst);
+            })
+            ->editColumn('gst', function ($gst) {
+                return number_format($gst->gst);
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
