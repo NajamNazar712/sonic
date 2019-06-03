@@ -4456,8 +4456,8 @@ class DeliveryController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
-            ->editColumn('amount', function($shipment){
-                return number_format($shipment->amount);
+            ->editColumn('replacement_charges', function($shipment){
+                return number_format($shipment->replacement_charges);
             })
             ->editColumn('insurance', function($shipment){
                 if($shipment->insurance == 1){
