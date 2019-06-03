@@ -440,6 +440,10 @@
                             }
                         }
                     });
+
+                    $(".reason_select").on('change', function(){
+                        table.columns.adjust().draw();
+                    });
                     $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 
                         var id = parseInt($(this).parent('tr').attr('id'));
