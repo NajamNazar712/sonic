@@ -211,12 +211,7 @@ class ShipmentChargesController extends Controller
 
                     $result = array();
 
-                    if ((int)$weight_charge->spkg == $weight_charge->spkg) {
-                        $result['chargeable_weight'] = $weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1);
-                    }
-                    else {
-                        $result['chargeable_weight'] = $weight_charge->spkg * intval($weight / $weight_charge->spkg);
-                    }
+                    $result['chargeable_weight'] = $weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1);
 
                     $previous = TRUE;
 
