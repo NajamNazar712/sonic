@@ -4136,7 +4136,7 @@ class DeliveryController extends Controller
 
             })
             ->editColumn('amount', function ($shipment){
-                $amount = '<input class="form-control form-control-sm col_amount" value="' .number_format($shipment->amount). '" name="amount['.$shipment->shipment_id.']" data-rule-required="true" data-msg-required="Amount is required">';
+                $amount = '<input class="form-control form-control-sm col_amount" value="' .$shipment->amount. '" name="amount['.$shipment->shipment_id.']" data-rule-required="true" data-msg-required="Amount is required">';
                 return $amount;
             });
 
@@ -4160,18 +4160,19 @@ class DeliveryController extends Controller
             }
             ShipmentsJourneyController::add($shipment_id, 13, 13, $request->shipment_reason[$shipment_id], NULL, NULL, Auth::id());
         }
-            return ['status' => 1, 'success' => 'Shipment has been marked as Re-Attempt'];
+        return ['status' => 1, 'success' => 'Shipment has been marked as Re-Attempt'];
     }
     public function replacement_not_collected_regular_re_attempt(Request $request){
         foreach ($request->shipment_ids as $shipment_id){
             $shipment = Shipment::where('id', $shipment_id)->first();
             $product_type = ShipmentItem::where(['shipment_id' => $shipment_id, 'type' => 1])->first();
-            $insurance = $product_type->insuarance;
-            $type = $product_type->type;
-            $product_type_id = $product_type->product_type_id;
-            $item_description = $product_type->description;
-            $item_quantity = $product_type->quantity;
-            $item_price = $product_type->price;
+            $insurance = $product_type['insurance'];
+            $type = $product_type['type'];
+            $product_type_id = $product_type['product_type_id'];
+            $item_description = $product_type['description'];
+            $item_quantity = $product_type['quantity'];
+            $item_price = $product_type['price'];
+            $replacement_charges = $shipment['replacement_charges'];
             Shipment::where('id', $shipment_id)->update([
                 'booking_type_id' => 1,
                 'shipper_status_id' => 13,
@@ -4191,7 +4192,7 @@ class DeliveryController extends Controller
             ReplacementToRegularLog::create([
                 'shipment_id' => $shipment->id,
                 'updated_by' => Auth::id(),
-                'replacement_charges' => 0,
+                'replacement_charges' => $replacement_charges,
                 'product_type_id' => $product_type_id,
                 'item_description' => $item_description,
                 'item_quantity' => $item_quantity,
@@ -4202,7 +4203,7 @@ class DeliveryController extends Controller
 
             ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1])->delete();
         }
-            return ['status' => 1, 'success' => 'Shipment Service type is changed to Regular and has been marked as Re-Attempt'];
+        return ['status' => 1, 'success' => 'Shipment Service type is changed to Regular and has been marked as Re-Attempt'];
     }
     public function replacement_collected_index(){
         return view('admin.delivery.replacement.collected');
@@ -4246,7 +4247,7 @@ class DeliveryController extends Controller
                     return ['status' => 0, 'success' => 'Shipment\'s service type can be changed', 'details' => $details];
                 }
                 else {
-                return ['status' => 1, 'error' => 'Shipment Status is Not Verified yet'];
+                    return ['status' => 1, 'error' => 'Shipment Status is Not Verified yet'];
                 }
             }
             else {
@@ -4266,12 +4267,12 @@ class DeliveryController extends Controller
             if($shipment->booking_type_id == 2){
                 if($product_type->exists()){
                     $product_type = $product_type->first();
-                    $insurance = $product_type->insuarance;
-                    $type = $product_type->type;
-                    $product_type_id = $product_type->product_type_id;
-                    $item_description = $product_type->description;
-                    $item_quantity = $product_type->quantity;
-                    $item_price = $product_type->price;
+                    $insurance = $product_type['insurance'];
+                    $type = $product_type['type'];
+                    $product_type_id = $product_type['product_type_id'];
+                    $item_description = $product_type['description'];
+                    $item_quantity = $product_type['quantity'];
+                    $item_price = $product_type['price'];
                     Shipment::where('id', $request->shipment_id)->update([
                         'booking_type_id' => 1,
                         'shipper_status_id' => 13,
@@ -4279,7 +4280,7 @@ class DeliveryController extends Controller
                     ]);
                     ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
 
-                    $replacement_charges = $shipment->replacement_charges;
+                    $replacement_charges = $shipment['replacement_charges'];
 
                     ReplacementToRegularLog::create([
                         'shipment_id' => $shipment->id,
@@ -4292,8 +4293,9 @@ class DeliveryController extends Controller
                         'insurance' => $insurance,
                         'type' => $type,
                     ]);
-
-                    AdminFinanceController::add_adjustment($shipment->id, $replacement_charges);
+                    if($replacement_charges != null){
+                        AdminFinanceController::add_adjustment($shipment->id, $replacement_charges);
+                    }
 
                     $shipment->replacement_charges = NULL;
 
@@ -4332,7 +4334,20 @@ class DeliveryController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
             ->editColumn('replacement_charges', function($shipment){
-                return number_format($shipment->replacement_charges);
+                if($shipment->replacement_charges != null){
+                    return number_format($shipment->replacement_charges);
+                }
+                else{
+                    return "-";
+                }
+            })
+            ->editColumn('insurance', function($shipment){
+                if($shipment->insurance == 1){
+                    return "Yes";
+                }
+                else{
+                    return "No";
+                }
             });
 
         return $datatables->make(true);
