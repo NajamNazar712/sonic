@@ -161,12 +161,7 @@ class ShipmentChargesController extends Controller
                     return $result;
                 }
                 else {
-                    if ((int)$weight_charge->spkg == $weight_charge->spkg) {
-                        $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
-                    }
-                    else {
-                        $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg);
-                    }
+                    $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
 
                     if ($type_of_charges == 0) {
                         $charges = ($weight_charge->local_or_6hr * $multiplier);
