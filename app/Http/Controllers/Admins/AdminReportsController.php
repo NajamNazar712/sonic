@@ -4223,6 +4223,12 @@ public function revenue_index(){
             ->editColumn('return_charges', function($shipment){
                 return number_format($shipment->return_charges);
             })
+            ->editColumn('weight_charges', function($shipment){
+                return number_format($shipment->weight_charges);
+            })
+            ->editColumn('fuel_surcharge', function($shipment){
+                return number_format($shipment->fuel_surcharge);
+            })
             ->editColumn('replacement_charges', function($shipment){
                 return number_format($shipment->replacement_charges);
             })
