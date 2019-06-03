@@ -4418,8 +4418,9 @@ class DeliveryController extends Controller
                         'insurance' => $insurance,
                         'type' => $type,
                     ]);
-
-                    AdminFinanceController::add_adjustment($shipment->id, $replacement_charges);
+                    if($replacement_charges != null){
+                        AdminFinanceController::add_adjustment($shipment->id, $replacement_charges);
+                    }
 
                     $shipment->replacement_charges = NULL;
 
