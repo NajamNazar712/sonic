@@ -2258,13 +2258,13 @@ class AdminReportsController extends Controller
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
                         })->sum('amount'));
-                        $details['revenue'][$s->id][$month] = DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereExists(function($query) use ($thisMonth,$thisYear) {
+                        $details['revenue'][$s->id][$month] = number_format(DB::connection('reports')->table('shipments')->where('user_id', $s->id)->whereExists(function($query) use ($thisMonth,$thisYear) {
                             $query->from('shipments_journey')
                                 ->where('shipments.id', '=', DB::raw('`shipments_journey`.`shipment_id`'))
                                 ->whereMonth('created_at', $thisMonth)
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
-                        })->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                        })->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)')));
 
                     }
                 }
@@ -2565,18 +2565,18 @@ class AdminReportsController extends Controller
                 }
             }else{
                 if(session('department_id') != 7){
-                    $details['s'][$month] = DB::connection('reports')->table('users')->whereDate('activated_at','<=',$first_date)->where('status',3)->count();
-                    $details['e'][$month] = DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->count();
-                    $details['n'][$month] = DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->count();
+                    $details['s'][$month] = number_format(DB::connection('reports')->table('users')->whereDate('activated_at','<=',$first_date)->where('status',3)->count());
+                    $details['e'][$month] = number_format(DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->count());
+                    $details['n'][$month] = number_format(DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->count());
                 }else{
                     if(session('role_id') != 4){
-                        $details['s'][$month] = DB::connection('reports')->table('users')->whereDate('activated_at','<=',$first_date)->where('status',3)->whereIn('id', session('tagged_shippers'))->count();
-                        $details['e'][$month] = DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->whereIn('id', session('tagged_shippers'))->count();
-                        $details['n'][$month] = DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->whereIn('id', session('tagged_shippers'))->count();
+                        $details['s'][$month] = number_format(DB::connection('reports')->table('users')->whereDate('activated_at','<=',$first_date)->where('status',3)->whereIn('id', session('tagged_shippers'))->count());
+                        $details['e'][$month] = number_format(DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->whereIn('id', session('tagged_shippers'))->count());
+                        $details['n'][$month] = number_format(DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->whereIn('id', session('tagged_shippers'))->count());
                     }else{
-                        $details['s'][$month] = DB::connection('reports')->table('users')->whereDate('activated_at','<=',$first_date)->where('status',3)->count();
-                        $details['e'][$month] = DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->count();
-                        $details['n'][$month] = DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->count();
+                        $details['s'][$month] = number_format(DB::connection('reports')->table('users')->whereDate('activated_at','<=',$first_date)->where('status',3)->count());
+                        $details['e'][$month] = number_format(DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->count());
+                        $details['n'][$month] = number_format(DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->count());
                     }
                 }
             }
@@ -3108,7 +3108,7 @@ class AdminReportsController extends Controller
                     }
 
                     $sum_of_pickups = array_sum($sales_persons_data[$person->id]['pickups'][$user->id]);
-                    array_push($sales_persons_data[$person->id]['pickups'][$user->id],$sum_of_pickups);
+                    array_push($sales_persons_data[$person->id]['pickups'][$user->id],number_format($sum_of_pickups));
                 }
 
             }
