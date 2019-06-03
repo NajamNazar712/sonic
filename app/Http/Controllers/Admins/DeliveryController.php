@@ -4316,7 +4316,7 @@ class DeliveryController extends Controller
             ReplacementToRegularLog::create([
                 'shipment_id' => $shipment->id,
                 'updated_by' => Auth::id(),
-                'replacement_charges' => 0,
+                'replacement_charges' => $shipment->replacement_charges,
                 'product_type_id' => $product_type_id,
                 'item_description' => $item_description,
                 'item_quantity' => $item_quantity,
@@ -4458,6 +4458,14 @@ class DeliveryController extends Controller
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
+            })
+            ->editColumn('insurance', function($shipment){
+                if($shipment->insurance == 1){
+                    return "Yes";
+                }
+                else{
+                    return "No";
+                }
             });
 
         return $datatables->make(true);

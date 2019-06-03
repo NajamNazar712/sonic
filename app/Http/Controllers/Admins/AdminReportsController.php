@@ -123,6 +123,16 @@ class AdminReportsController extends Controller
         if ($hub = $request->get('search_hub')) {
             $datatable->where('h.id', '=', $hub);
         }
+        if ($search_qsr = $request->get('search_qsr')) {
+            if($search_qsr != 3){
+                if($search_qsr == 1){
+                    $datatable->whereIn('shipments.shipper_status_id',[2,3,4,5,6,7,8,9,10,11,12]);
+                }
+                if($search_qsr == 2){
+                    $datatable->whereIn('shipments.shipper_status_id',[20,21,22,23,24,47,48]);
+                }
+            }
+        }
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');

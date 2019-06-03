@@ -50,6 +50,15 @@
                         </select>
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                        <select name="search_qsr" id="search_qsr" class="form-control select2">
+                                <option value="1">Delivery</option>
+                                <option value="2">Return</option>
+                                <option value="3">All</option>
+                        </select>
+                        </fieldset>
+                    </div>
                     <div class="col-4 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -179,6 +188,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_qsr').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select QSR',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Hub',
                 width:'100%',
@@ -233,6 +247,7 @@
                             'search_shipper': $('#search_shipper').val(),
                             'search_origin': $('#search_origin').val(),
                             'search_destination': $('#search_destination').val(),
+                            'search_qsr': $('#search_qsr').val(),
                             'search_hub': $('#search_hub').val(),
                             'search_from': $('input[name="from_date_formatted"]').val(),
                             'search_to': $('input[name="to_date_formatted"]').val()
@@ -317,6 +332,7 @@
                         d.search_shipper = $('#search_shipper').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
+                        d.search_qsr = $('#search_qsr').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
