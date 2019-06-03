@@ -22,8 +22,8 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
-                        <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
+                        <th class="border-primary border-darken-1">Reason</th>
                     </tr>
                     </thead>
                 </table>
@@ -129,8 +129,8 @@
                             head.push('Consignee Name');
                             head.push('Phone');
                             head.push('Address');
-                            head.push('Reason');
                             head.push('Collection Amount');
+                            head.push('Reason');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -141,8 +141,8 @@
                                 row.push(values.consignee_name);
                                 row.push(values.phone);
                                 row.push(values.consignee_address);
-                                row.push(values.reason_name);
                                 row.push(values.cod_amount);
+                                row.push(values.reason_name);
 
                                 body.push(row);
                             });
@@ -389,8 +389,8 @@
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'reason', name: 'reason', class: 'align-middle reason custom-col-width form-group'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount form-group'},
+                    {data: 'reason', name: 'reason', class: 'align-middle reason custom-col-width form-group'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -439,6 +439,10 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+
+                    $(".reason_select").on('change', function(){
+                        table.columns.adjust().draw();
                     });
                     $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 

@@ -862,13 +862,12 @@
                             }).done(function (data) {
                                 if(data.status == 1){
                                     var html = '';
-                                    html += 'OSA/NSA Status Shipment against Tracking Number: '+ data.nsa_shipment +'<br/>';
-                                    html += 'Estimated Charges will be: '+ data.estimated_charge +'<br/>';
-                                    html += 'Select Yes for the approval to deliver shipment with additional charges ';
+                                    html += 'Out of Service Area / Non Service Area Shipment against Tracking Number: '+ data.nsa_shipment +'<br/><br/>';
+                                    html += '<b>Estimated Charges: '+ data.estimated_charge +'</b><br/><br/>';
+                                    html += 'Are you sure you want to deliver shipment with additional charges?';
                                     content = document.createElement('div');
                                     content.innerHTML = html;
                                     swal({
-                                        title: 'Are You Sure?',
                                         content: content,
                                         icon: 'warning',
                                         buttons: {
