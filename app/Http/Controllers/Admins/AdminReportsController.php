@@ -126,10 +126,10 @@ class AdminReportsController extends Controller
         if ($search_qsr = $request->get('search_qsr')) {
             if($search_qsr != 3){
                 if($search_qsr == 1){
-                    $datatable->whereIn('shipments.shipper_status_id',[2,3,4,5,6,7,8,9,10,11,12]);
+                    $datatable->whereIn('shipments.shipper_status_id',[2,3,4,5,6,7,8,9,10,11,12,13,15,18,49,51,52,54,55]);
                 }
                 if($search_qsr == 2){
-                    $datatable->whereIn('shipments.shipper_status_id',[20,21,22,23,24,47,48]);
+                    $datatable->whereIn('shipments.shipper_status_id',[20, 21,22,23,24,26,27,28,29,32,33,34,35,37,44,45,46,47,48,50]);
                 }
             }
         }
