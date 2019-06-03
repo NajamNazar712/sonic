@@ -4291,12 +4291,13 @@ class DeliveryController extends Controller
         foreach ($request->shipment_ids as $shipment_id){
             $shipment = Shipment::where('id', $shipment_id)->first();
             $product_type = ShipmentItem::where(['shipment_id' => $shipment_id, 'type' => 1])->first();
-            $insurance = $product_type->insuarance;
-            $type = $product_type->type;
-            $product_type_id = $product_type->product_type_id;
-            $item_description = $product_type->description;
-            $item_quantity = $product_type->quantity;
-            $item_price = $product_type->price;
+            $insurance = $product_type['insurance'];
+            $type = $product_type['type'];
+            $product_type_id = $product_type['product_type_id'];
+            $item_description = $product_type['description'];
+            $item_quantity = $product_type['quantity'];
+            $item_price = $product_type['price'];
+            $replacement_charges = $shipment['replacement_charges'];
             Shipment::where('id', $shipment_id)->update([
                 'booking_type_id' => 1,
                 'shipper_status_id' => 13,
@@ -4316,7 +4317,7 @@ class DeliveryController extends Controller
             ReplacementToRegularLog::create([
                 'shipment_id' => $shipment->id,
                 'updated_by' => Auth::id(),
-                'replacement_charges' => $shipment->replacement_charges,
+                'replacement_charges' => $replacement_charges,
                 'product_type_id' => $product_type_id,
                 'item_description' => $item_description,
                 'item_quantity' => $item_quantity,
@@ -4391,12 +4392,12 @@ class DeliveryController extends Controller
             if($shipment->booking_type_id == 2){
                 if($product_type->exists()){
                     $product_type = $product_type->first();
-                    $insurance = $product_type->insuarance;
-                    $type = $product_type->type;
-                    $product_type_id = $product_type->product_type_id;
-                    $item_description = $product_type->description;
-                    $item_quantity = $product_type->quantity;
-                    $item_price = $product_type->price;
+                    $insurance = $product_type['insurance'];
+                    $type = $product_type['type'];
+                    $product_type_id = $product_type['product_type_id'];
+                    $item_description = $product_type['description'];
+                    $item_quantity = $product_type['quantity'];
+                    $item_price = $product_type['price'];
                     Shipment::where('id', $request->shipment_id)->update([
                         'booking_type_id' => 1,
                         'shipper_status_id' => 13,
@@ -4404,7 +4405,7 @@ class DeliveryController extends Controller
                     ]);
                     ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
 
-                    $replacement_charges = $shipment->replacement_charges;
+                    $replacement_charges = $shipment['replacement_charges'];
 
                     ReplacementToRegularLog::create([
                         'shipment_id' => $shipment->id,
@@ -4457,7 +4458,12 @@ class DeliveryController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
             ->editColumn('replacement_charges', function($shipment){
-                return number_format($shipment->replacement_charges);
+                if($shipment->replacement_charges != null){
+                    return number_format($shipment->replacement_charges);
+                }
+                else{
+                    return "-";
+                }
             })
             ->editColumn('insurance', function($shipment){
                 if($shipment->insurance == 1){
