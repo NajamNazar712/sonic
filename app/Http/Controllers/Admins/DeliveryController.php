@@ -4261,7 +4261,7 @@ class DeliveryController extends Controller
 
             })
             ->editColumn('amount', function ($shipment){
-                $amount = '<input class="form-control form-control-sm col_amount" value="' .number_format($shipment->amount). '" name="amount['.$shipment->shipment_id.']" data-rule-required="true" data-msg-required="Amount is required">';
+                $amount = '<input class="form-control form-control-sm col_amount" value="' .$shipment->amount. '" name="amount['.$shipment->shipment_id.']" data-rule-required="true" data-msg-required="Amount is required">';
                 return $amount;
             });
 
