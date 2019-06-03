@@ -1166,7 +1166,7 @@ class AdminReportsController extends Controller
         $total_avg_revenue = 0;
         $total_avg_cash_collection = 0;
         $total_rev_on_cash_collection = 0;
-        $serial_number_hubs = 1;
+        $serial_number_hubs = 0;
         $booked = 0;
         $received = 0;
         $revenue_wo_gst = 0;
@@ -1643,7 +1643,7 @@ class AdminReportsController extends Controller
 //                $total_avg_revenue += $avg_rev;
 
 //                $total_rev_on_cash_collection += $rev_occ;
-                $serial_number_hubs++;
+
             }
 
         }
@@ -1653,17 +1653,21 @@ class AdminReportsController extends Controller
         $total_avg_chargeable_weight = ($total_received != 0) ? $total_chargeable_weight / $total_received:0;
         $total_avg_rev_chargeable_weight = ($total_chargeable_weight != 0) ? $total_revenue_wo_gst / $total_chargeable_weight:0;
         $total_avg_cash_collection = ($total_received != 0) ? $total_cod_collection / $total_received:0;
-        $total_rev_on_cash_collection = ($total_avg_cash_collection != 0) ? $total_avg_revenue / $total_avg_cash_collection:0;
+        $total_rev_on_cash_collection = ($total_cod_collection != 0) ? $total_revenue_wo_gst / $total_cod_collection:0;
+        $total_rev_on_cash_collection = $total_rev_on_cash_collection * 100;
         array_multisort($sort_support_array, SORT_DESC, $sorted_details_array);
+        $counter = 1;
         foreach ($sorted_details_array as $item) {
+            $item['serials'] = $counter;
             $details[] = $item;
+            $counter++;
         }
-        $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),number_format($total_actual_weight),number_format((float) $total_avg_actual_weight,2,'.',''),round($total_avg_rev_actual_weight),number_format($total_chargeable_weight),number_format((float) $total_avg_chargeable_weight,2,'.',''),round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection).'%'];
+        $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),number_format($total_actual_weight),number_format((float) $total_avg_actual_weight,2,'.',''),round($total_avg_rev_actual_weight),number_format($total_chargeable_weight),number_format((float) $total_avg_chargeable_weight,2,'.',''), round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection).'%'];
 
         $details_shipper['header'] = ['S. No.','Shipper Name(s) (Account No(s))', 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg. Actual Weight/Parcel','Avg. Revenue On Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
 
 //        $details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
-        $serial_number_shippers = 1;
+        $serial_number_shippers = 0;
 
         if($sales_tagging == TRUE){
             if($search_city != null){
@@ -2003,7 +2007,7 @@ class AdminReportsController extends Controller
 //                $total_shipper_rev_on_cash_collection += $avg_rev_cc;
 
 
-                $serial_number_shippers++;
+//                $serial_number_shippers++;
             }
         }
 
@@ -2013,11 +2017,15 @@ class AdminReportsController extends Controller
         $total_shipper_avg_chargeable_weight = ($total_shipper_received != 0) ? $total_shipper_chargeable_weight / $total_shipper_received:0;
         $total_shipper_avg_rev_chargeable_weight = ($total_shipper_chargeable_weight != 0) ? $total_shipper_revenue_wo_gst / $total_shipper_chargeable_weight:0;
         $total_shipper_avg_cash_collection = ($total_shipper_received != 0) ? $total_shipper_cod_collection / $total_shipper_received:0;
-        $total_shipper_rev_on_cash_collection = ($total_shipper_avg_cash_collection != 0) ? $total_shipper_avg_revenue / $total_shipper_avg_cash_collection:0;
 
+        $total_shipper_rev_on_cash_collection = ($total_shipper_cod_collection != 0) ? $total_shipper_revenue_wo_gst / $total_shipper_cod_collection:0;
+        $total_shipper_rev_on_cash_collection = $total_shipper_rev_on_cash_collection * 100;
         array_multisort($shipper_sort_support_array, SORT_DESC, $sorted_shipper_array);
+        $shipper_counter = 1;
         foreach ($sorted_shipper_array as $shipper) {
+            $shipper['shipper_serial'] = $shipper_counter;
             $details_shipper[] = $shipper;
+            $shipper_counter++;
         }
         $details_shipper[] = ['Grand Total','DSR '.$only_date, number_format($total_shipper_booked), number_format($total_shipper_received), number_format($total_shipper_revenue_wo_gst),number_format($total_shipper_avg_revenue),number_format($total_shipper_actual_weight),number_format((float) $total_shipper_avg_actual_weight,2,'.',''),round($total_shipper_avg_rev_actual_weight),number_format($total_shipper_chargeable_weight),number_format((float) $total_shipper_avg_chargeable_weight,2,'.',''),round($total_shipper_avg_rev_chargeable_weight), number_format($total_shipper_cod_collection),number_format($total_shipper_avg_cash_collection),number_format($total_shipper_rev_on_cash_collection).'%'];
 
@@ -2025,72 +2033,74 @@ class AdminReportsController extends Controller
         $cell_st =[
             'font' =>['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-            'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            'borders' => array(
+                'allBorders' => array(
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => array('argb' => '000000'),
+                )
+            ),
         ];
         $total_cell_st =[
             'font' =>['bold' => true],
-            'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]],
+            'borders' => array(
+                'allBorders' => array(
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => array('argb' => '000000'),
+                ),
+            )
         ];
         $sheet = $spreadsheet->getActiveSheet();
 
         $sheet->getDefaultColumnDimension()->setWidth(20);
-
-        $sheet->fromArray($details,NULL,'A1',true);
+        $sheet->getStyle('D3:R3')
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+        $sheet->getStyle('D3:R3')->getAlignment()->setWrapText(true);
+        $sheet->fromArray($details,NULL,'D3',true);
         $count_hubs = count($hubs);
         $count_hub_rows = count($details);
-//        $set_actual_number_format = 'G2:G'.$count_hub_rows;
-//        $set_chargeable_number_format = 'J2:J'.$count_hub_rows;
-//        $sheet->getStyle($set_actual_number_format)->getNumberFormat()->setFormatCode('0.00');
-//        $sheet->getStyle($set_chargeable_number_format)->getNumberFormat()->setFormatCode('0.00');
+        $count_hub_rows += 2;
+
+
         $count_hubs += 3;
         $total_shipper_rows = count($details_shipper);
         $total_shipper_rows += $count_hubs;
         $total_shipper_rows = $total_shipper_rows - 1;
-//         $cellIndexShipper = Coordinate::stringFromColumnIndex($count_hubs+2);
-        $shipper_cell = 'A'.$count_hubs;
-        $shipper_last_cell = 'O'.$count_hubs;
-        $sheet->fromArray($details_shipper,NULL,$shipper_cell,true);
-//         $sheet->insertNewRowBefore(9, 8);
-        $sheet->setTitle('Daily Pickup Sales Report');
-//         $sheet->setCellValue('A1','S. No.');
-//         $sheet->fromArray($shipper_details);
-        $sheet->getStyle("A1:O1")->applyFromArray($cell_st);
 
-        $shipper_style_cell = "A$count_hubs".":O".$count_hubs;
-        $total_style_cell = "A$count_hub_rows".":O".$count_hub_rows;
-        $total_shipper_style_cell = "A$total_shipper_rows".":O".$total_shipper_rows;
-        $sheet->getStyle("A1:O1")->applyFromArray($cell_st);
-        $sheet->getStyle($shipper_style_cell)->applyFromArray($cell_st);
-        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
-        $sheet->getStyle($total_shipper_style_cell)->applyFromArray($total_cell_st);
-        $set_shipper_actual_number_format = 'H2:H'.$total_shipper_rows;
-        $set_shipper_chargeable_number_format = 'K2:K'.$total_shipper_rows;
+        $shipper_cell = 'D'.$count_hubs;
+        $shipper_last_cell = 'Q'.$count_hubs;
+        $sheet->fromArray($details_shipper,NULL,$shipper_cell,true);
+
+        $sheet->setTitle('Daily Pickup Sales Report');
+
+        $hub_all_rows = "D3".":R".$count_hub_rows;
+
+        $sheet->getStyle($hub_all_rows)->applyFromArray($cell_st);
+
+        $shipper_style_cell = "D$count_hubs".":R".$count_hubs;
+        $shipper_all_rows = "D$count_hubs".":R".$total_shipper_rows;
+
+        $total_style_cell = "D$count_hub_rows".":R".$count_hub_rows;
+        $total_shipper_style_cell = "D$total_shipper_rows".":R".$total_shipper_rows;
+        $sheet->getStyle($shipper_style_cell)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+//        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
+        $sheet->getStyle($shipper_all_rows)->applyFromArray($cell_st);
+
+        $sheet->getStyle($shipper_style_cell)->getAlignment()->setWrapText(true);
+//        $sheet->getStyle($total_shipper_style_cell)->applyFromArray($total_cell_st);
+
+        $set_shipper_actual_number_format = 'K3:K'.$total_shipper_rows;
+        $set_shipper_chargeable_number_format = 'N3:N'.$total_shipper_rows;
         $sheet->getStyle($set_shipper_actual_number_format)->getNumberFormat()->setFormatCode('0.00');
         $sheet->getStyle($set_shipper_chargeable_number_format)->getNumberFormat()->setFormatCode('0.00');
 
-        $sheet->getStyle('H1:I1')
-            ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
-            ->getStartColor()
-            ->setRGB('FFFF00');
-        $sheet->getStyle('K1:L1')
-            ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
-            ->getStartColor()
-            ->setRGB('FFFF00');
-
-        $shipper_color_cell1 = "H$count_hubs".":I".$count_hubs;
-        $shipper_color_cell2 = "K$count_hubs".":L".$count_hubs;
-        $sheet->getStyle($shipper_color_cell1)
-            ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
-            ->getStartColor()
-            ->setRGB('FFFF00');
-        $sheet->getStyle($shipper_color_cell2)
-            ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
-            ->getStartColor()
-            ->setRGB('FFFF00');
 
         $writer = new Xlsx($spreadsheet);
 
