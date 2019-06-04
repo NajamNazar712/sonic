@@ -4285,7 +4285,7 @@ class DeliveryController extends Controller
             }
             ShipmentsJourneyController::add($shipment_id, 13, 13, $request->shipment_reason[$shipment_id], NULL, NULL, Auth::id());
         }
-            return ['status' => 1, 'success' => 'Shipment has been marked as Re-Attempt'];
+        return ['status' => 1, 'success' => 'Shipment has been marked as Re-Attempt'];
     }
     public function replacement_not_collected_regular_re_attempt(Request $request){
         foreach ($request->shipment_ids as $shipment_id){
@@ -4328,7 +4328,7 @@ class DeliveryController extends Controller
 
             ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1])->delete();
         }
-            return ['status' => 1, 'success' => 'Shipment Service type is changed to Regular and has been marked as Re-Attempt'];
+        return ['status' => 1, 'success' => 'Shipment Service type is changed to Regular and has been marked as Re-Attempt'];
     }
     public function replacement_collected_index(){
         return view('admin.delivery.replacement.collected');
@@ -4372,7 +4372,7 @@ class DeliveryController extends Controller
                     return ['status' => 0, 'success' => 'Shipment\'s service type can be changed', 'details' => $details];
                 }
                 else {
-                return ['status' => 1, 'error' => 'Shipment Status is Not Verified yet'];
+                    return ['status' => 1, 'error' => 'Shipment Status is Not Verified yet'];
                 }
             }
             else {
