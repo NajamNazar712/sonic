@@ -191,14 +191,15 @@ public function return_reattempt_nsa(Request $request){
     }
 public function change_status_to_self_collection(Request $request){
         $shipmentId = $request->shipment_id;
+        $remark = $request->remark;
         if($shipmentId){
-            if(Shipment::where('id', $shipmentId)->exists()){
+            if(Shipment::where('id', $shipmentId)->where('shipper_status_id','!=', 15)->exists()){
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>15,'consignee_status_id'=>15]);
-                ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, null,  Auth::id(), NULL);
+                ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark,  Auth::id(), NULL);
 
                 return ['status'=>0, 'success'=>"Shipment status successfully updated to Shipment - On Hold for Self Collection"];
             }else{
-                return response()->json(['status' => 1, 'error' => 'Shipment Not found!']);
+                return response()->json(['status' => 1, 'error' => 'Shipment already updated to Shipment - On Hold for Self Collection!']);
             }
 
         }else{

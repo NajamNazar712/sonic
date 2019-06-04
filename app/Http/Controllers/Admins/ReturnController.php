@@ -433,10 +433,11 @@ class ReturnController extends Controller
 
     public function change_status_to_self_collection(Request $request){
         $shipmentId = $request->shipment_id;
+        $remark = $request->remark;
         if($shipmentId){
             if(Shipment::where('id', $shipmentId)->where('shipper_status_id','!=', 15)->exists()){
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>15,'consignee_status_id'=>15]);
-                ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, null, NULL, Auth::id());
+                ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, NULL, Auth::id());
 
                 return ['status'=>0, 'success'=>"Shipment status successfully updated to Shipment - On Hold for Self Collection"];
             }else{

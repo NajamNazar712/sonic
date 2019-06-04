@@ -848,6 +848,7 @@
 
             $('#datatable').on('click', '.selfCollection', function () {
                 var row_id = $(this).parents('tr').attr('id');
+                var remark = $.trim($('tr#' + row_id).find('td.shipment_remarks input').val());
                 if(row_id){
                     swal({
                         text: 'Are you sure you want to mark shipment for Self-Collection?',
@@ -877,6 +878,7 @@
                                 method:'POST',
                                 data:{
                                     'shipment_id':row_id,
+                                    'remark':remark,
                                     '_token':'{{ csrf_token() }}',
                                 }
                             }).done(function (data) {
