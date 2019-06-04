@@ -361,7 +361,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('cod.reports.summary.list') }}',
+                        url: '{{ route('admin.reports.summary.list') }}',
                         data: {
                             'page': 'all',
                             'search_origin': $('#origin').val(),
@@ -425,7 +425,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Summary Reportt',
+                        title: 'Summary Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
