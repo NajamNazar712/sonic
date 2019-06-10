@@ -229,7 +229,6 @@
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
-                min:future_date,
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -238,8 +237,11 @@
                     $('#search_date_to').pickadate('picker').clear({muted: true});
                     if (context.select) {
                         var selected_date = new Date(context.select);
+                        var max_selected_date = moment(selected_date).add(30, 'days');
+                        console.log(selected_date);
                         $('#search_date_to').attr('disabled', false);
-                        $('#search_form #search_date_to').pickadate('picker').set({'min':selected_date},{muted: true});
+                        $('#search_form #search_date_to').pickadate('picker').set({'min':selected_date},{'max':max_selected_date.toDate()},{muted: true});
+                        $('#search_form #search_date_to').pickadate('picker').set({'max':max_selected_date.toDate()},{muted: true});
                     }
                 }
             });
