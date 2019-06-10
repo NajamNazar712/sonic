@@ -1037,7 +1037,7 @@ class AdminFinanceController extends Controller
             $delivery_note_shipment = $delivery_note_shipment->first();
 
             $shipment = Shipment::find($request->id);
-            
+
 
             $delivery_note_shipment->status = 8;
 
