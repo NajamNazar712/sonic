@@ -144,6 +144,7 @@ class AdminCRMController extends Controller
             $shipment_status = Shipment::find($crm_request->shipment_id);
             $shipment_status = $shipment_status->status_shipper->name;
         }
+        
         if($crm_request->shipper_id != null){
             $shipper = User::find($crm_request->shipper_id);
             $shipper = $shipper->name;
