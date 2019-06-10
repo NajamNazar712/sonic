@@ -296,7 +296,7 @@ class AdminCRMController extends Controller
             })
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('user_shipping_infos AS usi', 'usi.id', '=', 's.pickup_address_id')
-            ->leftjoin('users as user', 'user.id', '=', 's.user_id')
+            ->leftjoin('users as user', 'user.id', '=', 'crm_requests.shipper_id')
             ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
@@ -330,7 +330,7 @@ class AdminCRMController extends Controller
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('id_padded_link', function ($requests) {
-                return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . '>' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
+                return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . '  target="_blank">' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
             })
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
@@ -464,7 +464,7 @@ class AdminCRMController extends Controller
             })
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
-            ->leftjoin('users as user', 'user.id', '=', 's.user_id')
+            ->leftjoin('users as user', 'user.id', '=', 'crm_requests.shipper_id')
             ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftjoin('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
@@ -510,7 +510,7 @@ class AdminCRMController extends Controller
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('id_padded_link', function ($requests) {
-                return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . '>' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
+                return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . ' target="_blank">' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
             })
             ->addColumn('tagged', function ($requests) {
                 if($requests->tagged_type == 1){
@@ -675,7 +675,7 @@ class AdminCRMController extends Controller
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
             ->leftjoin('user_shipping_infos AS usi', 'usi.id', '=', 's.pickup_address_id')
-            ->leftjoin('users as user', 'user.id', '=', 's.user_id')
+            ->leftjoin('users as user', 'user.id', '=', 'crm_requests.shipper_id')
             ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftJoin('crm_request_status_histories as inp', function ($join) {
@@ -701,7 +701,7 @@ class AdminCRMController extends Controller
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('id_padded_link', function ($requests) {
-                return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . '>' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
+                return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . ' target="_blank">' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
             })
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
@@ -828,7 +828,7 @@ class AdminCRMController extends Controller
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
             ->leftjoin('user_shipping_infos AS usi', 'usi.id', '=', 's.pickup_address_id')
-            ->leftjoin('users as user', 'user.id', '=', 's.user_id')
+            ->leftjoin('users as user', 'user.id', '=', 'crm_requests.shipper_id')
             ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftJoin('crm_request_status_histories as inp', function ($join) {
@@ -854,7 +854,7 @@ class AdminCRMController extends Controller
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('id_padded_link', function ($requests) {
-                return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . '>' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
+                return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->id]) . ' target="_blank">' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
             })
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
