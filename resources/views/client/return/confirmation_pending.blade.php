@@ -31,7 +31,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
-                        <th class="border-primary border-darken-1">NSA/OSA Estimated Charges</th>
+                        <th class="border-primary border-darken-1">OSA Estimated Charges</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Action</th>
@@ -47,7 +47,7 @@
         <div class="modal-dialog modal-full-length" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="nsa_shipments_modal_title">OSA/NSA Status Shipment(s)</h4>
+                    <h4 class="modal-title" id="nsa_shipments_modal_title">Out of Service Area Status Shipment(s)</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -160,7 +160,7 @@
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remarks');
-                            head.push('NSA/OSA Estimated Charges');
+                            head.push('OSA Estimated Charges');
                             head.push('Arrival Date');
                             head.push('Status Date');
 

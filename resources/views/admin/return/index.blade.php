@@ -44,7 +44,7 @@
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Shipper Remarks</th>
-                        <th class="border-primary border-darken-1">NSA/OSA Estimated Charges</th>
+                        <th class="border-primary border-darken-1">OSA Estimated Charges</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Re-Attempt Count</th>
@@ -229,7 +229,7 @@
                             head.push('Reason');
                             head.push('Remarks');
                             head.push('Shipper Remarks');
-                            head.push('NSA/OSA Estimated Charges');
+                            head.push('OSA Estimated Charges');
                             head.push('Arrival Date');
                             head.push('Status Date');
                             head.push('Re-Attempt Count');

@@ -59,7 +59,7 @@ class ShipperReturnController extends Controller
         return Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
-                    if($shipments->reason_id == 12 || $shipments->reason_id == 34){
+                    if($shipments->reason_id == 12){
                         return 'nsa_osa_reason';
                     }
                 },
@@ -123,7 +123,7 @@ class ShipperReturnController extends Controller
                             $dropdown .= $intercept;
                         }
 
-                        if($result->reason_id == 12 || $result->reason_id == 34){
+                        if($result->reason_id == 12){
                             $dropdown .= $self_collection_button;
                         }
 
@@ -144,7 +144,7 @@ public function return_reattempt_nsa(Request $request){
             $shipment = Shipment::where('id', $shipment_ids)->first();
             if($shipment['shipper_status_id'] == 12){
                 $shipment_journey = ShipmentsJourney::where(['shipment_id' => $shipment_ids, 'shipper_status_id' => 12])->first();
-                if($shipment_journey['status_reason_id'] == 34 || $shipment_journey['status_reason_id'] == 12){
+                if($shipment_journey['status_reason_id'] == 12){
                     $nsa_shipment = $shipment->tracking_number;
                     $nsa_shipments_id = (int)$shipment_ids;
                     if($shipment->nsa_osa_estimated_charges){
@@ -169,7 +169,7 @@ public function return_reattempt_nsa(Request $request){
                 $shipment = Shipment::where('id', $shipment_id)->first();
                 if($shipment['shipper_status_id'] == 12){
                     $shipment_journey = ShipmentsJourney::where(['shipment_id' => $shipment_id, 'shipper_status_id' => 12])->first();
-                    if($shipment_journey['status_reason_id'] == 34 || $shipment_journey['status_reason_id'] == 12){
+                    if($shipment_journey['status_reason_id'] == 12){
                         $nsa_shipments[$shipment_id] = $shipment->tracking_number;
                         $nsa_shipments_ids[] = (int)$shipment_id;
                         if($shipment->nsa_osa_estimated_charges){
@@ -286,7 +286,7 @@ public function change_status_to_self_collection(Request $request){
             foreach ($shipment_ids as $shipment) {
                 $parcel = Shipment::find($shipment);
                 if (($parcel->shipper_status_id != 52) && ($parcel->shipper_status_id == 12)) {
-                    $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->whereIn('status_reason_id',[12, 34])->latest('id')->first();
+                    $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
 
 
                     $remark_inp = "remark.$shipment";
@@ -295,7 +295,7 @@ public function change_status_to_self_collection(Request $request){
 
                     Shipment::where('id', $shipment)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
                     ShipmentsJourneyController::add($shipment, 52, 52, NULL, $remarks, session('user_id'), NULL);
-                    if($parcel->shipper_status_id == 12 && ($journey['status_reason_id'] == 12 || $journey['status_reason_id'] == 34)){
+                    if($parcel->shipper_status_id == 12 && ($journey['status_reason_id'] == 12)){
                         NotificationsController::send(33, $shipment);
                     }
                     $updated_shipments[] = $parcel->tracking_number;
@@ -314,10 +314,10 @@ public function change_status_to_self_collection(Request $request){
         if($parcel){
             if($parcel->shipper_status_id != 52){
                 if($parcel->shipper_status_id == 12){
-                    $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->whereIn('status_reason_id',[12, 34])->latest('id')->first();
+                    $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
                     ShipmentsJourneyController::add($request->shipment_id, 52, 52, NULL, $request->remark, session('user_id'), NULL);
-                    if($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12 || $journey->status_reason_id == 34)){
+                    if($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12)){
                         NotificationsController::send(33, $request->shipment_id);
                     }
 
