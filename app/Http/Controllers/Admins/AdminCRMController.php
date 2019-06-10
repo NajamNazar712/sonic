@@ -559,6 +559,7 @@ class AdminCRMController extends Controller
                     });
                 }
             })
+            ->orderColumn('tagged_to', DB::raw('IF (crt.crm_request_tagging_type_id = 1, adp.name, IF (crt.crm_request_tagging_type_id = 2, at.name, ""))') . ' $1')
             ->editColumn('agent', function ($requests){
                 if($requests->agent == null){
                     return '-';
