@@ -19,8 +19,22 @@
   <script type="text/javascript">
     $(document).ready(function() {
       Marquee3k.init();
+        $('body #app_content').on('click', function () {
+            if($('#sidebar_menu').hasClass('is-active')){
+                $.app.menu.hide();
+            }
+        });
     });
   </script>
 @endif
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('body #app_content').on('click', function () {
+            if($('#sidebar_menu').hasClass('is-active')){
+                $.app.menu.hide();
+            }
+        });
+    });
+</script>
 
   @yield('js')
