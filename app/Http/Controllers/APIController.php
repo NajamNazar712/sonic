@@ -723,14 +723,22 @@ class APIController extends Controller
 
         $details['shipper']['name'] = $shipper->name;
 
+        $pickup = $shipment->pickup_address;
+
+        $details['pickup']['origin'] = $pickup->city->name;
+
         if ($type == 0) {
           $details['shipper']['account_number'] = $shipper->id;
           $details['shipper']['phone_number_1'] = $shipper->phone;
           $details['shipper']['phone_number_2'] = $shipper->phone2;
-          $details['shipper']['address'] = $shipper->address;
-        }
+          $details['shipper']['email'] = $shipper->email;
+          $details['shipper']['city'] = $shipper->city->name;
 
-        $details['shipper']['origin'] = $shipper->city->name;
+          $details['pickup']['point_of_contact'] = $pickup->poc;
+          $details['pickup']['phone_number'] = $pickup->phone;
+          $details['pickup']['email'] = $pickup->email;
+          $details['pickup']['address'] = $pickup->pickup_address;
+        }
 
         $details['consignee']['name'] = $shipment->consignee_name;
         $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
