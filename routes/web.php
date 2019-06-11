@@ -1128,6 +1128,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\AdminCRMController@update_request')->name('update');
             Route::get('', 'Admins\AdminCRMController@launched')->name('launched');
             Route::get('{id}', 'Admins\AdminCRMController@request_details')->name('details');
+            Route::post('edit', 'Admins\AdminCRMController@edit_request')->name('edit');
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');

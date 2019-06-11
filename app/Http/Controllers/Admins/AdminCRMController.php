@@ -199,8 +199,11 @@ class AdminCRMController extends Controller
         $crm_agent_history = CrmRequestAgentHistory::where('crm_request_id', $id)->get();
         $crm_status_history = CrmRequestStatusHistory::where('crm_request_id', $id)->get();
         $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -1371,5 +1374,34 @@ class AdminCRMController extends Controller
         }
 
         return redirect()->route('admin.crm.permissions')->with(['success' => 'CRM Permissions: ' . $request->input('name') . ' has been updated!']);
+    }
+
+    public function edit_request(Request $request){
+        $crm_request_id = $request->request_id;
+        $crm_details = CrmRequest::where('id', $crm_request_id)->first();
+        $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
+        if($crm_details['shipment_id'] == null){
+            $shipment_id = $shipment['id'];
+        }
+        else{
+            $shipment_id = $crm_details['shipment_id'];
+        }
+        $crm_check = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $request->case_nature_id)->first();
+        if($crm_check == null){
+            CrmRequest::where('id', $crm_request_id)->update([
+                'shipment_id' => $shipment_id,
+                'case_nature_id' => $request->case_nature_id,
+                'case_nature_type_id' => $request->complaint_id
+            ]);
+            return ['status' => 0, 'success' => 'Request Updated Successfully'];
+        }
+        else{
+            if($crm_request_id == 1){
+                return ['status' => 1, 'error' => 'Complaint already lodged for Tracking Number: ' . $request->tracking_number];
+            }
+            else{
+                return ['status' => 1, 'error' => 'Request already lodged for Tracking Number: ' . $request->tracking_number];
+            }
+        }
     }
 }
