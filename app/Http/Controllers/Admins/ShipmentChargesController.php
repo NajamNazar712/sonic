@@ -1393,4 +1393,14 @@ class ShipmentChargesController extends Controller
             }
         }
     }
+
+    static public function nsa_osa_charges($id) {
+        $shipment = Shipment::find($id);
+
+        if ($shipment->nsa_osa_status == 1) {
+            $shipment->nsa_osa_charges = $shipment->nsa_osa_estimated_charges;
+
+            $shipment->save();
+        }
+    }
 }

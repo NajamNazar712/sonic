@@ -5,19 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-use App\Http\Models\ShipmentsAirWaybillJourney;
-
-use Auth;
+use App\Jobs\ProcessShipmentsAirWaybillJourney;
 
 class ShipmentsAirWaybillJourneyController extends Controller
 {
     static public function add($shipment_id, $user_type, $user_id) {
-      $shipment_air_waybill_journey = new ShipmentsAirWaybillJourney();
+      $entry = array();
 
-      $shipment_air_waybill_journey->shipment_id = $shipment_id;
-      $shipment_air_waybill_journey->user_type = $user_type;
-      $shipment_air_waybill_journey->user_id = $user_id;
+      $entry['shipment_id'] = $shipment_id;
+      $entry['user_type'] = $user_type;
+      $entry['user_id'] = $user_id;
 
-      $shipment_air_waybill_journey->save();
+      dispatch(new ProcessShipmentsAirWaybillJourney($entry));
     }
 }

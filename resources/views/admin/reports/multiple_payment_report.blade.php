@@ -37,6 +37,7 @@
                         <th class="border-primary border-darken-1">Return Charges</th>
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
                         <th class="border-primary border-darken-1">Replacement Charges</th>
+                        <th class="border-primary border-darken-1">NSA/OSA Charges</th>
                         <th class="border-primary border-darken-1">Packaging Material Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Total Payable</th>
@@ -141,6 +142,7 @@
                             head.push('Return Charges');
                             head.push('Fuel Surcharge');
                             head.push('Replacement Charges');
+                            head.push('NSA/OSA Charges');
                             head.push('Packaging Material Charges');
                             head.push('GST');
                             head.push('Total Payable');
@@ -159,6 +161,7 @@
                                 row.push(values.return_charges);
                                 row.push(values.fuel_surcharge);
                                 row.push(values.replacement_charges);
+                                row.push(values.nsa_osa_charges);
                                 row.push(values.packaging_material_charges);
                                 row.push(values.gst);
                                 row.push(values.total_payable);
@@ -212,6 +215,7 @@
                     {data: 'return_charges', name: 's.return_charges', class: 'align-middle insurance_charges'},
                     {data: 'fuel_surcharge', name: 's.fuel_surcharge', class: 'align-middle fuel_surcharge'},
                     {data: 'replacement_charges', name: 's.replacement_charges', class: 'align-middle replacement_charges'},
+                    {data:'nsa_osa_charges' ,name: 's.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
                     {data: 'packaging_material_charges', name: 's.packaging_material_charges', class: 'align-middle packaging_material_charges'},
                     {data: 'gst', name: 'done_payment_shipments.gst', class: 'align-middle gst'},
                     {data: 'total_payable', name: 'done_payment_shipments.payable', class: 'align-middle total_payable'}

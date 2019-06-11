@@ -119,125 +119,150 @@ class AdminMonthClosingController extends Controller
             ->make(true);
     }
     public function add_shipment(Request $request){
-        $tracking_number = $request->tracking_number;
-        $shipment = Shipment::where('tracking_number', $tracking_number);
+        $tracking_numbers = explode(',', $request->tracking_numbers);
+
         $status_not_allowed = array(1, 5, 6, 14, 17, 25, 31, 38, 51, 53);
         $intransit_status_array = array(3, 21, 26, 32);
         $return_revert_statuses = array(20, 21, 22, 23, 24, 44, 47, 48);
         $return_note_statuses = array(23, 24, 28, 29, 34, 35, 44, 45,46, 47, 48);
         $replacement_try_and_buy_statuses = array(26,27,28,29,30,32,33,34,35,36,37,45,46);
 
+        $errors = array();
+        $success = array();
+        foreach ($tracking_numbers as $tracking_number){
+            $shipment = Shipment::where('tracking_number', $tracking_number);
 
-        if($shipment->exists()){
-            $shipment_details = $shipment->first();
-            if($shipment_details->shipper_status_id != 51){
-                if(!in_array($shipment_details->shipper_status_id, $status_not_allowed)){
-                    if(in_array($shipment_details->shipper_status_id, [7, 8, 9, 10, 11, 12, 15, 18, 20, 30])) {
-                        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_details->id);
-                        if ($delivery_note_shipment->exists()) {
-                            $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id');
-                            $delivery = DeliveryNote::where('id' , $delivery_note_shipment)->where('status', 0)->exists();
-                            if($delivery){
-                                return response()->json(['status' => 0, 'error' => 'Shipment is in an Unverified Delivery Note']);
+            if($shipment->exists()){
+                $shipment_details = $shipment->first();
+                if($shipment_details->shipper_status_id != 51){
+                    if(!in_array($shipment_details->shipper_status_id, $status_not_allowed)){
+                        if(in_array($shipment_details->shipper_status_id, [7, 8, 9, 10, 11, 12, 15, 18, 20, 30])) {
+                            $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_details->id);
+                            if ($delivery_note_shipment->exists()) {
+                                $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id');
+                                $delivery = DeliveryNote::where('id' , $delivery_note_shipment)->where('status', 0)->exists();
+                                if($delivery){
+                                    $errors[$tracking_number] = 'Shipment is in an Unverified Delivery Note';
+//                                    return response()->json(['status' => 0, 'error' => 'Shipment is in an Unverified Delivery Note']);
+                                }
                             }
                         }
-                    }
-                    if(in_array($shipment_details->shipper_status_id, $return_revert_statuses)){
-                        AdminFinanceController::return_confirmed_revert($shipment_details->id);
-                    }
-
-                    if(in_array($shipment_details->shipper_status_id, $replacement_try_and_buy_statuses)){
-                        AdminFinanceController::replacement_or_try_and_buy_adjust_in_payment($shipment_details->id);
-                    }
-                    if (in_array($shipment_details->shipper_status_id, $intransit_status_array )) {
-                        $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
-                        if ($cargo_consignment_shipment->exists()) {
-                            $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
-
-                            $cargo = CargoConsignment::find($cargo_consignment_shipment);
-                            $cargo->cargo_consignment_shipments()->where('shipment_id', $shipment_details->id)->delete();
-                            if (in_array($cargo->status_id, [1, 2])) {
-                                $shipments_count = $cargo->shipments;
-                                $shipment_weight = $cargo->shipment_weight;
-                                $shipments_count = $shipments_count - 1;
-                                $cargo->shipments = $shipments_count;
-                                $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
-                                if ($shipments_count == 0) {
-                                    $cargo->status_id = 5;
-                                }
-                                $cargo->save();
-                                $shipment_details->shipper_status_id = 51;
-                                $shipment_details->consignee_status_id = 51;
-                                $shipment_details->save();
-                                ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
-                                return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
-                            } else if ($cargo->status_id == 4) {
-                                $shipments_count = $cargo->shipments;
-                                $shipments_received_count = $cargo->received_shipments;
-                                $shipment_weight = $cargo->shipment_weight;
-                                $shipments_count = $shipments_count - 1;
-                                $cargo->shipments = $shipments_count;
-                                $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
-                                if ($shipments_count == 0) {
-                                    $cargo->status_id = 5;
-                                } else if ($shipments_count == $shipments_received_count) {
-                                    $cargo->status_id = 3;
-                                }
-                                $cargo->save();
-                                $shipment_details->shipper_status_id = 51;
-                                $shipment_details->consignee_status_id = 51;
-                                $shipment_details->save();
-                                ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
-                                return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
-                            }
+                        if(in_array($shipment_details->shipper_status_id, $return_revert_statuses)){
+                            AdminFinanceController::return_confirmed_revert($shipment_details->id);
                         }
 
-                    }
+                        if(in_array($shipment_details->shipper_status_id, $replacement_try_and_buy_statuses)){
+                            AdminFinanceController::replacement_or_try_and_buy_adjust_in_payment($shipment_details->id);
+                        }
+                        if (in_array($shipment_details->shipper_status_id, $intransit_status_array )) {
+                            $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
+                            if ($cargo_consignment_shipment->exists()) {
+                                $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
 
-                    if(in_array($shipment_details->shipper_status_id,$return_note_statuses)){
-                        $return_note_shipments_details = ReturnNoteShipment::where('shipment_id', $shipment_details->id);
-                        if($return_note_shipments_details->exists()){
-                            $return_note_shipments_details = $return_note_shipments_details->get();
-                            foreach ($return_note_shipments_details as $return_note_shipments){
-                                $return_note = ReturnNote::find($return_note_shipments->return_note_id);
-                                if($return_note){
-                                    if($return_note->status == 0){
-                                        ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('shipment_id', $return_note_shipments->shipment_id)->delete();
-                                        $return_note->shipments_count = $return_note->shipments_count - 1;
-                                        if(ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('status', 0)->count() == 0){
-                                            $return_note->status = 1;
-                                        }
-                                        $return_note->save();
+                                $cargo = CargoConsignment::find($cargo_consignment_shipment);
+                                $cargo->cargo_consignment_shipments()->where('shipment_id', $shipment_details->id)->delete();
+                                if (in_array($cargo->status_id, [1, 2])) {
+                                    $shipments_count = $cargo->shipments;
+                                    $shipment_weight = $cargo->shipment_weight;
+                                    $shipments_count = $shipments_count - 1;
+                                    $cargo->shipments = $shipments_count;
+                                    $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
+                                    if ($shipments_count == 0) {
+                                        $cargo->status_id = 5;
                                     }
-                                }
+                                    $cargo->save();
+                                    $shipment_details->shipper_status_id = 51;
+                                    $shipment_details->consignee_status_id = 51;
+                                    $shipment_details->save();
+                                    ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
+                                    $success[$tracking_number] = 'Shipment is successfully added to Month Closing!';
+//                                    return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
+                                } else if ($cargo->status_id == 4) {
+                                    $shipments_count = $cargo->shipments;
+                                    $shipments_received_count = $cargo->received_shipments;
+                                    $shipment_weight = $cargo->shipment_weight;
+                                    $shipments_count = $shipments_count - 1;
+                                    $cargo->shipments = $shipments_count;
+                                    $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
+                                    if ($shipments_count == 0) {
+                                        $cargo->status_id = 5;
+                                    } else if ($shipments_count == $shipments_received_count) {
+                                        $cargo->status_id = 3;
+                                    }
+                                    $cargo->save();
+                                    $shipment_details->shipper_status_id = 51;
+                                    $shipment_details->consignee_status_id = 51;
+                                    $shipment_details->save();
+                                    ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
+                                    $success[$tracking_number] = 'Shipment is successfully added to Month Closing!';
 
+//                                    return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
+                                }
                             }
 
                         }
+
+                        if(in_array($shipment_details->shipper_status_id,$return_note_statuses)){
+                            $return_note_shipments_details = ReturnNoteShipment::where('shipment_id', $shipment_details->id);
+                            if($return_note_shipments_details->exists()){
+                                $return_note_shipments_details = $return_note_shipments_details->get();
+                                foreach ($return_note_shipments_details as $return_note_shipments){
+                                    $return_note = ReturnNote::find($return_note_shipments->return_note_id);
+                                    if($return_note){
+                                        if($return_note->status == 0){
+                                            ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('shipment_id', $return_note_shipments->shipment_id)->delete();
+                                            $return_note->shipments_count = $return_note->shipments_count - 1;
+                                            if(ReturnNoteShipment::where('return_note_id', $return_note_shipments->return_note_id)->where('status', 0)->count() == 0){
+                                                $return_note->status = 1;
+                                            }
+                                            $return_note->save();
+                                        }
+                                    }
+
+                                }
+
+                            }
+                        }
+
+
+                        $shipment_details->shipper_status_id = 51;
+                        $shipment_details->consignee_status_id = 51;
+                        $shipment_details->save();
+                        ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
+                        $success[$tracking_number] = 'Shipment is successfully added to Month Closing!';
+//                        return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
+
                     }
+                    else{
+                        $errors[$tracking_number] = 'Shipment can not added to Month Closing!';
 
-
-                    $shipment_details->shipper_status_id = 51;
-                    $shipment_details->consignee_status_id = 51;
-                    $shipment_details->save();
-                    ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
-                    return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
+//                        return response()->json(['status' => 0, 'error' => 'Shipment can not added to Month Closing!']);
+                    }
 
                 }
                 else{
-                    return response()->json(['status' => 0, 'error' => 'Shipment can not added to Month Closing!']);
+                    $errors[$tracking_number] = 'Shipment is already added as Month Closing!';
+
+//                    return response()->json(['status' => 0, 'error' => 'Shipment is already added as Month Closing!']);
                 }
 
+
             }
-            else{
-                return response()->json(['status' => 0, 'error' => 'Shipment is already added as Month Closing!']);
-            }
+        }
+        $status = 0;
+        if(!empty($errors) && empty($success)) {
+            $status = 1;
+        }
+        if(!empty($success)  && empty($errors)){
+            $status = 2;
+        }
+        if(!empty($errors) && !empty($success)){
+            $status = 3;
+        }
+
+        return response()->json(['status' => $status, 'success' => $success, 'errors' => $errors]);
 
 
-        }
-        else{
-            return response()->json(['status' => 0, 'error' => 'Shipment with this tracking number not found!']);
-        }
     }
 
     public function return_confirm_shipment(Request $request){

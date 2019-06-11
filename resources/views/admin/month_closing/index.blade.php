@@ -54,7 +54,8 @@
                     <form id="add_shipment_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
 
                         <div class="form-group">
-                            <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                            <input type="text" name="tracking_numbers" class="form-control tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Add Shipment</button>
@@ -65,10 +66,6 @@
 
                 </div>
 
-                {{--<div class="modal-footer">--}}
-                    {{--<button type="submit" class="btn btn-primary" id="add_shipment_submit_btn">Submit</button>--}}
-                    {{--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>--}}
-                {{--</div>--}}
             </div>
         </div>
     </div>
@@ -78,6 +75,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
     <style>
         table.dataTable {
@@ -134,6 +132,8 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -552,13 +552,43 @@
             });
 
 
-            $('#add_shipment_form input.tracking_number').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
+            // $('#add_shipment_form input.tracking_number').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false
+            // });
+
+            var select = $('#add_shipment_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                onType: function(str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function(input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
             });
 
             $('#add_shipment_form').validate({
+                ignore: [],
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
@@ -593,31 +623,96 @@
                     }).then(function (confirm) {
                         if(confirm){
                             blockPagePermanently();
-                            var tracking_number = $('#add_shipment_form input.tracking_number').val();
+                            var tracking_numbers = $('#add_shipment_form input.tracking_numbers').val();
                             $('#add_shipment_form button[type="submit"]').attr('disabled', 'disabled');
                             $.ajax({
                                 url: '{!! route('admin.month_closing.add') !!}',
                                 method: 'POST',
                                 data: {
-                                    'tracking_number': tracking_number,
+                                    'tracking_numbers': tracking_numbers,
                                     '_token': '{{ csrf_token() }}'
                                 }
                             }).done(function(data){
-                               if(data.status){
-                                   UnblockPagePermanently();
+                                console.log(data);
+                                UnblockPagePermanently();
+                               if(data.status == 1) {
+
+                                   var html = '';
+
+                                   html += 'The following Shipment(s) could not be added:<br/>';
+
+                                   $.each(data.errors, function (index, message) {
+                                       html += index + ', ';
+                                   });
+
+                                   html = html.slice(0, -2);
+
+                                   content = document.createElement('div');
+                                   content.innerHTML = html;
+                                   swal({
+                                       // title: 'Month Closing!',
+                                       content: content,
+                                       icon: 'warning',
+                                       buttons: {
+                                           cancel: {
+                                               text: 'Close',
+                                               value: null,
+                                               visible: true,
+                                               closeModal: true,
+                                           },
+                                       },
+                                       closeOnClickOutside: false,
+                                       closeOnEsc: false,
+                                       dangerMode: true
+                                   });
                                    scan_sound(1);
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    table.draw(true);
-                               }else{
-                                   UnblockPagePermanently();
+                                   table.draw(true);
+
+                               }else if(data.status == 2){
+                                   var success = "Shipment(s) has been successfully added";
+                                   toastr.success(success, 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
                                    scan_sound(2);
-                                   toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                   table.draw(true);
+                               }else if(data.status == 3){
+                                   var html = '';
+
+                                   html += 'Some Shipment(s) has been successfully added!<br/><br/>';
+
+                                   html += 'The following Shipment(s) could not be added:<br/>';
+
+                                   $.each(data.errors, function (index, message) {
+                                       html += index + ', ';
+                                   });
+
+                                   html = html.slice(0, -2);
+
+                                   content = document.createElement('div');
+                                   content.innerHTML = html;
+                                   swal({
+                                       // title: 'Month Closing!',
+                                       content: content,
+                                       icon: 'warning',
+                                       buttons: {
+                                           cancel: {
+                                               text: 'Close',
+                                               value: null,
+                                               visible: true,
+                                               closeModal: true,
+                                           },
+                                       },
+                                       closeOnClickOutside: false,
+                                       closeOnEsc: false,
+                                       dangerMode: true
+                                   });
+                                   scan_sound(1);
+                                   table.draw(true);
                                }
-                                $('#add_shipment_form input.tracking_number').val('');
+                                select[0].selectize.clear();
                                 $('#add_shipments_modal').modal('hide');
                                 $('#add_shipment_form button[type="submit"]').attr('disabled', false);
                             });
-
+                        return false;
                         }
                     });
 

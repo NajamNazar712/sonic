@@ -16,7 +16,31 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
+                            <div id="search_form" class="row mb-2 justify-content-center">
+                                <div class="col-4">
+                                    <div class="form-group input-group ml">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                        </div>
+                                        <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)">
+                                    </div>
+                                </div>
+                                <div class="col-4 ">
+                                    <div class="form-group input-group ml">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                        </div>
+                                        <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Search Date (To)">
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                </div>
+                            </div>
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
@@ -95,6 +119,32 @@
 
     <script>
         $(document).ready(function() {
+            $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
             function print(id) {
                 $.ajax({
                     url: '{!! route('admin.cargo.history.print') !!}',
@@ -132,6 +182,8 @@
                         url: '{{ route('admin.cargo.history.list') }}',
                         data: {
                             'page': 'all',
+                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
+                            'search_date_to': $('input[name="search_date_to_formatted"]').val()
                         },
                         success: function (result) {
                             head = [];
@@ -212,7 +264,13 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.cargo.history.list') }}',
+                ajax:{
+                    url: '{{ route('admin.cargo.history.list') }}',
+                    data: function (d) {
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                    }
+                },
                 rowId: 'id',
                 order: [[17, 'desc']],
                 columns: [
@@ -361,6 +419,10 @@
                     });
                     this.api().table().columns.adjust();
                 }
+            });
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
             });
             var route = '{!! route('admin.tracking.index') !!}';
 

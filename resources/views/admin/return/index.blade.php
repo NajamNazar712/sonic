@@ -44,10 +44,11 @@
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Shipper Remarks</th>
+                        <th class="border-primary border-darken-1">OSA Estimated Charges</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Re-Attempt Count</th>
-                        <th class="border-primary border-darken-1">Action</th>
+                        <th class="border-primary border-darken-1">Actions</th>
                     </tr>
                     </thead>
                 </table>
@@ -91,6 +92,38 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="EditEstimateChargesModal" role="dialog" aria-labelledby="EditEstimateChargesModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Estimate Charges</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="update_charges_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                            <input type="text" name="estimate_charges" id="estimated_charges_input" class="form-control decimal" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
+
+                        </div>
+                        <input type="hidden" id="eec_shipment_id">
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary update_charges" value="Add">Update Charges</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
             </div>
         </div>
     </div>
@@ -196,6 +229,7 @@
                             head.push('Reason');
                             head.push('Remarks');
                             head.push('Shipper Remarks');
+                            head.push('OSA Estimated Charges');
                             head.push('Arrival Date');
                             head.push('Status Date');
                             head.push('Re-Attempt Count');
@@ -222,6 +256,7 @@
                                 row.push(values.reason);
                                 row.push(values.remarks);
                                 row.push(values.shipper_remarks);
+                                row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
                                 row.push(values.reattempts);
@@ -498,7 +533,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[20, 'asc'], [19, 'asc']],
+                order: [[21, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -519,6 +554,7 @@
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'shipment_remarks', name: 'admin_journey.remarks', class: 'align-middle shipment_remarks'},
                     {data: 'shipper_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipper_remarks'},
+                    {data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
@@ -809,6 +845,140 @@
                 }
 
             });
+
+            $('#datatable').on('click', '.selfCollection', function () {
+                var row_id = $(this).parents('tr').attr('id');
+                var remark = $.trim($('tr#' + row_id).find('td.shipment_remarks input').val());
+                if(row_id){
+                    swal({
+                        text: 'Are you sure you want to mark shipment for Self-Collection?',
+                        icon: 'info',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            $.ajax({
+                                url:"{{route('admin.return.marked.self_collection')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_id':row_id,
+                                    'remark':remark,
+                                    '_token':'{{ csrf_token() }}',
+                                }
+                            }).done(function (data) {
+                                UnblockPagePermanently();
+                                if(data.status == 1){
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }else{
+                                    table.draw(false);
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+
+            $('.decimal').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 0,
+                'max': 100000
+            });
+
+
+            $('#datatable').on('click', '.editEstimateCharges', function () {
+               var id =  $(this).parents('tr').attr('id');
+               if(id){
+                   $('#EditEstimateChargesModal').modal('show');
+                   $('#eec_shipment_id').val(id);
+               }
+
+            });
+            $('#update_charges_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    // $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to update Estimated Charges!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            var charges = $('#estimated_charges_input').val();
+                            var shipment_id = $('#eec_shipment_id').val();
+                            $.ajax({
+                                url: '{!! route('admin.return.edit.estimated_charges') !!}',
+                                method: 'POST',
+                                data: {
+                                    'charges': charges,
+                                    'shipment_id': shipment_id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                UnblockPagePermanently();
+                                $('#EditEstimateChargesModal').modal('hide');
+
+                                if(data.status){
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }else{
+                                    table.draw(false);
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                                $('#estimated_charges_input').val('');
+                                $('#eec_shipment_id').val('');
+                            });
+
+                        }
+                    });
+                }
+            });
+
+
         });
     </script>
 @endsection

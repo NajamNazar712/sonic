@@ -103,9 +103,9 @@
                                                                     </div>
 
                                                                     <div class="chat-body">
-                                                                        <div class="chat-content">
-                                                                            <p>{{$comment->comment}}</p>
-                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}}</small>
+                                                                        <div class="chat-content text-left">
+                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <small>{{$comment->created_at}}</small>
                                                                         </div>
                                                                     </div>
 
@@ -125,9 +125,9 @@
                                                                     </div>
                                                                     @endif
                                                                     <div class="chat-body">
-                                                                        <div class="chat-content {{($shipper_flag == false)? 'mr-3':'' }}">
-                                                                            <p>{{$comment->comment}}</p>
-                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}}</small>
+                                                                        <div class="chat-content text-left {{($shipper_flag == false)? 'mr-3':'' }}">
+                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <small>{{$comment->created_at}}</small>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -146,9 +146,9 @@
                                                                             </div>
                                                                         @endif
                                                                         <div class="chat-body">
-                                                                            <div class="chat-content {{($sub_flag == false)? 'mr-3':'' }}">
-                                                                                <p>{{$comment->comment}}</p>
-                                                                                <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}}</small>
+                                                                            <div class="chat-content text-left {{($sub_flag == false)? 'mr-3':'' }}">
+                                                                                <p>{!! $comment->comment !!}</p>
+                                                                                <small>{{$comment->created_at}}</small>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -170,7 +170,8 @@
                                                             <div class="form-control-position">
                                                                 <i class="la la-chevron-right"></i>
                                                             </div>
-                                                            <input type="text" class="form-control" id="chat_input" placeholder="Type your message">
+                                                            {{--<input type="text" class="form-control" id="chat_input" placeholder="Type your message">--}}
+                                                            <textarea id="chat_input" class="form-control width-500 height-75" placeholder="Type your message"></textarea>
                                                         </fieldset>
                                                         <fieldset class="form-group position-relative has-icon-left col-2 m-0">
                                                             <button id="chat_send" type="button" class="btn btn-block btn-info" ><i class="la la-paper-plane-o d-lg-none"></i>
@@ -240,14 +241,9 @@
             $('body').on('change', '#chat_form input', function () {
                 $(this).val($(this).val().trim());
             });
-            $('#chat_form').keypress(function (e) {
-                if (e.keyCode == 13) {
-                    $('#chat_send').trigger('click');
-                }
-            });
             $('#chat_send').on('click', function () {
                 var flag = true;
-                var comment = $('#chat_input').val();
+                var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br>');
                 $('#chat_input').val('');
                 var request_id = '{{$crm_details->id}}';
                 if(comment == ''){
@@ -273,18 +269,18 @@
                             var shipper = 'You';
                             if(user == 1){
                                 if($('div.chat:last-child').hasClass('shipper')) {
-                                    var html = '<div class="chat-content"><p>' + comment + '</p><small>just now</small></div>';
+                                    var html = '<div class="chat-content text-left"><p>' + comment + '</p><small>{{Carbon\Carbon::now()}}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 }else{
-                                    var html = '<div class="chat shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p><small>just now</small></div></div></div>';
+                                    var html = '<div class="chat shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>{{Carbon\Carbon::now()}}</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
                             }else{
                                 if($('div.chat:last-child').hasClass('substitute-user')) {
-                                    var html = '<div class="chat-content"><p>' + comment + '</p><small>just now</small></div>';
+                                    var html = '<div class="chat-content text-left"><p>' + comment + '</p><small>{{Carbon\Carbon::now()}}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 }else{
-                                    var html = '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content"><p>' + comment + '</p><small>just now</small></div></div></div>';
+                                    var html = '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>{{Carbon\Carbon::now()}}</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
                             }
@@ -318,18 +314,18 @@
                         if(data.status){
                             if(data.comment.comment_by === 0){
                                 if($('div.chat:last-child').hasClass('admin')){
-                                    var html = '<div class="chat-content mr-3"><p>'+ data.comment.comment +'</p><small>just now</small></div>';
+                                    var html = '<div class="chat-content text-left mr-3"><p>'+ data.comment.comment +'</p><small>{{Carbon\Carbon::now()}}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 }else{
-                                    var html = '<div class="chat chat-left admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>Agent</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p><small>just now</small></div></div></div>';
+                                    var html = '<div class="chat chat-left admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>Agent</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>{{Carbon\Carbon::now()}}</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
                             }else if(data.comment.comment_by === 2){
                                 if($('div.chat:last-child').hasClass('substitute-user')) {
-                                    var html = '<div class="chat-content"><p>' + data.comment.comment + '</p><small>just now</small></div>';
+                                    var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>{{Carbon\Carbon::now()}}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 }else{
-                                    var html = '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>'+ data.name +'</div></div><div class="chat-body"><div class="chat-content"><p>' + data.comment.comment + '</p><small>just now</small></div></div></div>';
+                                    var html = '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>'+ data.name +'</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>{{Carbon\Carbon::now()}}</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
                             }

@@ -123,6 +123,16 @@ class AdminReportsController extends Controller
         if ($hub = $request->get('search_hub')) {
             $datatable->where('h.id', '=', $hub);
         }
+        if ($search_qsr = $request->get('search_qsr')) {
+            if($search_qsr != 3){
+                if($search_qsr == 1){
+                    $datatable->whereIn('shipments.shipper_status_id',[2,3,4,5,6,7,8,9,10,11,12,13,15,18,49,51,52,54,55]);
+                }
+                if($search_qsr == 2){
+                    $datatable->whereIn('shipments.shipper_status_id',[20, 21,22,23,24,26,27,28,29,32,33,34,35,37,44,45,46,47,48,50]);
+                }
+            }
+        }
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
@@ -134,10 +144,13 @@ class AdminReportsController extends Controller
     public function return_note_index(Request $request){
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
-        return view('admin.reports.return_notes_report')->with(['riders'=>$riders,'admins'=>$admins]);
+        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->where('status',1)->select('id','name')->get();
+        return view('admin.reports.return_notes_report')->with(['riders' => $riders, 'admins' => $admins, 'hubs' => $hubs]);
     }
     public function return_note_list(Request $request){
-        $return_note = DB::connection('reports')->table('return_notes')->join('riders','riders.id','=','return_notes.rider_id')
+        $return_note = DB::connection('reports')->table('return_notes')
+            ->join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
+            ->join('riders','riders.id','=','return_notes.rider_id')
             ->leftjoin('return_note_shipments as rns','rns.return_note_id', '=', 'return_notes.id')
             ->leftjoin('shipments','shipments.id', '=', 'rns.shipment_id')
             ->join('admins as cr','cr.id','=','return_notes.admin_id')
@@ -180,6 +193,9 @@ class AdminReportsController extends Controller
         }
         if($rider = $request->get('search_rider')){
             $return->where('riders.id','=',$rider);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $return->where('oc.id', '=', $hub);
         }
         if($created_by = $request->get('search_created_by')){
             $return->where('cr.id','=',$created_by);
@@ -1150,7 +1166,7 @@ class AdminReportsController extends Controller
         $total_avg_revenue = 0;
         $total_avg_cash_collection = 0;
         $total_rev_on_cash_collection = 0;
-        $serial_number_hubs = 1;
+        $serial_number_hubs = 0;
         $booked = 0;
         $received = 0;
         $revenue_wo_gst = 0;
@@ -1627,7 +1643,7 @@ class AdminReportsController extends Controller
 //                $total_avg_revenue += $avg_rev;
 
 //                $total_rev_on_cash_collection += $rev_occ;
-                $serial_number_hubs++;
+
             }
 
         }
@@ -1637,17 +1653,21 @@ class AdminReportsController extends Controller
         $total_avg_chargeable_weight = ($total_received != 0) ? $total_chargeable_weight / $total_received:0;
         $total_avg_rev_chargeable_weight = ($total_chargeable_weight != 0) ? $total_revenue_wo_gst / $total_chargeable_weight:0;
         $total_avg_cash_collection = ($total_received != 0) ? $total_cod_collection / $total_received:0;
-        $total_rev_on_cash_collection = ($total_avg_cash_collection != 0) ? $total_avg_revenue / $total_avg_cash_collection:0;
+        $total_rev_on_cash_collection = ($total_cod_collection != 0) ? $total_revenue_wo_gst / $total_cod_collection:0;
+        $total_rev_on_cash_collection = $total_rev_on_cash_collection * 100;
         array_multisort($sort_support_array, SORT_DESC, $sorted_details_array);
+        $counter = 1;
         foreach ($sorted_details_array as $item) {
+            $item['serials'] = $counter;
             $details[] = $item;
+            $counter++;
         }
-        $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),number_format($total_actual_weight),number_format((float) $total_avg_actual_weight,2,'.',''),round($total_avg_rev_actual_weight),number_format($total_chargeable_weight),number_format((float) $total_avg_chargeable_weight,2,'.',''),round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection).'%'];
+        $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),number_format($total_actual_weight),number_format((float) $total_avg_actual_weight,2,'.',''),round($total_avg_rev_actual_weight),number_format($total_chargeable_weight),number_format((float) $total_avg_chargeable_weight,2,'.',''), round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection).'%'];
 
         $details_shipper['header'] = ['S. No.','Shipper Name(s) (Account No(s))', 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg. Actual Weight/Parcel','Avg. Revenue On Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
 
 //        $details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
-        $serial_number_shippers = 1;
+        $serial_number_shippers = 0;
 
         if($sales_tagging == TRUE){
             if($search_city != null){
@@ -1987,7 +2007,7 @@ class AdminReportsController extends Controller
 //                $total_shipper_rev_on_cash_collection += $avg_rev_cc;
 
 
-                $serial_number_shippers++;
+//                $serial_number_shippers++;
             }
         }
 
@@ -1997,11 +2017,15 @@ class AdminReportsController extends Controller
         $total_shipper_avg_chargeable_weight = ($total_shipper_received != 0) ? $total_shipper_chargeable_weight / $total_shipper_received:0;
         $total_shipper_avg_rev_chargeable_weight = ($total_shipper_chargeable_weight != 0) ? $total_shipper_revenue_wo_gst / $total_shipper_chargeable_weight:0;
         $total_shipper_avg_cash_collection = ($total_shipper_received != 0) ? $total_shipper_cod_collection / $total_shipper_received:0;
-        $total_shipper_rev_on_cash_collection = ($total_shipper_avg_cash_collection != 0) ? $total_shipper_avg_revenue / $total_shipper_avg_cash_collection:0;
 
+        $total_shipper_rev_on_cash_collection = ($total_shipper_cod_collection != 0) ? $total_shipper_revenue_wo_gst / $total_shipper_cod_collection:0;
+        $total_shipper_rev_on_cash_collection = $total_shipper_rev_on_cash_collection * 100;
         array_multisort($shipper_sort_support_array, SORT_DESC, $sorted_shipper_array);
+        $shipper_counter = 1;
         foreach ($sorted_shipper_array as $shipper) {
+            $shipper['shipper_serial'] = $shipper_counter;
             $details_shipper[] = $shipper;
+            $shipper_counter++;
         }
         $details_shipper[] = ['Grand Total','DSR '.$only_date, number_format($total_shipper_booked), number_format($total_shipper_received), number_format($total_shipper_revenue_wo_gst),number_format($total_shipper_avg_revenue),number_format($total_shipper_actual_weight),number_format((float) $total_shipper_avg_actual_weight,2,'.',''),round($total_shipper_avg_rev_actual_weight),number_format($total_shipper_chargeable_weight),number_format((float) $total_shipper_avg_chargeable_weight,2,'.',''),round($total_shipper_avg_rev_chargeable_weight), number_format($total_shipper_cod_collection),number_format($total_shipper_avg_cash_collection),number_format($total_shipper_rev_on_cash_collection).'%'];
 
@@ -2009,72 +2033,74 @@ class AdminReportsController extends Controller
         $cell_st =[
             'font' =>['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-            'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            'borders' => array(
+                'allBorders' => array(
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => array('argb' => '000000'),
+                )
+            ),
         ];
         $total_cell_st =[
             'font' =>['bold' => true],
-            'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]],
+            'borders' => array(
+                'allBorders' => array(
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => array('argb' => '000000'),
+                ),
+            )
         ];
         $sheet = $spreadsheet->getActiveSheet();
 
         $sheet->getDefaultColumnDimension()->setWidth(20);
-
-        $sheet->fromArray($details,NULL,'A1',true);
+        $sheet->getStyle('D3:R3')
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+        $sheet->getStyle('D3:R3')->getAlignment()->setWrapText(true);
+        $sheet->fromArray($details,NULL,'D3',true);
         $count_hubs = count($hubs);
         $count_hub_rows = count($details);
-//        $set_actual_number_format = 'G2:G'.$count_hub_rows;
-//        $set_chargeable_number_format = 'J2:J'.$count_hub_rows;
-//        $sheet->getStyle($set_actual_number_format)->getNumberFormat()->setFormatCode('0.00');
-//        $sheet->getStyle($set_chargeable_number_format)->getNumberFormat()->setFormatCode('0.00');
+        $count_hub_rows += 2;
+
+
         $count_hubs += 3;
         $total_shipper_rows = count($details_shipper);
         $total_shipper_rows += $count_hubs;
         $total_shipper_rows = $total_shipper_rows - 1;
-//         $cellIndexShipper = Coordinate::stringFromColumnIndex($count_hubs+2);
-        $shipper_cell = 'A'.$count_hubs;
-        $shipper_last_cell = 'O'.$count_hubs;
-        $sheet->fromArray($details_shipper,NULL,$shipper_cell,true);
-//         $sheet->insertNewRowBefore(9, 8);
-        $sheet->setTitle('Daily Pickup Sales Report');
-//         $sheet->setCellValue('A1','S. No.');
-//         $sheet->fromArray($shipper_details);
-        $sheet->getStyle("A1:O1")->applyFromArray($cell_st);
 
-        $shipper_style_cell = "A$count_hubs".":O".$count_hubs;
-        $total_style_cell = "A$count_hub_rows".":O".$count_hub_rows;
-        $total_shipper_style_cell = "A$total_shipper_rows".":O".$total_shipper_rows;
-        $sheet->getStyle("A1:O1")->applyFromArray($cell_st);
-        $sheet->getStyle($shipper_style_cell)->applyFromArray($cell_st);
-        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
-        $sheet->getStyle($total_shipper_style_cell)->applyFromArray($total_cell_st);
-        $set_shipper_actual_number_format = 'H2:H'.$total_shipper_rows;
-        $set_shipper_chargeable_number_format = 'K2:K'.$total_shipper_rows;
+        $shipper_cell = 'D'.$count_hubs;
+        $shipper_last_cell = 'Q'.$count_hubs;
+        $sheet->fromArray($details_shipper,NULL,$shipper_cell,true);
+
+        $sheet->setTitle('Daily Pickup Sales Report');
+
+        $hub_all_rows = "D3".":R".$count_hub_rows;
+
+        $sheet->getStyle($hub_all_rows)->applyFromArray($cell_st);
+
+        $shipper_style_cell = "D$count_hubs".":R".$count_hubs;
+        $shipper_all_rows = "D$count_hubs".":R".$total_shipper_rows;
+
+        $total_style_cell = "D$count_hub_rows".":R".$count_hub_rows;
+        $total_shipper_style_cell = "D$total_shipper_rows".":R".$total_shipper_rows;
+        $sheet->getStyle($shipper_style_cell)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('CECECE');
+//        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
+        $sheet->getStyle($shipper_all_rows)->applyFromArray($cell_st);
+
+        $sheet->getStyle($shipper_style_cell)->getAlignment()->setWrapText(true);
+//        $sheet->getStyle($total_shipper_style_cell)->applyFromArray($total_cell_st);
+
+        $set_shipper_actual_number_format = 'K3:K'.$total_shipper_rows;
+        $set_shipper_chargeable_number_format = 'N3:N'.$total_shipper_rows;
         $sheet->getStyle($set_shipper_actual_number_format)->getNumberFormat()->setFormatCode('0.00');
         $sheet->getStyle($set_shipper_chargeable_number_format)->getNumberFormat()->setFormatCode('0.00');
 
-        $sheet->getStyle('H1:I1')
-            ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
-            ->getStartColor()
-            ->setRGB('FFFF00');
-        $sheet->getStyle('K1:L1')
-            ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
-            ->getStartColor()
-            ->setRGB('FFFF00');
-
-        $shipper_color_cell1 = "H$count_hubs".":I".$count_hubs;
-        $shipper_color_cell2 = "K$count_hubs".":L".$count_hubs;
-        $sheet->getStyle($shipper_color_cell1)
-            ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
-            ->getStartColor()
-            ->setRGB('FFFF00');
-        $sheet->getStyle($shipper_color_cell2)
-            ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
-            ->getStartColor()
-            ->setRGB('FFFF00');
 
         $writer = new Xlsx($spreadsheet);
 
@@ -2369,7 +2395,8 @@ class AdminReportsController extends Controller
     public function completed_delivery_notes_index(){
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
-        return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins]);
+        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->where('status',1)->select('id','name')->get();
+        return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins, 'hubs' => $hubs]);
     }
     public function completed_delivery_notes_list(Request $request){
         $deliveries = DB::connection('reports')->table('delivery_notes')->
@@ -2455,6 +2482,9 @@ class AdminReportsController extends Controller
         }
         if($submitted_by = $request->get('search_updated_by')){
             $datatable->where('ub.id','=',$submitted_by);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $datatable->where('oc.id', '=', $hub);
         }
         if($submission_date = $request->get('search_submission')){
             $datatable->whereDate('delivery_notes.updated_at',$submission_date);
@@ -2815,7 +2845,7 @@ class AdminReportsController extends Controller
                     ->where('spt.status','=',0);
             })
             ->leftjoin('products as p','p.id','=','si.product_type_id')
-            ->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person')
+			->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges')
             ->whereNotIn('shipments.shipper_status_id',[1,17]);
 //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
 //            $now = Carbon::now();
@@ -2843,6 +2873,19 @@ class AdminReportsController extends Controller
             ->editColumn('insurance_charges', function($shipment){
                 return number_format($shipment->insurance_charges);
             })
+            ->editColumn('cash_handling_charges', function($shipment){
+                if($shipment->shipment_status == 20 || $shipment->shipment_status == 21 || $shipment->shipment_status == 22 || $shipment->shipment_status == 23 || $shipment->shipment_status == 23 || $shipment->shipment_status == 25){
+                    return "-";
+                }
+                else{
+                    if($shipment->cash_handling_charges != null){
+                        return $shipment->cash_handling_charges;
+                    }
+                    else{
+                        return "-";
+                    }
+                }
+            })
             ->editColumn('return_charges', function($shipment){
                 return number_format($shipment->return_charges);
             })
@@ -2851,6 +2894,9 @@ class AdminReportsController extends Controller
             })
             ->editColumn('try_and_buy_charges', function($shipment){
                 return number_format($shipment->try_and_buy_charges);
+            })
+            ->editColumn('nsa_osa_charges', function($shipment){
+                return number_format($shipment->nsa_osa_charges);
             })
             ->editColumn('packaging_material_charges', function($shipment){
                 return number_format($shipment->packaging_material_charges);
@@ -4049,7 +4095,7 @@ class AdminReportsController extends Controller
         return view('admin.reports.multiple_payment_report');
     }
     public function multiple_payment_report_list(Request $request){
-        $payments = DB::connection('reports')->table('done_payment_shipments')->join('shipments as s','s.id', '=', 'done_payment_shipments.shipment_id')->select(['s.tracking_number as tracking_number', 's.actual_weight as actual_weight', 's.cash_handling_charges as cash_handling_charges','s.insurance_charges as insurance_charges','s.return_charges as return_charges','s.fuel_surcharge as fuel_surcharge','s.replacement_charges as replacement_charges','s.packaging_material_charges as packaging_material_charges', 'done_payment_shipments.done_payment_id as payment_id', 'done_payment_shipments.gst as gst', 'done_payment_shipments.amount as amount', 'done_payment_shipments.payable as total_payable', 'done_payment_shipments.type as status']);
+        $payments = DB::connection('reports')->table('done_payment_shipments')->join('shipments as s','s.id', '=', 'done_payment_shipments.shipment_id')->select(['s.tracking_number as tracking_number', 's.actual_weight as actual_weight', 's.cash_handling_charges as cash_handling_charges','s.insurance_charges as insurance_charges','s.return_charges as return_charges','s.fuel_surcharge as fuel_surcharge','s.replacement_charges as replacement_charges','s.packaging_material_charges as packaging_material_charges', 'done_payment_shipments.done_payment_id as payment_id', 'done_payment_shipments.gst as gst', 'done_payment_shipments.amount as amount', 'done_payment_shipments.payable as total_payable', 'done_payment_shipments.type as status', 's.nsa_osa_charges as nsa_osa_charges']);
         $datatable = Datatables::of($payments)
             ->addColumn('id_padded', function ($shipments) {
                 return str_pad($shipments->payment_id, 6, '0', STR_PAD_LEFT);
@@ -4071,6 +4117,9 @@ class AdminReportsController extends Controller
             })
             ->editColumn('replacement_charges', function ($shipments){
                 return number_format($shipments->replacement_charges);
+            })
+            ->editColumn('nsa_osa_charges', function($shipment){
+                return number_format($shipment->nsa_osa_charges);
             })
             ->editColumn('packaging_material_charges', function ($shipments){
                 return number_format($shipments->packaging_material_charges);
@@ -4155,7 +4204,7 @@ public function revenue_index(){
                     ->where('dr.id','=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37))'));
             })
-            ->select('shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.id as payment_id', 'shipments.booking_type_id', 'usi.poc')
+            ->select('shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges')
             ->whereNotIn('shipments.shipper_status_id',[1,17]);
 //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
 //            $now = Carbon::now();
@@ -4176,17 +4225,39 @@ public function revenue_index(){
             ->editColumn('insurance_charges', function($shipment){
                 return number_format($shipment->insurance_charges);
             })
+            ->editColumn('cash_handling_charges', function($shipment){
+                if($shipment->shipment_status == 20 || $shipment->shipment_status == 21 || $shipment->shipment_status == 22 || $shipment->shipment_status == 23 || $shipment->shipment_status == 23 || $shipment->shipment_status == 25){
+                    return "-";
+                }
+                else{
+                    if($shipment->cash_handling_charges != null){
+                        return $shipment->cash_handling_charges;
+                    }
+                    else{
+                        return "-";
+                    }
+                }
+            })
             ->editColumn('account_no', function ($shipments) {
                 return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('return_charges', function($shipment){
                 return number_format($shipment->return_charges);
             })
+            ->editColumn('weight_charges', function($shipment){
+                return number_format($shipment->weight_charges);
+            })
+            ->editColumn('fuel_surcharge', function($shipment){
+                return number_format($shipment->fuel_surcharge);
+            })
             ->editColumn('replacement_charges', function($shipment){
                 return number_format($shipment->replacement_charges);
             })
             ->editColumn('try_and_buy_charges', function($shipment){
                 return number_format($shipment->try_and_buy_charges);
+            })
+            ->editColumn('nsa_osa_charges', function($shipment){
+                return number_format($shipment->nsa_osa_charges);
             })
             ->editColumn('packaging_material_charges', function($shipment){
                 return number_format($shipment->packaging_material_charges);
@@ -4366,6 +4437,7 @@ public function revenue_index(){
 
     public function crm_list(Request $request){
         $crm = DB::connection('reports')->table('crm_requests')->leftjoin('shipments as s','s.id','=','crm_requests.shipment_id')
+            ->leftjoin('crm_request_statuses as crs', 'crs.id' , '=', 'crm_requests.status_id')
             ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('users as u', 'u.id', '=', 'crm_requests.shipper_id')
@@ -4403,7 +4475,7 @@ public function revenue_index(){
                 $join->on('crshc.crm_request_id', '=', 'crm_requests.id')
                     ->where('crshc.id', '=', DB::connection('reports')->raw('(select max(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 4)'));
             })
-            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crsh.created_at as valid_invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id')
+            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crsh.created_at as valid_invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status')
         ->groupBy('crm_requests.id');
         $datatable = Datatables::of($crm)
             ->editColumn('tracking_number_link', function ($crm_request) {
@@ -4504,5 +4576,205 @@ public function revenue_index(){
 
         return $datatable->make(true);
     }
+
+    public function summary_index(Request $request){
+        $today = Carbon::now()->endOfDay();
+        $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
+        $shippers = DB::connection('reports')->table('users')->where('status','>=',3)->get();
+        $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
+
+        return view('admin.reports.summary')->with(['hubs'=>$hubs,'shippers'=>$shippers,'today' => $today, 'thirtyday' => $thirtyDays]);
+    }
+
+    public function summary_data(Request $request){
+        $stats = array();
+        $shipper = $request->shipper;
+        $from = $request->from_date;
+        $to = $request->to_date;
+        $origin = $request->origin;
+        $destination = $request->destination;
+        if($from == null || $to == null){
+            $toDays = Carbon::now()->endOfDay();
+            $fromDays = Carbon::now()->subDays(30)->startOfDay();
+        }else{
+            $fromDays = $from;
+            $toDays = $to;
+        }
+
+        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        if ($origin) {
+            $stats['total'] = $stats['total']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['booked'] = $stats['booked']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['canceled'] = $stats['canceled']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['received'] = $stats['received']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['delivered'] = $stats['delivered']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['return'] = $stats['return']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['in_process'] = $stats['in_process']->whereExists(function($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+        }
+
+        if ($destination) {
+            $stats['total'] = $stats['total']->where('consignee_city_id', $destination);
+            $stats['booked'] = $stats['booked']->where('consignee_city_id', $destination);
+            $stats['received'] = $stats['received']->where('consignee_city_id', $destination);
+            $stats['canceled'] = $stats['canceled']->where('consignee_city_id', $destination);
+            $stats['delivered'] = $stats['delivered']->where('consignee_city_id', $destination);
+            $stats['return'] = $stats['return']->where('consignee_city_id', $destination);
+            $stats['in_process'] = $stats['in_process']->where('consignee_city_id', $destination);
+        }
+        $stats['total'] = number_format($stats['total']->count());
+        $stats['booked'] = number_format($stats['booked']->count());
+        $stats['canceled'] = number_format($stats['canceled']->count());
+        $stats['received'] = number_format($stats['received']->count());
+        $stats['delivered'] = number_format($stats['delivered']->count());
+        $stats['return'] = number_format($stats['return']->count());
+        $stats['in_process'] = number_format($stats['in_process']->count());
+
+
+        return response()->json(['status' => 1, 'stats' => $stats]);
+
+    }
+    public function summary_list(Request $request){
+        $shipments = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftjoin('shipment_items as si', function ($join) {
+                $join->on('si.shipment_id', '=', 'shipments.id')
+                    ->where('si.type','=',0);
+            })
+            ->leftjoin('products as p','p.id','=','si.product_type_id')
+            ->select(['shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','p.product_name','si.description','sj.created_at as arrival_date','oc.name as origin','dc.name as destination']);
+        if( $request->get('search_shipper')){
+            $shipments->where('shipments.user_id', '=',$request->get('search_shipper'));
+        }else{
+            $shipments->where('shipments.user_id', '=', null);
+        }
+
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments = $shipments->whereBetween('shipments.created_at', [$from,$to]);
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('collection_amount', function ($shipments){
+                return number_format($shipments->collection_amount);
+            });
+//        if($shipper = $request->get('search_shipper')){
+//            $datatable->where('shipments.user_id','=', $shipper);
+//        }
+        if($origin = $request->get('search_origin')){
+            $datatable->where('oc.id', '=', $origin);
+        }
+        if($destination = $request->get('search_destination')){
+            $datatable->where('dc.id', '=', $destination);
+        }
+        if($card = $request->get('cards_filter')){
+            switch ($card) {
+                case 'total':
+                    $today = Carbon::now()->endOfDay();
+                    $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
+                    $datatable->whereBetween('shipments.created_at',[$thirtyDays,$today]);
+                    break;
+                case 'booked':
+                    $datatable->where('shipments.shipper_status_id',1);
+                    break;
+                case 'received':
+                    $datatable->whereIn('shipments.shipper_status_id',[2,3,4]);
+                    break;
+                case 'delivered':
+                    $datatable->whereIn('shipments.shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
+                    break;
+                case 'returned':
+                    $datatable->whereIn('shipments.shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50]);
+                    break;
+                case 'in_process':
+                    $datatable->whereIn('shipments.shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52]);
+                    break;
+                case 'cancelled':
+                    $datatable->where('shipments.shipper_status_id',17);
+                    break;
+            }
+        }
+        return $datatable->make(true);
+
+    }
+
+
 }
 

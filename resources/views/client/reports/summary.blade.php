@@ -68,7 +68,7 @@
                                             <i class="icon-grid font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-right">
-                                            <h3 class="">{{$stats['total']}}</h3>
+                                            <h3 id="total">{{$stats['total']}}</h3>
                                             <span>Total Booked Shipment(s)</span>
                                         </div>
                                     </div>
@@ -85,7 +85,7 @@
                                             <i class="icon-hourglass text-white font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-white text-right">
-                                            <h3 class="text-white">{{$stats['booked']}}</h3>
+                                            <h3 class="text-white" id="booked">{{$stats['booked']}}</h3>
                                             <span>Pending Shipment(s)</span>
                                         </div>
                                     </div>
@@ -102,7 +102,7 @@
                                             <i class="icon-layers text-white font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-white text-right">
-                                            <h3 class="text-white">{{$stats['received']}}</h3>
+                                            <h3 class="text-white" id="received">{{$stats['received']}}</h3>
                                             <span>Received Shipment(s)</span>
                                         </div>
                                     </div>
@@ -118,7 +118,7 @@
                                             <i class="icon-check text-white font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-white text-right">
-                                            <h3 class="text-white">{{$stats['delivered']}}</h3>
+                                            <h3 class="text-white" id="delivered">{{$stats['delivered']}}</h3>
                                             <span>Delivered Shipment(s)</span>
                                         </div>
                                     </div>
@@ -137,7 +137,7 @@
                                             <i class="icon-loop text-white font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-white text-right">
-                                            <h3 class="text-white">{{$stats['return']}}</h3>
+                                            <h3 class="text-white" id="return">{{$stats['return']}}</h3>
                                             <span>Returned Shipment(s)</span>
                                         </div>
                                     </div>
@@ -154,7 +154,7 @@
                                             <i class="icon-shuffle text-white font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-white text-right">
-                                            <h3 class="text-white">{{$stats['in_process']}}</h3>
+                                            <h3 class="text-white" id="in_process">{{$stats['in_process']}}</h3>
                                             <span>In Process Shipment(s)</span>
                                         </div>
                                     </div>
@@ -171,7 +171,7 @@
                                             <i class="icon-close text-white font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-white text-right">
-                                            <h3 class="text-white">{{$stats['canceled']}}</h3>
+                                            <h3 class="text-white" id="canceled">{{$stats['canceled']}}</h3>
                                             <span>Cancelled Shipment(s)</span>
                                         </div>
                                     </div>
@@ -512,6 +512,7 @@
             });
             $('#search_filter_btn').on('click',function () {
                 table.draw();
+                get_summary_cards_data();
             });
             $('#total_shipments').on('click', function () {
                 $('#cards_filter_input').val('total');
@@ -541,6 +542,47 @@
                 $('#cards_filter_input').val('cancelled');
                 table.draw();
             });
+
+            function get_summary_cards_data() {
+                console.log('here');
+                var from_date = $('input[name="search_date_from_formatted"]').val();
+                var to_date = $('input[name="search_date_to_formatted"]').val();
+                var origin = $('#search_origin').val();
+                var destination = $('#search_destination').val();
+                $.ajax({
+                    url: '{!! route('cod.reports.summary.data') !!}',
+                    method: 'post',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'from_date': from_date,
+                        'to_date': to_date,
+                        'origin': origin,
+                        'destination': destination,
+
+                    }
+                }).done(function (data) {
+                    if(data.status){
+                        console.log(data);
+                        $('#total').text(data.stats.total);
+                        $('#booked').text(data.stats.booked);
+                        $('#received').text(data.stats.received);
+                        $('#delivered').text(data.stats.delivered);
+                        $('#in_process').text(data.stats.in_process);
+                        $('#return').text(data.stats.return);
+                        $('#canceled').text(data.stats.canceled);
+
+                    }else{
+                        $('#total').text(0);
+                        $('#booked').text(0);
+                        $('#received').text(0);
+                        $('#delivered').text(0);
+                        $('#in_process').text(0);
+                        $('#return').text(0);
+                        $('#canceled').text(0);
+
+                    }
+                });
+            }
         });
     </script>
 

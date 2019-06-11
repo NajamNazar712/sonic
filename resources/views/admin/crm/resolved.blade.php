@@ -38,6 +38,7 @@
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1">Resolved By</th>
+                                    <th class="border-primary border-darken-1">Resolved Date</th>
                                     <th class="border-primary border-darken-1">In-Process To Resolved (TAT)</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -108,6 +109,7 @@
                             head.push('Launched By Type');
                             head.push('Launched Date');
                             head.push('Resolved By');
+                            head.push('Resolved Date');
                             head.push('In-Process To Resolved (TAT)');
 
                             $.each(result.data, function(index, values) {
@@ -129,6 +131,7 @@
                                 row.push(values.added_by);
                                 row.push(values.created_at);
                                 row.push(values.resolved_by);
+                                row.push(values.resolved_date);
                                 row.push(values.in_process_resolved_tat);
 
                                 body.push(row);
@@ -227,6 +230,65 @@
                         }
                     },
                         @endif
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(182, session('permissions')))
+                    {
+                        text: 'Close Requests',
+                        className: 'btn btn-danger close_requests',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                                swal({
+                                    text: 'Are you sure, you want to Close these Request(s)?',
+                                    icon: 'info',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('admin.crm.close') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'crm_request_ids[]': selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                            .done(function (data) {
+                                                if (data.status == 0) {
+                                                    toastr.success(data.success, 'Success!', {
+                                                        positionClass: 'toast-bottom-center',
+                                                        containerId: 'toast-bottom-center'
+                                                    });
+                                                } else {
+                                                    toastr.error(data.error, 'Error!', {
+                                                        positionClass: 'toast-top-center',
+                                                        containerId: 'toast-top-center'
+                                                    });
+                                                }
+                                                selected_rows = [];
+
+                                                table.rows().deselect();
+
+                                                table.draw('false');
+                                            });
+                                    }
+                                });
+                        }
+                    },
+                        @endif
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -249,6 +311,7 @@
                                     }
 
                                     table.button('.assign').enable();
+                                    table.button('.close_requests').enable();
                                 }
                             });
                         }
@@ -275,6 +338,7 @@
 
                                     if (selected_rows.length == 0) {
                                         table.button('.assign').disable();
+                                        table.button('.close_requests').disable();
                                     }
                                 }
                             });
@@ -299,11 +363,11 @@
                 serverSide: true,
                 ajax: '{{ route('admin.crm.resolved.list') }}',
                 rowId: 'id',
-                order: [[15, 'desc']],
+                order: [[17, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'id_padded', name: 'crm_requests.id', class: 'align-middle request_id'},
+                    {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle id_padded_link'},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
@@ -318,6 +382,7 @@
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'resolved_by', name: 'ra.name', class: 'align-middle resolved_by'},
+                    {data: 'resolved_date', name: 'res.created_at', class: 'align-middle resolved_date'},
                     {data: 'in_process_resolved_tat', name: 'in_process_resolved_tat', class: 'align-middle in_process_resolved_tat', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
@@ -509,9 +574,11 @@
 
                 if (selected_rows.length > 0) {
                     table.button('.assign').enable();
+                    table.button('.close_requests').enable();
                 }
                 else {
                     table.button('.assign').disable();
+                    table.button('.close_requests').disable();
                 }
             });
 

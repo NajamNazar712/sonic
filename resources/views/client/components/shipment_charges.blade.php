@@ -33,13 +33,17 @@
                 @if ($shipment->intercept_charges != null)
                 <th class="border-primary border-darken-1 align-middle text-center">Intercept</th>
                 @endif
+
+                @if ($shipment->nsa_osa_charges != null)
+                <th class="border-primary border-darken-1 align-middle text-center">NSA/OSA Charges</th>
+                @endif
             @else
                 <th class="border-primary border-darken-1 align-middle text-center">Packaging Material</th>
             @endif
         </tr>
     </thead>
     <tbody>
-        @if (($shipment->weight_charges == null) && ($shipment->cash_handling_charges == null) && ($shipment->insurance_charges == null) && ($shipment->return_charges == null) && ($shipment->fuel_surcharge == null) && ($shipment->replacement_charges == null) && ($shipment->try_and_buy_charges == null) && ($shipment->intercept_charges == null) && ($shipment->packaging_material_charges == null))
+        @if (($shipment->weight_charges == null) && ($shipment->cash_handling_charges == null) && ($shipment->insurance_charges == null) && ($shipment->return_charges == null) && ($shipment->fuel_surcharge == null) && ($shipment->replacement_charges == null) && ($shipment->try_and_buy_charges == null) && ($shipment->intercept_charges == null) && ($shipment->nsa_osa_charges == null) && ($shipment->packaging_material_charges == null))
             <tr>
                 <td>No Charges!</td>
             </tr>
@@ -73,8 +77,12 @@
                     <td class="align-middle text-center">Rs. {{ floatval($shipment->try_and_buy_charges) }}</td>
                 @endif
 
-                @if ($shipment->try_and_buy_charges != null)
+                @if ($shipment->intercept_charges != null)
                     <td class="align-middle text-center">Rs. {{ floatval($shipment->intercept_charges) }}</td>
+                @endif
+
+                @if ($shipment->nsa_osa_charges != null)
+                    <td class="align-middle text-center">Rs. {{ floatval($shipment->nsa_osa_charges) }}</td>
                 @endif
 
                 @if ($shipment->packaging_material_charges != null)

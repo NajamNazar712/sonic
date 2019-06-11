@@ -31,6 +31,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">OSA Estimated Charges</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Action</th>
@@ -38,6 +39,26 @@
                     </thead>
                 </table>
 
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="nsa_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="nsa_shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-full-length" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="nsa_shipments_modal_title">Out of Service Area Status Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" name="submit_nsa" id="submit_nsa" class="btn btn-primary" data-dismiss="modal">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -139,6 +160,7 @@
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remarks');
+                            head.push('OSA Estimated Charges');
                             head.push('Arrival Date');
                             head.push('Status Date');
 
@@ -161,6 +183,7 @@
                                 row.push(values.status);
                                 row.push(values.reason);
                                 row.push(values.remarks);
+                                row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
 
@@ -175,6 +198,7 @@
             } );
             var shipment_remarks = {};
             var selected_rows = [];
+            var selected_rows_nsa = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -253,6 +277,7 @@
                         enabled: false,
                         action: function (e, dt, node, config) {
                             if(selected_rows !== ''){
+                                var route = '{!! route('cod.tracking.index') !!}';
                                 swal({
                                     title: 'Are You Sure?',
                                     text: 'Select Yes to request shipment for Re-Attempt!',
@@ -286,64 +311,106 @@
                                                     shipment_remarks[id] = remarks;
                                                 }
                                             });
-
                                             $.ajax({
-                                                url: "{{route('cod.return.pending.reattempt.status')}}",
+                                                url: "{{route('cod.return.pending.reattempt.nsa')}}",
                                                 method: 'POST',
                                                 data: {
                                                     'shipment_ids': selected_rows,
                                                     '_token': '{{ csrf_token() }}',
-                                                    'remark': shipment_remarks
+                                                    'single' : 0
                                                 }
                                             }).done(function (data) {
-                                                table.rows().deselect();
-                                                selected_rows = [];
-                                                shipment_remarks = {};
-                                                table.button('.reattempt').disable();
-                                                table.draw('false');
-                                                if (data.not_updated_shipments.length > 0) {
-                                                    var alert_icon = 'warning';
+                                                if(data.status == 1){
+                                                    $('#nsa_shipments_modal .modal-body').html('');
+                                                    $('#nsa_shipments_modal').modal('show');
                                                     var html = '';
-                                                    if (data.updated_shipments.length > 0) {
-                                                        alert_icon = 'success';
-                                                        $.each(data.updated_shipments, function (index, tracking_number) {
-                                                            html += tracking_number + '<br/>';
+                                                    html += '<table  class="table table-bordered datatable" id="datatable" style="z-index: 3;">';
+                                                    html += '<thead><tr><th class="border-primary border-darken-1">Tracking No.</th>\n' +
+                                                        '<th class="border-primary border-darken-1">Estimated Charges</th>\n' +
+                                                        '<th class="border-primary border-darken-1">Action</th></tr>\n' +
+                                                        '</thead>';
+                                                    html += '<tbody>';
+                                                    if (data.nsa_shipments) {
+                                                        selected_rows_nsa = data.nsa_shipments_ids;
+                                                        $.each(data.nsa_shipments, function(index) {
+                                                            // console.log(index);
+                                                            html += '<tr role="row">' +
+                                                                '<td class="text-center"><u><a href='+route+'?tracking_number='+data.nsa_shipments[index]+' target="_blank">'+data.nsa_shipments[index]+'</a></u></td>';
+                                                            html += '<td class="text-center">'+ data.estimated_charges[index] +'</td>';
+                                                            html += '<td class="text-center"><div class="d-inline-block custom-control custom-checkbox mr-1">\n' +
+                                                                '<input type="checkbox" class="custom-control-input" name="confirm['+index+']" id="confirm['+index+']">\n' +
+                                                                '<label class="custom-control-label" for="confirm['+index+']">Re-Attempt</label>\n' +
+                                                                '</div></td></tr>';
                                                         });
-                                                        html += '<br/>Shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';
+                                                        html += '</tbody>';
+                                                        html += '</table>';
+                                                    }else{
+                                                        var html = 'No shipments found!';
 
                                                     }
-                                                    $.each(data.not_updated_shipments, function (index, tracking_number) {
-                                                        html += tracking_number + '<br/>';
-                                                    });
-                                                    html += '<br/>Shipment(s) are already updated';
-                                                    content = document.createElement('div');
-                                                    content.innerHTML = html;
-                                                    swal({
-                                                        title: 'Shipments Re-Attempt Requested',
-                                                        content: content,
-                                                        icon: alert_icon,
-                                                        buttons: {
-                                                            cancel: {
-                                                                text: 'Close',
-                                                                value: null,
-                                                                visible: true,
-                                                                closeModal: true,
-                                                            }
-                                                        },
-                                                        closeOnClickOutside: true,
-                                                        closeOnEsc: false,
-                                                        dangerMode: true
-                                                    });
-                                                } else {
-                                                    toastr.success(data.success, 'Success!', {
-                                                        positionClass: 'toast-bottom-center',
-                                                        containerId: 'toast-bottom-center'
-                                                    });
-
+                                                    $('#nsa_shipments_modal .modal-body').html(html);
                                                 }
+                                                else{
+                                                    $.ajax({
+                                                        url: "{{route('cod.return.pending.reattempt.status')}}",
+                                                        method: 'POST',
+                                                        data: {
+                                                            'shipment_ids': selected_rows,
+                                                            '_token': '{{ csrf_token() }}',
+                                                            'remark': shipment_remarks
+                                                        }
+                                                    }).done(function (data) {
+                                                        table.rows().deselect();
+                                                        selected_rows = [];
+                                                        shipment_remarks = {};
+                                                        table.button('.reattempt').disable();
+                                                        table.draw('false');
+                                                        if (data.not_updated_shipments.length > 0) {
+                                                            var alert_icon = 'warning';
+                                                            var html = '';
+                                                            if (data.updated_shipments.length > 0) {
+                                                                alert_icon = 'success';
+                                                                $.each(data.updated_shipments, function (index, tracking_number) {
+                                                                    html += tracking_number + '<br/>';
+                                                                });
+                                                                html += '<br/>Shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';
+
+                                                            }
+                                                            $.each(data.not_updated_shipments, function (index, tracking_number) {
+                                                                html += tracking_number + '<br/>';
+                                                            });
+                                                            html += '<br/>Shipment(s) are already updated';
+                                                            content = document.createElement('div');
+                                                            content.innerHTML = html;
+                                                            swal({
+                                                                title: 'Shipments Re-Attempt Requested',
+                                                                content: content,
+                                                                icon: alert_icon,
+                                                                buttons: {
+                                                                    cancel: {
+                                                                        text: 'Close',
+                                                                        value: null,
+                                                                        visible: true,
+                                                                        closeModal: true,
+                                                                    }
+                                                                },
+                                                                closeOnClickOutside: true,
+                                                                closeOnEsc: false,
+                                                                dangerMode: true
+                                                            });
+                                                        } else {
+                                                            toastr.success(data.success, 'Success!', {
+                                                                positionClass: 'toast-bottom-center',
+                                                                containerId: 'toast-bottom-center'
+                                                            });
+
+                                                        }
 
 
+                                                    });
+                                                }
                                             });
+
                                         }else{
                                             var error = "No shipments selected!";
                                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -455,7 +522,7 @@
                 serverSide: true,
                 ajax: '{{ route('cod.return.pending.list') }}',
                 rowId: 'shId',
-                order: [[16, 'asc'], [17, 'asc']],
+                order: [[18, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -473,6 +540,7 @@
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipment_remarks', orderable: false, searchable: false},
+                    {data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -569,6 +637,85 @@
                 }
             });
             var hub_ids = [];
+
+            $('#submit_nsa').on('click', function () {
+                var new_selected_rows = selected_rows;
+                var nsa = null;
+                selected_rows_nsa.forEach(function (index) {
+                    if($('input[name="confirm['+index+']"]').prop('checked') === false){
+                        var key = $.inArray(index, new_selected_rows);
+                            new_selected_rows.splice(key, 1);
+                    }
+                });
+                table.rows().nodes().each(function (index) {
+                    var row = table.row(index);
+                    if ($(row.node()).hasClass('selected')) {
+                        var id = parseInt(row.id());
+                        var remarks = $(row.node()).find('td.shipment_remarks input').val();
+                        shipment_remarks[id] = remarks;
+                    }
+
+                });
+                // console.log(shipment_remarks);
+                $.ajax({
+                    url: "{{route('cod.return.pending.reattempt.status')}}",
+                    method: 'POST',
+                    data: {
+                        'shipment_ids': new_selected_rows,
+                        '_token': '{{ csrf_token() }}',
+                        'remark': shipment_remarks
+                    }
+                }).done(function (data) {
+                    table.rows().deselect();
+                    selected_rows = [];
+                    new_selected_rows = [];
+                    shipment_remarks = {};
+                    table.button('.reattempt').disable();
+                    table.draw('false');
+                    if (data.not_updated_shipments.length > 0) {
+                        var alert_icon = 'warning';
+                        var html = '';
+                        if (data.updated_shipments.length > 0) {
+                            alert_icon = 'success';
+                            $.each(data.updated_shipments, function (index, tracking_number) {
+                                html += tracking_number + '<br/>';
+                            });
+                            html += '<br/>Shipment(s) has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!</br><hr>';
+
+                        }
+                        $.each(data.not_updated_shipments, function (index, tracking_number) {
+                            html += tracking_number + '<br/>';
+                        });
+                        html += '<br/>Shipment(s) are already updated';
+                        content = document.createElement('div');
+                        content.innerHTML = html;
+                        swal({
+                            title: 'Shipments Re-Attempt Requested',
+                            content: content,
+                            icon: alert_icon,
+                            buttons: {
+                                cancel: {
+                                    text: 'Close',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                }
+                            },
+                            closeOnClickOutside: true,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        });
+                    } else {
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-bottom-center',
+                            containerId: 'toast-bottom-center'
+                        });
+
+                    }
+
+
+                });
+            });
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 
@@ -676,7 +823,6 @@
 
                 }
             });
-
             $('body').on('click','.returnReattemptStatus',function () {
                 var row_id = $(this).parents('tr').attr('id');
                 var remark = $(this).parents('tr').find('td.shipment_remarks input').val();
@@ -706,31 +852,99 @@
                     }).then(function (confirm) {
                         if (confirm) {
                             $.ajax({
-                                url:"{{route('cod.return.pending.reattempt.status.single')}}",
-                                method:'POST',
-                                data:{
-                                    'shipment_id':row_id,
-                                    '_token':'{{ csrf_token() }}',
-                                    'remark':remark
+                                url: "{{route('cod.return.pending.reattempt.nsa')}}",
+                                method: 'POST',
+                                data: {
+                                    'shipment_ids': row_id,
+                                    '_token': '{{ csrf_token() }}',
+                                    'single' : 1
                                 }
                             }).done(function (data) {
                                 if(data.status == 1){
-                                    table.draw('false');
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    var html = '';
+                                    html += 'Out of Service Area / Non Service Area Shipment against Tracking Number: '+ data.nsa_shipment +'<br/><br/>';
+                                    html += '<b>Estimated Charges: '+ data.estimated_charge +'</b><br/><br/>';
+                                    html += 'Are you sure you want to deliver shipment with additional charges?';
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
+                                    swal({
+                                        content: content,
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'No',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Yes',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    }).then(function (confirm) {
+                                        if(confirm){
+                                            $.ajax({
+                                                url:"{{route('cod.return.pending.reattempt.status.single')}}",
+                                                method:'POST',
+                                                data:{
+                                                    'shipment_id':row_id,
+                                                    '_token':'{{ csrf_token() }}',
+                                                    'remark':remark
+                                                }
+                                            }).done(function (data) {
+                                                if(data.status == 1){
+                                                    table.draw('false');
+                                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                                }else{
-                                    table.draw('false');
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                                }else{
+                                                    table.draw('false');
+                                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
+                                                }
+
+                                            });
+                                        }
+                                    })
                                 }
+                                else{
+                                    $.ajax({
+                                        url:"{{route('cod.return.pending.reattempt.status.single')}}",
+                                        method:'POST',
+                                        data:{
+                                            'shipment_id':row_id,
+                                            '_token':'{{ csrf_token() }}',
+                                            'remark':remark
+                                        }
+                                    }).done(function (data) {
+                                        if(data.status == 1){
+                                            table.draw('false');
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                                        }else{
+                                            table.draw('false');
+                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                        }
+
+                                    });
+                                }
                             });
                         }
+                        {{--if (confirm) {--}}
+
+                        {{--}--}}
                     });
 
 
                 }
             });
+
 
             $('body').on('click','.intercept',function () {
                 var row_id = $(this).parents('tr').attr('id');
@@ -741,6 +955,56 @@
                     window.location = url;
                 }
             });
+
+            $('#datatable').on('click', '.selfCollection', function () {
+                var row_id = $(this).parents('tr').attr('id');
+                var remark = $.trim($('tr#' + row_id).find('td.shipment_remarks input').val());
+                if(row_id){
+                    swal({
+                        text: 'Are you sure you want to mark shipment for Self-Collection?',
+                        icon: 'info',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            $.ajax({
+                                url:"{{route('cod.return.pending.marked.self_collection')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_id':row_id,
+                                    'remark': remark,
+                                    '_token':'{{ csrf_token() }}',
+                                }
+                            }).done(function (data) {
+                                UnblockPagePermanently();
+                                if(data.status == 1){
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }else{
+                                    table.draw(false);
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
         });
     </script>
 @endsection
