@@ -47,6 +47,9 @@
                             <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i
                                         class="la la-search"></i> Search
                             </button>
+                            <button type="button" id="refresh_filters" class="ml-2 mb-1 btn btn-primary"><i
+                                        class="la la-refresh"></i>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -285,6 +288,15 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#refresh_filters').on('click', function(){
+                $('#track_form .tracking_numbers').val('');
+                $('#booking_from_date').val('');
+                $('#booking_to_date').val('');
+                $('input[name="tracking_numbers"]').val('');
+                $('input[name="booking_to_date_formatted"]').val('');
+                $('input[name="booking_from_date_formatted"]').val('');
+                select[0].selectize.clear();
+            });
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
 
 
@@ -814,9 +826,9 @@
                 var booking_from_date = $('#track_form #booking_from_date').val();
                 var booking_to_date = $('#track_form #booking_to_date').val();
 
-                if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '')) {
+                // if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '')) {
                     table.draw();
-                }
+                // }
 
             });
             var max_char = 245;
