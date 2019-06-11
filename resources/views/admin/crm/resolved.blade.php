@@ -40,6 +40,8 @@
                                     <th class="border-primary border-darken-1">Resolved By</th>
                                     <th class="border-primary border-darken-1">Resolved Date</th>
                                     <th class="border-primary border-darken-1">In-Process To Resolved (TAT)</th>
+                                    <th class="border-primary border-darken-1">Last Comment By</th>
+                                    <th class="border-primary border-darken-1">Last Comment</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -111,6 +113,8 @@
                             head.push('Resolved By');
                             head.push('Resolved Date');
                             head.push('In-Process To Resolved (TAT)');
+                            head.push('Last Comment By');
+                            head.push('Last Comment');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -133,6 +137,8 @@
                                 row.push(values.resolved_by);
                                 row.push(values.resolved_date);
                                 row.push(values.in_process_resolved_tat);
+                                row.push(values.last_comment_name);
+                                row.push(values.last_comment.replace(/<br\\s*[\\/]?>/gi, '\n'));
 
                                 body.push(row);
                             });
@@ -384,6 +390,8 @@
                     {data: 'resolved_by', name: 'ra.name', class: 'align-middle resolved_by'},
                     {data: 'resolved_date', name: 'res.created_at', class: 'align-middle resolved_date'},
                     {data: 'in_process_resolved_tat', name: 'in_process_resolved_tat', class: 'align-middle in_process_resolved_tat', orderable: false, searchable: false},
+                    {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
+                    {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],

@@ -26,6 +26,9 @@
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
+                                    <th class="border-primary border-darken-1">Mode of Shipment</th>
+                                    <th class="border-primary border-darken-1">Actual Weight</th>
+                                    <th class="border-primary border-darken-1">Chargeable Weight</th>
                                     <th class="border-primary border-darken-1">Weight Charges</th>
                                     <th class="border-primary border-darken-1">Fuel Surcharge</th>
                                     <th class="border-primary border-darken-1">Return Charges</th>
@@ -157,7 +160,7 @@
                     url: '{{ route('admin.finance.outstanding_shipments.walk_in_list') }}',
                 },
                 rowId: 'id',
-                order: [[17, 'desc']],
+                order: [[20, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'tracking_number', name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -167,6 +170,9 @@
                     {data:'origin', name: 'oc.name', class: 'align-middle text-center origin'},
                     {data:'destination', name: 'dc.name', class: 'align-middle text-center destination'},
                     {data:'hub', name: 'hc.name', class: 'align-middle text-center hub'},
+                    {data:'shipping_mode', name: 'sm.id', class: 'align-middle text-center shipping_mode'},
+                    {data:'actual_weight', name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
+                    {data:'chargeable_weight', name: 'shipments.chargeable_weight', class: 'align-middle text-center chargeable_weight'},
                     {data:'weight_charges', name: 'shipments.weight_charges', class: 'align-middle text-center weight_charges'},
                     {data:'fuel_surcharge', name: 'shipments.fuel_surcharge', class: 'align-middle text-center fuel_surcharge'},
                     {data:'return_charges', name: 'shipments.return_charges', class: 'align-middle text-center return_charges'},
@@ -195,6 +201,7 @@
                     var status_walk_in_select = '<select name="status_walk_in_select" id="status_walk_in_select" class="select2 form-control"></select>';
                     var charges_mode = '<select name="charges_mode" id="charges_mode" class="select2 form-control"></select>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                    var shipping_mode = '<select name="shipping_mode" id="shipping_mode" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -219,6 +226,11 @@
                                 } ).wrap(td);
                         }else if($(header).is('.charges_modes')){
                             $(charges_mode).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.shipping_mode')){
+                            $(shipping_mode).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -264,6 +276,24 @@
                     $("#charges_mode").prepend('<option value="" selected></option>').select2({
                         data:data2,
                         placeholder: "Charges Modes",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var data3 = $.map({!! $shipping_modes !!}, function (obj) {
+                        obj.id = obj.id;
+                        return obj;
+                    });
+                    var data3 = $.map({!! $shipping_modes !!}, function (obj) {
+                        obj.text = obj.mode;
+
+                        return obj;
+                    });
+
+                    $("#shipping_mode").prepend('<option value="" selected></option>').select2({
+                        data:data3,
+                        placeholder: "Shipping Modes",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

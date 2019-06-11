@@ -8,6 +8,7 @@ use App\Http\Models\ChargesModes;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShippingMode;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -788,10 +789,11 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_walk_in_shipments_index(){
+        $shipping_modes = ShippingMode::where('id', '!=', 4)->get();
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $charges_mode_name = ChargesModes::select('id','charges_mode')->get();
         $status = [['id' => 0, 'text' => 'Pending Charges Collection'], ['id' => 1, 'text' => 'Resolved'], ['id' => 2, 'text' => 'Pending Return Charges Collection']];
-        return view('admin.finance.outstanding_walk_in_shipments')->with(['shipment_status' => $shipment_status, 'status' => json_encode($status), 'charges_mode_name' => $charges_mode_name]);
+        return view('admin.finance.outstanding_walk_in_shipments')->with(['shipment_status' => $shipment_status, 'status' => json_encode($status), 'charges_mode_name' => $charges_mode_name, 'shipping_modes' => $shipping_modes]);
     }
 
     public function outstanding_walk_in_shipments_list(Request $request){
@@ -813,7 +815,8 @@ class AdminFinanceController extends Controller
             ->leftjoin('admins as adn','adn.id','=','an.admin_id')
             ->leftjoin('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('admins as a', 'sj.admin_id', '=', 'a.id')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.amount', 'shipments.received_amount', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status','adn.name as booked_by','oc.name as origin')
+            ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.amount', 'shipments.received_amount', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status','adn.name as booked_by','oc.name as origin', 'shipments.actual_weight as actual_weight', 'shipments.chargeable_weight as chargeable_weight', 'sm.mode as shipping_mode')
             ->where('shipments.booking_type_id',4);
 
 
@@ -1038,22 +1041,6 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($request->id);
 
-            $shipper_payable = 0;
-            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
-            if ($pending_payment->exists()) {
-                $pending_payment = $pending_payment->first();
-
-                $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
-                if ($pending_payment_shipments->exists()) {
-                    $pending_payment_shipments = $pending_payment_shipments->get();
-                    foreach ($pending_payment_shipments as $pending_payment_shipment) {
-                        $shipper_payable += $pending_payment_shipment->payable;
-                    }
-                }
-            }
-            if ($shipper_payable < 0) {
-                return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
-            }
 
             $delivery_note_shipment->status = 8;
 
