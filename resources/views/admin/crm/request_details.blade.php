@@ -30,7 +30,7 @@
                                 <button type="button" class="btn btn-primary width-10-per" id="tag"><span
                                             class="d-none d-lg-block" style="color: white">Tag</span></button>
                             @endif
-                                @if(($crm_details['status_id'] == 1) && (session('role_id') == 1 || in_array(185, session('permissions'))))
+                                @if(($crm_details['status_id'] == 1) && (session('role_id') == 1 || in_array(213, session('permissions'))))
                                 <button type="button" class="btn btn-primary width-10-per" id="edit_request"><span
                                             class="d-none d-lg-block" style="color: white">Edit Request</span></button>
                             @endif

@@ -11,6 +11,7 @@ use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
+use App\Http\Models\CRM\CrmRequestCaseNatureAndTypeHistory;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
@@ -1392,6 +1393,11 @@ class AdminCRMController extends Controller
                 'shipment_id' => $shipment_id,
                 'case_nature_id' => $request->case_nature_id,
                 'case_nature_type_id' => $request->complaint_id
+            ]);
+            CrmRequestCaseNatureAndTypeHistory::create([
+                'crm_request_id' => $crm_request_id,
+                'case_nature_id' => $crm_details['case_nature_id'],
+                'case_nature_type_id' => $crm_details['case_nature_type_id']
             ]);
             return ['status' => 0, 'success' => 'Request Updated Successfully'];
         }
