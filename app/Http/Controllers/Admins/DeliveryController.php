@@ -12,6 +12,7 @@ use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\BanksList;
@@ -753,12 +754,19 @@ class DeliveryController extends Controller
                 if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
                     $class = 'complaint';
                 }
+                $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
+                if($check_walk_in['setting_value'] == $shipment->user->id){
+                    $user_details = 'Walk-In ('.$shipment->pickup_address->poc . ') | ' . $shipment->pickup_address->phone;
+                }
+                else{
+                    $user_details = $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '');
+                }
 
                 $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_shipments . '</td>
                             <td class="'.$class.'">' . $shipment->tracking_number . '</td>
-                            <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '') . '</td>
+                            <td>' . $user_details . '</td>
                             <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
                             <td>' . $shipment->consignee_address . '</td>
                 ';
@@ -2046,7 +2054,13 @@ class DeliveryController extends Controller
             foreach ($filtered_shipments as $shipment) {
                 $total_shipments++;
 //                    $shipment = Shipment::find($parcel->shipment_id);
-
+                $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
+                if($check_walk_in['setting_value'] == $shipment->user->id){
+                    $user_details = 'Walk-In ('.$shipment->pickup_address->poc . ') | ' . $shipment->pickup_address->phone;
+                }
+                else{
+                    $user_details = $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '');
+                }
                 $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_shipments . '</td>
@@ -2054,7 +2068,7 @@ class DeliveryController extends Controller
                             <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
                             <td>' . $shipment->consignee_address . '</td>
                             <td>' . $shipment->booking_type->booking_type . '</td>
-                            <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '') . '</td>
+                            <td>' . $user_details . '</td>
                             <td>' . (($shipment->booking_type_id == 2) ? $shipment->replacement_weight : $shipment->actual_weight) . '</td>
                 ';
 
@@ -2329,6 +2343,13 @@ class DeliveryController extends Controller
                 foreach ($filtered_shipments as $shipment) {
                     $total_shipments++;
                     $status = ShipmentStatus::find($shipment->shipper_status_id);
+                    $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
+                    if($check_walk_in['setting_value'] == $shipment->user->id){
+                        $user_details = 'Walk-In ('.$shipment->pickup_address->poc . ') | ' . $shipment->pickup_address->phone;
+                    }
+                    else{
+                        $user_details = $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '');
+                    }
                     $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_shipments . '</td>
@@ -2336,7 +2357,7 @@ class DeliveryController extends Controller
                             <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
                             <td>' . $shipment->consignee_address . '</td>
                             <td>' . $shipment->booking_type->booking_type . '</td>
-                            <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '') . '</td>
+                            <td>' . $user_details . '</td>
                             <td>' . $status->name . '</td>
                     ';
 
@@ -3397,7 +3418,13 @@ class DeliveryController extends Controller
             foreach ($filtered_shipments as $shipment) {
                 $total_shipments++;
 //                    $shipment = Shipment::find($parcel->shipment_id);
-
+                $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
+                if($check_walk_in['setting_value'] == $shipment->user->id){
+                    $user_details = 'Walk-In ('.$shipment->pickup_address->poc . ') | ' . $shipment->pickup_address->phone;
+                }
+                else{
+                    $user_details = $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '');
+                }
                 $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_shipments . '</td>
@@ -3405,7 +3432,7 @@ class DeliveryController extends Controller
                             <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
                             <td>' . $shipment->consignee_address . '</td>
                             <td>' . $shipment->booking_type->booking_type . '</td>
-                            <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '') . '</td>
+                            <td>' . $user_details . '</td>
                             <td>' . (($shipment->booking_type_id == 2) ? $shipment->replacement_weight : $shipment->actual_weight) . '</td>
                             <td>Rs ' . number_format($shipment->received_amount) . '</td>
                             

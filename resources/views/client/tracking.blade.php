@@ -159,17 +159,21 @@
                                 shipment += '<div class="p-1">';
                                 shipment += '<div class="row justify-content-between">';
 
-                                shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5">';
+                                shipment += '<div class="col-12">';
                                 shipment += '<h4><u>Shipper Information</u></h4>';
-                                shipment += '<div class="border">';
+                                shipment += '<div class="border table-responsive">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
+
                                 shipment += '<tr>';
-                                shipment += '<td><strong>Shipper</strong></td>';
+                                shipment += '<td><strong>Name</strong></td>';
                                 shipment += '<td>' + details.shipper.name + '</td>';
                                 shipment += '<td><strong>Account No.</strong></td>';
                                 shipment += '<td>' + details.shipper.account_number + '</td>';
+                                shipment += '<td><strong>City</strong></td>';
+                                shipment += '<td>' + details.shipper.city + '</td>';
                                 shipment += '</tr>';
+
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Phone No(s).</strong></td>';
 
@@ -180,10 +184,6 @@
                                     shipment += '<td>' + details.shipper.phone_number_1 + '<br/>' + details.shipper.phone_number_2 + '</td>';
                                 }
 
-                                shipment += '<td><strong>Origin</strong></td>';
-                                shipment += '<td>' + details.shipper.origin + '</td>';
-                                shipment += '</tr>';
-                                shipment += '<tr>';
                                 shipment += '<td><strong>Email</strong></td>';
                                 if (details.shipper.email) {
                                     shipment += '<td colspan="3">' + details.shipper.email + '</td>';
@@ -191,19 +191,50 @@
                                 else{
                                     shipment += '<td colspan="3"></td>'
                                 }
+
+                                shipment += '</tr>';
+
+                                shipment += '</tbody>';
+                                shipment += '</table>';
+                                shipment += '</div>';
+                                shipment += '</div>';
+
+                                shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-2">';
+                                shipment += '<h4><u>Pickup Information</u></h4>';
+                                shipment += '<div class="border table-responsive">';
+                                shipment += '<table class="table table-sm table-borderless mb-0">';
+                                shipment += '<tbody>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Person of Contact</strong></td>';
+                                shipment += '<td>' + details.pickup.person_of_contact + '</td>';
+                                shipment += '<td><strong>Origin</strong></td>';
+                                shipment += '<td>' + details.pickup.origin + '</td>';
+                                shipment += '</tr>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Phone No.</strong></td>';
+                                shipment += '<td>' + details.pickup.phone_number + '</td>';
+                                shipment += '</tr>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Email</strong></td>';
+                                if (details.pickup.email) {
+                                    shipment += '<td colspan="3">' + details.pickup.email + '</td>';
+                                }
+                                else{
+                                    shipment += '<td colspan="3"></td>'
+                                }
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Address</strong></td>';
-                                shipment += '<td colspan="3">' + details.shipper.address + '</td>';
+                                shipment += '<td colspan="3">' + details.pickup.address + '</td>';
                                 shipment += '</tr>';
                                 shipment += '</tbody>';
                                 shipment += '</table>';
                                 shipment += '</div>';
                                 shipment += '</div>';
 
-                                shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-xs-2 mt-sm-2 mt-md-2 mt-lg-0">';
+                                shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-2">';
                                 shipment += '<h4><u>Consignee Information</u></h4>';
-                                shipment += '<div class="border">';
+                                shipment += '<div class="border table-responsive">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
                                 shipment += '<tr>';
@@ -243,7 +274,7 @@
 
                                 shipment += '<div class="col-12 mt-2">';
                                 shipment += '<h4><u>Order Information</u></h4>';
-                                shipment += '<div class="border">';
+                                shipment += '<div class="border table-responsive">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
 
@@ -290,7 +321,7 @@
 
                                 shipment += '<div class="col-12 mt-2">';
                                 shipment += '<h4><u>Tracking History</u></h4>';
-                                shipment += '<div class="border">';
+                                shipment += '<div class="border table-responsive">';
 
                                 shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
@@ -321,7 +352,7 @@
                                 if ('payment_history' in details) {
                                     shipment += '<div class="col-12 mt-2">';
                                     shipment += '<h4><u>Payment History</u></h4>';
-                                    shipment += '<div class="border">';
+                                    shipment += '<div class="border table-responsive">';
 
                                     shipment += '<table class="table table-sm table-borderless datatable payment_history">';
                                     shipment += '<thead>';

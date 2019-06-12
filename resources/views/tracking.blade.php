@@ -87,8 +87,8 @@
                                 shipment += '<div class="row justify-content-between">';
 
                                 shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5">';
-                                shipment += '<h4><u>Shipper Information</u></h4>';
-                                shipment += '<div class="border">';
+                                shipment += '<h4><u>Shipper/Pickup Information</u></h4>';
+                                shipment += '<div class="border table-responsive">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
                                 shipment += '<tr>';
@@ -97,16 +97,16 @@
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Origin</strong></td>';
-                                shipment += '<td>' + details.shipper.origin + '</td>';
+                                shipment += '<td>' + details.pickup.origin + '</td>';
                                 shipment += '</tr>';
                                 shipment += '</tbody>';
                                 shipment += '</table>';
                                 shipment += '</div>';
                                 shipment += '</div>';
 
-                                shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-xs-2 mt-sm-2 mt-md-2 mt-lg-0">';
+                                shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-2 mt-xs-2 mt-sm-2 mt-md-2 mt-lg-0">';
                                 shipment += '<h4><u>Consignee Information</u></h4>';
-                                shipment += '<div class="border">';
+                                shipment += '<div class="border table-responsive">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
                                 shipment += '<tr>';
@@ -125,7 +125,7 @@
 
                                 shipment += '<div class="col-12 mt-2">';
                                 shipment += '<h4><u>Tracking History</u></h4>';
-                                shipment += '<div class="border">';
+                                shipment += '<div class="border table-responsive">';
 
                                 shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
