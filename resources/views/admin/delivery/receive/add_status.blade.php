@@ -1097,7 +1097,7 @@
                                             shipment_remarks_obj[id] = remarks;
                                             if(amount == 0){
                                                 var receiver_name =  $(row.node()).find('td.received_or_refused_by input').val();
-                                                if(receiver_name == ''){
+                                                if($.trim(receiver_name) == ''){
                                                     not_updated_shipments.push($(row.node()).find('td.tracking_number').text()) ;
                                                     submit_all_status_flag = false;
                                                 }else{
@@ -1115,7 +1115,7 @@
                                             html += tracking_number + '<br/>';
                                         });
 
-                                        html += '<br/>Update Received / Refused By for all shipments of 0 (zero) amount!';
+                                        html += '<br/>Update Received/Refused By for all Shipment(s) of 0 (zero) amount!';
 
                                         content = document.createElement('div');
                                         content.innerHTML = html;

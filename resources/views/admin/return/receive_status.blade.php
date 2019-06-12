@@ -26,7 +26,7 @@
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
-                            <th class="border-primary border-darken-1">Received/Refused By</th>
+                            <th class="border-primary border-darken-1">Received By</th>
                             <th class="border-primary border-darken-1">Current Status</th>
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Destination</th>
@@ -180,7 +180,7 @@
 
                                                 var receiver_name =  $(row.node()).find('td.received_or_refused_by input').val();
 
-                                                if (receiver_name == '') {
+                                                if ($.trim(receiver_name) == '') {
                                                     not_updated_shipments.push($(row.node()).find('td.tracking_number').text()) ;
                                                     submit_all_status_flag = false;
                                                 }
@@ -197,7 +197,7 @@
                                                 html += tracking_number + '<br/>';
                                             });
 
-                                            html += '<br/>Update Received / Refused By for all Shipment(s)!';
+                                            html += '<br/>Update Received By for all Returned Shipment(s)!';
 
                                             content = document.createElement('div');
                                             content.innerHTML = html;
