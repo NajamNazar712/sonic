@@ -48,6 +48,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <style>
         table.dataTable {
@@ -178,7 +179,8 @@
                         extend: 'excel',
                         title: 'Return Confirmed',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }
+                    },
+                    'reset'
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,

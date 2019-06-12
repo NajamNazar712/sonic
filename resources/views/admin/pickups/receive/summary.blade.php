@@ -144,6 +144,7 @@
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
@@ -178,7 +179,8 @@
 			@endif
 
 			var table = $('#datatable').DataTable({
-				dom: 'ltipr',
+				dom: '<"d-inline-block"l><"pull-right"B>tipr',
+				buttons:['reset'],
 				scrollX: true, scrollY: '350px',
                 paging:false,
                 processing: true,

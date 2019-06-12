@@ -387,6 +387,7 @@
                             });
                         }
                     },
+                    'reset'
                 ],
                 @else
                 buttons:[{
@@ -394,7 +395,7 @@
                     title: 'Month Closing',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
-                }],
+                },'reset'],
                 @endif
                 select: {
                     info: false,

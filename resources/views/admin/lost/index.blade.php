@@ -57,6 +57,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
     $(document).ready(function(){
@@ -302,7 +303,8 @@
                             }
                         });
                     }
-                }
+                },
+                'reset'
             ],
             @else
             buttons:[{
@@ -310,7 +312,7 @@
                 title: 'Lost Shipments',
                 className: 'btn btn-primary',
                 text: '<i class="la la-file-excel-o"></i> Excel',
-            }],
+            },'reset'],
             @endif
             scrollX: true, scrollY: '350px',
             select: {

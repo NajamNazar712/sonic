@@ -61,6 +61,7 @@
 @endsection
 
 @section('js')
+	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 	<script>
 		$(document).ready(function() {
 			jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -117,7 +118,8 @@
 	                    title: 'Zonal Management',
 	                    className: 'btn btn-primary',
 	                    text: '<i class="la la-file-excel-o"></i> Excel',
-					}
+					},
+					'reset'
 				],
 				scrollX: true, scrollY: '350px',
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],

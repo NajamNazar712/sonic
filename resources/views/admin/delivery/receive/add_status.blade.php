@@ -300,6 +300,7 @@
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -453,8 +454,9 @@
                             }
                             $('#submit_selected_status').attr('disabled', true);
                         }
-                    }
+                    },
                     @endif
+                    'reset'
                 ],
                 select: {
                     info: false,

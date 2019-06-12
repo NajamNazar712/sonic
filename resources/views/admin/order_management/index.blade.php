@@ -275,6 +275,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/charts/echarts/echarts.common.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
@@ -434,24 +435,6 @@
                     }
                 });
             }
-            // $.extend( true, $.fn.dataTable.Buttons.defaults, {
-            //     buttons: [
-            //         {
-            //             extend: 'reset',
-            //             name: 'reset',
-            //             text: '<i class="la la-refresh"></i>',
-            //             className: 'reset',
-            //             action : function(e) {
-            //                 e.preventDefault();
-            //                 console.log($(table.table().header()));
-            //                 // $(table.table().header()).find('input').val('');
-            //                 // $(table.table().header()).find('select').val('').change();
-            //                 //
-            //                 // table.columns().search('').draw();
-            //             }
-            //         }
-            //     ]
-            // });
 
             var selected_rows = [];
             var table = $('#datatable').DataTable({
@@ -612,20 +595,7 @@
                             });
                         }
                     },
-                    {
-                        // extend: 'reset',
-                        name: 'reset',
-                        text: '<i class="la la-refresh"></i> Reset',
-                        className: 'btn btn-primary reset',
-                        action : function(e) {
-                            e.preventDefault();
-                            console.log($(table.table().header()));
-                            $(table.table().header()).find('input').val('');
-                            $(table.table().header()).find('select').val('').change();
-
-                            table.columns().search('').draw();
-                        }
-                    }
+                    'reset'
                 ],
                 select: {
                     info: false,

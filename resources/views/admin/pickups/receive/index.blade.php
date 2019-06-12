@@ -115,6 +115,7 @@
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
@@ -212,7 +213,8 @@
                         title: 'Receive Pickups',
 						className:'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }
+                    },
+					'reset'
                 ],
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
 				pageLength: 50,
