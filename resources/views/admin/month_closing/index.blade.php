@@ -134,6 +134,7 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -387,6 +388,7 @@
                             });
                         }
                     },
+                    'reset'
                 ],
                 @else
                 buttons:[{
@@ -394,7 +396,7 @@
                     title: 'Month Closing',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
-                }],
+                },'reset'],
                 @endif
                 select: {
                     info: false,

@@ -26,6 +26,8 @@
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
+                                    <th class="border-primary border-darken-1">Item Quantity</th>
+                                    <th class="border-primary border-darken-1">Product Name</th>
                                     <th class="border-primary border-darken-1">Mode of Shipment</th>
                                     <th class="border-primary border-darken-1">Actual Weight</th>
                                     <th class="border-primary border-darken-1">Chargeable Weight</th>
@@ -67,6 +69,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
@@ -90,6 +93,11 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Item Quantity');
+                            head.push('Product Name');
+                            head.push('Mode of Shipment');
+                            head.push('Actual Weight');
+                            head.push('Chargeable Weight');
                             head.push('Weight Charges');
                             head.push('Fuel Surcharge');
                             head.push('Return Charges');
@@ -116,6 +124,11 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.item_quantity);
+                                row.push(values.product_name);
+                                row.push(values.shipping_mode);
+                                row.push(values.actual_weight);
+                                row.push(values.chargeable_weight);
                                 row.push(values.weight_charges);
                                 row.push(values.fuel_surcharge);
                                 row.push(values.return_charges);
@@ -146,7 +159,7 @@
                         title: 'Outstanding Walk-in Shipments',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }],
+                    },'reset'],
                 scrollX: true, scrollY: '350px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -160,7 +173,7 @@
                     url: '{{ route('admin.finance.outstanding_shipments.walk_in_list') }}',
                 },
                 rowId: 'id',
-                order: [[20, 'desc']],
+                order: [[22, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'tracking_number', name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -170,6 +183,8 @@
                     {data:'origin', name: 'oc.name', class: 'align-middle text-center origin'},
                     {data:'destination', name: 'dc.name', class: 'align-middle text-center destination'},
                     {data:'hub', name: 'hc.name', class: 'align-middle text-center hub'},
+                    {data:'item_quantity', name: 'sis.quantity', class: 'align-middle text-center item_quantity'},
+                    {data:'product_name', name: 'prod.product_name', class: 'align-middle text-center product_name'},
                     {data:'shipping_mode', name: 'sm.id', class: 'align-middle text-center shipping_mode'},
                     {data:'actual_weight', name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
                     {data:'chargeable_weight', name: 'shipments.chargeable_weight', class: 'align-middle text-center chargeable_weight'},

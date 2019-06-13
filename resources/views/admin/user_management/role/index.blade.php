@@ -45,6 +45,7 @@
 
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
@@ -57,9 +58,10 @@
 						action: function (e, dt, node, config) {
 							window.location = '{{ route('admin.user_management.roles.add.index') }}';
 						}
-					}],
+					},'reset'],
 				@else
-	                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: ['reset'],
 	            @endif
 	            scrollX: true, scrollY: '350px',
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],

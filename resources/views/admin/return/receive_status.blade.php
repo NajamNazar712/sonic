@@ -119,6 +119,7 @@
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     {{-- <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -262,9 +263,10 @@
                               }
                             });
                         }
-                    }],
+                    },'reset'],
                 @else
-                    dom: 'ltipr',
+                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                    buttons: ['reset'],
                 @endif
                 select: {
                     info: false,

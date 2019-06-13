@@ -173,7 +173,7 @@
 
 							shipment += '<tr>';
 							shipment += '<td><strong>Name</strong></td>';
-							shipment += '<td>' + details.shipper.name + ' kg</td>';
+							shipment += '<td>' + details.shipper.name + '</td>';
 							shipment += '<td><strong>Account No.</strong></td>';
 							shipment += '<td>' + details.shipper.account_number + '</td>';
 							shipment += '<td><strong>City</strong></td>';
@@ -211,8 +211,8 @@
 							shipment += '<table class="table table-sm table-borderless mb-0">';
 							shipment += '<tbody>';
 							shipment += '<tr>';
-							shipment += '<td><strong>Point of Contact</strong></td>';
-							shipment += '<td>' + details.pickup.point_of_contact + '</td>';
+							shipment += '<td><strong>Person of Contact</strong></td>';
+							shipment += '<td>' + details.pickup.person_of_contact + '</td>';
 							shipment += '<td><strong>Origin</strong></td>';
 							shipment += '<td>' + details.pickup.origin + '</td>';
 							shipment += '</tr>';
