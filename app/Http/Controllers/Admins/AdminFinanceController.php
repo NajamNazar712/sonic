@@ -1879,7 +1879,7 @@ class AdminFinanceController extends Controller
 
         $datatables = Datatables::of($pending_payments)
             ->addColumn('total_deductable', function($pending_payments) {
-                return number_format(ROUND(($pending_payments->total_charges + $pending_payments->total_gst), 0, PHP_ROUND_HALF_DOWN));
+                return number_format(($pending_payments->total_charges + $pending_payments->total_gst), 2);
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -1925,20 +1925,20 @@ class AdminFinanceController extends Controller
                 }
             })
             ->editColumn('total_amount', function($pending_payment) {
-                return number_format(ROUND($pending_payment->total_amount, 0, PHP_ROUND_HALF_DOWN));
+                return number_format($pending_payment->total_amount, 2);
             })
             ->editColumn('total_charges', function($pending_payment) {
-                return number_format(ROUND($pending_payment->total_charges, 0, PHP_ROUND_HALF_DOWN));
+                return number_format($pending_payment->total_charges, 2);
             })
             ->editColumn('total_gst', function($pending_payment) {
-                return number_format(ROUND($pending_payment->total_gst, 0, PHP_ROUND_HALF_DOWN));
+                return number_format($pending_payment->total_gst, 2);
             })
             ->editColumn('total_payable', function($pending_payment) {
                 return number_format(ROUND($pending_payment->total_payable, 0, PHP_ROUND_HALF_DOWN));
             })
             ->editColumn('total_adjustments', function($pending_payment) {
                 if ($pending_payment->total_adjustments) {
-                    return number_format(ROUND($pending_payment->total_adjustments, 0, PHP_ROUND_HALF_DOWN));
+                    return number_format($pending_payment->total_adjustments, 2);
                 }
                 else {
                     return 0;
@@ -3209,7 +3209,7 @@ class AdminFinanceController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(ROUND(($total_charges + $total_gst - $total_adjustments), 0, PHP_ROUND_HALF_DOWN)) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - $total_adjustments), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
@@ -3365,7 +3365,7 @@ class AdminFinanceController extends Controller
 
         $total_columns = count($details[0]);
 
-        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ROUND(($total_charges - $total_packaging_material_charges), 0, PHP_ROUND_HALF_DOWN), 'Total GST' => ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN), 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ROUND(($total_charges + $total_gst - $total_adjustments), 0, PHP_ROUND_HALF_DOWN)];
+        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments)];
 
         $details[] = [];
 
