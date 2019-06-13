@@ -353,14 +353,16 @@ class DeliveryController extends Controller
         $shipments_count = 0;
         $total_cod_amount = 0;
         foreach ($shipments as $shipment) {
-            $shipment_details = Shipment::find($shipment);
-            if($shipment_details) {
-                if (in_array($shipment_details->shipper_status_id, $pending_status)) {
-                    $valid_shipments[] = $shipment;
-                    $shipments_count++;
+            if (!in_array($shipment, $valid_shipments)) {
+                $shipment_details = Shipment::find($shipment);
+                if($shipment_details) {
+                    if (in_array($shipment_details->shipper_status_id, $pending_status)) {
+                        $valid_shipments[] = $shipment;
+                        $shipments_count++;
 
-                    if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
-                        $total_cod_amount += $shipment_details->amount;
+                        if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
+                            $total_cod_amount += $shipment_details->amount;
+                        }
                     }
                 }
             }
