@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 
 class AdminPettyCashController extends Controller
@@ -54,6 +55,7 @@ class AdminPettyCashController extends Controller
         if(PettyCashStatement::where('reference_no','=',$request->reference_no)->exists()){
             return ['status' => 0, 'error' => 'Reference No. not Unique'];
         }
+
         $selected_ids = explode(',', $request->input('selected_rows'));
         $petty_cash = new PettyCashStatement();
         $petty_cash->hub_id = $request->select_statement_hub;
@@ -65,6 +67,9 @@ class AdminPettyCashController extends Controller
         foreach ($selected_ids as $selected_id) {
             $total_amount += $request->amount[$selected_id];
             $petty_detail = new PettyCashStatementDetail();
+            $path = 'statement_'. $petty_cash->id .'_detail_'. $petty_detail->id . '.png';
+            Storage::disk('petty_cash')->put($path, file_get_contents($request->upload_image));
+            $petty_detail->image = $path;
             $petty_detail->petty_cash_statement_id = $petty_cash->id;
             $petty_detail->account_head_id = $request->head[$selected_id];
             $petty_detail->account_title_id = $request->title[$selected_id];

@@ -287,8 +287,8 @@
                     }).then(function (confirm) {
                         if (confirm) {
                             $('#selected_rows').val(selected_rows);
-                            console.log($('#upload_image').val());
-                            // form.submit();
+                            // console.log($('#upload_image').val());
+                            form.submit();
                         }
                     });
 
