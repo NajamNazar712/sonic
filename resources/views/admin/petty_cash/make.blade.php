@@ -69,6 +69,7 @@
                         <th class="border-primary border-darken-1"> Amount </th>
                         <th class="border-primary border-darken-1">Reference No.</th>
                         <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">Reference Documents</th>
                         <th class="border-primary border-darken-1"></th>
 
                     </tr>
@@ -83,6 +84,26 @@
             </div>
         </div>
     </div>
+    {{--<section>--}}
+        {{--<div class="modal fade" id="upload_image_modal" data-backdrop="static" role="dialog" aria-labelledby="upload_image_modal" aria-hidden="true">--}}
+            {{--<div class="modal-dialog modal-sm" role="document">--}}
+                {{--<div class="modal-content">--}}
+                    {{--<div class="modal-header">--}}
+                        {{--<h4 class="modal-title" id="shipments_modal_title">Upload Image</h4>--}}
+
+                        {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+                            {{--<span aria-hidden="true">×</span>--}}
+                        {{--</button>--}}
+                    {{--</div>--}}
+                    {{--<div class="modal-body text-center">--}}
+                    {{--</div>--}}
+                    {{--<div class="modal-footer">--}}
+                        {{--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>--}}
+                    {{--</div>--}}
+                {{--</div>--}}
+            {{--</div>--}}
+        {{--</div>--}}
+    {{--</section>--}}
 
 
 @endsection
@@ -219,6 +240,7 @@
                     {name: 'amount', class: 'align-middle expense_amount form-group'},
                     {name: 'reference_no', class: 'align-middle reference_no form-group'},
                     {name: 'remarks', class: 'align-middle remarks'},
+                    {name: 'image', class: 'align-middle image'},
                     {name: 'action', class: 'align-middle action'},
                 ],
 
@@ -265,7 +287,8 @@
                     }).then(function (confirm) {
                         if (confirm) {
                             $('#selected_rows').val(selected_rows);
-                            form.submit();
+                            console.log($('#upload_image').val());
+                            // form.submit();
                         }
                     });
 
@@ -314,6 +337,15 @@
                 var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount"  data-rule-required="true" data-msg-required="Amount is required">';
                 var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Reference No" data-rule-required="true" data-msg-required="Reference No. is required">';
                 var remarks_input = '<textarea class="form-control form-control-sm" rows="5" name="remarks['+rows_count+']" placeholder="Remarks"></textarea>';
+                // var $dropdown = '<div class="btn-group">' +
+                //     '<button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>' +
+                //     '<div class="dropdown-menu dropdown-menu-sm"><button type="button" class="dropdown-item upload_image" >' +
+                //     '<div class="row no-gutters align-items-center">' +
+                //     '<div class="col-2">' +
+                //     '<i class="ft-plus-circle"></i>' +
+                //     '</div>' +
+                //     '<div class="col-9 offset-1">Upload Image</div></button></div></div></div>';
+                var upload_image = '<input name="upload_image" type="file" id="upload_image">';
                 if(rows_count == 1){
                     var remove = '';
                 }else{
@@ -332,7 +364,7 @@
                     return obj;
                 });
 
-                table.row.add([0, heads_select,titles_select,hub_select,date_input,expense_detail_input,amount_input,reference_input,remarks_input,remove]).node().id = rows_count;
+                table.row.add([0, heads_select,titles_select,hub_select,date_input,expense_detail_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
