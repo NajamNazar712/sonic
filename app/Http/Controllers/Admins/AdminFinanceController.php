@@ -2624,7 +2624,7 @@ class AdminFinanceController extends Controller
             })
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
             ->addColumn('total_deductable', function($done_payment) {
-                return number_format(ROUND(($done_payment->total_charges + $done_payment->total_gst), 0, PHP_ROUND_HALF_DOWN));
+                return number_format(($done_payment->total_charges + $done_payment->total_gst), 2);
             })
             ->editColumn('delivered_shipments', function($done_payment) {
                 if ($done_payment->delivered_shipments != 0) {
@@ -2651,13 +2651,13 @@ class AdminFinanceController extends Controller
                 }
             })
             ->editColumn('total_amount', function($done_payment) {
-                return number_format(ROUND($done_payment->total_amount, 0, PHP_ROUND_HALF_DOWN));
+                return number_format($done_payment->total_amount, 2);
             })
             ->editColumn('total_charges', function($done_payment) {
-                return number_format(ROUND($done_payment->total_charges, 0, PHP_ROUND_HALF_DOWN));
+                return number_format($done_payment->total_charges, 2);
             })
             ->editColumn('total_gst', function($done_payment) {
-                return number_format(ROUND($done_payment->total_gst, 0, PHP_ROUND_HALF_DOWN));
+                return number_format($done_payment->total_gst, 2);
             })
             ->editColumn('total_payable', function($done_payment) {
                 return number_format(ROUND($done_payment->total_payable, 0, PHP_ROUND_HALF_DOWN));
@@ -3193,11 +3193,11 @@ class AdminFinanceController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Charges (w/o GST)</strong></td>
-                                        <td class="color secondary">' . number_format(ROUND(($total_charges - $total_packaging_material_charges), 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                        <td class="color secondary">' . number_format(($total_charges - $total_packaging_material_charges), 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total GST</strong></td>
-                                        <td class="color secondary">' . number_format(ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                        <td class="color secondary">' . number_format($total_gst, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Packaging Material Charges</strong></td>
@@ -3517,8 +3517,8 @@ class AdminFinanceController extends Controller
                     $invoice->total_delivered_shipments = $total_delivered_shipments;
                     $invoice->total_returned_shipments = $total_returned_shipments;
                     $invoice->total_adjusted_shipments = $total_adjusted_shipments;
-                    $invoice->total_charges = ROUND($total_charges, 0, PHP_ROUND_HALF_DOWN);
-                    $invoice->total_gst = ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN);
+                    $invoice->total_charges = $total_charges;
+                    $invoice->total_gst = $total_gst;
                     $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
 
                     $invoice->save();
@@ -3792,11 +3792,11 @@ class AdminFinanceController extends Controller
                               <tbody>
                                 <tr>
                                   <td class="color secondary text-left"><strong>Subtotal (PKR)</strong></td>
-                                  <td class="text-right">' . number_format(ROUND($total_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                  <td class="text-right">' . number_format($total_charges, 2) . '</td>
                                 </tr>
                                 <tr>
                                   <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
-                                  <td class="text-right">' . number_format(ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                  <td class="text-right">' . number_format($total_gst, 2) . '</td>
                                 </tr>
                                 <tr>
                                   <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
@@ -3916,10 +3916,10 @@ class AdminFinanceController extends Controller
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->invoice_number . '</button>';
             })
             ->editColumn('total_charges', function($invoice) {
-                return number_format(ROUND($invoice->total_charges, 0, PHP_ROUND_HALF_DOWN));
+                return number_format($invoice->total_charges, 2);
             })
             ->editColumn('total_gst', function($invoice) {
-                return number_format(ROUND($invoice->total_gst, 0, PHP_ROUND_HALF_DOWN));
+                return number_format($invoice->total_gst, 2);
             })
             ->editColumn('total_invoice_amount', function($invoice) {
                 return number_format(ROUND($invoice->total_invoice_amount, 0, PHP_ROUND_HALF_DOWN));

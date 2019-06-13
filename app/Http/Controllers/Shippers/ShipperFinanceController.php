@@ -76,13 +76,13 @@ class ShipperFinanceController extends Controller
             }
         })
         ->editColumn('total_amount', function($done_payment) {
-            return number_format(ROUND($done_payment->total_amount, 0, PHP_ROUND_HALF_DOWN));
+            return number_format($done_payment->total_amount, 2);
         })
         ->editColumn('total_charges', function($done_payment) {
-            return number_format(ROUND($done_payment->total_charges, 0, PHP_ROUND_HALF_DOWN));
+            return number_format($done_payment->total_charges, 2);
         })
         ->editColumn('total_gst', function($done_payment) {
-            return number_format(ROUND($done_payment->total_gst, 0, PHP_ROUND_HALF_DOWN));
+            return number_format($done_payment->total_gst, 2);
         })
         ->editColumn('total_payable', function($done_payment) {
             return number_format(ROUND($done_payment->total_payable, 0, PHP_ROUND_HALF_DOWN));
@@ -535,11 +535,11 @@ class ShipperFinanceController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Charges (w/o GST)</strong></td>
-                                        <td class="color secondary">' . number_format(ROUND(($total_charges - $total_packaging_material_charges), 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                        <td class="color secondary">' . number_format(($total_charges - $total_packaging_material_charges), 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total GST</strong></td>
-                                        <td>' . number_format(ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                        <td>' . number_format($total_gst, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Packaging Material Charges</strong></td>
