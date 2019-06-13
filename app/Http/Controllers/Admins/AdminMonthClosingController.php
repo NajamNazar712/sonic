@@ -87,6 +87,10 @@ class AdminMonthClosingController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
+                return $remark;
+            })
 
             ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
             ->editColumn('status_date',function ($shipments){
@@ -120,6 +124,7 @@ class AdminMonthClosingController extends Controller
     }
     public function add_shipment(Request $request){
         $tracking_numbers = explode(',', $request->tracking_numbers);
+        $remarks = $request->remarks;
 
         $status_not_allowed = array(1, 5, 6, 14, 17, 25, 31, 38, 51, 53);
         $intransit_status_array = array(3, 21, 26, 32);
@@ -174,7 +179,7 @@ class AdminMonthClosingController extends Controller
                                     $shipment_details->shipper_status_id = 51;
                                     $shipment_details->consignee_status_id = 51;
                                     $shipment_details->save();
-                                    ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
+                                    ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
                                     $success[$tracking_number] = 'Shipment is successfully added to Month Closing!';
 //                                    return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
                                 } else if ($cargo->status_id == 4) {
@@ -193,7 +198,7 @@ class AdminMonthClosingController extends Controller
                                     $shipment_details->shipper_status_id = 51;
                                     $shipment_details->consignee_status_id = 51;
                                     $shipment_details->save();
-                                    ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
+                                    ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
                                     $success[$tracking_number] = 'Shipment is successfully added to Month Closing!';
 
 //                                    return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
@@ -228,7 +233,7 @@ class AdminMonthClosingController extends Controller
                         $shipment_details->shipper_status_id = 51;
                         $shipment_details->consignee_status_id = 51;
                         $shipment_details->save();
-                        ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
                         $success[$tracking_number] = 'Shipment is successfully added to Month Closing!';
 //                        return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
 
@@ -268,6 +273,7 @@ class AdminMonthClosingController extends Controller
     public function return_confirm_shipment(Request $request){
         $shipment_ids = $request->shipment_ids;
         $not_updated_shipments = array();
+        $shipment_remarks = $request->remark;
         $untouched = false;
             if(!empty($shipment_ids)){
 
@@ -276,7 +282,7 @@ class AdminMonthClosingController extends Controller
                     if($parcel){
                         if (!$parcel->packaging_material_request) {
                             Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                            ShipmentsJourneyController::add($shipment, 20, 20, NULL, NULL, NULL, Auth::id());
+                            ShipmentsJourneyController::add($shipment, 20, 20, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
 
                             NotificationsController::send(15, 0, $shipment);
                             NotificationsController::send(16, 0, $shipment);
@@ -287,7 +293,7 @@ class AdminMonthClosingController extends Controller
                         }
                         else {
                             Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
-                            ShipmentsJourneyController::add($shipment, 17, 17, NULL, NULL, NULL, Auth::id());
+                            ShipmentsJourneyController::add($shipment, 17, 17, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
 
                             NotificationsController::send(15, 0, $shipment);
                             NotificationsController::send(16, 0, $shipment);
@@ -307,6 +313,7 @@ class AdminMonthClosingController extends Controller
 
      public function return_reattempt_shipment(Request $request){
          $shipment_ids = $request->shipment_ids;
+         $shipment_remarks = $request->remark;
          $not_updated_shipments = array();
          $untouched = false;
             if(!empty($shipment_ids)){
@@ -315,7 +322,7 @@ class AdminMonthClosingController extends Controller
                     $parcel = Shipment::find($shipment);
                     if($parcel){
                         Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
-                        ShipmentsJourneyController::add($shipment, 13, 13, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment, 13, 13, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
 
                         NotificationsController::send(15, 0, $shipment);
                         NotificationsController::send(16, 0, $shipment);
