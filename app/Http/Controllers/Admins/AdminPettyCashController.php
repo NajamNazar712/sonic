@@ -106,7 +106,7 @@ class AdminPettyCashController extends Controller
     public function edit_petty_cash_statement_list(Request $request, $id){
         $petty_details = PettyCashStatementDetail::leftjoin('cities as h','h.id','=','petty_cash_statement_details.hub_id')
             ->join('petty_cash_statements as pcs','pcs.id', '=', 'petty_cash_statement_details.petty_cash_statement_id')
-            ->select('petty_cash_statement_details.id as statement_detail_id','h.name as hub','petty_cash_statement_details.hub_id','petty_cash_statement_details.account_head_id','petty_cash_statement_details.account_title_id','petty_cash_statement_details.date','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.status as petty_status','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document')
+            ->select('petty_cash_statement_details.id as statement_detail_id','h.name as hub','petty_cash_statement_details.hub_id','petty_cash_statement_details.account_head_id','petty_cash_statement_details.account_title_id','petty_cash_statement_details.date','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.status as petty_status','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document as reference_document')
             ->where('petty_cash_statement_details.petty_cash_statement_id',$id);
         return Datatables::of($petty_details)
             ->setRowAttr([
@@ -207,7 +207,11 @@ class AdminPettyCashController extends Controller
                 return $remarks;
             })
             ->editColumn('reference_document', function ($petty_details){
-                $reference_document = '<div class="text-center"><button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document]).' target="_blank">View</a></button><div class="d-inline-block"><input class="form-control form-control-sm" type="file" name="upload_image'.$petty_details->statement_detail_id.'" disabled data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."></div></div>';
+                $reference_document = '<div class="text-center">';
+                if($petty_details->reference_document != null){
+                    $reference_document .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document]).' target="_blank">View</a></button>';
+                }
+                $reference_document .= '<div class="d-inline-block"><input class="form-control form-control-sm" type="file" name="upload_image'.$petty_details->statement_detail_id.'" disabled data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."></div></div>';
                 return $reference_document;
             })
             ->editColumn('status', function ($petty_details){
