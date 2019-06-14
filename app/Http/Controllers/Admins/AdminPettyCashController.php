@@ -249,8 +249,8 @@ class AdminPettyCashController extends Controller
     }
 
     public function reference_document($reference_document){
-        $url = Storage::url($reference_document);
-//        dd($url);
+        $url = Storage::url('petty_cash_statement_details/' . $reference_document);
+
         return view('admin.petty_cash.reference_document')->with(['url' => $url]);
     }
 
