@@ -14,7 +14,7 @@ class UpdatePettyCashStatementDetailTableReferenceDocument extends Migration
     public function up()
     {
         Schema::table('petty_cash_statement_details', function (Blueprint $table) {
-            $table->double('reference_document')->nullable();
+            $table->string('reference_document')->nullable();
         });
     }
 

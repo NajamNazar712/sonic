@@ -66,10 +66,8 @@ class AdminPettyCashController extends Controller
         $petty_cash->save();
         foreach ($selected_ids as $selected_id) {
             $total_amount += $request->amount[$selected_id];
+
             $petty_detail = new PettyCashStatementDetail();
-            $path = 'statement_'. $petty_cash->id .'_detail_'. $petty_detail->id . '.png';
-            Storage::disk('petty_cash')->put($path, file_get_contents($request->upload_image));
-            $petty_detail->image = $path;
             $petty_detail->petty_cash_statement_id = $petty_cash->id;
             $petty_detail->account_head_id = $request->head[$selected_id];
             $petty_detail->account_title_id = $request->title[$selected_id];
@@ -80,6 +78,18 @@ class AdminPettyCashController extends Controller
             $petty_detail->reference_no = $request->reference[$selected_id];
             $petty_detail->remarks = $request->remarks[$selected_id];
             $petty_detail->save();
+
+            if($request->hasFile('upload_image'.$selected_id)) {
+                $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.png';
+
+                $file = $request->file('upload_image'.$selected_id);
+
+                Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
+
+                $petty_detail->reference_document = $filename;
+                $petty_detail->save();
+            }
+
         }
         PettyCashStatement::where('id' , $petty_cash->id)->update(['total_amount' => $total_amount]);
         return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
@@ -96,7 +106,7 @@ class AdminPettyCashController extends Controller
     public function edit_petty_cash_statement_list(Request $request, $id){
         $petty_details = PettyCashStatementDetail::leftjoin('cities as h','h.id','=','petty_cash_statement_details.hub_id')
             ->join('petty_cash_statements as pcs','pcs.id', '=', 'petty_cash_statement_details.petty_cash_statement_id')
-            ->select('petty_cash_statement_details.id as statement_detail_id','h.name as hub','petty_cash_statement_details.hub_id','petty_cash_statement_details.account_head_id','petty_cash_statement_details.account_title_id','petty_cash_statement_details.date','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.status as petty_status','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount')
+            ->select('petty_cash_statement_details.id as statement_detail_id','h.name as hub','petty_cash_statement_details.hub_id','petty_cash_statement_details.account_head_id','petty_cash_statement_details.account_title_id','petty_cash_statement_details.date','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.status as petty_status','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document')
             ->where('petty_cash_statement_details.petty_cash_statement_id',$id);
         return Datatables::of($petty_details)
             ->setRowAttr([
@@ -196,6 +206,10 @@ class AdminPettyCashController extends Controller
                 $remarks = '<textarea class="form-control form-control-sm" disabled name="remarks['.$petty_details->statement_detail_id.']">'.$petty_details->remarks.'</textarea>';
                 return $remarks;
             })
+            ->editColumn('reference_document', function ($petty_details){
+                $reference_document = '<div class="row col text-center"><input type="file" name="upload_image'.$petty_details->statement_detail_id.'" disabled><div class="mt-1 col"><button type="button" class="btn btn-primary"><a class="white" href='.route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document]).' target="_blank">View</a></button></div></div>';
+                return $reference_document;
+            })
             ->editColumn('status', function ($petty_details){
                 if($petty_details->status == 0){
                     return "Pending";
@@ -215,6 +229,7 @@ class AdminPettyCashController extends Controller
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
+//                    $dropdown .= '<button type="button" class="dropdown-item reference_document" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Reference Document</div></button>';
                     $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Approve</div></button>';
                     $dropdown .= '<button type="button" class="dropdown-item reject" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Reject</div></button>';
 
@@ -231,6 +246,12 @@ class AdminPettyCashController extends Controller
             $hubs = City::where('hub',1)->where('status',1)->whereIn('id',session('hubs'))->get();
         }
         return view('admin.petty_cash.statements')->with(['hubs'=> $hubs]);
+    }
+
+    public function reference_document($reference_document){
+        $url = Storage::url($reference_document);
+        dd($url);
+        return view('admin.petty_cash.reference_document')->with(['url' => $url]);
     }
 
     public function petty_cash_statements_list(Request $request){
@@ -446,7 +467,6 @@ class AdminPettyCashController extends Controller
     }
 
     public function edit_petty_cash_statements_submit(Request $request){
-
         $selected_ids = explode(',', $request->input('selected_rows'));
         $statement_id = $request->petty_statement_id;
         $petty_cash = PettyCashStatement::find($statement_id);
@@ -484,6 +504,17 @@ class AdminPettyCashController extends Controller
                     $amount_log->save();
                 }
                 $petty_detail->save();
+                if($request->hasFile('upload_image'.$petty_detail->id)) {
+                    $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.png';
+
+                    $file = $request->file('upload_image'.$petty_detail->id);
+
+                    Storage::disk('public')->delete('petty_cash_statement_details/'.$filename);
+                    Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
+
+                    $petty_detail->reference_document = $filename;
+                    $petty_detail->save();
+                }
             }
             $petty_cash->total_amount = $total_amount;
             $petty_cash->save();

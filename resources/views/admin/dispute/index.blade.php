@@ -387,7 +387,7 @@
                         className: 'btn btn-primary',
                         title: 'Disputes',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }],
+                    },'reset'],
             @else
             buttons: [
                 {

@@ -10,7 +10,7 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="make_statement_form" action="{{route('admin.petty_cash.make.submit')}}" method="post">
+                <form id="make_statement_form" action="{{route('admin.petty_cash.make.submit')}}" method="post" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="selected_rows" id="selected_rows">
                     <div class="row">
@@ -345,7 +345,7 @@
                 //     '<i class="ft-plus-circle"></i>' +
                 //     '</div>' +
                 //     '<div class="col-9 offset-1">Upload Image</div></button></div></div></div>';
-                var upload_image = '<input name="upload_image" type="file" id="upload_image">';
+                var upload_image = '<input type="file" name="upload_image'+rows_count+'">';
                 if(rows_count == 1){
                     var remove = '';
                 }else{

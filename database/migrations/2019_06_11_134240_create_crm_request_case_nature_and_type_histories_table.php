@@ -18,6 +18,7 @@ class CreateCrmRequestCaseNatureAndTypeHistoriesTable extends Migration
             $table->integer('crm_request_id');
             $table->integer('case_nature_id');
             $table->integer('case_nature_type_id')->nullable();
+            $table->string('description');
             $table->integer('edited_by');
             $table->timestamps();
         });
