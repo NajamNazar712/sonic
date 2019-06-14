@@ -127,7 +127,7 @@
                         title: 'Rider Management',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }],
+                    },'reset'],
                 @else
                 buttons: [{
                     extend: 'excel',

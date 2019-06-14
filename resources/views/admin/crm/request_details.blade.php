@@ -549,13 +549,11 @@
                                     </div>
                                 </div>
                                 <div class="row justify-content-center">
-                                    <div class="col-8">
+                                    <div class="col-6">
                                         <fieldset class="form-group">
                                             <select name="case_nature_select" id="case_nature_select" class="form-control select2">
                                                 @foreach($case_nature as $nature)
-                                                    @if($crm_details->case_nature_id != $nature->id)
-                                                        <option value="{{$nature->id}}">{{$nature->name}}</option>
-                                                    @endif
+                                                    <option value="{{$nature->id}}">{{$nature->name}}</option>
                                                 @endforeach
                                             </select>
                                         </fieldset>
@@ -587,6 +585,15 @@
                                                         @endif
                                                     @endforeach
                                                 </select>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-none" id="description_div">
+                                    <div class="row justify-content-center">
+                                        <div class="col-8">
+                                            <fieldset class="form-group">
+                                                <textarea class="form-control" name="description" id="description" rows="5" placeholder="Enter Description Here...">{{$crm_details->description}}</textarea>
                                             </fieldset>
                                         </div>
                                     </div>
@@ -754,16 +761,19 @@
                 if(id === 1){
                     $('#request_service').addClass('d-none');
                     $('#request_complaints').removeClass('d-none');
+                    $('#description_div').removeClass('d-none');
                     $('#request_feedback').addClass('d-none');
                     $('#editRequest').removeClass('d-none');
                 }else if(id === 2){
                     $('#request_complaints').addClass('d-none');
                     $('#request_service').removeClass('d-none');
+                    $('#description_div').removeClass('d-none');
                     $('#request_feedback').addClass('d-none');
                     $('#editRequest').removeClass('d-none');
                 }else{
                     $('#request_complaints').addClass('d-none');
                     $('#request_service').addClass('d-none');
+                    $('#description_div').addClass('d-none');
                     $('#editRequest').addClass('d-none');
                 }
             });$('#case_nature_complaints').prepend('<option value="" selected="selected"></option>').select2({
@@ -1019,9 +1029,18 @@
                 var nature_flag = true;
                 if(case_nature_id === 1) {
                     var case_nature_complaint_id = $('#case_nature_complaints').val();
+                    var description = $('#description').val();
                     if (!case_nature_complaint_id) {
                         nature_flag = false;
                         var error = "Please select Complaint type!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (!description) {
+                        nature_flag = false;
+                        var error = "Please Enter Description!";
                         toastr.error(error, 'Error!', {
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
@@ -1038,10 +1057,19 @@
                 }
                 else if(case_nature_id === 2){
                     var case_nature_complaint_id = $('#case_nature_requests').val();
+                    var description = $('#description').val();
                     if(!case_nature_complaint_id){
                         nature_flag = false;
                         var error = "Please select Request type!";
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if (!description) {
+                        nature_flag = false;
+                        var error = "Please Enter Description!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
                     }
                     if(!tracking_number){
                         nature_flag = false;
@@ -1062,7 +1090,8 @@
                             'tracking_number': $('.tracking_number').val(),
                             'request_id': $('#request_id').val(),
                             'case_nature_id' : case_nature_id,
-                            'complaint_id' : case_nature_complaint_id
+                            'complaint_id' : case_nature_complaint_id,
+                            'description' : description
                         }
                     })
                         .done(function(data) {
@@ -1092,6 +1121,7 @@
                 $('.tracking_number').val('');
                 $('#request_complaints').addClass('d-none');
                 $('#request_service').addClass('d-none');
+                $('#description_div').addClass('d-none');
 
             });
         });

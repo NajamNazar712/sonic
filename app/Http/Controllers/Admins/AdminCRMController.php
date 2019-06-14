@@ -75,22 +75,22 @@ class AdminCRMController extends Controller
         }
     }
 
-    public function update_request(Request $request){
-        $request_id = $request->request_id;
-        $nature_id = $request->case_nature_id;
-        $complaint_id = $request->complaint_id;
-        $channel_id = $request->channel_id;
-        if($request_id != null){
-            $crm_request = CrmRequest::find($request_id);
-            $crm_request->case_nature_id = $nature_id;
-            $crm_request->case_nature_type_id = $complaint_id;
-            $crm_request->channel_id = $channel_id;
-            $crm_request->save();
-            return ['status' => 1, 'success' => 'Request successfully updated!'];
-        }
-        return ['status' => 0, 'error' => 'Request not found!'];
-
-    }
+//    public function update_request(Request $request){
+//        $request_id = $request->request_id;
+//        $nature_id = $request->case_nature_id;
+//        $complaint_id = $request->complaint_id;
+//        $channel_id = $request->channel_id;
+//        if($request_id != null){
+//            $crm_request = CrmRequest::find($request_id);
+//            $crm_request->case_nature_id = $nature_id;
+//            $crm_request->case_nature_type_id = $complaint_id;
+//            $crm_request->channel_id = $channel_id;
+//            $crm_request->save();
+//            return ['status' => 1, 'success' => 'Request successfully updated!'];
+//        }
+//        return ['status' => 0, 'error' => 'Request not found!'];
+//
+//    }
     public function add_feedback(Request $request){
         $nature_id = 3;
         $channel_id = $request->channel_id;
@@ -252,19 +252,19 @@ class AdminCRMController extends Controller
         }
     }
 
-    public function get_request_info(Request $request){
-        $request_id = $request->request_id;
-        $request_details = CrmRequest::find($request_id);
-        if($request_details){
-            $tracking_number = '';
-            if($request_details->shipment_id != null){
-                $tracking_number = Shipment::find($request_details->shipment_id)->tracking_number;
-            }
-            return ['status' => 1, 'details' => $request_details, 'tracking_number' => $tracking_number];
-        }else{
-            return ['status' => 0, 'error' => 'Request ID not found!'];
-        }
-    }
+//    public function get_request_info(Request $request){
+//        $request_id = $request->request_id;
+//        $request_details = CrmRequest::find($request_id);
+//        if($request_details){
+//            $tracking_number = '';
+//            if($request_details->shipment_id != null){
+//                $tracking_number = Shipment::find($request_details->shipment_id)->tracking_number;
+//            }
+//            return ['status' => 1, 'details' => $request_details, 'tracking_number' => $tracking_number];
+//        }else{
+//            return ['status' => 0, 'error' => 'Request ID not found!'];
+//        }
+//    }
 
 
     public function launched_re_open_index(){
@@ -469,9 +469,9 @@ class AdminCRMController extends Controller
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
                     $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
-                    if($requests->nature_id == 1 || $requests->nature_id == 2){
-                        $dropdown .= '<button type="button" class="dropdown-item update_request"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update</div></button>';
-                    }
+//                    if($requests->nature_id == 1 || $requests->nature_id == 2){
+//                        $dropdown .= '<button type="button" class="dropdown-item update_request"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update</div></button>';
+//                    }
 
 
                     $dropdown .= '</div>
@@ -1388,17 +1388,19 @@ class AdminCRMController extends Controller
             else{
                 $shipment_id = $crm_details['shipment_id'];
             }
-            $crm_check = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $request->case_nature_id)->first();
+            $crm_check = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $request->case_nature_id)->where('case_nature_type_id', $request->complaint_id)->first();
             if($crm_check == null){
                 CrmRequest::where('id', $crm_request_id)->update([
                     'shipment_id' => $shipment_id,
                     'case_nature_id' => $request->case_nature_id,
-                    'case_nature_type_id' => $request->complaint_id
+                    'case_nature_type_id' => $request->complaint_id,
+                    'description' => $request->description,
                 ]);
                 CrmRequestCaseNatureAndTypeHistory::create([
                     'crm_request_id' => $crm_request_id,
                     'case_nature_id' => $crm_details['case_nature_id'],
                     'case_nature_type_id' => $crm_details['case_nature_type_id'],
+                    'description' => $crm_details['description'],
                     'edited_by' => Auth::id()
                 ]);
                 return ['status' => 0, 'success' => 'Request Edited Successfully'];
