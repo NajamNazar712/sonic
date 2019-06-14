@@ -3299,10 +3299,10 @@ class AdminReportsController extends Controller
                 return number_format($shipment->amount);
             })
             ->editColumn('charges', function($shipment){
-                return number_format($shipment->charges);
+                return number_format($shipment->charges, 2);
             })
             ->editColumn('payable', function($shipment){
-                return number_format($shipment->payable);
+                return number_format($shipment->payable, 2);
             })
             ->addColumn('account_no', function ($user) {
                 return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);
