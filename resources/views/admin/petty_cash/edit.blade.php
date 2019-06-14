@@ -10,7 +10,7 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="edit_statement_form" action="{{route('admin.petty_cash.statements.edit.submit')}}" method="post">
+                <form id="edit_statement_form" action="{{route('admin.petty_cash.statements.edit.submit')}}" method="post" enctype="multipart/form-data">
                     @method('PUT')
                     @csrf
                     <input type="hidden" name="selected_rows" id="selected_rows">

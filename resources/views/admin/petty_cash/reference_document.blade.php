@@ -1,6 +1,6 @@
 {{--{{dd($path)}}--}}
 {{--{{$detail}}--}}
-<div class="panel-body">
+<div>
 {{--{{ $myTheory->description }}--}}
 <!-- CODE GOES HERE FOR THE IMAGE SOURCE-->
 
