@@ -1381,33 +1381,39 @@ class AdminCRMController extends Controller
         $crm_request_id = $request->request_id;
         $crm_details = CrmRequest::where('id', $crm_request_id)->first();
         $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
-        if($crm_details['shipment_id'] == null){
-            $shipment_id = $shipment['id'];
-        }
-        else{
-            $shipment_id = $crm_details['shipment_id'];
-        }
-        $crm_check = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $request->case_nature_id)->first();
-        if($crm_check == null){
-            CrmRequest::where('id', $crm_request_id)->update([
-                'shipment_id' => $shipment_id,
-                'case_nature_id' => $request->case_nature_id,
-                'case_nature_type_id' => $request->complaint_id
-            ]);
-            CrmRequestCaseNatureAndTypeHistory::create([
-                'crm_request_id' => $crm_request_id,
-                'case_nature_id' => $crm_details['case_nature_id'],
-                'case_nature_type_id' => $crm_details['case_nature_type_id']
-            ]);
-            return ['status' => 0, 'success' => 'Request Updated Successfully'];
-        }
-        else{
-            if($crm_request_id == 1){
-                return ['status' => 1, 'error' => 'Complaint already lodged for Tracking Number: ' . $request->tracking_number];
+        if($shipment != null){
+            if($crm_details['shipment_id'] == null){
+                $shipment_id = $shipment['id'];
             }
             else{
-                return ['status' => 1, 'error' => 'Request already lodged for Tracking Number: ' . $request->tracking_number];
+                $shipment_id = $crm_details['shipment_id'];
             }
+            $crm_check = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $request->case_nature_id)->first();
+            if($crm_check == null){
+                CrmRequest::where('id', $crm_request_id)->update([
+                    'shipment_id' => $shipment_id,
+                    'case_nature_id' => $request->case_nature_id,
+                    'case_nature_type_id' => $request->complaint_id
+                ]);
+                CrmRequestCaseNatureAndTypeHistory::create([
+                    'crm_request_id' => $crm_request_id,
+                    'case_nature_id' => $crm_details['case_nature_id'],
+                    'case_nature_type_id' => $crm_details['case_nature_type_id'],
+                    'edited_by' => Auth::id()
+                ]);
+                return ['status' => 0, 'success' => 'Request Edited Successfully'];
+            }
+            else{
+                if($crm_request_id == 1){
+                    return ['status' => 1, 'error' => 'Complaint already lodged for Tracking Number: ' . $request->tracking_number];
+                }
+                else{
+                    return ['status' => 1, 'error' => 'Request already lodged for Tracking Number: ' . $request->tracking_number];
+                }
+            }
+        }
+        else{
+            return ['status' => 1, 'error' => 'Tracking Number: ' . $request->tracking_number . ' doesn\'t exists'];
         }
     }
 }

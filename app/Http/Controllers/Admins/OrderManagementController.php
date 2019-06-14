@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\BookingType;
 use App\Http\Models\Product;
 use App\Http\Models\Shipment;
@@ -199,21 +200,31 @@ class OrderManagementController extends Controller
                 if ($shipment && $shipment->shipper_status_id == 2 && !$shipment->packaging_material_request) {
                     $valid = TRUE;
 
-                    $shipment->shipper_status_id = 20;
-                    $shipment->consignee_status_id = 20;
+                    $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
+                    if($check_walk_in['setting_value'] == $shipment->user->id){
+                        $shipment->shipper_status_id = 17;
+                        $shipment->consignee_status_id = 17;
 
-                    $shipment->save();
+                        $shipment->save();
+                        ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
+                    }
+                    else{
+                        $shipment->shipper_status_id = 20;
+                        $shipment->consignee_status_id = 20;
 
-                    ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
+                        $shipment->save();
 
-                    ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
 
-                    NotificationsController::send(15, 0, $shipment_id);
-                    NotificationsController::send(16, 0, $shipment_id);
+                        ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
 
-                    ShipmentChargesController::return($shipment_id);
+                        NotificationsController::send(15, 0, $shipment_id);
+                        NotificationsController::send(16, 0, $shipment_id);
 
-                    AdminFinanceController::add_payment($shipment_id, 1);
+                        ShipmentChargesController::return($shipment_id);
+
+                        AdminFinanceController::add_payment($shipment_id, 1);
+                    }
                 }
             }
 
