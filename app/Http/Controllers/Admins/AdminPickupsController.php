@@ -276,7 +276,7 @@ class AdminPickupsController extends Controller
           $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
           ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
           ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
-          ->select('pickup_requests.id','pickup_requests.id as pickup_request_id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
+          ->select('pickup_requests.id','pickup_requests.id as pickup_request_id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date', 'usi.vendor')
           ->where('pickup_requests.status', 0);
 
           if (session('role_id') != 1) {
@@ -724,6 +724,7 @@ class AdminPickupsController extends Controller
 
         $detail['shipper'] = $shipper->name;
         $detail['contact_person'] = $pickup_address['poc'];
+        $detail['vendor'] = $pickup_address['vendor'];
         $detail['contact_number'] = $pickup_address['phone'];
         $detail['address'] = $pickup_address['pickup_address'];
         $detail['bookings'] = $pickup_request['bookings'];
@@ -867,6 +868,7 @@ class AdminPickupsController extends Controller
                             <td class="color primary"><strong>S. No.</strong></td>
                             <td class="color primary"><strong>Company Name</strong></td>
                             <td class="color primary"><strong>Contact Person</strong></td>
+                            <td class="color primary"><strong>Vendor</strong></td>
                             <td class="color primary"><strong>Contact Number</strong></td>
                             <td class="color primary"><strong>Pickup Address</strong></td>
                             <td class="color primary"><strong>Bookings</strong></td>
@@ -889,6 +891,7 @@ class AdminPickupsController extends Controller
                             <td>' . $serial_number . '</td>
                             <td>' . $shipper->name . '</td>
                             <td>' . $pickup_address['poc'] . '</td>
+                            <td>' . $pickup_address['vendor'] . '</td>
                             <td>' . $pickup_address['phone'] . '</td>
                             <td>' . $pickup_address['pickup_address'] . '</td>
                             <td>' . $pickup_request['bookings'] . '</td>

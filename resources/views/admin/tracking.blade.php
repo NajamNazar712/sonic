@@ -213,12 +213,19 @@
 							shipment += '<tr>';
 							shipment += '<td><strong>Person of Contact</strong></td>';
 							shipment += '<td>' + details.pickup.person_of_contact + '</td>';
-							shipment += '<td><strong>Origin</strong></td>';
-							shipment += '<td>' + details.pickup.origin + '</td>';
+							shipment += '<td><strong>Vendor</strong></td>';
+							if (details.pickup.vendor) {
+								shipment += '<td>' + details.pickup.vendor + '</td>';
+							}
+							else{
+								shipment += '<td></td>'
+							}
 							shipment += '</tr>';
 							shipment += '<tr>';
 							shipment += '<td><strong>Phone No.</strong></td>';
 							shipment += '<td>' + details.pickup.phone_number + '</td>';
+							shipment += '<td><strong>Origin</strong></td>';
+							shipment += '<td>' + details.pickup.origin + '</td>';
 							shipment += '</tr>';
 							shipment += '<tr>';
 							shipment += '<td><strong>Email</strong></td>';

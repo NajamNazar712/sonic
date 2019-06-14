@@ -294,7 +294,7 @@ class ShipperDashboardController extends Controller
 
     public function getPickups(Request $request) {
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
-        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name'])
+        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name', 'user_shipping_infos.vendor'])
         ->where('user_id', session('user_id'))
         ->where('hidden', 0);
 
@@ -394,6 +394,7 @@ class ShipperDashboardController extends Controller
         $pickup_address = $request->pickup_address;
         $phone = $request->phone;
         $poc = $request->poc;
+        $vendor = $request->vendor;
         $email = $request->email;
         $city_id = $request->city_id;
         $user_id = session('user_id');
@@ -401,7 +402,7 @@ class ShipperDashboardController extends Controller
         if($pickup_address != null && $phone != null && $poc != null && $email != null && $city_id != null)
         {
             UserShippingInfo::create(['user_id'=>$user_id,'pickup_address'=>$pickup_address,'poc'=>$poc,
-                'email'=>$email,'city_id'=>$city_id,'phone'=>$phone]);
+                'email'=>$email,'city_id'=>$city_id,'phone'=>$phone, 'vendor' => $vendor]);
             return redirect()->back()->with('success','Pickup Address added successfully!');
 
         }else{
