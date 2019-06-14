@@ -868,6 +868,7 @@ class AdminPickupsController extends Controller
                             <td class="color primary"><strong>S. No.</strong></td>
                             <td class="color primary"><strong>Company Name</strong></td>
                             <td class="color primary"><strong>Contact Person</strong></td>
+                            <td class="color primary"><strong>Vendor</strong></td>
                             <td class="color primary"><strong>Contact Number</strong></td>
                             <td class="color primary"><strong>Pickup Address</strong></td>
                             <td class="color primary"><strong>Bookings</strong></td>
@@ -890,6 +891,7 @@ class AdminPickupsController extends Controller
                             <td>' . $serial_number . '</td>
                             <td>' . $shipper->name . '</td>
                             <td>' . $pickup_address['poc'] . '</td>
+                            <td>' . $pickup_address['vendor'] . '</td>
                             <td>' . $pickup_address['phone'] . '</td>
                             <td>' . $pickup_address['pickup_address'] . '</td>
                             <td>' . $pickup_request['bookings'] . '</td>

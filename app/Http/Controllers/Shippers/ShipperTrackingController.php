@@ -53,6 +53,7 @@ class ShipperTrackingController extends Controller
                     $pickup = $shipment->pickup_address;
 
                     $details['pickup']['person_of_contact'] = $pickup->poc;
+                    $details['pickup']['vendor'] = $pickup->vendor;
                     $details['pickup']['phone_number'] = $pickup->phone;
                     $details['pickup']['email'] = $pickup->email;
                     $details['pickup']['origin'] = $pickup->city->name;
