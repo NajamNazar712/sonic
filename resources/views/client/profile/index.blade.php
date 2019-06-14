@@ -122,6 +122,7 @@
                                                 <th class="border-primary border-darken-1">Pickup Address ID</th>
                                                 <th class="border-primary border-darken-1">Pickup Address</th>
                                                 <th class="border-primary border-darken-1">Person of Contact</th>
+                                                <th class="border-primary border-darken-1">Vendor</th>
                                                 <th class="border-primary border-darken-1">Phone Number</th>
                                                 <th class="border-primary border-darken-1">City</th>
                                                 <th class="border-primary border-darken-1">Email Address</th>
@@ -256,8 +257,6 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group row">
-
-
                                                 <div class="form-group col-md-9">
                                                     <label>Person of Contact:</label>
                                                     <span class="danger">*</span>
@@ -276,7 +275,6 @@
                                         </div>
                                     </div>
                                     <div class="row">
-
                                         <div class="col-md-6">
                                             <div class="form-group row">
                                                 <div class="form-group col-md-9">
@@ -339,6 +337,9 @@
                                 </div>
                                 <div class="col-6 form-group">
                                     <input type="text" name="poc" id="poc" class="form-control numeric flyer" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters" data-rule-required="true" data-msg-required="Person of Contact is required" placeholder="Person of Contact" required>
+                                </div>
+                                <div class="col-6 form-group">
+                                    <input type="text" name="vendor" id="vendor" class="form-control numeric flyer" data-rule-maxlength="100" data-msg-maxlength="Vendor can be maximum 100 characters" placeholder="Vendor">
                                 </div>
                                 <div class="col-6 form-group">
                                     <input type="email" name="email" id="add_stock_boxes" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Email Address is required" placeholder="Email Address" required>
@@ -535,6 +536,7 @@
                     {data: 'id', name: 'id'},
                     {data: 'pickup_address', name: 'pickup_address'},
                     {data: 'poc', name: 'poc'},
+                    {data: 'vendor', name: 'vendor'},
                     {data: 'phone', name: 'phone'},
                     {data: 'city_name', name: 'c.name'},
                     {data: 'email', name: 'email'},

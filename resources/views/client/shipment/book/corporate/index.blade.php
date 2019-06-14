@@ -79,6 +79,10 @@
                                             </div>
 
                                             <div class="form-group">
+                                                <input type="text" name="new_pickup_vendor" class="form-control" placeholder="Vendor" data-rule-maxlength="100" data-msg-maxlength="Vendor can be maximum 100 characters">
+                                            </div>
+
+                                            <div class="form-group">
                                                 <input type="text" name="new_pickup_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                                             </div>
 
