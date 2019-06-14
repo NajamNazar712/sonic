@@ -386,8 +386,15 @@ class DeliveryController extends Controller
                         'notification' => $notifications[$index],
                         'rider_information' => $rider_informations[$index]
                     ]);
+                }
 
+                foreach ($valid_shipments as $index => $shipment) {
                     Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
+
+                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
+                }
+
+                foreach ($valid_shipments as $index => $shipment) {
                     $old_delivery_note_id = DeliveryNoteShipment::where('shipment_id', $shipment)->where('status','>', 0)->orderBy('delivery_note_id', 'desc');
 
                     if ($old_delivery_note_id->exists()) {
@@ -401,7 +408,6 @@ class DeliveryController extends Controller
                         }
 
                     }
-                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
