@@ -35,6 +35,7 @@ class APIController extends Controller
 {
     private $names = [
       'person_of_contact' => 'Person of Contact',
+      'vendor' => 'Vendor',
       'phone_number' => 'Phone Number',
       'email_address' => 'Email Address',
       'address' => 'Address',
@@ -165,6 +166,7 @@ class APIController extends Controller
 
       $rules = [
         'person_of_contact' => ['required', 'between:1,190'],
+        'vendor' => ['nullable', 'filled', 'between:0,190'],
         'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
         'email_address' => ['required', 'email'],
         'address' => ['required', 'between:1,190'],
@@ -194,6 +196,7 @@ class APIController extends Controller
         }
 
         $person_of_contact = $request->input('person_of_contact');
+        $vendor = $request->input('vendor');
         $phone_number = substr_replace($request->input('phone_number'), '-', 4, 0);
         $email_address = $request->input('email_address');
         $address = $request->input('address');
@@ -203,6 +206,7 @@ class APIController extends Controller
 
         $pickup_address->user_id = $user_id;
         $pickup_address->poc = $person_of_contact;
+        $pickup_address->vendor = $vendor;
         $pickup_address->phone = $phone_number;
         $pickup_address->email = $email_address;
         $pickup_address->pickup_address = $address;
