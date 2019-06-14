@@ -615,7 +615,6 @@
             });
             $('#add_shipments_modal').on('hide.bs.modal', function () {
                 $('#add_shipment_form input.add_remarks').val('');
-                select[0].selectize.clear();
             });
 
             $('#add_shipment_form').validate({
