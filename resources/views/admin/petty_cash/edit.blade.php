@@ -269,18 +269,27 @@
 
                 },
                 drawCallback: function (settings) {
+                    var this_table = this;
 
                     $(".head_select").select2({
                         placeholder: "Select Account Head",
                         width:'100%'
+                    }).bind('change', function() {
+                        this_table.api().table().columns.adjust();
                     });
+
                     $(".title_select").select2({
                         placeholder: "Select Account Title",
                         width:'100%'
+                    }).bind('change', function() {
+                        this_table.api().table().columns.adjust();
                     });
+
                     $(".hub_select").select2({
                         placeholder: "Select Hub",
                         width:'100%'
+                    }).bind('change', function() {
+                        this_table.api().table().columns.adjust();
                     });
                     // $(".statusDrop").prepend('<option value="" selected="selected"></option>').select2({
                     //     placeholder: "Select a Status",

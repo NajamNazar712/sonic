@@ -195,7 +195,7 @@ class AdminPettyCashController extends Controller
                     $selected_amount = $petty_details->amount;
                 }
 
-                $amount = '<div class="input-group"><input type="text" class="form-control form-control-sm" disabled value="' .$selected_amount. '" name="amount['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Amount is required"><div class="input-group-append amount_log"><span class="input-group-text p-0 pl-sm-1 pr-sm-1"><i class="ft-align-justify font-medium-4"></i></span></div></div>';
+                $amount = '<div class="input-group" style="min-width: 100px;"><input type="text" class="form-control form-control-sm" disabled value="' .$selected_amount. '" name="amount['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Amount is required"><div class="input-group-append amount_log"><span class="input-group-text p-0 pl-sm-1 pr-sm-1"><i class="ft-align-justify font-medium-4"></i></span></div></div>';
                 return $amount;
             })
             ->editColumn('reference_no', function ($petty_details){
@@ -211,7 +211,7 @@ class AdminPettyCashController extends Controller
                 if($petty_details->reference_document != null){
                     $reference_document .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document]).' target="_blank">View</a></button>';
                 }
-                $reference_document .= '<div class="d-inline-block"><input class="form-control form-control-sm" type="file" name="upload_image'.$petty_details->statement_detail_id.'" disabled data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."></div></div>';
+                $reference_document .= '<input class="form-control form-control-sm" style="min-width: 200px;" type="file" name="upload_image'.$petty_details->statement_detail_id.'" disabled data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."></div>';
                 return $reference_document;
             })
             ->editColumn('status', function ($petty_details){
