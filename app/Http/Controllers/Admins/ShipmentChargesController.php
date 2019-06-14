@@ -158,10 +158,10 @@ class ShipmentChargesController extends Controller
                     $result = array();
 
                     if ($charges < $discount) {
-                        $result['weight_charges'] = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                        $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $result['weight_charges'] = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
 
                     if ($weight > 1) {
@@ -307,10 +307,10 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($charges < $discount) {
-                        $result['weight_charges'] = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                        $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $result['weight_charges'] = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
 
                     return $result;
@@ -395,10 +395,10 @@ class ShipmentChargesController extends Controller
                     $result = array();
 
                     if ($charges < $discount) {
-                        $result['cash_handling_charges'] = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                        $result['cash_handling_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $result['cash_handling_charges'] = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $result['cash_handling_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
 
                     return $result;
@@ -501,10 +501,10 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($charges < $discount) {
-                        $shipment->insurance_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                        $shipment->insurance_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->insurance_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $shipment->insurance_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
@@ -629,10 +629,10 @@ class ShipmentChargesController extends Controller
                 }
 
                 if ($charges < $discount) {
-                    $shipment->return_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                    $shipment->return_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                 }
                 else {
-                    $shipment->return_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                    $shipment->return_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                 }
 
                 $shipment->save();
@@ -661,7 +661,7 @@ class ShipmentChargesController extends Controller
 
                 $result = array();
 
-                $result['fuel_surcharge'] = ROUND((($fuel_charge->fuel_surcharge / 100) * $weight_charges), 0, PHP_ROUND_HALF_DOWN);
+                $result['fuel_surcharge'] = ROUND((($fuel_charge->fuel_surcharge / 100) * $weight_charges), 2, PHP_ROUND_HALF_DOWN);
 
                 return $result;
             }
@@ -805,10 +805,10 @@ class ShipmentChargesController extends Controller
                     $charges = ($charges * $replacement_multiplier);
 
                     if ($charges < $discount) {
-                        $shipment->replacement_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                        $shipment->replacement_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->replacement_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $shipment->replacement_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
@@ -945,10 +945,10 @@ class ShipmentChargesController extends Controller
                     $charges = ($charges * $replacement_multiplier);
 
                     if ($charges < $discount) {
-                        $shipment->replacement_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                        $shipment->replacement_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->replacement_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $shipment->replacement_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
@@ -1002,10 +1002,10 @@ class ShipmentChargesController extends Controller
             }
 
             if ($charges < $discount) {
-                $shipment->try_and_buy_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                $shipment->try_and_buy_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
             }
             else {
-                $shipment->try_and_buy_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                $shipment->try_and_buy_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
             }
 
             $shipment->save();
@@ -1043,10 +1043,10 @@ class ShipmentChargesController extends Controller
         }
 
         if ($charges < $discount) {
-            $charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+            $charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
         }
         else {
-            $charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+            $charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
         }
 
         if ($type == 1) {
@@ -1115,7 +1115,7 @@ class ShipmentChargesController extends Controller
             }
         }
 
-        $charges = ROUND(($shipment->weight_charges * ($percentage / 100)), 0, PHP_ROUND_HALF_DOWN);
+        $charges = ROUND(($shipment->weight_charges * ($percentage / 100)), 2, PHP_ROUND_HALF_DOWN);
 
         $shipment->return_charges = $charges;
 
@@ -1244,10 +1244,10 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($charges < $discount) {
-                        $shipment->intercept_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                        $shipment->intercept_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->intercept_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $shipment->intercept_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
@@ -1382,10 +1382,10 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($charges < $discount) {
-                        $shipment->intercept_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+                        $shipment->intercept_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->intercept_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $shipment->intercept_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
