@@ -57,6 +57,10 @@
                             <input type="text" name="tracking_numbers" class="form-control tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
 
                         </div>
+                        <div class="form-group">
+                            <input type="text" name="add_remarks" class="form-control add_remarks" placeholder="Remarks">
+
+                        </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Add Shipment</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
@@ -134,6 +138,7 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -198,6 +203,7 @@
                 }
             } );
             var selected_rows = [];
+            var shipment_remarks = {};
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || count(array_intersect([142, 143, 144], session('permissions'))) !== 0)
@@ -234,16 +240,26 @@
                                 }).then(function (confirm) {
                                     if (confirm) {
                                         blockPagePermanently();
+                                        table.rows().nodes().each(function(index) {
+                                            var row = table.row(index);
+                                            if ($(row.node()).hasClass('selected')) {
+                                                var id = parseInt(row.id());
+                                                var remarks = $(row.node()).find('td.remarks input').val();
+                                                shipment_remarks[id] = remarks;
+                                            }
+                                        });
                                         $.ajax({
                                             url:"{{route('admin.month_closing.confirm')}}",
                                             method:'POST',
                                             data:{
                                                 'shipment_ids':selected_rows,
-                                                '_token':'{{ csrf_token() }}'
+                                                '_token':'{{ csrf_token() }}',
+                                                'remark': shipment_remarks
                                             }
                                         }).done(function (data) {
                                             UnblockPagePermanently();
                                             selected_rows = [];
+                                            shipment_remarks = {};
                                             table.button('.confirm').disable();
                                             table.button('.re-attempt').disable();
                                             table.draw(true);
@@ -293,16 +309,26 @@
                                 }).then(function (confirm) {
                                     if (confirm) {
                                         blockPagePermanently();
+                                        table.rows().nodes().each(function (index) {
+                                            var row = table.row(index);
+                                            if ($(row.node()).hasClass('selected')) {
+                                                var id = parseInt(row.id());
+                                                var remarks = $(row.node()).find('td.remarks input').val();
+                                                shipment_remarks[id] = remarks;
+                                            }
+                                        });
                                         $.ajax({
                                             url:"{{route('admin.month_closing.reattempt')}}",
                                             method:'POST',
                                             data:{
                                                 'shipment_ids':selected_rows,
-                                                '_token':'{{ csrf_token() }}'
+                                                '_token':'{{ csrf_token() }}',
+                                                'remark': shipment_remarks
                                             }
                                         }).done(function (data) {
                                             UnblockPagePermanently();
                                             selected_rows = [];
+                                            shipment_remarks = {};
                                             table.button('.confirm').disable();
                                             table.button('.re-attempt').disable();
                                             table.draw(true);
@@ -387,6 +413,7 @@
                             });
                         }
                     },
+                    'reset'
                 ],
                 @else
                 buttons:[{
@@ -394,7 +421,7 @@
                     title: 'Month Closing',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
-                }],
+                },'reset'],
                 @endif
                 select: {
                     info: false,
@@ -430,7 +457,7 @@
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
+                    {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'}
 
@@ -556,7 +583,7 @@
             //     'alias': 'integer',
             //     'allowMinus': false,
             //     'allowPlus': false
-            // });
+            // });so
 
             var select = $('#add_shipment_form .tracking_numbers').selectize({
                 placeholder: 'Tracking Number(s)*',
@@ -585,6 +612,9 @@
                         return false;
                     }
                 }
+            });
+            $('#add_shipments_modal').on('hide.bs.modal', function () {
+                $('#add_shipment_form input.add_remarks').val('');
             });
 
             $('#add_shipment_form').validate({
@@ -624,16 +654,17 @@
                         if(confirm){
                             blockPagePermanently();
                             var tracking_numbers = $('#add_shipment_form input.tracking_numbers').val();
+                            var remarks = $('#add_shipment_form input.add_remarks').val();
                             $('#add_shipment_form button[type="submit"]').attr('disabled', 'disabled');
                             $.ajax({
                                 url: '{!! route('admin.month_closing.add') !!}',
                                 method: 'POST',
                                 data: {
                                     'tracking_numbers': tracking_numbers,
+                                    'remarks': remarks,
                                     '_token': '{{ csrf_token() }}'
                                 }
                             }).done(function(data){
-                                console.log(data);
                                 UnblockPagePermanently();
                                if(data.status == 1) {
 
@@ -665,14 +696,14 @@
                                        closeOnEsc: false,
                                        dangerMode: true
                                    });
-                                   scan_sound(1);
+                                   scan_sound(2);
                                    table.draw(true);
 
                                }else if(data.status == 2){
                                    var success = "Shipment(s) has been successfully added";
                                    toastr.success(success, 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
-                                   scan_sound(2);
+                                   scan_sound(1);
                                    table.draw(true);
                                }else if(data.status == 3){
                                    var html = '';
@@ -705,7 +736,7 @@
                                        closeOnEsc: false,
                                        dangerMode: true
                                    });
-                                   scan_sound(1);
+                                   scan_sound(2);
                                    table.draw(true);
                                }
                                 select[0].selectize.clear();

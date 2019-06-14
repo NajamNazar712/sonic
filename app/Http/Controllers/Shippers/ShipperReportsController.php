@@ -115,10 +115,10 @@ class ShipperReportsController extends Controller
                     return number_format($shipment->d_collection_amount);
                 })
                 ->editColumn('weight_charges', function($shipment){
-                    return number_format($shipment->weight_charges);
+                    return number_format($shipment->weight_charges, 2);
                 })
                 ->editColumn('cash_handling_charges', function($shipment){
-                    return number_format($shipment->cash_handling_charges);
+                    return number_format($shipment->cash_handling_charges, 2);
                 })
             ->editColumn('p_collection_amount',function($sale){
                 $amount = '';

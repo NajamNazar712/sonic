@@ -40,6 +40,8 @@
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1">Agent Assigned Date</th>
                                     <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
+                                    <th class="border-primary border-darken-1">Last Comment By</th>
+                                    <th class="border-primary border-darken-1">Last Comment</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -73,105 +75,105 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="UpdateRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UpdateRequestModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Update Request</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form id="update_request_form" method="post">
-                        @method('POST')
-                        @csrf
-                        <div class="container">
+    {{--<div class="modal fade text-left" id="UpdateRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UpdateRequestModal"--}}
+         {{--aria-hidden="true">--}}
+        {{--<div class="modal-dialog modal-lg" role="document">--}}
+            {{--<div class="modal-content">--}}
+                {{--<div class="modal-header bg-primary white">--}}
+                    {{--<h4 class="modal-title white">Update Request</h4>--}}
+                    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+                        {{--<span aria-hidden="true">&times;</span>--}}
+                    {{--</button>--}}
+                {{--</div>--}}
+                {{--<div class="modal-body text-center">--}}
+                    {{--<form id="update_request_form" method="post">--}}
+                        {{--@method('POST')--}}
+                        {{--@csrf--}}
+                        {{--<div class="container">--}}
                             {{--<div class="row">--}}
                                 {{--<h3 class="heading">Tracking Number</h3>--}}
                             {{--</div>--}}
-                            <input type="hidden" id="update_request_id_selected">
-                            <div class="row old_scroll justify-content-center" id="requested_shipments">
-                            <h3 id="requested_shipment_tracking" class="text-center font-weight-bold"></h3>
-                            </div>
-                            <hr>
-                            <div class="row justify-content-center">
-                                <div class="col-8">
-                                    <fieldset class="form-group">
-                                        <select name="case_nature_select" id="case_nature_select" class="form-control select2">
-                                            @foreach($case_nature as $nature)
-                                                <option value="{{$nature->id}}">{{$nature->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-                            </div>
-                            <div class="complaints d-none" id="request_complaints">
-                                <div class="row justify-content-center">
-                                    <div class="col-6">
-                                        <fieldset class="form-group">
-                                            <select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2">
-                                                @foreach($case_nature_complaints as $complaints)
-                                                    <option value="{{$complaints->id}}">{{$complaints->type}}</option>
-                                                @endforeach
-                                            </select>
-                                        </fieldset>
-                                    </div>
-                                    <div class="col-6">
-                                        <fieldset class="form-group">
-                                            <select name="complaint_channel" id="complaint_channels" class="form-control select2">
-                                                @foreach($channels as $channel1)
-                                                    <option value="{{$channel1->id}}">{{$channel1->channel}}</option>
-                                                @endforeach
-                                            </select>
-                                        </fieldset>
-                                    </div>
-                                    <div class="col-6">
-                                        <fieldset class="form-group">
-                                            <textarea class="form-control info" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..." disabled></textarea>
-                                        </fieldset>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="service d-none" id="request_service">
-                                <div class="row justify-content-center">
-                                    <div class="col-6">
-                                        <fieldset class="form-group">
-                                            <select name="case_nature_request" id="case_nature_requests" class="form-control select2">
-                                                @foreach($case_nature_service_requests as $service)
-                                                    <option value="{{$service->id}}">{{$service->type}}</option>
-                                                @endforeach
-                                            </select>
-                                        </fieldset>
-                                    </div>
-                                    <div class="col-6">
-                                        <fieldset class="form-group">
-                                            <select name="request_channel" id="request_channels" class="form-control select2">
-                                                @foreach($channels as $channel2)
-                                                    <option value="{{$channel2->id}}">{{$channel2->channel}}</option>
-                                                @endforeach
-                                            </select>
-                                        </fieldset>
-                                    </div>
-                                    <div class="col-6">
-                                        <fieldset class="form-group">
-                                            <textarea class="form-control info" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..." disabled></textarea>
-                                        </fieldset>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row justify-content-center">
-                                <div class="col-3">
-                                    <button id="UpdateRequestBtn" type="submit" class="btn btn-primary btn-block d-none">Update</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+                            {{--<input type="hidden" id="update_request_id_selected">--}}
+                            {{--<div class="row old_scroll justify-content-center" id="requested_shipments">--}}
+                            {{--<h3 id="requested_shipment_tracking" class="text-center font-weight-bold"></h3>--}}
+                            {{--</div>--}}
+                            {{--<hr>--}}
+                            {{--<div class="row justify-content-center">--}}
+                                {{--<div class="col-8">--}}
+                                    {{--<fieldset class="form-group">--}}
+                                        {{--<select name="case_nature_select" id="case_nature_select" class="form-control select2">--}}
+                                            {{--@foreach($case_nature as $nature)--}}
+                                                {{--<option value="{{$nature->id}}">{{$nature->name}}</option>--}}
+                                            {{--@endforeach--}}
+                                        {{--</select>--}}
+                                    {{--</fieldset>--}}
+                                {{--</div>--}}
+                            {{--</div>--}}
+                            {{--<div class="complaints d-none" id="request_complaints">--}}
+                                {{--<div class="row justify-content-center">--}}
+                                    {{--<div class="col-6">--}}
+                                        {{--<fieldset class="form-group">--}}
+                                            {{--<select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2">--}}
+                                                {{--@foreach($case_nature_complaints as $complaints)--}}
+                                                    {{--<option value="{{$complaints->id}}">{{$complaints->type}}</option>--}}
+                                                {{--@endforeach--}}
+                                            {{--</select>--}}
+                                        {{--</fieldset>--}}
+                                    {{--</div>--}}
+                                    {{--<div class="col-6">--}}
+                                        {{--<fieldset class="form-group">--}}
+                                            {{--<select name="complaint_channel" id="complaint_channels" class="form-control select2">--}}
+                                                {{--@foreach($channels as $channel1)--}}
+                                                    {{--<option value="{{$channel1->id}}">{{$channel1->channel}}</option>--}}
+                                                {{--@endforeach--}}
+                                            {{--</select>--}}
+                                        {{--</fieldset>--}}
+                                    {{--</div>--}}
+                                    {{--<div class="col-6">--}}
+                                        {{--<fieldset class="form-group">--}}
+                                            {{--<textarea class="form-control info" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..." disabled></textarea>--}}
+                                        {{--</fieldset>--}}
+                                    {{--</div>--}}
+                                {{--</div>--}}
+                            {{--</div>--}}
+                            {{--<div class="service d-none" id="request_service">--}}
+                                {{--<div class="row justify-content-center">--}}
+                                    {{--<div class="col-6">--}}
+                                        {{--<fieldset class="form-group">--}}
+                                            {{--<select name="case_nature_request" id="case_nature_requests" class="form-control select2">--}}
+                                                {{--@foreach($case_nature_service_requests as $service)--}}
+                                                    {{--<option value="{{$service->id}}">{{$service->type}}</option>--}}
+                                                {{--@endforeach--}}
+                                            {{--</select>--}}
+                                        {{--</fieldset>--}}
+                                    {{--</div>--}}
+                                    {{--<div class="col-6">--}}
+                                        {{--<fieldset class="form-group">--}}
+                                            {{--<select name="request_channel" id="request_channels" class="form-control select2">--}}
+                                                {{--@foreach($channels as $channel2)--}}
+                                                    {{--<option value="{{$channel2->id}}">{{$channel2->channel}}</option>--}}
+                                                {{--@endforeach--}}
+                                            {{--</select>--}}
+                                        {{--</fieldset>--}}
+                                    {{--</div>--}}
+                                    {{--<div class="col-6">--}}
+                                        {{--<fieldset class="form-group">--}}
+                                            {{--<textarea class="form-control info" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..." disabled></textarea>--}}
+                                        {{--</fieldset>--}}
+                                    {{--</div>--}}
+                                {{--</div>--}}
+                            {{--</div>--}}
+                            {{--<div class="row justify-content-center">--}}
+                                {{--<div class="col-3">--}}
+                                    {{--<button id="UpdateRequestBtn" type="submit" class="btn btn-primary btn-block d-none">Update</button>--}}
+                                {{--</div>--}}
+                            {{--</div>--}}
+                        {{--</div>--}}
+                    {{--</form>--}}
+                {{--</div>--}}
+            {{--</div>--}}
+        {{--</div>--}}
+    {{--</div>--}}
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -181,6 +183,7 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
@@ -211,6 +214,8 @@
                             head.push('Launched Date');
                             head.push('Agent Assigned Date');
                             head.push('Launched To Today (TAT)');
+                            head.push('Last Comment By');
+                            head.push('Last Comment');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -233,6 +238,8 @@
                                 row.push(values.created_at);
                                 row.push(values.agent_assigned_date);
                                 row.push(values.current_tat);
+                                row.push(values.last_comment_name);
+                                row.push(values.last_comment.replace(/<br>/gi, '\n'));
 
                                 body.push(row);
                             });
@@ -388,7 +395,8 @@
                         title: 'CRM Request (Launched/Re-Open)',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }],
+                    },
+                'reset'],
                 select: {
                     info: false,
                     style: 'multi',
@@ -423,6 +431,8 @@
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'agent_assigned_date', name: 'res.created_at', class: 'align-middle agent_assigned_date'},
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
+                    {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
+                    {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -736,130 +746,130 @@
             });
 
 
-            $('body').on('click', '.dropdown-item.update_request', function () {
-                var nature = parseInt($(this).parents('tr').attr('nature'));
-                var request_id = parseInt($(this).parents('tr').attr('id'));
-                if(nature == 1 || nature == 2){
-                    $('#UpdateRequestModal').modal('show');
-                    $('#update_request_id_selected').val(request_id);
-                    $.ajax({
-                        url: '{!! route('admin.crm.request.get_request') !!}',
-                        method: 'POST',
-                        data: {
-                            'request_id': request_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                            if(data.status){
-                                if(data.details.case_nature_id == 1){
-                                    $('#case_nature_select').val(data.details.case_nature_id).trigger('change');
-                                    $('#case_nature_complaints').val(data.details.case_nature_type_id).trigger('change');
-                                    $('#complaint_channels').val(data.details.channel_id).trigger('change');
-                                    $('#complaint_description').val(data.details.description);
+            {{--$('body').on('click', '.dropdown-item.update_request', function () {--}}
+                {{--var nature = parseInt($(this).parents('tr').attr('nature'));--}}
+                {{--var request_id = parseInt($(this).parents('tr').attr('id'));--}}
+                {{--if(nature == 1 || nature == 2){--}}
+                    {{--$('#UpdateRequestModal').modal('show');--}}
+                    {{--$('#update_request_id_selected').val(request_id);--}}
+                    {{--$.ajax({--}}
+                        {{--url: '{!! route('admin.crm.request.get_request') !!}',--}}
+                        {{--method: 'POST',--}}
+                        {{--data: {--}}
+                            {{--'request_id': request_id,--}}
+                            {{--'_token': '{{ csrf_token() }}'--}}
+                        {{--}--}}
+                    {{--}).done(function (data) {--}}
+                            {{--if(data.status){--}}
+                                {{--if(data.details.case_nature_id == 1){--}}
+                                    {{--$('#case_nature_select').val(data.details.case_nature_id).trigger('change');--}}
+                                    {{--$('#case_nature_complaints').val(data.details.case_nature_type_id).trigger('change');--}}
+                                    {{--$('#complaint_channels').val(data.details.channel_id).trigger('change');--}}
+                                    {{--$('#complaint_description').val(data.details.description);--}}
 
-                                    $('#requested_shipment_tracking').text(data.tracking_number);
-                                }else if(data.details.case_nature_id == 2){
-                                    $('#case_nature_select').val(data.details.case_nature_id).trigger('change');
-                                    $('#case_nature_requests').val(data.details.case_nature_type_id).trigger('change');
-                                    $('#request_channels').val(data.details.channel_id).trigger('change');
-                                    $('#service_description').val(data.details.description);
+                                    {{--$('#requested_shipment_tracking').text(data.tracking_number);--}}
+                                {{--}else if(data.details.case_nature_id == 2){--}}
+                                    {{--$('#case_nature_select').val(data.details.case_nature_id).trigger('change');--}}
+                                    {{--$('#case_nature_requests').val(data.details.case_nature_type_id).trigger('change');--}}
+                                    {{--$('#request_channels').val(data.details.channel_id).trigger('change');--}}
+                                    {{--$('#service_description').val(data.details.description);--}}
 
-                                    $('#requested_shipment_tracking').text(data.tracking_number);
-                                }
-                            }else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                    });
-                }
-            });
+                                    {{--$('#requested_shipment_tracking').text(data.tracking_number);--}}
+                                {{--}--}}
+                            {{--}else{--}}
+                                {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                            {{--}--}}
+                    {{--});--}}
+                {{--}--}}
+            {{--});--}}
 
-            $( "#update_request_form" ).bind('submit', function (e) {
-                e.preventDefault();
-                var case_nature_id = parseInt($('#case_nature_select').val());
-                var request_id = $('#update_request_id_selected').val();
-                if(case_nature_id === 1){
-                    var nature_flag = true;
-                    var case_nature_complaint_id = $('#case_nature_complaints').val();
-                    var case_nature_channel_id = $('#complaint_channels').val();
+            {{--$( "#update_request_form" ).bind('submit', function (e) {--}}
+                {{--e.preventDefault();--}}
+                {{--var case_nature_id = parseInt($('#case_nature_select').val());--}}
+                {{--var request_id = $('#update_request_id_selected').val();--}}
+                {{--if(case_nature_id === 1){--}}
+                    {{--var nature_flag = true;--}}
+                    {{--var case_nature_complaint_id = $('#case_nature_complaints').val();--}}
+                    {{--var case_nature_channel_id = $('#complaint_channels').val();--}}
 
-                    if(!case_nature_complaint_id){
-                        nature_flag = false;
-                        var error = "Please select Complaint type!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
-                    if(!case_nature_channel_id){
-                        nature_flag = false;
-                        var error = "Please select Channel!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
-                    if(nature_flag){
-                        $.ajax({
-                            url: '{!! route('admin.crm.request.update') !!}',
-                            method: 'POST',
-                            data: {
-                                '_token': '{{ csrf_token() }}',
-                                'request_id' : request_id,
-                                'case_nature_id' : case_nature_id,
-                                'complaint_id' : case_nature_complaint_id,
-                                'channel_id': case_nature_channel_id
-                            }
-                        })
-                            .done(function(data) {
-                                if (data.status) {
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                }
-                                else {
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                                table.draw('false');
+                    {{--if(!case_nature_complaint_id){--}}
+                        {{--nature_flag = false;--}}
+                        {{--var error = "Please select Complaint type!";--}}
+                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                    {{--}--}}
+                    {{--if(!case_nature_channel_id){--}}
+                        {{--nature_flag = false;--}}
+                        {{--var error = "Please select Channel!";--}}
+                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                    {{--}--}}
+                    {{--if(nature_flag){--}}
+                        {{--$.ajax({--}}
+                            {{--url: '{!! route('admin.crm.request.update') !!}',--}}
+                            {{--method: 'POST',--}}
+                            {{--data: {--}}
+                                {{--'_token': '{{ csrf_token() }}',--}}
+                                {{--'request_id' : request_id,--}}
+                                {{--'case_nature_id' : case_nature_id,--}}
+                                {{--'complaint_id' : case_nature_complaint_id,--}}
+                                {{--'channel_id': case_nature_channel_id--}}
+                            {{--}--}}
+                        {{--})--}}
+                            {{--.done(function(data) {--}}
+                                {{--if (data.status) {--}}
+                                    {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                                {{--}--}}
+                                {{--else {--}}
+                                    {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                                {{--}--}}
+                                {{--table.draw('false');--}}
 
-                                $('#UpdateRequestModal').modal('hide');
-                            });
-                    }
+                                {{--$('#UpdateRequestModal').modal('hide');--}}
+                            {{--});--}}
+                    {{--}--}}
 
-                }else if(case_nature_id == 2){
-                    var nature_flag = true;
-                    var case_nature_complaint_id = $('#case_nature_requests').val();
-                    var case_nature_channel_id = $('#request_channels').val();
-                    if(!case_nature_complaint_id){
-                        nature_flag = false;
-                        var error = "Please select Complaint type!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
-                    if(!case_nature_channel_id){
-                        nature_flag = false;
-                        var error = "Please select Channel!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
+                {{--}else if(case_nature_id == 2){--}}
+                    {{--var nature_flag = true;--}}
+                    {{--var case_nature_complaint_id = $('#case_nature_requests').val();--}}
+                    {{--var case_nature_channel_id = $('#request_channels').val();--}}
+                    {{--if(!case_nature_complaint_id){--}}
+                        {{--nature_flag = false;--}}
+                        {{--var error = "Please select Complaint type!";--}}
+                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                    {{--}--}}
+                    {{--if(!case_nature_channel_id){--}}
+                        {{--nature_flag = false;--}}
+                        {{--var error = "Please select Channel!";--}}
+                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                    {{--}--}}
 
-                    if(nature_flag){
-                        $.ajax({
-                            url: '{!! route('admin.crm.request.update') !!}',
-                            method: 'POST',
-                            data: {
-                                '_token': '{{ csrf_token() }}',
-                                'request_id' : request_id,
-                                'case_nature_id' : case_nature_id,
-                                'complaint_id' : case_nature_complaint_id,
-                                'channel_id': case_nature_channel_id
-                            }
-                        })
-                            .done(function(data) {
-                                if (data.status) {
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                }
-                                else {
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                                table.draw('false');
-                                $('#UpdateRequestModal').modal('hide');
-                            });
-                    }
-                }else{
-                    var error = "Please select case nature!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-            });
+                    {{--if(nature_flag){--}}
+                        {{--$.ajax({--}}
+                            {{--url: '{!! route('admin.crm.request.update') !!}',--}}
+                            {{--method: 'POST',--}}
+                            {{--data: {--}}
+                                {{--'_token': '{{ csrf_token() }}',--}}
+                                {{--'request_id' : request_id,--}}
+                                {{--'case_nature_id' : case_nature_id,--}}
+                                {{--'complaint_id' : case_nature_complaint_id,--}}
+                                {{--'channel_id': case_nature_channel_id--}}
+                            {{--}--}}
+                        {{--})--}}
+                            {{--.done(function(data) {--}}
+                                {{--if (data.status) {--}}
+                                    {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                                {{--}--}}
+                                {{--else {--}}
+                                    {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                                {{--}--}}
+                                {{--table.draw('false');--}}
+                                {{--$('#UpdateRequestModal').modal('hide');--}}
+                            {{--});--}}
+                    {{--}--}}
+                {{--}else{--}}
+                    {{--var error = "Please select case nature!";--}}
+                    {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                {{--}--}}
+            {{--});--}}
 
         });
     </script>

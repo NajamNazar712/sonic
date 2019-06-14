@@ -250,6 +250,7 @@
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
@@ -438,7 +439,8 @@
 	                          }
 	                        });
 	                    }
-	                }],
+	                },
+				'reset'],
 				@else
                 buttons: [
                     {
@@ -446,7 +448,8 @@
                         title: 'Make Payments',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }],
+                    },
+				'reset'],
 				@endif
 				scrollX: true, scrollY: '350px',
 				select: {
@@ -955,7 +958,7 @@
 					selected_rows_shipments.push(id);
 
 					var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector.val()) : 0) + ((parent.children('td.amount').html() != '') ? parseInt(parent.children('td.amount').html().replace(/,/g, '')) : 0);
-					var total_charges = ((total_charges_selector.val() != '') ? parseInt(total_charges_selector.val()) : 0) + ((parent.children('td.charges').html() != '') ? parseInt(parent.children('td.charges').html().replace(/,/g, '')) : 0);
+					var total_charges = ((total_charges_selector.val() != '') ? parseFloat(total_charges_selector.val()) : 0) + ((parent.children('td.charges').html() != '') ? parseFloat(parent.children('td.charges').html().replace(/,/g, '')) : 0);
 					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) + ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html().replace(/,/g, '')) : 0);
 					var total_deductable = ((total_deductable_selector.val() != '') ? parseFloat(total_deductable_selector.val()) : 0) + ((parent.children('td.deductable').html() != '') ? parseFloat(parent.children('td.deductable').html().replace(/,/g, '')) : 0);
 					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')) : 0);
@@ -965,7 +968,7 @@
 					selected_rows_shipments.splice(index, 1);
 
 					var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector.val()) : 0) - ((parent.children('td.amount').html() != '') ? parseInt(parent.children('td.amount').html().replace(/,/g, '')) : 0);
-					var total_charges = ((total_charges_selector.val() != '') ? parseInt(total_charges_selector.val()) : 0) - ((parent.children('td.charges').html() != '') ? parseInt(parent.children('td.charges').html().replace(/,/g, '')) : 0);
+					var total_charges = ((total_charges_selector.val() != '') ? parseFloat(total_charges_selector.val()) : 0) - ((parent.children('td.charges').html() != '') ? parseFloat(parent.children('td.charges').html().replace(/,/g, '')) : 0);
 					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) - ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html().replace(/,/g, '')) : 0);
 					var total_deductable = ((total_deductable_selector.val() != '') ? parseFloat(total_deductable_selector.val()) : 0) - ((parent.children('td.deductable').html() != '') ? parseFloat(parent.children('td.deductable').html().replace(/,/g, '')) : 0);
 					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')) : 0);
@@ -974,7 +977,7 @@
 
 				if (selected_rows_shipments.length > 0) {
 					total_amount_selector.val(parseInt(total_amount));
-					total_charges_selector.val(parseInt(total_charges));
+					total_charges_selector.val(parseFloat(total_charges).toFixed(2));
 					total_gst_selector.val(parseFloat(total_gst).toFixed(2));
 					total_deductable_selector.val(parseFloat(total_deductable).toFixed(2));
 					total_payable_selector.val(parseFloat(total_payable).toFixed(2));

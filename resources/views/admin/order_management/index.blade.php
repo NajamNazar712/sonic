@@ -275,6 +275,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/charts/echarts/echarts.common.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
@@ -593,7 +594,9 @@
                                 }
                             });
                         }
-                    }],
+                    },
+                    'reset'
+                ],
                 select: {
                     info: false,
                     style: 'multi',
@@ -637,7 +640,7 @@
 
                 ],
                 rowCallback: function(row, data, index) {
-                    if (data.booking_type_id != 4 && data.shipper_status_id != 17) {
+                    if (data.shipper_status_id != 17) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shipment_id, selected_rows) !== -1) {

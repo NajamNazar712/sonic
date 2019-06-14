@@ -34,10 +34,9 @@ class TrackingController extends Controller
 
                 $details['tracking_number'] = $tracking_number;
 
-    			$shipper = $shipment->user;
+    			$details['shipper']['name'] = $shipment->user->name;
 
-    			$details['shipper']['name'] = $shipper->name;
-    			$details['shipper']['origin'] = $shipper->city->name;
+                $details['pickup']['origin'] = $shipment->pickup_address->city->name;
 
     			$details['consignee']['name'] = $shipment->consignee_name;
     			$details['consignee']['destination'] = $shipment->consignee_city->name;

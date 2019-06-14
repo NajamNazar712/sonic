@@ -2845,7 +2845,17 @@ class AdminReportsController extends Controller
                     ->where('spt.status','=',0);
             })
             ->leftjoin('products as p','p.id','=','si.product_type_id')
-			->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges')
+            ->leftJoin('pending_invoice_shipments as pis', function ($join) {
+                $join->on('pis.shipment_id', '=', 'shipments.id')
+                    ->where('pis.id','=',
+                        DB::connection('reports')->raw('(select max(id) from pending_invoice_shipments where pending_invoice_shipments.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('invoice_shipments as is', function ($join) {
+                $join->on('is.shipment_id', '=', 'shipments.id')
+                    ->where('is.id','=',
+                        DB::connection('reports')->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id)'));
+            })
+			->select('p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst')
             ->whereNotIn('shipments.shipper_status_id',[1,17]);
 //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
 //            $now = Carbon::now();
@@ -2871,7 +2881,7 @@ class AdminReportsController extends Controller
                 return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('insurance_charges', function($shipment){
-                return number_format($shipment->insurance_charges);
+                return number_format($shipment->insurance_charges, 2);
             })
             ->editColumn('cash_handling_charges', function($shipment){
                 if($shipment->shipment_status == 20 || $shipment->shipment_status == 21 || $shipment->shipment_status == 22 || $shipment->shipment_status == 23 || $shipment->shipment_status == 23 || $shipment->shipment_status == 25){
@@ -2879,7 +2889,7 @@ class AdminReportsController extends Controller
                 }
                 else{
                     if($shipment->cash_handling_charges != null){
-                        return $shipment->cash_handling_charges;
+                        return number_format($shipment->cash_handling_charges, 2);
                     }
                     else{
                         return "-";
@@ -2887,34 +2897,34 @@ class AdminReportsController extends Controller
                 }
             })
             ->editColumn('return_charges', function($shipment){
-                return number_format($shipment->return_charges);
+                return number_format($shipment->return_charges, 2);
             })
             ->editColumn('replacement_charges', function($shipment){
-                return number_format($shipment->replacement_charges);
+                return number_format($shipment->replacement_charges, 2);
             })
             ->editColumn('try_and_buy_charges', function($shipment){
-                return number_format($shipment->try_and_buy_charges);
+                return number_format($shipment->try_and_buy_charges, 2);
             })
             ->editColumn('nsa_osa_charges', function($shipment){
-                return number_format($shipment->nsa_osa_charges);
+                return number_format($shipment->nsa_osa_charges, 2);
             })
             ->editColumn('packaging_material_charges', function($shipment){
-                return number_format($shipment->packaging_material_charges);
+                return number_format($shipment->packaging_material_charges, 2);
             })
             ->editColumn('p_total_charges', function($shipment){
-                return number_format($shipment->p_total_charges);
+                return number_format($shipment->p_total_charges, 2);
             })
             ->editColumn('d_total_charges', function($shipment){
-                return number_format($shipment->d_total_charges);
+                return number_format($shipment->d_total_charges, 2);
             })
             ->editColumn('p_net_payable', function($shipment){
-                return number_format($shipment->p_net_payable);
+                return number_format($shipment->p_net_payable, 2);
             })
             ->editColumn('d_net_payable', function($shipment){
-                return number_format($shipment->d_net_payable);
+                return number_format($shipment->d_net_payable, 2);
             })
             ->editColumn('d_gst', function($shipment){
-                return number_format($shipment->d_gst);
+                return number_format($shipment->d_gst, 2);
             })
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -2947,12 +2957,21 @@ class AdminReportsController extends Controller
             })
             ->editColumn('p_gst',function($sale){
                 $gst = '';
-                if($sale->p_gst != null){
-                    $gst = $sale->p_gst;
-                }else if($sale->d_gst != null){
-                    $gst = $sale->d_gst;
+                if($sale->account_type_id == 1){
+                    if($sale->p_gst != null){
+                        $gst = $sale->p_gst;
+                    }else if($sale->d_gst != null){
+                        $gst = $sale->d_gst;
+                    }
                 }
-                return number_format((float)$gst);
+                else{
+                    if($sale->pis_gst != null){
+                        $gst = $sale->pis_gst;
+                    }else if($sale->is_gst != null){
+                        $gst = $sale->is_gst;
+                    }
+                }
+                return number_format((float)$gst, 2);
             })
             ->editColumn('p_total_charges',function($sale){
                 $total = '';
@@ -2961,12 +2980,12 @@ class AdminReportsController extends Controller
                 }else if($sale->d_total_charges != null){
                     $total = $sale->d_total_charges;
                 }
-                return number_format((float)$total);
+                return number_format((float)$total, 2);
             })
             ->addColumn('estimated_charges',function($sale){
                 $estimated = '';
                 $estimated = (($sale->weight_charges != null)? $sale->weight_charges:0) + (($sale->cash_handling_charges != null)? $sale->cash_handling_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->return_charges != null)? $sale->return_charges:0) + (($sale->replacement_charges != null)? $sale->replacement_charges:0) + (($sale->fuel_surcharge != null)? $sale->fuel_surcharge:0) + (($sale->try_and_buy_charges != null)? $sale->try_and_buy_charges:0) + (($sale->packaging_material_charges != null)? $sale->packaging_material_charges:0);
-                return number_format((float)$estimated);
+                return number_format((float)$estimated, 2);
             })
             ->editColumn('p_net_payable',function($sale){
                 $payable = '';
@@ -2975,7 +2994,7 @@ class AdminReportsController extends Controller
                 }else if($sale->d_net_payable != null){
                     $payable = $sale->d_net_payable;
                 }
-                return number_format((float)$payable);
+                return number_format((float)$payable, 2);
             })
             ->addColumn('class',function($sale){
                 $class = '';
@@ -3280,10 +3299,10 @@ class AdminReportsController extends Controller
                 return number_format($shipment->amount);
             })
             ->editColumn('charges', function($shipment){
-                return number_format($shipment->charges);
+                return number_format($shipment->charges, 2);
             })
             ->editColumn('payable', function($shipment){
-                return number_format($shipment->payable);
+                return number_format($shipment->payable, 2);
             })
             ->addColumn('account_no', function ($user) {
                 return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);
@@ -4104,34 +4123,34 @@ class AdminReportsController extends Controller
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->payment_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
             })
             ->editColumn('cash_handling_charges', function ($shipments){
-                return number_format($shipments->cash_handling_charges);
+                return number_format($shipments->cash_handling_charges, 2);
             })
             ->editColumn('insurance_charges', function ($shipments){
-                return number_format($shipments->insurance_charges);
+                return number_format($shipments->insurance_charges, 2);
             })
             ->editColumn('return_charges', function ($shipments){
-                return number_format($shipments->return_charges);
+                return number_format($shipments->return_charges, 2);
             })
             ->editColumn('fuel_surcharge', function ($shipments){
-                return number_format($shipments->fuel_surcharge);
+                return number_format($shipments->fuel_surcharge, 2);
             })
             ->editColumn('replacement_charges', function ($shipments){
-                return number_format($shipments->replacement_charges);
+                return number_format($shipments->replacement_charges, 2);
             })
             ->editColumn('nsa_osa_charges', function($shipment){
-                return number_format($shipment->nsa_osa_charges);
+                return number_format($shipment->nsa_osa_charges, 2);
             })
             ->editColumn('packaging_material_charges', function ($shipments){
-                return number_format($shipments->packaging_material_charges);
+                return number_format($shipments->packaging_material_charges, 2);
             })
             ->editColumn('gst', function ($shipments){
-                return number_format($shipments->gst);
+                return number_format($shipments->gst, 2);
             })
             ->editColumn('amount', function ($shipments){
-                return number_format($shipments->amount);
+                return number_format($shipments->amount, 2);
             })
             ->editColumn('total_payable', function ($shipments){
-                return number_format($shipments->total_payable);
+                return number_format($shipments->total_payable, 2);
             })
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -4199,12 +4218,22 @@ public function revenue_index(){
                     ->where('dps.id','=',
                         DB::connection('reports')->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
             })
+            ->leftJoin('pending_invoice_shipments as pis', function ($join) {
+                $join->on('pis.shipment_id', '=', 'shipments.id')
+                    ->where('pis.id','=',
+                        DB::connection('reports')->raw('(select max(id) from pending_invoice_shipments where pending_invoice_shipments.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('invoice_shipments as is', function ($join) {
+                $join->on('is.shipment_id', '=', 'shipments.id')
+                    ->where('is.id','=',
+                        DB::connection('reports')->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id)'));
+            })
             ->leftJoin('shipments_journey as dr', function ($join) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37))'));
             })
-            ->select('shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges')
+            ->select('shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst')
             ->whereNotIn('shipments.shipper_status_id',[1,17]);
 //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
 //            $now = Carbon::now();
@@ -4223,7 +4252,7 @@ public function revenue_index(){
 
         $datatable = Datatables::of($sales)
             ->editColumn('insurance_charges', function($shipment){
-                return number_format($shipment->insurance_charges);
+                return number_format($shipment->insurance_charges, 2);
             })
             ->editColumn('cash_handling_charges', function($shipment){
                 if($shipment->shipment_status == 20 || $shipment->shipment_status == 21 || $shipment->shipment_status == 22 || $shipment->shipment_status == 23 || $shipment->shipment_status == 23 || $shipment->shipment_status == 25){
@@ -4242,50 +4271,50 @@ public function revenue_index(){
                 return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('return_charges', function($shipment){
-                return number_format($shipment->return_charges);
+                return number_format($shipment->return_charges, 2);
             })
             ->editColumn('weight_charges', function($shipment){
-                return number_format($shipment->weight_charges);
+                return number_format($shipment->weight_charges, 2);
             })
             ->editColumn('fuel_surcharge', function($shipment){
-                return number_format($shipment->fuel_surcharge);
+                return number_format($shipment->fuel_surcharge, 2);
             })
             ->editColumn('replacement_charges', function($shipment){
-                return number_format($shipment->replacement_charges);
+                return number_format($shipment->replacement_charges, 2);
             })
             ->editColumn('try_and_buy_charges', function($shipment){
-                return number_format($shipment->try_and_buy_charges);
+                return number_format($shipment->try_and_buy_charges, 2);
             })
             ->editColumn('nsa_osa_charges', function($shipment){
-                return number_format($shipment->nsa_osa_charges);
+                return number_format($shipment->nsa_osa_charges, 2);
             })
             ->editColumn('packaging_material_charges', function($shipment){
-                return number_format($shipment->packaging_material_charges);
+                return number_format($shipment->packaging_material_charges, 2);
             })
             ->editColumn('p_total_charges', function($shipment){
-                return number_format($shipment->p_total_charges);
+                return number_format($shipment->p_total_charges, 2);
             })
             ->editColumn('d_total_charges', function($shipment){
-                return number_format($shipment->d_total_charges);
+                return number_format($shipment->d_total_charges, 2);
             })
             ->editColumn('p_net_payable', function($shipment){
-                return number_format($shipment->p_net_payable);
+                return number_format($shipment->p_net_payable, 2);
             })
             ->editColumn('d_net_payable', function($shipment){
-                return number_format($shipment->d_net_payable);
+                return number_format($shipment->d_net_payable, 2);
             })
             ->editColumn('d_gst', function($shipment){
-                return number_format($shipment->d_gst);
+                return number_format($shipment->d_gst, 2);
             })
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('s_collection_amount', function($shipment){
-                return number_format($shipment->s_collection_amount);
+                return number_format($shipment->s_collection_amount, 2);
             })
             ->editColumn('d_collection_amount', function($shipment){
-                return number_format($shipment->d_collection_amount);
+                return number_format($shipment->d_collection_amount, 2);
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -4308,12 +4337,21 @@ public function revenue_index(){
             })
             ->editColumn('p_gst',function($sale){
                 $gst = '';
-                if($sale->p_gst != null){
-                    $gst = $sale->p_gst;
-                }else if($sale->d_gst != null){
-                    $gst = $sale->d_gst;
+                if($sale->account_type_id == 1){
+                    if($sale->p_gst != null){
+                        $gst = $sale->p_gst;
+                    }else if($sale->d_gst != null){
+                        $gst = $sale->d_gst;
+                    }
                 }
-                return number_format((float)$gst);
+                else{
+                    if($sale->pis_gst != null){
+                        $gst = $sale->pis_gst;
+                    }else if($sale->is_gst != null){
+                        $gst = $sale->is_gst;
+                    }
+                }
+                return number_format((float)$gst, 2);
             })
             ->editColumn('p_total_charges',function($sale){
                 $total = '';
@@ -4322,12 +4360,12 @@ public function revenue_index(){
                 }else if($sale->d_total_charges != null){
                     $total = $sale->d_total_charges;
                 }
-                return number_format((float)$total);
+                return number_format((float)$total, 2);
             })
             ->addColumn('estimated_charges',function($sale){
                 $estimated = '';
                 $estimated = (($sale->weight_charges != null)? $sale->weight_charges:0) + (($sale->cash_handling_charges != null)? $sale->cash_handling_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->return_charges != null)? $sale->return_charges:0) + (($sale->replacement_charges != null)? $sale->replacement_charges:0) + (($sale->fuel_surcharge != null)? $sale->fuel_surcharge:0) + (($sale->try_and_buy_charges != null)? $sale->try_and_buy_charges:0) + (($sale->packaging_material_charges != null)? $sale->packaging_material_charges:0);
-                return number_format((float)$estimated);
+                return number_format((float)$estimated, 2);
             })
             ->editColumn('p_net_payable',function($sale){
                 $payable = '';
@@ -4336,7 +4374,7 @@ public function revenue_index(){
                 }else if($sale->d_net_payable != null){
                     $payable = $sale->d_net_payable;
                 }
-                return number_format((float)$payable);
+                return number_format((float)$payable, 2);
             })
             ->addColumn('class',function($sale){
                 $class = '';
@@ -4409,13 +4447,13 @@ public function revenue_index(){
                 }
             })
             ->editColumn('total_charges', function ($gst) {
-                return number_format($gst->total_charges);
+                return number_format($gst->total_charges, 2);
             })
             ->editColumn('w_o_gst', function ($gst) {
-                return number_format($gst->w_o_gst);
+                return number_format($gst->w_o_gst, 2);
             })
             ->editColumn('gst', function ($gst) {
-                return number_format($gst->gst);
+                return number_format($gst->gst, 2);
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');

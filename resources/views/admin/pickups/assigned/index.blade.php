@@ -113,6 +113,7 @@
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
@@ -302,14 +303,14 @@
 		                      }
 		                    });
 		                  }
-		                }],
+		                },'reset'],
 				@else
 	               buttons:[{
                     extend: 'excel',
                     title: 'Assigned Pickups',
                     className:'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
-                }],
+                },'reset'],
 	            @endif
 	            scrollX: true, scrollY: '350px',
 				select: {
@@ -521,13 +522,14 @@
 							$.each(data, function(index, details) {
 								var shipper = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipper</strong></td><td class="align-middle text-center">' + details.shipper + '</td></tr>';
 								var contact_person = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Contact Person</strong></td><td class="align-middle text-center">' + details.contact_person + '</td></tr>';
+								var vendor = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Vendor</strong></td><td class="align-middle text-center">' + ((details.vendor) ? details.vendor : '') + '</td></tr>';
 								var contact_number = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Contact Number</strong></td><td class="align-middle text-center">' + details.contact_number + '</td></tr>';
 								var address = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Address</strong></td><td class="align-middle text-center">' + details.address + '</td></tr>';
 								var bookings = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Bookings</strong></td><td class="align-middle text-center">' + details.bookings + '</td></tr>';
 								var total_estimated_weight = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Total Estimated Weight</strong></td><td class="align-middle text-center">' + details.total_estimated_weight + 'kg</td></tr>';
 								var pickup_type = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Pickup Type</strong></td><td class="align-middle text-center">' + details.pickup_type + '</td></tr>';
 
-								pickup_requests += '<table class="table table-sm table-bordered mb-1"><tbody>' + shipper + contact_person + contact_number + address + bookings + total_estimated_weight + pickup_type + '</tbody></table>';
+								pickup_requests += '<table class="table table-sm table-bordered mb-1"><tbody>' + shipper + contact_person + vendor + contact_number + address + bookings + total_estimated_weight + pickup_type + '</tbody></table>';
 							});
 
 							$('#view_details .modal-body').html(pickup_requests);

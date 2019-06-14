@@ -27,6 +27,7 @@
 										<th class="border-primary border-darken-1">Requested Datetime</th>
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Contact Person</th>
+										<th class="border-primary border-darken-1">Vendor</th>
 										<th class="border-primary border-darken-1">Contact No(s).</th>
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">City</th>
@@ -125,6 +126,7 @@
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
@@ -151,6 +153,7 @@
                             head.push('Requested Datetime');
                             head.push('Shipper');
                             head.push('Contact Person');
+                            head.push('Vendor');
                             head.push('Contact No(s).');
                             head.push('Address');
                             head.push('City');
@@ -169,6 +172,7 @@
                                 row.push(values.requested_at);
                                 row.push(values.shipper);
                                 row.push(values.contact_person);
+                                row.push(values.vendor);
                                 row.push(values.contact_number);
                                 row.push(values.address);
                                 row.push(values.city);
@@ -325,7 +329,8 @@
 		                      }
 		                    });
 		                  }
-		                }
+		                },
+					'reset'
                         ],
 				@else
                 buttons: [
@@ -334,7 +339,8 @@
                         title: 'Pending Pickups',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }
+                    },
+					'reset'
                     ],
 				@endif
 				scrollX: true, scrollY: '350px',
@@ -363,6 +369,7 @@
 					{data: 'requested_at', name: 'pickup_requests.created_at', class: 'align-middle requested_at'},
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
+					{data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
 					{data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
 					{data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
 					{data: 'city', name: 'ci.name', class: 'align-middle city'},

@@ -30,6 +30,10 @@
                                 <button type="button" class="btn btn-primary width-10-per" id="tag"><span
                                             class="d-none d-lg-block" style="color: white">Tag</span></button>
                             @endif
+                                @if(($crm_details['status_id'] == 1) && (session('role_id') == 1 || in_array(213, session('permissions'))))
+                                <button type="button" class="btn btn-primary width-10-per" id="edit_request"><span
+                                            class="d-none d-lg-block" style="color: white">Edit Request</span></button>
+                            @endif
 
                         </div>
                     </h1>
@@ -519,6 +523,92 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade text-left" id="editRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editRequestModal"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary white">
+                        <h4 class="modal-title white">Edit Request</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <form id="edit_request_form" method="post">
+                            @method('POST')
+                            @csrf
+                            <input type="text" name="request_id" id="request_id" class="hidden" value="{{$crm_details->id}}">
+                            <div class="container">
+                                <div class="row justify-content-center">
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <input type="text" name="tracking_number" class="form-control tracking_number"
+                                                   placeholder="Tracking Number*" data-tags-input-name="tracking_number"
+                                                   data-rule-required="true" data-msg-required="Tracking Number is required">
+                                        </fieldset>
+                                    </div>
+                                </div>
+                                <div class="row justify-content-center">
+                                    <div class="col-6">
+                                        <fieldset class="form-group">
+                                            <select name="case_nature_select" id="case_nature_select" class="form-control select2">
+                                                @foreach($case_nature as $nature)
+                                                    <option value="{{$nature->id}}">{{$nature->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                                <div class="complaints d-none" id="request_complaints">
+                                    <div class="row justify-content-center">
+                                        <div class="col-6">
+                                            <fieldset class="form-group">
+                                                <select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2">
+                                                    @foreach($case_nature_complaints as $complaints)
+                                                        @if($crm_details->case_nature_type_id != $complaints->id)
+                                                            <option value="{{$complaints->id}}">{{$complaints->type}}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="service d-none" id="request_service">
+                                    <div class="row justify-content-center">
+                                        <div class="col-6">
+                                            <fieldset class="form-group">
+                                                <select name="case_nature_request" id="case_nature_requests" class="form-control select2">
+                                                    @foreach($case_nature_service_requests as $service)
+                                                        @if($crm_details->case_nature_type_id != $service->id)
+                                                            <option value="{{$service->id}}">{{$service->type}}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-none" id="description_div">
+                                    <div class="row justify-content-center">
+                                        <div class="col-8">
+                                            <fieldset class="form-group">
+                                                <textarea class="form-control" name="description" id="description" rows="5" placeholder="Enter Description Here...">{{$crm_details->description}}</textarea>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row justify-content-center">
+                                    <div class="col-3">
+                                        <button id="editRequest" type="submit" class="btn btn-primary btn-block d-none">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 @endsection
 @section('css')
@@ -608,6 +698,7 @@
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}"
             type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/ui/scrollable.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -654,7 +745,58 @@
             {{--}--}}
             {{--});--}}
             {{--});--}}
+            $('.tracking_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                dropdownParent:$('#edit_request_form')
+            });
+            $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Case Nature",
+                allowClear:true,
+                dropdownParent:$('#edit_request_form')
+            }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id === 1){
+                    $('#request_service').addClass('d-none');
+                    $('#request_complaints').removeClass('d-none');
+                    $('#description_div').removeClass('d-none');
+                    $('#request_feedback').addClass('d-none');
+                    $('#editRequest').removeClass('d-none');
+                }else if(id === 2){
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').removeClass('d-none');
+                    $('#description_div').removeClass('d-none');
+                    $('#request_feedback').addClass('d-none');
+                    $('#editRequest').removeClass('d-none');
+                }else{
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').addClass('d-none');
+                    $('#description_div').addClass('d-none');
+                    $('#editRequest').addClass('d-none');
+                }
+            });$('#case_nature_complaints').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Complaint Type",
+                allowClear:true,
+                dropdownParent:$('#edit_request_form')
+            });
+            $('#case_nature_requests').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Request Type",
+                allowClear:true,
+                dropdownParent:$('#edit_request_form')
+            });
+            $('#edit_request').on('click', function(){
+                @if (isset($crm_details->shipment->tracking_number))
+                    var tracking_no = @json($crm_details->shipment->tracking_number);
+                    $('.tracking_number').val(tracking_no);
+                    $('.tracking_number').attr('disabled', true);
+                @endif
 
+                $('#editRequestModal').modal('show');
+            });
             $("#tag_admin").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select User",
                 width: '100%',
@@ -880,6 +1022,108 @@
             }
 
             updateScroll();
+            $( "#edit_request_form" ).bind('submit', function (e) {
+                e.preventDefault();
+                var case_nature_id = parseInt($('#case_nature_select').val());
+                var tracking_number = $('.tracking_number').val();
+                var nature_flag = true;
+                if(case_nature_id === 1) {
+                    var case_nature_complaint_id = $('#case_nature_complaints').val();
+                    var description = $('#description').val();
+                    if (!case_nature_complaint_id) {
+                        nature_flag = false;
+                        var error = "Please select Complaint type!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (!description) {
+                        nature_flag = false;
+                        var error = "Please Enter Description!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if(!tracking_number){
+                        nature_flag = false;
+                        var error = "Tracking Number Required!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                }
+                else if(case_nature_id === 2){
+                    var case_nature_complaint_id = $('#case_nature_requests').val();
+                    var description = $('#description').val();
+                    if(!case_nature_complaint_id){
+                        nature_flag = false;
+                        var error = "Please select Request type!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if (!description) {
+                        nature_flag = false;
+                        var error = "Please Enter Description!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if(!tracking_number){
+                        nature_flag = false;
+                        var error = "Tracking Number Required!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                }
+                if(nature_flag){
+                    $('#editRequest').attr('disabled',true);
+                    $.ajax({
+                        url: '{!! route('admin.crm.request.edit') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'tracking_number': $('.tracking_number').val(),
+                            'request_id': $('#request_id').val(),
+                            'case_nature_id' : case_nature_id,
+                            'complaint_id' : case_nature_complaint_id,
+                            'description' : description
+                        }
+                    })
+                        .done(function(data) {
+                            if(data.status == 0){
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                                setTimeout(function(){
+                                    window.location.reload(1);
+                                }, 1500);
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+
+                            $('#editRequestModal').modal('hide');
+                            $('#editRequest').attr('disabled',false);
+                        });
+                }
+            });
+            $('#editRequestModal').on('hide.bs.modal', function (e) {
+                $('#edit_request_form')[0].reset();
+                $('#case_nature_complaints').val('').trigger('change');
+                $('#case_nature_select').val('').trigger('change');
+                $('#case_nature_requests').val('').trigger('change');
+                $('.tracking_number').val('');
+                $('#request_complaints').addClass('d-none');
+                $('#request_service').addClass('d-none');
+                $('#description_div').addClass('d-none');
+
+            });
         });
 
     </script>

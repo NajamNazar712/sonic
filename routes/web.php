@@ -834,7 +834,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit/reject', 'Admins\AdminPettyCashController@edit_petty_cash_statements_reject')->name('edit.reject');
             Route::put('edit/submit', 'Admins\AdminPettyCashController@edit_petty_cash_statements_submit')->name('edit.submit');
             Route::post('view/amount', 'Admins\AdminPettyCashController@edit_petty_cash_statements_amount')->name('view.amount');
-
+            Route::get('reference_document/{reference_document}', 'Admins\AdminPettyCashController@reference_document')->name('reference_document');
 
         });
         Route::prefix('approved')->name('approved.')->group(function (){
@@ -1124,10 +1124,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('crm')->name('crm.')->group(function () {
         Route::prefix('request')->name('request.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_request')->name('add');
-            Route::post('get_request', 'Admins\AdminCRMController@get_request_info')->name('get_request');
-            Route::post('update', 'Admins\AdminCRMController@update_request')->name('update');
+//            Route::post('get_request', 'Admins\AdminCRMController@get_request_info')->name('get_request');
+//            Route::post('update', 'Admins\AdminCRMController@update_request')->name('update');
             Route::get('', 'Admins\AdminCRMController@launched')->name('launched');
             Route::get('{id}', 'Admins\AdminCRMController@request_details')->name('details');
+            Route::post('edit', 'Admins\AdminCRMController@edit_request')->name('edit');
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');

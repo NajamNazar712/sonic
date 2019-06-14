@@ -57,12 +57,13 @@ class ShipperShipmentBookController extends Controller
         session(['service_type_name' => $service_type->booking_type]);
     }
 
-    static public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id, $default, $hidden = FALSE) {
+    static public function add_pickup_address($user_id, $address, $person_of_contact, $vendor, $phone_number, $email_address, $city_id, $default, $hidden = FALSE) {
         $user_shipping_info = new UserShippingInfo();
 
         $user_shipping_info->user_id = $user_id;
         $user_shipping_info->pickup_address = $address;
         $user_shipping_info->poc = $person_of_contact;
+        $user_shipping_info->vendor = $vendor;
         $user_shipping_info->phone = $phone_number;
         $user_shipping_info->email = $email_address;
         $user_shipping_info->city_id = $city_id;
@@ -282,7 +283,7 @@ class ShipperShipmentBookController extends Controller
                         }
                         UserShippingInfo::where('user_id', $user_id)->update(['default_address' => 0]);
 
-                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, $default);
+                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_vendor'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, $default);
                     }
                     else {
                         if ($service_type_id != 5) {
@@ -293,7 +294,7 @@ class ShipperShipmentBookController extends Controller
                             $pickup_city_id = $user_shipping_info->city_id;
                         }
                         else {
-                            $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE);
+                            $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE);
 
                             $pickup_city_id = $request->input('consignee_city');
 
@@ -1137,13 +1138,13 @@ class ShipperShipmentBookController extends Controller
             'order_id' => ['nullable', 'between:0,100'],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2', 'between:0,250'],
+            'item_description' => ['required_if:service_type_id,1,2', 'between:0,500'],
             'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
             'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,250'],
+            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,500'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,1000'],
 
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
@@ -1492,7 +1493,7 @@ class ShipperShipmentBookController extends Controller
 
                     $pickup_city_id = $request->input('new_pickup_city');
 
-                    $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, 0);
+                    $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_vendor'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, 0);
                 }
                 else {
                     if ($service_type_id != 5) {
@@ -1503,7 +1504,7 @@ class ShipperShipmentBookController extends Controller
                         $pickup_city_id = $user_shipping_info->city_id;
                     }
                     else {
-                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE);
+                        $pickup_address_id = $this->add_pickup_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE);
 
                         $pickup_city_id = $request->input('consignee_city');
                     }
@@ -2269,13 +2270,13 @@ class ShipperShipmentBookController extends Controller
             'order_id' => ['nullable', 'between:0,100'],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2', 'between:0,250'],
+            'item_description' => ['required_if:service_type_id,1,2', 'between:0,500'],
             'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
             'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,250'],
+            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,500'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,1000'],
 
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],

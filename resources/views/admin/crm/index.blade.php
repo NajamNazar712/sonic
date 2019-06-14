@@ -45,12 +45,16 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
             var table = $('#datatable').DataTable({
-                dom: 'ltipr',
                 scrollX: true, scrollY: '350px',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons:[
+                    'reset'
+                    ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',

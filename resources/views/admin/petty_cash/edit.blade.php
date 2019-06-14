@@ -10,7 +10,7 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="edit_statement_form" action="{{route('admin.petty_cash.statements.edit.submit')}}" method="post">
+                <form id="edit_statement_form" action="{{route('admin.petty_cash.statements.edit.submit')}}" method="post" enctype="multipart/form-data">
                     @method('PUT')
                     @csrf
                     <input type="hidden" name="selected_rows" id="selected_rows">
@@ -71,6 +71,7 @@
                             <th class="border-primary border-darken-1"> Amount </th>
                             <th class="border-primary border-darken-1">Reference No.</th>
                             <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Reference Document</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1"></th>
 
@@ -155,6 +156,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -229,9 +231,10 @@
                         $('#statement_submit').attr('disabled', false);
 
                     }
-                }],
+                },'reset'],
                 @else
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: ['reset'],
                 @endif
                 autoWidth: false,
                 scrollX: true, scrollY:'200px',
@@ -254,6 +257,7 @@
                     {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount form-group'},
                     {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle reference_no form-group'},
                     {data:'remarks' ,name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},
+                    {data:'reference_document' ,name: 'reference_document', class: 'align-middle reference_document form-group'},
                     {data:'status' ,name: 'petty_cash_statement_details.status', class: 'align-middle status'},
                     {data:'action' ,name: 'action', class: 'align-middle action'}
                 ],
@@ -598,6 +602,7 @@
                         $(row.node()).find('td.expense_amount input').attr('disabled',false);
                         $(row.node()).find('td.reference_no input').attr('disabled',false);
                         $(row.node()).find('td.remarks textarea').attr('disabled',false);
+                        $(row.node()).find('td.reference_document input').attr('disabled',false);
                         selected_rows.push(id);
                     }
 
@@ -618,6 +623,7 @@
                         $(row.node()).find('td.expense_amount input').attr('disabled',false);
                         $(row.node()).find('td.reference_no input').attr('disabled',false);
                         $(row.node()).find('td.remarks textarea').attr('disabled',false);
+                        $(row.node()).find('td.reference_document input').attr('disabled',false);
                         selected_rows.push(id);
                     }
 

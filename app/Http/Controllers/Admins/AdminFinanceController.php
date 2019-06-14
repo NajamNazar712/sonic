@@ -8,6 +8,7 @@ use App\Http\Models\ChargesModes;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShippingMode;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -788,10 +789,11 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_walk_in_shipments_index(){
+        $shipping_modes = ShippingMode::where('id', '!=', 4)->get();
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $charges_mode_name = ChargesModes::select('id','charges_mode')->get();
         $status = [['id' => 0, 'text' => 'Pending Charges Collection'], ['id' => 1, 'text' => 'Resolved'], ['id' => 2, 'text' => 'Pending Return Charges Collection']];
-        return view('admin.finance.outstanding_walk_in_shipments')->with(['shipment_status' => $shipment_status, 'status' => json_encode($status), 'charges_mode_name' => $charges_mode_name]);
+        return view('admin.finance.outstanding_walk_in_shipments')->with(['shipment_status' => $shipment_status, 'status' => json_encode($status), 'charges_mode_name' => $charges_mode_name, 'shipping_modes' => $shipping_modes]);
     }
 
     public function outstanding_walk_in_shipments_list(Request $request){
@@ -813,8 +815,11 @@ class AdminFinanceController extends Controller
             ->leftjoin('admins as adn','adn.id','=','an.admin_id')
             ->leftjoin('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('admins as a', 'sj.admin_id', '=', 'a.id')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.amount', 'shipments.received_amount', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status','adn.name as booked_by','oc.name as origin')
-            ->where('shipments.booking_type_id',4);
+            ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftjoin('shipment_items as sis', 'sis.shipment_id', '=', 'shipments.id')
+            ->leftjoin('products as prod', 'prod.id', '=', 'sis.product_type_id')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.amount', 'shipments.received_amount', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status','adn.name as booked_by','oc.name as origin', 'shipments.actual_weight as actual_weight', 'shipments.chargeable_weight as chargeable_weight', 'sm.mode as shipping_mode', 'sis.quantity as item_quantity', 'prod.product_name as product_name')
+            ->where('shipments.booking_type_id',4)->where('shipments.shipper_status_id', '!=', 17);
 
 
         $datatables = Datatables::of($shipments)
@@ -845,10 +850,10 @@ class AdminFinanceController extends Controller
                 }
             })
             ->editColumn('return_charges', function($shipment){
-                return number_format($shipment->return_charges);
+                return number_format($shipment->return_charges, 2);
             })
             ->editColumn('weight_charges', function($shipment){
-                return number_format($shipment->weight_charges);
+                return number_format($shipment->weight_charges, 2);
             })
             ->addColumn('aging', function($shipment) {
                 $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
@@ -1038,22 +1043,6 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($request->id);
 
-            $shipper_payable = 0;
-            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
-            if ($pending_payment->exists()) {
-                $pending_payment = $pending_payment->first();
-
-                $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
-                if ($pending_payment_shipments->exists()) {
-                    $pending_payment_shipments = $pending_payment_shipments->get();
-                    foreach ($pending_payment_shipments as $pending_payment_shipment) {
-                        $shipper_payable += $pending_payment_shipment->payable;
-                    }
-                }
-            }
-            if ($shipper_payable < 0) {
-                return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
-            }
 
             $delivery_note_shipment->status = 8;
 
@@ -1890,7 +1879,7 @@ class AdminFinanceController extends Controller
 
         $datatables = Datatables::of($pending_payments)
             ->addColumn('total_deductable', function($pending_payments) {
-                return number_format(ROUND(($pending_payments->total_charges + $pending_payments->total_gst), 0, PHP_ROUND_HALF_DOWN));
+                return number_format(($pending_payments->total_charges + $pending_payments->total_gst), 2);
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -1936,20 +1925,20 @@ class AdminFinanceController extends Controller
                 }
             })
             ->editColumn('total_amount', function($pending_payment) {
-                return number_format($pending_payment->total_amount);
+                return number_format($pending_payment->total_amount, 2);
             })
             ->editColumn('total_charges', function($pending_payment) {
-                return number_format($pending_payment->total_charges);
+                return number_format($pending_payment->total_charges, 2);
             })
             ->editColumn('total_gst', function($pending_payment) {
-                return number_format(ROUND($pending_payment->total_gst, 0, PHP_ROUND_HALF_DOWN));
+                return number_format($pending_payment->total_gst, 2);
             })
             ->editColumn('total_payable', function($pending_payment) {
                 return number_format(ROUND($pending_payment->total_payable, 0, PHP_ROUND_HALF_DOWN));
             })
             ->editColumn('total_adjustments', function($pending_payment) {
                 if ($pending_payment->total_adjustments) {
-                    return number_format($pending_payment->total_adjustments);
+                    return number_format($pending_payment->total_adjustments, 2);
                 }
                 else {
                     return 0;
@@ -2122,7 +2111,7 @@ class AdminFinanceController extends Controller
             }
 
             $detail['amount'] = number_format($pending_payment_shipment->amount);
-            $detail['charges'] = number_format($pending_payment_shipment->charges);
+            $detail['charges'] = number_format($pending_payment_shipment->charges, 2);
             $detail['gst'] = number_format($pending_payment_shipment->gst, 2);
             $detail['deductable'] = number_format(($pending_payment_shipment->charges + $pending_payment_shipment->gst), 2);
             $detail['payable'] = number_format($pending_payment_shipment->payable, 2);
@@ -2161,7 +2150,7 @@ class AdminFinanceController extends Controller
                 return number_format($pending_payment_shipment->amount);
             })
             ->editColumn('charges', function($pending_payment_shipment) {
-                return number_format($pending_payment_shipment->charges);
+                return number_format($pending_payment_shipment->charges, 2);
             })
             ->editColumn('gst', function($pending_payment_shipment) {
                 return number_format($pending_payment_shipment->gst, 2);
@@ -2252,7 +2241,7 @@ class AdminFinanceController extends Controller
 
         $spreadsheet->getActiveSheet()->getStyle('C')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0.00');
@@ -2353,7 +2342,7 @@ class AdminFinanceController extends Controller
 
             $shipper = User::find($done_payment->user_id);
 
-            $payable = number_format(DonePaymentShipment::where('done_payment_id', $done_payment_id)->sum('payable'));
+            $payable = number_format(ROUND(DonePaymentShipment::where('done_payment_id', $done_payment_id)->sum('payable'), 0, PHP_ROUND_HALF_DOWN));
 
             $row = array();
 
@@ -2635,7 +2624,7 @@ class AdminFinanceController extends Controller
             })
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
             ->addColumn('total_deductable', function($done_payment) {
-                return number_format(ROUND(($done_payment->total_charges + $done_payment->total_gst), 0, PHP_ROUND_HALF_DOWN));
+                return number_format(($done_payment->total_charges + $done_payment->total_gst), 2);
             })
             ->editColumn('delivered_shipments', function($done_payment) {
                 if ($done_payment->delivered_shipments != 0) {
@@ -2662,13 +2651,13 @@ class AdminFinanceController extends Controller
                 }
             })
             ->editColumn('total_amount', function($done_payment) {
-                return number_format($done_payment->total_amount);
+                return number_format($done_payment->total_amount, 2);
             })
             ->editColumn('total_charges', function($done_payment) {
-                return number_format($done_payment->total_charges);
+                return number_format($done_payment->total_charges, 2);
             })
             ->editColumn('total_gst', function($done_payment) {
-                return number_format(ROUND($done_payment->total_gst, 0, PHP_ROUND_HALF_DOWN));
+                return number_format($done_payment->total_gst, 2);
             })
             ->editColumn('total_payable', function($done_payment) {
                 return number_format(ROUND($done_payment->total_payable, 0, PHP_ROUND_HALF_DOWN));
@@ -3060,9 +3049,9 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->weight_charges) : '0') . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
-                              <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
                             </tr>
             ';
 
@@ -3121,9 +3110,9 @@ class AdminFinanceController extends Controller
                                 <td colspan="7"></td>
                                 <td class="color primary"><strong>Total</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
-                                <td class="color secondary"><strong>' . number_format($total_weight_charges) . '</strong></td>
-                                <td class="color secondary"><strong>' . number_format($total_cash_handling_charges) . '</strong></td>
-                                <td class="color secondary"><strong>' . number_format($total_adjustments) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_weight_charges, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_cash_handling_charges, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_adjustments, 2) . '</strong></td>
                             </tr>
       ';
 
@@ -3134,7 +3123,7 @@ class AdminFinanceController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Total Payable (PKR)</strong></td>
-                              <td>' . number_format($total_payable) . '</td>
+                              <td>' . number_format(ROUND($total_payable, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                             </tr>
                           </tbody>
                         </table>
@@ -3172,55 +3161,55 @@ class AdminFinanceController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Weight Charges</strong></td>
-                                        <td>' . number_format($total_weight_charges) . '</td>
+                                        <td>' . number_format($total_weight_charges, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Cash Handling Charges</strong></td>
-                                        <td>' . number_format($total_cash_handling_charges) . '</td>
+                                        <td>' . number_format($total_cash_handling_charges, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Insurance Charges</strong></td>
-                                        <td>' . number_format($total_insurance_charges) . '</td>
+                                        <td>' . number_format($total_insurance_charges, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Replacement Charges</strong></td>
-                                        <td>' . number_format($total_replacement_charges) . '</td>
+                                        <td>' . number_format($total_replacement_charges, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Return Charges</strong></td>
-                                        <td>' . number_format($total_return_charges) . '</td>
+                                        <td>' . number_format($total_return_charges, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Fuel Surcharge</strong></td>
-                                        <td>' . number_format($total_fuel_surcharge) . '</td>
+                                        <td>' . number_format($total_fuel_surcharge, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Intercept Charges</strong></td>
-                                        <td>' . number_format($total_intercept_charges) . '</td>
+                                        <td>' . number_format($total_intercept_charges, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total OSA Charges</strong></td>
-                                        <td>' . number_format($total_nsa_osa_charges) . '</td>
+                                        <td>' . number_format($total_nsa_osa_charges, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Charges (w/o GST)</strong></td>
-                                        <td>' . number_format($total_charges - $total_packaging_material_charges) . '</td>
+                                        <td class="color secondary">' . number_format(($total_charges - $total_packaging_material_charges), 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total GST</strong></td>
-                                        <td>' . number_format(ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                        <td class="color secondary">' . number_format($total_gst, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Packaging Material Charges</strong></td>
-                                        <td>' . number_format($total_packaging_material_charges) . '</td>
+                                        <td>' . number_format($total_packaging_material_charges, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total Adjustments</strong></td>
-                                        <td>' . number_format($total_adjustments) . '</td>
+                                        <td class="color secondary">' . number_format($total_adjustments, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(ROUND(($total_charges + $total_gst - $total_adjustments), 0, PHP_ROUND_HALF_DOWN)) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - $total_adjustments), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
@@ -3376,7 +3365,7 @@ class AdminFinanceController extends Controller
 
         $total_columns = count($details[0]);
 
-        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN), 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ROUND(($total_charges + $total_gst - $total_adjustments), 0, PHP_ROUND_HALF_DOWN)];
+        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments)];
 
         $details[] = [];
 
@@ -3408,10 +3397,10 @@ class AdminFinanceController extends Controller
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0.00');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
@@ -3529,7 +3518,7 @@ class AdminFinanceController extends Controller
                     $invoice->total_returned_shipments = $total_returned_shipments;
                     $invoice->total_adjusted_shipments = $total_adjusted_shipments;
                     $invoice->total_charges = $total_charges;
-                    $invoice->total_gst = ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN);
+                    $invoice->total_gst = $total_gst;
                     $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
 
                     $invoice->save();
@@ -3699,19 +3688,19 @@ class AdminFinanceController extends Controller
                           <td>' . $shipment->consignee_city->name . '</td>
                           <td>' . $date . '</td>
                           <td>' . $shipment->actual_weight . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->insurance_charges) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->replacement_charges) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 1) ? number_format($shipment->return_charges) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->intercept_charges) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->nsa_osa_charges) : '0') . '</td>
-                          <td>' . (($shipment->packaging_material_request == 1 && $invoice_shipment->type == 0) ? number_format($shipment->packaging_material_charges) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount) : '0') . '</td>
-                          <td>' . number_format($invoice_shipment->charges) . '</td>
-                          <td>' . number_format($invoice_shipment->gst) . '</td>
-                          <td>' . number_format($invoice_shipment->invoice_amount) . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->insurance_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->replacement_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type == 1) ? number_format($shipment->return_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->intercept_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
+                          <td>' . (($shipment->packaging_material_request == 1 && $invoice_shipment->type == 0) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
+                          <td>' . number_format($invoice_shipment->charges, 2) . '</td>
+                          <td>' . number_format($invoice_shipment->gst, 2) . '</td>
+                          <td>' . number_format($invoice_shipment->invoice_amount, 2) . '</td>
                         </tr>
             ';
 
@@ -3756,43 +3745,43 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="text-left">Weight Charges</td>
-                          <td class="text-right">' . number_format($total_weight_charges) . '</td>
+                          <td class="text-right">' . number_format($total_weight_charges, 2) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">Cash Handling Charges</td>
-                          <td class="text-right">' . number_format($total_cash_handling_charges) . '</td>
+                          <td class="text-right">' . number_format($total_cash_handling_charges, 2) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">Insurance Charges</td>
-                          <td class="text-right">' . number_format($total_insurance_charges) . '</td>
+                          <td class="text-right">' . number_format($total_insurance_charges, 2) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">Replacement Charges</td>
-                          <td class="text-right">' . number_format($total_replacement_charges) . '</td>
+                          <td class="text-right">' . number_format($total_replacement_charges, 2) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">Return Charges</td>
-                          <td class="text-right">' . number_format($total_return_charges) . '</td>
+                          <td class="text-right">' . number_format($total_return_charges, 2) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">Fuel Surcharge</td>
-                          <td class="text-right">' . number_format($total_fuel_surcharge) . '</td>
+                          <td class="text-right">' . number_format($total_fuel_surcharge, 2) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">Intercept Charges</td>
-                          <td class="text-right">' . number_format($total_intercept_charges) . '</td>
+                          <td class="text-right">' . number_format($total_intercept_charges, 2) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">OSA Charges</td>
-                          <td class="text-right">' . number_format($total_nsa_osa_charges) . '</td>
+                          <td class="text-right">' . number_format($total_nsa_osa_charges, 2) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">Packaging Charges</td>
-                          <td class="text-right">' . number_format($total_packaging_material_charges) . '</td>
+                          <td class="text-right">' . number_format($total_packaging_material_charges, 2) . '</td>
                         </tr>
                         <tr>
                           <td class="text-left">Adjustment Charges</td>
-                          <td class="text-right">' . number_format($total_adjustment_charges) . '</td>
+                          <td class="text-right">' . number_format($total_adjustment_charges, 2) . '</td>
                         </tr>
                       </tbody>
                     </table>
@@ -3803,11 +3792,11 @@ class AdminFinanceController extends Controller
                               <tbody>
                                 <tr>
                                   <td class="color secondary text-left"><strong>Subtotal (PKR)</strong></td>
-                                  <td class="text-right">' . number_format($total_charges) . '</td>
+                                  <td class="text-right">' . number_format($total_charges, 2) . '</td>
                                 </tr>
                                 <tr>
                                   <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
-                                  <td class="text-right">' . number_format(ROUND($total_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                  <td class="text-right">' . number_format($total_gst, 2) . '</td>
                                 </tr>
                                 <tr>
                                   <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
@@ -3927,10 +3916,10 @@ class AdminFinanceController extends Controller
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->invoice_number . '</button>';
             })
             ->editColumn('total_charges', function($invoice) {
-                return number_format($invoice->total_charges);
+                return number_format($invoice->total_charges, 2);
             })
             ->editColumn('total_gst', function($invoice) {
-                return number_format(ROUND($invoice->total_gst, 0, PHP_ROUND_HALF_DOWN));
+                return number_format($invoice->total_gst, 2);
             })
             ->editColumn('total_invoice_amount', function($invoice) {
                 return number_format(ROUND($invoice->total_invoice_amount, 0, PHP_ROUND_HALF_DOWN));
@@ -4099,19 +4088,19 @@ class AdminFinanceController extends Controller
         $spreadsheet = new Spreadsheet();
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('R')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('T')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('U')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('R')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('T')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('U')->getNumberFormat()->setFormatCode('#,##0.00');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 

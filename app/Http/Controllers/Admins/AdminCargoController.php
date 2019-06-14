@@ -286,8 +286,19 @@ class AdminCargoController extends Controller
 
                 }
 
-                if (session('role_id') == 1 || (in_array($hub_id, session('hubs')))) {
+                $allowed = FALSE;
 
+                if (session('role_id') == 1) {
+                    $allowed = TRUE;
+                }
+                else if (in_array($hub_id, session('hubs'))) {
+                    $allowed = TRUE;
+                }
+                else if ($shipment->shipper_status_id == 49 && in_array($shipment->pickup_address->city->hub_id, session('hubs'))) {
+                    $allowed = TRUE;
+                }
+
+                if ($allowed) {
                     if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id) )) {
                         if ($request->cargo_type != 0) {
                             if (in_array($shipment->shipper_status_id, [2, 49, 55])) {
@@ -341,12 +352,12 @@ class AdminCargoController extends Controller
                                     $destination = $shipment->pickup_address->city;
                                 }
 
-                  $details['id'] = $shipment->id;
-                  $details['tracking_number'] = $shipment->tracking_number;
-                  $details['order_id'] = $shipment->order_id;
-                  $details['service_type'] = $shipment->booking_type->booking_type;
-                  $details['destination'] = $destination->name;
-                  $details['amount'] = number_format($shipment->amount);
+                              $details['id'] = $shipment->id;
+                              $details['tracking_number'] = $shipment->tracking_number;
+                              $details['order_id'] = $shipment->order_id;
+                              $details['service_type'] = $shipment->booking_type->booking_type;
+                              $details['destination'] = $destination->name;
+                              $details['amount'] = number_format($shipment->amount);
                                 $hub = $destination->hub_city;
 
                                 $details['hub']['id'] = $hub->id;

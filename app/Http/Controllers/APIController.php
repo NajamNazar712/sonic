@@ -35,6 +35,7 @@ class APIController extends Controller
 {
     private $names = [
       'person_of_contact' => 'Person of Contact',
+      'vendor' => 'Vendor',
       'phone_number' => 'Phone Number',
       'email_address' => 'Email Address',
       'address' => 'Address',
@@ -165,6 +166,7 @@ class APIController extends Controller
 
       $rules = [
         'person_of_contact' => ['required', 'between:1,190'],
+        'vendor' => ['nullable', 'filled', 'between:0,190'],
         'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
         'email_address' => ['required', 'email'],
         'address' => ['required', 'between:1,190'],
@@ -194,6 +196,7 @@ class APIController extends Controller
         }
 
         $person_of_contact = $request->input('person_of_contact');
+        $vendor = $request->input('vendor');
         $phone_number = substr_replace($request->input('phone_number'), '-', 4, 0);
         $email_address = $request->input('email_address');
         $address = $request->input('address');
@@ -203,6 +206,7 @@ class APIController extends Controller
 
         $pickup_address->user_id = $user_id;
         $pickup_address->poc = $person_of_contact;
+        $pickup_address->vendor = $vendor;
         $pickup_address->phone = $phone_number;
         $pickup_address->email = $email_address;
         $pickup_address->pickup_address = $address;
@@ -252,18 +256,18 @@ class APIController extends Controller
             })],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2', 'between:0,250'],
+            'item_description' => ['required_if:service_type_id,1,2', 'between:0,500'],
             'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
             'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
             'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,250'],
+            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,500'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
 
             'items' => ['required_if:service_type_id,3', 'array'],
             'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,250'],
+            'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,500'],
             'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,1000'],
             'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
             'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000']
@@ -303,18 +307,18 @@ class APIController extends Controller
             })],
 
             'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'item_description' => ['required_if:service_type_id,1,2', 'between:0,250'],
+            'item_description' => ['required_if:service_type_id,1,2', 'between:0,500'],
             'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
             'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
             'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
             'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,250'],
+            'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,500'],
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
 
             'items' => ['required_if:service_type_id,3', 'array'],
             'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
-            'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,250'],
+            'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,500'],
             'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,1000'],
             'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
             'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000']
@@ -723,14 +727,22 @@ class APIController extends Controller
 
         $details['shipper']['name'] = $shipper->name;
 
+        $pickup = $shipment->pickup_address;
+
+        $details['pickup']['origin'] = $pickup->city->name;
+
         if ($type == 0) {
           $details['shipper']['account_number'] = $shipper->id;
           $details['shipper']['phone_number_1'] = $shipper->phone;
           $details['shipper']['phone_number_2'] = $shipper->phone2;
-          $details['shipper']['address'] = $shipper->address;
-        }
+          $details['shipper']['email'] = $shipper->email;
+          $details['shipper']['city'] = $shipper->city->name;
 
-        $details['shipper']['origin'] = $shipper->city->name;
+          $details['pickup']['person_of_contact'] = $pickup->poc;
+          $details['pickup']['phone_number'] = $pickup->phone;
+          $details['pickup']['email'] = $pickup->email;
+          $details['pickup']['address'] = $pickup->pickup_address;
+        }
 
         $details['consignee']['name'] = $shipment->consignee_name;
         $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
