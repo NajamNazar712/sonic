@@ -207,7 +207,7 @@ class AdminPettyCashController extends Controller
                 return $remarks;
             })
             ->editColumn('reference_document', function ($petty_details){
-                $reference_document = '<div class="row col text-center"><input type="file" name="upload_image'.$petty_details->statement_detail_id.'" disabled><div class="mt-1 col"><button type="button" class="btn btn-primary"><a class="white" href='.route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document]).' target="_blank">View</a></button></div></div>';
+                $reference_document = '<div class="text-center"><button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document]).' target="_blank">View</a></button><div class="d-inline-block"><input class="form-control form-control-sm" type="file" name="upload_image'.$petty_details->statement_detail_id.'" disabled data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."></div></div>';
                 return $reference_document;
             })
             ->editColumn('status', function ($petty_details){
@@ -238,7 +238,6 @@ class AdminPettyCashController extends Controller
             })
             ->make(true);
     }
-
     public function petty_cash_statements_index(){
         if(session('role_id') == 1){
             $hubs = City::where('hub',1)->where('status',1)->get();
