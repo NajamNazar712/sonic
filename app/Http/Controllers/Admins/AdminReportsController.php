@@ -409,7 +409,7 @@ class AdminReportsController extends Controller
         $cargo_consignments_shipments = DB::connection('reports')->table('cargo_consignment_shipments')->where('cargo_consignment_id', $request->id)->get();
 
         foreach ($cargo_consignments_shipments as $cargo_consignments_shipment) {
-            $shipment = DB::connection('reports')->table('shipments')->find($cargo_consignments_shipment->id);
+            $shipment = DB::connection('reports')->table('shipments')->find($cargo_consignments_shipment->shipment_id);
 
             $tracking_number = array();
 
@@ -3497,7 +3497,7 @@ class AdminReportsController extends Controller
 
     public function fake_status_shipments(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
-        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->where('fake_status','=',1)->get();
+        $delivery_note_shipments = $delivery_note_id->delivery_note_shipments()->where('fake_status','=',1)->get();
         $shipments = array();
         if($delivery_note_shipments->count() != 0){
             foreach ($delivery_note_shipments as $delivery_note_shipment){

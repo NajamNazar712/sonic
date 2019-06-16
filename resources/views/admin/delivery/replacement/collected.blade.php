@@ -30,15 +30,11 @@
                             <div class="shipment mt-2" id="shipment">
                             </div>
 
-                            @if (session('role_id') == 1 || in_array(135, session('permissions')))
+                            @if (session('role_id') == 1 || in_array(207, session('permissions')))
                                 <form id="change_booking_type_form" class="form-inline mb-1 justify-content-center mt-2 d-none" method="POST" action="{{ route('admin.delivery.replacement.collected.change_booking_type') }}" novalidate="novalidate">
                                     {{ csrf_field() }}
 
                                     <input type="hidden" name="shipment_id" class="shipment_id">
-
-                                    {{--<div class="form-group">--}}
-                                        {{--<input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,1000]" data-msg-range="Weight needs to be from 0.01 to 1000">--}}
-                                    {{--</div>--}}
 
                                     <div class="form-group">
                                         <button type="submit" name="change" class="btn btn-primary change" value="Change">Change Service Type to Regular</button>

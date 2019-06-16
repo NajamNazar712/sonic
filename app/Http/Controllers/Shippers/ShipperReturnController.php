@@ -155,7 +155,7 @@ public function return_reattempt_nsa(Request $request){
                     }
                 }
             }
-            if($nsa_shipment != null){
+            if(isset($nsa_shipment) && $nsa_shipment != null){
                 return ['status' => 1, 'nsa_shipment' => $nsa_shipment, 'estimated_charge' => $estimated_charge, 'nsa_shipments_id' => $nsa_shipments_id];
             }
             else{
@@ -181,7 +181,7 @@ public function return_reattempt_nsa(Request $request){
                     }
                 }
             }
-            if($nsa_shipments != null){
+            if(isset($nsa_shipment) && $nsa_shipments != null){
                 return ['status' => 1, 'nsa_shipments' => $nsa_shipments, 'estimated_charges' => $estimated_charges, 'nsa_shipments_ids' => $nsa_shipments_ids];
             }
             else{
@@ -317,7 +317,7 @@ public function change_status_to_self_collection(Request $request){
                     $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
                     ShipmentsJourneyController::add($request->shipment_id, 52, 52, NULL, $request->remark, session('user_id'), NULL);
-                    if($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12)){
+                    if($journey){
                         NotificationsController::send(33, $request->shipment_id);
                     }
 

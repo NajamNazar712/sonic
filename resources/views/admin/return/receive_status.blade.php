@@ -26,7 +26,7 @@
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
-                            <th class="border-primary border-darken-1">Received/Refused By</th>
+                            <th class="border-primary border-darken-1">Received By</th>
                             <th class="border-primary border-darken-1">Current Status</th>
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Destination</th>
@@ -169,39 +169,110 @@
                                     dangerMode: true
                                 }).then(function (confirm) {
                                     if (confirm) {
+                                        var submit_all_status_flag = true;
+                                        var not_updated_shipments = [];
+                                        var not_updated_shipment_ids = [];
+
                                         table.rows().nodes().each(function(index) {
                                             var row = table.row(index);
                                             if ($(row.node()).hasClass('selected')) {
                                                 var id = parseInt(row.id());
                                                 var remarks = $(row.node()).find('td.remarks input').val();
                                                 shipment_remarks_obj[id] = remarks;
+
                                                 var receiver_name =  $(row.node()).find('td.received_or_refused_by input').val();
-                                                shipment_received_refused_obj[id] = receiver_name;
+
+                                                if ($.trim(receiver_name) == '') {
+                                                    not_updated_shipments.push($(row.node()).find('td.tracking_number').text());
+                                                    not_updated_shipment_ids.push(id);
+                                                    submit_all_status_flag = false;
+                                                }
+                                                else {
+                                                    shipment_received_refused_obj[id] = receiver_name;
+                                                }
 
                                             }
                                         });
-                                        $.ajax({
-                                            url: '{!! route('admin.return.receive.status.delivered') !!}',
-                                            method: 'POST',
-                                            data: {
-                                                'shipment_ids': selected_rows,
-                                                'return_note_id': note_id,
-                                                'remarks': shipment_remarks_obj,
-                                                'received_or_refused_by': shipment_received_refused_obj,
-                                                '_token': '{{ csrf_token() }}'
-                                            }
-                                        }).done(function (data) {
-                                            if(data.status === 0){
+                                        if (submit_all_status_flag == false) {
+                                            swal({
+                                                title: 'Enter Receiver Name for remaining Returned Shipment(s)',
+                                                content: {
+                                                    element: 'input',
+                                                    attributes: {
+                                                        placeholder: 'Receiver Name',
+                                                        type: 'text'
+                                                    }
+                                                },
+                                                icon: 'warning',
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'Cancel',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
+                                                    confirm: {
+                                                        text: 'Update',
+                                                        value: true,
+                                                        visible: true,
+                                                        closeModal: true
+                                                    }
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                dangerMode: true
+                                            }).then(function (receiver_name) {
+                                                if (receiver_name) {
+                                                    $.each(not_updated_shipment_ids, function(index, id) {
+                                                        shipment_received_refused_obj[id] = receiver_name;
+                                                    });
 
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                                    $.ajax({
+                                                        url: '{!! route('admin.return.receive.status.delivered') !!}',
+                                                        method: 'POST',
+                                                        data: {
+                                                            'shipment_ids': selected_rows,
+                                                            'return_note_id': note_id,
+                                                            'remarks': shipment_remarks_obj,
+                                                            'received_or_refused_by': shipment_received_refused_obj,
+                                                            '_token': '{{ csrf_token() }}'
+                                                        }
+                                                    }).done(function (data) {
+                                                        if(data.status === 0){
+                                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                                            }else{
-                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                                        }else{
+                                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
-                                            }
-                                            location.reload();
+                                                        }
+                                                        location.reload();
+                                                    });
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            $.ajax({
+                                                url: '{!! route('admin.return.receive.status.delivered') !!}',
+                                                method: 'POST',
+                                                data: {
+                                                    'shipment_ids': selected_rows,
+                                                    'return_note_id': note_id,
+                                                    'remarks': shipment_remarks_obj,
+                                                    'received_or_refused_by': shipment_received_refused_obj,
+                                                    '_token': '{{ csrf_token() }}'
+                                                }
+                                            }).done(function (data) {
+                                                if(data.status === 0){
 
-                                        });
+                                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                                }else{
+                                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                                }
+                                                location.reload();
+                                            });
+                                        }
                                     }
                                 });
 

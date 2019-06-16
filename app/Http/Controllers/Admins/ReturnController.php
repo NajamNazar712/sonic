@@ -1308,7 +1308,13 @@ class ReturnController extends Controller
                     ->whereIn('crm.status_id', [2, 3, 5])
                     ->where('crm.case_nature_id', 1);
             })
-            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges','crm.id as complaint'])
+            ->leftjoin('shipments_journey as rrb', function ($join) {
+                $join->on('rrb.shipment_id', '=', 'shipments.id')
+                    ->whereIn('shipments.shipper_status_id', [25, 31, 38])
+                    ->where('rrb.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges','crm.id as complaint', 'rrb.received_or_refused_by'])
             ->where('return_notes.id',$request->id);
 
         if (session('role_id') != 1) {
@@ -1397,7 +1403,7 @@ class ReturnController extends Controller
                         $received_or_refused_by = '<input class="form-control form-control-sm" name="received_or_refused_by['.$deliveries->shId.']" placeholder="Enter Name">';
                         return $received_or_refused_by;
                     }else{
-                        return "";
+                        return $deliveries->received_or_refused_by;
                     }
 
 

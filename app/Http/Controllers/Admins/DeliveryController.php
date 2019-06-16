@@ -354,14 +354,16 @@ class DeliveryController extends Controller
         $shipments_count = 0;
         $total_cod_amount = 0;
         foreach ($shipments as $shipment) {
-            $shipment_details = Shipment::find($shipment);
-            if($shipment_details) {
-                if (in_array($shipment_details->shipper_status_id, $pending_status)) {
-                    $valid_shipments[] = $shipment;
-                    $shipments_count++;
+            if (!in_array($shipment, $valid_shipments)) {
+                $shipment_details = Shipment::find($shipment);
+                if($shipment_details) {
+                    if (in_array($shipment_details->shipper_status_id, $pending_status)) {
+                        $valid_shipments[] = $shipment;
+                        $shipments_count++;
 
-                    if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
-                        $total_cod_amount += $shipment_details->amount;
+                        if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
+                            $total_cod_amount += $shipment_details->amount;
+                        }
                     }
                 }
             }
@@ -385,8 +387,15 @@ class DeliveryController extends Controller
                         'notification' => $notifications[$index],
                         'rider_information' => $rider_informations[$index]
                     ]);
+                }
 
+                foreach ($valid_shipments as $index => $shipment) {
                     Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
+
+                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
+                }
+
+                foreach ($valid_shipments as $index => $shipment) {
                     $old_delivery_note_id = DeliveryNoteShipment::where('shipment_id', $shipment)->where('status','>', 0)->orderBy('delivery_note_id', 'desc');
 
                     if ($old_delivery_note_id->exists()) {
@@ -400,7 +409,6 @@ class DeliveryController extends Controller
                         }
 
                     }
-                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
@@ -1547,7 +1555,7 @@ class DeliveryController extends Controller
             })
             ->leftJoin('shipments_journey as rrb', function ($join) {
                 $join->on('rrb.shipment_id', '=', 'shipments.id')
-                    ->where('rrb.created_at', '=',
+                    ->where('rrb.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
             ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','rrb.received_or_refused_by'])
