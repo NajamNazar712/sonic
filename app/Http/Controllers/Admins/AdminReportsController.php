@@ -409,7 +409,7 @@ class AdminReportsController extends Controller
         $cargo_consignments_shipments = DB::connection('reports')->table('cargo_consignment_shipments')->where('cargo_consignment_id', $request->id)->get();
 
         foreach ($cargo_consignments_shipments as $cargo_consignments_shipment) {
-            $shipment = DB::connection('reports')->table('shipments')->find($cargo_consignments_shipment->id);
+            $shipment = DB::connection('reports')->table('shipments')->find($cargo_consignments_shipment->shipment_id);
 
             $tracking_number = array();
 
