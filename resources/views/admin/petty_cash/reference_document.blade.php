@@ -5,5 +5,5 @@
 @endphp
 
 <div>
-    <img src="{{asset($url)}}" alt="" title="" />
+    <img class="" src="{{asset($url)}}" alt="" title="" style="max-width: 100%"/>
 </div>
