@@ -321,7 +321,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.status') || $(header).is('.date') || $(header).is('.hub_name') || $(header).is('.account_head') || $(header).is('.account_title') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.status') || $(header).is('.date') || $(header).is('.hub_name') || $(header).is('.account_head') || $(header).is('.account_title') || $(header).is('.action') || $(header).is('.reference_document')) {
                             $(td).appendTo($(search));
                         }
                         else {
