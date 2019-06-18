@@ -380,6 +380,9 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
+                language: {
+                    processing: data_table_loader
+                },
                 ajax: '{{ route('admin.crm.in_process.list') }}',
                 rowId: 'id',
                 order: [[17, 'desc']],
