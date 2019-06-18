@@ -60,6 +60,9 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
+                language: {
+                    processing: data_table_loader
+                },
                 ajax: '{{ route('admin.crm.list') }}',
                 rowId: 'id',
                 order: [[3, 'desc']],
