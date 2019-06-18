@@ -12,6 +12,7 @@ use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\models\PackagingMaterialTypes;
 use App\Http\Models\PackagingPaymentMode;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipment;
@@ -491,5 +492,58 @@ class AdminPackagingMaterialController extends Controller
         $shipment_item->type = $type;
 
         $shipment_item->save();
+    }
+
+    public function types_index(){
+        return view('admin.materials.types.index');
+    }
+
+    public function types_list(Request $request){
+        $types = PackagingMaterialTypes::leftjoin('admins as ac', 'ac.id', '=', 'packaging_material_types.created_by')
+            ->leftjoin('admins as au', 'au.id', '=', 'packaging_material_types.updated_by')
+        ->select('packaging_material_types.id','packaging_material_types.type','packaging_material_types.description','packaging_material_types.status','packaging_material_types.created_at','packaging_material_types.updated_at','ac.name as created_by','au.name as updated_by');
+        return Datatables::of($types)
+            ->editColumn('status',function ($type){
+                if($type->status == 0){
+                    return 'Enabled';
+                }
+                else{
+                    return 'Disabled';
+                }
+            })
+            ->editColumn('updated_by', function($type){
+                if($type->updated_by == null){
+                    return '-';
+                }
+                else{
+                    return $type->updated_by;
+                }
+            })
+            ->addColumn('action', function($type) {//Change ID
+                    $edit = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    $dropdown .= $edit;
+                    if($type->status == 1){
+                        $dropdown .= $enable_button;
+                    }
+                    else{
+                        $dropdown .= $disable_button;
+                    }
+
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+            })
+            ->make(true);
     }
 }

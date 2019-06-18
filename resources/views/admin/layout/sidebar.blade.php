@@ -508,6 +508,10 @@
                             <li><a class="menu-item" href="{{ route('admin.packaging.requests.index') }}">Requests</a>
                             </li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(79, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.packaging.types.index') }}">Types</a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif
