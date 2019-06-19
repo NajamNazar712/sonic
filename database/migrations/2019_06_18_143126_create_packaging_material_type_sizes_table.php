@@ -16,8 +16,7 @@ class CreatePackagingMaterialTypeSizesTable extends Migration
         Schema::create('packaging_material_type_sizes', function (Blueprint $table) {
             $table->increments('id');
             $table->string('size');
-            $table->string('type_id');
-            $table->integer('quantity');
+            $table->integer('type_id');
             $table->float('standard_charges');
             $table->timestamps();
         });

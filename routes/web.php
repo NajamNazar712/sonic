@@ -872,7 +872,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('types')->name('types.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@types_index')->name('index');
             Route::get('list','Admins\AdminPackagingMaterialController@types_list')->name('list');
-//            Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
+            Route::post('add','Admins\AdminPackagingMaterialController@type_add')->name('add');
+            Route::post('details','Admins\AdminPackagingMaterialController@type_details')->name('details');
+            Route::post('edit','Admins\AdminPackagingMaterialController@type_edit')->name('edit');
+            Route::post('enable_disable','Admins\AdminPackagingMaterialController@type_enable_disable')->name('enable_disable');
         });
     });
 

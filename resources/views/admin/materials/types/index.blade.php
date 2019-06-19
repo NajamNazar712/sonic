@@ -49,24 +49,77 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="add_stock_form" action="{{route('admin.packaging.add.submit')}}" method="post">
+                    <form id="add_material_form" action="{{route('admin.packaging.types.add')}}" method="post">
                         @method('POST')
                         @csrf
                         <div class="container">
                             <div class="row justify-content-center">
                                 <div class="col-8 form-group">
-                                    <input type="text" name="type" id="type" class="form-control type" placeholder="Type *" data-rule-required="true" data-msg-required="This field is required">
+                                    <input type="text" name="type" id="type" class="form-control type" placeholder="Type *" data-rule-required="true" data-msg-required="Type name is required">
                                 </div>
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-12 form-group">
-                                    <textarea name="description" id="description" class="form-control" placeholder="Description *"></textarea>
+                                    <textarea name="description" id="description" class="form-control" placeholder="Description *" data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                </div>
+                            </div>
+                            <div id="size_charges_wrapper">
+                                <div class="row">
+                                    <div class="col-5 form-group">
+                                        <input name="size[0]" id="size[0]" class="form-control" placeholder="Size *" data-rule-required="true" data-msg-required="Size name is required">
+                                    </div>
+                                    <div class="col-5 form-group">
+                                        <input name="standard_charges[0]" id="standard_charges[0]" class="form-control decimal" placeholder="Standard Charges *" data-rule-required="true" data-msg-required="Standard charges is required">
+                                    </div>
+                                    {{--<div class="col-1">--}}
+                                        {{--<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 row_close"><i class="ft-x"></i></span>--}}
+                                    {{--</div>--}}
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-outline-success mb-1" title="Add more sizes" id="add_row_btn"><i class="la la-plus"></i></button>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="AddNewStock" type="submit" class="btn btn-primary btn-block">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="EditMaterialModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditMaterialModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-m" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Edit Material</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="edit_material_form" action="{{route('admin.packaging.types.edit')}}" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-8 form-group" id="type_div">
+
                                 </div>
                             </div>
                             <div class="row justify-content-center">
-                                <div class="col-5 form-group">
-                                    <textarea name="description" id="description" class="form-control" placeholder="Description *"></textarea>
+                                <div class="col-12 form-group" id="description_div">
+
                                 </div>
+                            </div>
+                            <div id="edit_size_charges_wrapper">
+
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-outline-success mb-1" title="Add more sizes" id="add_edit_row_btn"><i class="la la-plus"></i></button>
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-3">
@@ -139,11 +192,33 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+        var index_count = 0;
         $(document).ready(function () {
-
+            $('.decimal').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 3,
+                'min': 0.00,
+                'max': 10000,
+            });
+            function masks() {
+                $('.decimal').inputmask({
+                    'alias': 'decimal',
+                    'allowMinus': false,
+                    'allowPlus': false,
+                    'rightAlign': false,
+                    'digits': 3,
+                    'min': 0.00,
+                    'max': 10000
+                });
+            }
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -157,9 +232,12 @@
                             head = [];
                             head.push('S.No');
                             head.push('Type');
+                            head.push('Description');
                             head.push('Status');
                             head.push('Updated At');
                             head.push('Updated By');
+                            head.push('Created At');
+                            head.push('Created By');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -167,7 +245,10 @@
 
                                 row.push(index + 1);
                                 row.push(values.type);
+                                row.push(values.description);
                                 row.push(values.status);
+                                row.push(values.created_at);
+                                row.push(values.created_by);
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
 
@@ -196,6 +277,7 @@
                         extend: 'excel',
                         title: 'Packaging Material Requests',
                         text: '<i class="la la-file-excel-o"></i> Excel',
+                        className: 'btn btn-primary',
                     },
                     'reset'
                 ],
@@ -217,7 +299,7 @@
                     {data: 'status', name: 'packaging_material_types.status', class: 'align-middle status'},
                     {data: 'created_at', name: 'packaging_material_types.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'ac.name', class: 'align-middle created_by'},
-                    {data: 'updated_at', name: 'ct.name', class: 'align-middle updated_at'},
+                    {data: 'updated_at', name: 'packaging_material_types.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'au.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 
@@ -270,55 +352,162 @@
                     this.api().table().columns.adjust();
                 }
             });
-            //dispatch
-            {{--$('body').on('click','.dispatch',function(){--}}
-                {{--var request_id = parseInt($(this).parents('tr').attr('id'));--}}
-                {{--swal({--}}
-                    {{--title: 'Are You Sure?',--}}
-                    {{--text: 'Select Yes to Dispatch Packaging Material!',--}}
-                    {{--icon: 'warning',--}}
-                    {{--buttons: {--}}
-                        {{--cancel: {--}}
-                            {{--text: 'No',--}}
-                            {{--value: null,--}}
-                            {{--visible: true,--}}
-                            {{--closeModal: true,--}}
-                        {{--},--}}
-                        {{--confirm: {--}}
-                            {{--text: 'Yes',--}}
-                            {{--value: true,--}}
-                            {{--visible: true,--}}
-                            {{--closeModal: true--}}
-                        {{--}--}}
-                    {{--},--}}
-                    {{--closeOnClickOutside: false,--}}
-                    {{--closeOnEsc: false,--}}
-                    {{--dangerMode: true--}}
-                {{--}).then(function (confirm) {--}}
-                    {{--if (confirm) {--}}
-                        {{--$.ajax({--}}
-                            {{--url: '{!! route('admin.packaging.requests.dispatch') !!}',--}}
-                            {{--method: 'POST',--}}
-                            {{--data: {--}}
-                                {{--'id': request_id,--}}
-                                {{--'_token': '{{ csrf_token() }}'--}}
-                            {{--}--}}
-                        {{--}).done(function (data) {--}}
+            $('body').on('click', '#add_material_form #row_close',function () {
+                $(this).parent().parent().remove();
+            });
 
-                            {{--if(data.status === 1){--}}
-                                {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                                {{--setTimeout(function(){--}}
-                                    {{--window.location.reload();--}}
-                                {{--},2000);--}}
-                            {{--}else{--}}
-                                {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            var row_count = 1;
+            $('#add_material_form #add_row_btn').on('click',function () {
+                let htmdiv = '<div class="row size_row"><div class="col-5 form-group">' +
+                    '<input name="size[' + row_count + ']" id="size[' + row_count + ']" class="form-control" placeholder="Size *" data-rule-required="true" data-msg-required="Size name is required">' +
+                    '</div>' +
+                    '<div class="col-5 form-group">' +
+                    '<input name="standard_charges[' + row_count + ']" id="standard_charges[' + row_count + ']" class="form-control decimal" placeholder="Standard Charges *" data-rule-required="true" data-msg-required="Standard charges is required">' +
+                    '</div>' +
+                    '<div class="col-1">' +
+                    '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 row_close" id="row_close"><i class="ft-x"></i></span>' +
+                    '</div></div>';
+                $('#size_charges_wrapper').append(htmdiv);
+                masks();
+                row_count++;
+                });
 
-                            {{--}--}}
-                        {{--});--}}
-                    {{--}--}}
-                {{--});--}}
+            $( "#add_material_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-            {{--});--}}
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'New material type is being added!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                }
+            });
+
+            $('body').on('click','button.edit',function () {
+                var id = $(this).parents('tr').attr('id');
+                console.log(id);
+                $.ajax({
+                    url: '{!! route('admin.packaging.types.details') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        console.log(data.type);
+                        var html_type = '<input type="hidden" name="id" value="' + data.type.id + '"><input type="text" name="edit_type" id="edit_type" class="form-control type" value="' + data.type.type + '" placeholder="Type *" data-rule-required="true" data-msg-required="Type name is required">';
+                        var html_description = '<textarea name="edit_description" id="edit_description" class="form-control" placeholder="Description *" data-rule-required="true" data-msg-required="Description is required">' + data.type.description + '</textarea>';
+                        var html_sizes = '';
+                        data.sizes.forEach(function(size, index) {
+                            html_sizes += '<div class="row size_row"><input type="hidden" name="size_id[' + index +']" value="' + size.id + '"><div class="col-5 form-group">' +
+                                '<input name="edit_size[' + index + ']" id="edit_size[' + index + ']" class="form-control" value="' + size.size + '" placeholder="Size *" data-rule-required="true" data-msg-required="Size name is required">' +
+                                '</div>' +
+                                '<div class="col-5 form-group">' +
+                                '<input name="edit_standard_charges[' + index + ']" id="edit_standard_charges[' + index + ']" class="form-control decimal" value="' + size.standard_charges + '" placeholder="Standard Charges *" data-rule-required="true" data-msg-required="Standard charges is required">' +
+                                '</div></div>';
+                            index_count++;
+                        });
+                        $('#EditMaterialModal #type_div').html(html_type);
+                        $('#EditMaterialModal #description_div').html(html_description);
+                        $('#EditMaterialModal #edit_size_charges_wrapper').html(html_sizes);
+                        masks();
+
+                        $('#EditMaterialModal').modal('show');
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            });
+
+            $("#EditMaterialModal").on("hidden.bs.modal", function(){
+                $("#EditMaterialModal  #type_div").html("");
+                $("#EditMaterialModal  #description_div").html("");
+                $("#EditMaterialModal  #edit_size_charges_wrapper").html("");
+            });
+
+            $('#edit_material_form #add_edit_row_btn').on('click',function () {
+                let htmdiv = '<div class="row size_row"><div class="col-5 form-group">' +
+                    '<input name="edit_size[' + index_count + ']" id="edit_size[' + index_count + ']" class="form-control" placeholder="Size *" data-rule-required="true" data-msg-required="Size name is required">' +
+                    '</div>' +
+                    '<div class="col-5 form-group">' +
+                    '<input name="edit_standard_charges[' + index_count + ']" id="edit_standard_charges[' + index_count + ']" class="form-control decimal" placeholder="Standard Charges *" data-rule-required="true" data-msg-required="Standard charges is required">' +
+                    '</div></div>';
+                $('#EditMaterialModal #edit_size_charges_wrapper').append(htmdiv);
+                index_count++;
+                masks();
+
+                row_count++;
+            });
+            $( "#edit_material_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Material type is being edited!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+
+            $('body').on('click','button.disable',function () {
+                var id = $(this).parents('tr').attr('id');
+                $.ajax({
+                    url: '{!! route('admin.packaging.types.enable_disable') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        'status': 1,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        table.draw();
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            });
+            $('body').on('click','button.enable',function () {
+                var id = $(this).parents('tr').attr('id');
+                $.ajax({
+                    url: '{!! route('admin.packaging.types.enable_disable') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        'status': 0,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        table.draw();d
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            });
 
         });
 
