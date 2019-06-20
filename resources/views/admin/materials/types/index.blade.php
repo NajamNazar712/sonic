@@ -265,15 +265,17 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '350px',
                 buttons: [
-                    {
-                        text: '<i class="la la-plus"></i> Add Material',
-                        className: 'btn btn-primary add_material',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#AddMaterialModal').modal('show');
+                    @if (session('role_id') == 1 || in_array(215, session('permissions')))
+                        {
+                            text: '<i class="la la-plus"></i> Add Material',
+                            className: 'btn btn-primary add_material',
+                            enabled: true,
+                            action: function (e, dt, node, config) {
+                                $('#AddMaterialModal').modal('show');
 
-                        }
-                    },{
+                            }
+                        },
+                    @endif{
                         extend: 'excel',
                         title: 'Packaging Material Requests',
                         text: '<i class="la la-file-excel-o"></i> Excel',

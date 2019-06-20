@@ -13,7 +13,9 @@ use App\Http\Models\City;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\models\PackagingMaterialTypes;
+use App\Http\Models\PackagingMaterialTypesHistory;
 use App\Http\models\PackagingMaterialTypeSizes;
+use App\Http\Models\PackagingMaterialTypeSizesHistory;
 use App\Http\Models\PackagingPaymentMode;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipment;
@@ -529,6 +531,8 @@ class AdminPackagingMaterialController extends Controller
                 }
             })
             ->addColumn('action', function($type) {//Change ID
+                $dropdown = '';
+                if ((session('role_id') == 1 || in_array(215, session('permissions')) || in_array(216, session('permissions')))) {
                     $edit = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                     $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
@@ -538,19 +542,24 @@ class AdminPackagingMaterialController extends Controller
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
-                    $dropdown .= $edit;
-                    if($type->status == 1){
-                        $dropdown .= $enable_button;
+
+                    if ((session('role_id') == 1 || in_array(215, session('permissions')))) {
+                        $dropdown .= $edit;
                     }
-                    else{
-                        $dropdown .= $disable_button;
+                    if ((session('role_id') == 1 || in_array(216, session('permissions')))) {
+                        if ($type->status == 1) {
+                            $dropdown .= $enable_button;
+                        } else {
+                            $dropdown .= $disable_button;
+                        }
                     }
+
 
                     $dropdown .= '
                         </div>
                       </div>
                     ';
-
+                }
                     return $dropdown;
             })
             ->make(true);
@@ -562,12 +571,27 @@ class AdminPackagingMaterialController extends Controller
         $type->status = 0;
         $type->created_by = Auth::id();
         $type->save();
+
+        $type_history = new PackagingMaterialTypesHistory();
+        $type_history->type = $request->type;
+        $type_history->description = $request->description;
+        $type_history->status = 0;
+        $type_history->created_by = Auth::id();
+        $type_history->save();
+
         foreach($request->size as $index => $type_size){
             $packaging_material_type_size = new PackagingMaterialTypeSizes();
             $packaging_material_type_size->size = $type_size;
             $packaging_material_type_size->type_id = $type->id;
             $packaging_material_type_size->standard_charges = $request->standard_charges[$index];
             $packaging_material_type_size->save();
+
+            $type_size_history = new PackagingMaterialTypeSizesHistory();
+            $type_size_history->size = $type_size;
+            $type_size_history->type_id = $type->id;
+            $type_size_history->standard_charges = $request->standard_charges[$index];
+            $type_size_history->updated_by = Auth::id();
+            $type_size_history->save();
         }
         return redirect()->back()->with(['status'=>1,'success'=>"Packaging Material Type has been Added successfully!"]);
     }
@@ -585,6 +609,16 @@ class AdminPackagingMaterialController extends Controller
         $type->status = 0;
         $type->updated_by = Auth::id();
         $type->save();
+
+        $type_history = new PackagingMaterialTypesHistory();
+        $type_history->type_id = $type->id;
+        $type_history->type = $request->edit_type;
+        $type_history->description = $request->edit_description;
+        $type_history->status = 0;
+        $type_history->created_by = $type->created_by;
+        $type_history->updated_by = Auth::id();
+        $type_history->save();
+
         foreach($request->edit_size as $index => $type_size){
             if(array_key_exists($index, $request->size_id)){
                 $packaging_material_type_size = PackagingMaterialTypeSizes::where('id',$request->size_id[$index])->first();
@@ -600,6 +634,12 @@ class AdminPackagingMaterialController extends Controller
                 $packaging_material_type_size->standard_charges = $request->edit_standard_charges[$index];
                 $packaging_material_type_size->save();
             }
+            $type_size_history = new PackagingMaterialTypeSizesHistory();
+            $type_size_history->size = $type_size;
+            $type_size_history->type_id = $type->id;
+            $type_size_history->standard_charges = $request->edit_standard_charges[$index];
+            $type_size_history->updated_by = Auth::id();
+            $type_size_history->save();
         }
         return redirect()->back()->with(['status'=>1,'success'=>"Packaging Material Type has been Edited successfully!"]);
     }
@@ -608,6 +648,16 @@ class AdminPackagingMaterialController extends Controller
         $type = PackagingMaterialTypes::where('id',$request->id)->first();
         $type->status = $request->status;
         $type->save();
+
+        $type_history = new PackagingMaterialTypesHistory();
+        $type_history->type_id = $request->id;
+        $type_history->type = $type->type;
+        $type_history->description = $type->description;
+        $type_history->status = $request->status;
+        $type_history->created_by = $type->created_by;
+        $type_history->updated_by = Auth::id();
+        $type_history->save();
+
         if($request->status == 1){
             $status = 'disabled';
         }

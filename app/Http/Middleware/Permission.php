@@ -347,6 +347,12 @@ class Permission
             'packaging.requests.index' => 79,
             'packaging.requests.list' => 79,
             'packaging.requests.dispatch' => 80,
+            'packaging.types.index' => 214,
+            'packaging.types.list' => 214,
+            'packaging.types.add' => 215,
+            'packaging.types.edit' => 215,
+            'packaging.types.details' => 215,
+            'packaging.types.enable_disable' => 216,
 
             'user_management.users.index' => 81,
             'user_management.users.list' => 81,
