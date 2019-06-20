@@ -89,8 +89,9 @@ class AdminFinanceController extends Controller
 
     public function outstanding_sdn_index() {
         $banks = BanksList::where('affiliate', 1)->get();
+        $hubs = City::orderBy('name')->where('hub', 1)->get();
 
-        return view('admin.finance.outstanding_sdn')->with(['banks'=>$banks]);
+        return view('admin.finance.outstanding_sdn')->with(['banks'=>$banks, 'hubs'=>$hubs]);
     }
 
     public function outstanding_sdn_list(Request $request) {

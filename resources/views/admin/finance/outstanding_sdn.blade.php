@@ -240,7 +240,7 @@
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'sdn_number', name: 'station_deposit_notes.id', class: 'align-middle text-center sdn_number'},
-					{data:'hub', name: 'h.name', class: 'align-middle hub'},
+					{data:'hub', name: 'h.id', class: 'align-middle hub'},
 					{data:'dncc_count_link', name: 'station_deposit_notes.dncc_count', class: 'align-middle dnccs dncc_count_link text-center'},
 					{data:'delivered_shipments_link', name: 'sdn_delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
 					{data:'sdn_amount', name: 'station_deposit_notes.sdn_amount', class: 'align-middle amount'},
@@ -262,6 +262,7 @@
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
+                    var hub_select = '<select name="hub_select" id="hub_select" class="select2 form-control"></select>';
 
 					this.api().columns().every(function(column_id) {
 						var column = this;
@@ -271,6 +272,11 @@
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.hub')){
+                            $(hub_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -296,6 +302,20 @@
                     $("#bank_select").prepend('<option value="" selected></option>').select2({
                         data:data,
                         placeholder: "Select Bank",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data1 = $.map({!! $hubs !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#hub_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Hub",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
