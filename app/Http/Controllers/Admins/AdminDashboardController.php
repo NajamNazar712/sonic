@@ -815,7 +815,6 @@ class AdminDashboardController extends Controller
             $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
             $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
             $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
-            $packaging = StandardPackagingCharge::all()->groupBy('shipping_mode_id');
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             $packaging_sizes = array();
             if(count($packaging_material_types) > 0){
@@ -825,7 +824,7 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes]);
+            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }
@@ -850,8 +849,19 @@ class AdminDashboardController extends Controller
         $packaging = PackagingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $sale_person = SalePersonTag::where('user_id',$id)->first();
-//        return $discount;
-        return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person]);
+        $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
+        $packaging_sizes = array();
+        if(count($packaging_material_types) > 0){
+
+            foreach($packaging_material_types as $type){
+                $packaging_sizes[$type->id] = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+            }
+        }
+        $packaging_types = array();
+        foreach($packaging as $index => $p){
+            $packaging_types[$index] = $p->pluck('type_id')->toArray();
+        }
+        return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'packaging_types' => $packaging_types]);
 
     }
 
