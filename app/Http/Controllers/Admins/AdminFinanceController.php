@@ -1602,7 +1602,7 @@ class AdminFinanceController extends Controller
             }
             else {
                 $amount = 0;
-                $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges;
+                $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges + $shipment->nsa_osa_charges;
                 $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
 
                 $payable = 0 - ($charges + $gst);
@@ -3066,7 +3066,6 @@ class AdminFinanceController extends Controller
                             $total_cash_handling_charges += $shipment->cash_handling_charges;
                             $total_replacement_charges += $shipment->replacement_charges;
                             // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
-                            $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                         }
                         else {
                             $total_return_charges += $shipment->return_charges;
@@ -3081,6 +3080,7 @@ class AdminFinanceController extends Controller
                         $total_insurance_charges += $shipment->insurance_charges;
                         $total_fuel_surcharge += $shipment->fuel_surcharge;
                         $total_intercept_charges += $shipment->intercept_charges;
+                        $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                     }
                     else if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
@@ -3324,7 +3324,6 @@ class AdminFinanceController extends Controller
                             $total_cash_handling_charges += $shipment->cash_handling_charges;
                             $total_replacement_charges += $shipment->replacement_charges;
                             // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
-                            $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                         }
                         else {
                             $total_return_charges += $shipment->return_charges;
@@ -3339,6 +3338,7 @@ class AdminFinanceController extends Controller
                         $total_insurance_charges += $shipment->insurance_charges;
                         $total_fuel_surcharge += $shipment->fuel_surcharge;
                         $total_intercept_charges += $shipment->intercept_charges;
+                        $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                     }
                     else if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
@@ -3696,7 +3696,7 @@ class AdminFinanceController extends Controller
                           <td>' . (($invoice_shipment->type == 1) ? number_format($shipment->return_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->intercept_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($shipment->packaging_material_request == 1 && $invoice_shipment->type == 0) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . number_format($invoice_shipment->charges, 2) . '</td>
@@ -3712,7 +3712,6 @@ class AdminFinanceController extends Controller
                     $total_cash_handling_charges += $shipment->cash_handling_charges;
                     $total_replacement_charges += $shipment->replacement_charges;
                     // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
-                    $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                 }
                 else {
                     $total_return_charges += $shipment->return_charges;
@@ -3727,6 +3726,7 @@ class AdminFinanceController extends Controller
                 $total_insurance_charges += $shipment->insurance_charges;
                 $total_fuel_surcharge += $shipment->fuel_surcharge;
                 $total_intercept_charges += $shipment->intercept_charges;
+                $total_nsa_osa_charges += $shipment->nsa_osa_charges;
             }
             else {
                 $total_adjustment_charges += $invoice_shipment->invoice_amount;
@@ -4074,7 +4074,7 @@ class AdminFinanceController extends Controller
             $row[] = (($invoice_shipment->type == 2) ? $shipment->return_charges : 0);
             $row[] = (($invoice_shipment->type != 2) ? $shipment->fuel_surcharge : 0);
             $row[] = (($invoice_shipment->type != 2) ? $shipment->intercept_charges : 0);
-            $row[] = (($invoice_shipment->type == 0) ? $shipment->nsa_osa_charges : 0);
+            $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
             $row[] = (($shipment->packaging_material_request == 1 && $invoice_shipment->type == 0) ? $shipment->packaging_material_charges : 0);
             $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
             $row[] = $invoice_shipment->charges;

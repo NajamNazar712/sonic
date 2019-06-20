@@ -411,7 +411,6 @@ class ShipperFinanceController extends Controller
                       $total_cash_handling_charges += $shipment->cash_handling_charges;
                       $total_replacement_charges += $shipment->replacement_charges;
                       // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
-                      $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                   }
                   else {
                       $total_return_charges += $shipment->return_charges;
@@ -426,6 +425,7 @@ class ShipperFinanceController extends Controller
                   $total_insurance_charges += $shipment->insurance_charges;
                   $total_fuel_surcharge += $shipment->fuel_surcharge;
                   $total_intercept_charges += $shipment->intercept_charges;
+                  $total_nsa_osa_charges += $shipment->nsa_osa_charges;
               }
               else {
                   $total_adjustments += $done_payment_shipment->payable;
@@ -643,7 +643,6 @@ class ShipperFinanceController extends Controller
                             $total_cash_handling_charges += $shipment->cash_handling_charges;
                             $total_replacement_charges += $shipment->replacement_charges;
                             // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
-                            $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                         }
                         else {
                             $total_return_charges += $shipment->return_charges;
@@ -658,6 +657,7 @@ class ShipperFinanceController extends Controller
                         $total_insurance_charges += $shipment->insurance_charges;
                         $total_fuel_surcharge += $shipment->fuel_surcharge;
                         $total_intercept_charges += $shipment->intercept_charges;
+                        $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                     }
                     else if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
