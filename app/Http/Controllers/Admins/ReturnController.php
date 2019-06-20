@@ -322,19 +322,19 @@ class ReturnController extends Controller
 
                             $parcel->save();
 
-                            ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+                            ShipmentChargesController::nsa_osa_charges($shipment);
 
-                            NotificationsController::send(33, $request->shipment_id);
+                            NotificationsController::send(33, $shipment);
                         }
                         else if ($parcel->shipper_status_id == 52) {
-                            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
+                            $journey = ShipmentsJourney::where('shipment_id', $shipment)->where('shipper_status_id', 12)->latest('id')->first();
 
                             if ($journey && ($journey->status_reason_id == 12)) {
                                 $parcel->nsa_osa_status = 1;
 
                                 $parcel->save();
 
-                                ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+                                ShipmentChargesController::nsa_osa_charges($shipment);
                             }
                         }
                     }
