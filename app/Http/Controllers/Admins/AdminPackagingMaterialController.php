@@ -573,6 +573,7 @@ class AdminPackagingMaterialController extends Controller
         $type->save();
 
         $type_history = new PackagingMaterialTypesHistory();
+        $type_history->type_id = $type->id;
         $type_history->type = $request->type;
         $type_history->description = $request->description;
         $type_history->status = 0;
