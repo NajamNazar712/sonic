@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePackagingMaterialTypeSizesTable extends Migration
+class CreatePackagingMaterialTypesHistoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,14 @@ class CreatePackagingMaterialTypeSizesTable extends Migration
      */
     public function up()
     {
-        Schema::create('packaging_material_type_sizes', function (Blueprint $table) {
+        Schema::create('packaging_material_types_histories', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('size');
             $table->integer('type_id');
-            $table->float('standard_charges');
+            $table->string('type');
+            $table->string('description');
+            $table->integer('status');
+            $table->integer('created_by');
+            $table->integer('updated_by')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +32,6 @@ class CreatePackagingMaterialTypeSizesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('packaging_material_type_sizes');
+        Schema::dropIfExists('packaging_material_types_histories');
     }
 }
