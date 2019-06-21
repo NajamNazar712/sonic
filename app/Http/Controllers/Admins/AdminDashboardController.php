@@ -627,9 +627,7 @@ class AdminDashboardController extends Controller
 //        }
 //        return $datatable->make(true);
 //    }
-    public function ecommerce(){
-        return view('admin.ecommerce');
-    }
+
 //    public function orders_list(){
 //        return view('admin.dashboard');
 //    }
@@ -869,7 +867,7 @@ class AdminDashboardController extends Controller
     public function editRatesView($id){
         $user = User::find($id);
         $sale_person = SalePersonTag::where('user_id',$id)->first();
-        if ((($user['rate_status']>=0) && $user['status']==1)||(($user['rate_status']==0) && $user['status']==3)) {
+        if ((($user['rate_status']>=0) && $user['status']==1) || (($user['rate_status']==0) && $user['status']==3)) {
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
 //        var_dump(empty($switches));exit();
@@ -883,6 +881,18 @@ class AdminDashboardController extends Controller
             $packaging = PackagingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
+            $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
+            $packaging_sizes = array();
+            if(count($packaging_material_types) > 0){
+
+                foreach($packaging_material_types as $type){
+                    $packaging_sizes[$type->id] = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                }
+            }
+            $packaging_types = array();
+            foreach($packaging as $index => $p){
+                $packaging_types[$index] = $p->pluck('type_id')->toArray();
+            }
         }
         elseif(($user['rate_status']>=1) && $user['status']==3){
             $switches = PendingRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -898,12 +908,23 @@ class AdminDashboardController extends Controller
             $packaging = PendingPackagingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $discount = PendingDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
+            $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
+            $packaging_sizes = array();
+            if(count($packaging_material_types) > 0){
+
+                foreach($packaging_material_types as $type){
+                    $packaging_sizes[$type->id] = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                }
+            }
+            $packaging_types = array();
+            foreach($packaging as $index => $p){
+                $packaging_types[$index] = $p->pluck('type_id')->toArray();
+            }
         }
         else {
             return redirect(route('admin.accounts.pending'));
         }
-//        return $discount;
-        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person]);
+        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'packaging_types' => $packaging_types]);
 
     }
 
@@ -1185,10 +1206,7 @@ class AdminDashboardController extends Controller
                     'on_return_class_2_charges.*'=>'required_if:on_return_switch,==,on|numeric',
                     'on_return_class_3_charges.*'=>'required_if:on_return_switch,==,on|numeric',
                     'overnight_fuel_surcharge' => 'required_if:overnight_fuel_switch,==,on|numeric',
-                    'on_flyer_sm' => 'required_if:on_packaging_switch,==,on|numeric',
-                    'on_flyer_md' => 'required_if:on_packaging_switch,==,on|numeric',
-                    'on_flyer_lg' => 'required_if:on_packaging_switch,==,on|numeric',
-                    'on_flyer_box' => 'required_if:on_packaging_switch,==,on|numeric',
+
                     'on_discount_title' => 'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
                     'on_daterange' => 'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
                     'on_discount_weight_rate' => 'required_if:on_discount_weight_switch,==,on',
@@ -1223,10 +1241,7 @@ class AdminDashboardController extends Controller
                     'ol_return_class_2_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
                     'ol_return_class_3_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
                     'overland_fuel_surcharge' => 'required_if:overland_fuel_switch,==,on|numeric',
-                    'ol_flyer_sm' => 'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_flyer_md' => 'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_flyer_lg' => 'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_flyer_box' => 'required_if:ol_packaging_switch,==,on|numeric',
+
                     'ol_discount_title' => 'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
                     'ol_daterange' => 'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
                     'ol_discount_weight_rate' => 'required_if:ol_discount_weight_switch,==,on',
@@ -1261,10 +1276,7 @@ class AdminDashboardController extends Controller
                     'detain_return_class_2_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
                     'detain_return_class_3_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
                     'detain_fuel_surcharge' => 'required_if:detain_fuel_switch,==,on|numeric',
-                    'detain_flyer_sm' => 'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_flyer_md' => 'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_flyer_lg' => 'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_flyer_box' => 'required_if:detain_packaging_switch,==,on|numeric',
+
                     'detain_discount_title' => 'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
                     'detain_daterange' => 'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
                     'detain_discount_weight_rate' => 'required_if:detain_discount_weight_switch,==,on',
@@ -1296,10 +1308,7 @@ class AdminDashboardController extends Controller
                     'sameday_return_class_2charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
                     'sameday_return_class_3_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
                     'sameday_fuel_surcharge' => 'required_if:sameday_fuel_switch,==,on|numeric',
-                    'sameday_flyer_sm' => 'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_flyer_md' => 'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_flyer_lg' => 'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_flyer_box' => 'required_if:sameday_packaging_switch,==,on|numeric',
+
                     'sameday_discount_title' => 'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
                     'sameday_daterange' => 'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
                     'sameday_discount_weight_rate' => 'required_if:sameday_discount_weight_switch,==,on',
@@ -1599,28 +1608,31 @@ class AdminDashboardController extends Controller
 
                     }
                     //Packaging Charges
-                    if ($request->has('on_packaging_switch') && $request->on_packaging_switch == 'on') {
-                        if ($request->on_packaging_record != null) {
-                            PackagingCharge::where(['id' => $request->on_packaging_record])->update([
-                                'user_id' => $id,
-                                'shipping_mode_id' => 1,
-                                'sm_flyer' => $request->on_flyer_sm,
-                                'md_flyer' => $request->on_flyer_md,
-                                'lg_flyer' => $request->on_flyer_lg,
-                                'box_flyer' => $request->on_flyer_box
-                            ]);
-                        } else {
-                            PackagingCharge::create([
-                                'user_id' => $id,
-                                'shipping_mode_id' => 1,
-                                'sm_flyer' => $request->on_flyer_sm,
-                                'md_flyer' => $request->on_flyer_md,
-                                'lg_flyer' => $request->on_flyer_lg,
-                                'box_flyer' => $request->on_flyer_box
-                            ]);
+
+                    if($request->has('on_packaging_switch') && $request->on_packaging_switch == 'on'){
+                        $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+                        PackagingCharge::where('user_id', $id)->where('shipping_mode_id', 1)->delete();
+                        foreach ($packaging_types as $type){
+                            if($request->has('on_packaging_type_'.$type->id)){
+                                $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                                foreach ($packaging_size as $size) {
+                                    $key = "on_packaging_material_size.$size->id";
+                                    $packaging_charges = new PackagingCharge();
+                                    $packaging_charges->user_id = $id;
+                                    $packaging_charges->shipping_mode_id = 1;
+                                    $packaging_charges->type_id = $type->id;
+                                    $packaging_charges->size_id = $size->id;
+                                    $packaging_charges->charges = ($request->has($key) ? $request->on_packaging_material_size[$size->id]: 0);
+                                    $packaging_charges->save();
+                                }
+
+                            }
                         }
 
                     }
+
+
+
                     $discount_cash = 0;
                     $discount_weight = 0;
                     $discount_insurance = 0;
@@ -1870,25 +1882,24 @@ class AdminDashboardController extends Controller
 
                     }
                     //Packaging Charges
-                    if ($request->has('ol_packaging_switch') && $request->ol_packaging_switch == 'on') {
-                        if ($request->ol_packaging_record != null) {
-                            PackagingCharge::where(['id' => $request->ol_packaging_record])->update([
-                                'user_id' => $id,
-                                'shipping_mode_id' => 2,
-                                'sm_flyer' => $request->ol_flyer_sm,
-                                'md_flyer' => $request->ol_flyer_md,
-                                'lg_flyer' => $request->ol_flyer_lg,
-                                'box_flyer' => $request->ol_flyer_box
-                            ]);
-                        } else {
-                            PackagingCharge::create([
-                                'user_id' => $id,
-                                'shipping_mode_id' => 2,
-                                'sm_flyer' => $request->ol_flyer_sm,
-                                'md_flyer' => $request->ol_flyer_md,
-                                'lg_flyer' => $request->ol_flyer_lg,
-                                'box_flyer' => $request->ol_flyer_box
-                            ]);
+                    if($request->has('ol_packaging_switch') && $request->ol_packaging_switch == 'on'){
+                        $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+                        PackagingCharge::where('user_id', $id)->where('shipping_mode_id', 2)->delete();
+                        foreach ($packaging_types as $type){
+                            if($request->has('ol_packaging_type_'.$type->id)){
+                                $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                                foreach ($packaging_size as $size) {
+                                    $key = "ol_packaging_material_size.$size->id";
+                                    $packaging_charges = new PackagingCharge();
+                                    $packaging_charges->user_id = $id;
+                                    $packaging_charges->shipping_mode_id = 2;
+                                    $packaging_charges->type_id = $type->id;
+                                    $packaging_charges->size_id = $size->id;
+                                    $packaging_charges->charges = ($request->has($key) ? $request->ol_packaging_material_size[$size->id]: 0);
+                                    $packaging_charges->save();
+                                }
+
+                            }
                         }
 
                     }
@@ -2140,25 +2151,24 @@ class AdminDashboardController extends Controller
 
                     }
                     //Packaging Charges
-                    if ($request->has('detain_packaging_switch') && $request->detain_packaging_switch == 'on') {
-                        if ($request->detain_packaging_record != null) {
-                            PackagingCharge::where(['id' => $request->detain_packaging_record])->update([
-                                'user_id' => $id,
-                                'shipping_mode_id' => 3,
-                                'sm_flyer' => $request->detain_flyer_sm,
-                                'md_flyer' => $request->detain_flyer_md,
-                                'lg_flyer' => $request->detain_flyer_lg,
-                                'box_flyer' => $request->detain_flyer_box
-                            ]);
-                        } else {
-                            PackagingCharge::create([
-                                'user_id' => $id,
-                                'shipping_mode_id' => 3,
-                                'sm_flyer' => $request->detain_flyer_sm,
-                                'md_flyer' => $request->detain_flyer_md,
-                                'lg_flyer' => $request->detain_flyer_lg,
-                                'box_flyer' => $request->detain_flyer_box
-                            ]);
+                    if($request->has('detain_packaging_switch') && $request->detain_packaging_switch == 'on'){
+                        $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+                        PackagingCharge::where('user_id', $id)->where('shipping_mode_id', 3)->delete();
+                        foreach ($packaging_types as $type){
+                            if($request->has('detain_packaging_type_'.$type->id)){
+                                $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                                foreach ($packaging_size as $size) {
+                                    $key = "detain_packaging_material_size.$size->id";
+                                    $packaging_charges = new PackagingCharge();
+                                    $packaging_charges->user_id = $id;
+                                    $packaging_charges->shipping_mode_id = 3;
+                                    $packaging_charges->type_id = $type->id;
+                                    $packaging_charges->size_id = $size->id;
+                                    $packaging_charges->charges = ($request->has($key) ? $request->detain_packaging_material_size[$size->id]: 0);
+                                    $packaging_charges->save();
+                                }
+
+                            }
                         }
 
                     }
@@ -2411,25 +2421,24 @@ class AdminDashboardController extends Controller
 
                     }
                     //Packaging Charges
-                    if ($request->has('sameday_packaging_switch') && $request->sameday_packaging_switch == 'on') {
-                        if ($request->sameday_packaging_record != null) {
-                            PackagingCharge::where(['id' => $request->sameday_packaging_record])->update([
-                                'user_id' => $id,
-                                'shipping_mode_id' => 4,
-                                'sm_flyer' => $request->sameday_flyer_sm,
-                                'md_flyer' => $request->sameday_flyer_md,
-                                'lg_flyer' => $request->sameday_flyer_lg,
-                                'box_flyer' => $request->sameday_flyer_box
-                            ]);
-                        } else {
-                            PackagingCharge::create([
-                                'user_id' => $id,
-                                'shipping_mode_id' => 4,
-                                'sm_flyer' => $request->sameday_flyer_sm,
-                                'md_flyer' => $request->sameday_flyer_md,
-                                'lg_flyer' => $request->sameday_flyer_lg,
-                                'box_flyer' => $request->sameday_flyer_box
-                            ]);
+                    if($request->has('sameday_packaging_switch') && $request->sameday_packaging_switch == 'on'){
+                        $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+                        PackagingCharge::where('user_id', $id)->where('shipping_mode_id', 4)->delete();
+                        foreach ($packaging_types as $type){
+                            if($request->has('sameday_packaging_type_'.$type->id)){
+                                $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                                foreach ($packaging_size as $size) {
+                                    $key = "sameday_packaging_material_size.$size->id";
+                                    $packaging_charges = new PackagingCharge();
+                                    $packaging_charges->user_id = $id;
+                                    $packaging_charges->shipping_mode_id = 4;
+                                    $packaging_charges->type_id = $type->id;
+                                    $packaging_charges->size_id = $size->id;
+                                    $packaging_charges->charges = ($request->has($key) ? $request->sameday_packaging_material_size[$size->id]: 0);
+                                    $packaging_charges->save();
+                                }
+
+                            }
                         }
 
                     }
@@ -2785,10 +2794,7 @@ class AdminDashboardController extends Controller
                     'on_return_class_2_charges.*'=>'required_if:on_return_switch,==,on|numeric',
                     'on_return_class_3_charges.*'=>'required_if:on_return_switch,==,on|numeric',
                     'overnight_fuel_surcharge' => 'required_if:overnight_fuel_switch,==,on|numeric',
-                    'on_flyer_sm' => 'required_if:on_packaging_switch,==,on|numeric',
-                    'on_flyer_md' => 'required_if:on_packaging_switch,==,on|numeric',
-                    'on_flyer_lg' => 'required_if:on_packaging_switch,==,on|numeric',
-                    'on_flyer_box' => 'required_if:on_packaging_switch,==,on|numeric',
+
                     'on_discount_title' => 'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
                     'on_daterange' => 'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
                     'on_discount_weight_rate' => 'required_if:on_discount_weight_switch,==,on',
@@ -2823,10 +2829,7 @@ class AdminDashboardController extends Controller
                     'ol_return_class_2_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
                     'ol_return_class_3_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
                     'overland_fuel_surcharge' => 'required_if:overland_fuel_switch,==,on|numeric',
-                    'ol_flyer_sm' => 'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_flyer_md' => 'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_flyer_lg' => 'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_flyer_box' => 'required_if:ol_packaging_switch,==,on|numeric',
+
                     'ol_discount_title' => 'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
                     'ol_daterange' => 'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
                     'ol_discount_weight_rate' => 'required_if:ol_discount_weight_switch,==,on',
@@ -2861,10 +2864,7 @@ class AdminDashboardController extends Controller
                     'detain_return_class_2_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
                     'detain_return_class_3_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
                     'detain_fuel_surcharge' => 'required_if:detain_fuel_switch,==,on|numeric',
-                    'detain_flyer_sm' => 'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_flyer_md' => 'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_flyer_lg' => 'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_flyer_box' => 'required_if:detain_packaging_switch,==,on|numeric',
+
                     'detain_discount_title' => 'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
                     'detain_daterange' => 'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
                     'detain_discount_weight_rate' => 'required_if:detain_discount_weight_switch,==,on',
@@ -2896,10 +2896,7 @@ class AdminDashboardController extends Controller
                     'sameday_return_class_2_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
                     'sameday_return_class_3_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
                     'sameday_fuel_surcharge' => 'required_if:sameday_fuel_switch,==,on|numeric',
-                    'sameday_flyer_sm' => 'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_flyer_md' => 'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_flyer_lg' => 'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_flyer_box' => 'required_if:sameday_packaging_switch,==,on|numeric',
+
                     'sameday_discount_title' => 'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
                     'sameday_daterange' => 'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
                     'sameday_discount_weight_rate' => 'required_if:sameday_discount_weight_switch,==,on',
@@ -3054,15 +3051,26 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                     //Packaging Charges
-                    if ($request->has('on_packaging_switch') && $request->on_packaging_switch == 'on') {
-                        PendingPackagingCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'sm_flyer' => $request->on_flyer_sm,
-                            'md_flyer' => $request->on_flyer_md,
-                            'lg_flyer' => $request->on_flyer_lg,
-                            'box_flyer' => $request->on_flyer_box
-                        ]);
+                    if($request->has('on_packaging_switch') && $request->on_packaging_switch == 'on'){
+                        $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+
+                        foreach ($packaging_types as $type){
+                            if($request->has('on_packaging_type_'.$type->id)){
+                                $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                                foreach ($packaging_size as $size) {
+                                    $key = "on_packaging_material_size.$size->id";
+                                    $packaging_charges = new PendingPackagingCharge();
+                                    $packaging_charges->user_id = $id;
+                                    $packaging_charges->shipping_mode_id = 1;
+                                    $packaging_charges->type_id = $type->id;
+                                    $packaging_charges->size_id = $size->id;
+                                    $packaging_charges->charges = ($request->has($key) ? $request->on_packaging_material_size[$size->id]: 0);
+                                    $packaging_charges->save();
+                                }
+
+                            }
+                        }
+
                     }
                     $discount_cash = null;
                     $discount_weight = null;
@@ -3219,15 +3227,26 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                     //Packaging Charges
-                    if ($request->has('ol_packaging_switch') && $request->ol_packaging_switch == 'on') {
-                        PendingPackagingCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'sm_flyer' => $request->ol_flyer_sm,
-                            'md_flyer' => $request->ol_flyer_md,
-                            'lg_flyer' => $request->ol_flyer_lg,
-                            'box_flyer' => $request->ol_flyer_box
-                        ]);
+                    if($request->has('ol_packaging_switch') && $request->ol_packaging_switch == 'on'){
+                        $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+
+                        foreach ($packaging_types as $type){
+                            if($request->has('ol_packaging_type_'.$type->id)){
+                                $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                                foreach ($packaging_size as $size) {
+                                    $key = "ol_packaging_material_size.$size->id";
+                                    $packaging_charges = new PendingPackagingCharge();
+                                    $packaging_charges->user_id = $id;
+                                    $packaging_charges->shipping_mode_id = 2;
+                                    $packaging_charges->type_id = $type->id;
+                                    $packaging_charges->size_id = $size->id;
+                                    $packaging_charges->charges = ($request->has($key) ? $request->ol_packaging_material_size[$size->id]: 0);
+                                    $packaging_charges->save();
+                                }
+
+                            }
+                        }
+
                     }
                     $discount_cash = null;
                     $discount_weight = null;
@@ -3384,15 +3403,26 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                     //Packaging Charges
-                    if ($request->has('detain_packaging_switch') && $request->detain_packaging_switch == 'on') {
-                        PendingPackagingCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'sm_flyer' => $request->detain_flyer_sm,
-                            'md_flyer' => $request->detain_flyer_md,
-                            'lg_flyer' => $request->detain_flyer_lg,
-                            'box_flyer' => $request->detain_flyer_box
-                        ]);
+                    if($request->has('detain_packaging_switch') && $request->detain_packaging_switch == 'on'){
+                        $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+
+                        foreach ($packaging_types as $type){
+                            if($request->has('detain_packaging_type_'.$type->id)){
+                                $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                                foreach ($packaging_size as $size) {
+                                    $key = "detain_packaging_material_size.$size->id";
+                                    $packaging_charges = new PendingPackagingCharge();
+                                    $packaging_charges->user_id = $id;
+                                    $packaging_charges->shipping_mode_id = 3;
+                                    $packaging_charges->type_id = $type->id;
+                                    $packaging_charges->size_id = $size->id;
+                                    $packaging_charges->charges = ($request->has($key) ? $request->detain_packaging_material_size[$size->id]: 0);
+                                    $packaging_charges->save();
+                                }
+
+                            }
+                        }
+
                     }
                     $discount_cash = null;
                     $discount_weight = null;
@@ -3548,15 +3578,26 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                     //Packaging Charges
-                    if ($request->has('sameday_packaging_switch') && $request->sameday_packaging_switch == 'on') {
-                        PendingPackagingCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'sm_flyer' => $request->sameday_flyer_sm,
-                            'md_flyer' => $request->sameday_flyer_md,
-                            'lg_flyer' => $request->sameday_flyer_lg,
-                            'box_flyer' => $request->sameday_flyer_box
-                        ]);
+                    if($request->has('sameday_packaging_switch') && $request->sameday_packaging_switch == 'on'){
+                        $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+
+                        foreach ($packaging_types as $type){
+                            if($request->has('sameday_packaging_type_'.$type->id)){
+                                $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                                foreach ($packaging_size as $size) {
+                                    $key = "sameday_packaging_material_size.$size->id";
+                                    $packaging_charges = new PendingPackagingCharge();
+                                    $packaging_charges->user_id = $id;
+                                    $packaging_charges->shipping_mode_id = 4;
+                                    $packaging_charges->type_id = $type->id;
+                                    $packaging_charges->size_id = $size->id;
+                                    $packaging_charges->charges = ($request->has($key) ? $request->sameday_packaging_material_size[$size->id]: 0);
+                                    $packaging_charges->save();
+                                }
+
+                            }
+                        }
+
                     }
                     $discount_cash = null;
                     $discount_weight = null;
@@ -3949,50 +3990,46 @@ class AdminDashboardController extends Controller
                 }
                 if($packagings = PackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($packagings as $packaging) {
-                        HistoryPackagingCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'sm_flyer' => $packaging['sm_flyer'],
-                            'md_flyer' => $packaging['md_flyer'],
-                            'lg_flyer' => $packaging['lg_flyer'],
-                            'box_flyer' => $packaging['box_flyer']
-                        ]);
+                        $packaging_charges = new HistoryPackagingCharge();
+                        $packaging_charges->user_id = $id;
+                        $packaging_charges->shipping_mode_id = 1;
+                        $packaging_charges->type_id = $packaging->type_id;
+                        $packaging_charges->size_id = $packaging->size_id;
+                        $packaging_charges->charges = $packaging->charges;
+                        $packaging_charges->save();
                     }
                 }
                 if($packagings = PackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($packagings as $packaging) {
-                        HistoryPackagingCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'sm_flyer' => $packaging['sm_flyer'],
-                            'md_flyer' => $packaging['md_flyer'],
-                            'lg_flyer' => $packaging['lg_flyer'],
-                            'box_flyer' => $packaging['box_flyer']
-                        ]);
+                        $packaging_charges = new HistoryPackagingCharge();
+                        $packaging_charges->user_id = $id;
+                        $packaging_charges->shipping_mode_id = 2;
+                        $packaging_charges->type_id = $packaging->type_id;
+                        $packaging_charges->size_id = $packaging->size_id;
+                        $packaging_charges->charges = $packaging->charges;
+                        $packaging_charges->save();
                     }
                 }
                 if($packagings = PackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($packagings as $packaging) {
-                        HistoryPackagingCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'sm_flyer' => $packaging['sm_flyer'],
-                            'md_flyer' => $packaging['md_flyer'],
-                            'lg_flyer' => $packaging['lg_flyer'],
-                            'box_flyer' => $packaging['box_flyer']
-                        ]);
+                        $packaging_charges = new HistoryPackagingCharge();
+                        $packaging_charges->user_id = $id;
+                        $packaging_charges->shipping_mode_id = 3;
+                        $packaging_charges->type_id = $packaging->type_id;
+                        $packaging_charges->size_id = $packaging->size_id;
+                        $packaging_charges->charges = $packaging->charges;
+                        $packaging_charges->save();
                     }
                 }
                 if($packagings = PackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($packagings as $packaging) {
-                        HistoryPackagingCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'sm_flyer' => $packaging['sm_flyer'],
-                            'md_flyer' => $packaging['md_flyer'],
-                            'lg_flyer' => $packaging['lg_flyer'],
-                            'box_flyer' => $packaging['box_flyer']
-                        ]);
+                        $packaging_charges = new HistoryPackagingCharge();
+                        $packaging_charges->user_id = $id;
+                        $packaging_charges->shipping_mode_id = 4;
+                        $packaging_charges->type_id = $packaging->type_id;
+                        $packaging_charges->size_id = $packaging->size_id;
+                        $packaging_charges->charges = $packaging->charges;
+                        $packaging_charges->save();
                     }
                 }
                 if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
@@ -4416,50 +4453,46 @@ class AdminDashboardController extends Controller
                 }
                 if($pendingpackagings = PendingPackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingpackagings as $pendingpackaging) {
-                        PackagingCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'sm_flyer' => $pendingpackaging['sm_flyer'],
-                            'md_flyer' => $pendingpackaging['md_flyer'],
-                            'lg_flyer' => $pendingpackaging['lg_flyer'],
-                            'box_flyer' => $pendingpackaging['box_flyer']
-                        ]);
+                        $packaging_charges = new PackagingCharge();
+                        $packaging_charges->user_id = $id;
+                        $packaging_charges->shipping_mode_id = 1;
+                        $packaging_charges->type_id = $pendingpackaging->type_id;
+                        $packaging_charges->size_id = $pendingpackaging->size_id;
+                        $packaging_charges->charges = $pendingpackaging->charges;
+                        $packaging_charges->save();
                     }
                 }
                 if($pendingpackagings = PendingPackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingpackagings as $pendingpackaging) {
-                        PackagingCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'sm_flyer' => $pendingpackaging['sm_flyer'],
-                            'md_flyer' => $pendingpackaging['md_flyer'],
-                            'lg_flyer' => $pendingpackaging['lg_flyer'],
-                            'box_flyer' => $pendingpackaging['box_flyer']
-                        ]);
+                        $packaging_charges = new PackagingCharge();
+                        $packaging_charges->user_id = $id;
+                        $packaging_charges->shipping_mode_id = 2;
+                        $packaging_charges->type_id = $pendingpackaging->type_id;
+                        $packaging_charges->size_id = $pendingpackaging->size_id;
+                        $packaging_charges->charges = $pendingpackaging->charges;
+                        $packaging_charges->save();
                     }
                 }
                 if($pendingpackagings = PendingPackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingpackagings as $pendingpackaging) {
-                        PackagingCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'sm_flyer' => $pendingpackaging['sm_flyer'],
-                            'md_flyer' => $pendingpackaging['md_flyer'],
-                            'lg_flyer' => $pendingpackaging['lg_flyer'],
-                            'box_flyer' => $pendingpackaging['box_flyer']
-                        ]);
+                        $packaging_charges = new PackagingCharge();
+                        $packaging_charges->user_id = $id;
+                        $packaging_charges->shipping_mode_id = 3;
+                        $packaging_charges->type_id = $pendingpackaging->type_id;
+                        $packaging_charges->size_id = $pendingpackaging->size_id;
+                        $packaging_charges->charges = $pendingpackaging->charges;
+                        $packaging_charges->save();
                     }
                 }
                 if($pendingpackagings = PendingPackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingpackagings as $pendingpackaging) {
-                        PackagingCharge::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'sm_flyer' => $pendingpackaging['sm_flyer'],
-                            'md_flyer' => $pendingpackaging['md_flyer'],
-                            'lg_flyer' => $pendingpackaging['lg_flyer'],
-                            'box_flyer' => $pendingpackaging['box_flyer']
-                        ]);
+                        $packaging_charges = new PackagingCharge();
+                        $packaging_charges->user_id = $id;
+                        $packaging_charges->shipping_mode_id = 4;
+                        $packaging_charges->type_id = $pendingpackaging->type_id;
+                        $packaging_charges->size_id = $pendingpackaging->size_id;
+                        $packaging_charges->charges = $pendingpackaging->charges;
+                        $packaging_charges->save();
                     }
                 }
                 if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {

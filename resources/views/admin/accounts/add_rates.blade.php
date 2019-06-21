@@ -2324,8 +2324,9 @@
 
         @if(count($packaging_material_types) > 0)
 
-            var onPackageSwitch = [];
+
             @foreach($packaging_material_types as $index => $type)
+            var onPackageSwitch = [];
             var type_id_{{$index}} = '{{$type->id}}';
             var type_id = '{{$type->id}}';
             onPackageSwitch[type_id] = document.querySelector('.on_packaging_type_'+type_id);

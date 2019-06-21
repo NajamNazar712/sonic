@@ -514,7 +514,7 @@
                                             </div>
 
                                         </div>
-
+                                        @if(count($packaging_material_types) > 0)
                                         <hr>
                                         <div class="row">
                                             <div class="col-md-2">
@@ -538,34 +538,75 @@
                                             </div>
                                         </div>
 
-                                        <div class="row packaging-charges-div-overnight">
-                                            <input type="hidden" name="on_packaging_record" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->id != '')? $packagingCharges[1][0]->id : ''}}">
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Small Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="on_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->sm_flyer != '')? $packagingCharges[1][0]->sm_flyer : ''}}" {{$on_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Medium Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="on_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->md_flyer != '')? $packagingCharges[1][0]->md_flyer : ''}}" {{$on_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
+                                            @foreach($packaging_material_types as $index => $type)
+                                                @if(isset($packaging_types[1]) && in_array($type->id, $packaging_types[1]))
+                                                <div class="card-header border-success">
+                                                    <div class="row">
+                                                        <div class="col-6"><h4 class="card-title lead success">{{$type->type}}</h4></div>
+                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="on_packaging_type_{{$type->id}}"><input name="on_packaging_type_{{$type->id}}" type="checkbox"  class="switchery on_packaging_type_{{$type->id}}" data-size="sm" {{$on_packaging_switch == 'checked'? 'checked':''}}/></a></a></div>
 
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Large Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="on_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->lg_flyer != '')? $packagingCharges[1][0]->lg_flyer : ''}}" {{$on_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Box</label>
-                                                <fieldset class="form-group">
-                                                    <input name="on_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->box_flyer != '')? $packagingCharges[1][0]->box_flyer : ''}}" {{$on_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div id="on_package_type_{{$type->id}}" class="card border-success {{$on_packaging_switch == 'checked'? '':'hide'}}" aria-expanded="true">
+                                                    <div class="card-content">
+                                                        <div class="card-body packaging-charges-div-overnight">
+                                                            <div class="row">
+                                                                @foreach($packaging_material_type_sizes[$type->id] as $size)
+
+                                                                        @foreach($packagingCharges[1] as $packaging)
+                                                                        @if($packaging->size_id == $size->id)
+                                                                        <div class="col-md-3 text-center">
+                                                                            <label class="card-title">{{$size->size}}</label>
+                                                                            <fieldset class="form-group">
+                                                                                <input name="on_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging->charges}}">
+                                                                            </fieldset>
+                                                                        </div>
+                                                                        @endif
+                                                                        @endforeach
+
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                @else
+                                                    <div class="card-header border-success">
+                                                        <div class="row">
+                                                            <div class="col-6"><h4 class="card-title lead success">{{$type->type}}</h4></div>
+                                                            <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="on_packaging_type_{{$type->id}}"><input name="on_packaging_type_{{$type->id}}" type="checkbox"  class="switchery on_packaging_type_{{$type->id}}" data-size="sm"/></a></a></div>
+
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div id="on_package_type_{{$type->id}}" class="card border-success hide" aria-expanded="true">
+                                                        <div class="card-content">
+                                                            <div class="card-body packaging-charges-div-overnight">
+                                                                <div class="row">
+                                                                    @foreach($packaging_material_type_sizes[$type->id] as $size)
+
+
+                                                                                <div class="col-md-3 text-center">
+                                                                                    <label class="card-title">{{$size->size}}</label>
+                                                                                    <fieldset class="form-group">
+                                                                                        <input name="on_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
+                                                                                    </fieldset>
+                                                                                </div>
+
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        @endif
+
+
 
                                         <hr>
                                         <div class="">
@@ -1270,7 +1311,7 @@
                                             </div>
 
                                         </div>
-
+                                        @if(count($packaging_material_types) > 0)
                                         <hr>
                                         <div class="row">
                                             <div class="col-md-2">
@@ -1294,35 +1335,73 @@
                                             </div>
                                         </div>
 
-                                        <div class="row packaging-charges-div-overland">
-                                            <input type="hidden" name="ol_packaging_record" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->id != '')? $packagingCharges[2][0]->id : ''}}">
+                                        @foreach($packaging_material_types as $index => $type)
+                                            @if(isset($packaging_types[2]) && in_array($type->id, $packaging_types[2]))
+                                                <div class="card-header border-success">
+                                                    <div class="row">
+                                                        <div class="col-6"><h4 class="card-title lead success">{{$type->type}}</h4></div>
+                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="ol_packaging_type_{{$type->id}}"><input name="ol_packaging_type_{{$type->id}}" type="checkbox"  class="switchery ol_packaging_type_{{$type->id}}" data-size="sm" {{$ol_packaging_switch == 'checked'? 'checked':''}}/></a></a></div>
 
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Small Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="ol_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->sm_flyer != '')? $packagingCharges[2][0]->sm_flyer : ''}}" {{$ol_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Medium Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="ol_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->md_flyer != '')? $packagingCharges[2][0]->md_flyer : ''}}" {{$ol_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
+                                                    </div>
+                                                </div>
 
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Large Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="ol_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->lg_flyer != '')? $packagingCharges[2][0]->lg_flyer : ''}}" {{$ol_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Box</label>
-                                                <fieldset class="form-group">
-                                                    <input name="ol_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->box_flyer != '')? $packagingCharges[2][0]->box_flyer : ''}}" {{$ol_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                        </div>
+
+                                                <div id="ol_package_type_{{$type->id}}" class="card border-success {{$on_packaging_switch == 'checked'? '':'hide'}}" aria-expanded="true">
+                                                    <div class="card-content">
+                                                        <div class="card-body packaging-charges-div-overland">
+                                                            <div class="row">
+                                                                @foreach($packaging_material_type_sizes[$type->id] as $size)
+
+                                                                    @foreach($packagingCharges[2] as $packaging)
+                                                                        @if($packaging->size_id == $size->id)
+                                                                            <div class="col-md-3 text-center">
+                                                                                <label class="card-title">{{$size->size}}</label>
+                                                                                <fieldset class="form-group">
+                                                                                    <input name="ol_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging->charges}}">
+                                                                                </fieldset>
+                                                                            </div>
+                                                                        @endif
+                                                                    @endforeach
+
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            @else
+                                                <div class="card-header border-success">
+                                                    <div class="row">
+                                                        <div class="col-6"><h4 class="card-title lead success">{{$type->type}}</h4></div>
+                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="ol_packaging_type_{{$type->id}}"><input name="ol_packaging_type_{{$type->id}}" type="checkbox"  class="switchery ol_packaging_type_{{$type->id}}" data-size="sm"/></a></a></div>
+
+                                                    </div>
+                                                </div>
+
+
+                                                <div id="ol_package_type_{{$type->id}}" class="card border-success hide" aria-expanded="true">
+                                                    <div class="card-content">
+                                                        <div class="card-body packaging-charges-div-overland">
+                                                            <div class="row">
+                                                                @foreach($packaging_material_type_sizes[$type->id] as $size)
+
+
+                                                                    <div class="col-md-3 text-center">
+                                                                        <label class="card-title">{{$size->size}}</label>
+                                                                        <fieldset class="form-group">
+                                                                            <input name="ol_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
+                                                                        </fieldset>
+                                                                    </div>
+
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    @endif
 
                                         <hr>
                                         <div class="">
@@ -2031,7 +2110,7 @@
                                             </div>
 
                                         </div>
-
+                                        @if(count($packaging_material_types) > 0)
                                         <hr>
                                         <div class="row">
                                             <div class="col-md-2">
@@ -2055,35 +2134,74 @@
                                             </div>
                                         </div>
 
-                                        <div class="row packaging-charges-div-detain">
-                                       <input type="hidden" name="detain_packaging_record" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->id != '')? $packagingCharges[3][0]->id : ''}}">
+                                        @foreach($packaging_material_types as $index => $type)
 
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Small Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="detain_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->sm_flyer != '')? $packagingCharges[3][0]->sm_flyer : ''}}" {{$det_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Medium Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="detain_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->md_flyer != '')? $packagingCharges[3][0]->md_flyer : ''}}" {{$det_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
+                                            @if(isset($packaging_types[3]) && in_array($type->id, $packaging_types[3]))
+                                                <div class="card-header border-success">
+                                                    <div class="row">
+                                                        <div class="col-6"><h4 class="card-title lead success">{{$type->type}}</h4></div>
+                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="detain_packaging_type_{{$type->id}}"><input name="detain_packaging_type_{{$type->id}}" type="checkbox"  class="switchery detain_packaging_type_{{$type->id}}" data-size="sm" {{$det_packaging_switch == 'checked'? 'checked':''}}/></a></a></div>
 
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Large Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="detain_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->lg_flyer != '')? $packagingCharges[3][0]->lg_flyer : ''}}" {{$det_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Box</label>
-                                                <fieldset class="form-group">
-                                                    <input name="detain_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->box_flyer != '')? $packagingCharges[3][0]->box_flyer : ''}}" {{$det_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div id="detain_package_type_{{$type->id}}" class="card border-success {{$det_packaging_switch == 'checked'? '':'hide'}}" aria-expanded="true">
+                                                    <div class="card-content">
+                                                        <div class="card-body packaging-charges-div-detain">
+                                                            <div class="row">
+                                                                @foreach($packaging_material_type_sizes[$type->id] as $size)
+
+                                                                    @foreach($packagingCharges[3] as $packaging)
+                                                                        @if($packaging->size_id == $size->id)
+                                                                            <div class="col-md-3 text-center">
+                                                                                <label class="card-title">{{$size->size}}</label>
+                                                                                <fieldset class="form-group">
+                                                                                    <input name="detain_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging->charges}}">
+                                                                                </fieldset>
+                                                                            </div>
+                                                                        @endif
+                                                                    @endforeach
+
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            @else
+                                                <div class="card-header border-success">
+                                                    <div class="row">
+                                                        <div class="col-6"><h4 class="card-title lead success">{{$type->type}}</h4></div>
+                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="detain_packaging_type_{{$type->id}}"><input name="detain_packaging_type_{{$type->id}}" type="checkbox"  class="switchery detain_packaging_type_{{$type->id}}" data-size="sm"/></a></a></div>
+
+                                                    </div>
+                                                </div>
+
+
+                                                <div id="detain_package_type_{{$type->id}}" class="card border-success hide" aria-expanded="true">
+                                                    <div class="card-content">
+                                                        <div class="card-body packaging-charges-div-detain">
+                                                            <div class="row">
+                                                                @foreach($packaging_material_type_sizes[$type->id] as $size)
+
+
+                                                                    <div class="col-md-3 text-center">
+                                                                        <label class="card-title">{{$size->size}}</label>
+                                                                        <fieldset class="form-group">
+                                                                            <input name="detain_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
+                                                                        </fieldset>
+                                                                    </div>
+
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    @endif
 
                                         <hr>
                                         <div class="">
@@ -2741,7 +2859,7 @@
                                             </div>
 
                                         </div>
-
+                                        @if(count($packaging_material_types) > 0)
                                         <hr>
                                         <div class="row">
                                             <div class="col-md-2">
@@ -2765,35 +2883,73 @@
                                             </div>
                                         </div>
 
-                                        <div class="row packaging-charges-div-sameday">
-                                        <input type="hidden" name="sameday_packaging_record" value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->id != '')? $packagingCharges[4][0]->id : ''}}">
+                                        @foreach($packaging_material_types as $index => $type)
+                                            @if(isset($packaging_types[4]) && in_array($type->id, $packaging_types[4]))
+                                                <div class="card-header border-success">
+                                                    <div class="row">
+                                                        <div class="col-6"><h4 class="card-title lead success">{{$type->type}}</h4></div>
+                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="sameday_packaging_type_{{$type->id}}"><input name="sameday_packaging_type_{{$type->id}}" type="checkbox"  class="switchery sameday_packaging_type_{{$type->id}}" data-size="sm" {{$same_packaging_switch == 'checked'? 'checked':''}}/></a></a></div>
 
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Small Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="sameday_flyer_sm" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->sm_flyer != '')? $packagingCharges[4][0]->sm_flyer : ''}}" {{$same_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Medium Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="sameday_flyer_md" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->md_flyer != '')? $packagingCharges[4][0]->md_flyer : ''}}" {{$same_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
+                                                    </div>
+                                                </div>
 
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Large Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="sameday_flyer_lg" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->lg_flyer != '')? $packagingCharges[4][0]->lg_flyer : ''}}" {{$same_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Box</label>
-                                                <fieldset class="form-group">
-                                                    <input name="sameday_flyer_box" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->box_flyer != '')? $packagingCharges[4][0]->box_flyer : ''}}" {{$same_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                        </div>
+
+                                                <div id="sameday_package_type_{{$type->id}}" class="card border-success {{$same_packaging_switch == 'checked'? '':'hide'}}" aria-expanded="true">
+                                                    <div class="card-content">
+                                                        <div class="card-body packaging-charges-div-sameday">
+                                                            <div class="row">
+                                                                @foreach($packaging_material_type_sizes[$type->id] as $size)
+
+                                                                    @foreach($packagingCharges[4] as $packaging)
+                                                                        @if($packaging->size_id == $size->id)
+                                                                            <div class="col-md-3 text-center">
+                                                                                <label class="card-title">{{$size->size}}</label>
+                                                                                <fieldset class="form-group">
+                                                                                    <input name="sameday_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging->charges}}">
+                                                                                </fieldset>
+                                                                            </div>
+                                                                        @endif
+                                                                    @endforeach
+
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            @else
+                                                <div class="card-header border-success">
+                                                    <div class="row">
+                                                        <div class="col-6"><h4 class="card-title lead success">{{$type->type}}</h4></div>
+                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="sameday_packaging_type_{{$type->id}}"><input name="sameday_packaging_type_{{$type->id}}" type="checkbox"  class="switchery sameday_packaging_type_{{$type->id}}" data-size="sm"/></a></a></div>
+
+                                                    </div>
+                                                </div>
+
+
+                                                <div id="sameday_package_type_{{$type->id}}" class="card border-success hide" aria-expanded="true">
+                                                    <div class="card-content">
+                                                        <div class="card-body packaging-charges-div-sameday">
+                                                            <div class="row">
+                                                                @foreach($packaging_material_type_sizes[$type->id] as $size)
+
+
+                                                                    <div class="col-md-3 text-center">
+                                                                        <label class="card-title">{{$size->size}}</label>
+                                                                        <fieldset class="form-group">
+                                                                            <input name="sameday_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
+                                                                        </fieldset>
+                                                                    </div>
+
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                        @endif
 
                                         <hr>
                                         <div class="">
@@ -3528,6 +3684,71 @@
 
             }
         });
+
+
+        @if(count($packaging_material_types) > 0)
+
+
+        @foreach($packaging_material_types as $index => $type)
+        var onPackageSwitch = [];
+        var type_id_{{$index}} = '{{$type->id}}';
+        var type_id = '{{$type->id}}';
+        onPackageSwitch[type_id] = document.querySelector('.on_packaging_type_'+type_id);
+        onPackageSwitch[type_id].onchange = function () {
+
+            if ($(this).is(':checked') === true) {
+                console.log(type_id)
+                $('#on_package_type_'+type_id_{{$index}}).slideDown('slow');
+
+            } else if ($(this).is(':checked') === false) {
+                $('#on_package_type_'+type_id_{{$index}}).slideUp('slow');
+
+            }
+        };
+        {{--var olPackageSwitch = [];--}}
+        {{--olPackageSwitch[type_id] = document.querySelector('.ol_packaging_type_'+type_id);--}}
+        {{--olPackageSwitch[type_id].onchange = function () {--}}
+
+            {{--if ($(this).is(':checked') === true) {--}}
+                {{--$('#ol_package_type_'+type_id_{{$index}}).slideDown('slow');--}}
+
+            {{--} else if ($(this).is(':checked') === false) {--}}
+                {{--$('#ol_package_type_'+type_id_{{$index}}).slideUp('slow');--}}
+
+            {{--}--}}
+        {{--};--}}
+
+        {{--var detainPackageSwitch = [];--}}
+        {{--detainPackageSwitch[type_id] = document.querySelector('.detain_packaging_type_'+type_id);--}}
+        {{--detainPackageSwitch[type_id].onchange = function () {--}}
+
+            {{--if ($(this).is(':checked') === true) {--}}
+                {{--$('#detain_package_type_'+type_id_{{$index}}).slideDown('slow');--}}
+
+            {{--} else if ($(this).is(':checked') === false) {--}}
+                {{--$('#detain_package_type_'+type_id_{{$index}}).slideUp('slow');--}}
+
+            {{--}--}}
+        {{--};--}}
+
+        {{--var samedayPackageSwitch = [];--}}
+        {{--samedayPackageSwitch[type_id] = document.querySelector('.sameday_packaging_type_'+type_id);--}}
+        {{--samedayPackageSwitch[type_id].onchange = function () {--}}
+
+            {{--if ($(this).is(':checked') === true) {--}}
+                {{--$('#sameday_package_type_'+type_id_{{$index}}).slideDown('slow');--}}
+
+            {{--} else if ($(this).is(':checked') === false) {--}}
+                {{--$('#sameday_package_type_'+type_id_{{$index}}).slideUp('slow');--}}
+
+            {{--}--}}
+        {{--};--}}
+
+
+
+        @endforeach
+
+        @endif
         // weightAdditionOverland.onchange = function () {
         //     if (weightAdditionOverland.checked === true) {
         //         // $(this).next('.spkg').attr('disabled','');
