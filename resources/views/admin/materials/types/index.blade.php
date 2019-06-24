@@ -216,7 +216,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.packaging.requests.list') }}',
+                        url: '{{ route('admin.packaging.types.list') }}',
                         data: {
                             'page': 'all',
                         },
