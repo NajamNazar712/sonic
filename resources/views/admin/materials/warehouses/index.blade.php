@@ -140,7 +140,7 @@
                                 row.push(index + 1);
                                 row.push(values.hub);
                                 row.push(values.status);
-                                row.push(values.type);
+                                row.push(values.master_type);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.updated_at);
