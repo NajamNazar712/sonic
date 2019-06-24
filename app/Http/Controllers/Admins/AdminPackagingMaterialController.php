@@ -22,6 +22,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Warehouse\Warehouse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -666,5 +667,104 @@ class AdminPackagingMaterialController extends Controller
             $status = 'enabled';
         }
         return response()->json(['status' => 1, 'success'=>"Packaging Material Type " . $type->type . " has been " . $status . " successfully!"]);
+    }
+
+    public function warehouse_index(){
+        return view('admin.materials.warehouses.index');
+    }
+
+    public function warehouse_list(Request $request){
+        $types = Warehouse::leftjoin('admins as ac', 'ac.id', '=', 'warehouses.created_by')
+            ->leftjoin('admins as au', 'au.id', '=', 'warehouses.updated_by')
+            ->leftjoin('cities as h', 'h.id', '=', 'warehouses.hub_id')
+            ->select('warehouses.id','warehouses.master_type','h.name as hub','warehouses.status','warehouses.created_at','warehouses.updated_at','ac.name as created_by','au.name as updated_by');
+        return Datatables::of($types)
+            ->editColumn('status',function ($warehouse){
+                if($warehouse->status == 0){
+                    return 'Enabled';
+                }
+                else{
+                    return 'Disabled';
+                }
+            })
+            ->editColumn('master_type',function ($warehouse){
+                if($warehouse->status == 0){
+                    return 'Child';
+                }
+                else{
+                    return 'Master';
+                }
+            })
+            ->editColumn('updated_by', function($warehouse){
+                if($warehouse->updated_by == null){
+                    return '-';
+                }
+                else{
+                    return $warehouse->updated_by;
+                }
+            })
+            ->editColumn('updated_at', function($warehouse){
+                if($warehouse->updated_by == null){
+                    return '-';
+                }
+                else{
+                    return $warehouse->updated_at;
+                }
+            })
+            ->addColumn('action', function($warehouse) {//Change ID
+                $dropdown = '';
+                if ((session('role_id') == 1 || in_array(218, session('permissions')))) {
+//                    $edit = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+//                    if ((session('role_id') == 1 || in_array(215, session('permissions')))) {
+//                        $dropdown .= $edit;
+//                    }
+                    if ((session('role_id') == 1 || in_array(218, session('permissions')))) {
+                        if ($warehouse->status == 1) {
+                            $dropdown .= $enable_button;
+                        } else {
+                            $dropdown .= $disable_button;
+                        }
+                    }
+
+
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+                }
+                return $dropdown;
+            })
+            ->make(true);
+    }
+    public function warehouse_enable_disable(Request $request){
+        $warehouse = Warehouse::where('id',$request->id)->first();
+        $warehouse->status = $request->status;
+        $warehouse->save();
+
+//        $type_history = new PackagingMaterialTypesHistory();
+//        $type_history->type_id = $request->id;
+//        $type_history->type = $type->type;
+//        $type_history->description = $type->description;
+//        $type_history->status = $request->status;
+//        $type_history->created_by = $type->created_by;
+//        $type_history->updated_by = Auth::id();
+//        $type_history->save();
+
+        if($request->status == 1){
+            $status = 'disabled';
+        }
+        else{
+            $status = 'enabled';
+        }
+        return response()->json(['status' => 1, 'success'=>"Warehouse has been " . $status . " successfully!"]);
     }
 }

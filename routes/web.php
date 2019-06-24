@@ -877,6 +877,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit','Admins\AdminPackagingMaterialController@type_edit')->name('edit');
             Route::post('enable_disable','Admins\AdminPackagingMaterialController@type_enable_disable')->name('enable_disable');
         });
+        Route::prefix('warehouse')->name('warehouse.')->group(function (){
+            Route::get('','Admins\AdminPackagingMaterialController@warehouse_index')->name('index');
+            Route::get('list','Admins\AdminPackagingMaterialController@warehouse_list')->name('list');
+            Route::post('enable_disable','Admins\AdminPackagingMaterialController@warehouse_enable_disable')->name('enable_disable');
+        });
     });
 
     Route::prefix('notifications')->name('notifications.')->group(function () {

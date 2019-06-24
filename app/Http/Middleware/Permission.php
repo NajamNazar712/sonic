@@ -353,6 +353,11 @@ class Permission
             'packaging.types.edit' => 215,
             'packaging.types.details' => 215,
             'packaging.types.enable_disable' => 216,
+            'packaging.warehouse.index' => 217,
+            'packaging.warehouse.list' => 217,
+            'packaging.warehouse.enable_disable' => 218,
+//            'packaging.warehouse.add' => 219,
+//            'packaging.warehouse.edit' => 219,
 
             'user_management.users.index' => 81,
             'user_management.users.list' => 81,
