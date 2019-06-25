@@ -23,12 +23,13 @@ use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Warehouse\Warehouse;
+use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
-
+use DB;
 class AdminPackagingMaterialController extends Controller
 {
     public function __construct()
@@ -509,10 +510,10 @@ class AdminPackagingMaterialController extends Controller
         return Datatables::of($types)
             ->editColumn('status',function ($type){
                 if($type->status == 0){
-                    return 'Enabled';
+                    return 'Disabled';
                 }
                 else{
-                    return 'Disabled';
+                    return 'Enabled';
                 }
             })
             ->editColumn('updated_by', function($type){
@@ -548,7 +549,7 @@ class AdminPackagingMaterialController extends Controller
                         $dropdown .= $edit;
                     }
                     if ((session('role_id') == 1 || in_array(216, session('permissions')))) {
-                        if ($type->status == 1) {
+                        if ($type->status == 0) {
                             $dropdown .= $enable_button;
                         } else {
                             $dropdown .= $disable_button;
@@ -608,7 +609,6 @@ class AdminPackagingMaterialController extends Controller
         $type = PackagingMaterialTypes::where('id',$request->id)->first();
         $type->type = $request->edit_type;
         $type->description = $request->edit_description;
-        $type->status = 0;
         $type->updated_by = Auth::id();
         $type->save();
 
@@ -661,38 +661,48 @@ class AdminPackagingMaterialController extends Controller
         $type_history->save();
 
         if($request->status == 1){
-            $status = 'disabled';
+            $status = 'enabled';
         }
         else{
-            $status = 'enabled';
+            $status = 'disabled';
         }
         return response()->json(['status' => 1, 'success'=>"Packaging Material Type " . $type->type . " has been " . $status . " successfully!"]);
     }
 
     public function warehouse_index(){
-        return view('admin.materials.warehouses.index');
+        $warehouse_ids = Warehouse::where('master_type','!=', 1)->pluck('hub_id')->toArray();
+        $hubs = City::where('status', 1)->where('hub', 1)->whereNotIn('id', $warehouse_ids)->get();
+        $all_hubs = City::whereIn('id', $warehouse_ids)->where('status', 1)->get();
+        $fulfilment_ids = WarehouseFulfilmentHubs::all()->pluck('hub_id')->toArray();
+        $fulfilment_hubs = City::where('status', '=' ,1)->where('hub', '=' ,1)->whereNotIn('id', $fulfilment_ids)->get();
+        $all_active_hubs = City::all()->where('status',1)->where('hub', 1);
+        return view('admin.materials.warehouses.index')->with(['hubs'=> $hubs, 'fulfilment_hubs' => $fulfilment_hubs, 'all_hubs' => $all_hubs, 'all_active_hubs' => $all_active_hubs]);
     }
 
     public function warehouse_list(Request $request){
         $types = Warehouse::leftjoin('admins as ac', 'ac.id', '=', 'warehouses.created_by')
             ->leftjoin('admins as au', 'au.id', '=', 'warehouses.updated_by')
             ->leftjoin('cities as h', 'h.id', '=', 'warehouses.hub_id')
-            ->select('warehouses.id','warehouses.master_type','h.name as hub','warehouses.status','warehouses.created_at','warehouses.updated_at','ac.name as created_by','au.name as updated_by');
+//            ->leftjoin('warehouse_fulfilment_hubs as wfh', 'wfh.warehouse_id','=', 'warehouses.id')
+            ->leftJoin('warehouse_fulfilment_hubs as wfh', function ($join) {
+                $join->on('wfh.warehouse_id', '=', 'warehouses.id');
+            })
+            ->select('warehouses.id','h.name as hub','warehouses.status','warehouses.created_at','warehouses.updated_at','ac.name as created_by','au.name as updated_by',DB::raw('count(wfh.id) as associated_hubs'))
+            ->groupBy('warehouses.id');
         return Datatables::of($types)
-            ->editColumn('status',function ($warehouse){
-                if($warehouse->status == 0){
-                    return 'Enabled';
-                }
-                else{
-                    return 'Disabled';
+            ->editColumn('associated_hubs', function ($warehouse){
+                if($warehouse->associated_hubs > 0){
+                    return '<button type="button" class="btn btn-outline-success mr-1">' . $warehouse->associated_hubs . '</button>';
+                }else{
+                    return '-';
                 }
             })
-            ->editColumn('master_type',function ($warehouse){
+            ->editColumn('status',function ($warehouse){
                 if($warehouse->status == 0){
-                    return 'Child';
+                    return 'Disable';
                 }
                 else{
-                    return 'Master';
+                    return 'Enable';
                 }
             })
             ->editColumn('updated_by', function($warehouse){
@@ -717,6 +727,7 @@ class AdminPackagingMaterialController extends Controller
 //                    $edit = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                     $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                     $dropdown = '
                       <div class="btn-group">
@@ -729,10 +740,13 @@ class AdminPackagingMaterialController extends Controller
 //                    }
                     if ((session('role_id') == 1 || in_array(218, session('permissions')))) {
                         if ($warehouse->status == 1) {
-                            $dropdown .= $enable_button;
-                        } else {
                             $dropdown .= $disable_button;
+                        } else {
+                            $dropdown .= $enable_button;
                         }
+                    }
+                    if ((session('role_id') == 1 || in_array(220, session('permissions')))) {
+                        $dropdown .= $edit_button;
                     }
 
 
@@ -767,4 +781,97 @@ class AdminPackagingMaterialController extends Controller
         }
         return response()->json(['status' => 1, 'success'=>"Warehouse has been " . $status . " successfully!"]);
     }
+
+    public function warehouse_add(Request $request){
+        $hub_id = $request->hub_id;
+        $city_ids = $request->city_ids;
+
+        if($hub_id){
+            $warehouse = new Warehouse();
+            $warehouse->hub_id = $hub_id;
+            $warehouse->status = 1;
+            $warehouse->master_type = 0;
+            $warehouse->created_by = Auth::id();
+            $warehouse->save();
+
+            if($warehouse){
+                foreach($city_ids as $id){
+                    $fulfilment_hub = new WarehouseFulfilmentHubs();
+                    $fulfilment_hub->warehouse_id = $warehouse->id;
+                    $fulfilment_hub->hub_id = $id;
+                    $fulfilment_hub->save();
+                }
+                return redirect()->back()->with(['success' => 'Warehouse  has been added!']);
+
+            }
+        }
+        return redirect()->back()->with(['error' => 'Warehouse could not be added!']);
+
+    }
+
+    public function warehouse_master_add(Request $request){
+        $hub_id = $request->hub;
+        if($hub_id){
+            $master_hub = Warehouse::where('hub_id', $hub_id);
+            if($master_hub->exists()){
+                $master_hub = $master_hub->first();
+                if($master_hub->master_type == 0){
+                    Warehouse::where('master_type', 1)->update(['master_type' => 0]);
+                    $master_hub->master_type = 1;
+                    $master_hub->save();
+                    return redirect()->back()->with(['success' => 'Warehouse has been updated and set as Master Warehouse!']);
+
+                }else{
+                    return redirect()->back()->with(['error' => 'Master warehouse already set as the selected Hub!']);
+                }
+
+            }else{
+                return redirect()->back()->with(['error' => 'Warehouse For this Hub ID not found!']);
+            }
+        }else{
+            return redirect()->back()->with(['error' => 'Hub ID not found!']);
+
+        }
+    }
+    public function warehouse_edit_data(Request $request){
+        $id = $request->id;
+        if($id){
+            $warehouse = Warehouse::find($id);
+            $associated_hubs = $warehouse->associated_hubs->pluck('hub_id')->toArray();
+
+            if($warehouse){
+                return response()->json(['status' => 0, 'warehouse' => $warehouse, 'associated_hubs' => $associated_hubs]);
+            }else{
+                return response()->json(['status' => 1, 'error' => 'Warehouse not found']);
+            }
+        }else{
+            return response()->json(['status' => 1, 'error' => 'Warehouse ID not found']);
+        }
+    }
+    public function warehouse_edit(Request $request){
+
+        $warehouse_id = $request->warehouse_id;
+        if($warehouse_id){
+            $warehouse = Warehouse::find($warehouse_id);
+            $warehouse->hub_id = $request->hub_id;
+            $warehouse->updated_by = Auth::id();
+            $warehouse->save();
+
+            if($warehouse){
+                WarehouseFulfilmentHubs::where('warehouse_id', $warehouse_id)->delete();
+
+                foreach ($request->city_ids as $city){
+                    $fulfilment_hub = new WarehouseFulfilmentHubs();
+                    $fulfilment_hub->warehouse_id = $warehouse_id;
+                    $fulfilment_hub->hub_id = $city;
+                    $fulfilment_hub->save();
+                }
+                return redirect()->back()->with(['success' => 'Warehouse has been updated successfully!']);
+            }
+        }else{
+            return redirect()->back()->with(['error' => 'Warehouse ID not found!']);
+        }
+
+    }
+
 }

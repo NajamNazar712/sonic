@@ -14,6 +14,7 @@ class CreateWarehouseFulfilmentHubsTable extends Migration
     public function up()
     {
         Schema::create('warehouse_fulfilment_hubs', function (Blueprint $table) {
+            $table->increments('id');
             $table->integer('warehouse_id');
             $table->integer('hub_id');
             $table->timestamps();

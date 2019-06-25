@@ -15,13 +15,13 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Type</th>
+                        <th class="border-primary border-darken-1">Warehouse Hub</th>
+                        <th class="border-primary border-darken-1">Associated Hubs</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Updated At</th>
                         <th class="border-primary border-darken-1">Updated By</th>
+                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -32,7 +32,7 @@
 
     <div class="modal fade text-left" id="AddWarehouseModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddMaterialModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-m" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Add Warehouse</h4>
@@ -40,20 +40,109 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body text-center">
-
+                <form id="warehouse_add_form" action="{{ route('admin.packaging.warehouse.add') }}" method="POST" novalidate="novalidate">
+                    @csrf
+                <div class="modal-body p-3">
+                    <div class="pl-1 form-group">
+                        <select name="hub_id" id="ware_house_hub" data-rule-required="true" data-msg-required="Hub is required">
+                            @foreach($hubs as $hub)
+                                <option value="{{$hub->id}}">{{$hub->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="fulfillment_hubs form-group">
+                        <h3 class="pl-1">Fulfilment Cities</h3>
+                        @foreach($fulfilment_hubs as $hub)
+                        <fieldset class="d-inline-block m-1">
+                            <input type="checkbox" id="city_{{$hub->id}}" class="city" name="city_ids[]" value="{{$hub->id}}">
+                            <label for="city_{{$hub->id}}">{{$hub->name}}</label>
+                        </fieldset>
+                            @endforeach
+                    </div>
                 </div>
+                <div class="modal-footer">
+                        <button id="AddWarehouseBtn" type="submit" class="btn btn-primary">Add Warehouse</button>
+                </div>
+                </form>
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="AddMasterWarehouseModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddMasterWarehouseModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Assign Master Warehouse</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="warehouse_master_add_form" action="{{ route('admin.packaging.warehouse.master_add') }}" method="POST" novalidate="novalidate">
+                    @csrf
+                    <div class="modal-body text-center p-3">
+                        <div class="pl-1 form-group">
+                            <select name="hub" id="master_hub" data-rule-required="true" data-msg-required="Hub is required">
+                                @foreach($all_hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <button id="AddMasterWarehouseBtn" type="submit" class="btn btn-primary">Assign Master Warehouse</button>
+                    </div>
 
+                </form>
+            </div>
+        </div>
+    </div>
+    {{--Edit Modal--}}
+    <div class="modal fade text-left" id="EditWarehouseModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditMaterialModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Edit Warehouse</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="warehouse_edit_form" action="{{ route('admin.packaging.warehouse.edit') }}" method="POST" novalidate="novalidate">
+                    @csrf
+                    <input type="hidden" id="edit_warehouse_id" name="warehouse_id">
+                    <div class="modal-body p-3">
+                        <div class="pl-1 form-group">
+                            <select name="hub_id" id="edit_ware_house_hub" data-rule-required="true" data-msg-required="Hub is required">
+                                @foreach($all_active_hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="fulfillment_hubs form-group">
+                            <h3 class="pl-1">Fulfilment Cities</h3>
+                            <div id="fulfilment_city_div">
+                                {{--@foreach($all_active_hubs as $hub)--}}
+                                    {{--<fieldset class="d-inline-block m-1">--}}
+                                        {{--<input type="checkbox" id="city_{{$hub->id}}" class="city" name="city_ids[]" value="{{$hub->id}}">--}}
+                                        {{--<label for="city_{{$hub->id}}">{{$hub->name}}</label>--}}
+                                    {{--</fieldset>--}}
+                                {{--@endforeach--}}
+                            </div>
 
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="AddWarehouseBtn" type="submit" class="btn btn-primary">Edit Warehouse</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
     <style type="text/css">
         table.dataTable {
             font-size: 12px;
@@ -109,10 +198,91 @@
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         var index_count = 0;
         $(document).ready(function () {
+            $("#ware_house_hub").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Hub",
+                width:'300px',
+                dropdownParent:$('#AddWarehouseModal')
+            });
+
+            $("#master_hub").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Hub",
+                width:'300px',
+                dropdownParent:$('#AddMasterWarehouseModal')
+            });
+            $('#warehouse_add_form .city').each(function() {
+                var checkbox = $(this);
+                var label = checkbox.next();
+                var text = label.text();
+
+                label.remove();
+
+                checkbox.iCheck({
+                    checkboxClass: 'icheckbox_line pt-1 pb-1',
+                    checkedClass: 'checked bg-success',
+                    uncheckedClass: 'bg-danger',
+                    insert: '<div class="icheck_line-icon"></div>' + text
+                });
+            });
+            $('#warehouse_add_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                rules : {
+                    "city_ids[]": { required: true, minlength: 1 }
+                },
+                messages: {
+                    'city_ids[]': {
+                        required: "Select at-least One fulfillment City please",
+                    },
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Warehouse is being created!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+            $('#warehouse_master_add_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Master Warehouse is being assigned!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+
+
+
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -125,13 +295,13 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Hub');
-                            head.push('Status');
-                            head.push('Type');
+                            head.push('Warehouse Hub');
+                            head.push('Associated Hubs');
                             head.push('Updated At');
                             head.push('Updated By');
                             head.push('Created At');
                             head.push('Created By');
+                            head.push('Status');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -139,12 +309,12 @@
 
                                 row.push(index + 1);
                                 row.push(values.hub);
-                                row.push(values.status);
-                                row.push(values.master_type);
+                                row.push(values.associated_hubs);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
+                                row.push(values.status);
 
                                 body.push(row);
                             });
@@ -159,6 +329,17 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '350px',
                 buttons: [
+                        @if (session('role_id') == 1 || in_array(220, session('permissions')))
+                    {
+                        text: '<i class="la la-plus"></i> Assign Master Warehouse',
+                        className: 'btn btn-primary assign_warehouse',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            $('#AddMasterWarehouseModal').modal('show');
+
+                        }
+                    },
+                    @endif
                         @if (session('role_id') == 1 || in_array(219, session('permissions')))
                     {
                         text: '<i class="la la-plus"></i> Add Warehouse',
@@ -191,12 +372,12 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'status', name: 'warehouses.status', class: 'align-middle status'},
-                    {data: 'master_type', name: 'warehouses.master_type', class: 'align-middle master_type'},
+                    {data: 'associated_hubs', name: 'associated_hubs', class: 'align-middle text-center associated_hubs',orderable: false, searchable: false},
                     {data: 'created_at', name: 'warehouses.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'ac.name', class: 'align-middle created_by'},
                     {data: 'updated_at', name: 'warehouses.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'au.name', class: 'align-middle updated_by'},
+                    {data: 'status', name: 'warehouses.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 
                 ],
@@ -221,7 +402,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.associated_hubs') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -287,6 +468,96 @@
                     }
                 });
             });
+
+            $('body').on('click','button.edit',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.packaging.warehouse.edit_data') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status === 0){
+                            // var fulfilment_hubs =
+                            $('#EditWarehouseModal').modal('show');
+                            $('#edit_warehouse_id').val(id);
+
+                            $("#edit_ware_house_hub").prepend('<option value="" selected></option>').select2({
+                                placeholder: "Select Hub",
+                                width:'300px',
+                                allowClear: true,
+                                dropdownParent:$('#EditWarehouseModal')
+                            });
+                            $('#edit_ware_house_hub').val(data.warehouse.hub_id).trigger('change');
+                            var fulfilment_cities = @json($all_active_hubs);
+                            var boxes = '';
+                            $.each(fulfilment_cities, function (index, value) {
+                            boxes += '<fieldset class="d-inline-block m-1">';
+                            boxes += '<input type="checkbox" id="city_'+ value.id +'" class="city" name="city_ids[]" value="'+value.id+'">';
+                            boxes += '<label for="city_'+value.id+'">'+ value.name +'</label></fieldset>';
+
+                            });
+                            $('#fulfilment_city_div').html('');
+                            $('#fulfilment_city_div').html(boxes);
+                            $('#warehouse_edit_form .city').each(function() {
+                                var id = parseInt($(this).val());
+                                var checkbox = $(this);
+
+                                if(data.associated_hubs.indexOf(id) > -1){
+                                    checkbox.attr('checked', true);
+                                }
+                                var label = checkbox.next();
+                                var text = label.text();
+
+                                label.remove();
+
+                                checkbox.iCheck({
+                                    checkboxClass: 'icheckbox_line pt-1 pb-1',
+                                    checkedClass: 'checked bg-success',
+                                    uncheckedClass: 'bg-danger',
+                                    insert: '<div class="icheck_line-icon"></div>' + text
+                                });
+                            });
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+            });
+            $('#warehouse_edit_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                rules : {
+                    "city_ids[]": { required: true, minlength: 1 }
+                },
+                messages: {
+                    'city_ids[]': {
+                        required: "Select at-least One fulfillment City please",
+                    },
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Warehouse is being created!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+
+
 
         });
 

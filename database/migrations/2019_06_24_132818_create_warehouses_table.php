@@ -19,7 +19,7 @@ class CreateWarehousesTable extends Migration
             $table->integer('status')->default(1);
             $table->integer('master_type')->default(0);
             $table->integer('created_by');
-            $table->integer('updated_by');
+            $table->integer('updated_by')->nullable();
             $table->timestamps();
         });
     }

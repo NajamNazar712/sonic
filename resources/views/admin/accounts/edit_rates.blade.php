@@ -553,18 +553,25 @@
                                                     <div class="card-content">
                                                         <div class="card-body packaging-charges-div-overnight">
                                                             <div class="row">
-                                                                @foreach($packaging_material_type_sizes[$type->id] as $size)
+                                                                @foreach($packaging_material_type_sizes[$type->id] as $index => $size)
 
-                                                                        @foreach($packagingCharges[1] as $packaging)
-                                                                        @if($packaging->size_id == $size->id)
+
+                                                                        @if($packagingCharges[1][$index]->size_id == $size->id)
                                                                         <div class="col-md-3 text-center">
                                                                             <label class="card-title">{{$size->size}}</label>
                                                                             <fieldset class="form-group">
-                                                                                <input name="on_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging->charges}}">
+                                                                                <input name="on_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[1][$index]->charges}}">
+                                                                            </fieldset>
+                                                                        </div>
+                                                                        @else
+                                                                        <div class="col-md-3 text-center">
+                                                                            <label class="card-title">{{$size->size}}</label>
+                                                                            <fieldset class="form-group">
+                                                                                <input name="on_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
                                                                             </fieldset>
                                                                         </div>
                                                                         @endif
-                                                                        @endforeach
+
 
                                                                 @endforeach
                                                             </div>
@@ -1352,16 +1359,21 @@
                                                             <div class="row">
                                                                 @foreach($packaging_material_type_sizes[$type->id] as $size)
 
-                                                                    @foreach($packagingCharges[2] as $packaging)
-                                                                        @if($packaging->size_id == $size->id)
-                                                                            <div class="col-md-3 text-center">
-                                                                                <label class="card-title">{{$size->size}}</label>
-                                                                                <fieldset class="form-group">
-                                                                                    <input name="ol_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging->charges}}">
-                                                                                </fieldset>
-                                                                            </div>
-                                                                        @endif
-                                                                    @endforeach
+                                                                    @if($packagingCharges[2][$index]->size_id == $size->id)
+                                                                        <div class="col-md-3 text-center">
+                                                                            <label class="card-title">{{$size->size}}</label>
+                                                                            <fieldset class="form-group">
+                                                                                <input name="ol_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[2][$index]->charges}}">
+                                                                            </fieldset>
+                                                                        </div>
+                                                                    @else
+                                                                        <div class="col-md-3 text-center">
+                                                                            <label class="card-title">{{$size->size}}</label>
+                                                                            <fieldset class="form-group">
+                                                                                <input name="ol_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
+                                                                            </fieldset>
+                                                                        </div>
+                                                                    @endif
 
                                                                 @endforeach
                                                             </div>
@@ -2152,16 +2164,21 @@
                                                             <div class="row">
                                                                 @foreach($packaging_material_type_sizes[$type->id] as $size)
 
-                                                                    @foreach($packagingCharges[3] as $packaging)
-                                                                        @if($packaging->size_id == $size->id)
-                                                                            <div class="col-md-3 text-center">
-                                                                                <label class="card-title">{{$size->size}}</label>
-                                                                                <fieldset class="form-group">
-                                                                                    <input name="detain_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging->charges}}">
-                                                                                </fieldset>
-                                                                            </div>
-                                                                        @endif
-                                                                    @endforeach
+                                                                    @if($packagingCharges[3][$index]->size_id == $size->id)
+                                                                        <div class="col-md-3 text-center">
+                                                                            <label class="card-title">{{$size->size}}</label>
+                                                                            <fieldset class="form-group">
+                                                                                <input name="detain_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[3][$index]->charges}}">
+                                                                            </fieldset>
+                                                                        </div>
+                                                                    @else
+                                                                        <div class="col-md-3 text-center">
+                                                                            <label class="card-title">{{$size->size}}</label>
+                                                                            <fieldset class="form-group">
+                                                                                <input name="detain_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
+                                                                            </fieldset>
+                                                                        </div>
+                                                                    @endif
 
                                                                 @endforeach
                                                             </div>
@@ -2900,16 +2917,21 @@
                                                             <div class="row">
                                                                 @foreach($packaging_material_type_sizes[$type->id] as $size)
 
-                                                                    @foreach($packagingCharges[4] as $packaging)
-                                                                        @if($packaging->size_id == $size->id)
-                                                                            <div class="col-md-3 text-center">
-                                                                                <label class="card-title">{{$size->size}}</label>
-                                                                                <fieldset class="form-group">
-                                                                                    <input name="sameday_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging->charges}}">
-                                                                                </fieldset>
-                                                                            </div>
-                                                                        @endif
-                                                                    @endforeach
+                                                                    @if($packagingCharges[4][$index]->size_id == $size->id)
+                                                                        <div class="col-md-3 text-center">
+                                                                            <label class="card-title">{{$size->size}}</label>
+                                                                            <fieldset class="form-group">
+                                                                                <input name="sameday_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[4][$index]->charges}}">
+                                                                            </fieldset>
+                                                                        </div>
+                                                                    @else
+                                                                        <div class="col-md-3 text-center">
+                                                                            <label class="card-title">{{$size->size}}</label>
+                                                                            <fieldset class="form-group">
+                                                                                <input name="sameday_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
+                                                                            </fieldset>
+                                                                        </div>
+                                                                    @endif
 
                                                                 @endforeach
                                                             </div>

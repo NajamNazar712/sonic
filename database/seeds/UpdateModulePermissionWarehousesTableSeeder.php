@@ -15,6 +15,7 @@ class UpdateModulePermissionWarehousesTableSeeder extends Seeder
             array('id' => 217, 'name' => 'Warehouse - View', 'module_id' => 10),
             array('id' => 218, 'name' => 'Warehouse - Enable/Disable', 'module_id' => 10),
             array('id' => 219, 'name' => 'Warehouse - Add/Edit', 'module_id' => 10),
+            array('id' => 220, 'name' => 'Warehouse - Assign', 'module_id' => 10),
         ));
     }
 }

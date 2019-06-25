@@ -881,6 +881,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\AdminPackagingMaterialController@warehouse_index')->name('index');
             Route::get('list','Admins\AdminPackagingMaterialController@warehouse_list')->name('list');
             Route::post('enable_disable','Admins\AdminPackagingMaterialController@warehouse_enable_disable')->name('enable_disable');
+            Route::post('add','Admins\AdminPackagingMaterialController@warehouse_add')->name('add');
+            Route::post('edit_data','Admins\AdminPackagingMaterialController@warehouse_edit_data')->name('edit_data');
+            Route::post('edit','Admins\AdminPackagingMaterialController@warehouse_edit')->name('edit');
+            Route::post('master_add','Admins\AdminPackagingMaterialController@warehouse_master_add')->name('master_add');
+
         });
     });
 
