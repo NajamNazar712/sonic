@@ -24,6 +24,8 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Warehouse\Warehouse;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
+use App\Http\Models\Warehouse\WarehouseFulfilmentHubsHistory;
+use App\Http\Models\Warehouse\WarehouseHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -649,6 +651,7 @@ class AdminPackagingMaterialController extends Controller
     public function type_enable_disable(Request $request){
         $type = PackagingMaterialTypes::where('id',$request->id)->first();
         $type->status = $request->status;
+        $type->updated_by = Auth::id();
         $type->save();
 
         $type_history = new PackagingMaterialTypesHistory();
@@ -761,22 +764,23 @@ class AdminPackagingMaterialController extends Controller
     public function warehouse_enable_disable(Request $request){
         $warehouse = Warehouse::where('id',$request->id)->first();
         $warehouse->status = $request->status;
+        $warehouse->updated_by = Auth::id();
         $warehouse->save();
 
-//        $type_history = new PackagingMaterialTypesHistory();
-//        $type_history->type_id = $request->id;
-//        $type_history->type = $type->type;
-//        $type_history->description = $type->description;
-//        $type_history->status = $request->status;
-//        $type_history->created_by = $type->created_by;
-//        $type_history->updated_by = Auth::id();
-//        $type_history->save();
+        $warehouse_history = new WarehouseHistory();
+        $warehouse_history->warehouse_id = $warehouse->id;
+        $warehouse_history->hub_id = $warehouse->hub_id;
+        $warehouse_history->status = $request->status;
+        $warehouse_history->master_type = $warehouse->master_type;
+        $warehouse_history->created_by = $warehouse->created_by;
+        $warehouse_history->updated_by = Auth::id();
+        $warehouse_history->save();
 
         if($request->status == 1){
-            $status = 'disabled';
+            $status = 'Enabled';
         }
         else{
-            $status = 'enabled';
+            $status = 'Disabled';
         }
         return response()->json(['status' => 1, 'success'=>"Warehouse has been " . $status . " successfully!"]);
     }
@@ -793,12 +797,27 @@ class AdminPackagingMaterialController extends Controller
             $warehouse->created_by = Auth::id();
             $warehouse->save();
 
+            $warehouse_history = new WarehouseHistory();
+            $warehouse_history->warehouse_id = $warehouse->id;
+            $warehouse_history->hub_id = $hub_id;
+            $warehouse_history->status = 1;
+            $warehouse_history->master_type = 0;
+            $warehouse_history->created_by = Auth::id();
+            $warehouse_history->save();
+
             if($warehouse){
                 foreach($city_ids as $id){
                     $fulfilment_hub = new WarehouseFulfilmentHubs();
                     $fulfilment_hub->warehouse_id = $warehouse->id;
                     $fulfilment_hub->hub_id = $id;
                     $fulfilment_hub->save();
+
+                    $fulfilment_hub_history = new WarehouseFulfilmentHubsHistory();
+                    $fulfilment_hub_history->warehouse_id = $warehouse->id;
+                    $fulfilment_hub_history->hub_id = $id;
+                    $fulfilment_hub_history->updated_by = Auth::id();
+                    $fulfilment_hub_history->save();
+
                 }
                 return redirect()->back()->with(['success' => 'Warehouse  has been added!']);
 
@@ -817,7 +836,17 @@ class AdminPackagingMaterialController extends Controller
                 if($master_hub->master_type == 0){
                     Warehouse::where('master_type', 1)->update(['master_type' => 0]);
                     $master_hub->master_type = 1;
+                    $master_hub->updated_by = Auth::id();
                     $master_hub->save();
+
+                    $warehouse_history = new WarehouseHistory();
+                    $warehouse_history->warehouse_id = $master_hub->id;
+                    $warehouse_history->hub_id = $hub_id;
+                    $warehouse_history->status = $master_hub->status;
+                    $warehouse_history->master_type = 1;
+                    $warehouse_history->created_by = $master_hub->created_by;
+                    $warehouse_history->created_by = Auth::id();
+                    $warehouse_history->save();
                     return redirect()->back()->with(['success' => 'Warehouse has been updated and set as Master Warehouse!']);
 
                 }else{
@@ -856,6 +885,16 @@ class AdminPackagingMaterialController extends Controller
             $warehouse->updated_by = Auth::id();
             $warehouse->save();
 
+
+            $warehouse_history = new WarehouseHistory();
+            $warehouse_history->warehouse_id = $warehouse->id;
+            $warehouse_history->hub_id = $request->hub_id;
+            $warehouse_history->status = $warehouse->status;
+            $warehouse_history->master_type = $warehouse->master_type;
+            $warehouse_history->created_by = $warehouse->created_by;
+            $warehouse_history->updated_by = Auth::id();
+            $warehouse_history->save();
+
             if($warehouse){
                 WarehouseFulfilmentHubs::where('warehouse_id', $warehouse_id)->delete();
 
@@ -864,6 +903,12 @@ class AdminPackagingMaterialController extends Controller
                     $fulfilment_hub->warehouse_id = $warehouse_id;
                     $fulfilment_hub->hub_id = $city;
                     $fulfilment_hub->save();
+
+                    $fulfilment_hub_history = new WarehouseFulfilmentHubsHistory();
+                    $fulfilment_hub_history->warehouse_id = $warehouse->id;
+                    $fulfilment_hub_history->hub_id = $city;
+                    $fulfilment_hub_history->updated_by = Auth::id();
+                    $fulfilment_hub_history->save();
                 }
                 return redirect()->back()->with(['success' => 'Warehouse has been updated successfully!']);
             }

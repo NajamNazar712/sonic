@@ -564,8 +564,6 @@
 
                         $('#ViewWarehouseHubsModal .modal-body').html(html);
                         $('#ViewWarehouseHubsModal').modal('show');
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 });
             });
