@@ -136,6 +136,23 @@
             </div>
         </div>
     </div>
+    {{--View Modal--}}
+    <div class="modal fade text-left" id="ViewWarehouseHubsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewWarehouseHubsModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">View Warehouse Hubs</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                    <div class="modal-body p-3 text-center">
+
+                    </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -437,7 +454,7 @@
                     method: 'POST',
                     data: {
                         'id': id,
-                        'status': 1,
+                        'status': 0,
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
@@ -456,7 +473,7 @@
                     method: 'POST',
                     data: {
                         'id': id,
-                        'status': 0,
+                        'status': 1,
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
@@ -527,6 +544,32 @@
                     });
                 }
             });
+
+            $('body').on('click','button.associated_hubs',function () {
+                var id = $(this).parents('tr').attr('id');
+                $.ajax({
+                    url: '{!! route('admin.packaging.warehouse.warehouse_hubs') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        var html = '';
+                        data.associated_hubs.forEach(function(hub, index) {
+                            console.log(hub.name);
+                            html += '<div class="">' + hub.name + '</div>';
+                        });
+
+                        $('#ViewWarehouseHubsModal .modal-body').html(html);
+                        $('#ViewWarehouseHubsModal').modal('show');
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            });
+
             $('#warehouse_edit_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',

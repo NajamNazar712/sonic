@@ -616,7 +616,7 @@ class AdminPackagingMaterialController extends Controller
         $type_history->type_id = $type->id;
         $type_history->type = $request->edit_type;
         $type_history->description = $request->edit_description;
-        $type_history->status = 0;
+        $type_history->status = $type->status;
         $type_history->created_by = $type->created_by;
         $type_history->updated_by = Auth::id();
         $type_history->save();
@@ -683,7 +683,6 @@ class AdminPackagingMaterialController extends Controller
         $types = Warehouse::leftjoin('admins as ac', 'ac.id', '=', 'warehouses.created_by')
             ->leftjoin('admins as au', 'au.id', '=', 'warehouses.updated_by')
             ->leftjoin('cities as h', 'h.id', '=', 'warehouses.hub_id')
-//            ->leftjoin('warehouse_fulfilment_hubs as wfh', 'wfh.warehouse_id','=', 'warehouses.id')
             ->leftJoin('warehouse_fulfilment_hubs as wfh', function ($join) {
                 $join->on('wfh.warehouse_id', '=', 'warehouses.id');
             })
@@ -692,7 +691,7 @@ class AdminPackagingMaterialController extends Controller
         return Datatables::of($types)
             ->editColumn('associated_hubs', function ($warehouse){
                 if($warehouse->associated_hubs > 0){
-                    return '<button type="button" class="btn btn-outline-success mr-1">' . $warehouse->associated_hubs . '</button>';
+                    return '<button type="button" class="btn btn-outline-success mr-1 associated_hubs">' . $warehouse->associated_hubs . '</button>';
                 }else{
                     return '-';
                 }
@@ -872,6 +871,11 @@ class AdminPackagingMaterialController extends Controller
             return redirect()->back()->with(['error' => 'Warehouse ID not found!']);
         }
 
+    }
+
+    public function warehouse_hubs(Request $request){
+        $associated_hubs = WarehouseFulfilmentHubs::leftjoin('cities as h', 'h.id', '=', 'warehouse_fulfilment_hubs.hub_id')->select('h.name')->where('warehouse_id', $request->id)->get();
+        return response()->json(['status' => 1, 'associated_hubs' => $associated_hubs]);
     }
 
 }

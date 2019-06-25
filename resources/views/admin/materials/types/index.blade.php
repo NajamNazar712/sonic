@@ -399,7 +399,6 @@
                     }
                 }).done(function (data) {
                     if(data.status === 1){
-                        console.log(data.type);
                         var html_type = '<input type="hidden" name="id" value="' + data.type.id + '"><input type="text" name="edit_type" id="edit_type" class="form-control type" value="' + data.type.type + '" placeholder="Type *" data-rule-required="true" data-msg-required="Type name is required">';
                         var html_description = '<textarea name="edit_description" id="edit_description" class="form-control" placeholder="Description *" data-rule-required="true" data-msg-required="Description is required">' + data.type.description + '</textarea>';
                         var html_sizes = '';

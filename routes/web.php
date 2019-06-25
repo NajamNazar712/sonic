@@ -885,7 +885,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit_data','Admins\AdminPackagingMaterialController@warehouse_edit_data')->name('edit_data');
             Route::post('edit','Admins\AdminPackagingMaterialController@warehouse_edit')->name('edit');
             Route::post('master_add','Admins\AdminPackagingMaterialController@warehouse_master_add')->name('master_add');
-
+            Route::post('warehouse_hubs','Admins\AdminPackagingMaterialController@warehouse_hubs')->name('warehouse_hubs');
         });
     });
 
