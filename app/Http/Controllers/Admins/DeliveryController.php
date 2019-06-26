@@ -405,7 +405,7 @@ class DeliveryController extends Controller
                         }
                     }
 
-                    ShipmnetsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
+                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
