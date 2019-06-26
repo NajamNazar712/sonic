@@ -61,7 +61,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                        <button id="AddWarehouseBtn" type="submit" class="btn btn-primary">Add Warehouse</button>
+                    <button class="btn btn-info" data-dismiss="modal">Close</button>
+                        <button id="AddWarehouseBtn" type="submit" class="btn btn-success">Add Warehouse</button>
                 </div>
                 </form>
             </div>
@@ -82,12 +83,12 @@
                     <div class="modal-body text-center p-3">
                         <div class="pl-1 form-group">
                             <select name="hub" id="master_hub" data-rule-required="true" data-msg-required="Hub is required">
-                                @foreach($all_hubs as $hub)
+                                @foreach($all_warehouse_cities as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <button id="AddMasterWarehouseBtn" type="submit" class="btn btn-primary">Assign Master Warehouse</button>
+                        <button id="AddMasterWarehouseBtn" type="submit" class="btn btn-success">Assign Master Warehouse</button>
                     </div>
 
                 </form>
@@ -119,18 +120,14 @@
                         <div class="fulfillment_hubs form-group">
                             <h3 class="pl-1">Fulfilment Cities</h3>
                             <div id="fulfilment_city_div">
-                                {{--@foreach($all_active_hubs as $hub)--}}
-                                    {{--<fieldset class="d-inline-block m-1">--}}
-                                        {{--<input type="checkbox" id="city_{{$hub->id}}" class="city" name="city_ids[]" value="{{$hub->id}}">--}}
-                                        {{--<label for="city_{{$hub->id}}">{{$hub->name}}</label>--}}
-                                    {{--</fieldset>--}}
-                                {{--@endforeach--}}
+
                             </div>
 
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button id="AddWarehouseBtn" type="submit" class="btn btn-primary">Edit Warehouse</button>
+                        <button class="btn btn-info" data-dismiss="modal">Close</button>
+                        <button id="AddWarehouseBtn" type="submit" class="btn btn-success">Edit Warehouse</button>
                     </div>
                 </form>
             </div>
@@ -150,6 +147,9 @@
                     <div class="modal-body p-3 text-center">
 
                     </div>
+                <div class="modal-footer">
+                    <button class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -232,6 +232,8 @@
                 width:'300px',
                 dropdownParent:$('#AddMasterWarehouseModal')
             });
+            var master_hub = parseInt('{{$master_warehouse_hub}}');
+            $("#master_hub").val(master_hub).trigger('change');
             $('#warehouse_add_form .city').each(function() {
                 var checkbox = $(this);
                 var label = checkbox.next();
@@ -557,10 +559,15 @@
                 }).done(function (data) {
                     if(data.status === 1){
                         var html = '';
-                        data.associated_hubs.forEach(function(hub, index) {
-                            console.log(hub.name);
-                            html += '<div class="">' + hub.name + '</div>';
+                        html += '<table class="table table-sm table-bordered">';
+                        html += '<thead><tr><th>S No.</th><th><strong>Cities</strong></th></tr></thead>';
+                        html += '<tbody>';
+                        $.each(data.associated_hubs, function(index, value) {
+                            var ind = index+1;
+                            html += '<tr class=""><td>' + ind + '</td>';
+                            html += '<td><b>' + value.name + '</b></td></tr>';
                         });
+                        html += '</tbody></table>';
 
                         $('#ViewWarehouseHubsModal .modal-body').html(html);
                         $('#ViewWarehouseHubsModal').modal('show');

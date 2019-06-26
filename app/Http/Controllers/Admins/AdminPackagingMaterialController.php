@@ -673,13 +673,20 @@ class AdminPackagingMaterialController extends Controller
     }
 
     public function warehouse_index(){
-        $warehouse_ids = Warehouse::where('master_type','!=', 1)->pluck('hub_id')->toArray();
+        $warehouse_ids = Warehouse::where('status', 1)->where('master_type','!=', 1)->pluck('hub_id')->toArray();
+        $all_warehouse_ids = Warehouse::where('status', 1)->pluck('hub_id')->toArray();
+        $all_warehouse_cities = City::where('status', 1)->where('hub', 1)->whereIn('id', $all_warehouse_ids)->get();
         $hubs = City::where('status', 1)->where('hub', 1)->whereNotIn('id', $warehouse_ids)->get();
         $all_hubs = City::whereIn('id', $warehouse_ids)->where('status', 1)->get();
         $fulfilment_ids = WarehouseFulfilmentHubs::all()->pluck('hub_id')->toArray();
         $fulfilment_hubs = City::where('status', '=' ,1)->where('hub', '=' ,1)->whereNotIn('id', $fulfilment_ids)->get();
         $all_active_hubs = City::all()->where('status',1)->where('hub', 1);
-        return view('admin.materials.warehouses.index')->with(['hubs'=> $hubs, 'fulfilment_hubs' => $fulfilment_hubs, 'all_hubs' => $all_hubs, 'all_active_hubs' => $all_active_hubs]);
+        $master_warehouse = Warehouse::where('master_type', 1)->first();
+        $master_warehouse_hub = '';
+        if($master_warehouse){
+            $master_warehouse_hub = $master_warehouse->hub_id;
+        }
+        return view('admin.materials.warehouses.index')->with(['hubs'=> $hubs, 'fulfilment_hubs' => $fulfilment_hubs, 'all_hubs' => $all_hubs, 'all_active_hubs' => $all_active_hubs, 'master_warehouse_hub' => $master_warehouse_hub, 'all_warehouse_cities' => $all_warehouse_cities]);
     }
 
     public function warehouse_list(Request $request){
