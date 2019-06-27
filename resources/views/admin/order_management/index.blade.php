@@ -18,7 +18,16 @@
                                    placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number"
                                    data-rule-required="true" data-msg-required="Tracking Number is required">
                         </div>
-                        <div class="col-4">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <select name="shipment_status_select" id="shipment_status" class="form-control select2" multiple="multiple">
+                                    @foreach($shipment_status as $status)
+                                        <option value="{{$status->id}}">{{$status->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-3">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                       <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -30,7 +39,7 @@
                                        id="booking_from_date" placeholder="Booking Date From">
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-3">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                         <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -264,6 +273,12 @@
             width: 300px !important;
         }
 
+        .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
+             background-color: #64a0d2 !important;
+             border-color: #5587b4 !important;
+             color: #FFFFFF;
+        }
+
 
     </style>
 @endsection
@@ -286,6 +301,12 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#shipment_status').select2({
+                placeholder:'Search Shipment Status',
+                width:'100%',
+                allowClear:true
+            });
+
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
 
 
@@ -617,6 +638,7 @@
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.booking_from_date = $('input[name="booking_from_date_formatted"]').val();
                         d.booking_to_date = $('input[name="booking_to_date_formatted"]').val();
+                        d.shipment_status_select = $('#shipment_status').val();
                     }
                 },
                 rowId: 'shipment_id',
@@ -816,8 +838,8 @@
                 var tracking_numbers = $('#track_form .tracking_numbers').val();
                 var booking_from_date = $('#track_form #booking_from_date').val();
                 var booking_to_date = $('#track_form #booking_to_date').val();
-
-                if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '')) {
+                var shipment_status = $('#track_form #shipment_status').val();
+                if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '') || shipment_status != '') {
                     table.draw();
                 }
 
