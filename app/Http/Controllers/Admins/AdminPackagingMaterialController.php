@@ -845,7 +845,7 @@ class AdminPackagingMaterialController extends Controller
 
                     $warehouse_history = new WarehouseHistory();
                     $warehouse_history->warehouse_id = $master_hub->id;
-                    $warehouse_history->hub_id = $hub_id;
+                    $warehouse_history->hub_id = $master_hub->hub_id;
                     $warehouse_history->status = $master_hub->status;
                     $warehouse_history->master_type = 1;
                     $warehouse_history->created_by = $master_hub->created_by;
