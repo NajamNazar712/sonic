@@ -642,7 +642,7 @@
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.booking_from_date = $('input[name="booking_from_date_formatted"]').val();
                         d.booking_to_date = $('input[name="booking_to_date_formatted"]').val();
-                        d.shipment_status = $('#shipment_status').val();
+                        d.shipment_status_select = $('#shipment_status').val();
                     }
                 },
                 rowId: 'shipment_id',
@@ -845,24 +845,24 @@
                 },
             });
 
-            // $('#track_form').bind('submit',function (e) {
-            //     e.preventDefault();
-            //
-            //     var tracking_numbers = $('#track_form .tracking_numbers').val();
-            //     var booking_from_date = $('#track_form #booking_from_date').val();
-            //     var booking_to_date = $('#track_form #booking_to_date').val();
-            //     var shipment_status = $('#track_form #shipment_status').val();
-            //     if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '') || shipment_status != '') {
-            //         table.draw();
-            //     }
-            //     if(tracking_numbers == '' && shipment_status == ''){
-            //         toastr.error('Tracking Number is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-            //         toastr.error('Shipment Status is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-            //
-            //     }
-            //
-            //
-            // });
+            $('#track_form').bind('submit',function (e) {
+                e.preventDefault();
+                table.draw();
+                // var tracking_numbers = $('#track_form .tracking_numbers').val();
+                // var booking_from_date = $('#track_form #booking_from_date').val();
+                // var booking_to_date = $('#track_form #booking_to_date').val();
+                // var shipment_status = $('#track_form #shipment_status').val();
+                // if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '') || shipment_status != '') {
+                //     table.draw();
+                // }
+                // if(tracking_numbers == '' && shipment_status == ''){
+                //     toastr.error('Tracking Number is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                //     toastr.error('Shipment Status is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                //
+                // }
+
+
+            });
 
             // $('#track_form').validate({
             //
