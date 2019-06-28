@@ -887,6 +887,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('master_add','Admins\AdminPackagingMaterialController@warehouse_master_add')->name('master_add');
             Route::post('warehouse_hubs','Admins\AdminPackagingMaterialController@warehouse_hubs')->name('warehouse_hubs');
         });
+        Route::prefix('inventory')->name('inventory.')->group(function (){
+            Route::get('','Admins\AdminPackagingMaterialController@inventory_index')->name('index');
+            Route::post('list','Admins\AdminPackagingMaterialController@inventory_list')->name('list');
+        });
     });
 
     Route::prefix('notifications')->name('notifications.')->group(function () {

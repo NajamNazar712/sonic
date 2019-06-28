@@ -359,6 +359,8 @@ class Permission
             'packaging.warehouse.add' => 219,
             'packaging.warehouse.edit' => 219,
             'packaging.warehouse.master_add' => 220,
+            'packaging.inventory.index' => 221,
+            'packaging.inventory.list' => 221,
 
             'user_management.users.index' => 81,
             'user_management.users.list' => 81,

@@ -26,6 +26,7 @@ use App\Http\Models\Warehouse\Warehouse;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubsHistory;
 use App\Http\Models\Warehouse\WarehouseHistory;
+use App\http\Models\WarehouseStock;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -849,7 +850,7 @@ class AdminPackagingMaterialController extends Controller
                     $warehouse_history->status = $master_hub->status;
                     $warehouse_history->master_type = 1;
                     $warehouse_history->created_by = $master_hub->created_by;
-                    $warehouse_history->created_by = Auth::id();
+                    $warehouse_history->updated_by = Auth::id();
                     $warehouse_history->save();
 
 
@@ -938,6 +939,43 @@ class AdminPackagingMaterialController extends Controller
     public function warehouse_hubs(Request $request){
         $associated_hubs = WarehouseFulfilmentHubs::leftjoin('cities as h', 'h.id', '=', 'warehouse_fulfilment_hubs.hub_id')->select('h.name')->where('warehouse_id', $request->id)->get();
         return response()->json(['status' => 1, 'associated_hubs' => $associated_hubs]);
+    }
+
+    public function inventory_index(Request $request){
+        $warehouses = Warehouse::leftjoin('cities as h', 'h.id', '=', 'warehouses.hub_id')->select('warehouses.id as id', 'h.name as name')->where('warehouses.master_type',0)->get();
+        $master_warehouse = Warehouse::leftjoin('cities as h', 'h.id', '=', 'warehouses.hub_id')->select('warehouses.id as id', 'h.name as name')->where('warehouses.master_type',1)->first();
+        return view('admin.materials.inventory.index')->with(['warehouses' => $warehouses, 'master_warehouse' => $master_warehouse]);
+    }
+
+    public function inventory_list(Request $request){
+        $warehouses = $request->warehouses;
+        $packaging_inventory = WarehouseStock::leftjoin('warehouses as wm', function($join){
+            $join->on('wm.id', '=', 'warehouse_stocks.warehouse_id')
+            ->where('wm.master_type', 1);
+        })
+            ->leftjoin('warehouses as w', function($join){
+                $join->on('w.id', '=', 'warehouse_stocks.warehouse_id')
+                    ->where('w.master_type', 0);
+            })
+            ->leftjoin('packaging_material_types as pmt', 'pmt.id', '=', 'warehouse_stocks.type_id')
+            ->leftjoin('packaging_material_type_sizes as pmts', 'pmts.id', '=', 'warehouse_stocks.type_size_id')
+            ->select('pmt.id', 'pmt.type as packaging_type', 'pmts.size as size', DB::raw('(select sum(warehouse_stocks.stock) from warehouse_stocks where warehouse_stocks.warehouse_id = wm.id and warehouse_stocks.type_id = pmt.id and warehouse_stocks.type_size_id = pmts.id) as master_warehouse'), DB::raw('(select sum(warehouse_stocks.stock) from warehouse_stocks where warehouse_stocks.type_id = pmt.id and warehouse_stocks.type_size_id = pmts.id) as total'))->groupBy('pmts.id');
+
+        foreach ($warehouses as $warehouse){
+            $packaging_inventory->addselect(DB::raw('(select sum(warehouse_stocks.stock) from warehouse_stocks where  warehouse_stocks.warehouse_id = '. $warehouse['id'] .' and warehouse_stocks.type_id = pmt.id and warehouse_stocks.type_size_id = pmts.id) as '. strtolower(str_replace(' ', '', $warehouse['name']))));
+        }
+        return Datatables::of($packaging_inventory)
+            ->editColumn('packaging_type' ,function($inventory){
+                return $inventory->packaging_type . ' - ' . $inventory->size;
+            })
+            ->editColumn('total' ,function($inventory){
+                if($inventory->total == null){
+                    return '0';
+                }
+                else{
+                    return $inventory->total;
+                }
+            })->make(true);
     }
 
 }

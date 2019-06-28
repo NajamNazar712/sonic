@@ -318,6 +318,17 @@
                 @if (session('role_id') == 1 || count(array_intersect([77, 78], session('permissions'))) !== 0)
 
                     buttons: [
+                        @if (session('role_id') == 1 || in_array(221, session('permissions')))
+                    {
+                        text: '<i class="la la-align-justify"></i> View Inventory',
+                        className: 'btn btn-primary view_inventory',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            window.location.href = '{{route('admin.packaging.inventory.index')}}';
+
+                        }
+                    },
+                        @endif
                     @if (session('role_id') == 1 || in_array(77, session('permissions')))
                         {
                             text: '<i class="la la-plus"></i> Add Stock',
