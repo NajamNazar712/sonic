@@ -697,6 +697,7 @@ class AdminPackagingMaterialController extends Controller
                 $join->on('wfh.warehouse_id', '=', 'warehouses.id');
             })
             ->select('warehouses.id','h.name as hub','warehouses.status','warehouses.created_at','warehouses.updated_at','ac.name as created_by','au.name as updated_by',DB::raw('count(wfh.id) as associated_hubs'))
+            ->where('warehouses.master_type', '!=', 1)
             ->groupBy('warehouses.id');
         return Datatables::of($types)
             ->editColumn('associated_hubs', function ($warehouse){
@@ -837,14 +838,10 @@ class AdminPackagingMaterialController extends Controller
     public function warehouse_master_add(Request $request){
         $hub_id = $request->hub;
         if($hub_id){
-            $master_hub = Warehouse::where('hub_id', $hub_id);
+            $master_hub = Warehouse::where('master_type', 1);
             if($master_hub->exists()){
                 $master_hub = $master_hub->first();
-                if($master_hub->master_type == 0){
-                    Warehouse::where('master_type', 1)->update(['master_type' => 0]);
-                    $master_hub->master_type = 1;
-                    $master_hub->updated_by = Auth::id();
-                    $master_hub->save();
+                if($master_hub->hub_id != $hub_id){
 
                     $warehouse_history = new WarehouseHistory();
                     $warehouse_history->warehouse_id = $master_hub->id;
@@ -854,6 +851,13 @@ class AdminPackagingMaterialController extends Controller
                     $warehouse_history->created_by = $master_hub->created_by;
                     $warehouse_history->created_by = Auth::id();
                     $warehouse_history->save();
+
+
+                    $master_hub->hub_id = $hub_id;
+                    $master_hub->updated_by = Auth::id();
+                    $master_hub->save();
+
+
                     return redirect()->back()->with(['success' => 'Warehouse has been updated and set as Master Warehouse!']);
 
                 }else{
@@ -861,7 +865,13 @@ class AdminPackagingMaterialController extends Controller
                 }
 
             }else{
-                return redirect()->back()->with(['error' => 'Warehouse For this Hub ID not found!']);
+                $master_hub = new Warehouse();
+                $master_hub->hub_id = $hub_id;
+                $master_hub->master_type = 1;
+                $master_hub->created_by = Auth::id();
+                $master_hub->save();
+
+                return redirect()->back()->with(['success' => 'Warehouse has been updated and set as Master Warehouse!']);
             }
         }else{
             return redirect()->back()->with(['error' => 'Hub ID not found!']);
