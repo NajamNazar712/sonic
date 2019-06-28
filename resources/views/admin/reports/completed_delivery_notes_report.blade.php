@@ -138,6 +138,8 @@
                         <th class="border-primary border-darken-1">Update Date</th>
                         <th class="border-primary border-darken-1">Verified By</th>
                         <th class="border-primary border-darken-1">Verified Date</th>
+                        <th class="border-primary border-darken-1">Cash Collected By</th>
+                        <th class="border-primary border-darken-1">Cash Collection Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
                         <th class="border-primary border-darken-1">Aging (Added to Updated)</th>
                         <th class="border-primary border-darken-1">Aging (Updated to Verified)</th>
@@ -395,6 +397,8 @@
                             head.push('Updated Date');
                             head.push('Verified By');
                             head.push('Verified Date');
+                            head.push('Cash Collected By');
+                            head.push('Cash Collection Date');
                             head.push('DNCC Amount');
                             head.push('Aging (Added to Updated)');
                             head.push('Aging (Updated to Verified)');
@@ -415,6 +419,8 @@
                                 row.push(values.status_updated);
                                 row.push(values.verified_by);
                                 row.push(values.status_verified);
+                                row.push(values.cash_collected);
+                                row.push(values.cash_collected_at);
                                 row.push(values.amount);
                                 row.push(values.aging_create_update);
                                 row.push(values.aging_update_verified);
@@ -486,6 +492,8 @@
                     { data:'status_updated' ,name: 'delivery_notes.status_updated_at', class: 'align-middle updated_at'},
                     { data:'verified_by' ,name: 'vb.name', class: 'align-middle verified_by'},
                     { data:'status_verified' ,name: 'delivery_notes.status_verified_at', class: 'align-middle verified_time'},
+                    { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
+                    { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                     {orderable: false, searchable: false, data:'aging_create_update' ,name: 'aging_create_update', class: 'align-middle aging_create_update'},
                     {orderable: false, searchable: false, data:'aging_update_verified' ,name: 'aging_update_verified', class: 'align-middle aging_update_verified'},

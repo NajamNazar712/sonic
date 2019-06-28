@@ -307,7 +307,7 @@
                 $('#datatable_filter_btn').attr('disabled', false);
             });
             $('#shipment_status').on("select2:unselect", function(e) {
-                if($('#shipment_status').val() == ''){
+                if($('#shipment_status').val() == '' && $('input[name="tracking_numbers"]').val() == ''){
                     $('#datatable_filter_btn').attr('disabled', true);
                 }
             });
@@ -835,8 +835,7 @@
                     }
                 },
                 onChange: function (value) {
-                    var obj = $(this);
-                    if(value.length == 0){
+                    if(value.length == 0 && $('#shipment_status').val() == ''){
                         $('#datatable_filter_btn').attr('disabled', true);
                     }else{
                         $('#datatable_filter_btn').attr('disabled', false);

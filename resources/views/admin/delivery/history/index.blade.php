@@ -51,6 +51,8 @@
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Update Date</th>
+                        <th class="border-primary border-darken-1">Cash Collected By</th>
+                        <th class="border-primary border-darken-1">Cash Collection Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
                         <th class="border-primary border-darken-1">Last Updated At</th>
                     </tr>
@@ -222,6 +224,8 @@
                             head.push('Assigned Date');
                             head.push('Updated By');
                             head.push('Updated Date');
+                            head.push('Cash Collected By');
+                            head.push('Cash Collection Date');
                             head.push('DNCC Amount');
                             head.push('Last Updated At');
 
@@ -241,6 +245,8 @@
                                 row.push(values.created_at);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
+                                row.push(values.cash_collected);
+                                row.push(values.cash_collected_at);
                                 row.push(values.amount);
                                 row.push(values.last_updated_at);
 
@@ -293,6 +299,8 @@
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
                     { data:'updated_by' ,name: 'ub.name', class: 'align-middle updated_by'},
                     { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
+                    { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
+                    { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
                     { data:'last_updated_at' ,name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
                 ],
