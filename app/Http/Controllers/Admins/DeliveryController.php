@@ -2617,6 +2617,8 @@ class DeliveryController extends Controller
             if ($delivery_note_details->cash_collection_status == 0) {
                 $delivery_note_details = DeliveryNote::where('id', $delivery_note_id)->where('cash_collection_status', 0)->first();
                 $delivery_note_details->cash_collection_status = 1;
+                $delivery_note_details->cash_collected_by = Auth::id();
+                $delivery_note_details->cash_collected_at = Carbon::now();
                 $delivery_note_details->save();
                 return response()->json(['status' => 1, 'success' => 'Cash collected successfully!']);
             } else {
@@ -2635,6 +2637,8 @@ class DeliveryController extends Controller
             $note_details = DeliveryNote::where('id', $note_id)->where('cash_collection_status', 0)->first();
             if ($note_details) {
                 $note_details->cash_collection_status = 1;
+                $note_details->cash_collected_by = Auth::id();
+                $note_details->cash_collected_at = Carbon::now();
                 $note_details->save();
             } else {
                 $notes[] = $note_id;
@@ -2661,8 +2665,9 @@ class DeliveryController extends Controller
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
+            ->leftjoin('admins as ccb', 'ccb.id', '=', 'delivery_notes.cash_collected_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at'])
             ->where('delivery_notes.cash_collection_status', 1)
             ->where('delivery_notes.dncc_status', 0);
 
