@@ -175,6 +175,9 @@ class OrderManagementController extends Controller
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
+        if ($shipment_status_select = $request->get('shipment_status_select')) {
+            $datatable->whereIn('ss.id', $shipment_status_select);
+        }
         if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
             $from = $request->get('booking_from_date');
             $to = $request->get('booking_to_date');
