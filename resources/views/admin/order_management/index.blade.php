@@ -14,13 +14,12 @@
                 <div class="col mt-2">
                     <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                         <div class="form-group">
-                            <input type="text" name="tracking_numbers" class="tracking_numbers"
-                                   placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number"
-                                   data-rule-required="true" data-msg-required="Tracking Number is required">
+                            <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
+                                   placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
                         </div>
                         <div class="col-3">
                             <div class="form-group">
-                                <select name="shipment_status_select" id="shipment_status" class="form-control select2" multiple="multiple">
+                                <select name="shipment_status" id="shipment_status" class="form-control select2 dt_search" multiple="multiple" >
                                 @foreach($shipment_status as $status)
                                      <option value="{{$status->id}}">{{$status->name}}</option>
                                 @endforeach
@@ -53,7 +52,7 @@
                         </div>
 
                         <div class="form-group col-md-5 mt-2 justify-content-center">
-                            <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i
+                            <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width" disabled><i
                                         class="la la-search"></i> Search
                             </button>
                         </div>
@@ -296,6 +295,7 @@
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -303,6 +303,13 @@
                 placeholder:'Search Shipment Status',
                 width:'100%',
                 allowClear:true
+            }).bind('select2:select', function () {
+                $('#datatable_filter_btn').attr('disabled', false);
+            });
+            $('#shipment_status').on("select2:unselect", function(e) {
+                if($('#shipment_status').val() == ''){
+                    $('#datatable_filter_btn').attr('disabled', true);
+                }
             });
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
 
@@ -635,7 +642,7 @@
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.booking_from_date = $('input[name="booking_from_date_formatted"]').val();
                         d.booking_to_date = $('input[name="booking_to_date_formatted"]').val();
-                        d.shipment_status_select = $('#shipment_status').val();
+                        d.shipment_status = $('#shipment_status').val();
                     }
                 },
                 rowId: 'shipment_id',
@@ -801,7 +808,7 @@
 
             //Selectize
             var select = $('#track_form .tracking_numbers').selectize({
-                placeholder: 'Tracking Number(s)*',
+                placeholder: 'Tracking Number(s)',
                 delimiter: ',',
                 createOnBlur: true,
                 persist: false,
@@ -826,21 +833,61 @@
                     else {
                         return false;
                     }
-                }
+                },
+                onChange: function (value) {
+                    var obj = $(this);
+                    if(value.length == 0){
+                        $('#datatable_filter_btn').attr('disabled', true);
+                    }else{
+                        $('#datatable_filter_btn').attr('disabled', false);
+                    }
+
+                },
             });
 
-            $('#track_form').bind('submit',function (e) {
-                e.preventDefault();
+            // $('#track_form').bind('submit',function (e) {
+            //     e.preventDefault();
+            //
+            //     var tracking_numbers = $('#track_form .tracking_numbers').val();
+            //     var booking_from_date = $('#track_form #booking_from_date').val();
+            //     var booking_to_date = $('#track_form #booking_to_date').val();
+            //     var shipment_status = $('#track_form #shipment_status').val();
+            //     if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '') || shipment_status != '') {
+            //         table.draw();
+            //     }
+            //     if(tracking_numbers == '' && shipment_status == ''){
+            //         toastr.error('Tracking Number is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            //         toastr.error('Shipment Status is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            //
+            //     }
+            //
+            //
+            // });
 
-                var tracking_numbers = $('#track_form .tracking_numbers').val();
-                var booking_from_date = $('#track_form #booking_from_date').val();
-                var booking_to_date = $('#track_form #booking_to_date').val();
-                var shipment_status = $('#track_form #shipment_status').val();
-                if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '') || shipment_status != '') {
-                    table.draw();
-                }
+            // $('#track_form').validate({
+            //
+            //     rules: {
+            //         tracking_numbers: {
+            //             require_from_group: [1, ".dt_search"]
+            //         },
+            //         shipment_status: {
+            //             require_from_group: [1, ".dt_search"]
+            //         }
+            //     },
+            //     ignore: [],
+            //     errorClass: 'danger',
+            //     successClass: 'success',
+            //     errorPlacement: function(error, element) {
+            //         error.addClass('w-100').appendTo(element.parents('form-group'));
+            //     },
+            //     submitHandler: function(form) {
+            //         table.draw();
+            //
+            //         return false;
+            //     }
+            // });
 
-            });
+
             var max_char = 245;
             $('#feedback_description').on('keypress copy paste',function (e) {
                 if ($(this).val().length == max_char) {
