@@ -850,7 +850,7 @@ class AdminPackagingMaterialController extends Controller
                     $warehouse_history->status = $master_hub->status;
                     $warehouse_history->master_type = 1;
                     $warehouse_history->created_by = $master_hub->created_by;
-                    $warehouse_history->created_by = Auth::id();
+                    $warehouse_history->updated_by = Auth::id();
                     $warehouse_history->save();
 
 
