@@ -38,9 +38,6 @@ html {
     html body.boxed-layout {
       padding-left: 0;
       padding-right: 0; }
-    html body.bg-full-screen-image {
-      background: url(/app-assets/images/backgrounds/bg-2.jpg) no-repeat center center fixed;
-      background-size: cover; }
     html body .pace .pace-progress {
       background: #FF4961; }
 
