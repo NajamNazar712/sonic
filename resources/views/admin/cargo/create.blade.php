@@ -168,8 +168,8 @@
 												</div>
 											</div>
 											<div class="modal-footer text-center justify-content-around">
-												<button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>
 												<button type="submit" name="submit_and_print_form" class="btn btn-primary" value="submit_and_print_form">Submit &amp; Print</button>
+												<button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>
 											</div>
 										</form>
 								</div>
