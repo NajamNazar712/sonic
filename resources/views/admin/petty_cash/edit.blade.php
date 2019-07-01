@@ -655,9 +655,9 @@
             $('#statement_approve').on('click', function (e) {
                 e.preventDefault();
                 var current = $(this);
-                var id = {{$petty_statement_details->id}};
+                var id = '{{$petty_statement_details->id}}';
                 var status = parseInt({{$petty_statement_details->status}});
-                if(status == 0 || status == 1) {
+                if(status == 0 || status == 1 || status == 2) {
                     $('#statement_approve').attr('disabled', true);
 
                     $.ajax({
@@ -671,6 +671,7 @@
                     }).done(function (data) {
                         if (data.status) {
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
                             setTimeout(function() {
                                 window.location = '{{ route('admin.petty_cash.statements.edit',['id' => $petty_statement_details->id]) }}';
                             }, 2500);
