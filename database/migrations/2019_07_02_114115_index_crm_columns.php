@@ -92,7 +92,7 @@ class IndexCrmColumns extends Migration
         Schema::table('crm_comments', function (Blueprint $table) {
             $table->dropIndex(['created_at']);
             $table->dropIndex(['updated_at']);
-            $table->dropIndex(['comment_request_id']);
+            $table->dropIndex(['crm_request_id']);
             $table->dropIndex(['comment_by_id']);
             $table->dropIndex(['comment_by']);
             $table->dropIndex(['comment_type']);
