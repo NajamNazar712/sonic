@@ -436,14 +436,6 @@ class AdminCRMController extends Controller
                     return '-';
                 }
             })
-            ->editColumn('last_comment_name', function($requests){
-                if($requests->last_comment_by != null){
-                    return $requests->last_comment_by;
-                }
-                else{
-                    return '-';
-                }
-            })
             ->editColumn('last_comment_date', function($requests){
                 if($requests->last_comment_date != null){
                     return $requests->last_comment_date;
@@ -668,14 +660,6 @@ class AdminCRMController extends Controller
                     $name = $requests->sub_shipper;
                 }
                 return $name;
-            })
-            ->editColumn('last_comment_name', function($requests){
-                if($requests->last_comment_by != null){
-                    return $requests->last_comment_by;
-                }
-                else{
-                    return '-';
-                }
             })
             ->editColumn('last_comment_date', function($requests){
                 if($requests->last_comment_date != null){
@@ -949,14 +933,6 @@ class AdminCRMController extends Controller
             ->editColumn('last_comment', function($requests){
                 if($requests->last_comment != null){
                     return $requests->last_comment;
-                }
-                else{
-                    return '-';
-                }
-            })
-            ->editColumn('last_comment_name', function($requests){
-                if($requests->last_comment_by != null){
-                    return $requests->last_comment_by;
                 }
                 else{
                     return '-';
