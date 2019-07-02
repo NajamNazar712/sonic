@@ -216,7 +216,15 @@
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons:[{
+                buttons:[
+                    {
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-plus"></i> Make Petty Cash Statements',
+                        action: function (e, dt, node, config) {
+                            window.location = '{{ route('admin.petty_cash.make.index')  }}'
+                        }
+                    },
+                    {
                     extend: 'excel',
                     title: 'Petty Cash Statements',
                     className: 'btn btn-primary',
