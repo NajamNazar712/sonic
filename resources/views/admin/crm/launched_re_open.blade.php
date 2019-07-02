@@ -42,6 +42,7 @@
                                     <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                     <th class="border-primary border-darken-1">Last Comment By</th>
                                     <th class="border-primary border-darken-1">Last Comment</th>
+                                    <th class="border-primary border-darken-1">Last Comment Date</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -216,6 +217,7 @@
                             head.push('Launched To Today (TAT)');
                             head.push('Last Comment By');
                             head.push('Last Comment');
+                            head.push('Last Comment Date');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -240,6 +242,7 @@
                                 row.push(values.current_tat);
                                 row.push(values.last_comment_name);
                                 row.push(values.last_comment.replace(/<br>/gi, '\n'));
+                                row.push(values.last_comment_date);
 
                                 body.push(row);
                             });
@@ -436,6 +439,7 @@
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
+                    {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
