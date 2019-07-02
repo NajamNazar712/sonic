@@ -333,4 +333,66 @@ public function change_status_to_self_collection(Request $request){
         return ['status'=>0,'error'=>"Something went wrong, try again later!"];
 
     }
+
+    public function return_reattempt_history_index(){
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        $shipping_mode = ShippingMode::all();
+        return view('client.return.reattempt_history')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode]);
+    }
+
+    public function return_reattempt_history_list(Request $request){
+        $shipments_journey = ShipmentsJourney::join('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')
+            ->join('users as u', 's.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
+            ->join('shipping_modes as sm','sm.id','=','s.shipping_mode_id')
+            ->join('booking_types as bt','bt.id','=','s.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','s.shipper_status_id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = s.id)'));
+            })
+            ->select('s.tracking_number as tracking_number','s.tracking_number as tracking','u.name as shipper','oc.name as origin','dc.name as destination','s.consignee_name','s.consignee_phone_number_1','s.consignee_phone_number_2','s.consignee_address','s.amount','sm.mode','bt.booking_type as service_type','ss.name as current_status','sj.created_at as current_status_date','shipments_journey.created_at as reattempt_status_date')
+            ->where('shipments_journey.shipper_status_id', 52)
+            ->where('s.user_id', session('user_id'));
+        return Datatables::of($shipments_journey)
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->editColumn('consignee_phone',function ($shipper){
+                if($shipper->consignee_phone_number_2 != null){
+                    $phone = "$shipper->consignee_phone_number_1 | $shipper->consignee_phone_number_2";
+                }
+                else{
+                    $phone = $shipper->consignee_phone_number_1;
+                }
+                return $phone;
+            })
+            ->filterColumn('consignee_phone',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('s.consignee_phone_number_1', 'like', '%'.$keyword.'%')->orWhere('s.consignee_phone_number_2', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->orderColumn('consignee_phone', 's.consignee_phone_number_1 $1, s.consignee_phone_number_2 $1')
+            ->filterColumn('current_status',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->make(true);
+    }
 }
