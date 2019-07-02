@@ -980,8 +980,7 @@ class AdminCRMController extends Controller
                         DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 4)'));
             })
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination')
-            ->where('crm_requests.status_id', 4)
-            ->groupBy('crm_requests.id');
+            ->where('crm_requests.status_id', 4);
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $closed_request = $closed_request->where('crm_requests.agent_id', Auth::id());
