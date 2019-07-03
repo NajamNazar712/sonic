@@ -12,6 +12,7 @@ use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialRequestStatus;
 use App\Http\models\PackagingMaterialTypes;
 use App\Http\Models\PackagingMaterialTypesHistory;
 use App\Http\models\PackagingMaterialTypeSizes;
@@ -268,14 +269,16 @@ class AdminPackagingMaterialController extends Controller
     }
     public function request_index(Request $request){
         $payment_mode = PackagingPaymentMode::all();
+        $packaging_request_status = PackagingMaterialRequestStatus::select('id', 'name')->get();
         $packaging = PackagingMaterialStockHead::latest()->first();
-        return view('admin.materials.requests.index')->with(['packaging'=>$packaging,'payment_mode'=>$payment_mode]);
+        return view('admin.materials.requests.index')->with(['packaging'=>$packaging,'payment_mode'=>$payment_mode, 'packaging_request_status' => $packaging_request_status]);
     }
     public function request_list(Request $request){
         $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')
             ->join('users as u','u.id','=','packaging_material_requests.user_id')
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
-            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.small_flyers','packaging_material_requests.medium_flyers','packaging_material_requests.large_flyers','packaging_material_requests.boxes','packaging_material_requests.address','ppm.mode','packaging_material_requests.status','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link']);
+            ->leftjoin('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'packaging_material_requests.status')
+            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.small_flyers','packaging_material_requests.medium_flyers','packaging_material_requests.large_flyers','packaging_material_requests.boxes','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status as status_id']);
 
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
@@ -302,31 +305,35 @@ class AdminPackagingMaterialController extends Controller
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
             })
-            ->editColumn('status',function($packaging){
-                if($packaging->status == 0){
-                    return "Booked";
-                }
-                else if($packaging->status == 1){
-                    return "Dispatched";
-                }
-            })
             ->addColumn('action',function ($packaging) {
-                if (($packaging->status == 0) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
+                if (($packaging->status_id !== 4 && $packaging->status_id !== 5) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
                     $dropdown = '
-                      <span class="dropdown">
-                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false"><i class="ft-settings"></i></button>
-                        <div class="dropdown-menu open-left arrow">
-                            <a class="dropdown-item dispatch"><i class="ft-fast-forward primary"></i> Dispatch</a>
-                        </div>
-                      </span>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
                     ';
+                    if ($packaging->status_id == 1) {
+                        $dropdown .= '<button type="button" class="dropdown-item confirm"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Confirm</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
+                    }
+                    if ($packaging->status_id == 2) {
+                        $dropdown .= '<button type="button" class="dropdown-item dispatch"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Dispatch</div></button>';
+                    }
+                    if ($packaging->status_id == 3) {
+                        $dropdown .= '<button type="button" class="dropdown-item completed"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Completed</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item replenished"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Replenished</div></button>';
+                    }
+
+                    $dropdown .= '
+                    </div>
+                  </div>
+                  ';
+                }
+                else{
+                    $dropdown = '';
+                }
 
                     return $dropdown;
-                }
-                else {
-                    return '';
-                }
             })
             ->make(true);
     }
@@ -439,6 +446,152 @@ class AdminPackagingMaterialController extends Controller
 //            return response()->json(['status'=>0,'error'=>"Insufficient quantity!"]);
 //        }
 //        return $head_stocks;
+
+    }
+
+    public function request_confirm_good_receiving_note(Request $request){
+        $request_id = $request->id;
+
+        $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
+        $user = User::where('id', $request_details->user_id)->first();
+
+
+        $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Cargo Slip & Checklist</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .cargo_checklist {
+                        page-break-before: always;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div>
+                      <div class="good_receiving_note">
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle color primary"><strong>Good Receiving Note</strong></td>
+                              <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                              </tr>
+                            <tr>
+                              <td class="color secondary"><strong>City</strong></td>
+                              <td>' . $request_details->City->name . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Total Quantity</strong></td>
+                              <td>' . 1234 . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Tracking Number</strong></td>
+                              <td>' . $request_details->tracking_number . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Shipper</strong></td>
+                              <td>' . $user->name . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Address</strong></td>
+                              <td>' . 3213123 . '</td>
+                            </tr>
+                          </tbody>
+                        </table>
+      ';
+
+
+//        <table class="table table-sm table-bordered border">
+//                          <tbody>
+//                            <tr>
+//                              <td class="color primary"><strong>S. No.</strong></td>
+//                              <td class="color primary"><strong>Tracking No.</strong></td>
+//                              <td class="color primary"><strong>Consignee Name</strong></td>
+//                              <td class="color primary"><strong>Consignee Phone</strong></td>
+//                              <td class="color primary"><strong>Consignee City</strong></td>
+//                              <td class="color primary"><strong>Amount</strong></td>
+//        $serial_number = 1;
+//
+//        foreach ($cargo_consignment->cargo_consignment_shipments as $cargo_consignment_shipment) {
+//            $shipment = $cargo_consignment_shipment->shipment;
+//
+//
+//            $html .= '
+//                            <tr>
+//                              <td>' . $serial_number . '</td>
+//                              <td>' . $shipment->tracking_number . '</td>
+//                              <td>' . $shipment->consignee_name . '</td>
+//                              <td>' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+//                              <td>' . $shipment->consignee_city->name . '</td>
+//                              <td>' . number_format($shipment->amount) . '</td>
+//                            </tr>
+//        ';
+//
+//            $serial_number++;
+//        }
+
+        $html .= '
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+        return $html;
 
     }
     private function book($user_id,$service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id,$shipper_status_id,$consignee_status_id) {

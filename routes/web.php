@@ -868,6 +868,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\AdminPackagingMaterialController@request_index')->name('index');
             Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
             Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
+            Route::post('confirm','Admins\AdminPackagingMaterialController@request_confirm_good_receiving_note')->name('confirm');
         });
         Route::prefix('types')->name('types.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@types_index')->name('index');

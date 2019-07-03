@@ -11,14 +11,14 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div class="container justify-content-center pb-2 text-center">
-                    <div class="row">
-                        <div class="col-3"><h4>Small Flyers: <u id="sm_flyers_title">{{number_format($packaging->small_flyers)}}</u></h4></div>
-                        <div class="col-3"><h4>Medium Flyers: <u id="md_flyers_title">{{number_format($packaging->medium_flyers)}}</u></h4></div>
-                        <div class="col-3"><h4>Large Flyers: <u id="lg_flyers_title">{{number_format($packaging->large_flyers)}}</u></h4></div>
-                        <div class="col-3"><h4>Boxes: <u id="box_title">{{number_format($packaging->boxes)}}</u></h4></div>
-                    </div>
-                </div>
+                {{--<div class="container justify-content-center pb-2 text-center">--}}
+                    {{--<div class="row">--}}
+                        {{--<div class="col-3"><h4>Small Flyers: <u id="sm_flyers_title">{{number_format($packaging->small_flyers)}}</u></h4></div>--}}
+                        {{--<div class="col-3"><h4>Medium Flyers: <u id="md_flyers_title">{{number_format($packaging->medium_flyers)}}</u></h4></div>--}}
+                        {{--<div class="col-3"><h4>Large Flyers: <u id="lg_flyers_title">{{number_format($packaging->large_flyers)}}</u></h4></div>--}}
+                        {{--<div class="col-3"><h4>Boxes: <u id="box_title">{{number_format($packaging->boxes)}}</u></h4></div>--}}
+                    {{--</div>--}}
+                {{--</div>--}}
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -164,6 +164,17 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '350px',
                 buttons: [
+                        @if (session('role_id') == 1 || in_array(221, session('permissions')))
+                    {
+                        text: '<i class="la la-align-justify"></i> View Inventory',
+                        className: 'btn btn-primary view_inventory',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            window.location.href = '{{route('admin.packaging.inventory.index')}}';
+
+                        }
+                    },
+                        @endif
                     {
                         extend: 'excel',
                         title: 'Packaging Material Requests',
@@ -195,7 +206,7 @@
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'mode', name: 'ppm.id', class: 'align-middle mode'},
                     {data: 'tracking_number_link', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'status', name: 'packaging_material_requests.status', class: 'align-middle status'},
+                    {data: 'status', name: 'pmrs.id', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 
                 ],
@@ -209,10 +220,7 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Booked</option>' +
-                        '<option value="1">Dispatched</option>' +
-                        '</select>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
                     var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
@@ -244,7 +252,18 @@
                             }
                         }
                     });
+                    var data2 = $.map({!! $packaging_request_status !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data2 = $.map({!! $packaging_request_status !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data: data2,
                         placeholder: "Select Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
@@ -270,13 +289,12 @@
                     });
                     this.api().table().columns.adjust();
                 }
-            });
-            //dispatch
-            $('body').on('click','.dispatch',function(){
+            });//confirm
+            $('body').on('click','.confirm',function(){
                 var request_id = parseInt($(this).parents('tr').attr('id'));
                 swal({
                     title: 'Are You Sure?',
-                    text: 'Select Yes to Dispatch Packaging Material!',
+                    text: 'Select Yes to Confirm Packaging Material!',
                     icon: 'warning',
                     buttons: {
                         cancel: {
@@ -298,28 +316,183 @@
                 }).then(function (confirm) {
                     if (confirm) {
                         $.ajax({
-                            url: '{!! route('admin.packaging.requests.dispatch') !!}',
+                            url: '{!! route('admin.packaging.requests.confirm') !!}',
                             method: 'POST',
                             data: {
-                                'id': request_id,
-                                '_token': '{{ csrf_token() }}'
+                            'id': request_id,
+                            '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
+                            var tab = window.open('', '_blank');
 
-                            if(data.status === 1){
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                setTimeout(function(){
-                                    window.location.reload();
-                                },2000);
-                            }else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
+                            if(!tab) {
+                                swal({
+                                    title: 'Popup Blocker Enabled!',
+                                    text: 'Please add this site to your exception list.',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
                             }
+                            else {
+                                tab.document.write(data);
+                                tab.document.close();
+                                tab.focus();
+                            }
+                            // console.log(data.success);
                         });
                     }
                 });
 
             });
+            //dispatch
+            {{--$('body').on('click','.dispatch',function(){--}}
+                {{--var request_id = parseInt($(this).parents('tr').attr('id'));--}}
+                {{--swal({--}}
+                    {{--title: 'Are You Sure?',--}}
+                    {{--text: 'Select Yes to Dispatch Packaging Material!',--}}
+                    {{--icon: 'warning',--}}
+                    {{--buttons: {--}}
+                        {{--cancel: {--}}
+                            {{--text: 'No',--}}
+                            {{--value: null,--}}
+                            {{--visible: true,--}}
+                            {{--closeModal: true,--}}
+                        {{--},--}}
+                        {{--confirm: {--}}
+                            {{--text: 'Yes',--}}
+                            {{--value: true,--}}
+                            {{--visible: true,--}}
+                            {{--closeModal: true--}}
+                        {{--}--}}
+                    {{--},--}}
+                    {{--closeOnClickOutside: false,--}}
+                    {{--closeOnEsc: false,--}}
+                    {{--dangerMode: true--}}
+                {{--}).then(function (confirm) {--}}
+                    {{--if (confirm) {--}}
+                        {{--$.ajax({--}}
+                            {{--url: '{!! route('admin.packaging.requests.dispatch') !!}',--}}
+                            {{--method: 'POST',--}}
+                            {{--data: {--}}
+                                {{--'id': request_id,--}}
+                                {{--'_token': '{{ csrf_token() }}'--}}
+                            {{--}--}}
+                        {{--}).done(function (data) {--}}
+
+                            {{--if(data.status === 1){--}}
+                                {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                                {{--setTimeout(function(){--}}
+                                    {{--window.location.reload();--}}
+                                {{--},2000);--}}
+                            {{--}else{--}}
+                                {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+
+                            {{--}--}}
+                        {{--});--}}
+                    {{--}--}}
+                {{--});--}}
+
+            {{--});--}}
+            //complete
+            {{--$('body').on('click','.completed',function(){--}}
+                {{--var request_id = parseInt($(this).parents('tr').attr('id'));--}}
+                {{--swal({--}}
+                    {{--title: 'Are You Sure?',--}}
+                    {{--text: 'Select Yes to Complete Packaging Material!',--}}
+                    {{--icon: 'warning',--}}
+                    {{--buttons: {--}}
+                        {{--cancel: {--}}
+                            {{--text: 'No',--}}
+                            {{--value: null,--}}
+                            {{--visible: true,--}}
+                            {{--closeModal: true,--}}
+                        {{--},--}}
+                        {{--confirm: {--}}
+                            {{--text: 'Yes',--}}
+                            {{--value: true,--}}
+                            {{--visible: true,--}}
+                            {{--closeModal: true--}}
+                        {{--}--}}
+                    {{--},--}}
+                    {{--closeOnClickOutside: false,--}}
+                    {{--closeOnEsc: false,--}}
+                    {{--dangerMode: true--}}
+                {{--}).then(function (confirm) {--}}
+                    {{--if (confirm) {--}}
+                    {{--$.ajax({--}}
+                    {{--url: '{!! route('admin.packaging.requests.dispatch') !!}',--}}
+                    {{--method: 'POST',--}}
+                    {{--data: {--}}
+                    {{--'id': request_id,--}}
+                    {{--'_token': '{{ csrf_token() }}'--}}
+                    {{--}--}}
+                    {{--}).done(function (data) {--}}
+
+                    {{--if(data.status === 1){--}}
+                    {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                    {{--setTimeout(function(){--}}
+                    {{--window.location.reload();--}}
+                    {{--},2000);--}}
+                    {{--}else{--}}
+                    {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+
+                    {{--}--}}
+                    {{--});--}}
+                    {{--}--}}
+                {{--});--}}
+
+            {{--});--}}
+            //replenish
+            {{--$('body').on('click','.replenished',function(){--}}
+                {{--var request_id = parseInt($(this).parents('tr').attr('id'));--}}
+                {{--swal({--}}
+                    {{--title: 'Are You Sure?',--}}
+                    {{--text: 'Select Yes to Replenish Packaging Material!',--}}
+                    {{--icon: 'warning',--}}
+                    {{--buttons: {--}}
+                        {{--cancel: {--}}
+                            {{--text: 'No',--}}
+                            {{--value: null,--}}
+                            {{--visible: true,--}}
+                            {{--closeModal: true,--}}
+                        {{--},--}}
+                        {{--confirm: {--}}
+                            {{--text: 'Yes',--}}
+                            {{--value: true,--}}
+                            {{--visible: true,--}}
+                            {{--closeModal: true--}}
+                        {{--}--}}
+                    {{--},--}}
+                    {{--closeOnClickOutside: false,--}}
+                    {{--closeOnEsc: false,--}}
+                    {{--dangerMode: true--}}
+                {{--}).then(function (confirm) {--}}
+                    {{--if (confirm) {--}}
+                    {{--$.ajax({--}}
+                    {{--url: '{!! route('admin.packaging.requests.dispatch') !!}',--}}
+                    {{--method: 'POST',--}}
+                    {{--data: {--}}
+                    {{--'id': request_id,--}}
+                    {{--'_token': '{{ csrf_token() }}'--}}
+                    {{--}--}}
+                    {{--}).done(function (data) {--}}
+
+                    {{--if(data.status === 1){--}}
+                    {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                    {{--setTimeout(function(){--}}
+                    {{--window.location.reload();--}}
+                    {{--},2000);--}}
+                    {{--}else{--}}
+                    {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+
+                    {{--}--}}
+                    {{--});--}}
+                    {{--}--}}
+                {{--});--}}
+
+            {{--});--}}
+
 
         });
 
