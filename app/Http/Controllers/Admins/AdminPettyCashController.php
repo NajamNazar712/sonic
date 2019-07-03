@@ -845,10 +845,10 @@ class AdminPettyCashController extends Controller
             if($detail){
                 $log_data = array();
 
-                    $log_data['actual'] = ($detail->amount != null)? $detail->amount: '' ;
-                    $log_data['station'] = ($detail->station_amount != null)? $detail->station_amount: '' ;
-                    $log_data['ope'] = ($detail->operation_amount != null)? $detail->operation_amount: '' ;
-                    $log_data['finance'] = ($detail->finance_amount != null)? $detail->finance_amount: '' ;
+                    $log_data['actual'] = ($detail->amount !== null)? $detail->amount: '' ;
+                    $log_data['station'] = ($detail->station_amount !== null)? $detail->station_amount: '' ;
+                    $log_data['ope'] = ($detail->operation_amount !== null)? $detail->operation_amount: '' ;
+                    $log_data['finance'] = ($detail->finance_amount !== null)? $detail->finance_amount: '' ;
 
                 return response()->json(['status' => 0, 'amount' => $log_data]);
             }else{
