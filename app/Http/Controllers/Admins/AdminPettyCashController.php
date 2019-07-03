@@ -723,7 +723,7 @@ class AdminPettyCashController extends Controller
         $petty_cash_statement = PettyCashStatement::where('id', $statement_id);
         if ($petty_cash_statement->exists()) {
             $total_statements = 0;
-            $statement_details = PettyCashStatementDetail::where('petty_cash_statement_id', $statement_id)->get();
+            $statement_details = PettyCashStatementDetail::where('petty_cash_statement_id', $statement_id)->where('status', '!=', 1)->get();
 
             $petty_statement_details = '
                       <table class="table table-sm table-bordered border">
@@ -745,11 +745,11 @@ class AdminPettyCashController extends Controller
             foreach ($statement_details as $detail) {
                 $total_statements++;
                 $detain_amount = 0;
-                if($detail->finance_amount !== null || $detail->finance_amount !== ''){
+                if($detail->finance_amount !== null){
                     $detain_amount = $detail->finance_amount;
-                }else if($detail->operation_amount !== null || $detail->operation_amount !== ''){
+                }else if($detail->operation_amount !== null){
                     $detain_amount = $detail->operation_amount;
-                }else if($detail->station_amount !== null || $detail->station_amount !== ''){
+                }else if($detail->station_amount !== null){
                     $detain_amount = $detail->station_amount;
                 }else{
                     $detain_amount = $detail->amount;
