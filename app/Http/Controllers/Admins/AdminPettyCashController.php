@@ -185,11 +185,11 @@ class AdminPettyCashController extends Controller
             })
             ->editColumn('amount', function ($petty_details){
                 $selected_amount = '';
-                if($petty_details->finance_amount !== null || $petty_details->finance_amount !== ''){
+                if($petty_details->finance_amount !== null){
                     $selected_amount = $petty_details->finance_amount;
-                }else if($petty_details->operation_amount !== null || $petty_details->operation_amount !== ''){
+                }else if($petty_details->operation_amount !== null ){
                     $selected_amount = $petty_details->operation_amount;
-                }else if($petty_details->station_amount !== null || $petty_details->station_amount !== ''){
+                }else if($petty_details->station_amount !== null){
                     $selected_amount = $petty_details->station_amount;
                 }else{
                     $selected_amount = $petty_details->amount;
