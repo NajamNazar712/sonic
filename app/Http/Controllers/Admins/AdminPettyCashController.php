@@ -185,11 +185,11 @@ class AdminPettyCashController extends Controller
             })
             ->editColumn('amount', function ($petty_details){
                 $selected_amount = '';
-                if($petty_details->finance_amount != null || $petty_details->finance_amount != ''){
+                if($petty_details->finance_amount !== null || $petty_details->finance_amount !== ''){
                     $selected_amount = $petty_details->finance_amount;
-                }else if($petty_details->operation_amount != null || $petty_details->operation_amount != ''){
+                }else if($petty_details->operation_amount !== null || $petty_details->operation_amount !== ''){
                     $selected_amount = $petty_details->operation_amount;
-                }else if($petty_details->station_amount != null || $petty_details->station_amount != ''){
+                }else if($petty_details->station_amount !== null || $petty_details->station_amount !== ''){
                     $selected_amount = $petty_details->station_amount;
                 }else{
                     $selected_amount = $petty_details->amount;
@@ -745,11 +745,11 @@ class AdminPettyCashController extends Controller
             foreach ($statement_details as $detail) {
                 $total_statements++;
                 $detain_amount = 0;
-                if($detail->finance_amount != null || $detail->finance_amount != ''){
+                if($detail->finance_amount !== null || $detail->finance_amount !== ''){
                     $detain_amount = $detail->finance_amount;
-                }else if($detail->operation_amount != null || $detail->operation_amount != ''){
+                }else if($detail->operation_amount !== null || $detail->operation_amount !== ''){
                     $detain_amount = $detail->operation_amount;
-                }else if($detail->station_amount != null || $detail->station_amount != ''){
+                }else if($detail->station_amount !== null || $detail->station_amount !== ''){
                     $detain_amount = $detail->station_amount;
                 }else{
                     $detain_amount = $detail->amount;
