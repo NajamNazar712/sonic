@@ -744,7 +744,16 @@ class AdminPettyCashController extends Controller
 
             foreach ($statement_details as $detail) {
                 $total_statements++;
-
+                $detain_amount = 0;
+                if($detail->finance_amount != null || $detail->finance_amount != ''){
+                    $detain_amount = $detail->finance_amount;
+                }else if($detail->operation_amount != null || $detail->operation_amount != ''){
+                    $detain_amount = $detail->operation_amount;
+                }else if($detail->station_amount != null || $detail->station_amount != ''){
+                    $detain_amount = $detail->station_amount;
+                }else{
+                    $detain_amount = $detail->amount;
+                }
 
                 $shipment_details_row_start = '
                           <tr>
@@ -755,7 +764,7 @@ class AdminPettyCashController extends Controller
                             <td>' . $detail->expense_details . '</td>
                             <td>' . $detail->location->name . '</td>
                             <td>' . $detail->reference_no . '</td>
-                            <td>Rs ' . number_format($detail->amount) . '</td>
+                            <td>Rs ' . number_format($detain_amount) . '</td>
                             <td>' . $detail->remarks . '</td>
                 ';
 
@@ -835,8 +844,10 @@ class AdminPettyCashController extends Controller
 
             if($detail){
                 $log_data = array();
+
+                    $log_data['actual'] = ($detail->amount != null)? $detail->amount: '' ;
                     $log_data['station'] = ($detail->station_amount != null)? $detail->station_amount: '' ;
-                    $log_data['operation'] = ($detail->operation_amount != null)? $detail->operation_amount: '' ;
+                    $log_data['ope'] = ($detail->operation_amount != null)? $detail->operation_amount: '' ;
                     $log_data['finance'] = ($detail->finance_amount != null)? $detail->finance_amount: '' ;
 
                 return response()->json(['status' => 0, 'amount' => $log_data]);
