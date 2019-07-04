@@ -123,6 +123,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('packaging')->name('packaging.')->group(function (){
         Route::prefix('requests')->name('requests.')->group(function (){
             Route::get('','Shippers\ShipperPackagingMaterialController@packaging_request')->name('index');
+            Route::get('list','Shippers\ShipperPackagingMaterialController@packaging_request_list')->name('list');
+            Route::post('details','Shippers\ShipperPackagingMaterialController@packaging_request_details')->name('details');
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
         });
     });
