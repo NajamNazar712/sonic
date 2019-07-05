@@ -27,10 +27,7 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
                         <th class="border-primary border-darken-1">City</th>
-                        <th class="border-primary border-darken-1">Small Flyers</th>
-                        <th class="border-primary border-darken-1">Medium Flyers</th>
-                        <th class="border-primary border-darken-1">Large Flyers</th>
-                        <th class="border-primary border-darken-1">Boxes</th>
+                        <th class="border-primary border-darken-1">Quantity</th>
                         <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Payment Mode</th>
@@ -40,6 +37,28 @@
                     </tr>
                     </thead>
                 </table>
+            </div>
+        </div>
+    </div>
+
+
+    {{--View Modal--}}
+    <div class="modal fade text-left" id="ViewTypeSizeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewTypeSizeModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">View Type and Size</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-3 text-center">
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -123,10 +142,7 @@
                             head.push('Shipper');
                             head.push('Requested Date/Time');
                             head.push('City');
-                            head.push('Small Flyers');
-                            head.push('Medium Flyers');
-                            head.push('Large Flyers');
-                            head.push('Boxes');
+                            head.push('Total Quantity');
                             head.push('Amount');
                             head.push('Address');
                             head.push('Payment Mode');
@@ -141,10 +157,7 @@
                                 row.push(values.shipper);
                                 row.push(values.created_at);
                                 row.push(values.city);
-                                row.push(values.small_flyers);
-                                row.push(values.medium_flyers);
-                                row.push(values.large_flyers);
-                                row.push(values.boxes);
+                                row.push(values.total_quantity);
                                 row.push(values.amount);
                                 row.push(values.address);
                                 row.push(values.mode);
@@ -198,10 +211,7 @@
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'created_at', name: 'packaging_material_requests.created_at', class: 'align-middle created_at'},
                     {data: 'city', name: 'ct.name', class: 'align-middle city'},
-                    {data: 'small_flyers', name: 'packaging_material_requests.small_flyers', class: 'align-middle small_flyers'},
-                    {data: 'medium_flyers', name: 'packaging_material_requests.medium_flyers', class: 'align-middle medium_flyers'},
-                    {data: 'large_flyers', name: 'packaging_material_requests.large_flyers', class: 'align-middle large_flyers'},
-                    {data: 'boxes', name: 'packaging_material_requests.boxes', class: 'align-middle boxes'},
+                    {data: 'total_quantity_button', class: 'align-middle total_quantity_button', searchable: false},
                     {data: 'amount', name: 'packaging_material_requests.amount', class: 'align-middle amount'},
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'mode', name: 'ppm.id', class: 'align-middle mode'},
@@ -228,7 +238,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.total_quantity_button')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -289,7 +299,70 @@
                     });
                     this.api().table().columns.adjust();
                 }
-            });//confirm
+            });
+            $('body').on('click','.quantity',function(){
+                var request_id = parseInt($(this).parents('tr').attr('id'));
+
+                $.ajax({
+                    url: '{!! route('admin.packaging.requests.quantity_details') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': request_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        var html = '';
+                        html += '<table class="table table-sm table-bordered">';
+                        html += '<thead><tr><th>S No.</th><th><strong>Type</strong></th><th><strong>Size</strong></th><th><strong>Quantity</strong></th></tr></thead>';
+                        html += '<tbody>';
+                        $.each(data.types, function(index, value) {
+                            var ind = index+1;
+                            html += '<tr class=""><td>' + ind + '</td>';
+                            html += '<td>' + value.type + '</td>';
+                            html += '<td>' + value.size + '</td>';
+                            html += '<td>' + value.quantity + '</td></tr>';
+                        });
+                        html += '</tbody></table>';
+
+                        $('#ViewTypeSizeModal .modal-body').html(html);
+                        $('#ViewTypeSizeModal').modal('show');
+                    }
+                    // console.log(data.success);
+                });
+            });
+            //grn
+            $('body').on('click','.grn',function(){
+                var request_id = parseInt($(this).parents('tr').attr('id'));
+
+                    $.ajax({
+                        url: '{!! route('admin.packaging.requests.good_receiving_note') !!}',
+                        method: 'POST',
+                        data: {
+                        'id': request_id,
+                        '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                        // console.log(data.success);
+                    });
+            });
+            //confirm
             $('body').on('click','.confirm',function(){
                 var request_id = parseInt($(this).parents('tr').attr('id'));
                 swal({
@@ -319,81 +392,117 @@
                             url: '{!! route('admin.packaging.requests.confirm') !!}',
                             method: 'POST',
                             data: {
-                            'id': request_id,
-                            '_token': '{{ csrf_token() }}'
+                                'id': request_id,
+                                '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
-                            var tab = window.open('', '_blank');
 
-                            if(!tab) {
-                                swal({
-                                    title: 'Popup Blocker Enabled!',
-                                    text: 'Please add this site to your exception list.',
-                                    icon: 'error',
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false
-                                });
+                            if(data.status === 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw();
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
                             }
-                            else {
-                                tab.document.write(data);
-                                tab.document.close();
-                                tab.focus();
+                        });
+                    }
+                });
+
+            });
+            //cancel
+            $('body').on('click','.cancel',function(){
+                var request_id = parseInt($(this).parents('tr').attr('id'));
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Cancel Packaging Material!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.packaging.requests.cancel') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': request_id,
+                                '_token': '{{ csrf_token() }}'
                             }
-                            // console.log(data.success);
+                        }).done(function (data) {
+
+                            if(data.status === 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw();
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                            }
                         });
                     }
                 });
 
             });
             //dispatch
-            {{--$('body').on('click','.dispatch',function(){--}}
-                {{--var request_id = parseInt($(this).parents('tr').attr('id'));--}}
-                {{--swal({--}}
-                    {{--title: 'Are You Sure?',--}}
-                    {{--text: 'Select Yes to Dispatch Packaging Material!',--}}
-                    {{--icon: 'warning',--}}
-                    {{--buttons: {--}}
-                        {{--cancel: {--}}
-                            {{--text: 'No',--}}
-                            {{--value: null,--}}
-                            {{--visible: true,--}}
-                            {{--closeModal: true,--}}
-                        {{--},--}}
-                        {{--confirm: {--}}
-                            {{--text: 'Yes',--}}
-                            {{--value: true,--}}
-                            {{--visible: true,--}}
-                            {{--closeModal: true--}}
-                        {{--}--}}
-                    {{--},--}}
-                    {{--closeOnClickOutside: false,--}}
-                    {{--closeOnEsc: false,--}}
-                    {{--dangerMode: true--}}
-                {{--}).then(function (confirm) {--}}
-                    {{--if (confirm) {--}}
-                        {{--$.ajax({--}}
-                            {{--url: '{!! route('admin.packaging.requests.dispatch') !!}',--}}
-                            {{--method: 'POST',--}}
-                            {{--data: {--}}
-                                {{--'id': request_id,--}}
-                                {{--'_token': '{{ csrf_token() }}'--}}
-                            {{--}--}}
-                        {{--}).done(function (data) {--}}
+            $('body').on('click','.dispatch',function(){
+                var request_id = parseInt($(this).parents('tr').attr('id'));
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Dispatch Packaging Material!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.packaging.requests.dispatch') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': request_id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
 
-                            {{--if(data.status === 1){--}}
-                                {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                                {{--setTimeout(function(){--}}
-                                    {{--window.location.reload();--}}
-                                {{--},2000);--}}
-                            {{--}else{--}}
-                                {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                            if(data.status === 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw();
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
-                            {{--}--}}
-                        {{--});--}}
-                    {{--}--}}
-                {{--});--}}
+                            }
+                        });
+                    }
+                });
 
-            {{--});--}}
+            });
             //complete
             {{--$('body').on('click','.completed',function(){--}}
                 {{--var request_id = parseInt($(this).parents('tr').attr('id'));--}}
@@ -444,54 +553,51 @@
 
             {{--});--}}
             //replenish
-            {{--$('body').on('click','.replenished',function(){--}}
-                {{--var request_id = parseInt($(this).parents('tr').attr('id'));--}}
-                {{--swal({--}}
-                    {{--title: 'Are You Sure?',--}}
-                    {{--text: 'Select Yes to Replenish Packaging Material!',--}}
-                    {{--icon: 'warning',--}}
-                    {{--buttons: {--}}
-                        {{--cancel: {--}}
-                            {{--text: 'No',--}}
-                            {{--value: null,--}}
-                            {{--visible: true,--}}
-                            {{--closeModal: true,--}}
-                        {{--},--}}
-                        {{--confirm: {--}}
-                            {{--text: 'Yes',--}}
-                            {{--value: true,--}}
-                            {{--visible: true,--}}
-                            {{--closeModal: true--}}
-                        {{--}--}}
-                    {{--},--}}
-                    {{--closeOnClickOutside: false,--}}
-                    {{--closeOnEsc: false,--}}
-                    {{--dangerMode: true--}}
-                {{--}).then(function (confirm) {--}}
-                    {{--if (confirm) {--}}
-                    {{--$.ajax({--}}
-                    {{--url: '{!! route('admin.packaging.requests.dispatch') !!}',--}}
-                    {{--method: 'POST',--}}
-                    {{--data: {--}}
-                    {{--'id': request_id,--}}
-                    {{--'_token': '{{ csrf_token() }}'--}}
-                    {{--}--}}
-                    {{--}).done(function (data) {--}}
+            $('body').on('click','.replenished',function(){
+                var request_id = parseInt($(this).parents('tr').attr('id'));
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Replenish Packaging Material!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.packaging.requests.replenish') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': request_id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status === 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw();
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                    }
+                });
 
-                    {{--if(data.status === 1){--}}
-                    {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                    {{--setTimeout(function(){--}}
-                    {{--window.location.reload();--}}
-                    {{--},2000);--}}
-                    {{--}else{--}}
-                    {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-
-                    {{--}--}}
-                    {{--});--}}
-                    {{--}--}}
-                {{--});--}}
-
-            {{--});--}}
+            });
 
 
         });
