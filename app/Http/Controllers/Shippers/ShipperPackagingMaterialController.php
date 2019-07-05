@@ -31,7 +31,7 @@ class ShipperPackagingMaterialController extends Controller
         $packaging_type = PackagingMaterialTypes::where('status', 1)->get();
 //        $packaging_size = PackagingMaterialTypeSizes::all('id','size','type_id')->groupBy('type_id');
 
-        $status = PackagingRequestStatus::all();
+        $status = PackagingMaterialRequestStatus::all();
         $cities = City::where('status',1)->orderBy('name')->get();
         $address = UserShippingInfo::where(['user_id'=>session('user_id'),'hidden'=>0])->with('city')->get();
         $payment_mode = PackagingPaymentMode::all();
