@@ -125,6 +125,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('','Shippers\ShipperPackagingMaterialController@packaging_request')->name('index');
             Route::get('list','Shippers\ShipperPackagingMaterialController@packaging_request_list')->name('list');
             Route::post('details','Shippers\ShipperPackagingMaterialController@packaging_request_details')->name('details');
+            Route::post('sizes','Shippers\ShipperPackagingMaterialController@packaging_request_sizes')->name('sizes');
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
         });
     });

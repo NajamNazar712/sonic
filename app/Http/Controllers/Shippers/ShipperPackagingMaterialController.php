@@ -7,6 +7,8 @@ use App\Http\Models\DiscountCharge;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
+use App\Http\models\PackagingMaterialTypes;
+use App\Http\models\PackagingMaterialTypeSizes;
 use App\Http\Models\PackagingPaymentMode;
 use App\Http\Models\PackagingRequestStatus;
 use App\Http\Models\PendingPayment;
@@ -26,12 +28,15 @@ class ShipperPackagingMaterialController extends Controller
         $this->middleware('Permission');
     }
     public function packaging_request(){
+        $packaging_type = PackagingMaterialTypes::where('status', 1)->get();
+//        $packaging_size = PackagingMaterialTypeSizes::all('id','size','type_id')->groupBy('type_id');
+
         $status = PackagingRequestStatus::all();
         $cities = City::where('status',1)->orderBy('name')->get();
         $address = UserShippingInfo::where(['user_id'=>session('user_id'),'hidden'=>0])->with('city')->get();
         $payment_mode = PackagingPaymentMode::all();
-//        return $address;
-        return view('client.packaging.flyers.index')->with(['address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode, 'status' => $status]);
+
+        return view('client.packaging.flyers.index')->with(['address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode, 'status' => $status, 'packaging_types' => $packaging_type]);
     }
     public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id) {
 
@@ -96,14 +101,29 @@ class ShipperPackagingMaterialController extends Controller
         if($request_id){
             $material_details = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_id);
             if($material_details->exists()){
-                $material_details = $material_details->first();
-//                $details['type'][$material_details->type_id] = $
+                $details = $material_details->with(['types', 'sizes'])->get();
+
                 return response()->json(['status' => 0, 'details' => $details]);
             }else{
-                return "Not found";
+                return response()->json(['status' => 1, 'error' => 'No Details found!']);
             }
         }
     }
+
+    public function packaging_request_sizes(Request $request){
+        $id = $request->id;
+        if($id){
+            $sizes = PackagingMaterialTypeSizes::where('type_id', $id);
+            if($sizes->exists()){
+                $sizes = $sizes->select('id', 'size')->get();
+                return response()->json(['status' => 0, 'sizes' => $sizes]);
+            }else{
+                $type = PackagingMaterialTypes::find($id)->type;
+                return response()->json(['status' => 1, 'error' => 'No Size found for type: '.$type]);
+            }
+        }
+    }
+
 
     public function packaging_request_submit(Request $request){
         $total_charges = 0;
