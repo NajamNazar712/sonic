@@ -3572,117 +3572,99 @@ class AdminReportsController extends Controller
                 foreach ($types as $type) {
                     $rows = DB::connection('reports')->table('cities')->join('shipments as s', 'cities.id', '=', 's.consignee_city_id');
 
-                    if ($type == 'status_not_updated') {
+                    if ($type != 'correct_status' && $type != 'fake_status') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) use ($from, $to) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                            ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
+                        });
+                    }
+                    else {
+                        $rows = $rows->join('delivery_note_shipments as dns', function($join) {
+                            $join->on('s.id', '=', 'dns.shipment_id')
+                            ->where('dns.delivery_note_id', '=', DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
+                        })
+                        ->join('delivery_notes as dn', function($join) use ($from, $to) {
+                            $join->where('dn.status', '=', 1)
+                            ->whereBetween('dn.created_at', [$from, $to])
+                            ->where('dn.id', '=', DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
+                        });
+                    }
+
+                    if ($type == 'status_not_updated' || $type == 'delivery_tomorrow') {
                         $rows = $rows->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
                         ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
-                        ->join('zone_class_cities as zcc', function($join) {
+                        ->leftjoin('zone_class_cities as zcc', function($join) {
                             $join->on('pc.zone_id', '=', 'zcc.zone_id')
                             ->on('s.consignee_city_id', '=', 'zcc.city_id');
-                        })
-                        ->leftjoin('delivery_note_shipments as dns', function($join) {
-                            $join->on('s.id', '=', 'dns.shipment_id')
-                            ->where('dns.delivery_note_id', '=', DB::connection('reports')->raw('(select max(dns.delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
-                        })
-                        ->leftjoin('delivery_notes as dn', function($join) {
-                            $join->on('dns.delivery_note_id', '=', 'dn.id')
-                            ->whereDate('dn.created_at', 'shipments_journey.created_at');
-                        })
-                        ->join('shipments_journey as sj', function($join) use ($arrival_cut_off_time) {
-                            $join->on('s.id', '=', 'sj.shipment_id')
-                            ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and (shipments_journey.shipper_status_id = 7 or ((usi.city_id = s.consignee_city_id or zcc.class in (0, 1)) and dns.delivery_note_id is null and (shipments_journey.shipper_status_id in (2, 4) and hour(shipments_journey.created_at) < ' . $arrival_cut_off_time . '))))'));
+                        });
+                    }
+
+                    if ($type == 'status_not_updated') {
+                        $rows = $rows->where(function ($query) use ($arrival_cut_off_time) {
+                            $query->where('sj.shipper_status_id', '=', 7)
+                            ->orWhere(function ($sub_query) use ($arrival_cut_off_time) {
+                                $sub_query->where(function ($sub_sub_query) {
+                                    $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                    ->orWhereNull('zcc.class')
+                                    ->orWhereIn('zcc.class', [0, 1]);
+                                })
+                                ->whereIn('sj.shipper_status_id', [2, 4])
+                                ->whereRaw('hour(`sj`.`created_at`) < ?', [$arrival_cut_off_time]);
+                            });
                         });
                     }
                     else if ($type == 'delivered') {
-                        $rows = $rows->join('shipments_journey as sj', function($join) {
-                            $join->on('s.id', '=', 'sj.shipment_id')
-                        ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id IN (14, 30, 36, 37))'));
-                        });
+                        $rows = $rows->whereIn('sj.shipper_status_id', [14, 30, 36, 37]);
                     }
                     else if ($type == 'delivery_unsucessful') {
-                        $rows = $rows->join('shipments_journey as sj', function($join) {
-                            $join->on('s.id', '=', 'sj.shipment_id')
-                        ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 8)'));
-                        });
+                        $rows = $rows->where('sj.shipper_status_id', '=', 8);
                     }
                     else if ($type == 'on_hold') {
-                        $rows = $rows->join('shipments_journey as sj', function($join) {
-                            $join->on('s.id', '=', 'sj.shipment_id')
-                        ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id IN (9, 10, 11, 15))'));
-                        });
+                        $rows = $rows->whereIn('sj.shipper_status_id', [9, 10, 11, 15]);
                     }
                     else if ($type == 'confirmation_pending') {
-                        $rows = $rows->join('shipments_journey as sj', function($join) {
-                            $join->on('s.id', '=', 'sj.shipment_id')
-                        ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 12)'));
-                        });
+                        $rows = $rows->where('sj.shipper_status_id', '=', 12);
                     }
                     else if ($type == 'lost') {
-                        $rows = $rows->join('shipments_journey as sj', function($join) {
-                            $join->on('s.id', '=', 'sj.shipment_id')
-                        ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 18)'));
-                        });
+                        $rows = $rows->where('sj.shipper_status_id', '=', 18);
                     }
                     else if ($type == 'confirm') {
-                        $rows = $rows->join('shipments_journey as sj', function($join) {
-                            $join->on('s.id', '=', 'sj.shipment_id')
-                        ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 20 and shipments_journey.reference_1_id is not null)'));
-                        });
+                        $rows = $rows->where('sj.shipper_status_id', '=', 20)
+                        ->whereNotNull('sj.reference_1_id');
                     }
                     else if ($type == 'correct_status') {
-                        $rows = $rows->join('delivery_note_shipments as dns', function($join) {
-                            $join->on('s.id', '=', 'dns.shipment_id')
-                            ->where('dns.delivery_note_id', '=', DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id and fake_status = 0)'));
-                        })
-                        ->join('delivery_notes as dn', function($join) {
-                            $join->on('dns.delivery_note_id', '=', 'dn.id')
-                            ->where('dn.status', '=', 1);
-                        });
+                        $rows = $rows->where('dns.fake_status', '=', 0);
                     }
                     else if ($type == 'fake_status') {
-                        $rows = $rows->join('delivery_note_shipments as dns', function($join) {
-                            $join->on('s.id', '=', 'dns.shipment_id')
-                            ->where('dns.delivery_note_id', '=', DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id and fake_status = 1)'));
-                        })
-                        ->join('delivery_notes as dn', function($join) {
-                            $join->on('dns.delivery_note_id', '=', 'dn.id')
-                            ->where('dn.status', '=', 1);
-                        });
+                        $rows = $rows->where('dns.fake_status', '=', 1);
                     }
                     else if ($type == 'delivery_note_pending') {
-                        $rows = $rows->join('shipments_journey as sj', function($join) {
-                            $join->on('s.id', '=', 'sj.shipment_id')
-                        ->where('sj.id', '=', DB::connection('reports')->raw('(select max(isj.id) from shipments_journey as isj left join shipments_journey as isjj on isj.shipment_id = isjj.shipment_id and isj.reference_1_id = isjj.reference_1_id and isj.id != isjj.id where isj.shipment_id = s.id and isj.verification = 1 and isj.shipper_status_id = 5 and isjj.id is null)'));
-                        });
+                        $rows = $rows->where('sj.shipper_status_id', '=', 5);
                     }
                     else if ($type == 'delivery_tomorrow') {
-                        $rows = $rows->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
-                        ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
-                        ->join('zone_class_cities as zcc', function($join) {
-                            $join->on('pc.zone_id', '=', 'zcc.zone_id')
-                            ->on('s.consignee_city_id', '=', 'zcc.city_id');
-                        })
-                        ->leftjoin('delivery_note_shipments as dns', function($join) {
-                            $join->on('s.id', '=', 'dns.shipment_id')
-                            ->where('dns.delivery_note_id', '=', DB::connection('reports')->raw('(select max(dns.delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
-                        })
-                        ->leftjoin('delivery_notes as dn', function($join) {
-                            $join->on('dns.delivery_note_id', '=', 'dn.id')
-                            ->whereDate('dn.created_at', 'shipments_journey.created_at');
-                        })
-                        ->join('shipments_journey as sj', function($join) use ($arrival_cut_off_time) {
-                            $join->on('s.id', '=', 'sj.shipment_id')
-                            ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and ((usi.city_id = s.consignee_city_id and shipments_journey.shipper_status_id = 2) or (usi.city_id != s.consignee_city_id and shipments_journey.shipper_status_id = 4)) and (hour(shipments_journey.created_at) >= ' . $arrival_cut_off_time . ' or zcc.class in (2, 3)) and dns.delivery_note_id is null)'));
+                        $rows = $rows->where(function ($query) use ($arrival_cut_off_time) {
+                            $query->where(function ($sub_query) {
+                                $sub_query->where(function ($sub_sub_query) {
+                                    $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                    ->where('sj.shipper_status_id', 2);
+                                })
+                                ->orWhere(function ($sub_sub_query) {
+                                   $sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                   ->where('sj.shipper_status_id', 4);
+                                });
+                            })
+                            ->where(function ($sub_query) use ($arrival_cut_off_time) {
+                                $sub_query->where(function ($sub_sub_query) use ($arrival_cut_off_time) {
+                                    $sub_sub_query->whereRaw('hour(`sj`.`created_at`) >= ?', [$arrival_cut_off_time])
+                                    ->orWhereNull('zcc.class')
+                                    ->orWhereIn('zcc.class', [2, 3]);
+                                });
+                            });
                         });
                     }
 
-                    $rows = $rows->select('s.tracking_number')->where('cities.hub_id', $hub->id);
-
-                    if ($type != 'correct_status' && $type != 'fake_status') {
-                        $rows = $rows->whereBetween('sj.created_at', [$from, $to]);
-                    }
-                    else {
-                        $rows = $rows->whereBetween('dn.created_at', [$from, $to]);
-                    }
+                    $rows = $rows->select('s.tracking_number')
+                    ->where('cities.hub_id', $hub->id);
 
                     if ($rows->exists()) {
                         $rows = $rows->groupBy('s.id');
