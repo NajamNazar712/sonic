@@ -7,10 +7,10 @@ use App\Http\Models\DiscountCharge;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
+use App\http\models\PackagingMaterialRequestStatus;
 use App\Http\models\PackagingMaterialTypes;
 use App\Http\models\PackagingMaterialTypeSizes;
 use App\Http\Models\PackagingPaymentMode;
-use App\Http\Models\PackagingRequestStatus;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -56,7 +56,7 @@ class ShipperPackagingMaterialController extends Controller
     public function packaging_request_list(Request $request){
         $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
-            ->join('packaging_request_statuses as prs', 'prs.id','=', 'packaging_material_requests.status_id')
+            ->join('packaging_material_request_statuses as prs', 'prs.id','=', 'packaging_material_requests.status_id')
             ->select(['packaging_material_requests.id as request_id','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.status_id','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link', 'prs.name as request_status'])
         ->where('packaging_material_requests.user_id', session('user_id'));
 
@@ -101,7 +101,7 @@ class ShipperPackagingMaterialController extends Controller
         if($request_id){
             $material_details = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_id);
             if($material_details->exists()){
-                $details = $material_details->with(['types', 'sizes'])->get();
+                $details = $material_details->with(['packaging_type', 'packaging_type_size'])->get();
 
                 return response()->json(['status' => 0, 'details' => $details]);
             }else{
@@ -126,12 +126,12 @@ class ShipperPackagingMaterialController extends Controller
 
 
     public function packaging_request_submit(Request $request){
+
         $total_charges = 0;
         $boxFlyers = 0;
-        $smallFlyers = ($request->sm_flyer != null)? $request->sm_flyer:0;
-        $mediumFlyers =($request->md_flyer != null)? $request->md_flyer:0;
-        $largeFlyers =($request->lg_flyer != null)? $request->lg_flyer:0;
-//        $boxFlyers =($request->boxes != null)? $request->boxes:0;
+        $smallFlyers = 0;
+        $mediumFlyers =0;
+        $largeFlyers =0;
         $charges = PackagingCharge::where('user_id',session('user_id'))->latest()->first();
         $total_charges += $smallFlyers * $charges->sm_flyer;
         $total_charges += $mediumFlyers * $charges->md_flyer;
