@@ -24,6 +24,85 @@
                     <div class="card-content">
                         <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.edit.rates.submit',['id'=>$shipper->id])}}" method="post" novalidate="novalidate">
                             @csrf
+
+                            <div class="card">
+
+                                <div class="">
+                                    @if(count($packaging_material_types) > 0)
+
+                                        @php
+                                            $packaging_switch = '';
+                                        if(count($packaging_charges) > 0){
+                                            $packaging_switch = 'checked';
+                                             }else{
+                                            $packaging_switch = '';
+                                            }
+                                        @endphp
+                                        <div class="card-header border-primary">
+                                            <div class="row">
+                                                <div class="col-6"><h3 class="card-title lead primary">Packaging Material Charges</h3></div>
+                                                <div class="col-6"><a href="javascript:void(0);" class="pull-right" id="packaging_main_switch"><input type="checkbox" name="packaging_switch" class="switchery pull-right packagingChargesSwitch" data-color="info" data-size="sm" {{$packaging_switch}}/></a></div>
+
+                                            </div>
+                                        </div>
+
+                                        <div id="packaging_material_charges_div" class="card border-primary p-1 {{$packaging_switch == 'checked'? '':'hide'}}">
+                                            @foreach($packaging_material_types as $index => $type)
+                                                @php
+                                                $packaging_type_switch = '';
+                                                if(in_array($type->id, $packaging_type_ids)){
+                                                    $packaging_type_switch = 'checked';
+                                                }
+                                                @endphp
+                                                <div class="card-header border-primary">
+                                                    <div class="row">
+                                                        <div class="col-6"><h4 class="card-title lead primary">{{$type->type}}</h4></div>
+                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="packaging_type_{{$type->id}}"><input name="packaging_type_{{$type->id}}" type="checkbox"  class="switchery packaging_type_{{$type->id}}" data-color="info" data-size="sm" {{$packaging_type_switch}}/></a></a></div>
+
+                                                    </div>
+                                                </div>
+
+                                                <div id="package_type_{{$type->id}}" class="card border-primary {{$packaging_type_switch == 'checked'? '':'hide'}}" aria-expanded="true">
+                                                    <div class="card-content">
+                                                        <div class="card-body packaging-charges-div">
+                                                            <div class="row">
+                                                                @foreach($type->sizes as $ind => $size)
+                                                                    @foreach($packaging_charges[$type->id] as $charge)
+                                                                    @if($charge->size_id == $size->id)
+                                                                        <div class="col-md-3 text-center">
+                                                                            <label class="card-title">{{$size->size}}</label>
+                                                                            <fieldset class="form-group">
+                                                                                <input name="ol_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                                            </fieldset>
+                                                                        </div>
+                                                                    @else
+                                                                        <div class="col-md-3 text-center">
+                                                                            <label class="card-title">{{$size->size}}</label>
+                                                                            <fieldset class="form-group">
+                                                                                <input name="ol_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
+                                                                            </fieldset>
+                                                                        </div>
+                                                                    @endif
+                                                                    @endforeach
+
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            @endforeach
+                                        </div>
+
+
+                                    @endif
+
+                                </div>
+
+                            </div>
+
+
+
                             <input type="hidden" name="_method" value="PUT"/>
 
                             <div id="headingCollapse61" class="card-header border-success">
@@ -514,104 +593,7 @@
                                             </div>
 
                                         </div>
-                                        @if(count($packaging_material_types) > 0)
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Packaging Charges</h3>
-                                            </div>
-                                            @php
-                                                $on_packaging_sw = '';
-                                                $on_packaging_switch = '';
-                                            if((isset($switches[1][0]) && $switches[1][0]->packaging_charges == 1)){
-                                            $on_packaging_sw = '';
-                                            $on_packaging_switch = 'checked';
-                                             }else{
-                                            $on_packaging_sw = 'disabled';
-                                            $on_packaging_switch = '';
-                                            }
-                                            @endphp
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="on_packaging_switch" class="switchery packagingChargesOvernight" data-color="success" data-size="sm" {{$on_packaging_switch}}/>
-                                                </div>
-                                            </div>
-                                        </div>
 
-                                            @foreach($packaging_material_types as $index => $type)
-                                                @if(isset($packaging_types[1]) && in_array($type->id, $packaging_types[1]))
-                                                <div class="card-header border-success">
-                                                    <div class="row">
-                                                        <div class="col-6"><h4 class="card-title lead success">{{$type->type}}</h4></div>
-                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="on_packaging_type_{{$type->id}}"><input name="on_packaging_type_{{$type->id}}" type="checkbox"  class="switchery on_packaging_type_{{$type->id}}" data-size="sm" {{$on_packaging_switch == 'checked'? 'checked':''}}/></a></a></div>
-
-                                                    </div>
-                                                </div>
-
-
-                                                <div id="on_package_type_{{$type->id}}" class="card border-success {{$on_packaging_switch == 'checked'? '':'hide'}}" aria-expanded="true">
-                                                    <div class="card-content">
-                                                        <div class="card-body packaging-charges-div-overnight">
-                                                            <div class="row">
-                                                                @foreach($packaging_material_type_sizes[$type->id] as $index => $size)
-
-
-                                                                        @if($packagingCharges[1][$index]->size_id == $size->id)
-                                                                        <div class="col-md-3 text-center">
-                                                                            <label class="card-title">{{$size->size}}</label>
-                                                                            <fieldset class="form-group">
-                                                                                <input name="on_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[1][$index]->charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        @else
-                                                                        <div class="col-md-3 text-center">
-                                                                            <label class="card-title">{{$size->size}}</label>
-                                                                            <fieldset class="form-group">
-                                                                                <input name="on_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        @endif
-
-
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                                @else
-                                                    <div class="card-header border-success">
-                                                        <div class="row">
-                                                            <div class="col-6"><h4 class="card-title lead success">{{$type->type}}</h4></div>
-                                                            <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="on_packaging_type_{{$type->id}}"><input name="on_packaging_type_{{$type->id}}" type="checkbox"  class="switchery on_packaging_type_{{$type->id}}" data-size="sm"/></a></a></div>
-
-                                                        </div>
-                                                    </div>
-
-
-                                                    <div id="on_package_type_{{$type->id}}" class="card border-success hide" aria-expanded="true">
-                                                        <div class="card-content">
-                                                            <div class="card-body packaging-charges-div-overnight">
-                                                                <div class="row">
-                                                                    @foreach($packaging_material_type_sizes[$type->id] as $size)
-
-
-                                                                                <div class="col-md-3 text-center">
-                                                                                    <label class="card-title">{{$size->size}}</label>
-                                                                                    <fieldset class="form-group">
-                                                                                        <input name="on_packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
-                                                                                    </fieldset>
-                                                                                </div>
-
-                                                                    @endforeach
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-                                                @endif
-                                            @endforeach
-                                        @endif
 
 
 

@@ -878,10 +878,13 @@ class AdminDashboardController extends Controller
             $insurance = InsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $return = ReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $fuel = FuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $packaging = PackagingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $packaging = PackagingCharge::all()->where('user_id', $id);
+            $packaging_charges = PackagingCharge::all()->where('user_id', $id)->groupBy('type_id');
+            $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
+
             $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
-            $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
+            $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
             $packaging_sizes = array();
             if(count($packaging_material_types) > 0){
 
@@ -905,7 +908,7 @@ class AdminDashboardController extends Controller
             $insurance = PendingInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $return = PendingReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $fuel = PendingFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $packaging = PendingPackagingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $packaging = PendingPackagingCharge::all()->where('user_id', $id);
             $discount = PendingDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
@@ -924,7 +927,7 @@ class AdminDashboardController extends Controller
         else {
             return redirect(route('admin.accounts.pending'));
         }
-        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'packaging_types' => $packaging_types]);
+        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'packaging_types' => $packaging_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
 
     }
 
@@ -971,14 +974,7 @@ class AdminDashboardController extends Controller
                 'on_return_class_3_charges.*.required_if' => 'The overnight class D return charges field is required.',
                 'overnight_fuel_surcharge.required_if' => 'The overnight return national charges field is required.',
                 'overnight_fuel_surcharge.numeric' => 'The overnight return national charges field must be numeric or percentage.',
-                'on_flyer_sm.required_if' => 'The overnight small flyer field is required',
-                'on_flyer_sm.numeric' => 'The overnight small flyer field must be numeric',
-                'on_flyer_md.required_if' => 'The overnight meduim flyer field is required',
-                'on_flyer_md.numeric' => 'The overnight medium flyer field must be numeric',
-                'on_flyer_lg.required_if' => 'The overnight large flyer field is required',
-                'on_flyer_lg.numeric' => 'The overnight large flyer field must be numeric',
-                'on_flyer_box.required_if' => 'The overnight box flyer field is required',
-                'on_flyer_box.numeric' => 'The overnight box flyer field must be numeric',
+
                 'on_discount_title.required_if' => 'The overnight discount title field must be required',
                 'on_daterange.required_if' => 'The overnight discount date range field must be required',
                 'on_discount_weight_rate.required_if' => 'The overnight discount weight field must be required',
@@ -1032,14 +1028,7 @@ class AdminDashboardController extends Controller
                 'ol_return_class_3_charges.*.required_if' => 'The overland class D return charges field is required.',
                 'overland_fuel_surcharge.required_if' => 'The overland return national charges field is required.',
                 'overland_fuel_surcharge.numeric' => 'The overland return national charges field must be numeric or percentage.',
-                'ol_flyer_sm.required_if' => 'The overland small flyer field is required',
-                'ol_flyer_sm.numeric' => 'The overland small flyer field must be numeric',
-                'ol_flyer_md.required_if' => 'The overland meduim flyer field is required',
-                'ol_flyer_md.numeric' => 'The overland medium flyer field must be numeric',
-                'ol_flyer_lg.required_if' => 'The overland large flyer field is required',
-                'ol_flyer_lg.numeric' => 'The overland large flyer field must be numeric',
-                'ol_flyer_box.required_if' => 'The overland box flyer field is required',
-                'ol_flyer_box.numeric' => 'The overland box flyer field must be numeric',
+
                 'ol_discount_title.required_if' => 'The overland discount title field must be required',
                 'ol_daterange.required_if' => 'The overland discount date range field must be required',
                 'ol_discount_weight_rate.required_if' => 'The overland discount weight field must be required',
@@ -1093,14 +1082,7 @@ class AdminDashboardController extends Controller
                 'detain_return_class_3_charges.*.required_if' => 'The detain class D return charges field is required.',
                 'detain_fuel_surcharge.required_if' => 'The detain return national charges field is required.',
                 'detain_fuel_surcharge.numeric' => 'The detain return national charges field must be numeric or percentage.',
-                'detain_flyer_sm.required_if' => 'The detain small flyer field is required',
-                'detain_flyer_sm.numeric' => 'The detain small flyer field must be numeric',
-                'detain_flyer_md.required_if' => 'The detain meduim flyer field is required',
-                'detain_flyer_md.numeric' => 'The detain medium flyer field must be numeric',
-                'detain_flyer_lg.required_if' => 'The detain large flyer field is required',
-                'detain_flyer_lg.numeric' => 'The detain large flyer field must be numeric',
-                'detain_flyer_box.required_if' => 'The detain box flyer field is required',
-                'detain_flyer_box.numeric' => 'The detain box flyer field must be numeric',
+
                 'detain_discount_title.required_if' => 'The detain discount title field must be required',
                 'detain_daterange.required_if' => 'The detain discount date range field must be required',
                 'detain_discount_weight_rate.required_if' => 'The detain discount weight field must be required',
@@ -1151,14 +1133,7 @@ class AdminDashboardController extends Controller
                 'sameday_return_class_3_charges.*.required_if' => 'The sameday class D return charges field is required.',
                 'sameday_fuel_surcharge.required_if' => 'The sameday return national charges field is required.',
                 'sameday_fuel_surcharge.numeric' => 'The sameday return national charges field must be numeric or percentage.',
-                'sameday_flyer_sm.required_if' => 'The sameday small flyer field is required',
-                'sameday_flyer_sm.numeric' => 'The sameday small flyer field must be numeric',
-                'sameday_flyer_md.required_if' => 'The sameday meduim flyer field is required',
-                'sameday_flyer_md.numeric' => 'The sameday medium flyer field must be numeric',
-                'sameday_flyer_lg.required_if' => 'The sameday large flyer field is required',
-                'sameday_flyer_lg.numeric' => 'The sameday large flyer field must be numeric',
-                'sameday_flyer_box.required_if' => 'The sameday box flyer field is required',
-                'sameday_flyer_box.numeric' => 'The sameday box flyer field must be numeric',
+
                 'sameday_discount_title.required_if' => 'The sameday discount title field must be required',
                 'sameday_daterange.required_if' => 'The sameday discount date range field must be required',
                 'sameday_discount_weight_rate.required_if' => 'The sameday discount weight field must be required',
@@ -1338,8 +1313,7 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => ($request->has('on_cash_handling_switch')) ? 1 : 0,
                         'insurance_charges' => ($request->has('on_insurance_charges_switch')) ? 1 : 0,
                         'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
-                        'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
-                        'packaging_charges' => ($request->has('on_packaging_switch')) ? 1 : 0
+                        'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0
                     ]);
             } else {
                 RateStatus::create([
@@ -1349,8 +1323,7 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('on_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('on_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
-                    'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
-                    'packaging_charges' => ($request->has('on_packaging_switch')) ? 1 : 0
+                    'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0
                 ]);
             }
             if ($request->ol_rate_record != null) {
@@ -1362,8 +1335,7 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => ($request->has('ol_cash_handling_switch')) ? 1 : 0,
                         'insurance_charges' => ($request->has('ol_insurance_charges_switch')) ? 1 : 0,
                         'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
-                        'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
-                        'packaging_charges' => ($request->has('ol_packaging_switch')) ? 1 : 0
+                        'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0
                     ]);
             } else {
                 RateStatus::create([
@@ -1373,8 +1345,7 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('ol_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('ol_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
-                    'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
-                    'packaging_charges' => ($request->has('ol_packaging_switch')) ? 1 : 0
+                    'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0
                 ]);
             }
             if ($request->det_rate_record != null) {
@@ -1386,8 +1357,7 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => ($request->has('detain_cash_handling_switch')) ? 1 : 0,
                         'insurance_charges' => ($request->has('detain_insurance_charges_switch')) ? 1 : 0,
                         'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
-                        'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
-                        'packaging_charges' => ($request->has('detain_packaging_switch')) ? 1 : 0
+                        'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0
                     ]);
             } else {
                 RateStatus::create([
@@ -1397,8 +1367,7 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('detain_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('detain_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
-                    'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
-                    'packaging_charges' => ($request->has('detain_packaging_switch')) ? 1 : 0
+                    'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0
                 ]);
             }
             if ($request->same_rate_record != null) {
@@ -1421,8 +1390,7 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('sameday_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('sameday_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
-                    'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
-                    'packaging_charges' => ($request->has('sameday_packaging_switch')) ? 1 : 0
+                    'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0
                 ]);
             }
 
@@ -4585,7 +4553,7 @@ class AdminDashboardController extends Controller
      * @return int
      */
     public function addRates(Request $request, $id){
-//        return $request;
+
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
@@ -4627,8 +4595,8 @@ class AdminDashboardController extends Controller
             'on_return_class_3_charges.*.required_if' => 'The overnight class D return charges field is required.',
             'overnight_fuel_surcharge.required_if' => 'The overnight return national charges field is required.',
             'overnight_fuel_surcharge.numeric' => 'The overnight return national charges field must be numeric or percentage.',
-            'on_packaging_material_size_.*.required_if' => 'The overnight packaging material size charges field is required',
-            'on_packaging_material_size_.*.numeric' => 'The overnight packaging material size charges field must be numeric',
+            'packaging_material_size_.*.required_if' => 'The overnight packaging material size charges field is required',
+            'packaging_material_size_.*.numeric' => 'The overnight packaging material size charges field must be numeric',
             'on_discount_title.required_if' => 'The overnight discount title field must be required',
             'on_daterange.required_if' => 'The overnight discount date range field must be required',
             'on_discount_weight_rate.required_if' => 'The overnight discount weight field must be required',
@@ -4683,9 +4651,6 @@ class AdminDashboardController extends Controller
             'overland_fuel_surcharge.required_if' => 'The overland return national charges field is required.',
             'overland_fuel_surcharge.numeric' => 'The overland return national charges field must be numeric or percentage.',
 
-            'ol_packaging_material_size_.*.required_if' => 'The overland packaging material size charges field is required',
-            'ol_packaging_material_size_.*.numeric' => 'The overland packaging material size charges field must be numeric',
-
             'ol_discount_title.required_if' => 'The overland discount title field must be required',
             'ol_daterange.required_if' => 'The overland discount date range field must be required',
             'ol_discount_weight_rate.required_if' => 'The overland discount weight field must be required',
@@ -4739,8 +4704,7 @@ class AdminDashboardController extends Controller
             'detain_return_class_3_charges.*.required_if' => 'The detain class D return charges field is required.',
             'detain_fuel_surcharge.required_if' => 'The detain return national charges field is required.',
             'detain_fuel_surcharge.numeric' => 'The detain return national charges field must be numeric or percentage.',
-            'detain_packaging_material_size_.*.required_if' => 'The detain packaging material size charges field is required',
-            'detain_packaging_material_size_.*.numeric' => 'The detain packaging material size charges field must be numeric',
+
             'detain_discount_title.required_if' => 'The detain discount title field must be required',
             'detain_daterange.required_if' => 'The detain discount date range field must be required',
             'detain_discount_weight_rate.required_if' => 'The detain discount weight field must be required',
@@ -4791,8 +4755,7 @@ class AdminDashboardController extends Controller
             'sameday_return_class_3_charges.*.required_if' => 'The sameday class D return charges field is required.',
             'sameday_fuel_surcharge.required_if' => 'The sameday return national charges field is required.',
             'sameday_fuel_surcharge.numeric' => 'The sameday return national charges field must be numeric or percentage.',
-            'sameday_packaging_material_size_.*.required_if' => 'The sameday packaging material size charges field is required',
-            'sameday_packaging_material_size_.*.numeric' => 'The sameday packaging material size charges field must be numeric',
+
             'sameday_discount_title.required_if' => 'The sameday discount title field must be required',
             'sameday_daterange.required_if' => 'The sameday discount date range field must be required',
             'sameday_discount_weight_rate.required_if' => 'The sameday discount weight field must be required',
@@ -4963,6 +4926,28 @@ class AdminDashboardController extends Controller
                 ->withInput();
         }
 
+
+        //Packaging Charges
+        if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+            $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
+
+            foreach ($packaging_types as $type){
+                if($request->has('packaging_type_'.$type->id)){
+                    $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                    foreach ($packaging_size as $size) {
+                        $packaging_charges = new PackagingCharge();
+                        $packaging_charges->user_id = $id;
+                        $packaging_charges->type_id = $type->id;
+                        $packaging_charges->size_id = $size->id;
+                        $packaging_charges->charges = $request->packaging_material_size[$size->id];
+                        $packaging_charges->save();
+                    }
+
+                }
+            }
+
+        }
+
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
             if($request->has('on_default') && $request->on_default == 'on'){
                 $default_shipping_mode = User::where('id', $id)->update([
@@ -4979,8 +4964,7 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges'=> ($request->has('on_cash_handling_switch'))? 1:0,
                     'insurance_charges'=> ($request->has('on_insurance_charges_switch'))? 1:0,
                     'return_charges'=> ($request->has('on_return_switch'))? 1:0,
-                    'fuel_charges'=> ($request->has('overnight_fuel_switch'))? 1:0,
-                    'packaging_charges'=> ($request->has('on_packaging_switch'))? 1:0
+                    'fuel_charges'=> ($request->has('overnight_fuel_switch'))? 1:0
                 ]);
                 $wa_switch = array();
                 $wa_spkg = array();
@@ -5070,27 +5054,7 @@ class AdminDashboardController extends Controller
                         'fuel_surcharge'=> $request->overnight_fuel_surcharge
                     ]);
                 }
-                //Packaging Charges
-                if($request->has('on_packaging_switch') && $request->on_packaging_switch == 'on'){
-                    $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
-                    foreach ($packaging_types as $type){
-                        if($request->has('on_packaging_type_'.$type->id)){
-                            $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
-                            foreach ($packaging_size as $size) {
-                                $packaging_charges = new PackagingCharge();
-                                $packaging_charges->user_id = $id;
-                                $packaging_charges->shipping_mode_id = 1;
-                                $packaging_charges->type_id = $type->id;
-                                $packaging_charges->size_id = $size->id;
-                                $packaging_charges->charges = $request->on_packaging_material_size[$size->id];
-                                $packaging_charges->save();
-                            }
-
-                        }
-                    }
-
-                }
                 $discount_cash = null;
                 $discount_weight = null;
                 $discount_insurance = null;
@@ -5160,8 +5124,7 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges'=> ($request->has('ol_cash_handling_switch'))? 1:0,
                     'insurance_charges'=> ($request->has('ol_insurance_charges_switch'))? 1:0,
                     'return_charges'=> ($request->has('ol_return_switch'))? 1:0,
-                    'fuel_charges'=> ($request->has('overland_fuel_switch'))? 1:0,
-                    'packaging_charges'=> ($request->has('ol_packaging_switch'))? 1:0
+                    'fuel_charges'=> ($request->has('overland_fuel_switch'))? 1:0
                 ]);
                 $wa_switch_overland = array();
                 $wa_spkg_overland = array();
@@ -5250,27 +5213,7 @@ class AdminDashboardController extends Controller
                         'fuel_surcharge'=> $request->overland_fuel_surcharge
                     ]);
                 }
-                //Packaging Charges
-                if($request->has('ol_packaging_switch') && $request->ol_packaging_switch == 'on'){
-                    $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
-                    foreach ($packaging_types as $type){
-                        if($request->has('ol_packaging_type_'.$type->id)){
-                            $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
-                            foreach ($packaging_size as $size) {
-                                $packaging_charges = new PackagingCharge();
-                                $packaging_charges->user_id = $id;
-                                $packaging_charges->shipping_mode_id = 2;
-                                $packaging_charges->type_id = $type->id;
-                                $packaging_charges->size_id = $size->id;
-                                $packaging_charges->charges = $request->ol_packaging_material_size[$size->id];
-                                $packaging_charges->save();
-                            }
-
-                        }
-                    }
-
-                }
                 $discount_cash = null;
                 $discount_weight = null;
                 $discount_insurance = null;
@@ -5340,8 +5283,7 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('detain_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('detain_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
-                    'fuel_charges'=> ($request->has('detain_fuel_switch'))? 1:0,
-                    'packaging_charges' => ($request->has('detain_packaging_switch')) ? 1 : 0
+                    'fuel_charges'=> ($request->has('detain_fuel_switch'))? 1:0
                 ]);
                 $wa_switch_detain = array();
                 $wa_spkg_detain = array();
@@ -5430,27 +5372,7 @@ class AdminDashboardController extends Controller
                         'fuel_surcharge'=> $request->detain_fuel_surcharge
                     ]);
                 }
-                //Packaging Charges
-                if($request->has('detain_packaging_switch') && $request->detain_packaging_switch == 'on'){
-                    $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
-                    foreach ($packaging_types as $type){
-                        if($request->has('detain_packaging_type_'.$type->id)){
-                            $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
-                            foreach ($packaging_size as $size) {
-                                $packaging_charges = new PackagingCharge();
-                                $packaging_charges->user_id = $id;
-                                $packaging_charges->shipping_mode_id = 3;
-                                $packaging_charges->type_id = $type->id;
-                                $packaging_charges->size_id = $size->id;
-                                $packaging_charges->charges = $request->detain_packaging_material_size[$size->id];
-                                $packaging_charges->save();
-                            }
-
-                        }
-                    }
-
-                }
                 $discount_cash = null;
                 $discount_weight = null;
                 $discount_insurance = null;
@@ -5519,8 +5441,7 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges'=> ($request->has('sameday_cash_handling_switch'))? 1:0,
                     'insurance_charges'=> ($request->has('sameday_insurance_charges_switch'))? 1:0,
                     'return_charges'=> ($request->has('sameday_return_switch'))? 1:0,
-                    'fuel_charges'=> ($request->has('sameday_fuel_switch'))? 1:0,
-                    'packaging_charges'=> ($request->has('sameday_packaging_switch'))? 1:0
+                    'fuel_charges'=> ($request->has('sameday_fuel_switch'))? 1:0
                 ]);
                 $wa_switch_sameday = array();
                 $wa_spkg_sameday = array();
@@ -5609,27 +5530,7 @@ class AdminDashboardController extends Controller
                         'fuel_surcharge'=> $request->sameday_fuel_surcharge
                     ]);
                 }
-                //Packaging Charges
-                if($request->has('sameday_packaging_switch') && $request->sameday_packaging_switch == 'on'){
-                    $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
-                    foreach ($packaging_types as $type){
-                        if($request->has('sameday_packaging_type_'.$type->id)){
-                            $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
-                            foreach ($packaging_size as $size) {
-                                $packaging_charges = new PackagingCharge();
-                                $packaging_charges->user_id = $id;
-                                $packaging_charges->shipping_mode_id = 4;
-                                $packaging_charges->type_id = $type->id;
-                                $packaging_charges->size_id = $size->id;
-                                $packaging_charges->charges = $request->sameday_packaging_material_size[$size->id];
-                                $packaging_charges->save();
-                            }
-
-                        }
-                    }
-
-                }
                 $discount_cash = null;
                 $discount_weight = null;
                 $discount_insurance = null;
