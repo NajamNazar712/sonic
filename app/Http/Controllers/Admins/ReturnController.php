@@ -736,7 +736,7 @@ class ReturnController extends Controller
                 }
             })
             ->addColumn('action', function($shipment) {
-                if (($shipment->booking_type_id != 4) && ($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
+                if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
                     $revert_button = '<button type="button" class="dropdown-item revert"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Revert</div></button>';
 
                     $dropdown = '
