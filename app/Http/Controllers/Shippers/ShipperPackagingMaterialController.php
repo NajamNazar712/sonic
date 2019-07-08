@@ -127,16 +127,18 @@ class ShipperPackagingMaterialController extends Controller
 
     public function packaging_request_submit(Request $request){
 
+        $packaging_type_ids = explode(",",$request->packaging_type_ids);
+        $packaging_size_ids = explode(",",$request->packaging_size_ids);
+        $packaging_quantities = explode(",",$request->packaging_quantities);
+
         $total_charges = 0;
-        $boxFlyers = 0;
-        $smallFlyers = 0;
-        $mediumFlyers =0;
-        $largeFlyers =0;
-        $charges = PackagingCharge::where('user_id',session('user_id'))->latest()->first();
-        $total_charges += $smallFlyers * $charges->sm_flyer;
-        $total_charges += $mediumFlyers * $charges->md_flyer;
-        $total_charges += $largeFlyers * $charges->lg_flyer;
-        $total_charges += $boxFlyers * $charges->box_flyer;
+
+        foreach ($packaging_type_ids as $index => $packaging_type_id){
+            $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_ids[$index]])->latest()->first();
+            if($charges->exists()){
+                    $total_charges += $packaging_quantities[$index] * $charges->charges;
+            }
+        }
         $today = Carbon::today();
 
         if($discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
@@ -164,21 +166,13 @@ class ShipperPackagingMaterialController extends Controller
                 $result = PackagingMaterialRequest::create([
                     'user_id'=>$user_id,
                     'city_id'=>$request->new_pickup_city,
-                    'small_flyers'=>$smallFlyers,
-                    'medium_flyers'=>$mediumFlyers,
-                    'large_flyers'=>$largeFlyers,
-                    'boxes'=>$boxFlyers,
                     'address'=>$request->new_pickup_address,
                     'poc'=>$request->new_pickup_person_of_contact,
                     'phone'=>$request->new_pickup_phone_number,
                     'amount'=>$total_charges,
+                    'status_id'=>1,
                     'packaging_payment_mode_id'=>$request->mode_of_payment
                 ]);
-                if($result){
-                    return redirect()->back()->with('success','Request submitted!');
-                }else{
-                    return redirect()->back()->with('error','Request not submitted!');
-                }
             }
             else {
                 $address_id = $request->input('address_select');
@@ -186,22 +180,27 @@ class ShipperPackagingMaterialController extends Controller
                 $result = PackagingMaterialRequest::create([
                     'user_id'=>$user_id,
                     'city_id'=>$user_address->city_id,
-                    'small_flyers'=>$smallFlyers,
-                    'medium_flyers'=>$mediumFlyers,
-                    'large_flyers'=>$largeFlyers,
-                    'boxes'=>$boxFlyers,
                     'address'=>$user_address->pickup_address,
                     'poc'=>$user_address->poc,
                     'phone'=>$user_address->phone,
                     'amount'=>$total_charges,
+                    'status_id'=>1,
                     'packaging_payment_mode_id'=>$request->mode_of_payment
 
                 ]);
-                if($result){
-                    return redirect()->back()->with('success','Request submitted!');
-                }else{
-                    return redirect()->back()->with('error','Request not submitted!');
+            }
+            if($result){
+                foreach ($packaging_type_ids as $index => $packaging_type_id){
+                    PackagingMaterialRequestDetail::create([
+                        'packaging_material_request_id' => $result->id,
+                        'type_id' => $packaging_type_id,
+                        'type_size_id' => $packaging_size_ids[$index],
+                        'quantity' => $packaging_quantities[$index],
+                    ]);
                 }
+                return redirect()->back()->with('success','Request submitted!');
+            }else{
+                return redirect()->back()->with('error','Request not submitted!');
             }
         }else{
             if(PendingPayment::where('user_id', session('user_id'))->exists()){
@@ -217,21 +216,13 @@ class ShipperPackagingMaterialController extends Controller
                     $result = PackagingMaterialRequest::create([
                         'user_id'=>$user_id,
                         'city_id'=>$request->new_pickup_city,
-                        'small_flyers'=>($request->sm_flyer != null)? $request->sm_flyer:0,
-                        'medium_flyers'=>($request->md_flyer != null)? $request->md_flyer:0,
-                        'large_flyers'=>($request->lg_flyer != null)? $request->lg_flyer:0,
-                        'boxes'=>($request->boxes != null)? $request->boxes:0,
                         'address'=>$request->new_pickup_address,
                         'poc'=>$request->new_pickup_person_of_contact,
                         'phone'=>$request->new_pickup_phone_number,
                         'amount'=>$total_charges,
+                        'status_id'=>1,
                         'packaging_payment_mode_id'=>$request->mode_of_payment
                     ]);
-                    if($result){
-                        return redirect()->back()->with('success','Request submitted!');
-                    }else{
-                        return redirect()->back()->with('error','Request not submitted!');
-                    }
                 }
                 else {
                     $address_id = $request->input('address_select');
@@ -239,27 +230,30 @@ class ShipperPackagingMaterialController extends Controller
                     $result = PackagingMaterialRequest::create([
                         'user_id'=>$user_id,
                         'city_id'=>$user_address->city_id,
-                        'small_flyers'=>($request->sm_flyer != null)? $request->sm_flyer:0,
-                        'medium_flyers'=>($request->md_flyer != null)? $request->md_flyer:0,
-                        'large_flyers'=>($request->lg_flyer != null)? $request->lg_flyer:0,
-                        'boxes'=>($request->boxes != null)? $request->boxes:0,
                         'address'=>$user_address->pickup_address,
                         'poc'=>$user_address->poc,
                         'phone'=>$user_address->phone,
                         'amount'=>$total_charges,
+                        'status_id'=>1,
                         'packaging_payment_mode_id'=>$request->mode_of_payment
-
                     ]);
-                    if($result){
-                        return redirect()->back()->with('success','Request submitted!');
-                    }else{
-                        return redirect()->back()->with('error','Request not submitted!');
+                }
+                if($result){
+                    foreach ($packaging_type_ids as $index => $packaging_type_id){
+                        PackagingMaterialRequestDetail::create([
+                            'packaging_material_request_id' => $result->id,
+                            'type_id' => $packaging_type_id,
+                            'type_size_id' => $packaging_size_ids[$index],
+                            'quantity' => $packaging_quantities[$index],
+                        ]);
                     }
+                    return redirect()->back()->with('success','Request submitted!');
+                }else{
+                    return redirect()->back()->with('error','Request not submitted!');
                 }
 
             }else{
                 return redirect()->back()->with('error','Not enough balance!');
-
             }
         }
 
