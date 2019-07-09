@@ -869,6 +869,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('send/submit','Admins\AdminPackagingMaterialController@send_stock')->name('send.submit');
         Route::prefix('requests')->name('requests.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@request_index')->name('index');
+            Route::post('submit','Admins\AdminPackagingMaterialController@request_submit')->name('submit');
             Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
             Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
             Route::post('quantity_details','Admins\AdminPackagingMaterialController@quantity_details')->name('quantity_details');
@@ -876,6 +877,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('cancel','Admins\AdminPackagingMaterialController@request_cancel')->name('cancel');
             Route::post('replenish','Admins\AdminPackagingMaterialController@request_replenish')->name('replenish');
             Route::post('good_receiving_note','Admins\AdminPackagingMaterialController@good_receiving_note')->name('good_receiving_note');
+            Route::post('sizes','Admins\AdminPackagingMaterialController@packaging_request_sizes')->name('sizes');
         });
         Route::prefix('types')->name('types.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@types_index')->name('index');

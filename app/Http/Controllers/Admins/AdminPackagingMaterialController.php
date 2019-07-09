@@ -29,6 +29,8 @@ use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubsHistory;
 use App\Http\Models\Warehouse\WarehouseHistory;
 use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStockLog;
+use App\Http\Models\WarehouseStockLogDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -44,80 +46,111 @@ class AdminPackagingMaterialController extends Controller
         $this->middleware('Permission');
     }
 
-    public function packaging_index(){
+    public function packaging_index()
+    {
+        $packaging_type = PackagingMaterialTypes::with('sizes')->where('status', 1)->get();
+
         $packaging = PackagingMaterialStockHead::latest()->first();
-        return view('admin.materials.flyers.index')->with('packaging',$packaging);
+
+        return view('admin.materials.flyers.index')->with(['packaging' => $packaging, 'packaging_types' => $packaging_type]);
     }
-    public function packaging_list(Request $request){
-        $packaging = PackagingStockHistory::leftjoin('cities','cities.id','=','packaging_stock_histories.hub_id')
-            ->join('admins as ad','ad.id','=','packaging_stock_histories.admin_id')
-            ->select(['packaging_stock_histories.id as psh_id','packaging_stock_histories.reference_number','packaging_stock_histories.entry_type','packaging_stock_histories.created_at','packaging_stock_histories.small_flyers','packaging_stock_histories.medium_flyers','packaging_stock_histories.large_flyers','packaging_stock_histories.boxes','ad.name as admin','cities.name as hub']);
+
+    public function packaging_list(Request $request)
+    {
+        $packaging = PackagingStockHistory::leftjoin('cities', 'cities.id', '=', 'packaging_stock_histories.hub_id')
+            ->join('admins as ad', 'ad.id', '=', 'packaging_stock_histories.admin_id')
+            ->select(['packaging_stock_histories.id as psh_id', 'packaging_stock_histories.reference_number', 'packaging_stock_histories.entry_type', 'packaging_stock_histories.created_at', 'packaging_stock_histories.small_flyers', 'packaging_stock_histories.medium_flyers', 'packaging_stock_histories.large_flyers', 'packaging_stock_histories.boxes', 'ad.name as admin', 'cities.name as hub']);
         return Datatables::of($packaging)
-            ->editColumn('small_flyers', function($packaging){
+            ->editColumn('small_flyers', function ($packaging) {
                 return number_format($packaging->small_flyers);
             })
-            ->editColumn('medium_flyers', function($packaging){
+            ->editColumn('medium_flyers', function ($packaging) {
                 return number_format($packaging->medium_flyers);
             })
-            ->editColumn('large_flyers', function($packaging){
+            ->editColumn('large_flyers', function ($packaging) {
                 return number_format($packaging->large_flyers);
             })
-            ->editColumn('boxes', function($packaging){
+            ->editColumn('boxes', function ($packaging) {
                 return number_format($packaging->boxes);
             })
-            ->editColumn('entry_type',function($packaging){
-                if($packaging->entry_type == 0){
+            ->editColumn('entry_type', function ($packaging) {
+                if ($packaging->entry_type == 0) {
                     return "Inbound";
-                }
-                else if($packaging->entry_type == 1){
+                } else if ($packaging->entry_type == 1) {
                     return "Outbound";
                 }
             })
             ->make(true);
     }
-    public function add_stock(Request $request){
-        $reference_number = $request->invoice_number;
-        $sm_quantity = ($request->add_stock_smflyer != null)? $request->add_stock_smflyer:0;
-        $md_quantity = ($request->add_stock_mdflyer != null)? $request->add_stock_mdflyer:0;
-        $lg_quantity = ($request->add_stock_lgflyer != null)? $request->add_stock_lgflyer:0;
-        $box_quantity = ($request->add_stock_boxes != null)? $request->add_stock_boxes:0;
-        if($reference_number != null){
-            $packaging = PackagingMaterialStockHead::latest()->first();
-            if($packaging){
-                $small = $packaging->small_flyers;
-                $medium = $packaging->medium_flyers;
-                $large = $packaging->large_flyers;
-                $box = $packaging->boxes;
-                $small += $sm_quantity;
-                $medium += $md_quantity;
-                $large += $lg_quantity;
-                $box += $box_quantity;
-              $packaging_head =  PackagingMaterialStockHead::create([
-                   'small_flyers'=>$small,
-                   'medium_flyers'=>$medium,
-                   'large_flyers'=>$large,
-                   'boxes'=>$box
-                ]);
-                if($packaging_head){
-                    PackagingStockHistory::create([
-                        'admin_id'=>Auth::id(),
-                        'small_flyers'=>$sm_quantity,
-                        'medium_flyers'=>$md_quantity,
-                        'large_flyers'=>$lg_quantity,
-                        'boxes'=>$box_quantity,
-                        'entry_type'=>0,
-                        'reference_number'=>$reference_number
-                    ]);
-                }
-                return redirect()->back()->with('success','Stock added successfully!');
-            }else{
-                return redirect()->back()->with('error','No previous record found in database!');
 
+    public function packaging_request_sizes(Request $request)
+    {
+        $id = $request->id;
+        if ($id) {
+            $sizes = PackagingMaterialTypeSizes::where('type_id', $id);
+            if ($sizes->exists()) {
+                $sizes = $sizes->select('id', 'size')->get();
+                return response()->json(['status' => 0, 'sizes' => $sizes]);
+            } else {
+                $type = PackagingMaterialTypes::find($id)->type;
+                return response()->json(['status' => 1, 'error' => 'No Size found for type: ' . $type]);
             }
-        }else{
-            return redirect()->back()->with('error','No invoice number entered!');
         }
     }
+
+
+    public function add_stock(Request $request)
+    {
+        $reference_number = $request->invoice_number;
+
+        if ($reference_number != null) {
+            $master = Warehouse::where('master_type', 1)->first();
+            if($master){
+                $type_ids = explode(',', $request->packaging_type_ids);
+                $type_size_ids = explode(',', $request->packaging_size_ids);
+                $quantities = explode(',', $request->packaging_quantities);
+
+                $log = new WarehouseStockLog();
+                $log->warehouse_id = $master->id;
+                $log->updated_by = Auth::id();
+                $log->reference_number = $reference_number;
+                $log->save();
+
+                foreach ($type_ids as $index => $type){
+                        $stock = WarehouseStock::where('warehouse_id', $master->id)->where('type_id', $type)->where('type_size_id', $type_size_ids[$index])->first();
+                        if($stock){
+                            $stock->stock += $quantities[$index];
+                        }else{
+                            $stock = new WarehouseStock();
+                            $stock->warehouse_id = $master->id;
+                            $stock->type_id = $type;
+                            $stock->type_size_id = $type_size_ids[$index];
+                            $stock->stock = $quantities[$index];
+                        }
+                        $stock->save();
+
+                        $log_details = new WarehouseStockLogDetail();
+                        $log_details->warehouse_stock_log_id = $log->id;
+                        $log_details->type_id = $type;
+                        $log_details->size_id = $type_size_ids[$index];
+                        $log_details->quantity = $quantities[$index];
+                        $log_details->save();
+                }
+
+                return redirect()->back()->with('success', 'Stock added successfully!');
+            }
+            else{
+                return redirect()->back()->with('error', 'Master Warehouse not found!');
+            }
+
+        } else {
+            return redirect()->back()->with('error', 'No invoice number entered!');
+        }
+
+    }
+
+    
+
     public function fetch_cities(Request $request){
         $cities = City::where(['hub'=>1,'status'=>1])->select('id','name')->get();
         return response()->json(['status'=>1,'cities'=>$cities]);

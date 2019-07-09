@@ -51,43 +51,179 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body text-center">
-                    <form id="add_stock_form" action="{{route('admin.packaging.add.submit')}}" method="post">
-                        @method('POST')
-                        @csrf
-                    <div class="container">
-                        <div class="row justify-content-center">
-                            <div class="col-4 form-group">
-                                <input type="text" name="invoice_number" id="add_stock_invoice" class="form-control" placeholder="Invoice Number *" data-rule-required="true" data-msg-required="This field is required">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6 form-group">
-                                <input type="text" name="add_stock_smflyer" id="add_stock_smflyer" class="form-control numeric flyer" placeholder="Small Flyers">
-                            </div>
-                            <div class="col-6 form-group">
-                                <input type="text" name="add_stock_mdflyer" id="add_stock_mdflyer" class="form-control numeric flyer" placeholder="Medium Flyers">
-                            </div>
-                            <div class="col-6 form-group">
-                                <input type="text" name="add_stock_lgflyer" id="add_stock_lgflyer" class="form-control numeric flyer" placeholder="Large Flyers">
-                            </div>
-                            <div class="col-6 form-group">
-                                <input type="text" name="add_stock_boxes" id="add_stock_boxes" class="form-control numeric flyer" placeholder="Boxes">
-                            </div>
+                <form id="add_stock_form" action="{{route('admin.packaging.add.submit')}}" method="post">
+                    @method('POST')
+                    @csrf
 
-                        </div>
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="AddNewStock" type="submit" class="btn btn-primary btn-block">Add Stock</button>
+                <div class="modal-body">
+
+                        <div class="row justify-content-md-center">
+                            <div class="col-12">
+                                <div class="form-body">
+
+                                    <input type="hidden" id="packaging_type_ids" name="packaging_type_ids">
+                                    <input type="hidden" id="packaging_size_ids" name="packaging_size_ids">
+                                    <input type="hidden" id="packaging_quantities" name="packaging_quantities">
+                                    <div class="row justify-content-center">
+                                        <div class="col-4 form-group">
+                                            <input type="text" name="invoice_number" id="add_stock_invoice" class="form-control invoice" placeholder="Invoice Number *" data-rule-required="true" data-msg-required="This field is required">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-4">
+                                            <div class="form-group">
+                                                {{--<label for="sm_flyer">Packaging Material Type</label>--}}
+                                                <select name="packaging_material_type" class="select2" id="packaging_material_type">
+                                                    @foreach($packaging_types as $packaging_type)
+                                                        <option value="{{ $packaging_type->id }}">{{ $packaging_type->type }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-lg-4">
+                                            <div class="form-group">
+                                                <select name="packaging_material_size" class="select2" id="packaging_material_size"></select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-lg-2">
+                                            <div class="form-group">
+                                                <input name="packaging_material_quantity" class="form-control numeric quantity" id="packaging_material_quantity" placeholder="Quantity here"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-lg-2">
+                                            <div class="form-group">
+                                                <button class="btn btn-primary btn-block" type="button" id="add_packaging_material_btn"> Add</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <table class="table table-bordered packaging_type_datatable" id="packaging_type_datatable" style="z-index: 3;">
+                                            <thead>
+                                            <tr role="row" class="bg-primary white">
+
+                                                <th class="border-primary border-darken-1">S. No.</th>
+                                                <th class="border-primary border-darken-1">Packaging Type</th>
+                                                <th class="border-primary border-darken-1">Size</th>
+                                                <th class="border-primary border-darken-1">Quantity</th>
+                                                <th class="border-primary border-darken-1"></th>
+
+                                            </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+
+                                    <div class="row justify-content-center">
+                                        <div class="col-md-12 col-lg-6">
+                                            <button id="RequestMaterialBtn" type="submit" class="btn btn-primary btn-block" disabled>Request Material</button>
+                                        </div>
+                                    </div>
+
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    </form>
+
                 </div>
+            </form>
+
+
             </div>
         </div>
     </div>
     {{--Add Stock Modal--}}
+
+    <div class="modal fade text-left" id="RequestStockModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RequestStockModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Request Stock</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="request_stock_form" action="{{route('admin.packaging.request.submit')}}" method="post">
+                    @method('POST')
+                    @csrf
+
+                    <div class="modal-body">
+
+                        <div class="row justify-content-md-center">
+                            <div class="col-12">
+                                <div class="form-body">
+
+                                    <input type="hidden" id="packaging_type_ids" name="packaging_type_ids">
+                                    <input type="hidden" id="packaging_size_ids" name="packaging_size_ids">
+                                    <input type="hidden" id="packaging_quantities" name="packaging_quantities">
+                                    <div class="row justify-content-center">
+                                        <div class="col-4 form-group">
+                                            <input type="text" name="invoice_number" id="add_stock_invoice" class="form-control invoice" placeholder="Invoice Number *" data-rule-required="true" data-msg-required="This field is required">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-4">
+                                            <div class="form-group">
+                                                {{--<label for="sm_flyer">Packaging Material Type</label>--}}
+                                                <select name="packaging_material_type" class="select2" id="packaging_material_type">
+                                                    @foreach($packaging_types as $packaging_type)
+                                                        <option value="{{ $packaging_type->id }}">{{ $packaging_type->type }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-lg-4">
+                                            <div class="form-group">
+                                                <select name="packaging_material_size" class="select2" id="packaging_material_size"></select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-lg-2">
+                                            <div class="form-group">
+                                                <input name="packaging_material_quantity" class="form-control numeric quantity" id="packaging_material_quantity" placeholder="Quantity here"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-lg-2">
+                                            <div class="form-group">
+                                                <button class="btn btn-primary btn-block" type="button" id="add_packaging_material_btn"> Add</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <table class="table table-bordered packaging_type_datatable" id="packaging_type_datatable" style="z-index: 3;">
+                                            <thead>
+                                            <tr role="row" class="bg-primary white">
+
+                                                <th class="border-primary border-darken-1">S. No.</th>
+                                                <th class="border-primary border-darken-1">Packaging Type</th>
+                                                <th class="border-primary border-darken-1">Size</th>
+                                                <th class="border-primary border-darken-1">Quantity</th>
+                                                <th class="border-primary border-darken-1"></th>
+
+                                            </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+
+                                    <div class="row justify-content-center">
+                                        <div class="col-md-12 col-lg-6">
+                                            <button id="RequestMaterialBtn" type="submit" class="btn btn-primary btn-block" disabled>Request Material</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+
     {{--Send Stock Modal--}}
     <div class="modal fade text-left" id="SendStockModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SendStockModal"
          aria-hidden="true">
@@ -207,58 +343,55 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var small_flyer = parseInt(@json($packaging->small_flyers));
-            var medium_flyer = parseInt(@json($packaging->medium_flyers));
-            var large_flyer = parseInt(@json($packaging->large_flyers));
-            var box_flyer = parseInt(@json($packaging->boxes));
-            if(small_flyer == 0 && medium_flyer == 0 && large_flyer == 0 && box_flyer == 0){
-                $('#SendNewStock').prop("disabled",true);
-            }
-            if(small_flyer == 0){
+            var already_selected_size = [];
+            $('#packaging_material_type').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Packaging Material Type',
+                dropdownParent: $("#AddStockModal")
+            }).bind('select2:select', function () {
+                var type_id = $(this).val();
+                if(type_id){
+                    $.ajax({
+                        url: '{!! route('admin.packaging.requests.sizes') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': type_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            $('#packaging_material_size').empty();
 
-                $('#send_stock_smflyer').attr('disabled','disabled');
-            }
-            if(medium_flyer == 0){
-                $('#send_stock_mdflyer').attr('disabled','disabled');
-            }
-            if(large_flyer == 0){
-                $('#send_stock_lgflyer').attr('disabled','disabled');
-            }
-            if(box_flyer == 0){
-                $('#send_stock_boxes').attr('disabled','disabled');
-            }
-            $('.small_flyer').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'min': 1,
-                'max': small_flyer
+                            $.each(data.sizes,function (key,value) {
+                                var type_size = parseInt(type_id+value.id);
+
+                                var index = $.inArray(type_size, already_selected_size);
+
+                                if(index === -1){
+                                    var newOption = new Option(value.size, value.id, false, false);
+                                    $('#packaging_material_size').append(newOption).trigger('change');
+                                    $('#packaging_material_size').val('').trigger('change');
+                                }
+
+                            });
+
+                        }else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+
+                }
             });
-            $('.medium_flyer').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'min': 1,
-                'max': medium_flyer
+
+            $('#packaging_material_size').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Packaging Material Size',
+                dropdownParent: $("#AddStockModal")
             });
-            $('.large_flyer').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'min': 1,
-                'max': large_flyer
-            });
-            $('.box_flyer').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'min': 1,
-                'max': box_flyer
-            });
+
             $('.numeric').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -267,6 +400,13 @@
                 'min': 0,
                 'max': 1000000
             });
+
+            $('#AddStockModal').on('change','#add_stock_form input.invoice',function() {
+                $(this).val($(this).val().trim());
+            });
+
+
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -439,15 +579,15 @@
                 }
             });
 
-            $('body').on('change','#add_stock_form input',function() {
-                $(this).val($(this).val().trim());
-            });
+            // $('body').on('change','#add_stock_form input',function() {
+            //     $(this).val($(this).val().trim());
+            // });
             $('body').on('change','#send_stock_form input',function() {
                 $(this).val($(this).val().trim());
             });
-            $('#AddStockModal').on('hidden.bs.modal',function () {
-                $('#add_stock_form')[0].reset();
-            });
+            // $('#AddStockModal').on('hidden.bs.modal',function () {
+            //     $('#add_stock_form')[0].reset();
+            // });
             $('#SendStockModal').on('shown.bs.modal',function () {
                 if(!$('#city_select').hasClass('select2-hidden-accessible')){
                     $('#city_select').select2({
@@ -478,35 +618,35 @@
                 $('#city_select').empty().trigger('change');
                 $('#city_select').val('').trigger('change');
             });
-            $( "#add_stock_form" ).validate({
-                rules: {
-                    add_stock_sm_flyers: {
-                        require_from_group: [1, ".flyer"]
-                    },
-                    add_stock_md_flyers: {
-                        require_from_group: [1, ".flyer"]
-                    },
-                    add_stock_lg_flyers: {
-                        require_from_group: [1, ".flyer"]
-                    },
-                    add_stock_boxes: {
-                        require_from_group: [1, ".flyer"]
-                    }
-                },
-                errorClass:"danger",
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
-                },
-                submitHandler: function(form) {
-
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                    form.submit();
-
-                }
-
-
-            });
+            // $( "#add_stock_form" ).validate({
+            //     rules: {
+            //         add_stock_sm_flyers: {
+            //             require_from_group: [1, ".flyer"]
+            //         },
+            //         add_stock_md_flyers: {
+            //             require_from_group: [1, ".flyer"]
+            //         },
+            //         add_stock_lg_flyers: {
+            //             require_from_group: [1, ".flyer"]
+            //         },
+            //         add_stock_boxes: {
+            //             require_from_group: [1, ".flyer"]
+            //         }
+            //     },
+            //     errorClass:"danger",
+            //     errorPlacement: function(error, element) {
+            //         error.addClass('w-100').appendTo(element.parents('.form-group'));
+            //     },
+            //     submitHandler: function(form) {
+            //
+            //         $(form).find('button[type=submit]').attr('disabled', 'disabled');
+            //
+            //         form.submit();
+            //
+            //     }
+            //
+            //
+            // });
 
             $( "#send_stock_form" ).validate({
                 rules: {
@@ -538,6 +678,160 @@
 
             });
 
+            var ptable;
+            $("#AddStockModal").on('shown.bs.modal', function(){
+                initDatatable();
+            });
+            $("#AddStockModal").on('hidden.bs.modal', function(){
+                destroyDatatable();
+                $('#RequestMaterialBtn').attr('disabled', false);
+            });
+
+            function destroyDatatable() {
+                ptable.clear();
+                ptable.destroy();
+            }
+
+            function initDatatable() {
+                ptable = $('#packaging_type_datatable').DataTable({
+                    dom: 'ltipr',
+                    paging:false,
+                    ordering:[0, 'desc'],
+                    columns: [
+                        {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
+                        {name: 'packaging_type', class: 'align-middle packaging_type', orderable: false},
+                        {name: 'size', class: 'align-middle size', orderable: false},
+                        {name: 'quantity', class: 'align-middle quantity', orderable: false},
+                        {name: 'action', class: 'align-middle action', orderable: false}
+                    ],
+                    rowCallback: function(row, data, index) {
+
+                    },
+                    initComplete: function() {
+
+                    }
+                });
+            }
+
+            var packaging_types_array = [];
+            var packaging_size_array = [];
+            var packaging_quantity_array = [];
+            var packaging_index_array = [];
+            var rid = 100;
+            $('#add_packaging_material_btn').on('click', function () {
+                var type = $('#packaging_material_type').val();
+                var type_name = $('#packaging_material_type option:selected').text();
+                var size = $('#packaging_material_size').val();
+                var size_name = $('#packaging_material_size option:selected').text();
+                var quantity = $('#packaging_material_quantity').val();
+                var flag = false;
+                if(type == ''){
+                    flag = true;
+                    var error = "<p id='type_error' class='danger'>Type is required</p>";
+                    if($('#packaging_material_type').parent('div').find('p#type_error').length == 0){
+                        $('#packaging_material_type').parent('div').append(error);
+                    }
+                }else{
+                    flag = false;
+                    $('#type_error').remove();
+                }
+
+                if(size == ''){
+                    flag = true;
+                    var error = "<p id='size_error' class='danger'>Size is required</p>";
+                    if($('#packaging_material_size').parent('div').find('p#size_error').length == 0){
+                        $('#packaging_material_size').parent('div').append(error);
+                    }
+                }else{
+                    $('#size_error').remove();
+                }
+
+                if(quantity == ''){
+                    flag = true;
+                    var error = "<p id='quantity_error' class='danger'>Quantity is required</p>";
+                    if($('#packaging_material_quantity').parent('div').find('p#quantity_error').length == 0){
+                        $('#packaging_material_quantity').parent('div').append(error);
+                    }
+                }else{
+                    $('#quantity_error').remove();
+                }
+
+                if(flag == false){
+                    var rowNo = ptable.rows().count();
+
+                    var remove = '<a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="la la-close"></i></a>';
+                    ptable.row.add([rowNo+1,type_name,size_name,quantity, remove]).node().id = rid;
+                    ptable.draw(false);
+                    already_selected_size.push(parseInt(type+size));
+                    packaging_index_array.push(rid);
+                    rid++;
+                    packaging_types_array.push(type);
+                    packaging_size_array.push(size);
+                    packaging_quantity_array.push(quantity);
+                    $('#RequestMaterialBtn').attr('disabled', false);
+                    $('#packaging_material_type').val('').trigger('change');
+                    $('#packaging_material_size').empty();
+                    $('#packaging_material_quantity').val('');
+                }
+
+            });
+
+            $('#packaging_type_datatable').on('click', 'a.remove', function(){
+                var rowId = parseInt($(this).parents('tr').attr('id'));
+
+                var index = $.inArray(rowId, packaging_index_array);
+
+                if (index !== -1) {
+                    already_selected_size.splice(index, 1);
+                    packaging_index_array.splice(index, 1);
+                    packaging_types_array.splice(index, 1);
+                    packaging_size_array.splice(index, 1);
+                    packaging_quantity_array.splice(index, 1);
+                }
+                ptable.row( $(this).parents('tr') ).remove().draw();
+                if(ptable.rows().count() == 0){
+                    $('#RequestMaterialBtn').attr('disabled', true);
+                }
+            });
+
+
+            $('#add_stock_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    if(ptable.rows().count() > 0){
+                        $('#packaging_type_ids').val(packaging_types_array);
+                        $('#packaging_size_ids').val(packaging_size_array);
+                        $('#packaging_quantities').val(packaging_quantity_array);
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Stock is being added!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                    }else{
+
+                        toastr.error("Please Select atleast one packaging type!", 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        return false;
+                    }
+
+                }
+            });
 
         });
 
