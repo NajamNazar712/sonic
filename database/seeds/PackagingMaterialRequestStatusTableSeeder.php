@@ -14,7 +14,7 @@ class PackagingMaterialRequestStatusTableSeeder extends Seeder
         $timestamp = \Carbon\Carbon::now();
         DB::table('packaging_material_request_statuses')->truncate();
         DB::table('packaging_material_request_statuses')->insert(array(
-            array('id'=>1, 'name'=>'Booked', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id'=>1, 'name'=>'Requested', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id'=>2, 'name'=>'Confirmed', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id'=>3, 'name'=>'Dispatched', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id'=>4, 'name'=>'Completed', 'created_at' => $timestamp, 'updated_at' => $timestamp),

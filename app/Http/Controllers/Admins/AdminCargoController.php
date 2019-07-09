@@ -271,8 +271,8 @@ class AdminCargoController extends Controller
 
             $packaging_material_request = PackagingMaterialRequest::where('tracking_number',$shipment->tracking_number)->first();
             if($packaging_material_request != null){
-                if($packaging_material_request->status_id != 2){
-                    return ['status' => 1, 'error' => 'Packaging Material Request is not Confirmed yet!'];
+                if($packaging_material_request->status_id != 3){
+                    return ['status' => 1, 'error' => 'Packaging Material Request is not dispatched yet!'];
                 }
             }
 
