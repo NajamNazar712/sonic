@@ -36,13 +36,14 @@ class ShipperPackagingMaterialController extends Controller
     public function packaging_request(){
         $packaging_type = PackagingMaterialTypes::where('status', 1)->get();
 //        $packaging_size = PackagingMaterialTypeSizes::all('id','size','type_id')->groupBy('type_id');
+        $packaging_request_status = PackagingMaterialRequestStatus::select('id', 'name')->get();
 
         $status = PackagingMaterialRequestStatus::all();
         $cities = City::where('status',1)->orderBy('name')->get();
         $address = UserShippingInfo::where(['user_id'=>session('user_id'),'hidden'=>0])->with('city')->get();
         $payment_mode = PackagingPaymentMode::all();
 
-        return view('client.packaging.flyers.index')->with(['address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode, 'status' => $status, 'packaging_types' => $packaging_type]);
+        return view('client.packaging.flyers.index')->with(['address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode, 'status' => $status, 'packaging_types' => $packaging_type, 'packaging_request_status' => $packaging_request_status]);
     }
     public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id, $status) {
 

@@ -388,9 +388,9 @@
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'city', name: 'ct.name', class: 'align-middle city'},
                     {data: 'amount', name: 'ct.name', class: 'align-middle amount'},
-                    {data: 'mode', name: 'ppm.mode', class: 'align-middle mode'},
+                    {data: 'mode', name: 'packaging_material_requests.packaging_payment_mode_id', class: 'align-middle mode'},
                     {data: 'tracking_number_link', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number_link'},
-                    {data: 'request_status', name: 'prs.name', class: 'align-middle request_status'},
+                    {data: 'request_status', name: 'packaging_material_requests.status_id', class: 'align-middle request_status'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
@@ -407,7 +407,8 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var status = '<select name="status" id="status" class="select2 form-control"></select>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                    var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -415,12 +416,17 @@
 
                         if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.aging')) {
                             $(td).appendTo($(search));
-                        }
-                        else if ($(header).is('.status')) {
-                            $(status).appendTo($(search))
-                                .on('change', function () {
+                        }else if($(header).is('.request_status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.mode')){
+                            $(payment_mode_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -433,15 +439,37 @@
                         }
                     });
 
-                    var data = $.map({!! $status !!}, function (obj) {
+                    var data2 = $.map({!! $packaging_request_status !!}, function (obj) {
                         obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data2 = $.map({!! $packaging_request_status !!}, function (obj) {
                         obj.text = obj.name;
+
+                        return obj;
+                    });
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data: data2,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data1 = $.map({!! $payment_mode !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data1 = $.map({!! $payment_mode !!}, function (obj) {
+                        obj.text = obj.mode;
+
                         return obj;
                     });
 
-                    $('#status').prepend('<option value="" selected></option>').select2({
-                        data:data,
-                        placeholder: "Select Status",
+                    $("#payment_mode_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Mode",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
