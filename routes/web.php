@@ -127,6 +127,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('details','Shippers\ShipperPackagingMaterialController@packaging_request_details')->name('details');
             Route::post('sizes','Shippers\ShipperPackagingMaterialController@packaging_request_sizes')->name('sizes');
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
+            Route::post('cancel','Shippers\ShipperPackagingMaterialController@packaging_request_cancel')->name('cancel');
         });
     });
     Route::prefix('return')->name('return.')->group(function (){

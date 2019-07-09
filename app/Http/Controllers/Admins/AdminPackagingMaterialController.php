@@ -387,12 +387,16 @@ class AdminPackagingMaterialController extends Controller
 
     public function request_cancel(Request $request){
         $request_id = $request->id;
+        $shipment_id = $request->shipment_id;
 
-        $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
+        $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->first();
 
-        if($request_details->exists()){
-            $request_details->status = 6;
-            $request_details->save();
+        if($packaging_material_request->status_id > 1){
+            return response()->json(['status' => 0, 'error' => 'Cancellation failed, Request is already confirmed']);
+        }
+        else{
+            $packaging_material_request->status_id = 6;
+            $packaging_material_request->save();
 
             $packaging_request_history = new PackagingMaterialRequestHistory();
             $packaging_request_history->packaging_material_request_id = $request_id;
@@ -400,10 +404,9 @@ class AdminPackagingMaterialController extends Controller
             $packaging_request_history->updated_by = Auth::id();
             $packaging_request_history->save();
 
-            return response()->json(['status' => 1, 'success'=>"Packaging Material Request has been canceled successfully!"]);
-        }
-        else{
-            return response()->json(['status' => 0, 'success'=>"Packaging Material Request does\'nt exists!"]);
+            Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+            ShipmentsJourneyController::add($shipment_id, 17, 17, NULL,NULL, Auth::id(), NULL, $request_id);
+            return response()->json(['status' => 1, 'success' => 'Request cancelled successfully!']);
         }
     }
 

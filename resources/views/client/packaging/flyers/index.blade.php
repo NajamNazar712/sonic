@@ -237,11 +237,13 @@
 
             $('#mode_of_payment').select2({
                 width: '100%',
-                placeholder: 'Select Payment Mode'
+                placeholder: 'Select Payment Mode',
+                dropdownParent: $("#AddRequestModal")
             });
             $('#packaging_material_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Packaging Material Type'
+                placeholder: 'Select Packaging Material Type',
+                dropdownParent: $("#AddRequestModal")
             }).bind('select2:select', function () {
                 var type_id = $(this).val();
                 if(type_id){
@@ -284,13 +286,15 @@
 
             $('#packaging_material_size').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Packaging Material Size'
+                placeholder: 'Select Packaging Material Size',
+                dropdownParent: $("#AddRequestModal")
             });
 
 
             $('#address_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Send To*'
+                placeholder: 'Send To*',
+                dropdownParent: $("#AddRequestModal")
             }).bind('change', function() {
                 $(this).valid();
 
@@ -308,7 +312,8 @@
             });
             $('#new_pickup_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'City*'
+                placeholder: 'City*',
+                dropdownParent: $("#AddRequestModal")
             }).bind('change', function() {
                 $(this).valid();
             });
@@ -529,6 +534,57 @@
                    });
 
                }
+            });
+
+            $('body').on('click','.cancel',function(){
+                var request_id = parseInt($(this).parents('tr').attr('id'));
+                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
+
+                console.log(shipment_id_data);
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Cancel Packaging Material!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('cod.packaging.requests.cancel') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': request_id,
+                                'shipment_id': shipment_id_data,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+
+                            if(data.status === 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw();
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                            }
+                        });
+                    }
+                });
+
             });
             $('input.quantity').inputmask({
                 'alias': 'integer',

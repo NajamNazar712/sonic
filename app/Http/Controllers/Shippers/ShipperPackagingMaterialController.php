@@ -7,6 +7,7 @@ use App\Http\Models\DiscountCharge;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
+use App\Http\Models\PackagingMaterialRequestHistory;
 use App\http\models\PackagingMaterialRequestStatus;
 use App\Http\models\PackagingMaterialTypes;
 use App\Http\models\PackagingMaterialTypeSizes;
@@ -24,6 +25,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use phpDocumentor\Reflection\Types\Null_;
 use Yajra\Datatables\Datatables;
 
 class ShipperPackagingMaterialController extends Controller
@@ -65,7 +67,8 @@ class ShipperPackagingMaterialController extends Controller
         $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
             ->join('packaging_material_request_statuses as prs', 'prs.id','=', 'packaging_material_requests.status_id')
-            ->select(['packaging_material_requests.id as request_id','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.status_id','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link', 'prs.name as request_status'])
+            ->leftjoin('shipments as s', 's.tracking_number', '=', 'packaging_material_requests.tracking_number')
+            ->select(['packaging_material_requests.id as request_id','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.status_id','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link', 'prs.name as request_status', 's.id as shipment_id', 'packaging_material_requests.status_id as status_id'])
         ->where('packaging_material_requests.user_id', session('user_id'));
 
         return Datatables::of($requests)
@@ -87,7 +90,11 @@ class ShipperPackagingMaterialController extends Controller
                            <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
                             <div class='dropdown-menu dropdown-menu-sm'>";
                 $detail_button = '<a href="javascript:void(0);" class="dropdown-item primary details" ><i class="ft-list"></i> Details</a>';
+                $cancel_button = '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
                 $dropdown .= $detail_button;
+                if($packaging->status_id < 2){
+                    $dropdown .= $cancel_button;
+                }
                 $dropdown .= "
                             </div>
                         </div>
@@ -115,6 +122,31 @@ class ShipperPackagingMaterialController extends Controller
             }else{
                 return response()->json(['status' => 1, 'error' => 'No Details found!']);
             }
+        }
+    }
+
+    public function packaging_request_cancel(Request $request){
+        $request_id = $request->id;
+        $shipment_id = $request->shipment_id;
+
+        $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->first();
+
+        if($packaging_material_request->status_id > 1){
+            return response()->json(['status' => 0, 'error' => 'Cancellation failed, Request is already confirmed']);
+        }
+        else{
+            $packaging_material_request->status_id = 6;
+            $packaging_material_request->save();
+
+            $packaging_request_history = new PackagingMaterialRequestHistory();
+            $packaging_request_history->packaging_material_request_id = $request_id;
+            $packaging_request_history->status = 6;
+            $packaging_request_history->updated_by_user_id = Auth::id();
+            $packaging_request_history->save();
+
+            Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+            ShipmentsJourneyController::add($shipment_id, 17, 17, NULL,NULL, Auth::id(), NULL, $request_id);
+            return response()->json(['status' => 1, 'success' => 'Request cancelled successfully!']);
         }
     }
 

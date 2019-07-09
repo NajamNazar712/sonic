@@ -24,6 +24,7 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
                         <th class="border-primary border-darken-1">City</th>
@@ -31,7 +32,6 @@
                         <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Payment Mode</th>
-                        <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Action</th>
@@ -177,6 +177,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
+                            head.push('Tracking Number');
                             head.push('Shipper');
                             head.push('Requested Date/Time');
                             head.push('City');
@@ -184,14 +185,15 @@
                             head.push('Amount');
                             head.push('Address');
                             head.push('Payment Mode');
-                            head.push('Tracking Number');
                             head.push('Status');
+                            head.push('Aging');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
+                                row.push(values.tracking_number);
                                 row.push(values.shipper);
                                 row.push(values.created_at);
                                 row.push(values.city);
@@ -199,8 +201,8 @@
                                 row.push(values.amount);
                                 row.push(values.address);
                                 row.push(values.mode);
-                                row.push(values.tracking_number);
                                 row.push(values.status);
+                                row.push(values.aging);
 
                                 body.push(row);
                             });
@@ -246,6 +248,7 @@
                 order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'tracking_number_link', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'created_at', name: 'packaging_material_requests.created_at', class: 'align-middle created_at'},
                     {data: 'city', name: 'ct.name', class: 'align-middle city'},
@@ -253,7 +256,6 @@
                     {data: 'amount', name: 'packaging_material_requests.amount', class: 'align-middle amount'},
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'mode', name: 'ppm.id', class: 'align-middle mode'},
-                    {data: 'tracking_number_link', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'status', name: 'pmrs.id', class: 'align-middle status'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
