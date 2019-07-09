@@ -353,24 +353,96 @@ class AdminPackagingMaterialController extends Controller
         return response()->json(['status' => 1, 'types' => $packaging_material_request_details]);
     }
 
+
+    public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id, $status) {
+
+        $user_shipping_info = new UserShippingInfo();
+
+        $user_shipping_info->user_id = $user_id;
+        $user_shipping_info->pickup_address = $address;
+        $user_shipping_info->poc = $person_of_contact;
+        $user_shipping_info->phone = $phone_number;
+        $user_shipping_info->email = $email_address;
+        $user_shipping_info->city_id = $city_id;
+        $user_shipping_info->status = $status;
+
+        $user_shipping_info->save();
+
+        return $user_shipping_info->id;
+    }
+
     public function request_confirm(Request $request){
         $request_id = $request->id;
-        $shipment_id = $request->shipment_id;
 
         $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
 
-        if($request_details->exists()){
+        if($request_details != null){
+
+            $total_charges = $request_details->amount;
+
+            $city_id = $request_details->city_id;
+            $city_hub = City::where('id', $city_id)->first();
+            $hub_id = $city_hub->hub_id;
+
+            $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id);
+
+            if (!$fulfilment_hub->exists()) {
+                return redirect()->back()->with('error', 'Warehouse does\'nt exists for requested hub!');
+            } else {
+                $fulfilment_hub = $fulfilment_hub->first();
+            }
+
+            $warehouse_id = $fulfilment_hub->warehouse_id;
+
+            $warehouse = Warehouse::where('id', $warehouse_id)->first();
+
+            $warehouse_hub_id = $warehouse->hub_id;
+            $hub = City::where('id', $warehouse_hub_id)->first();
+
+            $user_id = $request_details->user_id;
+
+            $pickup_address_office = 'Trax Office ' . $hub->name;
+            $pickup_address_email = 'Info@Trax.pk';
+            $pickup_address_poc = 'Trax Logistics';
+            $pickup_address_phone = '0213-877-22-22';
+
+            $pickup_address_id = $this->add_pickup_address($user_id, $pickup_address_office, $pickup_address_poc, $pickup_address_phone, $pickup_address_email, $warehouse_hub_id, 0);
+            $trax_address = UserShippingInfo::find($pickup_address_id);
+
+            $now = Carbon::today();
+
+            $details = '';
+
+            $details = substr($details, 0, -2);
+
+            $shipper_details = User::where('id', $user_id)->select('name', 'poc', 'phone', 'email')->first();
+            $shipment_consignee_name = "Packaging Material to $shipper_details->name";
+
+            if($request_details->packaging_payment_mode_id == 1) {
+                $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request_details->city_id, $shipment_consignee_name, $request_details->address, $request_details->phone, null, null, null, 0, $now, null, 1, 1, null, $total_charges, 1, 2, 2);
+            }
+            else{
+                $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request_details->city_id, $shipment_consignee_name, $request_details->address, $request_details->phone, null, null, null, 0, $now, null, 1, 1, null, $total_charges, 2, 2, 2);
+            }
+
+            $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $request_details->city_id);
+
+
+
+            $this->add_item($shipment->id, 24, $details, 1, null, 0, 0);
+
+            PackagingMaterialRequest::where('id', $request_details->id)->update([
+                'tracking_number' => $new_tracking_number
+            ]);
+
+
+            ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, NULL, Auth::id(), $request_id);
+            ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, NULL, Auth::id(), $request_id);
+
+            ShipmentChargesController::packaging_material($shipment->id, $request_details->packaging_payment_mode_id, $total_charges);
+
             $request_details->status_id = 2;
             $request_details->save();
-
-            $shipment = Shipment::find($shipment_id);
-
-            $shipment->shipper_status_id = 2;
-            $shipment->consignee_status_id = 2;
-
-            $shipment->save();
-
-            ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $request_id);
 
             $packaging_request_history = new PackagingMaterialRequestHistory();
             $packaging_request_history->packaging_material_request_id = $request_id;
@@ -387,7 +459,6 @@ class AdminPackagingMaterialController extends Controller
 
     public function request_cancel(Request $request){
         $request_id = $request->id;
-        $shipment_id = $request->shipment_id;
 
         $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->first();
 
@@ -403,9 +474,7 @@ class AdminPackagingMaterialController extends Controller
             $packaging_request_history->status = 6;
             $packaging_request_history->updated_by = Auth::id();
             $packaging_request_history->save();
-
-            Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
-            ShipmentsJourneyController::add($shipment_id, 17, 17, NULL,NULL, Auth::id(), NULL, $request_id);
+            
             return response()->json(['status' => 1, 'success' => 'Request cancelled successfully!']);
         }
     }

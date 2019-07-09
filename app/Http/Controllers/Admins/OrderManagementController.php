@@ -200,7 +200,7 @@ class OrderManagementController extends Controller
             foreach ($shipment_ids as $shipment_id) {
                 $shipment = Shipment::find($shipment_id);
 
-                if ($shipment && $shipment->shipper_status_id == 2 && !$shipment->packaging_material_request) {
+                if ($shipment && $shipment->shipper_status_id == 2) {
                     $valid = TRUE;
 
                     $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
@@ -211,15 +211,29 @@ class OrderManagementController extends Controller
                         $shipment->save();
                         ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
                     }
-                    else{
-                        $shipment->shipper_status_id = 20;
-                        $shipment->consignee_status_id = 20;
+                    else {
+                        if ($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
+                            $shipment->shipper_status_id = 20;
+                            $shipment->consignee_status_id = 20;
 
-                        $shipment->save();
+                            $shipment->save();
 
-                        ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
+                            ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
 
-                        ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+                            ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+                        }
+                        else {
+                            $shipment->shipper_status_id = 22;
+                            $shipment->consignee_status_id = 22;
+
+                            $shipment->save();
+
+                            ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
+
+                            ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+
+                            ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, Auth::id());
+                        }
 
                         NotificationsController::send(15, 0, $shipment_id);
                         NotificationsController::send(16, 0, $shipment_id);
