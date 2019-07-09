@@ -298,7 +298,7 @@ class AdminPackagingMaterialController extends Controller
             })
             ->editColumn('total_quantity_button', function ($material){
                 if($material->total_quantity > 0){
-                    return '<button type="button" class="btn btn-outline-success mr-1 quantity">' . $material->total_quantity . '</button>';
+                    return '<div class="text-center"><button type="button" class="btn btn-sm btn-outline-info quantity">' . $material->total_quantity . '</button></div>';
                 }else{
                     return '-';
                 }
@@ -967,9 +967,9 @@ class AdminPackagingMaterialController extends Controller
             ->where('warehouses.master_type', '!=', 1)
             ->groupBy('warehouses.id');
         return Datatables::of($types)
-            ->editColumn('associated_hubs', function ($warehouse){
+            ->editColumn('associated_hubs_button', function ($warehouse){
                 if($warehouse->associated_hubs > 0){
-                    return '<button type="button" class="btn btn-outline-success mr-1 associated_hubs">' . $warehouse->associated_hubs . '</button>';
+                    return '<button type="button" class="btn btn-sm btn-outline-info mr-1 associated_hubs">' . $warehouse->associated_hubs . '</button>';
                 }else{
                     return '-';
                 }

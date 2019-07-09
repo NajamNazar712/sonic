@@ -72,7 +72,7 @@
                                 <button type="button" class="btn btn-outline-success mb-1" title="Add more sizes" id="add_row_btn"><i class="la la-plus"></i></button>
                             </div>
                             <div class="row justify-content-center">
-                                <div class="col-3">
+                                <div class="col-6">
                                     <button id="AddNewStock" type="submit" class="btn btn-primary btn-block">Add</button>
                                 </div>
                             </div>
@@ -114,8 +114,8 @@
                                 <button type="button" class="btn btn-outline-success mb-1" title="Add more sizes" id="add_edit_row_btn"><i class="la la-plus"></i></button>
                             </div>
                             <div class="row justify-content-center">
-                                <div class="col-3">
-                                    <button id="AddNewStock" type="submit" class="btn btn-primary btn-block">Add</button>
+                                <div class="col-6">
+                                    <button id="AddNewStock" type="submit" class="btn btn-primary btn-block">Edit</button>
                                 </div>
                             </div>
                         </div>
@@ -285,7 +285,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.packaging.types.list') }}',
                 rowId: 'id',
-                order: [[4, 'desc']],
+                order: [[3, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'type', name: 'packaging_material_types.type', class: 'align-middle type'},
@@ -309,8 +309,8 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Enabled</option>' +
-                        '<option value="1">Disabled</option>' +
+                        '<option value="1">Enabled</option>' +
+                        '<option value="0">Disabled</option>' +
                         '</select>';
                     // var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control"></select>';
 
@@ -387,6 +387,11 @@
                 }
             });
 
+
+            $('body').on('click', '#edit_material_form #row_close',function () {
+                $(this).parent().parent().remove();
+            });
+
             $('body').on('click','button.edit',function () {
                 var id = $(this).parents('tr').attr('id');
                 console.log(id);
@@ -435,6 +440,9 @@
                     '</div>' +
                     '<div class="col-5 form-group">' +
                     '<input name="edit_standard_charges[' + index_count + ']" id="edit_standard_charges[' + index_count + ']" class="form-control decimal" placeholder="Standard Charges *" data-rule-required="true" data-msg-required="Standard charges is required">' +
+                    '</div>' +
+                    '<div class="col-1">' +
+                    '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 row_close" id="row_close"><i class="ft-x"></i></span>' +
                     '</div></div>';
                 $('#EditMaterialModal #edit_size_charges_wrapper').append(htmdiv);
                 index_count++;

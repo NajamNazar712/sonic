@@ -89,7 +89,7 @@ class ShipperPackagingMaterialController extends Controller
                         <div class='btn-group'>
                            <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
                             <div class='dropdown-menu dropdown-menu-sm'>";
-                $detail_button = '<a href="javascript:void(0);" class="dropdown-item primary details" ><i class="ft-list"></i> Details</a>';
+                $detail_button = '<button type="button" class="dropdown-item details" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Details</div></button>';
                 $cancel_button = '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
                 $dropdown .= $detail_button;
                 if($packaging->status_id < 2){

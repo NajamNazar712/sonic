@@ -61,8 +61,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-info" data-dismiss="modal">Close</button>
-                        <button id="AddWarehouseBtn" type="submit" class="btn btn-success">Add Warehouse</button>
+                    <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button id="AddWarehouseBtn" type="submit" class="btn btn-info">Add Warehouse</button>
                 </div>
                 </form>
             </div>
@@ -80,7 +80,7 @@
                 </div>
                 <form id="warehouse_master_add_form" action="{{ route('admin.packaging.warehouse.master_add') }}" method="POST" novalidate="novalidate">
                     @csrf
-                    <div class="modal-body text-center p-3">
+                    <div class="modal-body text-center">
                         <div class="pl-1 form-group">
                             <select name="hub" id="master_hub" data-rule-required="true" data-msg-required="Hub is required">
                                 @foreach($all_warehouse_cities as $hub)
@@ -88,7 +88,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <button id="AddMasterWarehouseBtn" type="submit" class="btn btn-success">Assign Master Warehouse</button>
+                        <button id="AddMasterWarehouseBtn" type="submit" class="btn btn-info">Assign</button>
                     </div>
 
                 </form>
@@ -109,7 +109,7 @@
                 <form id="warehouse_edit_form" action="{{ route('admin.packaging.warehouse.edit') }}" method="POST" novalidate="novalidate">
                     @csrf
                     <input type="hidden" id="edit_warehouse_id" name="warehouse_id">
-                    <div class="modal-body p-3">
+                    <div class="modal-body">
                         <div class="pl-1 form-group">
                             <select name="hub_id" id="edit_ware_house_hub" data-rule-required="true" data-msg-required="Hub is required">
                                 @foreach($all_active_hubs as $hub)
@@ -126,8 +126,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-info" data-dismiss="modal">Close</button>
-                        <button id="AddWarehouseBtn" type="submit" class="btn btn-success">Edit Warehouse</button>
+                        <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button id="AddWarehouseBtn" type="submit" class="btn btn-info">Edit Warehouse</button>
                     </div>
                 </form>
             </div>
@@ -144,11 +144,11 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                    <div class="modal-body p-3 text-center">
+                    <div class="modal-body text-center">
 
                     </div>
                 <div class="modal-footer">
-                    <button class="btn btn-info" data-dismiss="modal">Close</button>
+                    <button class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -316,10 +316,10 @@
                             head.push('S.No');
                             head.push('Warehouse Hub');
                             head.push('Associated Hubs');
-                            head.push('Updated At');
-                            head.push('Updated By');
                             head.push('Created At');
                             head.push('Created By');
+                            head.push('Updated At');
+                            head.push('Updated By');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -387,11 +387,11 @@
                 serverSide: true,
                 ajax: '{{ route('admin.packaging.warehouse.list') }}',
                 rowId: 'id',
-                order: [[4, 'desc']],
+                order: [[3, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'associated_hubs', name: 'associated_hubs', class: 'align-middle text-center associated_hubs',orderable: false, searchable: false},
+                    {data: 'associated_hubs_button', name: 'associated_hubs', class: 'align-middle text-center associated_hubs',orderable: false, searchable: false},
                     {data: 'created_at', name: 'warehouses.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'ac.name', class: 'align-middle created_by'},
                     {data: 'updated_at', name: 'warehouses.updated_at', class: 'align-middle updated_at'},
@@ -411,8 +411,8 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Enabled</option>' +
-                        '<option value="1">Disabled</option>' +
+                        '<option value="1">Enabled</option>' +
+                        '<option value="0">Disabled</option>' +
                         '</select>';
                     // var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control"></select>';
 
@@ -464,7 +464,7 @@
                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                         setTimeout(function() {
                             location.reload()
-                        }, 2500);
+                        }, 1000);
                     }else{
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
@@ -485,7 +485,7 @@
                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                         setTimeout(function() {
                             location.reload()
-                        }, 2500);
+                        }, 1000);
                     }else{
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
@@ -569,7 +569,7 @@
                         $.each(data.associated_hubs, function(index, value) {
                             var ind = index+1;
                             html += '<tr class=""><td>' + ind + '</td>';
-                            html += '<td><b>' + value.name + '</b></td></tr>';
+                            html += '<td>' + value.name + '</td></tr>';
                         });
                         html += '</tbody></table>';
 

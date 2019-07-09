@@ -23,6 +23,7 @@
                                     <tr role="row" class="bg-primary white">
 
                                         <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1">Tracking Number</th>
                                         <th class="border-primary border-darken-1">Request Date/Time</th>
                                         <th class="border-primary border-darken-1">Requested Address</th>
                                         <th class="border-primary border-darken-1">City</th>
@@ -31,7 +32,6 @@
                                         {{--<th class="border-primary border-darken-1">Qty</th>--}}
                                         <th class="border-primary border-darken-1">Amount</th>
                                         <th class="border-primary border-darken-1">Payment Mode</th>
-                                        <th class="border-primary border-darken-1">Tracking Number</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Aging</th>
                                         <th class="border-primary border-darken-1"></th>
@@ -190,7 +190,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -328,12 +328,12 @@
                             head = [];
 
                             head.push('S No.');
+                            head.push('Tracking No.');
                             head.push('Request Date/Time');
                             head.push('Requested Address');
                             head.push('City');
                             head.push('Amount');
                             head.push('Payment Mode');
-                            head.push('Tracking No.');
                             head.push('Status');
                             head.push('Aging');
 
@@ -341,12 +341,12 @@
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.tracking_number);
                                 row.push(values.created_at);
                                 row.push(values.address);
                                 row.push(values.city);
                                 row.push(values.amount);
                                 row.push(values.mode);
-                                row.push(values.tracking_number);
                                 row.push(values.request_status);
                                 row.push(values.aging);
 
@@ -386,15 +386,15 @@
                 serverSide: true,
                 ajax: '{{ route('cod.packaging.requests.list') }}',
                 rowId: 'request_id',
-                order: [[1, 'desc']],
+                order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'tracking_number_link', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'created_at', name: 'packaging_material_requests.created_at', class: 'align-middle created_at'},
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'city', name: 'ct.name', class: 'align-middle city'},
                     {data: 'amount', name: 'ct.name', class: 'align-middle amount'},
                     {data: 'mode', name: 'packaging_material_requests.packaging_payment_mode_id', class: 'align-middle mode'},
-                    {data: 'tracking_number_link', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'request_status', name: 'packaging_material_requests.status_id', class: 'align-middle request_status'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -486,7 +486,7 @@
                 }
             });
 
-            $('body').on('click', 'a.details', function () {
+            $('body').on('click', '.details', function () {
                 var id = $(this).parents('tr').attr('id');
                if(id){
                    $.ajax({

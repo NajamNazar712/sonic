@@ -54,11 +54,11 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body p-3 text-center">
+                <div class="modal-body text-center">
 
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-info" data-dismiss="modal">Close</button>
+                    <button class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -230,6 +230,7 @@
                         @endif
                     {
                         extend: 'excel',
+                        className: 'btn btn-primary',
                         title: 'Packaging Material Requests',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -245,7 +246,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.packaging.requests.list') }}',
                 rowId: 'request_id',
-                order: [[2, 'desc']],
+                order: [[3, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
