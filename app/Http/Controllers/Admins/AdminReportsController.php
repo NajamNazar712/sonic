@@ -3572,16 +3572,16 @@ class AdminReportsController extends Controller
                 foreach ($types as $type) {
                     $rows = DB::connection('reports')->table('cities')->join('shipments as s', 'cities.id', '=', 's.consignee_city_id');
 
-                    if ($type != 'correct_status' && $type != 'fake_status') {
-                        $rows = $rows->join('shipments_journey as sj', function($join) use ($from, $to) {
-                            $join->on('s.id', '=', 'sj.shipment_id')
-                            ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
-                        });
-                    }
-                    else if ($type == 'delivery_note_pending') {
+                    if ($type == 'delivery_note_pending') {
                         $rows = $rows->join('shipments_journey as sj', function($join) use ($from, $to) {
                             $join->on('s.id', '=', 'sj.shipment_id')
                             ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at < "' . $to . '")'));
+                        });
+                    }
+                    else if ($type != 'correct_status' && $type != 'fake_status') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) use ($from, $to) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                            ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
                         });
                     }
                     else {
