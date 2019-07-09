@@ -1312,7 +1312,7 @@
 
 					swal({
 						text: 'Are you sure you want to update Cargo as Lost?',
-						icon: 'info',
+						icon: 'warning',
 						buttons: {
 							cancel: {
 								text: 'No',
@@ -1329,10 +1329,11 @@
 						},
 						closeOnClickOutside: false,
 						closeOnEsc: false,
+						dangerMode: true
 					}).then(function(confirm) {
 						if(confirm) {
 							$.ajax({
-								url: '{{ route('admin.cargo.lost') }}',
+								url: '{{ route('admin.cargo.in_transit.lost') }}',
 								method:'POST',
 								data:{
 									'_token': '{{ csrf_token() }}',
@@ -1345,9 +1346,12 @@
 								table.button('.re-attempt').disable();
 								table.draw('false');
 
-								if (data.)
-
-								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								if (data.status == 0) {
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
 
 								UnblockPagePermanently();
 							});

@@ -640,6 +640,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\AdminCargoController@in_transit_update')->name('update');
             Route::post('receive', 'Admins\AdminCargoController@in_transit_receive')->name('receive');
             Route::post('shipments', 'Admins\AdminCargoController@in_transit_shipments')->name('shipments');
+            Route::post('lost', 'Admins\AdminCargoController@in_transit_lost')->name('lost');
         });
 
         Route::prefix('receive')->name('receive.')->group(function () {
