@@ -137,6 +137,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('reattempt/status/single','Shippers\ShipperReturnController@return_reattempt_single_status')->name('reattempt.status.single');
             Route::post('marked/self_collection','Shippers\ShipperReturnController@change_status_to_self_collection')->name('marked.self_collection');
         });
+        Route::prefix('reattempt_history')->name('reattempt_history.')->group(function (){
+            Route::get('','Shippers\ShipperReturnController@return_reattempt_history_index')->name('index');
+            Route::get('list','Shippers\ShipperReturnController@return_reattempt_history_list')->name('list');
+        });
     });
 
     Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function() {
@@ -636,6 +640,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\AdminCargoController@in_transit_update')->name('update');
             Route::post('receive', 'Admins\AdminCargoController@in_transit_receive')->name('receive');
             Route::post('shipments', 'Admins\AdminCargoController@in_transit_shipments')->name('shipments');
+            Route::post('lost', 'Admins\AdminCargoController@in_transit_lost')->name('lost');
         });
 
         Route::prefix('receive')->name('receive.')->group(function () {

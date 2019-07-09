@@ -406,6 +406,34 @@ class AdminPettyCashController extends Controller
                             $flag = true;
                         }
                     }
+                    $petty = PettyCashStatement::find($id);
+                    if($petty){
+                        if($petty->station_approved_by == null){
+                            if(session('role_id') == 1 || in_array(190, session('permissions'))){
+                                $petty->station_approved_by = Auth::id();
+                                $petty->station_approved_at = Carbon::now();
+                                $petty->status = 1;
+                                $petty->save();
+                            }
+
+                        }else if($petty->operation_approved_by == null){
+                            if(session('role_id') == 1 || in_array(191, session('permissions'))){
+                                $petty->operation_approved_by = Auth::id();
+                                $petty->operation_approved_at = Carbon::now();
+                                $petty->status = 2;
+                                $petty->save();
+
+                            }
+                        }else if($petty->finance_approved_by == null){
+                            if(session('role_id') == 1 || in_array(173, session('permissions'))){
+                                $petty->finance_approved_by = Auth::id();
+                                $petty->finance_approved_at = Carbon::now();
+                                $petty->status = 3;
+                                $petty->save();
+                            }
+                        }
+                    }
+
                     if($flag = false){
                         return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
                     }

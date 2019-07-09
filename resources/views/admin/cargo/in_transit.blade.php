@@ -1305,6 +1305,63 @@
 					$('#receive_form').submit();
 				}
 				@endif
+
+				@if (session('role_id') == 1 || in_array(222, session('permissions')))
+				else if ($(this).hasClass('lost')) {
+					blockPagePermanently();
+
+					swal({
+						text: 'Are you sure you want to update Cargo as Lost?',
+						icon: 'warning',
+						buttons: {
+							cancel: {
+								text: 'No',
+								value: null,
+								visible: true,
+								closeModal: true,
+							},
+							confirm: {
+								text: 'Yes',
+								value: true,
+								visible: true,
+								closeModal: true
+							}
+						},
+						closeOnClickOutside: false,
+						closeOnEsc: false,
+						dangerMode: true
+					}).then(function(confirm) {
+						if(confirm) {
+							$.ajax({
+								url: '{{ route('admin.cargo.in_transit.lost') }}',
+								method:'POST',
+								data:{
+									'_token': '{{ csrf_token() }}',
+									'cargo_consignment_id': cargo_consignment_id
+								}
+							}).done(function (data) {
+								selected_rows = [];
+								table.rows().deselect();
+								table.button('.confirm').disable();
+								table.button('.re-attempt').disable();
+								table.draw('false');
+
+								if (data.status == 0) {
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
+
+								UnblockPagePermanently();
+							});
+						}
+						else {
+							UnblockPagePermanently();
+						}
+					});
+				}
+				@endif
 			});
 
 			$('#datatable tbody').on('click','tr td.cargo_number button.print',function () {

@@ -741,6 +741,7 @@ class AdminCargoController extends Controller
                 $add_forwarding_details_button = '<button type="button" class="dropdown-item add_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Forwarding Details</div></button>';
                 $view_forwarding_details_button = '<button type="button" class="dropdown-item view_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Forwarding Details</div></button>';
                 $launch_dispute_button = '<button type="button" class="dropdown-item launch_dispute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Launch Dispute</div></button>';
+                $lost_button = '<button type="button" class="dropdown-item lost"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Lost</div></button>';
                 $receive_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
 
                 $dropdown = '
@@ -759,6 +760,10 @@ class AdminCargoController extends Controller
 
                 if (session('role_id') == 1 || in_array(29, session('permissions'))) {
                     $dropdown .= $launch_dispute_button;
+                }
+
+                if (session('role_id') == 1 || in_array(222, session('permissions'))) {
+                    $dropdown .= $lost_button;
                 }
 
                 if (session('role_id') == 1 || (in_array(31, session('permissions')) && in_array($cargo_consignment->destination_hub_id, session('hubs')))) {
@@ -1458,7 +1463,7 @@ class AdminCargoController extends Controller
             ->join('cities as dh', 'cargo_consignments.destination_hub_id', '=', 'dh.id')
             ->join('shipping_modes as sm', 'cargo_consignments.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'cargo_consignments.sender_id', '=', 'a.id')
-            ->join('admins as ri','ri.id','=','cargo_consignments.receiver_id')
+            ->leftjoin('admins as ri','ri.id','=','cargo_consignments.receiver_id')
             ->join('cargo_consignment_status as ccs', 'cargo_consignments.status_id', '=', 'ccs.id')
             ->join('cities as jh1', 'cargo_consignments.junction_hub_1_id', '=', 'jh1.id')
             ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
@@ -2187,6 +2192,39 @@ class AdminCargoController extends Controller
         }
         else{
             return redirect()->back()->with('error', 'Mapping against these hubs already exists!');
+        }
+    }
+
+    public function in_transit_lost(Request $request) {
+        $cargo_consignment_id = $request->input('cargo_consignment_id');
+
+        $cargo_consignment = CargoConsignment::find($cargo_consignment_id);
+
+        if (in_array($cargo_consignment->status_id, [1, 2, 4, 6, 7])) {
+            $cargo_consignment->status_id = 8;
+
+            $cargo_consignment->save();
+
+            $cargo_consignment_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('status', 0);
+
+            if ($cargo_consignment_shipments->exists()) {
+                foreach ($cargo_consignment_shipments->get() as $cargo_consignment_shipment) {
+                    $shipment = $cargo_consignment_shipment->shipment;
+
+                    if (in_array($shipment->shipper_status_id, [3, 21, 26, 32])) {
+                        $shipment->shipper_status_id = 18;
+
+                        $shipment->save();
+
+                        ShipmentsJourneyController::add($shipment->id, 18, 18, NULL, NULL, NULL, Auth::id());
+                    }
+                }
+            }
+
+            return ['status' => 0, 'success' => 'Cargo Number #' . $request->input('cargo_consignment_id') . ' has been Updated as Lost'];
+        }
+        else {
+            return ['status' => 1, 'error' => 'Cargo Number #' . $request->input('cargo_consignment_id') . ' could not be Updated as Lost'];
         }
     }
 }

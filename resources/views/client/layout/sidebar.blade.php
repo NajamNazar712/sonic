@@ -30,6 +30,9 @@
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{ route('cod.return.pending.index') }}">Confirmation Pending</a></li>
                     </ul>
+                    <ul class="menu-content">
+                        <li><a class="menu-item" href="{{ route('cod.return.reattempt_history.index') }}">Re-Attempt Request</a></li>
+                    </ul>
                 </li>
             @endif
             @if(session('packaging_charges_check') && (session('user_type') == 1 || in_array(4, session('permissions'))))

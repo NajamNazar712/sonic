@@ -494,6 +494,8 @@ class Permission
             'return.pending.list' => 9,
             'return.pending.marked.status' => 9,
             'return.pending.marked.status.single' => 9,
+            'return.reattempt_history.index' => 9,
+            'return.reattempt_history.list' => 9,
 
             'intercept.index' => 9,
 
