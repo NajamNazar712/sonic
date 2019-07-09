@@ -13,6 +13,7 @@ use App\Http\Models\City;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
+use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\PackagingMaterialRequestStatus;
 use App\Http\models\PackagingMaterialTypes;
 use App\Http\Models\PackagingMaterialTypesHistory;
@@ -311,9 +312,11 @@ class AdminPackagingMaterialController extends Controller
         $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')
             ->join('users as u','u.id','=','packaging_material_requests.user_id')
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
-            ->leftjoin('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'packaging_material_requests.status')
+            ->leftjoin('shipments as s', 's.tracking_number', '=', 'packaging_material_requests.tracking_number')
+            ->leftjoin('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+            ->leftjoin('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'packaging_material_requests.status_id')
             ->leftjoin('packaging_material_request_details as pmrd', 'pmrd.packaging_material_request_id', '=', 'packaging_material_requests.id')
-            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status as status_id', DB::raw('sum(pmrd.quantity) as total_quantity')])
+            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.consignee_city_id as dc', 'usi.city_id as oc'])
         ->groupBy('packaging_material_requests.id');
 
         if(session('department_id') == 7){
@@ -333,6 +336,14 @@ class AdminPackagingMaterialController extends Controller
                     return '-';
                 }
             })
+            ->addColumn('aging',function ($shipments){
+                $days = Carbon::now()->diffInDays($shipments->created_at);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
             })
@@ -350,12 +361,8 @@ class AdminPackagingMaterialController extends Controller
                     if ($packaging->status_id >= 2) {
                         $dropdown .= '<button type="button" class="dropdown-item grn"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Print GRN</div></button>';
                     }
-                    if ($packaging->status_id == 2) {
+                    if ($packaging->status_id == 2 && ($packaging->shipper_status_id == 4 || ($packaging->oc == $packaging->dc))) {
                         $dropdown .= '<button type="button" class="dropdown-item dispatch"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Dispatch</div></button>';
-                    }
-                    if ($packaging->status_id == 3) {
-                        $dropdown .= '<button type="button" class="dropdown-item completed"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Completed</div></button>';
-                        $dropdown .= '<button type="button" class="dropdown-item replenished"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Replenished</div></button>';
                     }
 
                     $dropdown .= '
@@ -377,6 +384,82 @@ class AdminPackagingMaterialController extends Controller
 
         $packaging_material_request_details = PackagingMaterialRequestDetail::leftjoin('packaging_material_types as pmt', 'pmt.id', '=', 'packaging_material_request_details.type_id')->leftjoin('packaging_material_type_sizes as pmts', 'pmts.id', '=', 'packaging_material_request_details.type_size_id')->select('pmt.type as type', 'pmts.size as size', 'packaging_material_request_details.quantity')->where('packaging_material_request_id',$request_id)->get();
         return response()->json(['status' => 1, 'types' => $packaging_material_request_details]);
+    }
+
+    public function request_confirm(Request $request){
+        $request_id = $request->id;
+        $shipment_id = $request->shipment_id;
+
+        $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
+
+        if($request_details->exists()){
+            $request_details->status_id = 2;
+            $request_details->save();
+
+            $shipment = Shipment::find($shipment_id);
+
+            $shipment->shipper_status_id = 2;
+            $shipment->consignee_status_id = 2;
+
+            $shipment->save();
+
+            ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $request_id);
+
+            $packaging_request_history = new PackagingMaterialRequestHistory();
+            $packaging_request_history->packaging_material_request_id = $request_id;
+            $packaging_request_history->status = 2;
+            $packaging_request_history->updated_by = Auth::id();
+            $packaging_request_history->save();
+
+            return response()->json(['status' => 1, 'success'=>"Packaging Material Request has been confirmed successfully!"]);
+        }
+        else{
+            return response()->json(['status' => 0, 'success'=>"Packaging Material Request does\'nt exists!"]);
+        }
+    }
+
+    public function request_cancel(Request $request){
+        $request_id = $request->id;
+
+        $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
+
+        if($request_details->exists()){
+            $request_details->status = 6;
+            $request_details->save();
+
+            $packaging_request_history = new PackagingMaterialRequestHistory();
+            $packaging_request_history->packaging_material_request_id = $request_id;
+            $packaging_request_history->status = 6;
+            $packaging_request_history->updated_by = Auth::id();
+            $packaging_request_history->save();
+
+            return response()->json(['status' => 1, 'success'=>"Packaging Material Request has been canceled successfully!"]);
+        }
+        else{
+            return response()->json(['status' => 0, 'success'=>"Packaging Material Request does\'nt exists!"]);
+        }
+    }
+
+    public function request_completed(Request $request){
+        $request_id = $request->id;
+
+        $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
+
+        if($request_details->exists()){
+            $request_details->status = 4;
+            $request_details->save();
+
+            $packaging_request_history = new PackagingMaterialRequestHistory();
+            $packaging_request_history->packaging_material_request_id = $request_id;
+            $packaging_request_history->status = 4;
+            $packaging_request_history->updated_by = Auth::id();
+            $packaging_request_history->save();
+
+            return response()->json(['status' => 1, 'success'=>"Packaging Material Request has been completed successfully!"]);
+        }
+        else{
+            return response()->json(['status' => 0, 'success'=>"Packaging Material Request does\'nt exists!"]);
+        }
     }
 
     public function request_dispatch_submit(Request $request){
@@ -436,6 +519,15 @@ class AdminPackagingMaterialController extends Controller
                     $stock->save();
 
             }
+            $packaging_material_request->status_id = 3;
+            $packaging_material_request->save();
+
+
+            $packaging_request_history = new PackagingMaterialRequestHistory();
+            $packaging_request_history->packaging_material_request_id = $request_id;
+            $packaging_request_history->status = 3;
+            $packaging_request_history->updated_by = Auth::id();
+            $packaging_request_history->save();
             return response()->json(['status'=>1,'success'=>"Packaging Material has been dispatched successfully!"]);
         }
     }
@@ -473,8 +565,176 @@ class AdminPackagingMaterialController extends Controller
                 $stock->stock = $stock['stock'] + $detail_add->quantity;
                 $stock->save();
         }
+        $packaging_material_request->status = 5;
+        $packaging_material_request->save();
+
+
+        $packaging_request_history = new PackagingMaterialRequestHistory();
+        $packaging_request_history->packaging_material_request_id = $request_id;
+        $packaging_request_history->status = 5;
+        $packaging_request_history->updated_by = Auth::id();
+        $packaging_request_history->save();
 
         return response()->json(['status'=>1,'success'=>"Packaging Material has been Replenished successfully!"]);
+    }
+
+
+    public function good_receiving_note(Request $request){
+        $request_id = $request->id;
+
+        $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
+        $user = User::where('id', $request_details->user_id)->first();
+        $request_type_details = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_details->id)->get();
+
+//        return $request_type_details;
+
+        $total_quantity = 0;
+        foreach ($request_type_details as $type_detail){
+            $total_quantity = $total_quantity + $type_detail->quantity;
+        }
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+
+        $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Good Receiving Note</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .cargo_checklist {
+                        page-break-before: always;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div>
+                      <div class="good_receiving_note">
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle color primary"><strong>Good Receiving Note</strong></td>
+                              <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                              </tr>
+                            <tr>
+                              <td class="color secondary"><strong>City</strong></td>
+                              <td>' . $request_details->City->name . '</td>
+                              ';
+        if($request_details->tracking_number != null) {
+            $html .= '
+                                          <td rowspan="9" class="text-center align-middle">
+                                          <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request_details->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                          <span><strong>' . $request_details->tracking_number . '</strong></span>
+                                        </td>';
+        }
+        $html .= '
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Total Quantity</strong></td>
+                              <td>' . number_format($total_quantity) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Tracking Number</strong></td>
+                              <td>' . $request_details->tracking_number . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Shipper</strong></td>
+                              <td>' . $user->name . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Address</strong></td>
+                              <td>' . $request_details->address . '</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="color primary"><strong>S. No.</strong></td>
+                              <td class="color primary"><strong>Packaging Type</strong></td>
+                              <td class="color primary"><strong>Size</strong></td>
+                              <td class="color primary"><strong>Quantity</strong></td>
+      ';
+
+        $serial_number = 1;
+
+        foreach ($request_type_details as $detail) {
+
+            $html .= '
+                            <tr>
+                              <td>' . $serial_number . '</td>
+                              <td>' . $detail->packaging_type->type . '</td>
+                              <td>' . $detail->packaging_type_size->size  . '</td>
+                              <td>' . number_format($detail->quantity) . '</td>
+                            </tr>
+        ';
+
+            $serial_number++;
+        }
+
+        $html .= '
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+        return $html;
+
     }
 
     private function book($user_id,$service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id,$shipper_status_id,$consignee_status_id) {
@@ -1012,196 +1272,6 @@ class AdminPackagingMaterialController extends Controller
                     return $inventory->total;
                 }
             })->make(true);
-    }
-
-    public function good_receiving_note(Request $request){
-        $request_id = $request->id;
-
-        $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
-        $user = User::where('id', $request_details->user_id)->first();
-        $request_type_details = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_details->id)->get();
-
-//        return $request_type_details;
-
-        $total_quantity = 0;
-        foreach ($request_type_details as $type_detail){
-            $total_quantity = $total_quantity + $type_detail->quantity;
-        }
-        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-
-
-        $html = '
-                <!doctype html>
-                <html lang="en">
-                  <head>
-                    <meta charset="utf-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
-
-                    <title>Good Receiving Note</title>
-
-                    <style>
-                      @page {
-                        size: A4 portrait;
-                      }
-
-                      * {
-                        -webkit-print-color-adjust: exact !important;
-                        color-adjust: exact !important;
-                      }
-
-                      body {
-                        background: none !important;
-                        color: #09262e !important;
-                        font-size: 0.9rem !important;
-                      }
-
-                      hr {
-                        border-top: 1px dashed #000000;
-                      }
-
-                      table.table-bordered {
-                        page-break-inside: avoid;
-                      }
-
-                      table.table-bordered tbody tr td {
-                        border: 1px solid #09262e !important;
-                      }
-
-                      .color.primary {
-                        background: #c8c8c8 !important;
-                      }
-
-                      .color.secondary {
-                        background: #ebebeb !important;
-                      }
-
-                      .border {
-                        border: 1px solid #09262e !important;
-                      }
-
-                      .cargo_checklist {
-                        page-break-before: always;
-                      }
-                    </style>
-                  </head>
-                  <body>
-                    <div>
-                      <div class="good_receiving_note">
-                        <table class="table table-sm table-bordered border">
-                          <tbody>
-                            <tr>
-                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
-                              <td class="text-center align-middle color primary"><strong>Good Receiving Note</strong></td>
-                              <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
-                              </tr>
-                            <tr>
-                              <td class="color secondary"><strong>City</strong></td>
-                              <td>' . $request_details->City->name . '</td>
-                              ';
-        if($request_details->tracking_number != null) {
-            $html .= '
-                                          <td rowspan="9" class="text-center align-middle">
-                                          <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request_details->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                                          <span><strong>' . $request_details->tracking_number . '</strong></span>
-                                        </td>';
-        }
-        $html .= '
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Total Quantity</strong></td>
-                              <td>' . number_format($total_quantity) . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Tracking Number</strong></td>
-                              <td>' . $request_details->tracking_number . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Shipper</strong></td>
-                              <td>' . $user->name . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Address</strong></td>
-                              <td>' . $request_details->address . '</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                        
-                        <table class="table table-sm table-bordered border">
-                          <tbody>
-                            <tr>
-                              <td class="color primary"><strong>S. No.</strong></td>
-                              <td class="color primary"><strong>Packaging Type</strong></td>
-                              <td class="color primary"><strong>Size</strong></td>
-                              <td class="color primary"><strong>Quantity</strong></td>
-      ';
-
-        $serial_number = 1;
-
-        foreach ($request_type_details as $detail) {
-
-            $html .= '
-                            <tr>
-                              <td>' . $serial_number . '</td>
-                              <td>' . $detail->packaging_type->type . '</td>
-                              <td>' . $detail->packaging_type_size->size  . '</td>
-                              <td>' . number_format($detail->quantity) . '</td>
-                            </tr>
-        ';
-
-            $serial_number++;
-        }
-
-        $html .= '
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    <script>
-                      window.onload = function() {
-                        window.print();
-                      }
-                    </script>
-                  </body>
-                </html>
-      ';
-
-        return $html;
-
-    }
-
-    public function request_confirm(Request $request){
-        $request_id = $request->id;
-
-        $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
-
-        if($request_details->exists()){
-            $request_details->status = 2;
-            $request_details->save();
-
-            return response()->json(['status' => 1, 'success'=>"Packaging Material Request has been confirmed successfully!"]);
-        }
-        else{
-            return response()->json(['status' => 0, 'success'=>"Packaging Material Request does\'nt exists!"]);
-        }
-    }
-
-    public function request_cancel(Request $request){
-        $request_id = $request->id;
-
-        $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
-
-        if($request_details->exists()){
-            $request_details->status = 6;
-            $request_details->save();
-
-            return response()->json(['status' => 1, 'success'=>"Packaging Material Request has been canceled successfully!"]);
-        }
-        else{
-            return response()->json(['status' => 0, 'success'=>"Packaging Material Request does\'nt exists!"]);
-        }
     }
 
 }

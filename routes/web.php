@@ -876,6 +876,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('confirm','Admins\AdminPackagingMaterialController@request_confirm')->name('confirm');
             Route::post('cancel','Admins\AdminPackagingMaterialController@request_cancel')->name('cancel');
             Route::post('replenish','Admins\AdminPackagingMaterialController@request_replenish')->name('replenish');
+            Route::post('completed','Admins\AdminPackagingMaterialController@request_completed')->name('completed');
             Route::post('good_receiving_note','Admins\AdminPackagingMaterialController@good_receiving_note')->name('good_receiving_note');
             Route::post('sizes','Admins\AdminPackagingMaterialController@packaging_request_sizes')->name('sizes');
         });

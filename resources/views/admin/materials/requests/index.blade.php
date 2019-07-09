@@ -33,6 +33,7 @@
                         <th class="border-primary border-darken-1">Payment Mode</th>
                         <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -127,6 +128,43 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            function print(id, booking_type_id) {
+                if (booking_type_id != 4) {
+                    var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+                }
+                else {
+                    var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
+                }
+
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: {
+                        'ids[]': id,
+                        'admin': true,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -217,6 +255,7 @@
                     {data: 'mode', name: 'ppm.id', class: 'align-middle mode'},
                     {data: 'tracking_number_link', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'status', name: 'pmrs.id', class: 'align-middle status'},
+                    {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 
                 ],
@@ -238,7 +277,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.total_quantity_button')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.total_quantity_button') || $(header).is('.aging')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -334,12 +373,14 @@
             //grn
             $('body').on('click','.grn',function(){
                 var request_id = parseInt($(this).parents('tr').attr('id'));
+                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
 
                     $.ajax({
                         url: '{!! route('admin.packaging.requests.good_receiving_note') !!}',
                         method: 'POST',
                         data: {
                         'id': request_id,
+                        'shipment_id': shipment_id_data,
                         '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
@@ -365,6 +406,8 @@
             //confirm
             $('body').on('click','.confirm',function(){
                 var request_id = parseInt($(this).parents('tr').attr('id'));
+                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
+                var booking_type_id = table.row($(this).parents('tr')).data().booking_type_id;
                 swal({
                     title: 'Are You Sure?',
                     text: 'Select Yes to Confirm Packaging Material!',
@@ -393,12 +436,16 @@
                             method: 'POST',
                             data: {
                                 'id': request_id,
+                                'shipment_id': shipment_id_data,
                                 '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
 
                             if(data.status === 1){
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                if(shipment_id_data != null && booking_type_id != null){
+                                    print(shipment_id_data, booking_type_id);
+                                }
                                 table.draw();
                             }else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -412,6 +459,7 @@
             //cancel
             $('body').on('click','.cancel',function(){
                 var request_id = parseInt($(this).parents('tr').attr('id'));
+                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
                 swal({
                     title: 'Are You Sure?',
                     text: 'Select Yes to Cancel Packaging Material!',
@@ -440,6 +488,7 @@
                             method: 'POST',
                             data: {
                                 'id': request_id,
+                                'shipment_id': shipment_id_data,
                                 '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
@@ -459,6 +508,7 @@
             //dispatch
             $('body').on('click','.dispatch',function(){
                 var request_id = parseInt($(this).parents('tr').attr('id'));
+                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
                 swal({
                     title: 'Are You Sure?',
                     text: 'Select Yes to Dispatch Packaging Material!',
@@ -487,6 +537,7 @@
                             method: 'POST',
                             data: {
                                 'id': request_id,
+                                'shipment_id': shipment_id_data,
                                 '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
@@ -504,57 +555,56 @@
 
             });
             //complete
-            {{--$('body').on('click','.completed',function(){--}}
-                {{--var request_id = parseInt($(this).parents('tr').attr('id'));--}}
-                {{--swal({--}}
-                    {{--title: 'Are You Sure?',--}}
-                    {{--text: 'Select Yes to Complete Packaging Material!',--}}
-                    {{--icon: 'warning',--}}
-                    {{--buttons: {--}}
-                        {{--cancel: {--}}
-                            {{--text: 'No',--}}
-                            {{--value: null,--}}
-                            {{--visible: true,--}}
-                            {{--closeModal: true,--}}
-                        {{--},--}}
-                        {{--confirm: {--}}
-                            {{--text: 'Yes',--}}
-                            {{--value: true,--}}
-                            {{--visible: true,--}}
-                            {{--closeModal: true--}}
-                        {{--}--}}
-                    {{--},--}}
-                    {{--closeOnClickOutside: false,--}}
-                    {{--closeOnEsc: false,--}}
-                    {{--dangerMode: true--}}
-                {{--}).then(function (confirm) {--}}
-                    {{--if (confirm) {--}}
-                    {{--$.ajax({--}}
-                    {{--url: '{!! route('admin.packaging.requests.dispatch') !!}',--}}
-                    {{--method: 'POST',--}}
-                    {{--data: {--}}
-                    {{--'id': request_id,--}}
-                    {{--'_token': '{{ csrf_token() }}'--}}
-                    {{--}--}}
-                    {{--}).done(function (data) {--}}
+            $('body').on('click','.completed',function(){
+                var request_id = parseInt($(this).parents('tr').attr('id'));
+                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Complete Packaging Material!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.packaging.requests.completed') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': request_id,
+                                'shipment_id': shipment_id_data,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status === 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw();
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                    }
+                });
 
-                    {{--if(data.status === 1){--}}
-                    {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                    {{--setTimeout(function(){--}}
-                    {{--window.location.reload();--}}
-                    {{--},2000);--}}
-                    {{--}else{--}}
-                    {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-
-                    {{--}--}}
-                    {{--});--}}
-                    {{--}--}}
-                {{--});--}}
-
-            {{--});--}}
+            });
             //replenish
             $('body').on('click','.replenished',function(){
                 var request_id = parseInt($(this).parents('tr').attr('id'));
+                var shipment_id_data = table.row($(this).parents('tr')).data().shipment_id;
                 swal({
                     title: 'Are You Sure?',
                     text: 'Select Yes to Replenish Packaging Material!',
@@ -583,6 +633,7 @@
                             method: 'POST',
                             data: {
                                 'id': request_id,
+                                'shipment_id': shipment_id_data,
                                 '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
