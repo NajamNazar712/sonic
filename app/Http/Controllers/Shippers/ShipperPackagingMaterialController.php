@@ -14,6 +14,12 @@ use App\Http\Models\PackagingPaymentMode;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\Warehouse\Warehouse;
+use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -38,7 +44,7 @@ class ShipperPackagingMaterialController extends Controller
 
         return view('client.packaging.flyers.index')->with(['address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode, 'status' => $status, 'packaging_types' => $packaging_type]);
     }
-    public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id) {
+    public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id, $status) {
 
         $user_shipping_info = new UserShippingInfo();
 
@@ -48,6 +54,7 @@ class ShipperPackagingMaterialController extends Controller
         $user_shipping_info->phone = $phone_number;
         $user_shipping_info->email = $email_address;
         $user_shipping_info->city_id = $city_id;
+        $user_shipping_info->status = $status;
 
         $user_shipping_info->save();
 
@@ -124,7 +131,6 @@ class ShipperPackagingMaterialController extends Controller
         }
     }
 
-
     public function packaging_request_submit(Request $request){
 
         $packaging_type_ids = explode(",",$request->packaging_type_ids);
@@ -135,7 +141,7 @@ class ShipperPackagingMaterialController extends Controller
 
         foreach ($packaging_type_ids as $index => $packaging_type_id){
             $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_ids[$index]])->latest()->first();
-            if($charges->exists()){
+            if($charges != null){
                     $total_charges += $packaging_quantities[$index] * $charges->charges;
             }
         }
@@ -160,37 +166,80 @@ class ShipperPackagingMaterialController extends Controller
             }
             $total_charges = $discount_packaging;
         }
-        if($request->mode_of_payment == 1){
-            $user_id = session('user_id');
+
+        if ($request->input('address_select') == 0) {
+            $city_id = $request->new_pickup_city;
+            $city_hub = City::where('id', $city_id)->first();
+            $hub_id = $city_hub->hub_id;
+        }
+        else{
+            $address_id = $request->input('address_select');
+            $user_address = UserShippingInfo::find($address_id);
+            $city_hub = City::where('id', $user_address->city_id)->first();
+            $hub_id = $city_hub->hub_id;
+        }
+
+        $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id);
+
+        if (!$fulfilment_hub->exists()) {
+            return redirect()->back()->with('error', 'Warehouse does\'nt exists for requested hub!');
+        } else {
+            $fulfilment_hub = $fulfilment_hub->first();
+        }
+
+        $warehouse_id = $fulfilment_hub->warehouse_id;
+
+        $warehouse = Warehouse::where('id', $warehouse_id)->first();
+
+        $warehouse_hub_id = $warehouse->hub_id;
+        $hub = City::where('id', $warehouse_hub_id)->first();
+
+        $user_id = session('user_id');
+
+        $pickup_address_office = 'Trax Office ' . $hub->name;
+        $pickup_address_email = 'Info@Trax.pk';
+        $pickup_address_poc = 'Trax Logistics';
+        $pickup_address_phone = '0213-877-22-22';
+
+        $pickup_address_id = $this->add_pickup_address($user_id, $pickup_address_office, $pickup_address_poc, $pickup_address_phone, $pickup_address_email, $warehouse_hub_id, 0);
+        $trax_address = UserShippingInfo::find($pickup_address_id);
+
+        $now = Carbon::today();
+
+        $details = '';
+
+        $details = substr($details, 0, -2);
+
+        $shipper_details = User::where('id', $user_id)->select('name', 'poc', 'phone', 'email')->first();
+        $shipment_consignee_name = "Packaging Material to $shipper_details->name";
+
+        if($request->mode_of_payment == 1) {
             if ($request->input('address_select') == 0) {
                 $result = PackagingMaterialRequest::create([
-                    'user_id'=>$user_id,
-                    'city_id'=>$request->new_pickup_city,
-                    'address'=>$request->new_pickup_address,
-                    'poc'=>$request->new_pickup_person_of_contact,
-                    'phone'=>$request->new_pickup_phone_number,
-                    'amount'=>$total_charges,
-                    'status_id'=>1,
-                    'packaging_payment_mode_id'=>$request->mode_of_payment
+                    'user_id' => $user_id,
+                    'city_id' => $request->new_pickup_city,
+                    'address' => $request->new_pickup_address,
+                    'poc' => $request->new_pickup_person_of_contact,
+                    'phone' => $request->new_pickup_phone_number,
+                    'amount' => $total_charges,
+                    'status_id' => 1,
+                    'packaging_payment_mode_id' => $request->mode_of_payment
                 ]);
-            }
-            else {
-                $address_id = $request->input('address_select');
-                $user_address = UserShippingInfo::find($address_id);
+            } else {
                 $result = PackagingMaterialRequest::create([
-                    'user_id'=>$user_id,
-                    'city_id'=>$user_address->city_id,
-                    'address'=>$user_address->pickup_address,
-                    'poc'=>$user_address->poc,
-                    'phone'=>$user_address->phone,
-                    'amount'=>$total_charges,
-                    'status_id'=>1,
-                    'packaging_payment_mode_id'=>$request->mode_of_payment
+                    'user_id' => $user_id,
+                    'city_id' => $user_address->city_id,
+                    'address' => $user_address->pickup_address,
+                    'poc' => $user_address->poc,
+                    'phone' => $user_address->phone,
+                    'amount' => $total_charges,
+                    'status_id' => 1,
+                    'packaging_payment_mode_id' => $request->mode_of_payment
 
                 ]);
             }
-            if($result){
-                foreach ($packaging_type_ids as $index => $packaging_type_id){
+            if ($result) {
+                foreach ($packaging_type_ids as $index => $packaging_type_id) {
                     PackagingMaterialRequestDetail::create([
                         'packaging_material_request_id' => $result->id,
                         'type_id' => $packaging_type_id,
@@ -198,11 +247,37 @@ class ShipperPackagingMaterialController extends Controller
                         'quantity' => $packaging_quantities[$index],
                     ]);
                 }
-                return redirect()->back()->with('success','Request submitted!');
-            }else{
-                return redirect()->back()->with('error','Request not submitted!');
+
+                if ($request->input('address_select') == 0) {
+                    $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request->new_pickup_city, $shipment_consignee_name, $request->new_pickup_address, $request->new_pickup_phone_number, null, null, null, 0, $now, null, 1, 1, null, $total_charges, 1, 1, 1);
+
+                    $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $request->new_pickup_city);
+                }
+                else{
+                    $shipment = $this->book($user_id, 1, $trax_address->id, 1, $user_address->city_id, $shipment_consignee_name, $user_address->pickup_address, $user_address->phone, null, null, null, 0, $now, null, 1, 1, null, $total_charges, 1, 1, 1);
+
+                    $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $user_address->city_id);
+                }
+
+
+
+                $this->add_item($shipment->id, 24, $details, 1, null, 0, 0);
+
+                PackagingMaterialRequest::where('id', $result->id)->update([
+                    'tracking_number' => $new_tracking_number
+                ]);
+
+
+                ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, $user_id, NULL);
+
+                ShipmentChargesController::packaging_material($shipment->id, $request->mode_of_payment, $total_charges);
+
+                return redirect()->back()->with('success', 'Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
+            } else {
+                return redirect()->back()->with('error', 'Request not submitted!');
             }
-        }else{
+        }
+        else{
             if(PendingPayment::where('user_id', session('user_id'))->exists()){
                 $balance = PendingPayment::where('user_id', session('user_id'))->first()->pending_payment_shipments->sum('payable');
 
@@ -211,7 +286,6 @@ class ShipperPackagingMaterialController extends Controller
             }
 
             if($total_charges <= $balance){
-                $user_id = session('user_id');
                 if ($request->input('address_select') == 0) {
                     $result = PackagingMaterialRequest::create([
                         'user_id'=>$user_id,
@@ -225,8 +299,6 @@ class ShipperPackagingMaterialController extends Controller
                     ]);
                 }
                 else {
-                    $address_id = $request->input('address_select');
-                    $user_address = UserShippingInfo::find($address_id);
                     $result = PackagingMaterialRequest::create([
                         'user_id'=>$user_id,
                         'city_id'=>$user_address->city_id,
@@ -247,7 +319,30 @@ class ShipperPackagingMaterialController extends Controller
                             'quantity' => $packaging_quantities[$index],
                         ]);
                     }
-                    return redirect()->back()->with('success','Request submitted!');
+
+                    if ($request->input('address_select') == 0) {
+                        $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request->new_pickup_city, $shipment_consignee_name, $request->new_pickup_address, $request->new_pickup_phone_number, null, null, null, 0, $now, null, 1, 1, null, $total_charges, 1, 1, 1);
+
+                        $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $request->new_pickup_city);
+                    }
+                    else{
+                        $shipment = $this->book($user_id, 1, $trax_address->id, 1, $user_address->city_id, $shipment_consignee_name, $user_address->pickup_address, $user_address->phone, null, null, null, 0, $now, null, 1, 1, null, 0, 1, 1, 1);
+
+                        $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $user_address->city_id);
+                    }
+
+                    $this->add_item($shipment->id,24,$details,1,null,0,0);
+
+                    PackagingMaterialRequest::where('id', $result->id)->update([
+                        'tracking_number' => $new_tracking_number
+                    ]);
+
+
+                    ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, $user_id, NULL);
+
+                    ShipmentChargesController::packaging_material($shipment->id, $request->mode_of_payment, $total_charges);
+
+                    return redirect()->back()->with('success','Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
                 }else{
                     return redirect()->back()->with('error','Request not submitted!');
                 }
@@ -257,5 +352,66 @@ class ShipperPackagingMaterialController extends Controller
             }
         }
 
+    }
+
+    private function book($user_id,$service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id,$shipper_status_id,$consignee_status_id) {
+        $shipment = new Shipment();
+
+        $shipment->user_id = $user_id;
+        $shipment->booking_type_id = $service_type_id;
+        $shipment->pickup_address_id = $pickup_address_id;
+        $shipment->information_display = $information_display;
+
+        $shipment->consignee_city_id = $consignee_city_id;
+        $shipment->consignee_name = $consignee_name;
+        $shipment->consignee_address = $consignee_address;
+        $shipment->consignee_phone_number_1 = $consignee_phone_number_1;
+        $shipment->consignee_phone_number_2 = $consignee_phone_number_2;
+        $shipment->consignee_email = $consignee_email_address;
+
+        $shipment->order_id = $order_id;
+        $shipment->package_type = $package_type;
+        $shipment->pickup_date = $pickup_date;
+        $shipment->special_instructions = $special_instructions;
+
+
+        $shipment->estimated_weight = $estimated_weight;
+        $shipment->shipping_mode_id = $shipping_mode_id;
+        $shipment->same_day_timing_id = $same_day_timing_id;
+
+        $shipment->amount = $amount;
+        $shipment->payment_mode_id = $payment_mode_id;
+        $shipment->shipper_status_id = $shipper_status_id;
+        $shipment->consignee_status_id = $consignee_status_id;
+
+        $shipment->packaging_material_request = 1;
+
+        $shipment->save();
+
+        return $shipment;
+    }
+    private function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
+        $shipment = Shipment::find($shipment_id);
+
+        $tracking_number = $pickup_city_id . $consignee_city_id . str_pad($shipment_id, 6, '0', STR_PAD_LEFT);
+
+        $shipment->tracking_number = $tracking_number;
+
+        $shipment->save();
+
+        return $tracking_number;
+    }
+    private function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {
+        $shipment_item = new ShipmentItem();
+
+        $shipment_item->shipment_id = $shipment_id;
+        $shipment_item->product_type_id = $product_type_id;
+        $shipment_item->description = $item_description;
+        $shipment_item->quantity = $item_quantity;
+        $shipment_item->price = $price;
+        $shipment_item->insurance = $insurance;
+        $shipment_item->type = $type;
+
+        $shipment_item->save();
     }
 }

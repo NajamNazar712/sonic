@@ -280,9 +280,10 @@ class AdminPackagingMaterialController extends Controller
             ->join('users as u','u.id','=','packaging_material_requests.user_id')
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
             ->leftjoin('shipments as s', 's.tracking_number', '=', 'packaging_material_requests.tracking_number')
-            ->leftjoin('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'packaging_material_requests.status')
+            ->leftjoin('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+            ->leftjoin('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'packaging_material_requests.status_id')
             ->leftjoin('packaging_material_request_details as pmrd', 'pmrd.packaging_material_request_id', '=', 'packaging_material_requests.id')
-            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.booking_type_id as booking_type_id'])
+            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.consignee_city_id as dc', 'usi.city_id as oc'])
         ->groupBy('packaging_material_requests.id');
 
         if(session('department_id') == 7){
@@ -327,12 +328,8 @@ class AdminPackagingMaterialController extends Controller
                     if ($packaging->status_id >= 2) {
                         $dropdown .= '<button type="button" class="dropdown-item grn"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Print GRN</div></button>';
                     }
-                    if ($packaging->status_id == 2) {
+                    if ($packaging->status_id == 2 && ($packaging->shipper_status_id == 4 || ($packaging->oc == $packaging->dc))) {
                         $dropdown .= '<button type="button" class="dropdown-item dispatch"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Dispatch</div></button>';
-                    }
-                    if ($packaging->status_id == 3) {
-                        $dropdown .= '<button type="button" class="dropdown-item completed"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Completed</div></button>';
-                        $dropdown .= '<button type="button" class="dropdown-item replenished"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Replenished</div></button>';
                     }
 
                     $dropdown .= '
@@ -358,13 +355,22 @@ class AdminPackagingMaterialController extends Controller
 
     public function request_confirm(Request $request){
         $request_id = $request->id;
+        $shipment_id = $request->shipment_id;
 
         $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
 
         if($request_details->exists()){
-            $request_details->status = 2;
+            $request_details->status_id = 2;
             $request_details->save();
 
+            $shipment = Shipment::find($shipment_id);
+
+            $shipment->shipper_status_id = 2;
+            $shipment->consignee_status_id = 2;
+
+            $shipment->save();
+
+            ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $request_id);
 
             $packaging_request_history = new PackagingMaterialRequestHistory();
             $packaging_request_history->packaging_material_request_id = $request_id;
@@ -480,7 +486,7 @@ class AdminPackagingMaterialController extends Controller
                     $stock->save();
 
             }
-            $packaging_material_request->status = 3;
+            $packaging_material_request->status_id = 3;
             $packaging_material_request->save();
 
 
