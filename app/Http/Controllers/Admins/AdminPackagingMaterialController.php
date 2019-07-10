@@ -406,8 +406,15 @@ class AdminPackagingMaterialController extends Controller
             $pickup_address_poc = 'Trax Logistics';
             $pickup_address_phone = '0213-877-22-22';
 
-            $pickup_address_id = $this->add_pickup_address($user_id, $pickup_address_office, $pickup_address_poc, $pickup_address_phone, $pickup_address_email, $warehouse_hub_id, 0);
-            $trax_address = UserShippingInfo::find($pickup_address_id);
+            $user_shipping_info = UserShippingInfo::where(['user_id' => $user_id, 'city_id' => $warehouse_hub_id]);
+
+            if($user_shipping_info->exists()){
+                $trax_address = $user_shipping_info->latest()->first();
+            }
+            else{
+                $pickup_address_id = $this->add_pickup_address($user_id, $pickup_address_office, $pickup_address_poc, $pickup_address_phone, $pickup_address_email, $warehouse_hub_id, 0);
+                $trax_address = UserShippingInfo::find($pickup_address_id);
+            }
 
             $now = Carbon::today();
 
