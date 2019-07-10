@@ -195,11 +195,11 @@ class ShipperPackagingMaterialController extends Controller
             $discount_packaging = $discount->packaging;
             if (strpos($discount_packaging, '%') !== FALSE) {
                 $discount_packaging = (floatval(str_replace('%', '', $discount_packaging)) / 100) * $total_charges;
+                $total_charges = $discount_packaging;
             }
             else {
-                $discount_packaging += floatval($discount_packaging);
+                $total_charges = $total_charges - floatval($discount_packaging);
             }
-            $total_charges = $discount_packaging;
         }
 
         if ($request->input('address_select') != 0) {
