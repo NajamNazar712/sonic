@@ -398,6 +398,7 @@ class ShipperFinanceController extends Controller
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
                               <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
                               <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
+                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
                             </tr>
             ';
@@ -454,6 +455,7 @@ class ShipperFinanceController extends Controller
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_weight_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_cash_handling_charges, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_nsa_osa_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_adjustments, 2) . '</strong></td>
                             </tr>
       ';
@@ -484,6 +486,7 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
                               <td class="color primary"><strong>Weight Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>OSA Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Adjustments (PKR)</strong></td>
                             </tr>
       ';
@@ -579,7 +582,7 @@ class ShipperFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'Adjustments (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)'];
 
         $account_type_id = $done_payment->shipper->account_type_id;
 
@@ -629,6 +632,7 @@ class ShipperFinanceController extends Controller
             $row[] = $done_payment_shipment->amount;
             $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->weight_charges : 0);
             $row[] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
+            $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
             $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
 
             $details[] = $row;
