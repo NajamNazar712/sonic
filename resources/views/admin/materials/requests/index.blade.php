@@ -355,7 +355,7 @@
                 }).done(function (data) {
                     if(data.status === 1){
                         var html = '';
-                        html += '<table class="table table-sm table-bordered">';
+                        html += '<table class="table table-sm datatable text-center">';
                         html += '<thead><tr><th>S No.</th><th><strong>Type</strong></th><th><strong>Size</strong></th><th><strong>Quantity</strong></th></tr></thead>';
                         html += '<tbody>';
                         $.each(data.types, function(index, value) {
