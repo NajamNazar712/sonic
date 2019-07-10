@@ -401,7 +401,7 @@ class AdminPackagingMaterialController extends Controller
 
             $user_id = $request_details->user_id;
 
-            $pickup_address_office = 'Trax Office ' . $hub->name;
+            $pickup_address_office = 'Trax Office';
             $pickup_address_email = 'Info@Trax.pk';
             $pickup_address_poc = 'Trax Logistics';
             $pickup_address_phone = '0213-877-22-22';
