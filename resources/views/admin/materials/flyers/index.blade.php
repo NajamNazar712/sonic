@@ -787,54 +787,7 @@
                         {name: 'quantity', class: 'align-middle quantity', orderable: false},
                         {name: 'action', class: 'align-middle action', orderable: false}
                     ],
-                    rowCallback: function(row, data, index) {
-
-                    },
-                    initComplete: function() {
-                        var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                        var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                        var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                        var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                        var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                        this.api().columns().every(function(column_id) {
-                            var column = this;
-                            var header = column.header();
-
-                            if ($(header).is('.serial_number') || $(header).is('.action')) {
-                                $(td).appendTo($(search));
-                            }else if($(header).is('.status')){
-                                $(drop_select).appendTo($(search))
-                                    .on( 'change', function () {
-                                        column.search($(this).val(), false, false, true).draw();
-                                    } ).wrap(td);
-                            }
-                            else {
-                                var current = $(input).appendTo($(search)).on('change', function() {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td).after(icon);
-
-                                if (column.search()) {
-                                    current.val(column.search());
-                                }
-                            }
-                        });
-
-                        var data = $.map({!! $packaging_material_status !!}, function (obj) {
-                            obj.id = obj.id;
-                            obj.text = obj.name;
-                            return obj;
-                        });
-
-                        $("#status_select").prepend('<option value="" selected></option>').select2({
-                            data:data,
-                            placeholder: "Select Status",
-                            width:'100%',
-                            containerCssClass: 'select-xs',
-                            dropdownCssClass: 'form-control-sm p-0'
-                        });
-
-                    }
+                    
                 });
             }
 

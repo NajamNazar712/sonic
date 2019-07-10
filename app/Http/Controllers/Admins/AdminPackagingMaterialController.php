@@ -1561,6 +1561,37 @@ class AdminPackagingMaterialController extends Controller
         if($request_id){
             $stock_request = WarehouseStockRequest::find($request_id);
             if($stock_request){
+                $request_details = WarehouseStockRequestDetail::where('request_id', $request_id)->get();
+//                $warehouse_sender = WarehouseStock::where('warehouse_id', $stock_request->send_by)->get();
+                foreach ($request_details as $request_detail) {
+                    if(!WarehouseStock::where('warehouse_id', $stock_request->send_by)->where('type_id', $request_detail->type_id)->where('type_size_id', $request_detail->size_id)->where('stock', '>' , $request_detail->quantity)->exists()){
+                        return response()->json(['status' => 1, 'error' => 'Could not dispatch request, please check stock!']);
+                    }
+                }
+                foreach ($request_details as $request_detail) {
+                    $sender_stock = WarehouseStock::where('warehouse_id', $stock_request->send_by)->where('type_id', $request_detail->type_id)->where('type_size_id', $request_detail->size_id)->first();
+
+                    $sender_stock->stock -= $request_detail->quantity;
+                    $sender_stock->save();
+
+                    if($receiver_stock = WarehouseStock::where('warehouse_id', $stock_request->requested_by)->where('type_id', $request_detail->type_id)->where('type_size_id', $request_detail->size_id)->exists()){
+                        $receiver_stock = $receiver_stock->first();
+                        $receiver_stock->stock += $request_detail->quantity;
+                        $request_detail->save();
+                    }else{
+
+                        $receiver_stock = new WarehouseStock();
+                        $receiver_stock->warehouse_id = $stock_request->requested_by;
+                        $receiver_stock->type_id = $request_detail->type_id;
+                        $receiver_stock->type_size_id = $request_detail->size_id;
+                        $receiver_stock->stock = $request_detail->quantity;
+                        $receiver_stock->save();
+
+                    }
+
+
+                }
+
                 $stock_request->status_id = 3;
                 $stock_request->save();
                 return response()->json(['status' => 0, 'success' => 'Request Successfully dispatched!']);
