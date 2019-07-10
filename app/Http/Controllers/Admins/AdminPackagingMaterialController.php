@@ -387,7 +387,7 @@ class AdminPackagingMaterialController extends Controller
             $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id);
 
             if (!$fulfilment_hub->exists()) {
-                return response()->json(['status' => 1, 'success'=>'Warehouse does\'nt exists for requested hub!']);
+                return response()->json(['status' => 0, 'error'=>'Warehouse does\'nt exists for requested hub!']);
             } else {
                 $fulfilment_hub = $fulfilment_hub->first();
             }
