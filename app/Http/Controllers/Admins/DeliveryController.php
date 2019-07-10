@@ -246,7 +246,7 @@ class DeliveryController extends Controller
                         }
                     }
                 }
-                
+
                 $admin_hub = City::find($shipment->consignee_city->hub_id)->id;
                 if(session('role_id') == 1 || in_array($admin_hub, session('hubs'))){
                     $old_delivery_note_id = DeliveryNoteShipment::join('delivery_notes','delivery_notes.id', '=' ,'delivery_note_shipments.delivery_note_id')->where('delivery_note_shipments.shipment_id', $shipment->id)->where('delivery_notes.status', '!=', 4)->orderBy('delivery_note_id', 'desc');
