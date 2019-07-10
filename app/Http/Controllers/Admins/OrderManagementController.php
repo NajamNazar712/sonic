@@ -271,6 +271,8 @@ class OrderManagementController extends Controller
                                 $shipment->consignee_status_id = 17;
 
                                 $shipment->save();
+                                
+                                ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
 
                                 ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
 
