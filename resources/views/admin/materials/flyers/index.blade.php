@@ -24,15 +24,12 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Invoice No./Cargo ID</th>
-                        <th class="border-primary border-darken-1">Entry Type</th>
-                        <th class="border-primary border-darken-1">Entered Date/Time</th>
-                        <th class="border-primary border-darken-1">Entered By</th>
-                        <th class="border-primary border-darken-1">Small Flyers</th>
-                        <th class="border-primary border-darken-1">Medium Flyers</th>
-                        <th class="border-primary border-darken-1">Large Flyers</th>
-                        <th class="border-primary border-darken-1">Boxes</th>
-                        <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Request Date/Time</th>
+                        <th class="border-primary border-darken-1">Requested By</th>
+                        <th class="border-primary border-darken-1">Warehouse</th>
+                        <th class="border-primary border-darken-1">Tracking Number</th>
+                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
@@ -143,7 +140,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="request_stock_form" action="{{route('admin.packaging.request.submit')}}" method="post">
+                <form id="request_stock_form" action="{{route('admin.packaging.requests.submit')}}" method="post">
                     @method('POST')
                     @csrf
 
@@ -153,20 +150,36 @@
                             <div class="col-12">
                                 <div class="form-body">
 
-                                    <input type="hidden" id="packaging_type_ids" name="packaging_type_ids">
-                                    <input type="hidden" id="packaging_size_ids" name="packaging_size_ids">
-                                    <input type="hidden" id="packaging_quantities" name="packaging_quantities">
+                                    <input type="hidden" id="request_type_ids" name="request_type_ids">
+                                    <input type="hidden" id="request_size_ids" name="request_size_ids">
+                                    <input type="hidden" id="request_quantities" name="request_quantities">
                                     <div class="row justify-content-center">
                                         <div class="col-4 form-group">
-                                            <input type="text" name="invoice_number" id="add_stock_invoice" class="form-control invoice" placeholder="Invoice Number *" data-rule-required="true" data-msg-required="This field is required">
+                                            <select name="request_from" class="select2" id="request_from">
+                                                @foreach($warehouses as $warehouse)
+                                                    <option value="{{ $warehouse->id }}">{{ $warehouse->master_type == 1? 'Master Warehouse':$warehouse->city->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-4 form-group">
+                                            <select name="request_for" class="select2" id="request_for" data-rule-required="true" data-msg-required="This field is required">
+                                                @foreach($warehouses as $warehouse)
+                                                    @if($warehouse->master_type != 1)
+                                                    <option value="{{ $warehouse->id }}">{{$warehouse->city->name }}</option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
+
+                                <div id="request_div" class="d-none">
+
 
                                     <div class="row">
                                         <div class="col-md-6 col-lg-4">
                                             <div class="form-group">
                                                 {{--<label for="sm_flyer">Packaging Material Type</label>--}}
-                                                <select name="packaging_material_type" class="select2" id="packaging_material_type">
+                                                <select name="request_material_type" class="select2" id="request_material_type">
                                                     @foreach($packaging_types as $packaging_type)
                                                         <option value="{{ $packaging_type->id }}">{{ $packaging_type->type }}</option>
                                                     @endforeach
@@ -175,23 +188,23 @@
                                         </div>
                                         <div class="col-md-6 col-lg-4">
                                             <div class="form-group">
-                                                <select name="packaging_material_size" class="select2" id="packaging_material_size"></select>
+                                                <select name="request_material_size" class="select2" id="request_material_size"></select>
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-lg-2">
                                             <div class="form-group">
-                                                <input name="packaging_material_quantity" class="form-control numeric quantity" id="packaging_material_quantity" placeholder="Quantity here"/>
+                                                <input name="request_material_quantity" class="form-control numeric quantity" id="request_material_quantity" placeholder="Quantity here"/>
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-lg-2">
                                             <div class="form-group">
-                                                <button class="btn btn-primary btn-block" type="button" id="add_packaging_material_btn"> Add</button>
+                                                <button class="btn btn-primary btn-block" type="button" id="request_packaging_material_btn"> Add</button>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="row">
-                                        <table class="table table-bordered packaging_type_datatable" id="packaging_type_datatable" style="z-index: 3;">
+                                        <table class="table table-bordered request_type_datatable" id="request_type_datatable" style="z-index: 3;">
                                             <thead>
                                             <tr role="row" class="bg-primary white">
 
@@ -208,10 +221,10 @@
 
                                     <div class="row justify-content-center">
                                         <div class="col-md-12 col-lg-6">
-                                            <button id="RequestMaterialBtn" type="submit" class="btn btn-primary btn-block" disabled>Request Material</button>
+                                            <button id="RequestPackagingMaterialBtn" type="submit" class="btn btn-primary btn-block" disabled> Submit</button>
                                         </div>
                                     </div>
-
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -279,6 +292,23 @@
     </div>
     {{--Send Stock Modal--}}
 
+    <div class="modal fade text-left" id="DetailsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DetailsModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Details</h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -344,6 +374,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var already_selected_size = [];
+            var ptable;
             $('#packaging_material_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Packaging Material Type',
@@ -386,10 +417,58 @@
                 }
             });
 
+            $('#request_material_type').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Packaging Material Type',
+                dropdownParent: $("#RequestStockModal")
+            }).bind('select2:select', function () {
+                var type_id = $(this).val();
+                if(type_id){
+                    $.ajax({
+                        url: '{!! route('admin.packaging.requests.sizes') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': type_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            $('#request_material_size').empty();
+
+                            $.each(data.sizes,function (key,value) {
+                                var type_size = parseInt(type_id+value.id);
+
+                                var index = $.inArray(type_size, already_selected_size);
+
+                                if(index === -1){
+                                    var newOption = new Option(value.size, value.id, false, false);
+                                    $('#request_material_size').append(newOption).trigger('change');
+                                    $('#request_material_size').val('').trigger('change');
+                                }
+
+                            });
+
+                        }else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+
+                }
+            });
+
             $('#packaging_material_size').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Packaging Material Size',
                 dropdownParent: $("#AddStockModal")
+            });
+
+            $('#request_material_size').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Packaging Material Size',
+                dropdownParent: $("#RequestStockModal")
             });
 
             $('.numeric').inputmask({
@@ -491,6 +570,15 @@
 
                             }
                         },
+                    {
+                            text: '<i class="la la-send"></i> Request Stock',
+                            className: 'btn btn-primary request_stock',
+                            enabled:true,
+                            action: function(e, dt, node, config){
+                                $('#RequestStockModal').modal('show');
+
+                            }
+                        },
                     @endif
                         {
                             extend: 'excel',
@@ -517,19 +605,16 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.packaging.list') }}',
-                rowId: 'psh_id',
-                order: [[3, 'desc']],
+                rowId: 'stock_request_id',
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'reference_number', name: 'packaging_stock_histories.reference_number', class: 'align-middle reference_number'},
-                    {data: 'entry_type', name: 'packaging_stock_histories.entry_type', class: 'align-middle entry_type'},
-                    {data: 'created_at', name: 'packaging_stock_histories.created_at', class: 'align-middle created_at'},
-                    {data: 'admin', name: 'ad.name', class: 'align-middle admin'},
-                    {data: 'small_flyers', name: 'packaging_stock_histories.small_flyers', class: 'align-middle small_flyers'},
-                    {data: 'medium_flyers', name: 'packaging_stock_histories.medium_flyers', class: 'align-middle medium_flyers'},
-                    {data: 'large_flyers', name: 'packaging_stock_histories.large_flyers', class: 'align-middle large_flyers'},
-                    {data: 'boxes', name: 'packaging_stock_histories.boxes', class: 'align-middle boxes'},
-                    {data: 'hub', name: 'cities.name', class: 'align-middle hub'}
+                    {data: 'created_at', name: 'warehouse_stock_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'requested_by', name: 'rb.name', class: 'align-middle requested_by'},
+                    {data: 'send_by', name: 'sb.name', class: 'align-middle send_by'},
+                    {data: 'tracking_number', name: 'warehouse_stock_requests.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'action', name: 'action', class: 'align-middle action'}
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -542,19 +627,17 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var entry_select = '<select name="entry_select" id="entry_select" class="select2 form-control">' +
-                        '<option value="0">Inbound</option>' +
-                        '<option value="1">Outbound</option>' +
-                        '</select>';
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.entry_type')){
-                            $(entry_select).appendTo($(search))
+                        }else if($(header).is('.status')){
+                            $(drop_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -569,8 +652,14 @@
                             }
                         }
                     });
-                    $("#entry_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Type",
+                    var data = $.map({!! $packaging_material_status !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+                        return obj;
+                    });
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
@@ -579,6 +668,21 @@
                 }
             });
 
+
+
+
+            $('#request_for').prepend('<option value="" selected></option>').select2({
+                placeholder: "Requesting Warehouse",
+                width:'100%',
+            }).bind('select2:select', function () {
+                if($('#request_from').val() == $('#request_for').val()){
+                    toastr.error('Request Warehouse can not be the same', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                    $(this).val(null).trigger('change');
+                }
+            });
             // $('body').on('change','#add_stock_form input',function() {
             //     $(this).val($(this).val().trim());
             // });
@@ -618,35 +722,7 @@
                 $('#city_select').empty().trigger('change');
                 $('#city_select').val('').trigger('change');
             });
-            // $( "#add_stock_form" ).validate({
-            //     rules: {
-            //         add_stock_sm_flyers: {
-            //             require_from_group: [1, ".flyer"]
-            //         },
-            //         add_stock_md_flyers: {
-            //             require_from_group: [1, ".flyer"]
-            //         },
-            //         add_stock_lg_flyers: {
-            //             require_from_group: [1, ".flyer"]
-            //         },
-            //         add_stock_boxes: {
-            //             require_from_group: [1, ".flyer"]
-            //         }
-            //     },
-            //     errorClass:"danger",
-            //     errorPlacement: function(error, element) {
-            //         error.addClass('w-100').appendTo(element.parents('.form-group'));
-            //     },
-            //     submitHandler: function(form) {
-            //
-            //         $(form).find('button[type=submit]').attr('disabled', 'disabled');
-            //
-            //         form.submit();
-            //
-            //     }
-            //
-            //
-            // });
+
 
             $( "#send_stock_form" ).validate({
                 rules: {
@@ -678,22 +754,29 @@
 
             });
 
-            var ptable;
+
             $("#AddStockModal").on('shown.bs.modal', function(){
-                initDatatable();
+                initDatatable('packaging_type_datatable');
             });
             $("#AddStockModal").on('hidden.bs.modal', function(){
                 destroyDatatable();
                 $('#RequestMaterialBtn').attr('disabled', false);
             });
 
+            $("#RequestStockModal").on('shown.bs.modal', function(){
+                initDatatable('request_type_datatable');
+            });
+            $("#RequestStockModal").on('hidden.bs.modal', function(){
+                destroyDatatable();
+                $('#RequestMaterialBtn').attr('disabled', false);
+            });
             function destroyDatatable() {
                 ptable.clear();
                 ptable.destroy();
             }
 
-            function initDatatable() {
-                ptable = $('#packaging_type_datatable').DataTable({
+            function initDatatable(name) {
+                ptable = $('#'+name).DataTable({
                     dom: 'ltipr',
                     paging:false,
                     ordering:[0, 'desc'],
@@ -708,6 +791,48 @@
 
                     },
                     initComplete: function() {
+                        var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                        var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                        var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                        var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                        var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                        this.api().columns().every(function(column_id) {
+                            var column = this;
+                            var header = column.header();
+
+                            if ($(header).is('.serial_number') || $(header).is('.action')) {
+                                $(td).appendTo($(search));
+                            }else if($(header).is('.status')){
+                                $(drop_select).appendTo($(search))
+                                    .on( 'change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    } ).wrap(td);
+                            }
+                            else {
+                                var current = $(input).appendTo($(search)).on('change', function() {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td).after(icon);
+
+                                if (column.search()) {
+                                    current.val(column.search());
+                                }
+                            }
+                        });
+
+                        var data = $.map({!! $packaging_material_status !!}, function (obj) {
+                            obj.id = obj.id;
+                            obj.text = obj.name;
+                            return obj;
+                        });
+
+                        $("#status_select").prepend('<option value="" selected></option>').select2({
+                            data:data,
+                            placeholder: "Select Status",
+                            width:'100%',
+                            containerCssClass: 'select-xs',
+                            dropdownCssClass: 'form-control-sm p-0'
+                        });
 
                     }
                 });
@@ -794,7 +919,6 @@
                 }
             });
 
-
             $('#add_stock_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -832,6 +956,324 @@
 
                 }
             });
+
+            var request_types_array = [];
+            var request_size_array = [];
+            var request_quantity_array = [];
+            var request_index_array = [];
+            var rid = 100;
+            $('#request_packaging_material_btn').on('click', function () {
+                var type = $('#request_material_type').val();
+                var type_name = $('#request_material_type option:selected').text();
+                var size = $('#request_material_size').val();
+                var size_name = $('#request_material_size option:selected').text();
+                var quantity = $('#request_material_quantity').val();
+                var warehouse_id = $('#request_from').val();
+                var flag = false;
+
+                if(warehouse_id == ''){
+                    flag = true;
+                    var error = "<p id='request_hub_type_error' class='danger'>Select Requested Warehouse</p>";
+                    if($('#request_from').parent('div').find('p#request_hub_type_error').length == 0){
+                        $('#request_material_type').parent('div').append(error);
+                    }
+                }else{
+                    flag = false;
+                    $('#request_hub_type_error').remove();
+                }
+
+
+                if(type == ''){
+                    flag = true;
+                    var error = "<p id='request_type_error' class='danger'>Type is required</p>";
+                    if($('#request_material_type').parent('div').find('p#request_type_error').length == 0){
+                        $('#request_material_type').parent('div').append(error);
+                    }
+                }else{
+                    flag = false;
+                    $('#request_type_error').remove();
+                }
+
+                if(size == ''){
+                    flag = true;
+                    var error = "<p id='request_size_error' class='danger'>Size is required</p>";
+                    if($('#request_material_size').parent('div').find('p#request_size_error').length == 0){
+                        $('#request_material_size').parent('div').append(error);
+                    }
+                }else{
+                    $('#request_size_error').remove();
+                }
+
+                if(quantity == ''){
+                    flag = true;
+                    var error = "<p id='request_quantity_error' class='danger'>Quantity is required</p>";
+                    if($('#request_material_quantity').parent('div').find('p#request_quantity_error').length == 0){
+                        $('#request_material_quantity').parent('div').append(error);
+                    }
+                }else{
+                    $('#request_quantity_error').remove();
+                }
+
+
+                if(flag == false){
+                    $.ajax({
+                        url: '{!! route('admin.packaging.requests.check_quantity') !!}',
+                        method: 'POST',
+                        data: {
+                            'warehouse_id':warehouse_id,
+                            'type_id': type,
+                            'size_id': size,
+                            'quantity': quantity,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+
+                        if(data.status == 0){
+                            var rowNo = ptable.rows().count();
+
+                            var remove = '<a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="la la-close"></i></a>';
+                            ptable.row.add([rowNo+1,type_name,size_name,quantity, remove]).node().id = rid;
+                            ptable.draw(false);
+                            already_selected_size.push(parseInt(type+size));
+                            request_index_array.push(rid);
+                            rid++;
+                            request_types_array.push(type);
+                            request_size_array.push(size);
+                            request_quantity_array.push(quantity);
+                            $('#RequestPackagingMaterialBtn').attr('disabled', false);
+                            $('#request_material_type').val('').trigger('change');
+                            $('#request_material_size').empty();
+                            $('#request_material_quantity').val('');
+                        }else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+
+            });
+
+            $('#request_type_datatable').on('click', 'a.remove', function(){
+                var rowId = parseInt($(this).parents('tr').attr('id'));
+
+                var index = $.inArray(rowId, request_index_array);
+
+                if (index !== -1) {
+                    already_selected_size.splice(index, 1);
+                    request_index_array.splice(index, 1);
+                    request_types_array.splice(index, 1);
+                    request_size_array.splice(index, 1);
+                    request_quantity_array.splice(index, 1);
+                }
+                ptable.row( $(this).parents('tr') ).remove().draw();
+                if(ptable.rows().count() == 0){
+                    $('#RequestPackagingMaterialBtn').attr('disabled', true);
+                }
+            });
+
+            $('#request_stock_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    if(ptable.rows().count() > 0){
+                        $('#request_type_ids').val(request_types_array);
+                        $('#request_size_ids').val(request_size_array);
+                        $('#request_quantities').val(request_quantity_array);
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Stock is being requested!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                    }else{
+
+                        toastr.error("Please Select atleast one packaging type!", 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        return false;
+                    }
+
+                }
+            });
+
+            function resetRequestArrays() {
+                already_selected_size = [];
+                request_index_array = [];
+                request_types_array = [];
+                request_size_array = [];
+                request_quantity_array = [];
+                $('#RequestMaterialBtn').attr('disabled', true);
+            }
+
+            $('#request_from').prepend('<option value="" selected></option>').select2({
+                placeholder: "Request From",
+                width:'100%',
+            }).bind('select2:select', function () {
+                if($('#request_div').is(':hidden')){
+                    $('#request_div').removeClass('d-none');
+                }
+
+                destroyDatatable();
+                initDatatable('request_type_datatable');
+                resetRequestArrays();
+                if($('#request_from').val() == $('#request_for').val()){
+                    toastr.error('Request Warehouse can not be the same', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                    $(this).val(null).trigger('change');
+                }
+
+            });
+
+            $('body #datatable').on('click', 'button.cancel', function () {
+               var stock_request_id = $(this).parents('tr').attr('id');
+               if(stock_request_id){
+                   $.ajax({
+                       url: '{!! route('admin.packaging.stock_request.cancel') !!}',
+                       method: 'POST',
+                       data: {
+                           'stock_request_id':stock_request_id,
+                           '_token': '{{ csrf_token() }}'
+                       }
+                   }).done(function (data) {
+                        if(data.status){
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                   });
+               }
+            });
+
+            $('body #datatable').on('click', 'button.confirm', function () {
+                var stock_request_id = $(this).parents('tr').attr('id');
+                if(stock_request_id){
+                    $.ajax({
+                        url: '{!! route('admin.packaging.stock_request.confirm') !!}',
+                        method: 'POST',
+                        data: {
+                            'stock_request_id':stock_request_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            table.draw();
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('body').on('click', 'button.details', function () {
+                var id = $(this).parents('tr').attr('id');
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.packaging.stock_request.details') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            var html = '';
+
+                            html += '<table class="table table-sm datatable text-center">';
+                            html += '<thead>';
+                            html += '<tr role="row">';
+                            html += '<th><strong>Type</strong></th>';
+                            html += '<th><strong>Size</strong></th>';
+                            html += '<th><strong>Quantity</strong></th>';
+
+                            html += '</tr>';
+                            html += '</thead>';
+                            html += '<tbody>';
+
+                            $.each(data.details, function(index, value){
+                                html += '<tr>';
+                                html += '<td>' + value.packaging_type.type + '</td>';
+                                html += '<td>' + value.packaging_size.size + '</td>';
+                                html += '<td>' + value.quantity + '</td>';
+                                html += '</tr>';
+                            });
+
+
+                            html += '</tbody>';
+                            html += '</table>';
+
+                            $('#DetailsModal').modal('show');
+                            $('#DetailsModal .modal-body').html(html);
+                        }else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+
+                }
+            });
+
+            $('body #datatable').on('click', 'button.dispatch', function () {
+                var stock_request_id = $(this).parents('tr').attr('id');
+                if(stock_request_id){
+                    $.ajax({
+                        url: '{!! route('admin.packaging.stock_request.dispatch') !!}',
+                        method: 'POST',
+                        data: {
+                            'stock_request_id':stock_request_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            table.draw();
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+            });
+
 
         });
 

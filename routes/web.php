@@ -870,6 +870,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('requests')->name('requests.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@request_index')->name('index');
             Route::post('submit','Admins\AdminPackagingMaterialController@request_submit')->name('submit');
+            Route::post('check_quantity','Admins\AdminPackagingMaterialController@request_check_quantity')->name('check_quantity');
             Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
             Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
             Route::post('quantity_details','Admins\AdminPackagingMaterialController@quantity_details')->name('quantity_details');
@@ -897,6 +898,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit','Admins\AdminPackagingMaterialController@warehouse_edit')->name('edit');
             Route::post('master_add','Admins\AdminPackagingMaterialController@warehouse_master_add')->name('master_add');
             Route::post('warehouse_hubs','Admins\AdminPackagingMaterialController@warehouse_hubs')->name('warehouse_hubs');
+        });
+        Route::prefix('stock_request')->name('stock_request.')->group(function (){
+            Route::post('cancel','Admins\AdminPackagingMaterialController@stock_request_cancel')->name('cancel');
+            Route::post('confirm','Admins\AdminPackagingMaterialController@stock_request_confirm')->name('confirm');
+            Route::post('details','Admins\AdminPackagingMaterialController@stock_request_details')->name('details');
+            Route::post('dispatch','Admins\AdminPackagingMaterialController@stock_request_dispatch')->name('dispatch');
+
         });
         Route::prefix('inventory')->name('inventory.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@inventory_index')->name('index');

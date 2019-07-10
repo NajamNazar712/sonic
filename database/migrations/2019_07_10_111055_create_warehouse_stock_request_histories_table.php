@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateWarehouseStockRequestsTable extends Migration
+class CreateWarehouseStockRequestHistoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,11 @@ class CreateWarehouseStockRequestsTable extends Migration
      */
     public function up()
     {
-        Schema::create('warehouse_stock_requests', function (Blueprint $table) {
+        Schema::create('warehouse_stock_request_histories', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('requested_by')->nullable();
-            $table->integer('send_by');
-            $table->integer('tracking_number')->nullable();
-            $table->integer('created_by');
-            $table->integer('status_id');
+            $table->integer('warehouse_stock_request_id');
+            $table->integer('status');
+            $table->integer('updated_by');
             $table->timestamps();
         });
     }
@@ -31,6 +29,6 @@ class CreateWarehouseStockRequestsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('warehouse_stock_requests');
+        Schema::dropIfExists('warehouse_stock_request_histories');
     }
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\PackagingMaterialStockHead;
 use App\Http\Models\Admin\PackagingMaterialStockHub;
 use App\Http\Models\Admin\PackagingStockHistory;
@@ -23,6 +25,7 @@ use App\Http\Models\PackagingPaymentMode;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Warehouse\Warehouse;
@@ -32,6 +35,9 @@ use App\Http\Models\Warehouse\WarehouseHistory;
 use App\http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockLog;
 use App\Http\Models\WarehouseStockLogDetail;
+use App\Http\Models\WarehouseStockRequest;
+use App\Http\Models\WarehouseStockRequestDetail;
+use App\Http\Models\WarehouseStockRequestHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -49,37 +55,60 @@ class AdminPackagingMaterialController extends Controller
 
     public function packaging_index()
     {
+        $packaging_material_status = PackagingMaterialRequestStatus::all();
+        $warehouses = Warehouse::where('status', 1)->get();
         $packaging_type = PackagingMaterialTypes::with('sizes')->where('status', 1)->get();
 
         $packaging = PackagingMaterialStockHead::latest()->first();
 
-        return view('admin.materials.flyers.index')->with(['packaging' => $packaging, 'packaging_types' => $packaging_type]);
+        return view('admin.materials.flyers.index')->with(['packaging' => $packaging, 'packaging_types' => $packaging_type, 'warehouses' => $warehouses, 'packaging_material_status' => $packaging_material_status]);
     }
 
     public function packaging_list(Request $request)
     {
-        $packaging = PackagingStockHistory::leftjoin('cities', 'cities.id', '=', 'packaging_stock_histories.hub_id')
-            ->join('admins as ad', 'ad.id', '=', 'packaging_stock_histories.admin_id')
-            ->select(['packaging_stock_histories.id as psh_id', 'packaging_stock_histories.reference_number', 'packaging_stock_histories.entry_type', 'packaging_stock_histories.created_at', 'packaging_stock_histories.small_flyers', 'packaging_stock_histories.medium_flyers', 'packaging_stock_histories.large_flyers', 'packaging_stock_histories.boxes', 'ad.name as admin', 'cities.name as hub']);
-        return Datatables::of($packaging)
-            ->editColumn('small_flyers', function ($packaging) {
-                return number_format($packaging->small_flyers);
-            })
-            ->editColumn('medium_flyers', function ($packaging) {
-                return number_format($packaging->medium_flyers);
-            })
-            ->editColumn('large_flyers', function ($packaging) {
-                return number_format($packaging->large_flyers);
-            })
-            ->editColumn('boxes', function ($packaging) {
-                return number_format($packaging->boxes);
-            })
-            ->editColumn('entry_type', function ($packaging) {
-                if ($packaging->entry_type == 0) {
-                    return "Inbound";
-                } else if ($packaging->entry_type == 1) {
-                    return "Outbound";
+        $stock_requests = WarehouseStockRequest::leftjoin('warehouses as rw', 'rw.id', 'warehouse_stock_requests.requested_by')
+            ->leftjoin('warehouses as sw', 'sw.id', 'warehouse_stock_requests.send_by')
+            ->leftjoin('cities as rb', 'rb.id', '=', 'rw.hub_id')
+            ->leftjoin('cities as sb', 'sb.id', '=', 'sw.hub_id')
+            ->join('admins as cb', 'cb.id', '=', 'warehouse_stock_requests.created_by')
+            ->join('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'warehouse_stock_requests.status_id')
+            ->select(['warehouse_stock_requests.id as stock_request_id','warehouse_stock_requests.tracking_number','sb.name as send_by','rb.name as requested_by','cb.name as created_by','pmrs.id','pmrs.name as status','warehouse_stock_requests.created_at','warehouse_stock_requests.status_id']);
+        return Datatables::of($stock_requests)
+            ->filterColumn('status',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('warehouse_stock_requests.status_id','=',$keyword);
                 }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+
+            ->addColumn('action', function ($stock){
+                $confirm_button = '<button type="button" class="dropdown-item confirm"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Confirm</div></button>';
+                $dispatch_button = '<button type="button" class="dropdown-item dispatch"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Dispatch</div></button>';
+                $cancel_button = '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Cancel</div></button>';
+                $detail_button = '<button type="button" class="dropdown-item details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Details</div></button>';
+
+                $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                $dropdown .= $detail_button;
+                if($stock->status_id == 1){
+                    $dropdown .= $cancel_button;
+                    $dropdown .= $confirm_button;
+                }else if($stock->status_id == 2){
+                    $dropdown .= $dispatch_button;
+                }
+
+                $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                return $dropdown;
             })
             ->make(true);
     }
@@ -150,7 +179,76 @@ class AdminPackagingMaterialController extends Controller
 
     }
 
-    
+    public function request_check_quantity(Request $request){
+        $type_id = $request->type_id;
+        $size_id = $request->size_id;
+        $warehouse_id = $request->warehouse_id;
+        $quantity = $request->quantity;
+        if($type_id == null){
+            return response()->json(['status' => 1, 'error' => 'Please select Packaging Material Type']);
+        }
+
+        if($size_id == null){
+            return response()->json(['status' => 1, 'error' => 'Please select Packaging Material Size']);
+        }
+
+        if($warehouse_id == null){
+            return response()->json(['status' => 1, 'error' => 'Please select Warehouse']);
+        }
+
+        $warehouse = Warehouse::find($warehouse_id);
+        if($warehouse){
+            if($warehouse->status == 1){
+               $warehouse_stock = WarehouseStock::where('warehouse_id', $warehouse_id)->where('type_id', $type_id)->where('type_size_id', $size_id);
+               if($warehouse_stock->exists()){
+                   $warehouse_stock = $warehouse_stock->first();
+                   if($warehouse_stock->stock > $quantity){
+                       return response()->json(['status' => 0]);
+                   }else{
+                       return response()->json(['status' => 1, 'error' => 'Warehouse does not have selected quantity!']);
+                   }
+
+               }else{
+                   return response()->json(['status' => 1, 'error' => 'Warehouse does not have this packaging material!']);
+               }
+
+            }
+            else{
+                return response()->json(['status' => 1, 'error' => 'Warehouse is disabled, please select another warehouse!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1, 'error' => 'Warehouse is not found!']);
+        }
+
+
+    }
+
+    public function request_submit(Request $request){
+        $request_from = $request->request_from;
+        $request_for = $request->request_for;
+        $type_ids = explode(',', $request->request_type_ids);
+        $type_size_ids = explode(',', $request->request_size_ids);
+        $quantities = explode(',', $request->request_quantities);
+        $user_id = Auth::id();
+        $warehouse_stock_request = new WarehouseStockRequest();
+        $warehouse_stock_request->requested_by = $request_for;
+        $warehouse_stock_request->send_by = $request_from;
+        $warehouse_stock_request->created_by = $user_id;
+        $warehouse_stock_request->status_id = 1;
+        $warehouse_stock_request->save();
+
+        foreach($type_ids as $index => $type){
+            $warehouse_stock_details = new WarehouseStockRequestDetail();
+            $warehouse_stock_details->request_id = $warehouse_stock_request->id;
+            $warehouse_stock_details->type_id = $type;
+            $warehouse_stock_details->size_id = $type_size_ids[$index];
+            $warehouse_stock_details->quantity = $quantities[$index];
+            $warehouse_stock_details->save();
+        }
+
+        return redirect()->back()->with('success', 'Stock requested successfully!');
+    }
 
     public function fetch_cities(Request $request){
         $cities = City::where(['hub'=>1,'status'=>1])->select('id','name')->get();
@@ -1272,6 +1370,128 @@ class AdminPackagingMaterialController extends Controller
                     return $inventory->total;
                 }
             })->make(true);
+    }
+
+    public function stock_request_cancel(Request $request){
+        $request_id = $request->stock_request_id;
+        $request_details = WarehouseStockRequest::find($request_id);
+
+        if($request_details){
+            if($request_details->status_id != 6){
+                $request_details->status_id = 6;
+                $request_details->save();
+
+                $warehoude_stock_request_history = new WarehouseStockRequestHistory();
+                $warehoude_stock_request_history->warehouse_stock_request_id = $request_id;
+                $warehoude_stock_request_history->status = 6;
+                $warehoude_stock_request_history->updated_by = Auth::id();
+                $warehoude_stock_request_history->save();
+
+
+                return response()->json(['status' => 1, 'success'=>"Packaging Material Request has been canceled successfully!"]);
+            }else{
+                return response()->json(['status' => 0, 'error'=>"Packaging Material Request already cancelled!"]);
+            }
+
+        }
+        else{
+            return response()->json(['status' => 0, 'error'=>"Packaging Material Request does\'nt exists!"]);
+        }
+    }
+
+    public function stock_request_confirm(Request $request){
+        $request_id = $request->stock_request_id;
+        $stock_request = WarehouseStockRequest::find($request_id);
+        if($stock_request){
+            if($stock_request->status_id != 6){
+                $details = '';
+                foreach ($stock_request->stock_request_details as $item){
+                    $details .= $item->packaging_type->type. ' : '. $item->packaging_size->size. ' : '.$item->quantity;
+                }
+                $pickup_hub_id = $stock_request->request_send_by->hub_id;
+                $consignee_hub_id = $stock_request->request_requested_by->hub_id;
+
+
+
+
+                $request_status = $this->request_booked($request_id, $details, $pickup_hub_id, $consignee_hub_id);
+
+                if($request_status == "booked"){
+                    $stock_request->status_id = 2;
+                    $stock_request->save();
+
+                    return response()->json(['status' => 0, 'success' => 'Packaging Material Request successfully confirmed!']);
+
+                }else{
+                    return $request_status;
+                }
+            }else{
+                return response()->json(['status' => 1, 'error' => 'Packaging Material Request is Cancelled!']);
+            }
+
+        }
+    }
+
+    public function request_booked($request_id, $details, $pickup_hub_id, $consignee_hub_id){
+        $settings = GlobalSettings::where('type', 'packaging_material_stock_movement_account_id')->first();
+        if($settings){
+            $pickup = UserShippingInfo::where('user_id', $settings->setting_value)->where('city_id', $pickup_hub_id)->where('hidden', 2)->where('poc', '=','Trax Logistics');
+            $pickup_address_id = '';
+            if($pickup->exists()){
+                $pickup = $pickup->first();
+                $pickup_address_id = $pickup->id;
+            }else{
+                $pickup_address_id = ShipperShipmentBookController::add_pickup_address($settings->setting_value, 'Trax Office','Trax Logistics', null, '0213-8772222', 'info@trax.pk', $pickup_hub_id, 0,1);
+            }
+
+           $shipment = $this->book($settings->setting_value, 1, $pickup_address_id,1,$consignee_hub_id, 'Trax Logistics', 'Trax Office', '0213-8772222',NULL, 'info@trax.pk', NULL,0,Carbon::now(),NULL,1,1,NULL,0,1,2,2);
+
+            $this->generate_tracking_number($shipment->id, $pickup_hub_id, $consignee_hub_id);
+
+
+            $this->add_item($shipment->id, 24, $details,1, null,0,0);
+
+            ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, NULL, Auth::id(), $request_id);
+            ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, NULL, Auth::id(), $request_id);
+
+            return "booked";
+//            return response()->json(['status' => 1, 'success' => 'Packaging Material Request successfully confirmed!']);
+
+        }else{
+            return response()->json(['status' => 0, 'error' => 'Settings not found for Packaging Material Stock Movement Account']);
+        }
+
+    }
+
+    public function stock_request_details(Request $request){
+        $request_id = $request->id;
+        $details = array();
+        if($request_id){
+            $stock_request_details = WarehouseStockRequestDetail::where('request_id', $request_id);
+            if($stock_request_details->exists()){
+                $details = $stock_request_details->with(['packaging_type', 'packaging_size'])->get();
+
+                return response()->json(['status' => 0, 'details' => $details]);
+            }else{
+                return response()->json(['status' => 1, 'error' => 'No Details found!']);
+            }
+        }
+    }
+
+    public function stock_request_dispatch(Request $request){
+        $request_id = $request->stock_request_id;
+
+        if($request_id){
+            $stock_request = WarehouseStockRequest::find($request_id);
+            if($stock_request){
+                $stock_request->status_id = 3;
+                $stock_request->save();
+                return response()->json(['status' => 0, 'success' => 'Request Successfully dispatched!']);
+
+            }else{
+                return response()->json(['status' => 1, 'error' => 'Could not find request!']);
+            }
+        }
     }
 
 }
