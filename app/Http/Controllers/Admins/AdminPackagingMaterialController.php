@@ -387,7 +387,7 @@ class AdminPackagingMaterialController extends Controller
             $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id);
 
             if (!$fulfilment_hub->exists()) {
-                return redirect()->back()->with('error', 'Warehouse does\'nt exists for requested hub!');
+                return response()->json(['status' => 1, 'success'=>'Warehouse does\'nt exists for requested hub!']);
             } else {
                 $fulfilment_hub = $fulfilment_hub->first();
             }
@@ -397,7 +397,6 @@ class AdminPackagingMaterialController extends Controller
             $warehouse = Warehouse::where('id', $warehouse_id)->first();
 
             $warehouse_hub_id = $warehouse->hub_id;
-            $hub = City::where('id', $warehouse_hub_id)->first();
 
             $user_id = $request_details->user_id;
 
