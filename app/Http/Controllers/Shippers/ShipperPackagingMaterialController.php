@@ -7,6 +7,7 @@ use App\Http\Models\DiscountCharge;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
+use App\Http\Models\PackagingMaterialRequestHistory;
 use App\http\models\PackagingMaterialRequestStatus;
 use App\Http\models\PackagingMaterialTypes;
 use App\Http\models\PackagingMaterialTypeSizes;
@@ -24,6 +25,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use phpDocumentor\Reflection\Types\Null_;
 use Yajra\Datatables\Datatables;
 
 class ShipperPackagingMaterialController extends Controller
@@ -65,7 +67,8 @@ class ShipperPackagingMaterialController extends Controller
         $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
             ->join('packaging_material_request_statuses as prs', 'prs.id','=', 'packaging_material_requests.status_id')
-            ->select(['packaging_material_requests.id as request_id','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.status_id','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link', 'prs.name as request_status'])
+            ->leftjoin('shipments as s', 's.tracking_number', '=', 'packaging_material_requests.tracking_number')
+            ->select(['packaging_material_requests.id as request_id','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.status_id','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link', 'prs.name as request_status', 's.id as shipment_id', 'packaging_material_requests.status_id as status_id'])
         ->where('packaging_material_requests.user_id', session('user_id'));
 
         return Datatables::of($requests)
@@ -86,8 +89,12 @@ class ShipperPackagingMaterialController extends Controller
                         <div class='btn-group'>
                            <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
                             <div class='dropdown-menu dropdown-menu-sm'>";
-                $detail_button = '<a href="javascript:void(0);" class="dropdown-item primary details" ><i class="ft-list"></i> Details</a>';
+                $detail_button = '<button type="button" class="dropdown-item details" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Details</div></button>';
+                $cancel_button = '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
                 $dropdown .= $detail_button;
+                if($packaging->status_id < 2){
+                    $dropdown .= $cancel_button;
+                }
                 $dropdown .= "
                             </div>
                         </div>
@@ -115,6 +122,27 @@ class ShipperPackagingMaterialController extends Controller
             }else{
                 return response()->json(['status' => 1, 'error' => 'No Details found!']);
             }
+        }
+    }
+
+    public function packaging_request_cancel(Request $request){
+        $request_id = $request->id;
+
+        $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->first();
+
+        if($packaging_material_request->status_id > 1){
+            return response()->json(['status' => 0, 'error' => 'Cancellation failed, Request is already confirmed']);
+        }
+        else{
+            $packaging_material_request->status_id = 6;
+            $packaging_material_request->save();
+
+            $packaging_request_history = new PackagingMaterialRequestHistory();
+            $packaging_request_history->packaging_material_request_id = $request_id;
+            $packaging_request_history->status = 6;
+            $packaging_request_history->updated_by_user_id = Auth::id();
+            $packaging_request_history->save();
+            return response()->json(['status' => 1, 'success' => 'Request cancelled successfully!']);
         }
     }
 
@@ -168,51 +196,12 @@ class ShipperPackagingMaterialController extends Controller
             $total_charges = $discount_packaging;
         }
 
-        if ($request->input('address_select') == 0) {
-            $city_id = $request->new_pickup_city;
-            $city_hub = City::where('id', $city_id)->first();
-            $hub_id = $city_hub->hub_id;
-        }
-        else{
+        if ($request->input('address_select') != 0) {
             $address_id = $request->input('address_select');
             $user_address = UserShippingInfo::find($address_id);
-            $city_hub = City::where('id', $user_address->city_id)->first();
-            $hub_id = $city_hub->hub_id;
         }
-
-        $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id);
-
-        if (!$fulfilment_hub->exists()) {
-            return redirect()->back()->with('error', 'Warehouse does\'nt exists for requested hub!');
-        } else {
-            $fulfilment_hub = $fulfilment_hub->first();
-        }
-
-        $warehouse_id = $fulfilment_hub->warehouse_id;
-
-        $warehouse = Warehouse::where('id', $warehouse_id)->first();
-
-        $warehouse_hub_id = $warehouse->hub_id;
-        $hub = City::where('id', $warehouse_hub_id)->first();
 
         $user_id = session('user_id');
-
-        $pickup_address_office = 'Trax Office ' . $hub->name;
-        $pickup_address_email = 'Info@Trax.pk';
-        $pickup_address_poc = 'Trax Logistics';
-        $pickup_address_phone = '0213-877-22-22';
-
-        $pickup_address_id = $this->add_pickup_address($user_id, $pickup_address_office, $pickup_address_poc, $pickup_address_phone, $pickup_address_email, $warehouse_hub_id, 0);
-        $trax_address = UserShippingInfo::find($pickup_address_id);
-
-        $now = Carbon::today();
-
-        $details = '';
-
-        $details = substr($details, 0, -2);
-
-        $shipper_details = User::where('id', $user_id)->select('name', 'poc', 'phone', 'email')->first();
-        $shipment_consignee_name = "Packaging Material to $shipper_details->name";
 
         if($request->mode_of_payment == 1) {
             if ($request->input('address_select') == 0) {
@@ -248,31 +237,6 @@ class ShipperPackagingMaterialController extends Controller
                         'quantity' => $packaging_quantities[$index],
                     ]);
                 }
-
-                if ($request->input('address_select') == 0) {
-                    $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request->new_pickup_city, $shipment_consignee_name, $request->new_pickup_address, $request->new_pickup_phone_number, null, null, null, 0, $now, null, 1, 1, null, $total_charges, 1, 1, 1);
-
-                    $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $request->new_pickup_city);
-                }
-                else{
-                    $shipment = $this->book($user_id, 1, $trax_address->id, 1, $user_address->city_id, $shipment_consignee_name, $user_address->pickup_address, $user_address->phone, null, null, null, 0, $now, null, 1, 1, null, $total_charges, 1, 1, 1);
-
-                    $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $user_address->city_id);
-                }
-
-
-
-                $this->add_item($shipment->id, 24, $details, 1, null, 0, 0);
-
-                PackagingMaterialRequest::where('id', $result->id)->update([
-                    'tracking_number' => $new_tracking_number
-                ]);
-
-
-                ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, $user_id, NULL);
-
-                ShipmentChargesController::packaging_material($shipment->id, $request->mode_of_payment, $total_charges);
-
                 return redirect()->back()->with('success', 'Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
             } else {
                 return redirect()->back()->with('error', 'Request not submitted!');
@@ -320,29 +284,6 @@ class ShipperPackagingMaterialController extends Controller
                             'quantity' => $packaging_quantities[$index],
                         ]);
                     }
-
-                    if ($request->input('address_select') == 0) {
-                        $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request->new_pickup_city, $shipment_consignee_name, $request->new_pickup_address, $request->new_pickup_phone_number, null, null, null, 0, $now, null, 1, 1, null, $total_charges, 1, 1, 1);
-
-                        $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $request->new_pickup_city);
-                    }
-                    else{
-                        $shipment = $this->book($user_id, 1, $trax_address->id, 1, $user_address->city_id, $shipment_consignee_name, $user_address->pickup_address, $user_address->phone, null, null, null, 0, $now, null, 1, 1, null, 0, 1, 1, 1);
-
-                        $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $user_address->city_id);
-                    }
-
-                    $this->add_item($shipment->id,24,$details,1,null,0,0);
-
-                    PackagingMaterialRequest::where('id', $result->id)->update([
-                        'tracking_number' => $new_tracking_number
-                    ]);
-
-
-                    ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, $user_id, NULL);
-
-                    ShipmentChargesController::packaging_material($shipment->id, $request->mode_of_payment, $total_charges);
-
                     return redirect()->back()->with('success','Request submitted Successfully, The delivery for this request will be attempted to you within 2-3 working days and it cannot be cancelled after the status of this request is confirmed');
                 }else{
                     return redirect()->back()->with('error','Request not submitted!');
@@ -353,66 +294,5 @@ class ShipperPackagingMaterialController extends Controller
             }
         }
 
-    }
-
-    private function book($user_id,$service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id,$shipper_status_id,$consignee_status_id) {
-        $shipment = new Shipment();
-
-        $shipment->user_id = $user_id;
-        $shipment->booking_type_id = $service_type_id;
-        $shipment->pickup_address_id = $pickup_address_id;
-        $shipment->information_display = $information_display;
-
-        $shipment->consignee_city_id = $consignee_city_id;
-        $shipment->consignee_name = $consignee_name;
-        $shipment->consignee_address = $consignee_address;
-        $shipment->consignee_phone_number_1 = $consignee_phone_number_1;
-        $shipment->consignee_phone_number_2 = $consignee_phone_number_2;
-        $shipment->consignee_email = $consignee_email_address;
-
-        $shipment->order_id = $order_id;
-        $shipment->package_type = $package_type;
-        $shipment->pickup_date = $pickup_date;
-        $shipment->special_instructions = $special_instructions;
-
-
-        $shipment->estimated_weight = $estimated_weight;
-        $shipment->shipping_mode_id = $shipping_mode_id;
-        $shipment->same_day_timing_id = $same_day_timing_id;
-
-        $shipment->amount = $amount;
-        $shipment->payment_mode_id = $payment_mode_id;
-        $shipment->shipper_status_id = $shipper_status_id;
-        $shipment->consignee_status_id = $consignee_status_id;
-
-        $shipment->packaging_material_request = 1;
-
-        $shipment->save();
-
-        return $shipment;
-    }
-    private function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
-        $shipment = Shipment::find($shipment_id);
-
-        $tracking_number = $pickup_city_id . $consignee_city_id . str_pad($shipment_id, 6, '0', STR_PAD_LEFT);
-
-        $shipment->tracking_number = $tracking_number;
-
-        $shipment->save();
-
-        return $tracking_number;
-    }
-    private function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {
-        $shipment_item = new ShipmentItem();
-
-        $shipment_item->shipment_id = $shipment_id;
-        $shipment_item->product_type_id = $product_type_id;
-        $shipment_item->description = $item_description;
-        $shipment_item->quantity = $item_quantity;
-        $shipment_item->price = $price;
-        $shipment_item->insurance = $insurance;
-        $shipment_item->type = $type;
-
-        $shipment_item->save();
     }
 }

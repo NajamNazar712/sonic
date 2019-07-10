@@ -1510,22 +1510,25 @@ class ReturnController extends Controller
                             $request_id = $packaging_material_shipment->id;
 
                             $packaging_material_request = PackagingMaterialRequest::where('id',$request_id)->with('city')->first();
-                            $packaging_material_request_details = PackagingMaterialRequestDetail::where('packaging_material_request_id',$request_id)->get();
 
-                            $hub_id = $packaging_material_request->city->hub_id;
+                            if($packaging_material_shipment->status_id == 3) {
+                                $packaging_material_request_details = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_id)->get();
 
-                            $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id',$hub_id)->first();
+                                $hub_id = $packaging_material_request->city->hub_id;
 
-                            $warehouse_id = $fulfilment_hub->warehouse_id;
+                                $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id)->first();
 
-                            foreach ($packaging_material_request_details as $detail_add){
-                                $type_id = $detail_add->type_id;
-                                $type_size_id = $detail_add->type_size_id;
-                                $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
+                                $warehouse_id = $fulfilment_hub->warehouse_id;
 
-                                $stock = $stock->first();
-                                $stock->stock = $stock['stock'] + $detail_add->quantity;
-                                $stock->save();
+                                foreach ($packaging_material_request_details as $detail_add) {
+                                    $type_id = $detail_add->type_id;
+                                    $type_size_id = $detail_add->type_size_id;
+                                    $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
+
+                                    $stock = $stock->first();
+                                    $stock->stock = $stock['stock'] + $detail_add->quantity;
+                                    $stock->save();
+                                }
                             }
                             $packaging_material_request->status_id = 5;
                             $packaging_material_request->save();

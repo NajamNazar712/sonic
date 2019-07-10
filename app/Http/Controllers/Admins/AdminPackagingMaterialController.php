@@ -411,10 +411,10 @@ class AdminPackagingMaterialController extends Controller
             ->join('users as u','u.id','=','packaging_material_requests.user_id')
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
             ->leftjoin('shipments as s', 's.tracking_number', '=', 'packaging_material_requests.tracking_number')
-            ->leftjoin('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+//            ->leftjoin('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
             ->leftjoin('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'packaging_material_requests.status_id')
             ->leftjoin('packaging_material_request_details as pmrd', 'pmrd.packaging_material_request_id', '=', 'packaging_material_requests.id')
-            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.consignee_city_id as dc', 'usi.city_id as oc'])
+            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id'])
         ->groupBy('packaging_material_requests.id');
 
         if(session('department_id') == 7){
@@ -429,7 +429,7 @@ class AdminPackagingMaterialController extends Controller
             })
             ->editColumn('total_quantity_button', function ($material){
                 if($material->total_quantity > 0){
-                    return '<button type="button" class="btn btn-outline-success mr-1 quantity">' . $material->total_quantity . '</button>';
+                    return '<div class="text-center"><button type="button" class="btn btn-sm btn-outline-info quantity">' . $material->total_quantity . '</button></div>';
                 }else{
                     return '-';
                 }
@@ -459,7 +459,7 @@ class AdminPackagingMaterialController extends Controller
                     if ($packaging->status_id >= 2) {
                         $dropdown .= '<button type="button" class="dropdown-item grn"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Print GRN</div></button>';
                     }
-                    if ($packaging->status_id == 2 && ($packaging->shipper_status_id == 4 || ($packaging->oc == $packaging->dc))) {
+                    if ($packaging->status_id == 2 && ($packaging->shipper_status_id == 4 || $packaging->shipper_status_id == 2)) {
                         $dropdown .= '<button type="button" class="dropdown-item dispatch"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Dispatch</div></button>';
                     }
 
@@ -484,24 +484,102 @@ class AdminPackagingMaterialController extends Controller
         return response()->json(['status' => 1, 'types' => $packaging_material_request_details]);
     }
 
+
+    public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id, $status) {
+
+        $user_shipping_info = new UserShippingInfo();
+
+        $user_shipping_info->user_id = $user_id;
+        $user_shipping_info->pickup_address = $address;
+        $user_shipping_info->poc = $person_of_contact;
+        $user_shipping_info->phone = $phone_number;
+        $user_shipping_info->email = $email_address;
+        $user_shipping_info->city_id = $city_id;
+        $user_shipping_info->status = $status;
+
+        $user_shipping_info->save();
+
+        return $user_shipping_info->id;
+    }
+
     public function request_confirm(Request $request){
         $request_id = $request->id;
-        $shipment_id = $request->shipment_id;
 
         $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
 
-        if($request_details->exists()){
+        if($request_details != null){
+
+            $total_charges = $request_details->amount;
+
+            $city_id = $request_details->city_id;
+            $city_hub = City::where('id', $city_id)->first();
+            $hub_id = $city_hub->hub_id;
+
+            $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id);
+
+            if (!$fulfilment_hub->exists()) {
+                return response()->json(['status' => 0, 'error'=>'Warehouse does\'nt exists for requested hub!']);
+            } else {
+                $fulfilment_hub = $fulfilment_hub->first();
+            }
+
+            $warehouse_id = $fulfilment_hub->warehouse_id;
+
+            $warehouse = Warehouse::where('id', $warehouse_id)->first();
+
+            $warehouse_hub_id = $warehouse->hub_id;
+
+            $user_id = $request_details->user_id;
+
+            $pickup_address_office = 'Trax Office';
+            $pickup_address_email = 'Info@Trax.pk';
+            $pickup_address_poc = 'Trax Logistics';
+            $pickup_address_phone = '0213-877-22-22';
+
+            $user_shipping_info = UserShippingInfo::where(['user_id' => $user_id, 'city_id' => $warehouse_hub_id]);
+
+            if($user_shipping_info->exists()){
+                $trax_address = $user_shipping_info->latest()->first();
+            }
+            else{
+                $pickup_address_id = $this->add_pickup_address($user_id, $pickup_address_office, $pickup_address_poc, $pickup_address_phone, $pickup_address_email, $warehouse_hub_id, 0);
+                $trax_address = UserShippingInfo::find($pickup_address_id);
+            }
+
+            $now = Carbon::today();
+
+            $details = '';
+
+            $details = substr($details, 0, -2);
+
+            $shipper_details = User::where('id', $user_id)->select('name', 'poc', 'phone', 'email')->first();
+            $shipment_consignee_name = "Packaging Material to $shipper_details->name";
+
+            if($request_details->packaging_payment_mode_id == 1) {
+                $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request_details->city_id, $shipment_consignee_name, $request_details->address, $request_details->phone, null, null, null, 0, $now, null, 1, 1, null, $total_charges, 1, 2, 2);
+            }
+            else{
+                $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request_details->city_id, $shipment_consignee_name, $request_details->address, $request_details->phone, null, null, null, 0, $now, null, 1, 1, null, $total_charges, 2, 2, 2);
+            }
+
+            $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $request_details->city_id);
+
+
+
+            $this->add_item($shipment->id, 24, $details, 1, null, 0, 0);
+
+            PackagingMaterialRequest::where('id', $request_details->id)->update([
+                'tracking_number' => $new_tracking_number
+            ]);
+
+
+            ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, NULL, Auth::id(), $request_id);
+            ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, NULL, Auth::id(), $request_id);
+
+            ShipmentChargesController::packaging_material($shipment->id, $request_details->packaging_payment_mode_id, $total_charges);
+
             $request_details->status_id = 2;
             $request_details->save();
-
-            $shipment = Shipment::find($shipment_id);
-
-            $shipment->shipper_status_id = 2;
-            $shipment->consignee_status_id = 2;
-
-            $shipment->save();
-
-            ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $request_id);
 
             $packaging_request_history = new PackagingMaterialRequestHistory();
             $packaging_request_history->packaging_material_request_id = $request_id;
@@ -519,22 +597,21 @@ class AdminPackagingMaterialController extends Controller
     public function request_cancel(Request $request){
         $request_id = $request->id;
 
-        $request_details = PackagingMaterialRequest::where('id',$request_id)->first();
+        $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->first();
 
-        if($request_details->exists()){
-            $request_details->status = 6;
-            $request_details->save();
+        if($packaging_material_request->status_id > 1){
+            return response()->json(['status' => 0, 'error' => 'Cancellation failed, Request is already confirmed']);
+        }
+        else{
+            $packaging_material_request->status_id = 6;
+            $packaging_material_request->save();
 
             $packaging_request_history = new PackagingMaterialRequestHistory();
             $packaging_request_history->packaging_material_request_id = $request_id;
             $packaging_request_history->status = 6;
             $packaging_request_history->updated_by = Auth::id();
             $packaging_request_history->save();
-
-            return response()->json(['status' => 1, 'success'=>"Packaging Material Request has been canceled successfully!"]);
-        }
-        else{
-            return response()->json(['status' => 0, 'success'=>"Packaging Material Request does\'nt exists!"]);
+            return response()->json(['status' => 1, 'success' => 'Request cancelled successfully!']);
         }
     }
 
@@ -1095,9 +1172,9 @@ class AdminPackagingMaterialController extends Controller
             ->where('warehouses.master_type', '!=', 1)
             ->groupBy('warehouses.id');
         return Datatables::of($types)
-            ->editColumn('associated_hubs', function ($warehouse){
+            ->editColumn('associated_hubs_button', function ($warehouse){
                 if($warehouse->associated_hubs > 0){
-                    return '<button type="button" class="btn btn-outline-success mr-1 associated_hubs">' . $warehouse->associated_hubs . '</button>';
+                    return '<button type="button" class="btn btn-sm btn-outline-info mr-1 associated_hubs">' . $warehouse->associated_hubs . '</button>';
                 }else{
                     return '-';
                 }

@@ -7,6 +7,7 @@ use App\Http\Models\CargoConsignmentStatus;
 use App\Http\Models\DraftCargo;
 use App\Http\Models\DraftCargoShipment;
 use App\Http\Models\JunctionMapping;
+use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\ShipmentStatus;
 use http\Env\Response;
 use Illuminate\Http\Request;
@@ -266,6 +267,14 @@ class AdminCargoController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+
+
+            $packaging_material_request = PackagingMaterialRequest::where('tracking_number',$shipment->tracking_number)->first();
+            if($packaging_material_request != null){
+                if($packaging_material_request->status_id != 3){
+                    return ['status' => 1, 'error' => 'Packaging Material Request is not dispatched yet!'];
+                }
+            }
 
             if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37, 49, 55])) {
                 if ($shipment->shipper_status_id == 2) {
