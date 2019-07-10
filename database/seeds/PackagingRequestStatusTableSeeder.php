@@ -14,7 +14,7 @@ class PackagingRequestStatusTableSeeder extends Seeder
         DB::table('packaging_request_statuses')->truncate();
 
         DB::table('packaging_request_statuses')->insert(array(
-            array('id' => 1, 'name' => 'Booked'),
+            array('id' => 1, 'name' => 'Requested'),
             array('id' => 2, 'name' => 'Confirmed'),
             array('id' => 3, 'name' => 'Dispatched'),
             array('id' => 4, 'name' => 'Completed'),
