@@ -8,6 +8,9 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\BookingType;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialRequestDetail;
+use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Product;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentPaymentStatus;
@@ -15,6 +18,8 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
+use App\http\Models\WarehouseStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -212,28 +217,75 @@ class OrderManagementController extends Controller
                         ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
                     }
                     else {
-                        if ($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
-                            $shipment->shipper_status_id = 20;
-                            $shipment->consignee_status_id = 20;
+                        if ($shipment->packaging_material_request != 1) {
+                            if ($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
+                                $shipment->shipper_status_id = 20;
+                                $shipment->consignee_status_id = 20;
 
-                            $shipment->save();
+                                $shipment->save();
 
-                            ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
+                                ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
 
-                            ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+                                ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+                            } else {
+                                $shipment->shipper_status_id = 22;
+                                $shipment->consignee_status_id = 22;
+
+                                $shipment->save();
+
+                                ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
+
+                                ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+
+                                ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, Auth::id());
+                            }
                         }
                         else {
-                            $shipment->shipper_status_id = 22;
-                            $shipment->consignee_status_id = 22;
+                            $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+                            if ($packaging_material_shipment != null) {
+                                $request_id = $packaging_material_shipment->id;
 
-                            $shipment->save();
+                                $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->with('city')->first();
 
-                            ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
+                                if ($packaging_material_shipment->status_id == 3) {
+                                    $packaging_material_request_details = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_id)->get();
 
-                            ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+                                    $hub_id = $packaging_material_request->city->hub_id;
 
-                            ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, Auth::id());
-                        }
+                                    $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id)->first();
+
+                                    $warehouse_id = $fulfilment_hub->warehouse_id;
+
+                                    foreach ($packaging_material_request_details as $detail_add) {
+                                        $type_id = $detail_add->type_id;
+                                        $type_size_id = $detail_add->type_size_id;
+                                        $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
+
+                                        $stock = $stock->first();
+                                        $stock->stock = $stock['stock'] + $detail_add->quantity;
+                                        $stock->save();
+                                    }
+                                }
+
+                                $shipment->shipper_status_id = 17;
+                                $shipment->consignee_status_id = 17;
+
+                                $shipment->save();
+
+                                ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
+
+
+                                $packaging_material_request->status_id = 6;
+                                $packaging_material_request->save();
+
+
+                                $packaging_request_history = new PackagingMaterialRequestHistory();
+                                $packaging_request_history->packaging_material_request_id = $request_id;
+                                $packaging_request_history->status = 6;
+                                $packaging_request_history->updated_by = Auth::id();
+                                $packaging_request_history->save();
+                            }
+                    }
 
                         NotificationsController::send(15, 0, $shipment_id);
                         NotificationsController::send(16, 0, $shipment_id);
