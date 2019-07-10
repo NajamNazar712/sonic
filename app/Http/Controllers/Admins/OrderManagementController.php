@@ -265,13 +265,19 @@ class OrderManagementController extends Controller
                                         $stock->stock = $stock['stock'] + $detail_add->quantity;
                                         $stock->save();
                                     }
+
+                                    $packaging_request_history_replenished = new PackagingMaterialRequestHistory();
+                                    $packaging_request_history_replenished->packaging_material_request_id = $request_id;
+                                    $packaging_request_history_replenished->status = 5;
+                                    $packaging_request_history_replenished->updated_by = Auth::id();
+                                    $packaging_request_history_replenished->save();
                                 }
 
                                 $shipment->shipper_status_id = 17;
                                 $shipment->consignee_status_id = 17;
 
                                 $shipment->save();
-                                
+
                                 ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
 
                                 ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
