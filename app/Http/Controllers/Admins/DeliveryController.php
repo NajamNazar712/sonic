@@ -1154,10 +1154,10 @@ class DeliveryController extends Controller
                                     $warehouse_stock_request->save();
 
                                     $warehouse_stock_request_history = new WarehouseStockRequestHistory();
-                                    $warehoude_stock_request_history->warehouse_stock_request_id = $warehouse_stock_request->id;
-                                    $warehoude_stock_request_history->status = 6;
-                                    $warehoude_stock_request_history->updated_by = Auth::id();
-                                    $warehoude_stock_request_history->save();
+                                    $warehouse_stock_request_history->warehouse_stock_request_id = $warehouse_stock_request->id;
+                                    $warehouse_stock_request_history->status = 4;
+                                    $warehouse_stock_request_history->updated_by = Auth::id();
+                                    $warehouse_stock_request_history->save();
 
                                     if(WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $warehouse_stock_request->stock_request_details->type_id)->where('type_size_id', $warehouse_stock_request->stock_request_details->size_id)->exists()){
                                         $receiver_stock = WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $warehouse_stock_request->stock_request_details->type_id)->where('type_size_id', $warehouse_stock_request->stock_request_details->size_id)->first();
