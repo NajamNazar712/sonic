@@ -598,7 +598,7 @@ class AdminPackagingMaterialController extends Controller
             return response()->json(['status' => 1, 'success'=>"Packaging Material Request has been confirmed successfully!"]);
         }
         else{
-            return response()->json(['status' => 0, 'success'=>"Packaging Material Request does\'nt exists!"]);
+            return response()->json(['status' => 0, 'error'=>"Packaging Material Request does\'nt exists!"]);
         }
     }
 
@@ -1544,7 +1544,7 @@ class AdminPackagingMaterialController extends Controller
 //            return response()->json(['status' => 1, 'success' => 'Packaging Material Request successfully confirmed!']);
 
         }else{
-            return response()->json(['status' => 0, 'error' => 'Settings not found for Packaging Material Stock Movement Account']);
+            return response()->json(['status' => 1, 'error' => 'Settings not found for Packaging Material Stock Movement Account']);
         }
 
     }
