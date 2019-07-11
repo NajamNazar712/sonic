@@ -1146,6 +1146,26 @@ class DeliveryController extends Controller
                                     $packaging_request_history->updated_by = Auth::id();
                                     $packaging_request_history->save();
                                 }
+                                $warehouse_stock_request = WarehouseStockRequest::where('tracking_number', $shipment_details->tracking_number);
+                                if($warehouse_stock_request->exists()){
+                                    $warehouse_stock_request = $warehouse_stock_request->first();
+                                    if(WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $warehouse_stock_request->stock_request_details->type_id)->where('type_size_id', $warehouse_stock_request->stock_request_details->size_id)->exists()){
+                                        $receiver_stock = WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $warehouse_stock_request->stock_request_details->type_id)->where('type_size_id', $warehouse_stock_request->stock_request_details->size_id)->first();
+                                        $receiver_stock->stock += $warehouse_stock_request->stock_request_details->quantity;
+                                        $receiver_stock->save();
+                                    }else{
+
+                                        $receiver_stock = new WarehouseStock();
+                                        $receiver_stock->warehouse_id = $warehouse_stock_request->requested_by;
+                                        $receiver_stock->type_id = $warehouse_stock_request->stock_request_details->type_id;
+                                        $receiver_stock->type_size_id = $warehouse_stock_request->stock_request_details->size_id;
+                                        $receiver_stock->stock = $warehouse_stock_request->stock_request_details->quantity;
+                                        $receiver_stock->save();
+
+                                    }
+
+
+                                }
                             }
 
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
