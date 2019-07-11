@@ -3562,7 +3562,7 @@ class AdminFinanceController extends Controller
         ';
 
         $html .= '
-            <style>@page{size:A4 portrait}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.9rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
+            <style>@page{size:A4 portrait}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.9rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
         ';
 
         if (!$email) {
@@ -3848,32 +3848,34 @@ class AdminFinanceController extends Controller
                     <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
 
                     <table class="table table-sm table-bordered border shipments_summary">
-                      <tbody>
+                      <thead>
                         <tr>
-                            <td class="color primary text-center" colspan="18"><strong>Shipment(s) Summary</strong></td>
+                            <th class="color primary text-center" colspan="20">Shipment(s) Summary</th>
                         </tr>
                         <tr>
-                          <td class="color secondary"><strong>S. No.</strong></td>
-                          <td class="color secondary"><strong>Tracking No.</strong></td>
-                          <td class="color secondary"><strong>Type</strong></td>
-                          <td class="color secondary"><strong>Origin</strong></td>
-                          <td class="color secondary"><strong>Destination</strong></td>
-                          <td class="color secondary"><strong>Arrival Date</strong></td>
-                          <td class="color secondary"><strong>Weight (kg)</strong></td>
-                          <td class="color secondary"><strong>Weight Charges (PKR)</strong></td>
-                          <td class="color secondary"><strong>Cash Handling Charges (PKR)</strong></td>
-                          <td class="color secondary"><strong>Insurance Charges (PKR)</strong></td>
-                          <td class="color secondary"><strong>Replacement Charges (PKR)</strong></td>
-                          <td class="color secondary"><strong>Return Charges (PKR)</strong></td>
-                          <td class="color secondary"><strong>Fuel Surcharge (PKR)</strong></td>
-                          <td class="color secondary"><strong>Intercept Charges (PKR)</strong></td>
-                          <td class="color secondary"><strong>OSA Charges (PKR)</strong></td>
-                          <td class="color secondary"><strong>Packaging Charges (PKR)</strong></td>
-                          <td class="color secondary"><strong>Adjustment Charges (PKR)</strong></td>
-                          <td class="color secondary"><strong>Total Charges (PKR)</strong></td>
-                          <td class="color secondary"><strong>GST (PKR)</strong></td>
-                          <td class="color secondary"><strong>Invoice Amount (PKR)</strong></td>
+                          <th class="color secondary">S. No.</th>
+                          <th class="color secondary">Tracking No.</th>
+                          <th class="color secondary">Type</th>
+                          <th class="color secondary">Origin</th>
+                          <th class="color secondary">Destination</th>
+                          <th class="color secondary">Arrival Date</th>
+                          <th class="color secondary">Weight (kg)</th>
+                          <th class="color secondary">Weight Charges (PKR)</th>
+                          <th class="color secondary">Cash Handling Charges (PKR)</th>
+                          <th class="color secondary">Insurance Charges (PKR)</th>
+                          <th class="color secondary">Replacement Charges (PKR)</th>
+                          <th class="color secondary">Return Charges (PKR)</th>
+                          <th class="color secondary">Fuel Surcharge (PKR)</th>
+                          <th class="color secondary">Intercept Charges (PKR)</th>
+                          <th class="color secondary">OSA Charges (PKR)</th>
+                          <th class="color secondary">Packaging Charges (PKR)</th>
+                          <th class="color secondary">Adjustment Charges (PKR)</th>
+                          <th class="color secondary">Total Charges (PKR)</th>
+                          <th class="color secondary">GST (PKR)</th>
+                          <th class="color secondary">Invoice Amount (PKR)</th>
                         </tr>
+                    </thead>
+                    <tbody>
         ';
 
         $html .= $shipment_details;
