@@ -192,7 +192,7 @@ class ShipperPackagingMaterialController extends Controller
                 $total_charges -= floatval($discount_packaging);
             }
         }
-
+        
         if ($request->input('address_select') != 0) {
             $address_id = $request->input('address_select');
             $user_address = UserShippingInfo::find($address_id);
