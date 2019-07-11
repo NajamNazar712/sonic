@@ -11,6 +11,7 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                @if(!empty($warehouses))
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -24,6 +25,9 @@
                     </tr>
                     </thead>
                 </table>
+                @else
+                    <h3>No Data found</h3>
+                @endif
             </div>
         </div>
     </div>

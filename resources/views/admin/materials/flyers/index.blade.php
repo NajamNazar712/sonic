@@ -633,8 +633,9 @@
                         className: 'btn btn-primary view_inventory',
                         enabled: true,
                         action: function (e, dt, node, config) {
-                            window.location.href = '{{route('admin.packaging.inventory.index')}}';
-
+                            var url = '{{route('admin.packaging.inventory.index')}}';
+                            var win = window.open(url, '_blank');
+                            win.focus();
                         }
                     },
                         @endif

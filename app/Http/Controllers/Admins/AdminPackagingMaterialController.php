@@ -70,6 +70,7 @@ class AdminPackagingMaterialController extends Controller
             ->join('admins as cb', 'cb.id', '=', 'warehouse_stock_requests.created_by')
             ->join('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'warehouse_stock_requests.status_id')
             ->select(['warehouse_stock_requests.id as stock_request_id','warehouse_stock_requests.tracking_number','warehouse_stock_requests.tracking_number as tracking_number_link','sb.name as send_by','rb.name as requested_by','cb.name as created_by','pmrs.id','pmrs.name as status','warehouse_stock_requests.created_at','warehouse_stock_requests.status_id']);
+
         return Datatables::of($stock_requests)
             ->editColumn('tracking_number_link',function ($stock_requests){
                 $route = route('admin.tracking.index');
