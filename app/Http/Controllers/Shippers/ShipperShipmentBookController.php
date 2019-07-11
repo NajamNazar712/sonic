@@ -562,7 +562,7 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    public static function air_waybill($user_type, $user_id, $ids, $twice = FALSE) {
+    public static function air_waybill($user_type, $user_id, $ids, $twice = FALSE, $body_only = FALSE) {
 
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
@@ -585,26 +585,29 @@ class ShipperShipmentBookController extends Controller
             <div class="small mt-1">Printed By: ' . $user_name . '</div>
         ';
 
-        $html = '
+        $html = '';
+
+        if (!$body_only) {
+            $html .= '
                 <!doctype html>
                 <html lang="en">
                   <head>
                     <meta charset="utf-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        ';
+            ';
 
-        if ($user_type != 4) {
-            $html .= '
+            if ($user_type != 4) {
+                $html .= '
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
-            ';
-        }
-        else {
-            $html .= '
+                ';
+            }
+            else {
+                $html .= '
                     <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
-            ';
-        }
+                ';
+            }
 
-        $html .= '
+            $html .= '
                     <title>Air Waybill</title>
 
                     <style>
@@ -683,7 +686,8 @@ class ShipperShipmentBookController extends Controller
                   </head>
                   <body>
                     <div>
-        ';
+            ';
+        }
 
         $shipment_details = '';
 
@@ -990,24 +994,26 @@ class ShipperShipmentBookController extends Controller
             $html .= $shipment_details;
         }
 
-        $html .= '
-                    </div>
-        ';
-
-        if ($user_type != 4) {
+        if (!$body_only) {
             $html .= '
+                    </div>
+            ';
+
+            if ($user_type != 4) {
+                $html .= '
                 <script>
                   window.onload = function() {
                     window.print();
                   }
                 </script>
-            ';
-        }
+                ';
+            }
 
-        $html .= '
+            $html .= '
                   </body>
                 </html>
-        ';
+            ';
+        }
 
         return $html;
     }

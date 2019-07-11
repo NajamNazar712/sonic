@@ -63,6 +63,29 @@
 						</div>
 					</div>
 				</div>
+
+				<div class="modal fade" id="print_receiving_sheet_and_air_waybill" role="dialog" aria-labelledby="print_receiving_sheet_and_air_waybill_title" aria-hidden="true">
+					<div class="modal-dialog modal-sm" role="document">
+						<div class="modal-content">
+							<form class="form-horizontal">
+								{{ csrf_field() }}
+
+								<div class="modal-header">
+									<h4 class="modal-title" id="print_receiving_sheet_and_air_waybill_title">Print Receiving Sheet and Air Waybill(s)</h4>
+								</div>
+								<div class="modal-body">
+									<div class="form-group m-0">
+										<select name="receiving_sheet" class="select2 receiving_sheet" data-rule-required="true" data-msg-required="Receiving Sheet is required"></select>
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+									<button type="submit" class="btn btn-primary ml-auto">Print</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -216,6 +239,48 @@
 							table.draw('false');
 
 							swal.close();
+						});
+					}
+				}, {
+					text: 'Print Receiving Sheet & Air Waybill(s)',
+					className: 'btn btn-primary print_receiving_sheet_and_air_waybill_button',
+					action: function (e, dt, node, config) {
+						$.ajax({
+							url: '{!! route('cod.shipment.receiving_sheet.all') !!}',
+							method: 'GET'
+						})
+						.done(function(data) {
+							if (data) {
+								var options = [];
+
+								$.each(data, function(index, receiving_sheet) {
+									var id = receiving_sheet['id'];
+									var text = receiving_sheet['id'].toString();
+
+									while (text.length < 6) {
+										text = '0' + text;
+									}
+
+									options.push({id: id, text: text});
+								});
+
+								if ($('#print_receiving_sheet_and_air_waybill .receiving_sheet').hasClass('select2-hidden-accessible')) {
+									$('#print_receiving_sheet_and_air_waybill .receiving_sheet').empty();
+									$('#print_receiving_sheet_and_air_waybill .receiving_sheet').select2('destroy');
+								}
+
+								$('#print_receiving_sheet_and_air_waybill .receiving_sheet').select2({
+									width: '100%',
+									placeholder: 'Receiving Sheet*',
+									data: options
+								}).bind('change', function() {
+									if ($(this).hasClass('danger')) {
+										$(this).valid();
+									}
+								}).val(null).trigger('change');
+
+								$('#print_receiving_sheet_and_air_waybill').modal('show');
+							}
 						});
 					}
 				},
@@ -538,6 +603,46 @@
 								table.draw('false');
 							});
 						}
+					});
+				}
+			});
+
+			$('#print_receiving_sheet_and_air_waybill form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					var receiving_sheet_id = parseInt($(form).find('select.receiving_sheet').val());
+
+					$.ajax({
+						url: '{!! route('cod.shipment.receiving_sheet.print_receiving_sheet_and_air_waybill') !!}',
+						method: 'POST',
+						data: {
+							'receiving_sheet_id': receiving_sheet_id,
+							'_token': '{{ csrf_token() }}'
+						}
+					})
+					.done(function(data) {
+						var tab = window.open('', '_blank');
+
+						if(!tab) {
+							swal({
+								title: 'Popup Blocker Enabled!',
+								text: 'Please add this site to your exception list.',
+								icon: 'error',
+								closeOnClickOutside: false,
+								closeOnEsc: false
+							});
+						}
+						else {
+							tab.document.write(data);
+							tab.document.close();
+							tab.focus();
+						}
+
+						$('#print_receiving_sheet_and_air_waybill').modal('hide');
 					});
 				}
 			});

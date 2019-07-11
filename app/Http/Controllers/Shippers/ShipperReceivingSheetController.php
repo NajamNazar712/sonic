@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shippers;
 use App\Http\Models\BookingType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 
 use App\Http\Models\Shipment;
 use App\Http\Models\ReceivingSheet;
@@ -245,29 +246,32 @@ class ShipperReceivingSheetController extends Controller
         }
     }
 
-    static public function view($id, $user_type) {
+    static public function view($id, $user_type, $body_only = FALSE) {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
-        $html = '
+        $html = '';
+
+        if (!$body_only) {
+            $html .= '
                 <!doctype html>
                 <html lang="en">
                   <head>
                     <meta charset="utf-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        ';
+            ';
 
-        if ($user_type != 4) {
-            $html .= '
+            if ($user_type != 4) {
+                $html .= '
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
-            ';
-        }
-        else {
-            $html .= '
+                ';
+            }
+            else {
+                $html .= '
                     <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
-            ';
-        }
+                ';
+            }
 
-        $html .= '
+            $html .= '
                     <title>Receiving Sheet</title>
 
                     <style>
@@ -326,7 +330,8 @@ class ShipperReceivingSheetController extends Controller
                   </head>
                   <body>
                     <div class="p-1">
-        ';
+            ';
+        }
 
         $receiving_sheet_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $id);
 
@@ -616,24 +621,26 @@ class ShipperReceivingSheetController extends Controller
             ';
         }
 
-        $html .= '
-                    </div>
-        ';
-
-        if ($user_type != 4) {
+        if (!$body_only) {
             $html .= '
+                    </div>
+            ';
+
+            if ($user_type != 4) {
+                $html .= '
                     <script>
                       window.onload = function() {
                         window.print();
                       }
                     </script>
-            ';
-        }
+                ';
+            }
 
-        $html .= '
+            $html .= '
                   </body>
                 </html>
-        ';
+            ';
+        }
 
         return $html;
     }
@@ -706,5 +713,168 @@ class ShipperReceivingSheetController extends Controller
         }
     }
 
+    public function print_receiving_sheet_and_air_waybill(Request $request) {
+        $user_type = NULL;
+        $user_id = NULL;
 
+        if (Auth::guard('admin')->check()) {
+            $user_type = 3;
+
+            $user_id = Auth::id();
+        }
+        else if (Auth::guard('web')->check()) {
+            $user_type = 1;
+
+            $user_id = session('user_id');
+        }
+        else if (Auth::guard('substitute_users')->check()) {
+            $user_type = 2;
+
+            $user_id = session('user_id');
+        }
+
+        $html = '';
+
+        $receiving_sheet = ReceivingSheet::find($request->receiving_sheet_id);
+
+        if ($user_type && $receiving_sheet) {
+            $html .= '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Receiving Sheet and Air Waybill(s)</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .air_waybill table.table-bordered tbody tr td {
+                        width: 12.5% !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .border.twice {
+                        border-width: 2px !important;
+                      }
+
+                      .border.twice-top {
+                        border-top-width: 2px !important;
+                      }
+
+                      .border.twice-bottom {
+                        border-bottom-width: 2px !important;
+                      }
+
+                      .border.twice-left {
+                        border-left-width: 2px !important;
+                      }
+
+                      .border.twice-right {
+                        border-right-width: 2px !important;
+                      }
+
+                      .w-200 {
+                        width: 200px;
+                      }
+
+                      .line {
+                        border-bottom: 1px solid #09262e !important;
+                      }
+
+                      .manual_form {
+                        page-break-inside: avoid;
+                      }
+
+                      td.replacement span {
+                        width: 22px;
+                      }
+
+                      td.replacement span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
+                      }
+
+                      .receiving_sheet {
+                        page-break-after: always;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div class="p-1">
+                        <div class="receiving_sheet">
+            ';
+
+            $html .= $this->view($receiving_sheet->id, $user_type, TRUE);
+
+            $html .= '
+                        </div>
+                        <div class="air_waybill">
+            ';
+
+            $shipment_ids = array();
+
+            foreach ($receiving_sheet->receiving_sheet_shipments as $receiving_sheet_shipment) {
+                $shipment_ids[] = $receiving_sheet_shipment->shipment->id;
+            }
+
+            $html .= ShipperShipmentBookController::air_waybill($user_type, $user_id, $shipment_ids, FALSE, TRUE);
+
+            $html .= '
+                        </div>
+                    </div>
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+            ';
+        }
+
+        return $html;
+    }
 }
