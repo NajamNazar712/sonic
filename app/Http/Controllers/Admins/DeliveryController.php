@@ -39,6 +39,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
+use App\Http\Models\WarehouseStockRequestHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -1149,6 +1150,15 @@ class DeliveryController extends Controller
                                 $warehouse_stock_request = WarehouseStockRequest::where('tracking_number', $shipment_details->tracking_number);
                                 if($warehouse_stock_request->exists()){
                                     $warehouse_stock_request = $warehouse_stock_request->first();
+                                    $warehouse_stock_request->status_id = 4;
+                                    $warehouse_stock_request->save();
+
+                                    $warehouse_stock_request_history = new WarehouseStockRequestHistory();
+                                    $warehoude_stock_request_history->warehouse_stock_request_id = $warehouse_stock_request->id;
+                                    $warehoude_stock_request_history->status = 6;
+                                    $warehoude_stock_request_history->updated_by = Auth::id();
+                                    $warehoude_stock_request_history->save();
+
                                     if(WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $warehouse_stock_request->stock_request_details->type_id)->where('type_size_id', $warehouse_stock_request->stock_request_details->size_id)->exists()){
                                         $receiver_stock = WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $warehouse_stock_request->stock_request_details->type_id)->where('type_size_id', $warehouse_stock_request->stock_request_details->size_id)->first();
                                         $receiver_stock->stock += $warehouse_stock_request->stock_request_details->quantity;

@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Packaging Material Requests')
+@section('title', 'Packaging Material Stock Requests')
 
 @section('content')
     <h1 class="mb-1">
-        Packaging Material Requests
+        Packaging Material Stock Requests
     </h1>
 
     <div class="card">
@@ -660,7 +660,9 @@
 
                             }
                         },
-                    {
+                    @endif
+                    @if (session('role_id') == 1 || in_array(222, session('permissions')))
+                        {
                             text: '<i class="la la-send"></i> Request Stock',
                             className: 'btn btn-primary request_stock',
                             enabled:true,

@@ -98,10 +98,17 @@ class AdminPackagingMaterialController extends Controller
 
                 $dropdown .= $detail_button;
                 if($stock->status_id == 1){
-                    $dropdown .= $cancel_button;
-                    $dropdown .= $confirm_button;
+                    if(session('role_id') == 1 || in_array(223, session('permissions'))){
+                        $dropdown .= $confirm_button;
+                    }
+                    if(session('role_id') == 1 || in_array(225, session('permissions'))){
+                        $dropdown .= $cancel_button;
+                    }
+
                 }else if($stock->status_id == 2){
-                    $dropdown .= $dispatch_button;
+                    if(session('role_id') == 1 || in_array(224, session('permissions'))){
+                        $dropdown .= $dispatch_button;
+                    }
                 }
 
                 $dropdown .= '
