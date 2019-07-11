@@ -176,24 +176,30 @@ class ShipperPackagingMaterialController extends Controller
         }
         $today = Carbon::today();
 
-        if($discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
-            $discount = $discount->first();
-        }else if($discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
-            $discount = $discount->first();
-        }else if($discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',3)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
-            $discount = $discount->first();
-        }else if($discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',4)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+        if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+        }
+        else if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+        }
+        else if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',3)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',3)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+        }
+        else if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',4)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',4)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+        }
+        if($discount){
             $discount = $discount->first();
         }
         if(!empty($discount->packaging)){
             $discount_packaging = $discount->packaging;
             if (strpos($discount_packaging, '%') !== FALSE) {
                 $discount_packaging = (floatval(str_replace('%', '', $discount_packaging)) / 100) * $total_charges;
+                $total_charges = $discount_packaging;
             }
             else {
-                $discount_packaging += floatval($discount_packaging);
+                $total_charges = $total_charges - floatval($discount_packaging);
             }
-            $total_charges = $discount_packaging;
         }
 
         if ($request->input('address_select') != 0) {
