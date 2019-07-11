@@ -131,6 +131,9 @@
 				});
 			}
 
+			var complain_route = '{{ route('admin.crm.request.details', 0) }}';
+			complain_route = complain_route.slice(0, -1);
+
 			function track(tracking_numbers) {
                 $.ajax({
                     url: '{!! route('admin.tracking.track') !!}',
@@ -151,15 +154,32 @@
 						toastr.error(message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 					}
 
-
 					if (data.shipments != undefined) {
 						$.each(data.shipments, function(id, details) {
 							var shipment = '';
 
 							shipment += '<div class="mt-4 border-primary">';
-							shipment += '<div class="d-flex align-items-center bg-primary">';
-							shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.tracking_number + '</div>';
-							shipment += '<button class="btn btn-secondary ml-auto print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
+							shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
+							shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '</div>';
+
+							if ('complain' in details) {
+								shipment += '<a class="ml-auto mr-0 mr-sm-1" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
+
+								if (details.complain.tat >= 3) {
+									shipment += 'white bg-red';
+								}
+								else {
+									shipment += 'red bg-white';
+								}
+
+								shipment += '">' + details.complain.padded_id + ' (' + details.complain.tat + 'd)</button></a>';
+
+								shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
+							}
+							else {
+								shipment += '<button class="btn btn-secondary ml-auto print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
+							}
+
 							shipment += '</div>';
 
 							shipment += '<div class="p-1">';
