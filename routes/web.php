@@ -907,6 +907,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('dispatch','Admins\AdminPackagingMaterialController@stock_request_dispatch')->name('dispatch');
 
         });
+        Route::prefix('stock_send')->name('stock_send.')->group(function (){
+            Route::post('submit','Admins\AdminPackagingMaterialController@stock_send_submit')->name('submit');
+        });
+
         Route::prefix('inventory')->name('inventory.')->group(function (){
             Route::get('','Admins\AdminPackagingMaterialController@inventory_index')->name('index');
             Route::post('list','Admins\AdminPackagingMaterialController@inventory_list')->name('list');

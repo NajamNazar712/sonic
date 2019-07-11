@@ -1,24 +1,17 @@
 @extends('admin.layout.master')
 
-@section('title', 'Packaging Material Stock')
+@section('title', 'Packaging Material Requests')
 
 @section('content')
     <h1 class="mb-1">
-        Packaging Material Stock
+        Packaging Material Requests
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div class="container justify-content-center pb-2 text-center">
-                    <div class="row">
-                        <div class="col-3"><h4>Small Flyers: <u id="sm_flyers_title">{{number_format($packaging->small_flyers)}}</u></h4></div>
-                        <div class="col-3"><h4>Medium Flyers: <u id="md_flyers_title">{{number_format($packaging->medium_flyers)}}</u></h4></div>
-                        <div class="col-3"><h4>Large Flyers: <u id="lg_flyers_title">{{number_format($packaging->large_flyers)}}</u></h4></div>
-                        <div class="col-3"><h4>Boxes: <u id="box_title">{{number_format($packaging->boxes)}}</u></h4></div>
-                    </div>
-                </div>
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -248,45 +241,99 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body text-center">
-                    <form id="send_stock_form" action="{{route('admin.packaging.send.submit')}}" method="post">
-                        @method('POST')
-                        @csrf
-                        <div class="container">
-                            <div class="row justify-content-center">
-                                <div class="col-4 form-group">
-                                    <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row justify-content-center">
-                                <div class="col-4 form-group">
-                                    <input type="text" name="invoice_number" id="send_stock_invoice" class="form-control numeric" placeholder="Cargo Number *" data-rule-required="true" data-msg-required="This field is required">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-6 form-group">
-                                    <input type="text" name="send_stock_smflyer" id="send_stock_smflyer" class="form-control small_flyer flyer" placeholder="Small Flyers">
-                                </div>
-                                <div class="col-6 form-group">
-                                    <input type="text" name="send_stock_mdflyer" id="send_stock_mdflyer" class="form-control medium_flyer flyer" placeholder="Medium Flyers">
-                                </div>
-                                <div class="col-6 form-group">
-                                    <input type="text" name="send_stock_lgflyer" id="send_stock_lgflyer" class="form-control large_flyer flyer" placeholder="Large Flyers">
-                                </div>
-                                <div class="col-6 form-group">
-                                    <input type="text" name="send_stock_boxes" id="send_stock_boxes" class="form-control box_flyer flyer" placeholder="Boxes">
-                                </div>
+                <form id="send_stock_form" action="{{route('admin.packaging.stock_send.submit')}}" method="post">
+                    @method('POST')
+                    @csrf
 
-                            </div>
-                            <div class="row justify-content-center">
-                                <div class="col-3">
-                                    <button id="SendNewStock" type="submit" class="btn btn-primary btn-block">Send Stock</button>
+                    <div class="modal-body">
+
+                        <div class="row justify-content-md-center">
+                            <div class="col-12">
+                                <div class="form-body">
+
+                                    <input type="hidden" id="send_type_ids" name="send_type_ids">
+                                    <input type="hidden" id="send_size_ids" name="send_size_ids">
+                                    <input type="hidden" id="send_quantities" name="send_quantities">
+                                    <div class="row justify-content-center">
+                                        <div class="col-4 form-group">
+                                            <select name="send_from" class="select2" id="send_from">
+                                                @foreach($warehouses as $warehouse)
+                                                    <option value="{{ $warehouse->id }}">{{ $warehouse->master_type == 1? 'Master Warehouse':$warehouse->city->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-4 form-group">
+                                            <select name="send_for" class="select2" id="send_for" data-rule-required="true" data-msg-required="This field is required">
+                                                @foreach($warehouses as $warehouse)
+                                                    @if($warehouse->master_type != 1)
+                                                        <option value="{{ $warehouse->id }}">{{$warehouse->city->name }}</option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div id="send_div" class="d-none">
+
+
+                                        <div class="row">
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="form-group">
+                                                    {{--<label for="sm_flyer">Packaging Material Type</label>--}}
+                                                    <select name="send_material_type" class="select2" id="send_material_type">
+                                                        @foreach($packaging_types as $packaging_type)
+                                                            <option value="{{ $packaging_type->id }}">{{ $packaging_type->type }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="form-group">
+                                                    <select name="send_material_size" class="select2" id="send_material_size"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-lg-2">
+                                                <div class="form-group">
+                                                    <input name="send_material_quantity" class="form-control numeric quantity" id="send_material_quantity" placeholder="Quantity here"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-lg-2">
+                                                <div class="form-group">
+                                                    <button class="btn btn-primary btn-block" type="button" id="send_packaging_material_btn"> Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <table class="table table-bordered send_type_datatable" id="send_type_datatable" style="z-index: 3;">
+                                                <thead>
+                                                <tr role="row" class="bg-primary white">
+
+                                                    <th class="border-primary border-darken-1">S. No.</th>
+                                                    <th class="border-primary border-darken-1">Packaging Type</th>
+                                                    <th class="border-primary border-darken-1">Size</th>
+                                                    <th class="border-primary border-darken-1">Quantity</th>
+                                                    <th class="border-primary border-darken-1"></th>
+
+                                                </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
+
+                                        <div class="row justify-content-center">
+                                            <div class="col-md-12 col-lg-6">
+                                                <button id="SendPackagingMaterialBtn" type="submit" class="btn btn-primary btn-block" disabled> Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
+
+                    </div>
+                </form>
+
+
             </div>
         </div>
     </div>
@@ -459,6 +506,48 @@
                 }
             });
 
+            $('#send_material_type').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Packaging Material Type',
+                dropdownParent: $("#SendStockModal")
+            }).bind('select2:select', function () {
+                var type_id = $(this).val();
+                if(type_id){
+                    $.ajax({
+                        url: '{!! route('admin.packaging.requests.sizes') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': type_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            $('#send_material_size').empty();
+
+                            $.each(data.sizes,function (key,value) {
+                                var type_size = parseInt(type_id+value.id);
+
+                                var index = $.inArray(type_size, already_selected_size);
+
+                                if(index === -1){
+                                    var newOption = new Option(value.size, value.id, false, false);
+                                    $('#send_material_size').append(newOption).trigger('change');
+                                    $('#send_material_size').val('').trigger('change');
+                                }
+
+                            });
+
+                        }else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+
+                }
+            });
+
             $('#packaging_material_size').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Packaging Material Size',
@@ -469,6 +558,12 @@
                 width: '100%',
                 placeholder: 'Select Packaging Material Size',
                 dropdownParent: $("#RequestStockModal")
+            });
+
+            $('#send_material_size').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Packaging Material Size',
+                dropdownParent: $("#SendStockModal")
             });
 
             $('.numeric').inputmask({
@@ -683,76 +778,89 @@
                     $(this).val(null).trigger('change');
                 }
             });
+
+            $('#send_for').prepend('<option value="" selected></option>').select2({
+                placeholder: "Receiving Warehouse",
+                width:'100%',
+            }).bind('select2:select', function () {
+                if($('#send_from').val() == $('#send_for').val()){
+                    toastr.error('Receiving Warehouse can not be the same as sender', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                    $(this).val(null).trigger('change');
+                }
+            });
             // $('body').on('change','#add_stock_form input',function() {
             //     $(this).val($(this).val().trim());
             // });
-            $('body').on('change','#send_stock_form input',function() {
-                $(this).val($(this).val().trim());
-            });
+            // $('body').on('change','#send_stock_form input',function() {
+            //     $(this).val($(this).val().trim());
+            // });
             // $('#AddStockModal').on('hidden.bs.modal',function () {
             //     $('#add_stock_form')[0].reset();
             // });
-            $('#SendStockModal').on('shown.bs.modal',function () {
-                if(!$('#city_select').hasClass('select2-hidden-accessible')){
-                    $('#city_select').select2({
-                        placeholder:'Send To',
-                        dropdownParent:$('#send_stock_form')
-                    });
-                }
+            {{--$('#SendStockModal').on('shown.bs.modal',function () {--}}
+                {{--if(!$('#city_select').hasClass('select2-hidden-accessible')){--}}
+                    {{--$('#city_select').select2({--}}
+                        {{--placeholder:'Send To',--}}
+                        {{--dropdownParent:$('#send_stock_form')--}}
+                    {{--});--}}
+                {{--}--}}
 
-                $.ajax({
-                    url: '{!! route('admin.packaging.fetch.cities') !!}',
-                    method: 'GET'
-                }).done(function (data) {
-                    if(data.status === 1){
-                        var newOption = new Option('', '', false, false);
-                        $('#city_select').append(newOption).trigger('select');
-                        $.each(data.cities,function(key,value){
-                            var newOption = new Option(value.name, value.id, false, false);
-                            $('#city_select').append(newOption).trigger('select');
-                        });
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                {{--$.ajax({--}}
+                    {{--url: '{!! route('admin.packaging.fetch.cities') !!}',--}}
+                    {{--method: 'GET'--}}
+                {{--}).done(function (data) {--}}
+                    {{--if(data.status === 1){--}}
+                        {{--var newOption = new Option('', '', false, false);--}}
+                        {{--$('#city_select').append(newOption).trigger('select');--}}
+                        {{--$.each(data.cities,function(key,value){--}}
+                            {{--var newOption = new Option(value.name, value.id, false, false);--}}
+                            {{--$('#city_select').append(newOption).trigger('select');--}}
+                        {{--});--}}
+                    {{--}else{--}}
+                        {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
-                    }
-                });
-            });
-            $('#SendStockModal').on('hidden.bs.modal',function () {
-                $('#send_stock_form')[0].reset();
-                $('#city_select').empty().trigger('change');
-                $('#city_select').val('').trigger('change');
-            });
-
-
-            $( "#send_stock_form" ).validate({
-                rules: {
-                    send_stock_sm_flyers: {
-                        require_from_group: [1, ".flyer"]
-                    },
-                    send_stock_md_flyers: {
-                        require_from_group: [1, ".flyer"]
-                    },
-                    send_stock_lg_flyers: {
-                        require_from_group: [1, ".flyer"]
-                    },
-                    send_stock_boxes: {
-                        require_from_group: [1, ".flyer"]
-                    }
-                },
-                errorClass:"danger",
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
-                },
-                submitHandler: function(form) {
-
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                    form.submit();
-
-                }
+                    {{--}--}}
+                {{--});--}}
+            {{--});--}}
+            // $('#SendStockModal').on('hidden.bs.modal',function () {
+            //     $('#send_stock_form')[0].reset();
+            //     $('#city_select').empty().trigger('change');
+            //     $('#city_select').val('').trigger('change');
+            // });
 
 
-            });
+            // $( "#send_stock_form" ).validate({
+            //     rules: {
+            //         send_stock_sm_flyers: {
+            //             require_from_group: [1, ".flyer"]
+            //         },
+            //         send_stock_md_flyers: {
+            //             require_from_group: [1, ".flyer"]
+            //         },
+            //         send_stock_lg_flyers: {
+            //             require_from_group: [1, ".flyer"]
+            //         },
+            //         send_stock_boxes: {
+            //             require_from_group: [1, ".flyer"]
+            //         }
+            //     },
+            //     errorClass:"danger",
+            //     errorPlacement: function(error, element) {
+            //         error.addClass('w-100').appendTo(element.parents('.form-group'));
+            //     },
+            //     submitHandler: function(form) {
+            //
+            //         $(form).find('button[type=submit]').attr('disabled', 'disabled');
+            //
+            //         form.submit();
+            //
+            //     }
+            //
+            //
+            // });
 
 
             $("#AddStockModal").on('shown.bs.modal', function(){
@@ -767,6 +875,14 @@
                 initDatatable('request_type_datatable');
             });
             $("#RequestStockModal").on('hidden.bs.modal', function(){
+                destroyDatatable();
+                $('#RequestMaterialBtn').attr('disabled', false);
+            });
+
+            $("#SendStockModal").on('shown.bs.modal', function(){
+                initDatatable('send_type_datatable');
+            });
+            $("#SendStockModal").on('hidden.bs.modal', function(){
                 destroyDatatable();
                 $('#RequestMaterialBtn').attr('disabled', false);
             });
@@ -1064,6 +1180,7 @@
                 }
             });
 
+
             function resetRequestArrays() {
                 already_selected_size = [];
                 request_index_array = [];
@@ -1224,6 +1341,164 @@
                             });
                         }
                     });
+                }
+            });
+
+
+            $('#send_from').prepend('<option value="" selected></option>').select2({
+                placeholder: "Send From",
+                width:'100%',
+            }).bind('select2:select', function () {
+                if($('#send_div').is(':hidden')){
+                    $('#send_div').removeClass('d-none');
+                }
+
+                destroyDatatable();
+                initDatatable('send_type_datatable');
+                resetRequestArrays();
+                if($('#send_from').val() == $('#send_for').val()){
+                    toastr.error('Send Warehouse can not be the same as receiver', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                    $(this).val(null).trigger('change');
+                }
+
+            });
+
+            var send_types_array = [];
+            var send_size_array = [];
+            var send_quantity_array = [];
+            var send_index_array = [];
+            var rid = 100;
+            $('#send_packaging_material_btn').on('click', function () {
+                var type = $('#send_material_type').val();
+                var type_name = $('#send_material_type option:selected').text();
+                var size = $('#send_material_size').val();
+                var size_name = $('#send_material_size option:selected').text();
+                var quantity = $('#send_material_quantity').val();
+                var warehouse_id = $('#send_from').val();
+                var flag = false;
+
+                if(warehouse_id == ''){
+                    flag = true;
+                    var error = "<p id='send_hub_type_error' class='danger'>Select Sender Warehouse</p>";
+                    if($('#send_from').parent('div').find('p#send_hub_type_error').length == 0){
+                        $('#send_material_type').parent('div').append(error);
+                    }
+                }else{
+                    flag = false;
+                    $('#send_hub_type_error').remove();
+                }
+
+
+                if(type == ''){
+                    flag = true;
+                    var error = "<p id='send_type_error' class='danger'>Type is required</p>";
+                    if($('#send_material_type').parent('div').find('p#send_type_error').length == 0){
+                        $('#send_material_type').parent('div').append(error);
+                    }
+                }else{
+                    flag = false;
+                    $('#send_type_error').remove();
+                }
+
+                if(size == ''){
+                    flag = true;
+                    var error = "<p id='send_size_error' class='danger'>Size is required</p>";
+                    if($('#send_material_size').parent('div').find('p#send_size_error').length == 0){
+                        $('#send_material_size').parent('div').append(error);
+                    }
+                }else{
+                    $('#send_size_error').remove();
+                }
+
+                if(quantity == ''){
+                    flag = true;
+                    var error = "<p id='send_quantity_error' class='danger'>Quantity is required</p>";
+                    if($('#send_material_quantity').parent('div').find('p#send_quantity_error').length == 0){
+                        $('#send_material_quantity').parent('div').append(error);
+                    }
+                }else{
+                    $('#send_quantity_error').remove();
+                }
+
+
+                if(flag == false){
+                    $.ajax({
+                        url: '{!! route('admin.packaging.requests.check_quantity') !!}',
+                        method: 'POST',
+                        data: {
+                            'warehouse_id':warehouse_id,
+                            'type_id': type,
+                            'size_id': size,
+                            'quantity': quantity,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+
+                        if(data.status == 0){
+                            var rowNo = ptable.rows().count();
+
+                            var remove = '<a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="la la-close"></i></a>';
+                            ptable.row.add([rowNo+1,type_name,size_name,quantity, remove]).node().id = rid;
+                            ptable.draw(false);
+                            already_selected_size.push(parseInt(type+size));
+                            send_index_array.push(rid);
+                            rid++;
+                            send_types_array.push(type);
+                            send_size_array.push(size);
+                            send_quantity_array.push(quantity);
+                            $('#SendPackagingMaterialBtn').attr('disabled', false);
+                            $('#send_material_type').val('').trigger('change');
+                            $('#send_material_size').empty();
+                            $('#send_material_quantity').val('');
+                        }else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+
+            });
+
+            $('#send_stock_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    if(ptable.rows().count() > 0){
+                        $('#send_type_ids').val(send_types_array);
+                        $('#send_size_ids').val(send_size_array);
+                        $('#send_quantities').val(send_quantity_array);
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Stock is being send!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                    }else{
+
+                        toastr.error("Please Select atleast one packaging type!", 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        return false;
+                    }
+
                 }
             });
 

@@ -58,10 +58,7 @@ class AdminPackagingMaterialController extends Controller
         $packaging_material_status = PackagingMaterialRequestStatus::all();
         $warehouses = Warehouse::where('status', 1)->get();
         $packaging_type = PackagingMaterialTypes::with('sizes')->where('status', 1)->get();
-
-        $packaging = PackagingMaterialStockHead::latest()->first();
-
-        return view('admin.materials.flyers.index')->with(['packaging' => $packaging, 'packaging_types' => $packaging_type, 'warehouses' => $warehouses, 'packaging_material_status' => $packaging_material_status]);
+        return view('admin.materials.flyers.index')->with(['packaging_types' => $packaging_type, 'warehouses' => $warehouses, 'packaging_material_status' => $packaging_material_status]);
     }
 
     public function packaging_list(Request $request)
@@ -1523,9 +1520,10 @@ class AdminPackagingMaterialController extends Controller
 
            $shipment = $this->book($settings->setting_value, 1, $pickup_address_id,1,$consignee_hub_id, 'Trax Logistics', 'Trax Office', '0213-8772222',NULL, 'info@trax.pk', NULL,0,Carbon::now(),NULL,1,1,NULL,0,1,2,2);
 
-            $this->generate_tracking_number($shipment->id, $pickup_hub_id, $consignee_hub_id);
-
-
+            $tracking_number = $this->generate_tracking_number($shipment->id, $pickup_hub_id, $consignee_hub_id);
+            $stock_request = WarehouseStockRequest::find($request_id);
+            $stock_request->tracking_number = $tracking_number;
+            $stock_request->save();
             $this->add_item($shipment->id, 24, $details,1, null,0,0);
 
             ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, NULL, Auth::id(), $request_id);
@@ -1574,8 +1572,8 @@ class AdminPackagingMaterialController extends Controller
                     $sender_stock->stock -= $request_detail->quantity;
                     $sender_stock->save();
 
-                    if($receiver_stock = WarehouseStock::where('warehouse_id', $stock_request->requested_by)->where('type_id', $request_detail->type_id)->where('type_size_id', $request_detail->size_id)->exists()){
-                        $receiver_stock = $receiver_stock->first();
+                    if(WarehouseStock::where('warehouse_id', $stock_request->requested_by)->where('type_id', $request_detail->type_id)->where('type_size_id', $request_detail->size_id)->exists()){
+                        $receiver_stock = WarehouseStock::where('warehouse_id', $stock_request->requested_by)->where('type_id', $request_detail->type_id)->where('type_size_id', $request_detail->size_id)->first();
                         $receiver_stock->stock += $request_detail->quantity;
                         $request_detail->save();
                     }else{
@@ -1600,6 +1598,33 @@ class AdminPackagingMaterialController extends Controller
                 return response()->json(['status' => 1, 'error' => 'Could not find request!']);
             }
         }
+    }
+
+    public function stock_send_submit(Request $request){
+
+        $send_from = $request->send_from;
+        $send_for = $request->send_for;
+        $type_ids = explode(',', $request->send_type_ids);
+        $type_size_ids = explode(',', $request->send_size_ids);
+        $quantities = explode(',', $request->send_quantities);
+        $user_id = Auth::id();
+        $warehouse_stock_request = new WarehouseStockRequest();
+        $warehouse_stock_request->requested_by = $send_for;
+        $warehouse_stock_request->send_by = $send_from;
+        $warehouse_stock_request->created_by = $user_id;
+        $warehouse_stock_request->status_id = 1;
+        $warehouse_stock_request->save();
+
+        foreach($type_ids as $index => $type){
+            $warehouse_stock_details = new WarehouseStockRequestDetail();
+            $warehouse_stock_details->request_id = $warehouse_stock_request->id;
+            $warehouse_stock_details->type_id = $type;
+            $warehouse_stock_details->size_id = $type_size_ids[$index];
+            $warehouse_stock_details->quantity = $quantities[$index];
+            $warehouse_stock_details->save();
+        }
+
+        return redirect()->back()->with('success', 'Stock requested successfully!');
     }
 
 }

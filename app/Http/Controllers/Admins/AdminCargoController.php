@@ -270,14 +270,16 @@ class AdminCargoController extends Controller
             $shipment = $shipment->first();
 
             if($shipment->packaging_material_request == 1){
+
+
                 $packaging_material_request = PackagingMaterialRequest::where('tracking_number',$shipment->tracking_number)->first();
-                $packaging_material_request_stock = WarehouseStockRequest::where('tracking_number',$shipment->tracking_number)->first();
+
                 if($packaging_material_request != null){
                     if($packaging_material_request->status_id != 3){
                         return ['status' => 1, 'error' => 'Packaging Material Request is not dispatched yet!'];
                     }
                 }
-
+                $packaging_material_request_stock = WarehouseStockRequest::where('tracking_number',$shipment->tracking_number)->first();
                 if($packaging_material_request_stock != null){
                     if($packaging_material_request_stock->status_id != 3){
                         return ['status' => 1, 'error' => 'Warehouse Stock Request is not dispatched yet!'];
