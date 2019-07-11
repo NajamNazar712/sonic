@@ -802,4 +802,74 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'Settings can\'t be updated');
         }
     }
+
+    public function stock_movement_index(Request $request){
+        $settings = GlobalSettings::where('type', 'packaging_material_stock_movement_account_id')->first();
+        $account_id = '';
+        $account_name = '';
+        if($settings){
+            $account_id = $settings->setting_value;
+            $account_name = User::find($account_id)->name;
+        }
+        return view('admin.settings.stock_movement')->with(['account_id' => $account_id, 'account_name' => $account_name]);
+    }
+
+    public function stock_movement_update(Request $request){
+
+        $stock_movement_account_id = $request->stock_movement_account_id;
+        if ($stock_movement_account_id != null) {
+            $settings = GlobalSettings::where('type', 'packaging_material_stock_movement_account_id');
+            if($settings->exists()){
+                $settings = $settings->first();
+                $settings->setting_value = $stock_movement_account_id;
+                $settings->save();
+            }else{
+                $global_settings = new GlobalSettings();
+                $global_settings->setting_value = $stock_movement_account_id;
+                $global_settings->type = 'packaging_material_stock_movement_account_id';
+                $global_settings->save();
+
+            }
+
+            return redirect()->back()->with('success', 'Packaging Material Stock Movement Account Updated!');
+
+        }
+        return redirect()->back()->with('error', 'Settings can\'t be updated');
+
+    }
+
+    public function weight_factor_index(Request $request){
+        $settings = GlobalSettings::where('type', 'weight_charges_factor')->first();
+        $weight_factor = '';
+        if($settings){
+            $weight_factor = $settings->setting_value;
+        }
+        return view('admin.settings.weight_factor')->with(['weight_factor' => $weight_factor]);
+    }
+
+    public function weight_factor_update(Request $request){
+
+        $weight_factor = $request->weight_factor;
+        if ($weight_factor != null) {
+            $settings = GlobalSettings::where('type', 'weight_charges_factor');
+            if($settings->exists()){
+                $settings = $settings->first();
+                $settings->setting_value = $weight_factor;
+                $settings->save();
+            }else{
+                $global_settings = new GlobalSettings();
+                $global_settings->setting_value = $weight_factor;
+                $global_settings->type = 'weight_charges_factor';
+                $global_settings->save();
+
+            }
+
+            return redirect()->back()->with('success', 'Weight Charges Factor is Updated!');
+
+        }
+        return redirect()->back()->with('error', 'Settings can\'t be updated');
+
+    }
+
+
 }

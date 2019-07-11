@@ -177,35 +177,19 @@ class ShipperPackagingMaterialController extends Controller
 
         $today = Carbon::today();
 
-        $discount = DiscountCharge::where('user_id', session('user_id'))->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+        $discount = DiscountCharge::where('user_id', session('user_id'))->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->whereNotNull('packaging');
 
         if ($discount->exists()) {
-            $discount = $discount->orderBy('shipping_mode_id')->first();
-        }
+            $discount = $discount->orderBy('shipping_mode_id', 'ASC')->first();
 
-//        if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
-//            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-//        }
-//        else if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
-//            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-//        }
-//        else if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',3)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
-//            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',3)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-//        }
-//        else if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',4)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
-//            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',4)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-//        }
-//        if($discount){
-//            $discount = $discount->first();
-//        }
-        if(!empty($discount->packaging)){
             $discount_packaging = $discount->packaging;
+
             if (strpos($discount_packaging, '%') !== FALSE) {
                 $discount_packaging = (floatval(str_replace('%', '', $discount_packaging)) / 100) * $total_charges;
-                $total_charges = $discount_packaging;
+                $total_charges -= $discount_packaging;
             }
             else {
-                $total_charges = $total_charges - floatval($discount_packaging);
+                $total_charges -= floatval($discount_packaging);
             }
         }
 

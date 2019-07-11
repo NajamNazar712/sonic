@@ -463,6 +463,9 @@ class Permission
             'settings.cod_cap_zones.index' => 197,
             'settings.cod_cap_zones.update' => 197,
 
+            'settings.stock_movement.index' => 228,
+            'settings.stock_movement.update' => 228,
+
 
 
             'cancelled_shipments.index' => 117,
