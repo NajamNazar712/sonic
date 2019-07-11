@@ -19,6 +19,7 @@ class UpdateModulePermissionInventoryTableSeeder extends Seeder
             array('id' => 225, 'name' => 'Stock - Cancel', 'module_id' => 10),
             array('id' => 226, 'name' => 'Packaging - Confirm', 'module_id' => 10),
             array('id' => 227, 'name' => 'Packaging - Cancel', 'module_id' => 10),
+            array('id' => 228, 'name' => 'Stock Movement Account - View ', 'module_id' => 10),
         ));
         DB::table('module_permissions')->where('id', 80)->update([
             'name' => 'Packaging - Dispatch'

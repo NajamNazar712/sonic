@@ -1432,23 +1432,25 @@ class AdminPackagingMaterialController extends Controller
         return view('admin.materials.inventory.index')->with(['warehouses' => $warehouses, 'master_warehouse' => $master_warehouse]);
     }
 
-    public function inventory_list(Request $request){
+    public function inventory_list(Request $request)
+    {
         $warehouses = $request->warehouses;
-        $packaging_inventory = WarehouseStock::leftjoin('warehouses as wm', function($join){
+        $packaging_inventory = WarehouseStock::leftjoin('warehouses as wm', function ($join) {
             $join->on('wm.id', '=', 'warehouse_stocks.warehouse_id')
-            ->where('wm.master_type', 1);
+                ->where('wm.master_type', 1);
         })
-            ->leftjoin('warehouses as w', function($join){
+            ->leftjoin('warehouses as w', function ($join) {
                 $join->on('w.id', '=', 'warehouse_stocks.warehouse_id')
                     ->where('w.master_type', 0);
             })
             ->leftjoin('packaging_material_types as pmt', 'pmt.id', '=', 'warehouse_stocks.type_id')
             ->leftjoin('packaging_material_type_sizes as pmts', 'pmts.id', '=', 'warehouse_stocks.type_size_id')
             ->select('pmt.id', 'pmt.type as packaging_type', 'pmts.size as size', DB::raw('(select sum(warehouse_stocks.stock) from warehouse_stocks where warehouse_stocks.warehouse_id = wm.id and warehouse_stocks.type_id = pmt.id and warehouse_stocks.type_size_id = pmts.id) as master_warehouse'), DB::raw('(select sum(warehouse_stocks.stock) from warehouse_stocks where warehouse_stocks.type_id = pmt.id and warehouse_stocks.type_size_id = pmts.id) as total'))->groupBy('pmts.id');
-
-        foreach ($warehouses as $warehouse){
-            $packaging_inventory->addselect(DB::raw('(select sum(warehouse_stocks.stock) from warehouse_stocks where  warehouse_stocks.warehouse_id = '. $warehouse['id'] .' and warehouse_stocks.type_id = pmt.id and warehouse_stocks.type_size_id = pmts.id) as '. strtolower(str_replace(' ', '', $warehouse['name']))));
-        }
+            if (!empty($warehouse)) {
+                foreach ($warehouses as $warehouse) {
+                    $packaging_inventory->addselect(DB::raw('(select sum(warehouse_stocks.stock) from warehouse_stocks where  warehouse_stocks.warehouse_id = ' . $warehouse['id'] . ' and warehouse_stocks.type_id = pmt.id and warehouse_stocks.type_size_id = pmts.id) as ' . strtolower(str_replace(' ', '', $warehouse['name']))));
+                }
+            }
         return Datatables::of($packaging_inventory)
             ->editColumn('packaging_type' ,function($inventory){
                 return $inventory->packaging_type . ' - ' . $inventory->size;
