@@ -19,9 +19,9 @@
                         <th class="border-primary border-darken-1">Type - Size</th>
                         <th class="border-primary border-darken-1">Total</th>
                         <th class="border-primary border-darken-1">Master Warehouse @if(!empty($master_warehouse))({{$master_warehouse->name}})@endif</th>
-                        @if(!empty($warehouse))
+                        @if(!empty($warehouses))
                             @foreach($warehouses as $warehouse)
-                                <th class="border-primary border-darken-1">{{$warehouse['name']}}</th>
+                                    <th class="border-primary border-darken-1">{{$warehouse['name']}}</th>
                             @endforeach
                         @endif
                     </tr>
@@ -101,17 +101,20 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var warehouses = @json($warehouses);
+            var master_warehouse = @json($master_warehouse);
+            var master_warehouse_id = master_warehouse.id;
             var columns = [];
             var export_col = [1,2,3];
             columns.push({orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}});
             columns.push({data: 'packaging_type', name: 'pmt.type', class: 'align-middle packaging_type', width: 400 });
             columns.push({data: 'total', class: 'align-middle text-center total'});
             columns.push({data: 'master_warehouse', class: 'align-middle text-center master_warehouse'});
+
             $.each(warehouses, function (index, value) {
                 var i;
                 i = index+3;
-                export_col.push(i+1);
-                columns.push({data:value.name.replace(/ /g, '').toLowerCase(), class:'align-middle text-center counts'});
+                    export_col.push(i+1);
+                    columns.push({data:value.name.replace(/ /g, '').toLowerCase(), class:'align-middle text-center counts'});
             });
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -144,6 +147,7 @@
                     },
                     data: function (d) {
                         d.warehouses = warehouses;
+                        d.master_warehouse_id = master_warehouse_id;
                     },
                 },
                 columns: columns,
