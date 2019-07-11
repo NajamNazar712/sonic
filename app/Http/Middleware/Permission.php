@@ -347,6 +347,8 @@ class Permission
             'packaging.requests.index' => 79,
             'packaging.requests.list' => 79,
             'packaging.requests.dispatch' => 80,
+            'packaging.requests.confirm' => 226,
+            'packaging.requests.cancel' => 227,
             'packaging.types.index' => 214,
             'packaging.types.list' => 214,
             'packaging.types.add' => 215,
