@@ -455,20 +455,25 @@ class AdminPackagingMaterialController extends Controller
                 return number_format($shipment->amount);
             })
             ->addColumn('action',function ($packaging) {
-                if (($packaging->status_id !== 4 && $packaging->status_id !== 5) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
+                if (($packaging->status_id !== 4 && $packaging->status_id !== 5) && (session('role_id') == 1 || in_array(80, session('permissions')) || in_array(226, session('permissions')) || in_array(227, session('permissions')))) {
                     $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
                     if ($packaging->status_id == 1) {
-                        $dropdown .= '<button type="button" class="dropdown-item confirm"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Confirm</div></button>';
-                        $dropdown .= '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
+                        if (session('role_id') == 1 || in_array(226, session('permissions'))){
+                            $dropdown .= '<button type="button" class="dropdown-item confirm"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Confirm</div></button>';
+                        }
+
+                        if (session('role_id') == 1 || in_array(227, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
+                        }
                     }
                     if ($packaging->status_id >= 2) {
                         $dropdown .= '<button type="button" class="dropdown-item grn"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Print GRN</div></button>';
                     }
-                    if ($packaging->status_id == 2 && ($packaging->shipper_status_id == 4 || $packaging->shipper_status_id == 2)) {
+                    if ($packaging->status_id == 2 && ($packaging->shipper_status_id == 4 || $packaging->shipper_status_id == 2) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item dispatch"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Dispatch</div></button>';
                     }
 
