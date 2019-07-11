@@ -1133,19 +1133,21 @@ class DeliveryController extends Controller
                             ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0,($request->has($received_refused_by_name)? $request->received_or_refused_by[$shipment]:null));
                             Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
 
-                            $packaging_shipment = Shipment::where('id', $shipment)->first();
+                            if($shipment_details->packaging_material_request == 1){
 
-                            $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $packaging_shipment->tracking_number)->where('status_id', 3)->first();
-                            if($packaging_material_shipment != null){
-                                $packaging_material_shipment->status_id = 4;
-                                $packaging_material_shipment->save();
+                                $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment_details->tracking_number)->where('status_id', 3)->first();
+                                if($packaging_material_shipment != null){
+                                    $packaging_material_shipment->status_id = 4;
+                                    $packaging_material_shipment->save();
 
-                                $packaging_request_history = new PackagingMaterialRequestHistory();
-                                $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
-                                $packaging_request_history->status = 4;
-                                $packaging_request_history->updated_by = Auth::id();
-                                $packaging_request_history->save();
+                                    $packaging_request_history = new PackagingMaterialRequestHistory();
+                                    $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                                    $packaging_request_history->status = 4;
+                                    $packaging_request_history->updated_by = Auth::id();
+                                    $packaging_request_history->save();
+                                }
                             }
+
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                         }
                     }else if($selected_status == 56){

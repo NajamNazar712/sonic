@@ -79,7 +79,7 @@
                                         </div>
                                         <div class="col-md-6 col-lg-2">
                                             <div class="form-group">
-                                                <input name="packaging_material_quantity" class="form-control numeric quantity" id="packaging_material_quantity" placeholder="Quantity here"/>
+                                                <input name="packaging_material_quantity" class="form-control numeric quantity" id="packaging_material_quantity" placeholder="Quantity"/>
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-lg-2">
@@ -187,7 +187,7 @@
                                         </div>
                                         <div class="col-md-6 col-lg-2">
                                             <div class="form-group">
-                                                <input name="request_material_quantity" class="form-control numeric quantity" id="request_material_quantity" placeholder="Quantity here"/>
+                                                <input name="request_material_quantity" class="form-control numeric quantity" id="request_material_quantity" placeholder="Quantity"/>
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-lg-2">
@@ -295,7 +295,7 @@
                                             </div>
                                             <div class="col-md-6 col-lg-2">
                                                 <div class="form-group">
-                                                    <input name="send_material_quantity" class="form-control numeric quantity" id="send_material_quantity" placeholder="Quantity here"/>
+                                                    <input name="send_material_quantity" class="form-control numeric quantity" id="send_material_quantity" placeholder="Quantity"/>
                                                 </div>
                                             </div>
                                             <div class="col-md-6 col-lg-2">
@@ -425,7 +425,7 @@
             var ptable;
             $('#packaging_material_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Packaging Material Type',
+                placeholder: 'Packaging Material Type',
                 dropdownParent: $("#AddStockModal")
             }).bind('select2:select', function () {
                 var type_id = $(this).val();
@@ -467,7 +467,7 @@
 
             $('#request_material_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Packaging Material Type',
+                placeholder: 'Packaging Material Type',
                 dropdownParent: $("#RequestStockModal")
             }).bind('select2:select', function () {
                 var type_id = $(this).val();
@@ -509,7 +509,7 @@
 
             $('#send_material_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Packaging Material Type',
+                placeholder: 'Packaging Material Type',
                 dropdownParent: $("#SendStockModal")
             }).bind('select2:select', function () {
                 var type_id = $(this).val();
@@ -551,19 +551,19 @@
 
             $('#packaging_material_size').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Packaging Material Size',
+                placeholder: 'Packaging Material Size',
                 dropdownParent: $("#AddStockModal")
             });
 
             $('#request_material_size').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Packaging Material Size',
+                placeholder: 'Packaging Material Size',
                 dropdownParent: $("#RequestStockModal")
             });
 
             $('#send_material_size').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Packaging Material Size',
+                placeholder: 'Packaging Material Size',
                 dropdownParent: $("#SendStockModal")
             });
 
@@ -750,7 +750,7 @@
                     });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         data:data,
-                        placeholder: "Select Status",
+                        placeholder: "Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
@@ -969,7 +969,7 @@
 
                 if(warehouse_id == ''){
                     flag = true;
-                    var error = "<p id='request_hub_type_error' class='danger'>Select Requested Warehouse</p>";
+                    var error = "<p id='request_hub_type_error' class='danger'>Requested Warehouse</p>";
                     if($('#request_from').parent('div').find('p#request_hub_type_error').length == 0){
                         $('#request_material_type').parent('div').append(error);
                     }

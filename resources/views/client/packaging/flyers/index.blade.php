@@ -115,7 +115,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="row">
+                                    <div class="row packaging_div">
                                         <div class="col-md-6 col-lg-4">
                                             <div class="form-group">
                                                 {{--<label for="sm_flyer">Packaging Material Type</label>--}}
@@ -133,7 +133,7 @@
                                         </div>
                                         <div class="col-md-6 col-lg-2">
                                             <div class="form-group">
-                                                <input name="packaging_material_quantity" class="form-control quantity" id="packaging_material_quantity" placeholder="Quantity here"/>
+                                                <input name="packaging_material_quantity" class="form-control quantity" id="packaging_material_quantity" placeholder="Quantity"/>
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-lg-2">
@@ -234,16 +234,23 @@
                 'min': 1,
                 'max': 10000
             });
-
+            $('input.quantity').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 1,
+                'max': 100000
+            });
             $('#mode_of_payment').select2({
                 width: '100%',
-                placeholder: 'Select Payment Mode',
+                placeholder: 'Payment Mode',
                 dropdownParent: $("#AddRequestModal")
             });
             $('#packaging_material_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Packaging Material Type',
-                dropdownParent: $("#AddRequestModal")
+                placeholder: 'Packaging Material Type',
+                dropdownParent: $("#AddRequestModal .packaging_div")
             }).bind('select2:select', function () {
                 var type_id = $(this).val();
                 if(type_id){
@@ -286,8 +293,8 @@
 
             $('#packaging_material_size').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Packaging Material Size',
-                dropdownParent: $("#AddRequestModal")
+                placeholder: 'Packaging Material Size',
+                dropdownParent: $("#AddRequestModal .packaging_div")
             });
 
 
@@ -382,6 +389,7 @@
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
+                bInfo: false,
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('cod.packaging.requests.list') }}',
@@ -586,12 +594,7 @@
                 });
 
             });
-            $('input.quantity').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-            });
+
 
 
 

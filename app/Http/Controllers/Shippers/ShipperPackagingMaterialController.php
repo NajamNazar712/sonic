@@ -174,23 +174,30 @@ class ShipperPackagingMaterialController extends Controller
                     $total_charges += $packaging_quantities[$index] * $charges->charges;
             }
         }
+
         $today = Carbon::today();
 
-        if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
-            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+        $discount = DiscountCharge::where('user_id', session('user_id'))->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+
+        if ($discount->exists()) {
+            $discount = $discount->orderBy('shipping_mode_id')->first();
         }
-        else if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
-            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-        }
-        else if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',3)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
-            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',3)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-        }
-        else if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',4)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
-            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',4)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
-        }
-        if($discount){
-            $discount = $discount->first();
-        }
+
+//        if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+//            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+//        }
+//        else if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+//            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+//        }
+//        else if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',3)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+//            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',3)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+//        }
+//        else if(DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',4)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+//            $discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',4)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+//        }
+//        if($discount){
+//            $discount = $discount->first();
+//        }
         if(!empty($discount->packaging)){
             $discount_packaging = $discount->packaging;
             if (strpos($discount_packaging, '%') !== FALSE) {
