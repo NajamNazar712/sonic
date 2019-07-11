@@ -18,6 +18,7 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Request Date/Time</th>
+                        <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Requested By</th>
                         <th class="border-primary border-darken-1">Warehouse</th>
                         <th class="border-primary border-darken-1">Tracking Number</th>
@@ -593,30 +594,24 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Invoice No./Cargo ID');
-                            head.push('Entry Type');
-                            head.push('Entered Date/Time');
-                            head.push('Entered By');
-                            head.push('Small Flyers');
-                            head.push('Medium Flyers');
-                            head.push('Large Flyers');
-                            head.push('Boxes');
-                            head.push('Hub');
+                            head.push('Requested Date/Time');
+                            head.push('Created By');
+                            head.push('Requested By');
+                            head.push('Send By');
+                            head.push('Tracking Number');
+                            head.push('Status');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
-                                row.push(values.reference_number);
-                                row.push(values.entry_type);
                                 row.push(values.created_at);
-                                row.push(values.admin);
-                                row.push(values.small_flyers);
-                                row.push(values.medium_flyers);
-                                row.push(values.large_flyers);
-                                row.push(values.boxes);
-                                row.push(values.hub);
+                                row.push(values.created_by);
+                                row.push(values.requested_by);
+                                row.push(values.send_by);
+                                row.push(values.tracking_number);
+                                row.push(values.status);
 
                                 body.push(row);
                             });
@@ -685,7 +680,7 @@
                 @else
                     buttons:[{
                     extend: 'excel',
-                    title: 'Packaging Material Stock',
+                    title: 'Packaging Material Requests',
                     className:'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
@@ -705,9 +700,10 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'created_at', name: 'warehouse_stock_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'requested_by', name: 'rb.name', class: 'align-middle requested_by'},
                     {data: 'send_by', name: 'sb.name', class: 'align-middle send_by'},
-                    {data: 'tracking_number', name: 'warehouse_stock_requests.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'tracking_number_link', name: 'warehouse_stock_requests.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action'}
 
@@ -791,76 +787,7 @@
                     $(this).val(null).trigger('change');
                 }
             });
-            // $('body').on('change','#add_stock_form input',function() {
-            //     $(this).val($(this).val().trim());
-            // });
-            // $('body').on('change','#send_stock_form input',function() {
-            //     $(this).val($(this).val().trim());
-            // });
-            // $('#AddStockModal').on('hidden.bs.modal',function () {
-            //     $('#add_stock_form')[0].reset();
-            // });
-            {{--$('#SendStockModal').on('shown.bs.modal',function () {--}}
-                {{--if(!$('#city_select').hasClass('select2-hidden-accessible')){--}}
-                    {{--$('#city_select').select2({--}}
-                        {{--placeholder:'Send To',--}}
-                        {{--dropdownParent:$('#send_stock_form')--}}
-                    {{--});--}}
-                {{--}--}}
 
-                {{--$.ajax({--}}
-                    {{--url: '{!! route('admin.packaging.fetch.cities') !!}',--}}
-                    {{--method: 'GET'--}}
-                {{--}).done(function (data) {--}}
-                    {{--if(data.status === 1){--}}
-                        {{--var newOption = new Option('', '', false, false);--}}
-                        {{--$('#city_select').append(newOption).trigger('select');--}}
-                        {{--$.each(data.cities,function(key,value){--}}
-                            {{--var newOption = new Option(value.name, value.id, false, false);--}}
-                            {{--$('#city_select').append(newOption).trigger('select');--}}
-                        {{--});--}}
-                    {{--}else{--}}
-                        {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-
-                    {{--}--}}
-                {{--});--}}
-            {{--});--}}
-            // $('#SendStockModal').on('hidden.bs.modal',function () {
-            //     $('#send_stock_form')[0].reset();
-            //     $('#city_select').empty().trigger('change');
-            //     $('#city_select').val('').trigger('change');
-            // });
-
-
-            // $( "#send_stock_form" ).validate({
-            //     rules: {
-            //         send_stock_sm_flyers: {
-            //             require_from_group: [1, ".flyer"]
-            //         },
-            //         send_stock_md_flyers: {
-            //             require_from_group: [1, ".flyer"]
-            //         },
-            //         send_stock_lg_flyers: {
-            //             require_from_group: [1, ".flyer"]
-            //         },
-            //         send_stock_boxes: {
-            //             require_from_group: [1, ".flyer"]
-            //         }
-            //     },
-            //     errorClass:"danger",
-            //     errorPlacement: function(error, element) {
-            //         error.addClass('w-100').appendTo(element.parents('.form-group'));
-            //     },
-            //     submitHandler: function(form) {
-            //
-            //         $(form).find('button[type=submit]').attr('disabled', 'disabled');
-            //
-            //         form.submit();
-            //
-            //     }
-            //
-            //
-            // });
 
 
             $("#AddStockModal").on('shown.bs.modal', function(){

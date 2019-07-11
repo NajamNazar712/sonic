@@ -69,8 +69,12 @@ class AdminPackagingMaterialController extends Controller
             ->leftjoin('cities as sb', 'sb.id', '=', 'sw.hub_id')
             ->join('admins as cb', 'cb.id', '=', 'warehouse_stock_requests.created_by')
             ->join('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'warehouse_stock_requests.status_id')
-            ->select(['warehouse_stock_requests.id as stock_request_id','warehouse_stock_requests.tracking_number','sb.name as send_by','rb.name as requested_by','cb.name as created_by','pmrs.id','pmrs.name as status','warehouse_stock_requests.created_at','warehouse_stock_requests.status_id']);
+            ->select(['warehouse_stock_requests.id as stock_request_id','warehouse_stock_requests.tracking_number','warehouse_stock_requests.tracking_number as tracking_number_link','sb.name as send_by','rb.name as requested_by','cb.name as created_by','pmrs.id','pmrs.name as status','warehouse_stock_requests.created_at','warehouse_stock_requests.status_id']);
         return Datatables::of($stock_requests)
+            ->editColumn('tracking_number_link',function ($stock_requests){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$stock_requests->tracking_number' class='tracking' target='_blank'>$stock_requests->tracking_number</a></u>";
+            })
             ->filterColumn('status',function ($query,$keyword){
                 if ($keyword != '') {
                     $query->where('warehouse_stock_requests.status_id','=',$keyword);
@@ -1572,20 +1576,20 @@ class AdminPackagingMaterialController extends Controller
                     $sender_stock->stock -= $request_detail->quantity;
                     $sender_stock->save();
 
-                    if(WarehouseStock::where('warehouse_id', $stock_request->requested_by)->where('type_id', $request_detail->type_id)->where('type_size_id', $request_detail->size_id)->exists()){
-                        $receiver_stock = WarehouseStock::where('warehouse_id', $stock_request->requested_by)->where('type_id', $request_detail->type_id)->where('type_size_id', $request_detail->size_id)->first();
-                        $receiver_stock->stock += $request_detail->quantity;
-                        $request_detail->save();
-                    }else{
-
-                        $receiver_stock = new WarehouseStock();
-                        $receiver_stock->warehouse_id = $stock_request->requested_by;
-                        $receiver_stock->type_id = $request_detail->type_id;
-                        $receiver_stock->type_size_id = $request_detail->size_id;
-                        $receiver_stock->stock = $request_detail->quantity;
-                        $receiver_stock->save();
-
-                    }
+//                    if(WarehouseStock::where('warehouse_id', $stock_request->requested_by)->where('type_id', $request_detail->type_id)->where('type_size_id', $request_detail->size_id)->exists()){
+//                        $receiver_stock = WarehouseStock::where('warehouse_id', $stock_request->requested_by)->where('type_id', $request_detail->type_id)->where('type_size_id', $request_detail->size_id)->first();
+//                        $receiver_stock->stock += $request_detail->quantity;
+//                        $request_detail->save();
+//                    }else{
+//
+//                        $receiver_stock = new WarehouseStock();
+//                        $receiver_stock->warehouse_id = $stock_request->requested_by;
+//                        $receiver_stock->type_id = $request_detail->type_id;
+//                        $receiver_stock->type_size_id = $request_detail->size_id;
+//                        $receiver_stock->stock = $request_detail->quantity;
+//                        $receiver_stock->save();
+//
+//                    }
 
 
                 }
