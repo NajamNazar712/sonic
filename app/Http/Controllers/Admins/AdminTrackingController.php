@@ -10,6 +10,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Shipment;
 use App\Http\Models\Rider;
 use App\Http\Models\CargoConsignment;
+use App\Http\Models\CRM\CrmRequest;
 
 use Auth;
 use Yajra\Datatables\Datatables;
@@ -226,6 +227,19 @@ class AdminTrackingController extends Controller
                     }
                 }
 
+                $complain = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5]);
+
+                if ($complain->exists()) {
+                    $complain = $complain->first();
+
+                    $details['complain'] = array();
+                    $details['complain']['id'] = $complain->id;
+                    $details['complain']['padded_id'] = str_pad($complain->id, 6, '0', STR_PAD_LEFT);
+                    $details['complain']['tat'] = Carbon::parse($complain->created_at)->diffInWeekdays(Carbon::now());
+                }
+
+                // $details['complain']['id'] = 10;
+                // $details['complain']['tat'] = 3;
 
     			$tracking['shipments'][$shipment->id] = $details;
     		}
