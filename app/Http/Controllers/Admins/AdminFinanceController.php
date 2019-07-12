@@ -2451,6 +2451,14 @@ class AdminFinanceController extends Controller
                 $done_payment->returned_shipments = 0;
                 $done_payment->adjusted_shipments = 0;
 
+                $settings = GlobalSettings::where('type', 'ibft_charges');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+
+                    $done_payment->ibft_charges = $settings->setting_value;
+                }
+
                 $done_payment->save();
 
                 $total_shipments = 0;
@@ -2588,7 +2596,7 @@ class AdminFinanceController extends Controller
             ->join('shipments as s', 's.id', '=', 'dps.shipment_id')
             ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-            ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 's.booking_type_id', 'usi.poc')
+            ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 's.booking_type_id', 'usi.poc', 'done_payments.ibft_charges')
             ->groupBy('done_payments.id');
 
         if (session('role_id') != 1) {
@@ -2625,7 +2633,7 @@ class AdminFinanceController extends Controller
             })
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
             ->addColumn('total_deductable', function($done_payment) {
-                return number_format(($done_payment->total_charges + $done_payment->total_gst), 2);
+                return number_format(($done_payment->total_charges + $done_payment->total_gst + $done_payment->ibft_charges), 2);
             })
             ->editColumn('delivered_shipments', function($done_payment) {
                 if ($done_payment->delivered_shipments != 0) {
@@ -2655,13 +2663,13 @@ class AdminFinanceController extends Controller
                 return number_format($done_payment->total_amount, 2);
             })
             ->editColumn('total_charges', function($done_payment) {
-                return number_format($done_payment->total_charges, 2);
+                return number_format(($done_payment->total_charges + $done_payment->ibft_charges), 2);
             })
             ->editColumn('total_gst', function($done_payment) {
                 return number_format($done_payment->total_gst, 2);
             })
             ->editColumn('total_payable', function($done_payment) {
-                return number_format(ROUND($done_payment->total_payable, 0, PHP_ROUND_HALF_DOWN));
+                return number_format(ROUND($done_payment->total_payable - $done_payment->ibft_charges, 0, PHP_ROUND_HALF_DOWN));
             })
             ->addColumn('phone_numbers', function($done_payment) {
                 $phone_numbers = $done_payment->phone;
@@ -3126,7 +3134,7 @@ class AdminFinanceController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Total Payable (PKR)</strong></td>
-                              <td>' . number_format(ROUND($total_payable, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                              <td>' . number_format(ROUND(($total_payable - $done_payment->ibft_charges), 0, PHP_ROUND_HALF_DOWN)) . '</td>
                             </tr>
                           </tbody>
                         </table>
@@ -3212,8 +3220,12 @@ class AdminFinanceController extends Controller
                                         <td class="color secondary">' . number_format($total_adjustments, 2) . '</td>
                                     </tr>
                                     <tr>
+                                        <td class="color secondary"><strong>IBFT Charges</strong></td>
+                                        <td>' . number_format($done_payment->ibft_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - $total_adjustments), 2) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
@@ -3370,7 +3382,7 @@ class AdminFinanceController extends Controller
 
         $total_columns = count($details[0]);
 
-        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments)];
+        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges)];
 
         $details[] = [];
 

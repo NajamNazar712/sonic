@@ -802,4 +802,38 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'Settings can\'t be updated');
         }
     }
+
+    public function ibft_charges_index() {
+        $settings = GlobalSettings::where('type', 'ibft_charges');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $ibft_charges = $settings->setting_value;
+        }
+        else {
+            $ibft_charges = 0;
+        }
+
+        return view('admin.settings.ibft_charges')->with('ibft_charges', $ibft_charges);
+    }
+
+    public function ibft_charges_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'ibft_charges');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        }
+        else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'ibft_charges';
+        }
+
+        $settings->setting_value = $request->ibft_charges;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }
