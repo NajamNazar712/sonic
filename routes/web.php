@@ -1114,6 +1114,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@ibft_charges_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@ibft_charges_store')->name('store');
         });
+
+        Route::prefix('weight_factor')->name('weight_factor.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@weight_factor_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@weight_factor_update')->name('update');
+        });
+
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {

@@ -643,7 +643,7 @@
                     @endif
 
                     @if (session('role_id') == 1 || in_array(229, session('permissions')))
-                            <li><a class="menu-item" href="{{route('admin.settings.ibft_charges.index')}}">Weight Charge Factor</a></li>
+                        <li><a class="menu-item" href="{{ route('admin.settings.weight_factor.index') }}">Weight Charges Factor</a></li>
                     @endif
                 </ul>            </li>
             @endif
