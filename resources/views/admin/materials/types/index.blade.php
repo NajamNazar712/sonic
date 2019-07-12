@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Packaging Material List')
+@section('title', 'Packaging Material Types')
 
 @section('content')
     <h1 class="mb-1">
-        Packaging Material List
+        Packaging Material Types
     </h1>
 
     <div class="card">
@@ -225,10 +225,10 @@
                             head.push('S.No');
                             head.push('Type');
                             head.push('Description');
-                            head.push('Updated At');
-                            head.push('Updated By');
                             head.push('Created At');
                             head.push('Created By');
+                            head.push('Updated At');
+                            head.push('Updated By');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -269,7 +269,7 @@
                         },
                     @endif{
                         extend: 'excel',
-                        title: 'Packaging Material Requests',
+                        title: 'Packaging Material Types',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                         className: 'btn btn-primary',
                     },

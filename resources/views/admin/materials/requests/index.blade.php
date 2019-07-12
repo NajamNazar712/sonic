@@ -28,7 +28,7 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
                         <th class="border-primary border-darken-1">City</th>
-                        <th class="border-primary border-darken-1">Quantity</th>
+                        <th class="border-primary border-darken-1">Total Quantity</th>
                         <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Payment Mode</th>
@@ -254,7 +254,7 @@
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'created_at', name: 'packaging_material_requests.created_at', class: 'align-middle created_at'},
                     {data: 'city', name: 'ct.name', class: 'align-middle city'},
-                    {data: 'total_quantity_button', class: 'align-middle total_quantity_button', searchable: false},
+                    {data: 'total_quantity_button', class: 'align-middle total_quantity_button',orderable: false, searchable: false},
                     {data: 'amount', name: 'packaging_material_requests.amount', class: 'align-middle amount'},
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'mode', name: 'ppm.id', class: 'align-middle mode'},
