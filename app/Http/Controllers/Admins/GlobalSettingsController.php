@@ -13,12 +13,17 @@ use App\Http\Models\Admin\WalkInStandardWeightCharge;
 
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
+use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
+use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\RateStatus;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\WeightCharge;
+use App\Http\Models\WeightChargeFactorHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -861,14 +866,128 @@ class GlobalSettingsController extends Controller
                 $global_settings->setting_value = $weight_factor;
                 $global_settings->type = 'weight_charges_factor';
                 $global_settings->save();
-
             }
+            $this->weight_factor_account_charges_update($weight_factor);
 
             return redirect()->back()->with('success', 'Weight Charges Factor is Updated!');
 
         }
         return redirect()->back()->with('error', 'Settings can\'t be updated');
 
+    }
+
+    public function weight_factor_account_charges_update($weight_factor){
+        $shipping_modes = ShippingMode::all();
+        $users = User::where('status', 3)->select('id', 'account_type_id')->get();
+        if (!$users->isEmpty()) {
+            foreach ($users as $user) {
+                foreach ($shipping_modes as $shipping_mode) {
+                    if ($user->account_type_id == 1) {
+                        $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                    } else {
+                        $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                    }
+
+                    if ($rate_status->exists()) {
+                        $rate_status = $rate_status->first();
+
+                        if ($user->account_type_id == 1) {
+                            $weight_charge = WeightCharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                        } else {
+                            $weight_charge = CorporateWeightCharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                        }
+                        if ($weight_charge->exists()) {
+                            $weight_charges = $weight_charge->get();
+
+                            foreach($weight_charges as $charge){
+                                $local_or_6hr = self::calculate_weight_charges_factor($charge->local_or_6hr);
+                                $national_charges_class_0 = self::calculate_weight_charges_factor($charge->national_charges_class_0);
+
+                                if (strpos($charge->national_charges_class_1, '%') == FALSE) {
+                                    $national_charges_class_1 = self::calculate_weight_charges_factor($charge->national_charges_class_1);
+                                }
+                                else {
+                                    $national_charges_class_1 = $charge->national_charges_class_1;
+                                }
+
+                                if (strpos($charge->national_charges_class_2, '%') == FALSE) {
+                                    $national_charges_class_2 = self::calculate_weight_charges_factor($charge->national_charges_class_2);
+                                }
+                                else {
+                                    $national_charges_class_2 = $charge->national_charges_class_2;
+                                }
+
+                                if (strpos($charge->national_charges_class_3, '%') == FALSE) {
+                                    $national_charges_class_3 = self::calculate_weight_charges_factor($charge->national_charges_class_3);
+                                }
+                                else {
+                                    $national_charges_class_3 = $charge->national_charges_class_3;
+                                }
+
+                                if ($user->account_type_id == 1) {
+                                    $weight_charge_history = new HistoryWeightCharge();
+                                    $weight_charge_history->user_id = $charge->user_id;
+                                    $weight_charge_history->shipping_mode_id = $charge->shipping_mode_id;
+                                    $weight_charge_history->range_up = $charge->range_up;
+                                    $weight_charge_history->range_down = $charge->range_down;
+                                    $weight_charge_history->weight_addition = $charge->weight_addition;
+                                    $weight_charge_history->spkg = $charge->spkg;
+                                    $weight_charge_history->local_or_6hr = $charge->local_or_6hr;
+                                    $weight_charge_history->national_charges_class_0 = $charge->national_charges_class_0;
+                                    $weight_charge_history->national_charges_class_1 = $charge->national_charges_class_1;
+                                    $weight_charge_history->national_charges_class_2 = $charge->national_charges_class_2;
+                                    $weight_charge_history->national_charges_class_3 = $charge->national_charges_class_3;
+                                    $weight_charge_history->save();
+
+                                    WeightCharge::where('id', $charge->id)->update(['local_or_6hr' => $local_or_6hr, 'national_charges_class_0' => $national_charges_class_0, 'national_charges_class_1' => $national_charges_class_1, 'national_charges_class_2' => $national_charges_class_2, 'national_charges_class_3' => $national_charges_class_3]);
+
+                                } else {
+                                    $weight_charge_history = new HistoryCorporateWeightCharge();
+                                    $weight_charge_history->user_id = $charge->user_id;
+                                    $weight_charge_history->shipping_mode_id = $charge->shipping_mode_id;
+                                    $weight_charge_history->delivery_type_id = $charge->delivery_type_id;
+                                    $weight_charge_history->range_up = $charge->range_up;
+                                    $weight_charge_history->range_down = $charge->range_down;
+                                    $weight_charge_history->local_or_6hr = $charge->local_or_6hr;
+                                    $weight_charge_history->national_charges_class_0 = $charge->national_charges_class_0;
+                                    $weight_charge_history->national_charges_class_1 = $charge->national_charges_class_1;
+                                    $weight_charge_history->national_charges_class_2 = $charge->national_charges_class_2;
+                                    $weight_charge_history->national_charges_class_3 = $charge->national_charges_class_3;
+                                    $weight_charge_history->save();
+                                    CorporateWeightCharge::where('id', $charge->id)->update(['local_or_6hr' => $local_or_6hr, 'national_charges_class_0' => $national_charges_class_0, 'national_charges_class_1' => $national_charges_class_1, 'national_charges_class_2' => $national_charges_class_2, 'national_charges_class_3' => $national_charges_class_3]);
+
+                                }
+
+                            }
+
+                        }
+                    }
+
+                }
+            }
+
+            $weight_factor_history = new WeightChargeFactorHistory();
+            $weight_factor_history->fuel_factor = $weight_factor;
+            $weight_factor_history->admin_id = Auth::id();
+            $weight_factor_history->save();
+
+        }
+    }
+
+    private function calculate_weight_charges_factor($charges){
+        if($charges != 0){
+            $weight_factor = GlobalSettings::where('type', 'weight_charges_factor');
+            if($weight_factor->exists()){
+                $weight_factor = $weight_factor->first();
+                $weight_factor_percentage = (floatval($weight_factor->setting_value) / 100) * $charges;
+                $charges += $weight_factor_percentage;
+                return $charges;
+            }else{
+                return $charges;
+            }
+        }else{
+            return $charges;
+        }
     }
 
 
