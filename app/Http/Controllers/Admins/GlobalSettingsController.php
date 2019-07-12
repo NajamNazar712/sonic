@@ -966,7 +966,7 @@ class GlobalSettingsController extends Controller
             }
 
             $weight_factor_history = new WeightChargeFactorHistory();
-            $weight_factor_history->fuel_factor = $weight_factor;
+            $weight_factor_history->weight_factor = $weight_factor;
             $weight_factor_history->admin_id = Auth::id();
             $weight_factor_history->save();
 
