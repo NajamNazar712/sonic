@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Controller;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Shipment;
 
 use App\Http\Models\RateStatus;
