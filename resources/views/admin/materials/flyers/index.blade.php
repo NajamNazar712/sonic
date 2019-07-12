@@ -17,11 +17,11 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Request Date/Time</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Requested By</th>
                         <th class="border-primary border-darken-1">Warehouse</th>
-                        <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -594,11 +594,11 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
+                            head.push('Tracking Number');
                             head.push('Requested Date/Time');
                             head.push('Created By');
                             head.push('Requested By');
                             head.push('Send By');
-                            head.push('Tracking Number');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -606,11 +606,11 @@
 
 
                                 row.push(index + 1);
+                                row.push(values.tracking_number);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.requested_by);
                                 row.push(values.send_by);
-                                row.push(values.tracking_number);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -702,11 +702,11 @@
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'tracking_number_link', name: 'warehouse_stock_requests.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'created_at', name: 'warehouse_stock_requests.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'requested_by', name: 'rb.name', class: 'align-middle requested_by'},
                     {data: 'send_by', name: 'sb.name', class: 'align-middle send_by'},
-                    {data: 'tracking_number_link', name: 'warehouse_stock_requests.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action'}
 
@@ -849,36 +849,42 @@
                 var size_name = $('#packaging_material_size option:selected').text();
                 var quantity = $('#packaging_material_quantity').val();
                 var flag = false;
-                if(type == ''){
-                    flag = true;
-                    var error = "<p id='type_error' class='danger'>Type is required</p>";
-                    if($('#packaging_material_type').parent('div').find('p#type_error').length == 0){
-                        $('#packaging_material_type').parent('div').append(error);
+                if((type == '' || type == null) || (size == '' || size == null) || (quantity == '' || quantity == null)){
+                    if(type == '' || type == null){
+                        flag = true;
+                        var error = "<p id='type_error' class='danger'>Type is required</p>";
+                        if($('#packaging_material_type').parent('div').find('p#type_error').length == 0){
+                            $('#packaging_material_type').parent('div').append(error);
+                        }
+                    }else{
+                        $('#type_error').remove();
                     }
-                }else{
+                    if(size == '' || size == null){
+                        flag = true;
+                        var error = "<p id='size_error' class='danger'>Size is required</p>";
+                        if($('#packaging_material_size').parent('div').find('p#size_error').length == 0){
+                            $('#packaging_material_size').parent('div').append(error);
+                        }
+                    }else{
+                        $('#size_error').remove();
+                    }
+                    if(quantity == '' || quantity == null){
+                        flag = true;
+                        var error = "<p id='quantity_error' class='danger'>Quantity is required</p>";
+                        if($('#packaging_material_quantity').parent('div').find('p#quantity_error').length == 0){
+                            $('#packaging_material_quantity').parent('div').append(error);
+                        }
+                    }else{
+                        $('#quantity_error').remove();
+                    }
+                }
+                else{
                     flag = false;
                     $('#type_error').remove();
-                }
-
-                if(size == ''){
-                    flag = true;
-                    var error = "<p id='size_error' class='danger'>Size is required</p>";
-                    if($('#packaging_material_size').parent('div').find('p#size_error').length == 0){
-                        $('#packaging_material_size').parent('div').append(error);
-                    }
-                }else{
                     $('#size_error').remove();
-                }
-
-                if(quantity == ''){
-                    flag = true;
-                    var error = "<p id='quantity_error' class='danger'>Quantity is required</p>";
-                    if($('#packaging_material_quantity').parent('div').find('p#quantity_error').length == 0){
-                        $('#packaging_material_quantity').parent('div').append(error);
-                    }
-                }else{
                     $('#quantity_error').remove();
                 }
+
 
                 if(flag == false){
                     var rowNo = ptable.rows().count();
@@ -970,48 +976,61 @@
                 var warehouse_id = $('#request_from').val();
                 var flag = false;
 
-                if(warehouse_id == ''){
-                    flag = true;
-                    var error = "<p id='request_hub_type_error' class='danger'>Requested Warehouse</p>";
-                    if($('#request_from').parent('div').find('p#request_hub_type_error').length == 0){
-                        $('#request_material_type').parent('div').append(error);
+
+                if((warehouse_id == '' || warehouse_id == null) ||(type == '' || type == null) || (size == '' || size == null) || (quantity == '' || quantity == null)){
+                    if(warehouse_id == '' || warehouse_id == null){
+                        flag = true;
+                        var error = "<p id='request_hub_type_error' class='danger'>Requested Warehouse</p>";
+                        if($('#request_from').parent('div').find('p#request_hub_type_error').length == 0){
+                            $('#request_from').parent('div').append(error);
+                        }
+                    }else{
+                        $('#request_hub_type_error').remove();
                     }
-                }else{
+
+                    if(type == '' || type == null){
+                        flag = true;
+                        var error = "<p id='request_type_error' class='danger'>Type is required</p>";
+                        if($('#request_material_type').parent('div').find('p#request_type_error').length == 0){
+                            $('#request_material_type').parent('div').append(error);
+                        }
+                    }else{
+                        $('#request_type_error').remove();
+                    }
+
+                    if(size == '' || size == null){
+                        flag = true;
+                        var error = "<p id='request_size_error' class='danger'>Size is required</p>";
+                        if($('#request_material_size').parent('div').find('p#request_size_error').length == 0){
+                            $('#request_material_size').parent('div').append(error);
+                        }
+                    }else{
+                        $('#request_size_error').remove();
+                    }
+
+                    if(quantity == '' || quantity == null){
+                        flag = true;
+                        var error = "<p id='request_quantity_error' class='danger'>Quantity is required</p>";
+                        if($('#request_material_quantity').parent('div').find('p#request_quantity_error').length == 0){
+                            $('#request_material_quantity').parent('div').append(error);
+                        }
+                    }else{
+                        $('#request_quantity_error').remove();
+                    }
+                }
+                else{
                     flag = false;
                     $('#request_hub_type_error').remove();
-                }
-
-
-                if(type == ''){
-                    flag = true;
-                    var error = "<p id='request_type_error' class='danger'>Type is required</p>";
-                    if($('#request_material_type').parent('div').find('p#request_type_error').length == 0){
-                        $('#request_material_type').parent('div').append(error);
-                    }
-                }else{
-                    flag = false;
                     $('#request_type_error').remove();
-                }
-
-                if(size == ''){
-                    flag = true;
-                    var error = "<p id='request_size_error' class='danger'>Size is required</p>";
-                    if($('#request_material_size').parent('div').find('p#request_size_error').length == 0){
-                        $('#request_material_size').parent('div').append(error);
-                    }
-                }else{
                     $('#request_size_error').remove();
-                }
-
-                if(quantity == ''){
-                    flag = true;
-                    var error = "<p id='request_quantity_error' class='danger'>Quantity is required</p>";
-                    if($('#request_material_quantity').parent('div').find('p#request_quantity_error').length == 0){
-                        $('#request_material_quantity').parent('div').append(error);
-                    }
-                }else{
                     $('#request_quantity_error').remove();
                 }
+
+
+
+
+
+
 
 
                 if(flag == false){
@@ -1310,50 +1329,53 @@
                 var warehouse_id = $('#send_from').val();
                 var flag = false;
 
-                if(warehouse_id == ''){
-                    flag = true;
-                    var error = "<p id='send_hub_type_error' class='danger'>Select Sender Warehouse</p>";
-                    if($('#send_from').parent('div').find('p#send_hub_type_error').length == 0){
-                        $('#send_material_type').parent('div').append(error);
+                if((warehouse_id == '' || warehouse_id == null) ||(type == '' || type == null) || (size == '' || size == null) || (quantity == '' || quantity == null)){
+                    if(warehouse_id == ''){
+                        flag = true;
+                        var error = "<p id='send_hub_type_error' class='danger'>Select Sender Warehouse</p>";
+                        if($('#send_from').parent('div').find('p#send_hub_type_error').length == 0){
+                            $('#send_from').parent('div').append(error);
+                        }
+                    }else{
+                        // flag = false;
+                        $('#send_hub_type_error').remove();
                     }
-                }else{
-                    flag = false;
+                    if(type == '' || type == null){
+                        flag = true;
+                        var error = "<p id='send_type_error' class='danger'>Type is required</p>";
+                        if($('#send_material_type').parent('div').find('p#send_type_error').length == 0){
+                            $('#send_material_type').parent('div').append(error);
+                        }
+                    }else{
+                        // flag = false;
+                        $('#send_type_error').remove();
+                    }
+                    if(size == '' || size == null){
+                        flag = true;
+                        var error = "<p id='send_size_error' class='danger'>Size is required</p>";
+                        if($('#send_material_size').parent('div').find('p#send_size_error').length == 0){
+                            $('#send_material_size').parent('div').append(error);
+                        }
+                    }else{
+                        $('#send_size_error').remove();
+                    }
+                    if(quantity == '' || quantity == null){
+                        flag = true;
+                        var error = "<p id='send_quantity_error' class='danger'>Quantity is required</p>";
+                        if($('#send_material_quantity').parent('div').find('p#send_quantity_error').length == 0){
+                            $('#send_material_quantity').parent('div').append(error);
+                        }
+                    }else{
+                        $('#send_quantity_error').remove();
+                    }
+                }
+                else{
+                    flag == false;
                     $('#send_hub_type_error').remove();
-                }
-
-
-                if(type == ''){
-                    flag = true;
-                    var error = "<p id='send_type_error' class='danger'>Type is required</p>";
-                    if($('#send_material_type').parent('div').find('p#send_type_error').length == 0){
-                        $('#send_material_type').parent('div').append(error);
-                    }
-                }else{
-                    flag = false;
                     $('#send_type_error').remove();
-                }
-
-                if(size == ''){
-                    flag = true;
-                    var error = "<p id='send_size_error' class='danger'>Size is required</p>";
-                    if($('#send_material_size').parent('div').find('p#send_size_error').length == 0){
-                        $('#send_material_size').parent('div').append(error);
-                    }
-                }else{
                     $('#send_size_error').remove();
-                }
-
-                if(quantity == ''){
-                    flag = true;
-                    var error = "<p id='send_quantity_error' class='danger'>Quantity is required</p>";
-                    if($('#send_material_quantity').parent('div').find('p#send_quantity_error').length == 0){
-                        $('#send_material_quantity').parent('div').append(error);
-                    }
-                }else{
                     $('#send_quantity_error').remove();
                 }
-
-
                 if(flag == false){
                     $.ajax({
                         url: '{!! route('admin.packaging.requests.check_quantity') !!}',
