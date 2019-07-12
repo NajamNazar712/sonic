@@ -2396,6 +2396,14 @@ class AdminFinanceController extends Controller
                 $done_payment->returned_shipments = $pending_payment->returned_shipments;
                 $done_payment->adjusted_shipments = $pending_payment->adjusted_shipments;
 
+                $settings = GlobalSettings::where('type', 'ibft_charges');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+
+                    $done_payment->ibft_charges = $settings->setting_value;
+                }
+
                 $done_payment->save();
 
                 $pending_payment->delete();
