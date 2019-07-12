@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Controller;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Shipment;
 
 use App\Http\Models\RateStatus;
@@ -322,6 +323,22 @@ class ShipmentChargesController extends Controller
         }
         else {
             return FALSE;
+        }
+    }
+
+    private function calculate_weight_charges_factor($charges){
+        if($charges != 0){
+            $weight_factor = GlobalSettings::where('type', 'weight_charges_factor');
+            if($weight_factor->exists()){
+                $weight_factor = $weight_factor->first();
+                $weight_factor_percentage = (floatval($weight_factor->setting_value) / 100) * $charges;
+                $charges += $weight_factor_percentage;
+                return $charges;
+            }else{
+                return $charges;
+            }
+        }else{
+            return $charges;
         }
     }
 
