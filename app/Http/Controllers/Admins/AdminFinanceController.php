@@ -2343,7 +2343,7 @@ class AdminFinanceController extends Controller
 
             $shipper = User::find($done_payment->user_id);
 
-            $payable = number_format(ROUND(DonePaymentShipment::where('done_payment_id', $done_payment_id)->sum('payable'), 0, PHP_ROUND_HALF_DOWN));
+            $payable = number_format(ROUND((DonePaymentShipment::where('done_payment_id', $done_payment_id)->sum('payable') - $done_payment->ibft_charges), 0, PHP_ROUND_HALF_DOWN));
 
             $row = array();
 
