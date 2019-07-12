@@ -641,6 +641,10 @@
                     @if (session('role_id') == 1 || in_array(230, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.settings.ibft_charges.index')}}">IBFT Charges</a></li>
                     @endif
+
+                    @if (session('role_id') == 1 || in_array(229, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.settings.ibft_charges.index')}}">Weight Charge Factor</a></li>
+                    @endif
                 </ul>            </li>
             @endif
         </ul>
