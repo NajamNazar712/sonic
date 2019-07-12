@@ -657,9 +657,7 @@
                         <li><a class="menu-item" href="{{ route('admin.settings.stock_movement.index') }}">Packaging Material Stock Movement Account</a></li>
                     @endif
 
-                    @if (session('role_id') == 1 || in_array(229, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.settings.weight_factor.index') }}">Weight Charges Factor</a></li>
-                    @endif
+
                 </ul>
                 </li>
             @endif
