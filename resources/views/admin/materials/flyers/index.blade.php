@@ -598,7 +598,7 @@
                             head.push('Requested Date/Time');
                             head.push('Created By');
                             head.push('Requested By');
-                            head.push('Send By');
+                            head.push('Warehouse');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
