@@ -981,7 +981,7 @@ class GlobalSettingsController extends Controller
                 $weight_factor = $weight_factor->first();
                 $weight_factor_percentage = (floatval($weight_factor->setting_value) / 100) * $charges;
                 $charges += $weight_factor_percentage;
-                return $charges;
+                return ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
             }else{
                 return $charges;
             }
