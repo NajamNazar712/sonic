@@ -13,12 +13,16 @@ use App\Http\Models\Admin\WalkInStandardWeightCharge;
 
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
+use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
+use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\RateStatus;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\WeightChargeFactorHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
