@@ -22,6 +22,7 @@ use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\RateStatus;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

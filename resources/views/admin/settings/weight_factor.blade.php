@@ -28,7 +28,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Weight Charges Factor</span>
                                                 </div>
-                                                <input type="text" name="weight_factor" class="form-control weight_factor" placeholder="Weight Charges Factor*" data-rule-required="true" data-msg-required="Weight Charges Factor is required" value="{{$weight_factor}}">
+                                                <input type="text" name="weight_factor" class="form-control weight_factor" placeholder="Weight Charges Factor*" data-rule-required="true" data-msg-required="Weight Charges Factor is required" value="{{$weight_factor}}" data-rule-range="[-100,100]" data-msg-range="Weight Charges Factor needs to be from -100 to 100">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
@@ -60,7 +60,7 @@
                 'alias': 'integer',
                 'allowMinus': true,
                 'allowPlus': false,
-                'min' :0,
+                'min' :-100,
                 'max':100
             });
 
