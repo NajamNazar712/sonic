@@ -3462,7 +3462,17 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
+            $datatables->where(function($query) use ($from, $to) {
+                $query->where(function ($sub_query) use ($from, $to) {
+                    $sub_query->WhereNull('delivery_notes.status_verified_at')
+                        ->whereBetween('delivery_notes.created_at', [$from, $to]);
+                })
+                ->orwhere(function ($sub_query) use ($from, $to) {
+                    $sub_query->WhereNotNull('delivery_notes.status_verified_at')
+                        ->whereBetween('delivery_notes.status_verified_at', [$from, $to]);
+                });
+            });
+//            $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
         }
         return $datatables->make(true);
     }
