@@ -404,7 +404,7 @@
                     {data: 'amount', name: 'ct.name', class: 'align-middle amount'},
                     {data: 'mode', name: 'packaging_material_requests.packaging_payment_mode_id', class: 'align-middle mode'},
                     {data: 'request_status', name: 'packaging_material_requests.status_id', class: 'align-middle request_status'},
-                    {data: 'aging', name: 'aging', class: 'align-middle aging'},
+                    {data: 'aging', name: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
