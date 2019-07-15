@@ -640,7 +640,14 @@ class ReturnController extends Controller
             ->whereIn('shipments.shipper_status_id',$status_return);
 
         if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+            $shipments = $shipments->where(function($query) {
+                $query->where(function ($sub_query){
+                    $sub_query->whereIn('dc.hub_id', session('hubs'));
+                    })
+                    ->orWhere(function ($sub_query){
+                    $sub_query->whereIn('oc.hub_id', session('hubs'));
+                    });
+            });
         }
 
         $datatables = Datatables::of($shipments)
