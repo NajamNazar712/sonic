@@ -1144,13 +1144,13 @@
                                         icon: 'info',
                                         buttons: {
                                             cancel: {
-                                                text: 'No',
+                                                text: 'Cancel',
                                                 value: null,
                                                 visible: true,
                                                 closeModal: true,
                                             },
                                             confirm: {
-                                                text: 'Yes',
+                                                text: 'Continue to Booking',
                                                 value: true,
                                                 visible: true,
                                                 closeModal: true
