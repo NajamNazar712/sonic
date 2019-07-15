@@ -1135,18 +1135,18 @@
 						content = document.createElement('div');
 						content.innerHTML = html;
 						swal({
-							title: present + ' Detected!',
+							title: 'A possible address anomaly: ' + present + ' Detected!',
 							content: content,
 							icon: 'info',
 							buttons: {
 								cancel: {
-									text: 'No',
+									text: 'Cancel',
 									value: null,
 									visible: true,
 									closeModal: true,
 								},
 								confirm: {
-									text: 'Yes',
+									text: 'Continue to Booking',
 									value: true,
 									visible: true,
 									closeModal: true

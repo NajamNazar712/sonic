@@ -602,7 +602,7 @@ class APIController extends Controller
 
           if ($msg_string != null) {
               NotificationsController::send(32, $shipment_id, $msg_string);
-              $msg_string = $msg_string . " Detected!";
+              $msg_string = "A possible address anomaly: " . $msg_string . " Detected!";
               return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => 'Possible NSA ' . $msg_string . ' In case of, Out of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
           }
           else{

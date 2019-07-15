@@ -1139,7 +1139,7 @@
                                     content = document.createElement('div');
                                     content.innerHTML = html;
                                     swal({
-                                        title: present + ' Detected!',
+                                        title: 'A possible address anomaly: ' + present + ' Detected!',
                                         content: content,
                                         icon: 'info',
                                         buttons: {
