@@ -57,7 +57,14 @@ class AdminReportsController extends Controller
             ->select(['p.product_name as product_type','si.description as description','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name', 'shipments.booking_type_id', 'usi.poc','u.id as account_no'])
             ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,25,31,36,38,39,40,41,43,47]);
         if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+            $shipments = $shipments->where(function($query) {
+                $query->where(function ($sub_query){
+                    $sub_query->whereIn('dc.hub_id', session('hubs'));
+                })
+                    ->orWhere(function ($sub_query){
+                        $sub_query->whereIn('oc.hub_id', session('hubs'));
+                    });
+            });
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
