@@ -84,6 +84,13 @@ class LostShipmentsController extends Controller
                         return " - ";
                     }
                 })
+                ->editColumn('remarks', function ($shipments) {
+                    if ($shipments->remarks) {
+                        return $shipments->remarks;
+                    } else {
+                        return " - ";
+                    }
+                })
                 ->editColumn('amount', function($shipment){
                     return number_format($shipment->amount);
                 })
@@ -194,6 +201,7 @@ class LostShipmentsController extends Controller
                         $data['amount'] = number_format($shipment->amount);
                         $data['mode'] = $shipment->shipping_mode->mode;
                         $data['service_type'] = $shipment->booking_type->booking_type;
+                        $data['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
 
                         return response()->json(['status' => 1, 'details' => $data]);
                     }
@@ -212,6 +220,7 @@ class LostShipmentsController extends Controller
         $passing_status_array = array(1, 14, 17, 18, 25, 30, 31);
         $intransit_status_array = array(3, 21, 26, 32);
         $shipments = explode(',', $request->shipment_ids);
+        $remarks = $request->remarks;
         if(!empty($shipments)){
             foreach ($shipments as $shipment) {
                 $shipment_details = Shipment::where('id', $shipment)->whereNotIn('shipper_status_id', $passing_status_array);
@@ -250,13 +259,13 @@ class LostShipmentsController extends Controller
                             }
                             $shipment_details->shipper_status_id = 18;
                             $shipment_details->save();
-                            ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL,NULL,NULL,Auth::id());
+                            ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment],NULL,Auth::id());
                             AdminCargoController::check_draft_shipments($shipment);
                         }
                     } else {
                         $shipment_details->shipper_status_id = 18;
                         $shipment_details->save();
-                        ShipmentsJourneyController::add($shipment_details->id, 18, NULL, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment_details->id, 18, NULL, NULL, $remarks[$shipment], NULL, Auth::id());
                     }
                 }
             }
