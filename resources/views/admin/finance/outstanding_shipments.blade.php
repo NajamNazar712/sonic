@@ -358,6 +358,7 @@
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
 				var tracking_number = $(this).parents('tr').children('td.tracking_number').text();
+				var dncc = parseInt($(this).parents('tr').attr('data-dncc'));
 
 				if ($(this).hasClass('resolve')) {
 					swal({
@@ -433,6 +434,7 @@
 								method: 'PUT',
 								data: {
 									'id': id,
+									'dncc': dncc,
 									'_token': '{{ csrf_token() }}'
 								}
 							})
