@@ -116,6 +116,7 @@
                         <th class="border-primary border-darken-1">Launched By User Type</th>
                         <th class="border-primary border-darken-1">Launched Date</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
+                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Valid/Invalid Date</th>
                         <th class="border-primary border-darken-1">Resolved Date</th>
                         <th class="border-primary border-darken-1">Closed Date</th>
@@ -288,6 +289,7 @@
                             head.push('Launched By User Type');
                             head.push('Launched Date');
                             head.push('Assigned Date');
+                            head.push('Status');
                             head.push('Valid/Invalid Date');
                             head.push('Resolved Date');
                             head.push('Closed Date');
@@ -311,6 +313,7 @@
                                 row.push(values.launched_by_type);
                                 row.push(values.launched_date);
                                 row.push(values.assigned_date);
+                                row.push(values.valid_invalid_status);
                                 row.push(values.valid_invalid_date);
                                 row.push(values.resolved_date);
                                 row.push(values.closed_date);
@@ -378,7 +381,8 @@
                     {data: 'launched_by_type', name: 'crm_requests.launched_by', class: 'align-middle launched_by_type'},
                     {data: 'launched_date', name: 'crm_requests.created_at', class: 'align-middle launched_date'},
                     {data: 'assigned_date', name: 'crah.created_at', class: 'align-middle assigned_date'},
-                    {data: 'valid_invalid_date', name: 'crsh.created_at', class: 'align-middle valid_invalid_date'},
+                    {data: 'valid_invalid_status', name: 'crm_requests.status', class: 'align-middle valid_invalid_status', orderable: false, searchable: false},
+                    {data: 'valid_invalid_date', name: 'crsh.created_at', class: 'align-middle valid_invalid_date', orderable: false, searchable: false},
                     {data: 'resolved_date', name: 'crshr.created_at', class: 'align-middle resolved_date'},
                     {data: 'closed_date', name: 'crshc.created_at', class: 'align-middle closed_date'}
 

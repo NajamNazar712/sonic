@@ -4502,9 +4502,13 @@ public function revenue_index(){
                 $join->on('crah.crm_request_id', '=', 'crm_requests.id')
                     ->where('crah.id', '=', DB::connection('reports')->raw('(select max(id) from crm_request_agent_histories where crm_request_id = crm_requests.id and agent_id = crm_requests.agent_id)'));
             })
-            ->leftjoin('crm_request_status_histories as crsh', function ($join){
-                $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crsh.id', '=', DB::connection('reports')->raw('(select min(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 2)'));
+            ->leftjoin('crm_request_status_histories as crshv', function ($join){
+                $join->on('crshv.crm_request_id', '=', 'crm_requests.id')
+                    ->where('crshv.id', '=', DB::connection('reports')->raw('(select min(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 6)'));
+            })
+            ->leftjoin('crm_request_status_histories as crshiv', function ($join){
+                $join->on('crshiv.crm_request_id', '=', 'crm_requests.id')
+                    ->where('crshiv.id', '=', DB::connection('reports')->raw('(select min(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 7)'));
             })
             ->leftjoin('crm_request_status_histories as crshr', function ($join){
                 $join->on('crshr.crm_request_id', '=', 'crm_requests.id')
@@ -4514,12 +4518,34 @@ public function revenue_index(){
                 $join->on('crshc.crm_request_id', '=', 'crm_requests.id')
                     ->where('crshc.id', '=', DB::connection('reports')->raw('(select max(id) from crm_request_status_histories where crm_request_id = crm_requests.id and status_id = 4)'));
             })
-            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crsh.created_at as valid_invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status')
+            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status')
         ->groupBy('crm_requests.id');
         $datatable = Datatables::of($crm)
             ->editColumn('tracking_number_link', function ($crm_request) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$crm_request->tracking_number' class='tracking' target='_blank'>$crm_request->tracking_number</a></u>";
+            })
+            ->editColumn('valid_invalid_status', function($crm_request){
+                if($crm_request->valid_date != null) {
+                    return 'Valid';
+                }
+                else if ($crm_request->invalid_date != null){
+                    return 'Invalid';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('valid_invalid_date', function($crm_request){
+                if($crm_request->valid_date != null) {
+                    return $crm_request->valid_date;
+                }
+                else if ($crm_request->invalid_date != null){
+                    return $crm_request->invalid_date;
+                }
+                else{
+                    return '-';
+                }
             })
             ->editColumn('request_number', function ($crm_request) {
                 return str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT);
