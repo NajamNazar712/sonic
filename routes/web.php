@@ -602,6 +602,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('update/remove','Admins\ReturnController@return_receive_update_remove')->name('update.remove');
             Route::get('{id}/status','Admins\ReturnController@return_receive_status')->name('status');
             Route::post('status/submit','Admins\ReturnController@receive_return_status_submit')->name('status.submit');
+            Route::post('status/submit_all','Admins\ReturnController@receive_return_status_submit_all')->name('status.submit_all');
             Route::post('status/delivered','Admins\ReturnController@return_status_delivered')->name('status.delivered');
             Route::get('status/list','Admins\ReturnController@return_receive_status_list')->name('status.list');
             Route::post('reason','Admins\ReturnController@receive_return_reason')->name('reason');
