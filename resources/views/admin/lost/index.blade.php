@@ -29,8 +29,6 @@
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
-                        <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
@@ -74,7 +72,7 @@
                         head = [];
 
                         head.push('S.No');
-                        head.push('Tracking .No');
+                        head.push('Tracking No.');
                         head.push('Shipper');
                         head.push('Origin');
                         head.push('Destination');
@@ -85,8 +83,6 @@
                         head.push('Collection Amount');
                         head.push('Shipping Mode');
                         head.push('Service Type');
-                        head.push('Status');
-                        head.push('Reason');
                         head.push('Remarks');
                         head.push('Arrival Date');
                         head.push('Status Date');
@@ -104,10 +100,8 @@
                             row.push(values.phone);
                             row.push(values.consignee_address);
                             row.push(values.amount);
-                            row.push(values.mode);
+                            row.push(values.shipping_mode);
                             row.push(values.service_type);
-                            row.push(values.status);
-                            row.push(values.reason);
                             row.push(values.remarks);
                             row.push(values.arrival);
                             row.push(values.current_status_date);
@@ -331,7 +325,7 @@
             serverSide: true,
             ajax: '{{ route('admin.delivery.lost.list') }}',
             rowId: 'shId',
-            order: [[16, 'asc'], [17, 'asc']],
+            order: [[15, 'desc']],
             columns: [
                 {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -346,8 +340,6 @@
                 {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                 {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                 {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
-                {data: 'status', name: 'status', class: 'align-middle status'},
-                {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'}
