@@ -994,6 +994,20 @@ class GlobalSettingsController extends Controller
         $settings = DeliveryCallVerificationRatio::get();
         return view('admin.settings.delivery_call_verification_ratio')->with(['settings' => $settings]);
     }
+    public function delivery_call_verification_ratio_update(Request $request){
+//        dd($request);
+        $settings = DeliveryCallVerificationRatio::truncate();
+        foreach($request->verification as $index => $call_verification){
+            $new_ratios = new DeliveryCallVerificationRatio();
+            $new_ratios->id = $index;
+            $new_ratios->min = $request->min[$index];
+            $new_ratios->max = $request->max[$index];
+            $new_ratios->verification = $call_verification;
+            $new_ratios->save();
+        }
+        $new_ratios = new DeliveryCallVerificationRatio();
+        return redirect()->back()->with('success', 'Call verification ratio is Updated Successfully!');
+    }
 
 
 }

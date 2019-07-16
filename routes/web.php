@@ -1121,7 +1121,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('delivery_call_verification_ratio')->name('delivery_call_verification_ratio.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@delivery_call_verification_ratio_index')->name('index');
-//            Route::post('update', 'Admins\GlobalSettingsController@delivery_call_verification_ratio_update')->name('update');
+            Route::post('update', 'Admins\GlobalSettingsController@delivery_call_verification_ratio_update')->name('update');
         });
 
     });

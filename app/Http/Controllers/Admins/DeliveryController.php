@@ -21,6 +21,7 @@ use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\MisroutedHistory;
@@ -1556,7 +1557,17 @@ class DeliveryController extends Controller
             $total = $delivered_count/$total_count;
             $total_percentage = $total * 100;
             $percentage = number_format((float)$total_percentage, 2, '.', '');
-            return view('admin.delivery.receive.verify_status')->with(['delivery_note_id' => $id, 'shipments_count' => $note_data->shipments_count, 'delivery_note_status' => $note_data->status, 'percentage' => $percentage]);
+            $setting_call_verification = DeliveryCallVerificationRatio::where('min', '<',$total_percentage)->where('max', '>=',$total_percentage)->first();
+//            dd($setting_call_verification);
+            if($setting_call_verification == null){
+                $verification_percentage = 0;
+                $verification_shipments_count = 0;
+            }
+            else{
+                $verification_percentage = $setting_call_verification['verification'];
+                $verification_shipments_count = round(($total_count - $delivered_count) * ($verification_percentage/100));
+            }
+            return view('admin.delivery.receive.verify_status')->with(['delivery_note_id' => $id, 'shipments_count' => $note_data->shipments_count, 'delivery_note_status' => $note_data->status, 'percentage' => $percentage, 'verification_percentage' => $verification_percentage, 'verification_shipments_count' => $verification_shipments_count]);
         }else{
             return redirect(route('admin.delivery.receive.index'))->with('error','Delivery Note not ready for verification!');
         }
