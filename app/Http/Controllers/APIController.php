@@ -30,6 +30,7 @@ use App\Http\Models\CorporateRateStatus;
 use Carbon\Carbon;
 
 use SnappyImage;
+use SnappyPDF;
 
 class APIController extends Controller
 {
@@ -618,7 +619,8 @@ class APIController extends Controller
       $rules = [
         'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
-        })]
+        })],
+        'type' => ['nullable', 'boolean']
       ];
 
       $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -636,11 +638,20 @@ class APIController extends Controller
         if ($shipment->shipper_status_id == 1) {
           $air_waybill = ShipperShipmentBookController::air_waybill(4, $user_id, [$shipment->id]);
 
-          $image = SnappyImage::loadHTML($air_waybill);
+          if (!isset($request->type) || $request->type == 0) {
+            $image = SnappyImage::loadHTML($air_waybill);
 
-          $filename = 'air_waybill_' . $tracking_number . '.jpg';
+            $filename = 'air_waybill_' . $tracking_number . '.jpg';
 
-          return $image->download($filename);
+            return $image->download($filename);
+          }
+          else {
+            $pdf = SnappyPDF::loadHTML($air_waybill);
+
+            $filename = 'air_waybill_' . $tracking_number . '.pdf';
+
+            return $pdf->download($filename);
+          }
         }
         else {
           return response()->json(['status' => 1, 'message' => 'Already Received']);
@@ -1166,7 +1177,8 @@ class APIController extends Controller
       $rules = [
         'receiving_sheet_id' => ['required', 'integer', Rule::exists('receiving_sheets', 'id')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
-        })]
+        })],
+        'type' => ['nullable', 'boolean']
       ];
 
       $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -1181,11 +1193,20 @@ class APIController extends Controller
 
         $receiving_sheet = ShipperReceivingSheetController::view($receiving_sheet_id, 4);
 
-        $image = SnappyImage::loadHTML($receiving_sheet);
+        if (!isset($request->type) || $request->type == 0) {
+          $image = SnappyImage::loadHTML($receiving_sheet);
 
-        $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
+          $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
 
-        return $image->download($filename);
+          return $image->download($filename);
+        }
+        else {
+          $pdf = SnappyPDF::loadHTML($receiving_sheet);
+
+          $filename = 'receiving_sheet_' . $receiving_sheet_id . '.pdf';
+
+          return $pdf->download($filename);
+        }
       }
     }
 

@@ -577,12 +577,10 @@
                 if (selected_rows.length > 0) {
                     table.button('.delivered').enable();
                     $('#submit_selected_status').attr('disabled', false);
-                    // table.button(1).enable();
                 }
                 else {
                     table.button('.delivered').disable();
                     $('#submit_selected_status').attr('disabled', true);
-                    // table.button(1).disable();
                 }
             });
 
@@ -626,13 +624,11 @@
                 shipment_reason[rowid] = reason_status;
             });
             $('body').on('click','.clear',function () {
-                // console.log();
                 var status = $(this).parents().closest('tr').find('.statusDrop');
                 var reason = $(this).parents().closest('tr').find('.reasonDrop');
                 status.val('').trigger("change");
                 reason.val('').trigger("change");
                 $('.remarks input').val('');
-                // $('.reasonDrop').val('').trigger("change");
             });
             $('#status_update_form').on('keypress',function (e) {
                 if(e.which == 13) {
@@ -760,7 +756,6 @@
                                     var rowNo = repl.rows().count();
                                     $.each(data.data, function (key, value) {
                                         var inp = "<div class='form-group mb-0'><input class='form-control decimal' name='weight[" + value.id + "]' placeholder='Enter Weight'  data-rule-required='true' data-msg-required='Weight is required!'></div>";
-                                        // console.log(value.tracking_number)
                                         repl.row.add([rowNo + 1, value.tracking_number, value.booking_type_id, inp]).node().id = value.id;
                                         repl.draw(false);
                                         shipment_id_list.push(value.id);

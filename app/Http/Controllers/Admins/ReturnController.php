@@ -1296,8 +1296,8 @@ class ReturnController extends Controller
         $return = ReturnNote::where('id',$id);
         if($return->exists()){
             $return = $return->first();
-
-            return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count]);
+            $shipment_status = ShipmentStatus::whereIn('id', [24,25, 47, 48])->get();
+            return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count, 'return_note_status' => $return->status, 'shipment_statuses' => $shipment_status]);
         }else{
             return redirect()->route('admin.return.receive.index')->with(['error' => 'Return Note not found']);
         }
@@ -1536,6 +1536,61 @@ class ReturnController extends Controller
         }else{
             return ['status'=>1,'error'=>'No shipments selected'];
 
+        }
+    }
+
+    public function receive_return_status_submit_all(Request $request){
+
+        if(!empty($request->shipment_ids)){
+            $shipment_ids = $request->shipment_ids;
+            $shipment_status = $request->shipment_status;
+            if($shipment_status == 25){
+                foreach ($shipment_ids as $shipment_id) {
+                    $parcel = Shipment::where('id',$shipment_id)->first();
+                    if($parcel->booking_type_id == 2){
+                        ShipmentsJourneyController::add($shipment_id, 31, 31, NULL, NULL, NULL, Auth::id(),$request->return_note_id,NULL,1,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment_id]:null));
+
+                        Shipment::where('id',$shipment_id)->update(['shipper_status_id'=>31,'consignee_status_id'=>31]);
+
+                    }else if($parcel->booking_type_id == 3){
+                        ShipmentsJourneyController::add($shipment_id, 38, 38, NULL, NULL, NULL, Auth::id(),$request->return_note_id,NULL,1,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment_id]:null));
+
+                        Shipment::where('id',$shipment_id)->update(['shipper_status_id'=>38,'consignee_status_id'=>38]);
+
+                    }else{
+                        ShipmentsJourneyController::add($shipment_id, 25, 25, NULL, NULL, NULL, Auth::id(),$request->return_note_id,NULL,1,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment_id]:null));
+
+                        Shipment::where('id',$shipment_id)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
+                    }
+                    ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment_id])->update(['status'=>1]);
+                }
+                $shipment_status_count = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
+                if($shipment_status_count == 0){
+                    ReturnNote::where('id',$request->return_note_id)->update(['updated_by'=>Auth::id(),'status'=>1]);
+                }
+
+                NotificationsController::send(15, $request->return_note_id);
+                NotificationsController::send(16, $request->return_note_id);
+                return response()->json(['status'=> 0, 'success' => 'Return note shipments status are updated to : Delivered to Shipper']);
+            }
+            else{
+                $remarks = $request->remarks;
+                foreach ($shipment_ids as $shipment_id) {
+                    ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, NULL, $remarks, NULL, Auth::id(), $request->return_note_id);
+
+                    Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipment_status]);
+                    ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
+
+                }
+                $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
+                if($shipment_status == 0){
+                    ReturnNote::where('id',$request->return_note_id)->update(['updated_by'=>Auth::id(),'status'=>1]);
+                }
+
+                NotificationsController::send(15, $request->return_note_id);
+                NotificationsController::send(16, $request->return_note_id);
+                return response()->json(['status'=> 0, 'success' => 'Return Note Status Has Been Updated']);
+            }
         }
     }
     public function rrd_print(Request $request){
