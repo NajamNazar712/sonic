@@ -4522,6 +4522,9 @@ class AdminDashboardController extends Controller
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
             }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
+
+            NotificationsController::send(34, $id, Auth::id());
+
             return redirect()->back()->with('success', 'All Rates are updated');
         }
     }
