@@ -19,11 +19,56 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
                             <div class="row justify-content-center">
-                                <div class="col-md-9">
+                                <div class="col">
                                     <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.cod_cap_zones.update') }}">
                                         {{ csrf_field() }}
-                                        @if(!$settings->isEmpty())
-                                            @foreach($settings as $setting)
+                                        <div class="ratios_wrapper justify-content-center" id="ratios_wrapper">
+                                            @if(!$settings->isEmpty())
+                                                @foreach($settings as $index => $setting)
+                                                    <div class="form-group">
+                                                        <div class="input-group">
+                                                            <div class="col-3 ratio">
+                                                                <div class="input-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text">Minimum Range</span>
+                                                                    </div>
+                                                                    <input type="text" class="form-control" value="{{$setting->min}}" name="min[{{$setting->id}}]" required data-rule-required="true" data-msg-required="Minimum range is required">
+                                                                    <div class="input-group-append">
+                                                                        <span class="input-group-text">%</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-3 ratio">
+                                                                <div class="input-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text">Maximum Range</span>
+                                                                    </div>
+                                                                    <input type="text" class="form-control" value="{{$setting->max}}" name="max[{{$setting->id}}]" required data-rule-required="true" data-msg-required="Maximum range is required">
+                                                                    <div class="input-group-append">
+                                                                        <span class="input-group-text">%</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-3 ratio">
+                                                                <div class="input-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text">Call Verification</span>
+                                                                    </div>
+                                                                    <input type="text" class="form-control" value="{{$setting->verification}}" name="verification[{{$setting->id}}]" required data-rule-required="true" data-msg-required="Call verification range is required">
+                                                                    <div class="input-group-append">
+                                                                        <span class="input-group-text">%</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            @if($index != 0)
+                                                            <div class="col-1">
+                                                                <span  class="btn btn-danger rounded btn-sm-width row_close" id="row_close"><i class="ft-x"></i></span>
+                                                            </div>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            @else
                                                 <div class="form-group">
                                                     <div class="input-group">
                                                         <div class="col ratio">
@@ -31,8 +76,8 @@
                                                                 <div class="input-group-prepend">
                                                                     <span class="input-group-text">Minimum Range</span>
                                                                 </div>
-                                                                <input type="text" class="form-control" value="{{$setting->min}}" name="min[{{$setting->id}}]" placeholder="Minimum Range" required data-rule-required="true" data-msg-required="Minimum range is required">
-                                                                <div class="input-group-append mr-1">
+                                                                <input type="text" class="form-control ratio" name="min[1]" required data-rule-required="true" data-msg-required="Minimum range is required">
+                                                                <div class="input-group-append">
                                                                     <span class="input-group-text">%</span>
                                                                 </div>
                                                             </div>
@@ -42,8 +87,8 @@
                                                                 <div class="input-group-prepend">
                                                                     <span class="input-group-text">Maximum Range</span>
                                                                 </div>
-                                                                <input type="text" class="form-control" value="{{$setting->max}}" name="max[{{$setting->id}}]" placeholder="Maximum Range" required data-rule-required="true" data-msg-required="Maximum range is required">
-                                                                <div class="input-group-append mr-1">
+                                                                <input type="text" class="form-control ratio" name="max[1]" required data-rule-required="true" data-msg-required="Maximum range is required">
+                                                                <div class="input-group-append">
                                                                     <span class="input-group-text">%</span>
                                                                 </div>
                                                             </div>
@@ -53,7 +98,7 @@
                                                                 <div class="input-group-prepend">
                                                                     <span class="input-group-text">Call Verification</span>
                                                                 </div>
-                                                                <input type="text" class="form-control" value="{{$setting->verification}}" name="verification[{{$setting->id}}]" placeholder="Call Verification Range" required data-rule-required="true" data-msg-required="Call verification range is required">
+                                                                <input type="text" class="form-control ratio" name="verification[1]" required data-rule-required="true" data-msg-required="Call verification range is required">
                                                                 <div class="input-group-append">
                                                                     <span class="input-group-text">%</span>
                                                                 </div>
@@ -61,47 +106,11 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                            @endforeach
-                                        @else
-                                            <div class="form-group">
-                                                <div class="input-group">
-                                                    <div class="col ratio">
-                                                        <div class="input-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text">Minimum Range</span>
-                                                            </div>
-                                                            <input type="text" class="form-control ratio" name="min[1]" placeholder="Minimum Range" required data-rule-required="true" data-msg-required="Minimum range is required">
-                                                            <div class="input-group-append">
-                                                                <span class="input-group-text">%</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col ratio">
-                                                        <div class="input-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text">Maximum Range</span>
-                                                            </div>
-                                                            <input type="text" class="form-control ratio" name="max[1]" placeholder="Maximum Range" required data-rule-required="true" data-msg-required="Maximum range is required">
-                                                            <div class="input-group-append">
-                                                                <span class="input-group-text">%</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col ratio">
-                                                        <div class="input-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text">Call Verification</span>
-                                                            </div>
-                                                            <input type="text" class="form-control ratio" name="verification[1]" placeholder="Call Verification Range" required data-rule-required="true" data-msg-required="Call verification range is required">
-                                                            <div class="input-group-append">
-                                                                <span class="input-group-text">%</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-                                        <button type="button" class="btn btn-primary">Update</button>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <button type="button" class="btn btn-outline-success mb-1" title="Add more ratios" id="add_row_btn"><i class="la la-plus"></i></button>
+                                        </div>
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
                                 </div>
@@ -119,6 +128,61 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var settings = @json($settings);
+            var row_count = 0;
+            if(settings.length != 0){
+                row_count = settings.length + 1;
+            }
+            else{
+                row_count = 2;
+            }
+            console.log(row_count);
+            $('#add_row_btn').on('click',function () {
+                let htmdiv = '<div class="form-group">' +
+                                '<div class="input-group">' +
+                                    '<div class="col ratio">' +
+                                        '<div class="input-group">' +
+                                            '<div class="input-group-prepend">' +
+                                                '<span class="input-group-text">Minimum Range</span>' +
+                                            '</div>' +
+                                            '<input type="text" class="form-control ratio" name="min['+ row_count + ']" required data-rule-required="true" data-msg-required="Minimum range is required">' +
+                                            '<div class="input-group-append">' +
+                                                '<span class="input-group-text">%</span>' +
+                                            '</div>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div class="col ratio">' +
+                                        '<div class="input-group">' +
+                                            '<div class="input-group-prepend">' +
+                                                '<span class="input-group-text">Maximum Range</span>' +
+                                            '</div>' +
+                                            '<input type="text" class="form-control ratio" name="max['+ row_count + ']" required data-rule-required="true" data-msg-required="Maximum range is required">' +
+                                            '<div class="input-group-append">' +
+                                                '<span class="input-group-text">%</span>' +
+                                            '</div>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div class="col ratio">' +
+                                        '<div class="input-group">' +
+                                            '<div class="input-group-prepend">' +
+                                                '<span class="input-group-text">Call Verification</span>' +
+                                            '</div>' +
+                                            '<input type="text" class="form-control ratio" name="verification['+ row_count + ']" required data-rule-required="true" data-msg-required="Call verification range is required">' +
+                                            '<div class="input-group-append">' +
+                                                '<span class="input-group-text">%</span>' +
+                                            '</div>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div class="col-1">' +
+                                    '<span  class="btn btn-danger rounded btn-sm-width row_close" id="row_close"><i class="ft-x"></i></span>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+                $('#ratios_wrapper').append(htmdiv);
+                // masks();
+                row_count++;
+            });
+
             $('#settings_form').validate({
 
                 errorClass: "danger",
