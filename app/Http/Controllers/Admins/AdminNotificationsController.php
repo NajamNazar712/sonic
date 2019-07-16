@@ -229,6 +229,9 @@ class AdminNotificationsController extends Controller
         else if ($id == 33) {
              $details['fields'] = ['tracking_number','destination','nsa_osa_estimated_charges','remarks'];
         }
+        else if ($id == 34) {
+             $details['fields'] = ['user_id', 'updated_at', 'tagged_sales_person'];
+        }
 
         return $details;
     }
