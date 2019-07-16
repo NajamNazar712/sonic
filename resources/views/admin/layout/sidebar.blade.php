@@ -645,6 +645,9 @@
                     @if (session('role_id') == 1 || in_array(229, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.settings.weight_factor.index') }}">Weight Charges Factor</a></li>
                     @endif
+                    @if (session('role_id') == 1 || in_array(229, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.settings.delivery_call_verification_ratio.index') }}">Delivery Call Verification Ratio</a></li>
+                    @endif
                 </ul>            </li>
             @endif
         </ul>

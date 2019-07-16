@@ -19,6 +19,9 @@
 
                     <div class="row justify-content-center">
                         <div class="col-4">
+                            <h3>Delivery Ratio {{$percentage}}%</h3>
+                        </div>
+                        <div class="col-4">
                             <fieldset class="form-group">
                                 <select name="select_all_status" id="select_all_status" class="form-control select2">
                                     @foreach($shipment_statuses as $status)

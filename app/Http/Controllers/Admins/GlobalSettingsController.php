@@ -14,6 +14,7 @@ use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
@@ -987,6 +988,11 @@ class GlobalSettingsController extends Controller
         }else{
             return $charges;
         }
+    }
+
+    public function delivery_call_verification_ratio_index(){
+        $settings = DeliveryCallVerificationRatio::get();
+        return view('admin.settings.delivery_call_verification_ratio')->with(['settings' => $settings]);
     }
 
 
