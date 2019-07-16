@@ -66,7 +66,35 @@
     </div>
 
 
+    <div class="modal fade text-left" id="uploadReturnNote" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadReturnNote"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Return Note Image Upload</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body  text-center">
+                    <form id="return_note_upload_form" class="form" action="{{route('admin.return.receive.upload_image')}}" method="post" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="return_note_id" id="return_note_id"/>
+                        <fieldset class="form-group">
+                            <input type="file" class="form-control-file" id="return_note_image" name="return_note_image" accept="image/*" data-rule-required="true" data-msg-required="File is required" data-rule-extension="image/jpeg|image/jpg|image/png" data-msg-extension="Only file with extension jpeg or png allowed" data-rule-accept="application/image" data-msg-accept="Only Image file allowed">
+                        </fieldset>
 
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="ReturnNoteImageSubmitButton" type="submit" class="btn btn-primary btn-block">Upload</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -135,7 +163,8 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-    {{-- <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
@@ -776,7 +805,41 @@
                 }
 
             });
+            var return_note_status = {{$return_note_status}};
+            function upload_return_note_image() {
+                if(return_note_status){
+                    $('#uploadReturnNote').modal('show');
+                }
+            }
+            upload_return_note_image();
 
+
+            $('#return_note_upload_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                rules: { return_note_image: { required: true, extension: "png|jpeg|gif|jpg", filesize: 1048576  }},
+                messages: { return_note_image: "File must be JPG, GIF or PNG, less than 1MB" },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'File is being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    return false;
+                    // form.submit();
+                }
+            });
         });
     </script>
 @endsection

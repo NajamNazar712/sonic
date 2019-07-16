@@ -1911,4 +1911,8 @@ class ReturnController extends Controller
             return ['status' => 0, 'success' => 'No Return Note Shipments', 'shipments' => FALSE];
         }
     }
+
+    public function receive_return_note_image_upload(Request $request){
+        return $request;
+    }
 }

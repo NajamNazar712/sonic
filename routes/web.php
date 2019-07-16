@@ -608,6 +608,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('reason','Admins\ReturnController@receive_return_reason')->name('reason');
             Route::post('rn.print','Admins\ReturnController@rrd_print')->name('rn.print');
             Route::post('shipments','Admins\ReturnController@receive_return_shipments')->name('shipments');
+            Route::post('upload_image','Admins\ReturnController@receive_return_note_image_upload')->name('upload_image');
 
         });
         Route::prefix('history')->name('history.')->group(function () {
