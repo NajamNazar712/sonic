@@ -185,11 +185,11 @@ class AdminPettyCashController extends Controller
             })
             ->editColumn('amount', function ($petty_details){
                 $selected_amount = '';
-                if($petty_details->finance_amount != null){
-                    $selected_amount = $petty_details->station_amount;
-                }else if($petty_details->operation_amount != null){
-                    $selected_amount = $petty_details->station_amount;
-                }else if($petty_details->station_amount != null){
+                if($petty_details->finance_amount !== null){
+                    $selected_amount = $petty_details->finance_amount;
+                }else if($petty_details->operation_amount !== null ){
+                    $selected_amount = $petty_details->operation_amount;
+                }else if($petty_details->station_amount !== null){
                     $selected_amount = $petty_details->station_amount;
                 }else{
                     $selected_amount = $petty_details->amount;
@@ -751,7 +751,7 @@ class AdminPettyCashController extends Controller
         $petty_cash_statement = PettyCashStatement::where('id', $statement_id);
         if ($petty_cash_statement->exists()) {
             $total_statements = 0;
-            $statement_details = PettyCashStatementDetail::where('petty_cash_statement_id', $statement_id)->get();
+            $statement_details = PettyCashStatementDetail::where('petty_cash_statement_id', $statement_id)->where('status', '!=', 1)->get();
 
             $petty_statement_details = '
                       <table class="table table-sm table-bordered border">
@@ -772,7 +772,16 @@ class AdminPettyCashController extends Controller
 
             foreach ($statement_details as $detail) {
                 $total_statements++;
-
+                $detain_amount = 0;
+                if($detail->finance_amount !== null){
+                    $detain_amount = $detail->finance_amount;
+                }else if($detail->operation_amount !== null){
+                    $detain_amount = $detail->operation_amount;
+                }else if($detail->station_amount !== null){
+                    $detain_amount = $detail->station_amount;
+                }else{
+                    $detain_amount = $detail->amount;
+                }
 
                 $shipment_details_row_start = '
                           <tr>
@@ -783,7 +792,7 @@ class AdminPettyCashController extends Controller
                             <td>' . $detail->expense_details . '</td>
                             <td>' . $detail->location->name . '</td>
                             <td>' . $detail->reference_no . '</td>
-                            <td>Rs ' . number_format($detail->amount) . '</td>
+                            <td>Rs ' . number_format($detain_amount) . '</td>
                             <td>' . $detail->remarks . '</td>
                 ';
 
@@ -863,9 +872,11 @@ class AdminPettyCashController extends Controller
 
             if($detail){
                 $log_data = array();
-                    $log_data['station'] = ($detail->station_amount != null)? $detail->station_amount: '' ;
-                    $log_data['operation'] = ($detail->operation_amount != null)? $detail->operation_amount: '' ;
-                    $log_data['finance'] = ($detail->finance_amount != null)? $detail->finance_amount: '' ;
+
+                    $log_data['actual'] = ($detail->amount !== null)? $detail->amount: '' ;
+                    $log_data['station'] = ($detail->station_amount !== null)? $detail->station_amount: '' ;
+                    $log_data['ope'] = ($detail->operation_amount !== null)? $detail->operation_amount: '' ;
+                    $log_data['finance'] = ($detail->finance_amount !== null)? $detail->finance_amount: '' ;
 
                 return response()->json(['status' => 0, 'amount' => $log_data]);
             }else{

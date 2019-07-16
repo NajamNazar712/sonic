@@ -711,13 +711,11 @@
                             });
                         }else{
                             var log_table = '';
-                            if(data.amount.station == '' || data.amount.operation || data.amount.finance){
-                                log_table = '<p>No Data Found</p>';
-                            }else{
-
+                            if(data.amount){
                                 log_table += '<table class="table table-sm datatable">';
                                 log_table += '<thead>';
                                 log_table += '<tr role="row">';
+                                log_table += '<th><strong>Actual Amount</strong></th>';
                                 log_table += '<th><strong>Station Amount</strong></th>';
                                 log_table += '<th><strong>Operation Amount</strong></th>';
                                 log_table += '<th><strong>Finance Amount</strong></th>';
@@ -727,8 +725,9 @@
                                 log_table += '<tbody>';
 
                                 log_table += '<tr>';
+                                log_table += '<td>' + data.amount.actual + '</td>';
                                 log_table += '<td>' + data.amount.station + '</td>';
-                                log_table += '<td>' + data.amount.operation + '</td>';
+                                log_table += '<td>' + data.amount.ope + '</td>';
                                 log_table += '<td>' + data.amount.finance + '</td>';
                                 log_table += '</tr>';
 
