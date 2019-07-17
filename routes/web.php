@@ -1121,6 +1121,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@weight_factor_index')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@weight_factor_update')->name('update');
         });
+        Route::prefix('delivery_call_verification_ratio')->name('delivery_call_verification_ratio.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@delivery_call_verification_ratio_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@delivery_call_verification_ratio_update')->name('update');
+        });
 
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {

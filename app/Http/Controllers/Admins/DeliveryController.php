@@ -21,6 +21,7 @@ use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\MisroutedHistory;
@@ -912,10 +913,23 @@ class DeliveryController extends Controller
             }
 
             if($note_data->status == 0){
+                $note_data_shipments = DeliveryNoteShipment::where('delivery_note_id', $id)->pluck('shipment_id')->toArray();;
+                $delivered_count = 0;
+                $total_count = 0;
+                foreach ($note_data_shipments as $shipment_id){
+                    $shipment = Shipment::where('id', $shipment_id)->first();
+                    if($shipment->shipper_status_id == 14 || $shipment->shipper_status_id == 30){
+                        $delivered_count = $delivered_count + 1;
+                    }
+                    $total_count = $total_count + 1;
+                }
+                $total = $delivered_count/$total_count;
+                $total_percentage = $total * 100;
+                $percentage = number_format((float)$total_percentage, 2, '.', '');
                 $where = array(7, 8, 9, 10, 11, 12, 14, 15, 18, 56);
                 $statuses = ShipmentStatus::whereIn('id', $where)->select('id','name')->where('status', 1)->get();
 
-                return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->pending_status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed, 'shipment_statuses' => $statuses]);
+                return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->pending_status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed, 'shipment_statuses' => $statuses, 'percentage' => $percentage]);
             }else{
                 return redirect(route('admin.delivery.receive.index'));
             }
@@ -1530,7 +1544,30 @@ class DeliveryController extends Controller
 
         $note_data = DeliveryNote::where('id', $id)->first();
         if($note_data && ($note_data->pending_status ==1)){
-            return view('admin.delivery.receive.verify_status')->with(['delivery_note_id' => $id, 'shipments_count' => $note_data->shipments_count, 'delivery_note_status' => $note_data->status]);
+            $note_data_shipments = DeliveryNoteShipment::where('delivery_note_id', $id)->pluck('shipment_id')->toArray();;
+            $delivered_count = 0;
+            $total_count = 0;
+            foreach ($note_data_shipments as $shipment_id){
+                $shipment = Shipment::where('id', $shipment_id)->first();
+                if($shipment->shipper_status_id == 14 || $shipment->shipper_status_id == 30){
+                    $delivered_count = $delivered_count + 1;
+                }
+                $total_count = $total_count + 1;
+            }
+            $total = $delivered_count/$total_count;
+            $total_percentage = $total * 100;
+            $percentage = number_format((float)$total_percentage, 2, '.', '');
+            $setting_call_verification = DeliveryCallVerificationRatio::where('min', '<',$total_percentage)->where('max', '>=',$total_percentage)->first();
+//            dd($setting_call_verification);
+            if($setting_call_verification == null){
+                $verification_percentage = 0;
+                $verification_shipments_count = 0;
+            }
+            else{
+                $verification_percentage = $setting_call_verification['verification'];
+                $verification_shipments_count = round(($total_count - $delivered_count) * ($verification_percentage/100));
+            }
+            return view('admin.delivery.receive.verify_status')->with(['delivery_note_id' => $id, 'shipments_count' => $note_data->shipments_count, 'delivery_note_status' => $note_data->status, 'percentage' => $percentage, 'verification_percentage' => $verification_percentage, 'verification_shipments_count' => $verification_shipments_count]);
         }else{
             return redirect(route('admin.delivery.receive.index'))->with('error','Delivery Note not ready for verification!');
         }

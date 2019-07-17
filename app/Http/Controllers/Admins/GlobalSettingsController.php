@@ -14,6 +14,7 @@ use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
@@ -987,6 +988,25 @@ class GlobalSettingsController extends Controller
         }else{
             return $charges;
         }
+    }
+
+    public function delivery_call_verification_ratio_index(){
+        $settings = DeliveryCallVerificationRatio::get();
+        return view('admin.settings.delivery_call_verification_ratio')->with(['settings' => $settings]);
+    }
+    public function delivery_call_verification_ratio_update(Request $request){
+//        dd($request);
+        $settings = DeliveryCallVerificationRatio::truncate();
+        foreach($request->verification as $index => $call_verification){
+            $new_ratios = new DeliveryCallVerificationRatio();
+            $new_ratios->id = $index;
+            $new_ratios->min = $request->min[$index];
+            $new_ratios->max = $request->max[$index];
+            $new_ratios->verification = $call_verification;
+            $new_ratios->save();
+        }
+        $new_ratios = new DeliveryCallVerificationRatio();
+        return redirect()->back()->with('success', 'Call verification ratio is Updated Successfully!');
     }
 
 

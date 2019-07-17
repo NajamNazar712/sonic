@@ -1135,7 +1135,7 @@
 						content = document.createElement('div');
 						content.innerHTML = html;
 						swal({
-							title: 'A possible address anomaly: ' + present + ' Detected!',
+							title: 'A Possible Address Anomaly: ' + present + ' Detected!',
 							content: content,
 							icon: 'info',
 							buttons: {
