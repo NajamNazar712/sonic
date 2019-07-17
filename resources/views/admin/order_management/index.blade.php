@@ -1269,5 +1269,6 @@
             });
 
         });
+    });
     </script>
 @endsection
