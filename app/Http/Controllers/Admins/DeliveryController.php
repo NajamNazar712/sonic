@@ -24,6 +24,9 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\MisroutedHistory;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialRequestDetail;
+use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
@@ -33,6 +36,10 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
+use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStockRequest;
+use App\Http\Models\WarehouseStockRequestHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -232,6 +239,22 @@ class DeliveryController extends Controller
             $rider_name='';
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
+
+                if($shipment->packaging_material_request == 1) {
+                    $packaging_material_request = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+                    if ($packaging_material_request != null) {
+                        if ($packaging_material_request->status_id != 3) {
+                            return ['status' => 1, 'error' => 'Packaging Material Request is not dispatched yet!'];
+                        }
+                    }
+                    $packaging_material_request_stock = WarehouseStockRequest::where('tracking_number',$shipment->tracking_number)->first();
+                    if($packaging_material_request_stock != null){
+                        if($packaging_material_request_stock->status_id != 3){
+                            return ['status' => 1, 'error' => 'Warehouse Stock Request is not dispatched yet!'];
+                        }
+                    }
+                }
+
                 $admin_hub = City::find($shipment->consignee_city->hub_id)->id;
                 if(session('role_id') == 1 || in_array($admin_hub, session('hubs'))){
                     $old_delivery_note_id = DeliveryNoteShipment::join('delivery_notes','delivery_notes.id', '=' ,'delivery_note_shipments.delivery_note_id')->where('delivery_note_shipments.shipment_id', $shipment->id)->where('delivery_notes.status', '!=', 4)->orderBy('delivery_note_id', 'desc');
@@ -1107,6 +1130,51 @@ class DeliveryController extends Controller
                         } else {
                             ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 0,($request->has($received_refused_by_name)? $request->received_or_refused_by[$shipment]:null));
                             Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
+
+                            if($shipment_details->packaging_material_request == 1){
+
+                                $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment_details->tracking_number)->where('status_id', 3)->first();
+                                if($packaging_material_shipment != null){
+                                    $packaging_material_shipment->status_id = 4;
+                                    $packaging_material_shipment->save();
+
+                                    $packaging_request_history = new PackagingMaterialRequestHistory();
+                                    $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                                    $packaging_request_history->status = 4;
+                                    $packaging_request_history->updated_by = Auth::id();
+                                    $packaging_request_history->save();
+                                }
+                                $warehouse_stock_request = WarehouseStockRequest::where('tracking_number', $shipment_details->tracking_number);
+                                if($warehouse_stock_request->exists()){
+                                    $warehouse_stock_request = $warehouse_stock_request->first();
+                                    $warehouse_stock_request->status_id = 4;
+                                    $warehouse_stock_request->save();
+
+                                    $warehouse_stock_request_history = new WarehouseStockRequestHistory();
+                                    $warehouse_stock_request_history->warehouse_stock_request_id = $warehouse_stock_request->id;
+                                    $warehouse_stock_request_history->status = 4;
+                                    $warehouse_stock_request_history->updated_by = Auth::id();
+                                    $warehouse_stock_request_history->save();
+
+                                    if(WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $warehouse_stock_request->stock_request_details->type_id)->where('type_size_id', $warehouse_stock_request->stock_request_details->size_id)->exists()){
+                                        $receiver_stock = WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $warehouse_stock_request->stock_request_details->type_id)->where('type_size_id', $warehouse_stock_request->stock_request_details->size_id)->first();
+                                        $receiver_stock->stock += $warehouse_stock_request->stock_request_details->quantity;
+                                        $receiver_stock->save();
+                                    }else{
+
+                                        $receiver_stock = new WarehouseStock();
+                                        $receiver_stock->warehouse_id = $warehouse_stock_request->requested_by;
+                                        $receiver_stock->type_id = $warehouse_stock_request->stock_request_details->type_id;
+                                        $receiver_stock->type_size_id = $warehouse_stock_request->stock_request_details->size_id;
+                                        $receiver_stock->stock = $warehouse_stock_request->stock_request_details->quantity;
+                                        $receiver_stock->save();
+
+                                    }
+
+
+                                }
+                            }
+
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                         }
                     }else if($selected_status == 56){
@@ -1237,12 +1305,27 @@ class DeliveryController extends Controller
                         }
 
                     } else {
+
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
                             ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
 
                         }
                         if ($shipment_status->booking_type_id != 4) {
-                            Shipment::where('id', $shipment)->update(['received_amount' => null, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
+                            $packaging_shipment = Shipment::where('id', $shipment)->first();
+                            $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $packaging_shipment->tracking_number)->where('status_id', 3)->first();
+                            if($packaging_material_shipment != null){
+                                if($request->status_drop[$shipment] == 14){
+                                        $packaging_material_shipment->status_id = 4;
+                                        $packaging_material_shipment->save();
+
+                                        $packaging_request_history = new PackagingMaterialRequestHistory();
+                                        $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                                        $packaging_request_history->status = 4;
+                                        $packaging_request_history->updated_by = Auth::id();
+                                        $packaging_request_history->save();
+                                }
+                            }
+                                Shipment::where('id', $shipment)->update(['received_amount' => null, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
                         }
                         else {
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
