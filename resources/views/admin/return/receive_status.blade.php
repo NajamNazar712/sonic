@@ -72,16 +72,14 @@
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Return Note Image Upload</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+
                 </div>
                 <div class="modal-body  text-center">
                     <form id="return_note_upload_form" class="form" action="{{route('admin.return.receive.upload_image')}}" method="post" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="image_return_note_id" id="image_return_note_id"/>
                         <fieldset class="form-group">
-                            <input type="file" class="form-control-file" id="return_note_image" name="return_note_image"  data-rule-required="true" data-msg-required="Image File is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="1" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                            <input type="file" class="form-control-file" id="return_note_image" name="return_note_image" accept="image/*" data-rule-required="true" data-msg-required="Image File is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2048000" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                         </fieldset>
 
                         <hr>
@@ -806,9 +804,11 @@
 
             });
             var return_note_status = {{$return_note_status}};
+            var return_note_image_status = '{{$return_note_image_status}}';
             var return_note_id = {{$return_note_id}};
+            console.log(return_note_image_status);
             function upload_return_note_image() {
-                if(return_note_status){
+                if(return_note_status == 1 && return_note_image_status == ''){
                     $('#image_return_note_id').val(return_note_id);
                     $('#uploadReturnNote').modal('show');
                 }
@@ -816,20 +816,23 @@
             upload_return_note_image();
 
 
+            $.validator.addMethod('maxsize', function(value, element, params) {
+                if ($(element).attr('type') === 'file') {
+                    if (element.files && element.files.length) {
+                        console.log(element.files);
+                        for (var c = 0; c < element.files.length; c++) {
+                            if (element.files[c].size > params) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }, $.validator.format("File Size must not exceed {0} bytes."));
+
             $('#return_note_upload_form').validate({
-                // rules: {
-                //     return_note_image: {
-                //         accept: "image/jpeg, image/jpg, image/png",
-                //         filesize:1048576
-                //     },
-                // },
-                // // rules: { return_note_image: { required: true, extension: "png|jpeg|gif|jpg", filesize: 1048576  }},
-                // messages: {
-                //     return_note_image: {
-                //         accept:"File must be JPG or PNG, less than 1MB",
-                //         filesize:" file size must be less than 200 KB.",
-                //     }
-                // },
+
                 errorClass: 'danger',
                 successClass: 'success',
                 normalizer: function(value) {
