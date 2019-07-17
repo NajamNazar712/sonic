@@ -1913,6 +1913,8 @@ class ReturnController extends Controller
     }
 
     public function receive_return_note_image_upload(Request $request){
-        return $request;
+        $return_note_id = $request->image_return_note_id;
+        $return_note_image = $request->return_note_image;
+        return $return_note_image;
     }
 }

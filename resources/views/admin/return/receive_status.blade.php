@@ -79,9 +79,9 @@
                 <div class="modal-body  text-center">
                     <form id="return_note_upload_form" class="form" action="{{route('admin.return.receive.upload_image')}}" method="post" enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" name="return_note_id" id="return_note_id"/>
+                        <input type="hidden" name="image_return_note_id" id="image_return_note_id"/>
                         <fieldset class="form-group">
-                            <input type="file" class="form-control-file" id="return_note_image" name="return_note_image" accept="image/*" data-rule-required="true" data-msg-required="File is required" data-rule-extension="image/jpeg|image/jpg|image/png" data-msg-extension="Only file with extension jpeg or png allowed" data-rule-accept="application/image" data-msg-accept="Only Image file allowed">
+                            <input type="file" class="form-control-file" id="return_note_image" name="return_note_image"  data-rule-required="true" data-msg-required="Image File is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="1" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                         </fieldset>
 
                         <hr>
@@ -806,8 +806,10 @@
 
             });
             var return_note_status = {{$return_note_status}};
+            var return_note_id = {{$return_note_id}};
             function upload_return_note_image() {
                 if(return_note_status){
+                    $('#image_return_note_id').val(return_note_id);
                     $('#uploadReturnNote').modal('show');
                 }
             }
@@ -815,10 +817,21 @@
 
 
             $('#return_note_upload_form').validate({
+                // rules: {
+                //     return_note_image: {
+                //         accept: "image/jpeg, image/jpg, image/png",
+                //         filesize:1048576
+                //     },
+                // },
+                // // rules: { return_note_image: { required: true, extension: "png|jpeg|gif|jpg", filesize: 1048576  }},
+                // messages: {
+                //     return_note_image: {
+                //         accept:"File must be JPG or PNG, less than 1MB",
+                //         filesize:" file size must be less than 200 KB.",
+                //     }
+                // },
                 errorClass: 'danger',
                 successClass: 'success',
-                rules: { return_note_image: { required: true, extension: "png|jpeg|gif|jpg", filesize: 1048576  }},
-                messages: { return_note_image: "File must be JPG, GIF or PNG, less than 1MB" },
                 normalizer: function(value) {
                     return $.trim(value);
                 },
@@ -830,14 +843,13 @@
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'File is being updated!',
+                        text: 'Image is being uploaded!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
                         closeOnEsc: false
                     });
-                    return false;
-                    // form.submit();
+                    form.submit();
                 }
             });
         });
