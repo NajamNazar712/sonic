@@ -18,7 +18,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Type - Size</th>
                         <th class="border-primary border-darken-1">Total</th>
-                        <th class="border-primary border-darken-1">Master Warehouse @if(!empty($master_warehouse))({{$master_warehouse->name}})@endif</th>
+                        <th class="border-primary border-darken-1">Master</th>
                         @if(!empty($warehouses))
                             @foreach($warehouses as $warehouse)
                                     <th class="border-primary border-darken-1">{{$warehouse['name']}}</th>
