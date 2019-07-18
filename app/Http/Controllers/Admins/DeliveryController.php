@@ -1155,21 +1155,23 @@ class DeliveryController extends Controller
                                     $warehouse_stock_request_history->status = 4;
                                     $warehouse_stock_request_history->updated_by = Auth::id();
                                     $warehouse_stock_request_history->save();
+                                    foreach ($warehouse_stock_request->stock_request_details as $detail){
+                                        if(WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->exists()){
+                                            $receiver_stock = WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $detail->type_id)->where('type_size_id', $detail->size_id)->first();
+                                            $receiver_stock->stock += $detail->quantity;
+                                            $receiver_stock->save();
+                                        }else{
 
-                                    if(WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $warehouse_stock_request->stock_request_details->type_id)->where('type_size_id', $warehouse_stock_request->stock_request_details->size_id)->exists()){
-                                        $receiver_stock = WarehouseStock::where('warehouse_id', $warehouse_stock_request->requested_by)->where('type_id', $warehouse_stock_request->stock_request_details->type_id)->where('type_size_id', $warehouse_stock_request->stock_request_details->size_id)->first();
-                                        $receiver_stock->stock += $warehouse_stock_request->stock_request_details->quantity;
-                                        $receiver_stock->save();
-                                    }else{
+                                            $receiver_stock = new WarehouseStock();
+                                            $receiver_stock->warehouse_id = $warehouse_stock_request->requested_by;
+                                            $receiver_stock->type_id = $detail->type_id;
+                                            $receiver_stock->type_size_id = $detail->size_id;
+                                            $receiver_stock->stock = $detail->quantity;
+                                            $receiver_stock->save();
 
-                                        $receiver_stock = new WarehouseStock();
-                                        $receiver_stock->warehouse_id = $warehouse_stock_request->requested_by;
-                                        $receiver_stock->type_id = $warehouse_stock_request->stock_request_details->type_id;
-                                        $receiver_stock->type_size_id = $warehouse_stock_request->stock_request_details->size_id;
-                                        $receiver_stock->stock = $warehouse_stock_request->stock_request_details->quantity;
-                                        $receiver_stock->save();
-
+                                        }
                                     }
+
 
 
                                 }
