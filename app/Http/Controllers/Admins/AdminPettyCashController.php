@@ -482,6 +482,8 @@ class AdminPettyCashController extends Controller
                     $petty_details->status = 1;
                     $petty_details->updated_by = Auth::id();
                     $petty_details->save();
+                    $statement_id = $petty_details->petty_cash_statement_id;
+                    
                     return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Rejected!']);
                 }else if($petty_details->status == 1){
                     return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details Already Rejected!']);
