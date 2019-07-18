@@ -19,7 +19,7 @@ class PackagingMaterialRequestStatusTableSeeder extends Seeder
             array('id'=>3, 'name'=>'Dispatched', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id'=>4, 'name'=>'Completed', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id'=>5, 'name'=>'Replenished', 'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('id'=>6, 'name'=>'Canceled', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id'=>6, 'name'=>'Cancelled', 'created_at' => $timestamp, 'updated_at' => $timestamp),
         ));
     }
 }
