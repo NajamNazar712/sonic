@@ -167,6 +167,188 @@
                   </div>
               </div>
           </div>
+          <div class="row">
+              <div class="card col-12">
+                  <div class="card-content collapse show">
+                      <div class="card-body row">
+                          <div class="div_border" style="width: 50%">
+                              <div class="text-center">
+                                  <h2>Operations Incoming Loads Forecast</h2>
+                              </div>
+                              <div class="row mt-1 ml-1" style="width: 95%">
+                                  <div id="incoming_table">
+                                      <table class="table table-sm table-bordered datatable" id="datatable" style="z-index: 3;">
+                                          <thead>
+                                          <tr role="row" class="black">
+                                              <th class="border-darken-1">Description</th>
+                                              <th class="border-darken-1">Shipments</th>
+                                          </tr>
+                                          </thead>
+                                          <tbody>
+                                          <tr role="row" class="white" style="background-color: #5DADE2">
+                                              <td>Shipment - Booked</td>
+                                              <td>50</td>
+                                          </tr>
+                                          <tr role="row" class="white" style="background-color: #E67E22">
+                                              <td>Shipment - Arrived at Origin</td>
+                                              <td>10</td>
+                                          </tr>
+                                          <tr role="row" class="white" style="background-color: #7F8C8D">
+                                              <td>Shipment - In Transit</td>
+                                              <td>50</td>
+                                          </tr>
+                                          <tr role="row" class="white" style="background-color: #F1C40F">
+                                              <td>Shipment - Arrived at Destination</td>
+                                              <td>10</td>
+                                          </tr>
+                                          <tr role="row" class="white" style="background-color: #1F618D">
+                                              <td>Shipment - Not Attempted</td>
+                                              <td>10</td>
+                                          </tr>
+                                          <tr role="row" class="white" style="background-color: #28B463">
+                                              <td>Shipment - Delivery Unsuccessful</td>
+                                              <td>50</td>
+                                          </tr>
+                                          <tr role="row" class="white" style="background-color: #154360">
+                                              <td>Shipment - On Hold</td>
+                                              <td>10</td>
+                                          </tr>
+                                          <tr role="row" class="black">
+                                              <td>Delivery Forecast</td>
+                                              <td>10</td>
+                                          </tr>
+                                          </tbody>
+                                      </table>
+                                  </div>
+                                  <div id="incoming_chart" class="width-35-per mt-1" style="margin-left: 4px">
+                                      <canvas id="myChartincoming" width="10%" height="10%"></canvas>
+                                  </div>
+                              </div>
+                              <div class="ml-1 row height-200">
+                                  <div class="width-300 mt-1">
+                                      <table class="table table-sm table-bordered datatable" id="datatable" style="z-index: 3;">
+                                          <tbody>
+                                          <tr role="row">
+                                              <td>0.5 KG</td>
+                                              <td>50</td>
+                                          </tr>
+                                          <tr role="row">
+                                              <td>Upto 2 KG</td>
+                                              <td>10</td>
+                                          </tr>
+                                          <tr role="row">
+                                              <td>upto 5 KG</td>
+                                              <td>50</td>
+                                          </tr>
+                                          <tr role="row">
+                                              <td>Above 5 KG</td>
+                                              <td>10</td>
+                                          </tr>
+                                          </tbody>
+                                      </table>
+                                  </div>
+                                  <div class="width-200">
+                                      <canvas id="mybarchartincoming" height="230px"></canvas>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="float-right div_border" style="width: 49%; margin-left: 1px">
+                              <div class="text-center">
+                                  <h2>Operations Outgoing Loads Forecast</h2>
+                              </div>
+
+                              <div class="ml-1 row">
+                                  <div class="mt-1 width-300">
+                                      <table class="table table-sm table-bordered datatable" id="datatable" style="z-index: 3;"><thead>
+                                          <tr role="row">
+                                              <th>Description</th>
+                                              <th>Nos</th>
+                                          </tr>
+                                          </thead>
+                                          <tbody>
+                                          <tr role="row">
+                                              <td>0.5 KG</td>
+                                              <td>50</td>
+                                          </tr>
+                                          <tr role="row">
+                                              <td>Upto 2 KG</td>
+                                              <td>10</td>
+                                          </tr>
+                                          </tbody>
+                                      </table>
+                                  </div>
+                              </div>
+
+                              <div class="row mt-1 ml-1" style="width: 95%">
+                                  <div id="outgoing_table" class="width-300">
+                                      <table class="table table-sm table-bordered datatable" id="datatable" style="z-index: 3;">
+                                          <thead>
+                                          <tr role="row" class="black">
+                                              <th class="border-darken-1">Top Five Customers</th>
+                                              <th class="border-darken-1">Shipments</th>
+                                          </tr>
+                                          </thead>
+                                          <tbody>
+                                          <tr role="row" class="white" style="background-color: #5DADE2">
+                                              <td>Mega Brands</td>
+                                              <td>50</td>
+                                          </tr>
+                                          <tr role="row" class="white" style="background-color: #E67E22">
+                                              <td>Saloni</td>
+                                              <td>10</td>
+                                          </tr>
+                                          <tr role="row" class="white" style="background-color: #7F8C8D">
+                                              <td>Chinayere</td>
+                                              <td>50</td>
+                                          </tr>
+                                          <tr role="row" class="white" style="background-color: #F1C40F">
+                                              <td>Shiza Hassan</td>
+                                              <td>10</td>
+                                          </tr>
+                                          <tr role="row" class="white" style="background-color: #1F618D">
+                                              <td>Domelic</td>
+                                              <td>10</td>
+                                          </tr>
+                                          </tbody>
+                                      </table>
+                                  </div>
+                                  <div id="outgoing_chart" class="width-35-per" style="margin-left: 4px">
+                                      <canvas id="myChartoutgoing" width="10%" height="10%"></canvas>
+                                  </div>
+                              </div>
+
+                              <div class="ml-1 row height-200">
+                                  <div class="width-300 mt-1">
+                                      <table class="table table-sm table-bordered datatable" id="datatable" style="z-index: 3;">
+                                          <tbody>
+                                          <tr role="row">
+                                              <td>0.5 KG</td>
+                                              <td>50</td>
+                                          </tr>
+                                          <tr role="row">
+                                              <td>Upto 2 KG</td>
+                                              <td>10</td>
+                                          </tr>
+                                          <tr role="row">
+                                              <td>upto 5 KG</td>
+                                              <td>50</td>
+                                          </tr>
+                                          <tr role="row">
+                                              <td>Above 5 KG</td>
+                                              <td>10</td>
+                                          </tr>
+                                          </tbody>
+                                      </table>
+                                  </div>
+                                  <div class="width-200">
+                                      <canvas id="mybarchartoutgoing" height="230px"></canvas>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
       </div>
     </div>
   </div>
@@ -195,11 +377,16 @@
              width: 300px !important;
         }
 
+        .div_border{
+            border-style: solid;
+        }
+
 
     </style>
 @endsection
 
 @section('js')
+    {{--<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
@@ -207,6 +394,7 @@
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/charts/echarts/echarts.common.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/charts/chartjs/chart.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
@@ -376,6 +564,312 @@
                     window.echarts.getInstanceById(id).resize();
                 });
             };
+
+            var ctx = document.getElementById('myChartincoming').getContext('2d');
+            // var chart = new Chart(ctx, {
+            //     // The type of chart we want to create
+            //     type: 'line',
+            //
+            //     // The data for our dataset
+            //     data: {
+            //         labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            //         datasets: [{
+            //             label: 'My First dataset',
+            //             backgroundColor: 'rgb(255, 99, 132)',
+            //             borderColor: 'rgb(255, 99, 132)',
+            //             data: [0, 10, 5, 2, 20, 30, 45]
+            //         }]
+            //     },
+            //
+            //     // Configuration options go here
+            //     options: {}
+            // });
+            // var piedata = {
+            //     datasets: [{
+            //         data: [10, 20, 30, 40, 50, 60, 70],
+            //         backgroundColor: [
+            //             '#5DADE2',
+            //             '#E67E22',
+            //             '#7F8C8D',
+            //             '#F1C40F',
+            //             '#1F618D',
+            //             '#28B463',
+            //             '#154360'
+            //         ],
+            //     }],
+            //
+            //     // These labels appear in the legend and in the tooltips when hovering different arcs
+            //
+            //
+            // };
+            var piedata = {
+                datasets: [{
+                    data: [10, 20, 30, 40, 50, 60, 70],
+                    backgroundColor: [
+                        '#5DADE2',
+                        '#E67E22',
+                        '#7F8C8D',
+                        '#F1C40F',
+                        '#1F618D',
+                        '#28B463',
+                        '#154360'
+                    ],
+                }],
+
+                // These labels appear in the legend and in the tooltips when hovering different arcs
+
+                labels: [
+                    "Booked",
+                    "Arrived at Origin",
+                    "In Transit",
+                    "Arrived at Destination",
+                    "Not Attempted",
+                    "Delivery Unsuccessful",
+                    "On Hold",
+                ]
+
+            };
+            console.log(piedata);
+            var options = {
+                options: {
+                    legend: {
+                        display: false,
+                    },
+                    showTooltips: false
+                }
+            };
+
+            var myDoughnutChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: piedata,
+                options: {
+                    legend: {
+                        display: false,
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    tooltips: {
+                        tittle: [10, 20, 30, 40, 50, 60, 70],
+                    },
+                },
+                centerText: {
+                    display: true,
+                    text: "280"
+                }
+            });
+
+            ctxbarchart = document.getElementById('mybarchartincoming').getContext('2d');
+
+
+            var bardata = {
+                    datasets: [
+                        {
+                            label: "0.5 KG",
+                            data: [25],
+                            backgroundColor: ["#669911", "#119966" ],
+                            hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
+                        },
+                        {
+                            label: "Upto 2 KG",
+                            data: [20],
+                            backgroundColor: ["#669911", "#119966" ],
+                            hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
+                        },
+                        {
+                            label: "Upto 5 KG",
+                            data: [30],
+                            backgroundColor: ["#669911", "#119966" ],
+                            hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
+                        },
+                        {
+                            label: "Above 5 KG",
+                            data: [40],
+                            backgroundColor: ["#669911", "#119966" ],
+                            hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
+                        }
+                    ],
+
+                // These labels appear in the legend and in the tooltips when hovering different arcs
+
+            };
+
+            var myBarChart = new Chart(ctxbarchart, {
+                type: 'horizontalBar',
+                data: bardata,
+                options: {
+                    scales: {
+                        xAxes: [{
+                            barPercentage: 0.5,
+                            barThickness: 6,
+                            maxBarThickness: 8,
+                            minBarLength: 2,
+                            gridLines: {
+                                offsetGridLines: true
+                            }
+                        }]
+                    },
+                    legend: {
+                        display: false,
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    tooltips: {
+                        callbacks: {
+                            title: function() {}
+                        }
+                    }
+                }
+            });
+            var ctx_2 = document.getElementById('myChartoutgoing').getContext('2d');
+            // var chart = new Chart(ctx, {
+            //     // The type of chart we want to create
+            //     type: 'line',
+            //
+            //     // The data for our dataset
+            //     data: {
+            //         labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            //         datasets: [{
+            //             label: 'My First dataset',
+            //             backgroundColor: 'rgb(255, 99, 132)',
+            //             borderColor: 'rgb(255, 99, 132)',
+            //             data: [0, 10, 5, 2, 20, 30, 45]
+            //         }]
+            //     },
+            //
+            //     // Configuration options go here
+            //     options: {}
+            // });
+            // var piedata = {
+            //     datasets: [{
+            //         data: [10, 20, 30, 40, 50, 60, 70],
+            //         backgroundColor: [
+            //             '#5DADE2',
+            //             '#E67E22',
+            //             '#7F8C8D',
+            //             '#F1C40F',
+            //             '#1F618D',
+            //             '#28B463',
+            //             '#154360'
+            //         ],
+            //     }],
+            //
+            //     // These labels appear in the legend and in the tooltips when hovering different arcs
+            //
+            //
+            // };
+            var piedata_2 = {
+                datasets: [{
+                    data: [10, 20, 30, 40, 50, 60, 70],
+                    backgroundColor: [
+                        '#5DADE2',
+                        '#E67E22',
+                        '#7F8C8D',
+                        '#F1C40F',
+                        '#1F618D',
+                        '#28B463',
+                        '#154360'
+                    ],
+                }],
+
+                // These labels appear in the legend and in the tooltips when hovering different arcs
+
+                labels: [
+                    "Shipment - Booked",
+                    "Shipment - Arrived at Origin",
+                    "Shipment - In Transit",
+                    "Shipment - Arrived at Destination",
+                    "Shipment - Not Attempted",
+                    "Shipment - Delivery Unsuccessful",
+                    "Shipment - On Hold",
+                ]
+
+            };
+
+            var myDoughnutChart_2 = new Chart(ctx_2, {
+                type: 'doughnut',
+                data: piedata_2,
+                options: {
+                    legend: {
+                        display: false,
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    tooltips: {
+                        tittle: [10, 20, 30, 40, 50, 60, 70],
+                    },
+                },
+                centerText: {
+                    display: true,
+                    text: "280"
+                }
+            });
+
+            ctxbarchart_2 = document.getElementById('mybarchartoutgoing').getContext('2d');
+
+
+            var bardata_2 = {
+                datasets: [
+                    {
+                        label: "0.5 KG",
+                        data: [25],
+                        backgroundColor: ["#669911", "#119966" ],
+                        hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
+                    },
+                    {
+                        label: "Upto 2 KG",
+                        data: [20],
+                        backgroundColor: ["#669911", "#119966" ],
+                        hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
+                    },
+                    {
+                        label: "Upto 5 KG",
+                        data: [30],
+                        backgroundColor: ["#669911", "#119966" ],
+                        hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
+                    },
+                    {
+                        label: "Above 5 KG",
+                        data: [40],
+                        backgroundColor: ["#669911", "#119966" ],
+                        hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
+                    }
+                ],
+
+                // These labels appear in the legend and in the tooltips when hovering different arcs
+
+            };
+
+            var myBarChart_2 = new Chart(ctxbarchart_2, {
+                type: 'horizontalBar',
+                data: bardata_2,
+                options: {
+                    scales: {
+                        xAxes: [{
+                            barPercentage: 0.5,
+                            barThickness: 6,
+                            maxBarThickness: 8,
+                            minBarLength: 2,
+                            gridLines: {
+                                offsetGridLines: true
+                            }
+                        }]
+                    },
+                    legend: {
+                        display: false,
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    tooltips: {
+                        callbacks: {
+                            title: function() {}
+                        }
+                    }
+                }
+            });
 
 
         });
