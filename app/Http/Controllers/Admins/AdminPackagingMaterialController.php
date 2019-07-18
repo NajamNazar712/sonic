@@ -1058,7 +1058,7 @@ class AdminPackagingMaterialController extends Controller
         $type = new PackagingMaterialTypes();
         $type->type = $request->type;
         $type->description = $request->description;
-        $type->status = 0;
+        $type->status = 1;
         $type->created_by = Auth::id();
         $type->save();
 
@@ -1066,7 +1066,7 @@ class AdminPackagingMaterialController extends Controller
         $type_history->type_id = $type->id;
         $type_history->type = $request->type;
         $type_history->description = $request->description;
-        $type_history->status = 0;
+        $type_history->status = 1;
         $type_history->created_by = Auth::id();
         $type_history->save();
 
