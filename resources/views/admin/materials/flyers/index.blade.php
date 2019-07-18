@@ -699,7 +699,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.packaging.list') }}',
                 rowId: 'stock_request_id',
-                order: [[1, 'desc']],
+                order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'warehouse_stock_requests.tracking_number', class: 'align-middle tracking_number'},
