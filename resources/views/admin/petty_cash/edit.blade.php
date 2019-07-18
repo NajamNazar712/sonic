@@ -581,6 +581,7 @@
                                     current.parents('td').prev('td').text('Rejected');
                                     current.parents('tr').attr('status',1);
                                     current.parents('td').html('');
+                                    location.reload();
                                 }
                                 else{
                                     toastr.error(data.error, 'Error!', {
