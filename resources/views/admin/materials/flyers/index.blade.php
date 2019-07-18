@@ -107,7 +107,7 @@
 
                                     <div class="row justify-content-center">
                                         <div class="col-md-12 col-lg-6">
-                                            <button id="RequestMaterialBtn" type="submit" class="btn btn-primary btn-block" disabled>Request Material</button>
+                                            <button id="RequestMaterialBtn" type="submit" class="btn btn-primary btn-block" disabled>Submit</button>
                                         </div>
                                     </div>
 
