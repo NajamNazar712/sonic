@@ -21,7 +21,7 @@
                         <th class="border-primary border-darken-1">Request Date/Time</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Requested By</th>
-                        <th class="border-primary border-darken-1">Warehouse</th>
+                        <th class="border-primary border-darken-1">Requested From</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -598,7 +598,7 @@
                             head.push('Requested Date/Time');
                             head.push('Created By');
                             head.push('Requested By');
-                            head.push('Warehouse');
+                            head.push('Requested From');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
