@@ -645,34 +645,40 @@
                 var size_name = $('#packaging_material_size option:selected').text();
                 var quantity = $('#packaging_material_quantity').val();
                 var flag = false;
-                if(type == ''){
-                    flag = true;
-                    var error = "<p id='type_error' class='danger'>Type is required</p>";
-                    if($('#packaging_material_type').parent('div').find('p#type_error').length == 0){
-                        $('#packaging_material_type').parent('div').append(error);
+                if(type == '' || type == null || size == '' || size == null || quantity == '' || quantity == null){
+                    if(type == '' || type == null){
+                        var error = "<p id='type_error' class='danger'>Type is required</p>";
+                        if($('#packaging_material_type').parent('div').find('p#type_error').length == 0){
+                            $('#packaging_material_type').parent('div').append(error);
+                        }
                     }
-                }else{
+                    else{
+                        $('#type_error').remove();
+                    }
+                    if(size == '' || size == null){
+                        var error = "<p id='size_error' class='danger'>Size is required</p>";
+                        if($('#packaging_material_size').parent('div').find('p#size_error').length == 0){
+                            $('#packaging_material_size').parent('div').append(error);
+                        }
+                    }
+                    else{
+                        $('#size_error').remove();
+                    }
+                    if(quantity == '' || quantity == null){
+                        var error = "<p id='quantity_error' class='danger'>Quantity is required</p>";
+                        if($('#packaging_material_quantity').parent('div').find('p#quantity_error').length == 0){
+                            $('#packaging_material_quantity').parent('div').append(error);
+                        }
+                    }
+                    else{
+                        $('#quantity_error').remove();
+                    }
+                    flag = true;
+                }
+                else{
                     flag = false;
                     $('#type_error').remove();
-                }
-
-                if(size == ''){
-                    flag = true;
-                    var error = "<p id='size_error' class='danger'>Size is required</p>";
-                    if($('#packaging_material_size').parent('div').find('p#size_error').length == 0){
-                        $('#packaging_material_size').parent('div').append(error);
-                    }
-                }else{
                     $('#size_error').remove();
-                }
-
-                if(quantity == ''){
-                    flag = true;
-                    var error = "<p id='quantity_error' class='danger'>Quantity is required</p>";
-                    if($('#packaging_material_quantity').parent('div').find('p#quantity_error').length == 0){
-                        $('#packaging_material_quantity').parent('div').append(error);
-                    }
-                }else{
                     $('#quantity_error').remove();
                 }
 
