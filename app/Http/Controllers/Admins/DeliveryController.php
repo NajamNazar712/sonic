@@ -961,7 +961,7 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [2, 3, 5])
                     ->where('crm.case_nature_id', 1);
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request'])
             ->where('delivery_notes.id', $id);
 
         if (session('role_id') != 1) {
@@ -1026,7 +1026,12 @@ class DeliveryController extends Controller
                 return $attempt_counts;
             })
             ->addColumn('status', function ($deliveries) {
-                $where = array(7, 8, 9, 11, 12, 15, 18, 56);
+                if($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == ''){
+                    $where = array(7, 8, 9, 11, 15, 18, 56);
+                }else{
+                    $where = array(7, 8, 9, 11, 12, 15, 18, 56);
+                }
+
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
                 $drops = '';
                 foreach ($statuses as $status) {
@@ -1655,7 +1660,12 @@ class DeliveryController extends Controller
                 return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('status', function ($deliveries) {
-                $where = array(7, 8, 9, 11, 12, 15, 18, 20, 56);
+                if($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == ''){
+                    $where = array(7, 8, 9, 11, 15, 18, 56);
+                }else{
+                    $where = array(7, 8, 9, 11, 12, 15, 18, 20, 56);
+                }
+
 
 //                $where = array(7,8,9,10,11,12,14,15,16,18,20,30,35,36,37);
                 $delivered_statuses = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);
@@ -1851,6 +1861,7 @@ class DeliveryController extends Controller
                                                 ShipmentsJourneyController::add($shipment, 17, 17, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
 
                                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+
                                                 if ($verification == 1) {
                                                     NotificationsController::send(15, 0, $shipment);
                                                     NotificationsController::send(16, 0, $shipment);
