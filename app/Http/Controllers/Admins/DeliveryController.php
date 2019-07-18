@@ -1952,7 +1952,7 @@ class DeliveryController extends Controller
                                                 }
 
                                                 if ($parcel->booking_type_id != 4) {
-                                                    if(($parcel->packaging_material_request == 1 && $parcel->packaging_material_charges != null) || $parcel->packaging_material_request == 0){
+                                                    if(($parcel->packaging_material_request == 1 && $parcel->packaging_material_charges != '') || $parcel->packaging_material_request == 0){
                                                         AdminFinanceController::add_payment($shipment, 0);
                                                     }
                                                 } else {
