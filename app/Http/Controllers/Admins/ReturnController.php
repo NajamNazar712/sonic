@@ -1299,7 +1299,12 @@ class ReturnController extends Controller
         if($return->exists()){
             $return = $return->first();
             $shipment_status = ShipmentStatus::whereIn('id', [24,25, 47, 48])->get();
-            return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count, 'return_note_status' => $return->status, 'shipment_statuses' => $shipment_status, 'return_note_image_status' => $return->image]);
+            $shipment_count = ReturnNoteShipment::where(['return_note_id'=>$id,'status'=>0])->count();
+            $return_image = true;
+            if($shipment_count == 0){
+                $return_image = false;
+            }
+            return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count, 'return_note_status' => $return->status, 'shipment_statuses' => $shipment_status, 'return_note_image_status' => $return->image, 'return_image' => $return_image]);
         }else{
             return redirect()->route('admin.return.receive.index')->with(['error' => 'Return Note not found']);
         }
@@ -1488,7 +1493,7 @@ class ReturnController extends Controller
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$return_note_id,'status'=>0])->count();
             if($shipment_status == 0){
-                ReturnNote::where('id',$return_note_id)->update(['updated_by'=>Auth::id(),'status'=>1]);
+                ReturnNote::where('id',$return_note_id)->update(['updated_by'=>Auth::id()]);
             }
 
             NotificationsController::send(15, $return_note_id);
@@ -1528,7 +1533,7 @@ class ReturnController extends Controller
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
             if($shipment_status == 0){
-                ReturnNote::where('id',$request->return_note_id)->update(['updated_by'=>Auth::id(),'status'=>1]);
+                ReturnNote::where('id',$request->return_note_id)->update(['updated_by'=>Auth::id()]);
             }
 
             NotificationsController::send(15, $request->return_note_id);
@@ -1586,7 +1591,7 @@ class ReturnController extends Controller
                 }
                 $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
                 if($shipment_status == 0){
-                    ReturnNote::where('id',$request->return_note_id)->update(['updated_by'=>Auth::id(),'status'=>1]);
+                    ReturnNote::where('id',$request->return_note_id)->update(['updated_by'=>Auth::id()]);
                 }
 
                 NotificationsController::send(15, $request->return_note_id);
@@ -1959,7 +1964,11 @@ class ReturnController extends Controller
 
             $imageUpload = ReturnNote::find($return_note_id);
             $imageUpload->image = $generated_image_name;
+            $imageUpload->updated_by = Auth::id();
+            $imageUpload->status = 1;
             $imageUpload->save();
+
+
             return redirect()->back()->with(['status' => 1, 'success' => 'Return Note updated successfully']);
         }
         else{
