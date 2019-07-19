@@ -1185,10 +1185,9 @@ class ReturnController extends Controller
 
                 if (session('role_id') == 1 || count(array_intersect([50, 51], session('permissions'))) !== 0) {
                     $dropdown = "
-                    <span class='dropdown'>
-                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                        <div class='dropdown-menu open-left arrow'>";
+                    <div class='btn-group'>
+                           <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
+                            <div class='dropdown-menu dropdown-menu-sm'>";
 
                     if (session('role_id') == 1 || in_array(50, session('permissions'))) {
                         $dropdown .= $receive_button;
@@ -1200,7 +1199,7 @@ class ReturnController extends Controller
 
                     $dropdown .= "
                         </div>
-                    </span>
+                    </div>
                 ";
 
                     return $dropdown;
@@ -1862,9 +1861,10 @@ class ReturnController extends Controller
                 return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('image', function ($deliveries) {
-                if ($deliveries != null && ($now->diffInDays($deliveries->created_at) < 30)) {
+                $now = Carbon::now();
+                if ($deliveries->image != null && ($now->diffInDays($deliveries->created_at) < 30)) {
                     $img = asset('uploads/return_notes/' . $deliveries->image);
-                    return "<a href='{$img}' class='btn btn-icon btn-primary mr-1' target='_blank'><i class='la la-camera'></i></a>";
+                    return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
 
                 } else {
                     return "-";
