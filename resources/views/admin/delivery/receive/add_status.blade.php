@@ -18,7 +18,7 @@
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
 
                     <div class="row justify-content-center">
-                        <div class="col-4">
+                        <div class="col-3">
                             <h3>Delivery Ratio {{$percentage}}%</h3>
                         </div>
                         <div class="col-4">
@@ -31,7 +31,7 @@
                             </fieldset>
                         </div>
                         @if(!$delivery_note_status == 1)
-                            <div class="col-3">
+                            <div class="col-4">
                                 <button type="button" id="submit_selected_status" disabled class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-list-alt"></i> Bulk Update </button>
                             </div>
                         @endif
@@ -225,12 +225,50 @@
         </div>
     </div>
     <!--Non Service Modal -->
+
+    <div class="modal fade text-left" id="DateModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DateModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Update Shipment(s) Receiving Date</h4>
+                </div>
+                <div class="modal-body  text-center">
+
+                        <div class="row justify-content-center">
+                            <div class="col-8" id="receiving_date_div">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                      <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                      </span>
+                                    </div>
+                                    <input type="text" name="receiving_date"
+                                           class="form-control bg-primary border-primary white rounded-right"
+                                           id="receiving_date" placeholder="Receiving Date">
+                                </div>
+                            </div>
+
+                        </div>
+                        <input type="hidden" name="date_shipment_id" id="date_shipment_id">
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="DateUpdate" type="button" class="btn btn-primary btn-block">Update</button>
+                            </div>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style>
         table.dataTable {
             font-size: 12px;
@@ -304,6 +342,9 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -331,78 +372,7 @@
                 scrollX: true,
                 buttons: [
                         @if(!$delivery_note_status == 1)
-                        {{--{--}}
-                        {{--text: 'Delivered',--}}
-                        {{--className: 'btn btn-primary delivered',--}}
-                        {{--enabled: false,--}}
-                        {{--action: function (e, dt, node, config) {--}}
-                        {{--if(selected_rows !== ''){--}}
-                        {{--swal({--}}
-                        {{--title: 'Are You Sure?',--}}
-                        {{--text: 'Select Yes to mark shipments as Delivered!',--}}
-                        {{--icon: 'warning',--}}
-                        {{--buttons: {--}}
-                        {{--cancel: {--}}
-                        {{--text: 'No',--}}
-                        {{--value: null,--}}
-                        {{--visible: true,--}}
-                        {{--closeModal: true,--}}
-                        {{--},--}}
-                        {{--confirm: {--}}
-                        {{--text: 'Yes',--}}
-                        {{--value: true,--}}
-                        {{--visible: true,--}}
-                        {{--closeModal: true--}}
-                        {{--}--}}
-                        {{--},--}}
-                        {{--closeOnClickOutside: false,--}}
-                        {{--closeOnEsc: false,--}}
-                        {{--dangerMode: true--}}
-                        {{--}).then(function (confirm) {--}}
-                        {{--if (confirm) {--}}
 
-                        {{--table.rows().nodes().each(function(index) {--}}
-                        {{--var row = table.row(index);--}}
-                        {{--if ($(row.node()).hasClass('selected')) {--}}
-                        {{--var id = parseInt(row.id());--}}
-                        {{--var remarks = $(row.node()).find('td.remarks input').val();--}}
-                        {{--shipment_remarks[id] = remarks;--}}
-                        {{--}--}}
-                        {{--});--}}
-
-                        {{--$.ajax({--}}
-                        {{--url: '{!! route('admin.delivery.receive.delivered') !!}',--}}
-                        {{--method: 'POST',--}}
-                        {{--data: {--}}
-                        {{--'shipment_ids': selected_rows,--}}
-                        {{--'delivery_note_id': note_id,--}}
-                        {{--'_token': '{{ csrf_token() }}',--}}
-                        {{--'remark': shipment_remarks--}}
-                        {{--}--}}
-                        {{--}).done(function (data) {--}}
-                        {{--if(data.status === 0){--}}
-
-                        {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-
-                        {{--}else{--}}
-                        {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-
-                        {{--}--}}
-                        {{--location.reload();--}}
-
-                        {{--});--}}
-                        {{--}--}}
-                        {{--});--}}
-
-
-                        {{--}else{--}}
-                        {{--var error = "Something went wrong please refresh page and try again!";--}}
-                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-
-                        {{--}--}}
-                        {{--}--}}
-
-                        {{--}, --}}
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -617,12 +587,50 @@
                     }
                 });
             });
+
             $('body').on('select2:select','.reasonSelect .reasonDrop',function (e) {
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var reasonSelection = $(this).find(':selected');
                 var reason_status = reasonSelection.val();
                 shipment_reason[rowid] = reason_status;
+                if(reason_status == 16){
+                    $('#DateModal').modal('show');
+                    $('#date_shipment_id').val(rowid);
+                    $('#receiving_date').pickadate({
+                        firstDay: 1,
+                        clear: '',
+                        disable: [7],
+                        min: new Date('{{$tomorrow}}'),
+                        max: new Date('{{$next3days}}'),
+                        format:'dd mmmm, yyyy',
+                        selectYears: true,
+                        selectMonths: true,
+                        formatSubmit: 'yyyy-mm-dd 23:59:59',
+                        hiddenSuffix: '_formatted',
+                        onOpen: function() {
+                            $('#receiving_date_root').css('top','40px');
+                        },
+                    });
+                }
             });
+
+            $('#DateUpdate').on('click', function () {
+                var receiving_date = $('input[name="receiving_date_formatted"]').val();
+                if(receiving_date === '' || receiving_date === null){
+                    var error = '<p class="danger">Please select a date</p>';
+                    $('#receiving_date_div').append(error);
+                }else{
+                    $('#receiving_date_div p.danger').remove();
+                    var shipment_id = $('#date_shipment_id').val();
+                    var remarks_input = $('tr#'+shipment_id).find('td.remarks input');
+                    remarks = remarks_input.val();
+                    remarks = remarks+ ' ' + receiving_date;
+                    remarks_input.val(remarks);
+                    $('#DateModal').modal('hide');
+                    $('#receiving_date').pickadate('picker').set('clear');
+                }
+            });
+
             $('body').on('click','.clear',function () {
                 var status = $(this).parents().closest('tr').find('.statusDrop');
                 var reason = $(this).parents().closest('tr').find('.reasonDrop');
