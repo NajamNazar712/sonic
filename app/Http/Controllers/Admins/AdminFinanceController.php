@@ -3683,16 +3683,6 @@ class AdminFinanceController extends Controller
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
 
-            if ($invoice_shipment->type == 0) {
-                $type = 'Delivered';
-            }
-            else if ($invoice_shipment->type == 1) {
-                $type = 'Returned';
-            }
-            else {
-                $type = 'Adjusted';
-            }
-
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
             if ($shipment_journey->exists()) {
@@ -3708,20 +3698,13 @@ class AdminFinanceController extends Controller
                         <tr>
                           <td>' . $serial_number . '</td>
                           <td>' . $shipment->tracking_number . '</td>
-                          <td>' . $type . '</td>
                           <td>' . $shipment->pickup_address->city->name . '</td>
                           <td>' . $shipment->consignee_city->name . '</td>
                           <td>' . $date . '</td>
                           <td>' . $shipment->actual_weight . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->insurance_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 0) ? number_format($shipment->replacement_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 1) ? number_format($shipment->return_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->intercept_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
-                          <td>' . (($shipment->packaging_material_request == 1 && $invoice_shipment->type == 0) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . number_format($invoice_shipment->charges, 2) . '</td>
                           <td>' . number_format($invoice_shipment->gst, 2) . '</td>
@@ -3870,25 +3853,18 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="20">Shipment(s) Summary</th>
+                            <th class="color primary text-center" colspan="13">Shipment(s) Summary</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
                           <th class="color secondary">Tracking No.</th>
-                          <th class="color secondary">Type</th>
                           <th class="color secondary">Origin</th>
                           <th class="color secondary">Destination</th>
                           <th class="color secondary">Arrival Date</th>
                           <th class="color secondary">Weight (kg)</th>
                           <th class="color secondary">Weight Charges (PKR)</th>
-                          <th class="color secondary">Cash Handling Charges (PKR)</th>
-                          <th class="color secondary">Insurance Charges (PKR)</th>
-                          <th class="color secondary">Replacement Charges (PKR)</th>
-                          <th class="color secondary">Return Charges (PKR)</th>
                           <th class="color secondary">Fuel Surcharge (PKR)</th>
-                          <th class="color secondary">Intercept Charges (PKR)</th>
                           <th class="color secondary">OSA Charges (PKR)</th>
-                          <th class="color secondary">Packaging Charges (PKR)</th>
                           <th class="color secondary">Adjustment Charges (PKR)</th>
                           <th class="color secondary">Total Charges (PKR)</th>
                           <th class="color secondary">GST (PKR)</th>
@@ -4056,22 +4032,12 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Type', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'Insurance Charges (PKR)', 'Replacement Charges (PKR)', 'Return Charges (PKR)', 'Fuel Surcharge (PKR)', 'Intercept Charges (PKR)', 'OSA Charges (PKR)', 'Packaging Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
 
         $serial_number = 1;
 
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
-
-            if ($invoice_shipment->type == 0) {
-                $type = 'Delivered';
-            }
-            else if ($invoice_shipment->type == 1) {
-                $type = 'Returned';
-            }
-            else {
-                $type = 'Adjusted';
-            }
 
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
@@ -4088,20 +4054,13 @@ class AdminFinanceController extends Controller
 
             $row[] = $serial_number;
             $row[] = $shipment->tracking_number;
-            $row[] = $type;
             $row[] = $shipment->pickup_address->city->name;
             $row[] = $shipment->consignee_city->name;
             $row[] = $shipment->created_at;
             $row[] = $shipment->actual_weight;
             $row[] = (($invoice_shipment->type != 2) ? $shipment->weight_charges : 0);
-            $row[] = (($invoice_shipment->type == 0) ? $shipment->cash_handling_charges : 0);
-            $row[] = (($invoice_shipment->type != 2) ? $shipment->insurance_charges : 0);
-            $row[] = (($invoice_shipment->type == 0) ? $shipment->replacement_charges : 0);
-            $row[] = (($invoice_shipment->type == 2) ? $shipment->return_charges : 0);
             $row[] = (($invoice_shipment->type != 2) ? $shipment->fuel_surcharge : 0);
-            $row[] = (($invoice_shipment->type != 2) ? $shipment->intercept_charges : 0);
             $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
-            $row[] = (($shipment->packaging_material_request == 1 && $invoice_shipment->type == 0) ? $shipment->packaging_material_charges : 0);
             $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
             $row[] = $invoice_shipment->charges;
             $row[] = $invoice_shipment->gst;
@@ -4115,19 +4074,13 @@ class AdminFinanceController extends Controller
         $spreadsheet = new Spreadsheet();
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('G')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('R')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('T')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('U')->getNumberFormat()->setFormatCode('#,##0.00');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
