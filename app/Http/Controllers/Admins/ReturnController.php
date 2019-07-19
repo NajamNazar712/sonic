@@ -1299,9 +1299,9 @@ class ReturnController extends Controller
         if($return->exists()){
             $return = $return->first();
             $shipment_status = ShipmentStatus::whereIn('id', [24,25, 47, 48])->get();
-            $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$id,'status'=>0])->count();
+            $shipment_count = ReturnNoteShipment::where(['return_note_id'=>$id,'status'=>0])->count();
             $return_image = true;
-            if($shipment_status == 0){
+            if($shipment_count == 0){
                 $return_image = false;
             }
             return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count, 'return_note_status' => $return->status, 'shipment_statuses' => $shipment_status, 'return_note_image_status' => $return->image, 'return_image' => $return_image]);
