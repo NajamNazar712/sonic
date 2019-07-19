@@ -484,8 +484,8 @@
                     {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data:'consignee_name',name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data:'collection_amount',name: 'shipments.amount', class: 'align-middle amount'},
-                    {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
-                    {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
+                    {data:'status',name: 'status', class: 'align-middle status form-group statusOnChange',orderable: false, searchable: false},
+                    {data:'reason',name: 'reason', class: 'align-middle reason form-group reasonSelect',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                     {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
@@ -609,6 +609,8 @@
                         $.each(data.reasons,function (key,value) {
                             var newOption = new Option(value.name, value.id, false, false);
                             reason.append(newOption).trigger('change');
+                            reason.attr('data-rule-required', 'true');
+                            reason.attr('data-msg-required', 'Reason is required');
                         });
                         reason.val('').trigger('change');
                     }else{
@@ -636,48 +638,100 @@
                 }
             });
             var shipments = [];
-            $('#status_update_form').bind('submit', function(event) {
-                event.preventDefault();
-                var this_form = this;
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to change the status of shipments!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
+            // $('#status_update_form').bind('submit', function(event) {
+            //     event.preventDefault();
+            //     var this_form = this;
+            //     swal({
+            //         title: 'Are You Sure?',
+            //         text: 'Select Yes to change the status of shipments!',
+            //         icon: 'warning',
+            //         buttons: {
+            //             cancel: {
+            //                 text: 'No',
+            //                 value: null,
+            //                 visible: true,
+            //                 closeModal: true,
+            //             },
+            //             confirm: {
+            //                 text: 'Yes',
+            //                 value: true,
+            //                 visible: true,
+            //                 closeModal: true
+            //             }
+            //         },
+            //         closeOnClickOutside: false,
+            //         closeOnEsc: false,
+            //         dangerMode: true
+            //     }).then(function (confirm) {
+            //         if (confirm) {
+            //
+            //             var shipment = $('#shipment_ids');
+            //             event.preventDefault();
+            //             var id = '';
+            //             var count = table.data().count();
+            //             for(var i = 0;i<count;i++){
+            //                 id = table.row( i ).id();
+            //                 shipments.push(id);
+            //             }
+            //             shipment.val(shipments);
+            //             blockPagePermanently();
+            //             this_form.submit();
+            //         }
+            //     });
+            //
+            // });
+                $('#status_update_form').validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function (form) {
+                    var this_form = form;
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to change the status of shipments!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
                         },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
 
-                        var shipment = $('#shipment_ids');
-                        event.preventDefault();
-                        var id = '';
-                        var count = table.data().count();
-                        for(var i = 0;i<count;i++){
-                            id = table.row( i ).id();
-                            shipments.push(id);
+                            var shipment = $('#shipment_ids');
+                            event.preventDefault();
+                            var id = '';
+                            var count = table.data().count();
+                            for(var i = 0;i<count;i++){
+                                id = table.row( i ).id();
+                                shipments.push(id);
+                            }
+                            shipment.val(shipments);
+                            blockPagePermanently();
+                            this_form.submit();
                         }
-                        shipment.val(shipments);
-                        blockPagePermanently();
-                        this_form.submit();
-                    }
-                });
+                    });
 
+
+                }
             });
+
+
+
+
             //on page load ajax
             var trybuy_ids = [];
             var shipment_id_list = [];
