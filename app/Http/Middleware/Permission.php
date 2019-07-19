@@ -447,6 +447,9 @@ class Permission
             'settings.cod_cap_zones.index' => 197,
             'settings.cod_cap_zones.update' => 197,
 
+            'settings.delivery_call_verification_ratio.index' => 231,
+            'settings.delivery_call_verification_ratio.update' => 231,
+
 
 
             'cancelled_shipments.index' => 117,

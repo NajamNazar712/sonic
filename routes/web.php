@@ -608,6 +608,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('reason','Admins\ReturnController@receive_return_reason')->name('reason');
             Route::post('rn.print','Admins\ReturnController@rrd_print')->name('rn.print');
             Route::post('shipments','Admins\ReturnController@receive_return_shipments')->name('shipments');
+            Route::post('upload_image','Admins\ReturnController@receive_return_note_image_upload')->name('upload_image');
 
         });
         Route::prefix('history')->name('history.')->group(function () {
@@ -1119,6 +1120,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('weight_factor')->name('weight_factor.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@weight_factor_index')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@weight_factor_update')->name('update');
+        });
+        Route::prefix('delivery_call_verification_ratio')->name('delivery_call_verification_ratio.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@delivery_call_verification_ratio_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@delivery_call_verification_ratio_update')->name('update');
         });
 
     });

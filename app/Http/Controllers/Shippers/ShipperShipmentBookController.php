@@ -1370,7 +1370,7 @@ class ShipperShipmentBookController extends Controller
                             }
                         }
                         if (isset($con_nsa[$row_id])) {
-                            $nsa_error[$row_id]['msg'] = "A possible address anomaly: " . $msg_string . " Detected!";
+                            $nsa_error[$row_id]['msg'] = "A Possible Address Anomaly: " . $msg_string . " Detected!";
                         }
                     }
 
@@ -2503,7 +2503,7 @@ class ShipperShipmentBookController extends Controller
                             }
                         }
                         if (isset($con_nsa[$row_id])) {
-                            $nsa_error[$row_id]['msg'] = "A possible address anomaly: " . $msg_string . " Detected!";
+                            $nsa_error[$row_id]['msg'] = "A Possible Address Anomaly: " . $msg_string . " Detected!";
                         }
                     }
 

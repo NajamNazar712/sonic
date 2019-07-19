@@ -23,10 +23,13 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
@@ -1297,7 +1300,7 @@ class ReturnController extends Controller
         if($return->exists()){
             $return = $return->first();
             $shipment_status = ShipmentStatus::whereIn('id', [24,25, 47, 48])->get();
-            return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count, 'return_note_status' => $return->status, 'shipment_statuses' => $shipment_status]);
+            return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count, 'return_note_status' => $return->status, 'shipment_statuses' => $shipment_status, 'return_note_image_status' => $return->image]);
         }else{
             return redirect()->route('admin.return.receive.index')->with(['error' => 'Return Note not found']);
         }
@@ -1845,7 +1848,7 @@ class ReturnController extends Controller
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins','admins.id','=','return_notes.admin_id')
             ->join('admins as sb','sb.id','=','return_notes.updated_by')
-            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assigned_by','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status','sb.name as submitted_by','return_notes.updated_at as submitted_at']);
+            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assigned_by','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status','sb.name as submitted_by','return_notes.updated_at as submitted_at','return_notes.image']);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
@@ -1857,6 +1860,16 @@ class ReturnController extends Controller
             })
             ->addColumn('return_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('image', function ($deliveries) {
+                if ($deliveries != null && ($now->diffInDays($deliveries->created_at) < 30)) {
+                    $img = asset('uploads/return_notes/' . $deliveries->image);
+                    return "<a href='{$img}' class='btn btn-icon btn-primary mr-1' target='_blank'><i class='la la-camera'></i></a>";
+
+                } else {
+                    return "-";
+                }
+
             })
             ->editColumn('shipments_count_link', function($deliveries) {
                 if ($deliveries->shipments_count != 0) {
@@ -1909,6 +1922,63 @@ class ReturnController extends Controller
             return ['status' => 0, 'success' => 'Return Note Shipments', 'shipments' => $shipments];
         }else{
             return ['status' => 0, 'success' => 'No Return Note Shipments', 'shipments' => FALSE];
+        }
+    }
+
+    public function receive_return_note_image_upload(Request $request){
+
+        $return_note_id = $request->image_return_note_id;
+        $return_note_image = $request->return_note_image;
+
+        $messages = [
+            'return_note_image.required' => 'No Image file selected!.',
+            'return_note_image.mimes' => 'Image file not supported!.',
+            'return_note_image.size' => 'Image file size exceded!.',
+        ];
+        $validation = [
+            'return_note_image' => 'required | mimes:jpeg,png,jpg | max:2048',
+        ];
+        $validate = Validator::make($request->all(), $validation, $messages);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'error' => $validate->errors()]);
+        }
+
+        if($return_note_id){
+
+            $image = $request->file('return_note_image');
+            $imageName = $image->getClientOriginalName();
+
+            //$imageName = explode('.', $imageName);
+            $extension = $image->getClientOriginalExtension();
+            $random = rand(1000, 100000);
+            $now = Carbon::now();
+            $time = $now->year . '_' . $now->month;
+            $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+            $image->move(public_path('uploads/return_notes'), $generated_image_name);
+
+            $imageUpload = ReturnNote::find($return_note_id);
+            $imageUpload->image = $generated_image_name;
+            $imageUpload->save();
+            return redirect()->back()->with(['status' => 1, 'success' => 'Return Note updated successfully']);
+        }
+        else{
+            return redirect()->back()->with(['status' => 0, 'error' => 'Return Note Not found!']);
+        }
+    }
+
+    static public function archive_directory(){
+        $files = File::glob(public_path() . '/uploads/return_notes/*.*');
+        $now = Carbon::now();
+        foreach ($files as $file) {
+            if (is_file($file)) {
+               $created = date("F d Y H:i:s.",filemtime($file));
+                $file_name = pathinfo($file);
+               if($now->diffInDays($created) > 30){
+                   Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
+                   File::delete($file);
+               }
+            }
         }
     }
 }

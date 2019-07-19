@@ -51,6 +51,7 @@
                         <th class="border-primary border-darken-1">Created Date</th>
                         <th class="border-primary border-darken-1">Submitted By</th>
                         <th class="border-primary border-darken-1">Submitted Date</th>
+                        <th class="border-primary border-darken-1">Image</th>
                     </tr>
                     </thead>
                 </table>
@@ -261,6 +262,7 @@
                     { data:'created_at' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
                     { data:'submitted_by' ,name: 'sb.name', class: 'align-middle submitted_by'},
                     { data:'submitted_at' ,name: 'return_notes.updated_at', class: 'align-middle submitted_at'},
+                    { data:'image' ,name: 'image', class: 'align-middle text-center image', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -282,7 +284,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.image')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
