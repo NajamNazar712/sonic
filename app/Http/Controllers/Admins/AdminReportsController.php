@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\SalePersonTag;
 use Carbon\Carbon;
 use function foo\func;
 use Illuminate\Http\Request;
@@ -1682,7 +1684,7 @@ class AdminReportsController extends Controller
         }
         $details[] = ['Grand Total','Origin '.$only_date, number_format($total_booked), number_format($total_received), number_format($total_revenue_wo_gst),number_format($total_avg_revenue),number_format($total_actual_weight),number_format((float) $total_avg_actual_weight,2,'.',''),round($total_avg_rev_actual_weight),number_format($total_chargeable_weight),number_format((float) $total_avg_chargeable_weight,2,'.',''), round($total_avg_rev_chargeable_weight), number_format($total_cod_collection),number_format($total_avg_cash_collection),number_format($total_rev_on_cash_collection).'%'];
 
-        $details_shipper['header'] = ['S. No.','Shipper Name(s) (Account No(s))', 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg. Actual Weight/Parcel','Avg. Revenue On Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
+        $details_shipper['header'] = ['S. No.','Sales Person','Shipper Name(s) (Account No(s))', 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg. Actual Weight/Parcel','Avg. Revenue On Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
 
 //        $details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
         $serial_number_shippers = 0;
@@ -1803,6 +1805,7 @@ class AdminReportsController extends Controller
         $total_shipper_avg_revenue = 0;
         $total_shipper_avg_cash_collection = 0;
         $total_shipper_rev_on_cash_collection = 0;
+//        $shipper_sales_person = '';
 
         $shipper_booked = 0;
         $shipper_received = 0;
@@ -1812,7 +1815,12 @@ class AdminReportsController extends Controller
         $shipper_chargeable_weight = 0;
         if(count($shippers) > 0) {
             foreach ($shippers as $shipper) {
-
+                    $shipper_sales_person_name = '';
+                    $shipper_sales_person =  SalePersonTag::where('user_id', $shipper->id)->where('status', 1);
+                    if($shipper_sales_person->exists()){
+                        $shipper_sales_person = $shipper_sales_person->first();
+                        $shipper_sales_person_name = Admin::find($shipper_sales_person->admin_id)->name;
+                    }
                 if($sales_tagging == TRUE){
                     if ($search_city != null) {
                         $shipper_booked = DB::connection('reports')->table('shipments')->where('user_id', $shipper->id)
@@ -1989,6 +1997,7 @@ class AdminReportsController extends Controller
                 //end
                 $shipper_row = array();
                 $shipper_row['shipper_serial'] = $serial_number_shippers;
+                $shipper_row['shipper_sale_person'] = $shipper_sales_person_name;
                 $shipper_row['name'] = $shipper->name . ' (' . str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . ')';
                 $shipper_row['shipper_booked'] = number_format($shipper_booked);
                 $shipper_row['shipper_received'] = number_format($shipper_received);
@@ -2045,7 +2054,7 @@ class AdminReportsController extends Controller
             $details_shipper[] = $shipper;
             $shipper_counter++;
         }
-        $details_shipper[] = ['Grand Total','DSR '.$only_date, number_format($total_shipper_booked), number_format($total_shipper_received), number_format($total_shipper_revenue_wo_gst),number_format($total_shipper_avg_revenue),number_format($total_shipper_actual_weight),number_format((float) $total_shipper_avg_actual_weight,2,'.',''),round($total_shipper_avg_rev_actual_weight),number_format($total_shipper_chargeable_weight),number_format((float) $total_shipper_avg_chargeable_weight,2,'.',''),round($total_shipper_avg_rev_chargeable_weight), number_format($total_shipper_cod_collection),number_format($total_shipper_avg_cash_collection),number_format($total_shipper_rev_on_cash_collection).'%'];
+        $details_shipper[] = ['Grand Total','','DSR '.$only_date, number_format($total_shipper_booked), number_format($total_shipper_received), number_format($total_shipper_revenue_wo_gst),number_format($total_shipper_avg_revenue),number_format($total_shipper_actual_weight),number_format((float) $total_shipper_avg_actual_weight,2,'.',''),round($total_shipper_avg_rev_actual_weight),number_format($total_shipper_chargeable_weight),number_format((float) $total_shipper_avg_chargeable_weight,2,'.',''),round($total_shipper_avg_rev_chargeable_weight), number_format($total_shipper_cod_collection),number_format($total_shipper_avg_cash_collection),number_format($total_shipper_rev_on_cash_collection).'%'];
 
         $spreadsheet = new Spreadsheet();
         $cell_st =[
