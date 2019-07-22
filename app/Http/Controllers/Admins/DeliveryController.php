@@ -926,7 +926,7 @@ class DeliveryController extends Controller
                 $total = $delivered_count/$total_count;
                 $total_percentage = $total * 100;
                 $percentage = number_format((float)$total_percentage, 2, '.', '');
-                $where = array(7, 8, 9, 10, 11, 12, 14, 15, 18, 56);
+                $where = array(7, 8, 9, 10, 12, 14, 15, 18, 56);
                 $statuses = ShipmentStatus::whereIn('id', $where)->select('id','name')->where('status', 1)->get();
 
                 return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->pending_status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed, 'shipment_statuses' => $statuses, 'percentage' => $percentage]);
@@ -1017,7 +1017,7 @@ class DeliveryController extends Controller
                 return $attempt_counts;
             })
             ->addColumn('status', function ($deliveries) {
-                $where = array(7, 8, 9, 11, 12, 15, 18, 56);
+                $where = array(7, 8, 9, 12, 15, 18, 56);
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
                 $drops = '';
                 foreach ($statuses as $status) {
@@ -1607,7 +1607,7 @@ class DeliveryController extends Controller
                 return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('status', function ($deliveries) {
-                $where = array(7, 8, 9, 11, 12, 15, 18, 20, 56);
+                $where = array(7, 8, 9, 12, 15, 18, 20, 56);
 
 //                $where = array(7,8,9,10,11,12,14,15,16,18,20,30,35,36,37);
                 $delivered_statuses = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);

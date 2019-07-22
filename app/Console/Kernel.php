@@ -20,8 +20,8 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\AutoDisableShipperAccount',
         '\App\Console\Commands\DailyPickupSalesEmail',
         '\App\Console\Commands\GenerateInvoice',
-        '\App\Console\Commands\ClearSMS',
-        '\App\Console\Commands\OperationForecastHourlyUpdate'
+        '\App\Console\Commands\ClearSMS'
+        '\App\Console\Commands\OperationForecastHourlyUpdate'        '\App\Console\Commands\ReturnNoteImageArchive'
     ];
 
     /**
@@ -58,8 +58,8 @@ class Kernel extends ConsoleKernel
 
             $schedule->command('invoice:generate')->dailyAt($time)->runInBackground();
         }
-
         $schedule->command('hourlyupdate:operationforecast')->hourly()->runInBackground();
+        $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
     }
 
     /**
