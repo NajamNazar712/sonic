@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateOperationForecastsTable extends Migration
+class CreateOperationForecastWeightRangesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,9 @@ class CreateOperationForecastsTable extends Migration
      */
     public function up()
     {
-        Schema::create('operation_forecasts', function (Blueprint $table) {
+        Schema::create('operation_forecast_weight_ranges', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('shipper_status_id');
-            $table->integer('count');
+            $table->string('name');
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ class CreateOperationForecastsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('operation_forecasts');
+        Schema::dropIfExists('operation_forecast_weight_ranges');
     }
 }

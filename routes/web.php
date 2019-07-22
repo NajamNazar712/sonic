@@ -252,6 +252,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@index')->name('index');
         Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
+        Route::get('incoming_list','Admins\AdminDashboardController@incoming_list')->name('incoming_list');
+        Route::get('incoming_weight_range_list','Admins\AdminDashboardController@incoming_weight_range_list')->name('incoming_weight_range_list');
+        Route::get('{operation_forecasting?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
+    });
+    Route::prefix('operation_forecasting')->name('operation_forecasting.')->group(function () {
+        Route::get('{operation_forecasting?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
     });
 
 

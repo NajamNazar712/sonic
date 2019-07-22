@@ -38,6 +38,6 @@ class OperationForecastHourlyUpdate extends Command
      */
     public function handle()
     {
-        AdminOperationForecastController::update();
+        AdminOperationForecastController::update_operation_forecast();
     }
 }

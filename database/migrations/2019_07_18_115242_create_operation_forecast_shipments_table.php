@@ -15,6 +15,9 @@ class CreateOperationForecastShipmentsTable extends Migration
     {
         Schema::create('operation_forecast_shipments', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('operation_forecast_id');
+            $table->integer('weight_range_id');
+            $table->integer('shipment_id');
             $table->timestamps();
         });
     }

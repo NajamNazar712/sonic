@@ -17,6 +17,9 @@ use App\Http\Models\CityHistory;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\InvoicingCycle;
+use App\Http\Models\Operataions\OperationForecast;
+use App\Http\Models\Operataions\OperationForecastShipments;
+use App\Http\Models\Operataions\OperationForecastWeightRange;
 use App\Http\Models\Rates\HistoryBookingTypeCharges;
 use App\Http\Models\Rates\HistoryCashHandlingCharge;
 use App\Http\Models\Rates\HistoryDiscountCharge;
@@ -175,8 +178,101 @@ class AdminDashboardController extends Controller
         $shippers = User::where('status',3)->where('blacklist',0)->select('id','name')->get();
         $cities = City::where('status',1)->select('id','name')->get();
 
+        $doughnut_chart_shipments_count['booked'] = OperationForecast::where('shipper_status_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['arrived_at_origin'] = OperationForecast::where('shipper_status_id', 2)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['in_transit'] = OperationForecast::where('shipper_status_id', 3)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['arrived_at_destination'] = OperationForecast::where('shipper_status_id', 4)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['not_attempted'] = OperationForecast::where('shipper_status_id', 7)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['delivery_unsuccessful'] = OperationForecast::where('shipper_status_id', 8)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['on_hold'] = OperationForecast::where('shipper_status_id', 9)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['total'] = $doughnut_chart_shipments_count['booked'] + $doughnut_chart_shipments_count['arrived_at_origin'] + $doughnut_chart_shipments_count['in_transit'] + $doughnut_chart_shipments_count['arrived_at_destination'] + $doughnut_chart_shipments_count['not_attempted'] + $doughnut_chart_shipments_count['delivery_unsuccessful'] + $doughnut_chart_shipments_count['on_hold'];
+
+        $incoming_bar_chart_shipments['one'] = OperationForecastShipments::where('weight_range_id',1)->whereBetween('created_at',[$thirtyDays,$today])->count();
+        $incoming_bar_chart_shipments['two'] = OperationForecastShipments::where('weight_range_id',2)->whereBetween('created_at',[$thirtyDays,$today])->count();
+        $incoming_bar_chart_shipments['three'] = OperationForecastShipments::where('weight_range_id',3)->whereBetween('created_at',[$thirtyDays,$today])->count();
+        $incoming_bar_chart_shipments['four'] = OperationForecastShipments::where('weight_range_id',4)->whereBetween('created_at',[$thirtyDays,$today])->count();
         // return $cities;
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers]);
+        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments]);
+    }
+
+    public function incoming_list(Request $request){
+        $operation_incoming = OperationForecast::leftjoin('shipment_status as ss', 'ss.id', '=', 'operation_forecasts.shipper_status_id')
+            ->select('operation_forecasts.id as opfs_id', 'ss.id as shipper_status_id', 'ss.name as status', DB::raw('(SELECT SUM(count) FROM operation_forecasts AS opfs WHERE opfs.shipper_Status_id = operation_forecasts.shipper_status_id) AS count'))->groupBy('shipper_status_id');
+        $datatable = Datatables::of($operation_incoming)
+            ->setRowAttr([
+                'class' => function ($statuses) {
+                    if ($statuses->shipper_status_id == 1) {
+                        return 'statusBooked';
+                    }
+                    else if ($statuses->shipper_status_id == 2){
+                        return 'statusOrigin';
+                    }
+                    else if ($statuses->shipper_status_id == 3){
+                        return 'statusIntransit';
+                    }
+                    else if ($statuses->shipper_status_id == 4){
+                        return 'statusDestination';
+                    }
+                    else if ($statuses->shipper_status_id == 7){
+                        return 'statusNotattempted';
+                    }
+                    else if ($statuses->shipper_status_id == 8){
+                        return 'statusDeliveryunsuccessful';
+                    }
+                    else if ($statuses->shipper_status_id == 9){
+                        return 'statusOnhold';
+                    }
+                }
+            ])
+        ->editColumn('count_link', function ($shipments) {
+                $route = route('admin.operation_forecasting.shipments_list');
+                return "<u><a href='{$route}?operation_forecasting=$shipments->opfs_id' class='white' target='_blank'>$shipments->count</a></u>";
+            });
+//            ->editColumn('tracking_number', function ($shipments) {
+//                $route = route('admin.tracking.index');
+//                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+//            });
+//        if ($tracking_numbers = $request->get('tracking_numbers')) {
+//            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+//        }
+//        if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
+//            $from = $request->get('booking_from_date');
+//            $to = $request->get('booking_to_date');
+//            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+//        }
+        return $datatable->make(true);
+    }
+    public function incoming_weight_range_list(Request $request){
+        $operation_incoming = OperationForecastWeightRange::leftjoin('operation_forecast_shipments as ofss', 'ofss.weight_range_id', '=', 'operation_forecast_weight_ranges.id')
+            ->select('operation_forecast_weight_ranges.name as range', DB::raw('(SELECT count(id) FROM operation_forecast_shipments AS ofs WHERE ofs.weight_range_id = ofss.weight_range_id) AS count'))->groupBy('operation_forecast_weight_ranges.id');
+//        $operation_incoming = OperationForecastShipments::join('operation_forecast_weight_ranges as ofwr', 'ofwr.id', '=', 'operation_forecast_shipments.weight_range_id')
+//            ->select('ofwr.name as status', DB::raw('(SELECT count(id) FROM operation_forecast_shipments AS ofs WHERE ofs.weight_range_id = operation_forecast_shipments.weight_range_id) AS count'))->groupBy('ofwr.id')->orderBy('ofwr.id');
+        $datatable = Datatables::of($operation_incoming);
+//            ->editColumn('tracking_number', function ($shipments) {
+//                $route = route('admin.tracking.index');
+//                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+//            });
+//        if ($tracking_numbers = $request->get('tracking_numbers')) {
+//            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+//        }
+//        if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
+//            $from = $request->get('booking_from_date');
+//            $to = $request->get('booking_to_date');
+//            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+//        }
+        return $datatable->make(true);
+    }
+
+    public function shipments_list(Request $request){
+        $operation_forecasting_shipments_status = OperationForecast::leftjoin('shipment_status as ss', 'ss.id', '=', 'operation_forecasts.shipper_status_id')
+            ->select('ss.name as status')
+            ->where('operation_forecasts.id', $request->operation_forecasting)
+            ->first();
+        $operation_forecasting_shipments_list = OperationForecastShipments::leftjoin('shipments as s', 's.id', '=', 'operation_forecast_shipments.shipment_id')
+            ->select('s.tracking_number as tracking_number')
+            ->where('operation_forecast_id', $request->operation_forecasting)
+            ->get();
+        return view('admin.operation_forecasting.index')->with(['status'=>$operation_forecasting_shipments_status->status, 'shipments'=>$operation_forecasting_shipments_list]);
     }
     public function statistics_search(Request $request){
 //        return $request;

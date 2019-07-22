@@ -177,78 +177,138 @@
                               </div>
                               <div class="row mt-1 ml-1" style="width: 95%">
                                   <div id="incoming_table">
-                                      <table class="table table-sm table-bordered datatable" id="datatable" style="z-index: 3;">
+                                      <table class="table table-sm table-bordered datatable" id="datatable_incoming" style="z-index: 3;">
                                           <thead>
                                           <tr role="row" class="black">
-                                              <th class="border-darken-1">Description</th>
-                                              <th class="border-darken-1">Shipments</th>
+                                              <th class="black border-darken-1">Description</th>
+                                              <th class="black border-darken-1">Shipments</th>
                                           </tr>
                                           </thead>
-                                          <tbody>
-                                          <tr role="row" class="white" style="background-color: #5DADE2">
-                                              <td>Shipment - Booked</td>
-                                              <td>50</td>
-                                          </tr>
-                                          <tr role="row" class="white" style="background-color: #E67E22">
-                                              <td>Shipment - Arrived at Origin</td>
-                                              <td>10</td>
-                                          </tr>
-                                          <tr role="row" class="white" style="background-color: #7F8C8D">
-                                              <td>Shipment - In Transit</td>
-                                              <td>50</td>
-                                          </tr>
-                                          <tr role="row" class="white" style="background-color: #F1C40F">
-                                              <td>Shipment - Arrived at Destination</td>
-                                              <td>10</td>
-                                          </tr>
-                                          <tr role="row" class="white" style="background-color: #1F618D">
-                                              <td>Shipment - Not Attempted</td>
-                                              <td>10</td>
-                                          </tr>
-                                          <tr role="row" class="white" style="background-color: #28B463">
-                                              <td>Shipment - Delivery Unsuccessful</td>
-                                              <td>50</td>
-                                          </tr>
-                                          <tr role="row" class="white" style="background-color: #154360">
-                                              <td>Shipment - On Hold</td>
-                                              <td>10</td>
-                                          </tr>
-                                          <tr role="row" class="black">
-                                              <td>Delivery Forecast</td>
-                                              <td>10</td>
-                                          </tr>
-                                          </tbody>
+                                          {{--<tbody>--}}
+                                          {{--<tr role="row" class="white" style="background-color: #5DADE2">--}}
+                                              {{--<td>Shipment - Booked</td>--}}
+                                              {{--<td class="text-center">{{$doughnut_chart_shipments_count['booked']}}</td>--}}
+                                          {{--</tr>--}}
+                                          {{--<tr role="row" class="white" style="background-color: #E67E22">--}}
+                                              {{--<td>Shipment - Arrived at Origin</td>--}}
+                                              {{--<td class="text-center">{{$doughnut_chart_shipments_count['arrived_at_origin']}}</td>--}}
+                                          {{--</tr>--}}
+                                          {{--<tr role="row" class="white" style="background-color: #7F8C8D">--}}
+                                              {{--<td>Shipment - In Transit</td>--}}
+                                              {{--<td class="text-center">{{$doughnut_chart_shipments_count['in_transit']}}</td>--}}
+                                          {{--</tr>--}}
+                                          {{--<tr role="row" class="white" style="background-color: #F1C40F">--}}
+                                              {{--<td>Shipment - Arrived at Destination</td>--}}
+                                              {{--<td class="text-center">{{$doughnut_chart_shipments_count['arrived_at_destination']}}</td>--}}
+                                          {{--</tr>--}}
+                                          {{--<tr role="row" class="white" style="background-color: #1F618D">--}}
+                                              {{--<td>Shipment - Not Attempted</td>--}}
+                                              {{--<td class="text-center">{{$doughnut_chart_shipments_count['not_attempted']}}</td>--}}
+                                          {{--</tr>--}}
+                                          {{--<tr role="row" class="white" style="background-color: #28B463">--}}
+                                              {{--<td>Shipment - Delivery Unsuccessful</td>--}}
+                                              {{--<td class="text-center">{{$doughnut_chart_shipments_count['delivery_unsuccessful']}}</td>--}}
+                                          {{--</tr>--}}
+                                          {{--<tr role="row" class="white" style="background-color: #154360">--}}
+                                              {{--<td>Shipment - On Hold</td>--}}
+                                              {{--<td class="text-center">{{$doughnut_chart_shipments_count['on_hold']}}</td>--}}
+                                          {{--</tr>--}}
+                                          {{--<tr role="row" class="black">--}}
+                                              {{--<td>Delivery Forecast</td>--}}
+                                              {{--<td class="text-center">{{$doughnut_chart_shipments_count['total']}}</td>--}}
+                                          {{--</tr>--}}
+                                          {{--</tbody>--}}
                                       </table>
                                   </div>
-                                  <div id="incoming_chart" class="width-35-per mt-1" style="margin-left: 4px">
+                                  <div id="incoming_chart" class="width-150 mt-1" style="margin-left: 4px">
                                       <canvas id="myChartincoming" width="10%" height="10%"></canvas>
                                   </div>
                               </div>
                               <div class="ml-1 row height-200">
                                   <div class="width-300 mt-1">
-                                      <table class="table table-sm table-bordered datatable" id="datatable" style="z-index: 3;">
-                                          <tbody>
-                                          <tr role="row">
-                                              <td>0.5 KG</td>
-                                              <td>50</td>
-                                          </tr>
-                                          <tr role="row">
-                                              <td>Upto 2 KG</td>
-                                              <td>10</td>
-                                          </tr>
-                                          <tr role="row">
-                                              <td>upto 5 KG</td>
-                                              <td>50</td>
-                                          </tr>
-                                          <tr role="row">
-                                              <td>Above 5 KG</td>
-                                              <td>10</td>
-                                          </tr>
-                                          </tbody>
+                                      <table class="table table-sm table-bordered datatable" id="datatable_incoming_weight_range" style="z-index: 3;">
+                                          <thead style='display:none;'>
+                                          </thead>
+                                          {{--<tbody>--}}
+                                          {{--<tr role="row">--}}
+                                              {{--<td>0.5 KG</td>--}}
+                                              {{--<td>50</td>--}}
+                                          {{--</tr>--}}
+                                          {{--<tr role="row">--}}
+                                              {{--<td>Upto 2 KG</td>--}}
+                                              {{--<td>10</td>--}}
+                                          {{--</tr>--}}
+                                          {{--<tr role="row">--}}
+                                              {{--<td>upto 5 KG</td>--}}
+                                              {{--<td>50</td>--}}
+                                          {{--</tr>--}}
+                                          {{--<tr role="row">--}}
+                                              {{--<td>Above 5 KG</td>--}}
+                                              {{--<td>10</td>--}}
+                                          {{--</tr>--}}
+                                          {{--</tbody>--}}
                                       </table>
                                   </div>
                                   <div class="width-200">
                                       <canvas id="mybarchartincoming" height="230px"></canvas>
+                                  </div>
+                              </div>
+                              <div class="row">
+                                  <div class="col-3">
+                                      <div class="card bg-gradient-directional-info">
+                                          <div class="card-content">
+                                              <div class="card-body justify-content-center">
+                                                  <div class="text-white text-center">
+                                                      <h6 class="text-white">Per Rider Load</h6>
+                                                  </div>
+                                                  <div class="text-white text-center">
+                                                      <h4 class="text-white">{{$stats['delivered']}}</h4>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <div class="col-3">
+                                      <div class="card bg-gradient-directional-info">
+                                          <div class="card-content">
+                                              <div class="card-body justify-content-center">
+                                                  <div class="text-white text-center">
+                                                      <h6 class="text-white">Day Wise Growth</h6>
+                                                  </div>
+                                                  <div class="text-white text-center">
+                                                      <h4 class="text-white">{{$stats['delivered']}}</h4>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <div class="col-3">
+                                      <div class="card bg-gradient-directional-info">
+                                          <div class="card-content">
+                                              <div class="card-body justify-content-center">
+                                                  <div class="text-white text-center">
+                                                      <h6 class="text-white">Heavy Deliveries</h6>
+                                                  </div>
+                                                  <div class="text-white text-center">
+                                                      <h4 class="text-white">{{$stats['delivered']}}</h4>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <div class="col-3">
+                                      <div class="card bg-gradient-directional-info">
+                                          <div class="card-content">
+                                              <div class="card-body justify-content-center">
+                                                  <div class="text-white text-center">
+                                                      <h6 class="text-white">Light Deliveries</h6>
+                                                  </div>
+                                                  <div class="text-white text-center">
+                                                      <h4 class="text-white">{{$stats['delivered']}}</h4>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
                                   </div>
                               </div>
                           </div>
@@ -379,6 +439,28 @@
 
         .div_border{
             border-style: solid;
+        }
+
+        .statusBooked{
+            background-color: #5DADE2;
+        }
+        .statusOrigin{
+            background-color: #E67E22;
+        }
+        .statusIntransit{
+            background-color: #7F8C8D;
+        }
+        .statusDestination{
+            background-color: #F1C40F;
+        }
+        .statusNotattempted{
+            background-color: #1F618D;
+        }
+        .statusDeliveryunsuccessful{
+            background-color: #28B463;
+        }
+        .statusOnhold{
+            background-color: #154360;
         }
 
 
@@ -565,6 +647,42 @@
                 });
             };
 
+            var table_incoming = $('#datatable_incoming').DataTable({
+                searching: false,
+                paging: false,
+                info: false,
+                scrollX: false, scrollY: false,
+                autoWidth: false,
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                processing: true,
+                serverSide: true,
+                ajax: '{{ route('admin.dashboard.incoming_list') }}',
+                rowId: 'opfs_id',
+                columns: [
+                    {data: 'status', name: 'ss.name', class: 'white align-middle status',orderable: false, searchable: false},
+                    {data: 'count_link', name: 'count_link', class: 'text-center white align-middle count', orderable: false, searchable: false },
+
+                ]
+            });
+            var table_bar_incoming = $('#datatable_incoming_weight_range').DataTable({
+                searching: false,
+                paging: false,
+                info: false,
+                scrollX: false, scrollY: false,
+                autoWidth: false,
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                processing: true,
+                serverSide: true,
+                ajax: '{{ route('admin.dashboard.incoming_weight_range_list') }}',
+                columns: [
+                    {data: 'range', name: 'operation_forecast_weight_ranges.name', class: 'align-middle status',orderable: false, searchable: false},
+                    {data: 'count', name: 'count', class: 'text-center align-middle count',orderable: false, searchable: false },
+                ],
+            });
+            console.log(table_bar_incoming)
+
             var ctx = document.getElementById('myChartincoming').getContext('2d');
             // var chart = new Chart(ctx, {
             //     // The type of chart we want to create
@@ -602,9 +720,12 @@
             //
             //
             // };
+            var doughnut_chart_shipments = @json($doughnut_chart_shipments_count);
+            var incoming_bar_chart_shipments = @json($incoming_bar_chart_shipments);
+            console.log(doughnut_chart_shipments);
             var piedata = {
                 datasets: [{
-                    data: [10, 20, 30, 40, 50, 60, 70],
+                    data: [((doughnut_chart_shipments.booked/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.arrived_at_origin/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.in_transit/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.arrived_at_destination/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.not_attempted/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.delivery_unsuccessful/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.on_hold/doughnut_chart_shipments.total)*100).toFixed(2)],
                     backgroundColor: [
                         '#5DADE2',
                         '#E67E22',
@@ -629,15 +750,6 @@
                 ]
 
             };
-            console.log(piedata);
-            var options = {
-                options: {
-                    legend: {
-                        display: false,
-                    },
-                    showTooltips: false
-                }
-            };
 
             var myDoughnutChart = new Chart(ctx, {
                 type: 'doughnut',
@@ -649,42 +761,69 @@
                     dataLabels: {
                         enabled: false
                     },
+                    //             tooltips: {
+                    //                 //     label: [Math.round((doughnut_chart_shipments.booked/doughnut_chart_shipments.total)*100) + '%', 20, 30, 40, 50, 60, 70],
+                    //                 // },
+                    //                 callbacks: {
+                    //                     return dataset.data + "%";
+                    // }
+                    //             }
                     tooltips: {
-                        tittle: [10, 20, 30, 40, 50, 60, 70],
-                    },
-                },
-                centerText: {
-                    display: true,
-                    text: "280"
+                        callbacks: {
+                            label: function (tooltipItem, data) {
+                                var dataset = data.datasets[tooltipItem.datasetIndex];
+                                var currentValue = dataset.data[tooltipItem.index];
+                                return currentValue + "%";
+                            }
+                        },
+                    }
+                }
+            });
+            Chart.pluginService.register({
+                beforeDraw: function(chart) {
+                    var width = myDoughnutChart.width,
+                        height = myDoughnutChart.height,
+                        ctx = myDoughnutChart.ctx;
+
+                    ctx.restore();
+                    var fontSize = (height / 114).toFixed(2);
+                    ctx.font = fontSize + "em sans-serif";
+                    ctx.textBaseline = "middle";
+
+                    var text = doughnut_chart_shipments.total,
+                        textX = Math.round((width - ctx.measureText(text).width) / 2),
+                        textY = height / 2;
+
+                    ctx.fillText(text, textX, textY);
+                    ctx.save();
                 }
             });
 
             ctxbarchart = document.getElementById('mybarchartincoming').getContext('2d');
 
-
             var bardata = {
                     datasets: [
                         {
                             label: "0.5 KG",
-                            data: [25],
+                            data: [incoming_bar_chart_shipments.one],
                             backgroundColor: ["#669911", "#119966" ],
                             hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
                         },
                         {
                             label: "Upto 2 KG",
-                            data: [20],
+                            data: [incoming_bar_chart_shipments.two],
                             backgroundColor: ["#669911", "#119966" ],
                             hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
                         },
                         {
                             label: "Upto 5 KG",
-                            data: [30],
+                            data: [incoming_bar_chart_shipments.three],
                             backgroundColor: ["#669911", "#119966" ],
                             hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
                         },
                         {
                             label: "Above 5 KG",
-                            data: [40],
+                            data: [incoming_bar_chart_shipments.four],
                             backgroundColor: ["#669911", "#119966" ],
                             hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
                         }
