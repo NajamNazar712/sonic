@@ -18,7 +18,7 @@
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
 
                     <div class="row justify-content-center">
-                        <div class="col-4">
+                        <div class="col-12 mb-2">
                             <h3>Delivery Ratio {{$percentage}}%</h3>
                         </div>
                         <div class="col-4">
@@ -30,8 +30,14 @@
                                 </select>
                             </fieldset>
                         </div>
+                        <div class="col-4">
+                            <fieldset class="form-group">
+                                <select name="select_all_reason" id="select_all_reason" class="form-control select2">
+                                </select>
+                            </fieldset>
+                        </div>
                         @if(!$delivery_note_status == 1)
-                            <div class="col-3">
+                            <div class="col-4">
                                 <button type="button" id="submit_selected_status" disabled class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-list-alt"></i> Bulk Update </button>
                             </div>
                         @endif
@@ -312,6 +318,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#select_all_reason').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Selected reason Update',
+                width:'100%'
+            });
+
             $('.decimal').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -637,6 +648,41 @@
                     e.preventDefault();
                 }
             });
+
+
+            $('body').on('select2:select','#select_all_status',function (e) {
+
+                var statusSelection = $(this).find(':selected');
+                var status = statusSelection.val();
+                var all_reason = $('#select_all_reason');
+                $.ajax({
+                    url:'{!! route('admin.delivery.receive.reason_all') !!}',
+                    type:'POST',
+                    dataType:'json',
+                    data: {
+                        'status':status,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 0){
+                        all_reason.empty().trigger('change');
+                        $.each(data.reasons,function (key,value) {
+                            var newOption = new Option(value.name, value.id, false, false);
+                            all_reason.append(newOption).trigger('change');
+                            if(all_reason != 14){
+                                all_reason.attr('data-rule-required', 'true');
+                                all_reason.attr('data-msg-required', 'Reason is required');
+                            }
+                        });
+                        all_reason.val('').trigger('change');
+                    }else{
+                        all_reason.empty().trigger('change');
+                        toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }
+                });
+            });
+
+
             var shipments = [];
             // $('#status_update_form').bind('submit', function(event) {
             //     event.preventDefault();
@@ -1111,8 +1157,13 @@
             $('#submit_selected_status').on('click', function () {
                 var select_all_status = $('#select_all_status').val();
                 var delivery_note = $('#delivery_note').val();
+                var select_all_reason = $('#select_all_reason').val();
+                console.log(select_all_reason)
+                console.log(select_all_status)
                 if(selected_rows.length > 0){
-                    if(select_all_status != ''){
+                    if(select_all_status != null) {
+                        if ((select_all_reason != null) || (select_all_reason == null && select_all_status == 14)) {
+
                         swal({
                             title: 'Are You Sure?',
                             text: 'Select Yes to change the status of shipments!',
@@ -1141,20 +1192,20 @@
                                 var shipment_received_refused_obj = {};
                                 // blockPagePermanently();
                                 submit_all_status_flag = true;
-                                if(select_all_status == 14){
-                                    table.rows().nodes().each(function(index) {
+                                if (select_all_status == 14) {
+                                    table.rows().nodes().each(function (index) {
                                         var row = table.row(index);
                                         if ($(row.node()).hasClass('selected')) {
                                             var id = parseInt(row.id());
                                             var amount = parseInt($(row.node()).attr('amount'));
                                             var remarks = $(row.node()).find('td.remarks input').val();
                                             shipment_remarks_obj[id] = remarks;
-                                            if(amount == 0){
-                                                var receiver_name =  $(row.node()).find('td.received_or_refused_by input').val();
-                                                if($.trim(receiver_name) == ''){
-                                                    not_updated_shipments.push($(row.node()).find('td.tracking_number').text()) ;
+                                            if (amount == 0) {
+                                                var receiver_name = $(row.node()).find('td.received_or_refused_by input').val();
+                                                if ($.trim(receiver_name) == '') {
+                                                    not_updated_shipments.push($(row.node()).find('td.tracking_number').text());
                                                     submit_all_status_flag = false;
-                                                }else{
+                                                } else {
                                                     shipment_received_refused_obj[id] = receiver_name;
                                                 }
                                             }
@@ -1162,10 +1213,10 @@
 
                                         }
                                     });
-                                    if(submit_all_status_flag == false){
+                                    if (submit_all_status_flag == false) {
 
                                         var html = '';
-                                        $.each(not_updated_shipments, function(index, tracking_number) {
+                                        $.each(not_updated_shipments, function (index, tracking_number) {
                                             html += tracking_number + '<br/>';
                                         });
 
@@ -1191,8 +1242,8 @@
                                         });
                                     }
 
-                                }else{
-                                    table.rows().nodes().each(function(index) {
+                                } else {
+                                    table.rows().nodes().each(function (index) {
                                         var row = table.row(index);
                                         if ($(row.node()).hasClass('selected')) {
                                             var id = parseInt(row.id());
@@ -1203,7 +1254,7 @@
                                     });
                                 }
 
-                                if(submit_all_status_flag){
+                                if (submit_all_status_flag) {
                                     swal({
                                         title: 'Please Wait!',
                                         text: 'Shipment(s) are being updated!',
@@ -1218,19 +1269,26 @@
                                         data: {
                                             'shipment_ids': selected_rows,
                                             'selected_status': select_all_status,
+                                            'selected_reason': select_all_reason,
                                             'delivery_note_id': delivery_note,
                                             'remarks': shipment_remarks_obj,
                                             'received_or_refused_by': shipment_received_refused_obj,
                                             '_token': '{{ csrf_token() }}',
                                         }
                                     }).done(function (data) {
-                                        if(data.status === 1){
+                                        if (data.status === 1) {
                                             UnblockPagePermanently();
-                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
 
-                                        }else{
+                                        } else {
                                             UnblockPagePermanently();
-                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
 
                                         }
                                         location.reload();
@@ -1239,6 +1297,10 @@
                                 }
                             }
                         });
+                    }else{
+                            var error = "Please Select A Reason!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
                     }
                     else{
                         var error = "Please Select A Status!";
