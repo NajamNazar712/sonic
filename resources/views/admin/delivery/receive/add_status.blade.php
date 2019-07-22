@@ -231,6 +231,100 @@
         </div>
     </div>
     <!--Non Service Modal -->
+
+    <!--Incomplete Address Modal -->
+    <div class="modal fade text-left" id="IncompleteAddressModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="IncompleteAddressModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Incomplete Address Details</h4>
+
+                </div>
+                <div class="modal-body  text-center">
+
+                        <input type="hidden" name="iad_shipment_id" id="iad_shipment_id">
+                        <input type="hidden" name="iad_status" id="iad_status">
+                        <div class="row justify-content-center mb-2">
+                            <div class="col-9 text-left">
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio1" status="Need House No.">
+                                        <label class="custom-control-label" for="customRadio1">Need House No.</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio2" status="Need Plot No.">
+                                        <label class="custom-control-label" for="customRadio2">Need Plot No.</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio3" status="Need Area Name">
+                                        <label class="custom-control-label" for="customRadio3">Need Area Name</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio4" status="Need Street No.">
+                                        <label class="custom-control-label" for="customRadio4">Need Street No.</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio5" status="Need Street Name">
+                                        <label class="custom-control-label" for="customRadio5">Need Street Name</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio6" status="Need Sector No.">
+                                        <label class="custom-control-label" for="customRadio6">Need Sector No.</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio7" status="Need Floor No.">
+                                        <label class="custom-control-label" for="customRadio7">Need Floor No.</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio8" status="Need Office No.">
+                                        <label class="custom-control-label" for="customRadio8">Need Office No.</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio9" status="Need Building No.">
+                                        <label class="custom-control-label" for="customRadio9">Need Building No.</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio10">
+                                        <label class="custom-control-label" for="customRadio10">Other</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset class="d-none">
+                                    <textarea name="other_description" class="form-control" id="other_description" cols="30" rows="10"></textarea>
+                                </fieldset>
+                            </div>
+
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="AICUpdate" type="button" disabled class="btn btn-primary btn-block">Update</button>
+                            </div>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Incomplete Address Modal -->
+
 @endsection
 
 @section('css')
@@ -630,11 +724,41 @@
                     }
                 });
             });
+            $('.iad_radio').on('click', function () {
+                var id = $(this).attr('id');
+                var status = $(this).attr('status');
+                if(id == 'customRadio10'){
+                    $('#other_description').parent('fieldset').removeClass('d-none');
+                    $('#AICUpdate').attr('disabled', true);
+
+                }else{
+                    $('#other_description').parent('fieldset').addClass('d-none');
+                    $('#AICUpdate').attr('disabled', false);
+                    $('#iad_status').val(status);
+                }
+
+            });
+            $('#other_description').on('input', function () {
+               var description = $.trim($(this).val());
+               if(description != ''){
+                   $('#AICUpdate').attr('disabled', false);
+                   $('#iad_status').val(description);
+               }
+               if(description == ''){
+                   $('#AICUpdate').attr('disabled', true);
+                   $('#iad_status').val('');
+               }
+            });
             $('body').on('select2:select','.reasonSelect .reasonDrop',function (e) {
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var reasonSelection = $(this).find(':selected');
                 var reason_status = reasonSelection.val();
+
                 shipment_reason[rowid] = reason_status;
+                if(reason_status == 3){
+                    $('#IncompleteAddressModal').modal('show');
+                    $('#iad_shipment_id').val(rowid);
+                }
             });
             $('body').on('click','.clear',function () {
                 var status = $(this).parents().closest('tr').find('.statusDrop');
@@ -682,6 +806,24 @@
                 });
             });
 
+            $('#AICUpdate').on('click', function () {
+                var status = $('#iad_status').val();
+                var id = $('#iad_shipment_id').val();
+                var remark_input = $('#datatable tr#'+id).find('td.remarks input');
+                var remark = remark_input.val();
+                remark = remark+ ' ' + status;
+                remark_input.val(remark);
+                $('#IncompleteAddressModal').modal('hide');
+            });
+
+            $('#IncompleteAddressModal').on('hide.bs.modal', function () {
+                $('#iad_status').val('');
+                $('#iad_shipment_id').val('');
+                $('.iad_radio').prop('checked', false);
+                $('#AICUpdate').attr('disabled', true);
+                $('#other_description').parent('fieldset').addClass('d-none');
+                $('#other_description').val('');
+            });
 
             var shipments = [];
             // $('#status_update_form').bind('submit', function(event) {
