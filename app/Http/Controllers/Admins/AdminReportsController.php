@@ -1778,23 +1778,30 @@ class AdminReportsController extends Controller
             }
         }
         else{
-            $pickup_request_shippers = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date_from, $date_to) {
-                $query->from('shipments_journey')
-                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
-                ->whereBetween('created_at', [$date_from, $date_to]);
-            });
+            foreach($hubs as $hub){
 
-            if($pickup_request_shippers->exists()){
-                $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
+                $pickup_request_shippers = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
+                    $query->from('user_shipping_infos')
+                        ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                        ->whereExists(function ($sub_query) use ($hub) {
+                            $sub_query->from('cities')
+                                ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                                ->where('cities.id', $hub->id);
+                        });
+                })->whereExists(function ($query) use ($date_from, $date_to) {
+                    $query->from('shipments_journey')
+                        ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                        ->whereBetween('created_at', [$date_from, $date_to]);
+                });
 
-//                $pickup_request_shippers_ids = DB::connection('reports')->table('shipments')->whereIn('id', $pickup_request_shippers)->groupBy('user_id');
-//                if($pickup_request_shippers_ids->exists()){
-//                    $pickup_request_shippers_ids = $pickup_request_shippers_ids->get();
-//                    if($pickup_request_shippers_ids->ixists()){
-//                        $pickup_request_shippers_ids = $pickup_request_shippers_ids->get();
-                $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
-//                    }
-//                }
+                if($pickup_request_shippers->exists()) {
+                    $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
+
+                    $pickup_request_shippers_ids = array_unique($pickup_request_shippers_ids);
+
+                    $shippers[$hub->name] = DB::connection('reports')->table('users')->select('id', 'name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status', [3, 4])->get();
+                }
+
             }
         }
         
@@ -2109,7 +2116,7 @@ class AdminReportsController extends Controller
         $total_shipper_rows = $total_shipper_rows - 1;
 
         $shipper_cell = 'D'.$count_hubs;
-        $shipper_last_cell = 'Q'.$count_hubs;
+        $shipper_last_cell = 'T'.$count_hubs;
         $sheet->fromArray($details_shipper,NULL,$shipper_cell,true);
 
         $sheet->setTitle('Daily Pickup Sales Report');
@@ -2118,11 +2125,11 @@ class AdminReportsController extends Controller
 
         $sheet->getStyle($hub_all_rows)->applyFromArray($cell_st);
 
-        $shipper_style_cell = "D$count_hubs".":R".$count_hubs;
-        $shipper_all_rows = "D$count_hubs".":R".$total_shipper_rows;
+        $shipper_style_cell = "D$count_hubs".":T".$count_hubs;
+        $shipper_all_rows = "D$count_hubs".":T".$total_shipper_rows;
 
         $total_style_cell = "D$count_hub_rows".":R".$count_hub_rows;
-        $total_shipper_style_cell = "D$total_shipper_rows".":R".$total_shipper_rows;
+        $total_shipper_style_cell = "D$total_shipper_rows".":T".$total_shipper_rows;
         $sheet->getStyle($shipper_style_cell)
             ->getFill()
             ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
@@ -2134,8 +2141,8 @@ class AdminReportsController extends Controller
         $sheet->getStyle($shipper_style_cell)->getAlignment()->setWrapText(true);
 //        $sheet->getStyle($total_shipper_style_cell)->applyFromArray($total_cell_st);
 
-        $set_shipper_actual_number_format = 'K3:K'.$total_shipper_rows;
-        $set_shipper_chargeable_number_format = 'N3:N'.$total_shipper_rows;
+        $set_shipper_actual_number_format = 'K'.$count_hubs.':K'.$total_shipper_rows;
+        $set_shipper_chargeable_number_format = 'N'.$count_hubs.':N'.$total_shipper_rows;
         $sheet->getStyle($set_shipper_actual_number_format)->getNumberFormat()->setFormatCode('0.00');
         $sheet->getStyle($set_shipper_chargeable_number_format)->getNumberFormat()->setFormatCode('0.00');
 
