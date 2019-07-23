@@ -1826,7 +1826,7 @@ class AdminReportsController extends Controller
                     foreach ($shipper_row as $shipper) {
                         $origin_name = $origin;
                         $shipper_sales_person_name = '';
-                        $shipper_sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 1);
+                        $shipper_sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0);
                         if ($shipper_sales_person->exists()) {
                             $shipper_sales_person = $shipper_sales_person->first();
                             $shipper_sales_person_name = Admin::find($shipper_sales_person->admin_id)->name;
