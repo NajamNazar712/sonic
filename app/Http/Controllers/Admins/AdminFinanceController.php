@@ -3582,7 +3582,7 @@ class AdminFinanceController extends Controller
         ';
 
         $html .= '
-            <style>@page{size:A4 portrait}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.9rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
+            <style>@page{size:A4 portrait; margin-top: 10rem; margin-bottom: 8rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.9rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
         ';
 
         if (!$email) {
@@ -3595,20 +3595,6 @@ class AdminFinanceController extends Controller
         $html .= '
                 <div>
                   <div class="p-1">
-                    <table class="table table-sm table-bordered border">
-                      <tbody>
-                        <tr>
-                          <td class="text-left align-middle">
-                            <img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mb-1">
-                            <div><strong>TRAX ONLINE PRIVATE LIMITED</strong></div>
-                            <div><strong>Address:</strong> Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi.</div>
-                            <div><strong>NTN:</strong> 7930679-5</div>
-                          </td>
-                          <td class="text-center align-middle color primary"><strong>INVOICE</strong></td>
-                        </tr>
-                      </tbody>
-                    </table>
-
                     <div class="row align-items-start justify-content-between summary">
                         <div class="col-6">
                             <table class="table table-sm table-bordered border">
@@ -3643,6 +3629,10 @@ class AdminFinanceController extends Controller
                         <div class="col-4">
                             <table class="table table-sm table-bordered border">
                               <tbody>
+                                <tr>
+                                    <td class="color primary"><strong>NTN</strong></td>
+                                    <td>7930679-5</td>
+                                </tr>
                                 <tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
                                     <td>' . Carbon::parse($invoice->from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->to_date)->format('Y-m-d') . '</td>
