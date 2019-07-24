@@ -3158,7 +3158,7 @@ class AdminReportsController extends Controller
                                 ->whereExists(function($sub_query) use ($hub) {
                                     $sub_query->from('cities')
                                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
-                                    ->where('cities.id', $hub->id);
+                                    ->where('cities.id', $hub);
                                 });
                             })->where('shipments.user_id', $user->id)->count();
                         }else{
