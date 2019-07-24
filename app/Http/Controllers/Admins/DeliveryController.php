@@ -1063,20 +1063,42 @@ class DeliveryController extends Controller
 
     }
 
+    public function receive_delivery_reason_all(Request $request)
+    {
+        $status_id = $request->status;
+
+        $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+
+        if (!$statuses->isEmpty()) {
+            return response()->json(['status' => 0, 'reasons' => $statuses]);
+        } else {
+            return ['status' => 1, 'error' => 'No reasons are defined for this status!'];
+        }
+
+    }
+
     public function receive_delivery_status_submit_all(Request $request){
         $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
         $selected_status = $request->selected_status;
+        $selected_reason = $request->selected_reason;
+
         if($delivery_note_id != ''){
 
             foreach ( $shipment_ids as $shipment){
                 $shipment_details = Shipment::find($shipment);
                 if($shipment_details){
+                    if($shipment_details->nsa_osa_status == 1){
+                        if(in_array($selected_reason, [12, 34])){
+                            $selected_reason = null;
+                        }
+                    }
+
                     $received_refused_by_name = "received_or_refused_by.$shipment";
                     if($selected_status == 7 || $selected_status == 18)
                     {
                         if($shipment_details->shipper_status_id != $selected_status) {
-                            ShipmentsJourneyController::add($shipment, $selected_status, NULL, NULL, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                            ShipmentsJourneyController::add($shipment, $selected_status, NULL, $selected_reason, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
                         }
 
                         if ($shipment_details->booking_type_id != 4) {
@@ -1126,7 +1148,7 @@ class DeliveryController extends Controller
                     }else if($selected_status == 56){
                         if($shipment_details->booking_type_id == 2){
                             if ($shipment_details->shipper_status_id != $selected_status) {
-                                ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, NULL, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                                ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, $selected_reason, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
                             }
                             Shipment::where('id', $shipment)->update(['received_amount' => null, 'shipper_status_id' => $selected_status, 'consignee_status_id' => $selected_status]);
 
@@ -1136,7 +1158,7 @@ class DeliveryController extends Controller
                     else{
                         if ($shipment_details->shipper_status_id != $selected_status) {
 
-                            ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, NULL, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                            ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, $selected_reason, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
 
                         }
 

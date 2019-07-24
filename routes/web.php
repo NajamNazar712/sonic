@@ -469,6 +469,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add/status/all','Admins\DeliveryController@receive_delivery_status_submit_all')->name('add.status.all');
             Route::get('{id}/add/list','Admins\DeliveryController@receive_delivery_status_list')->name('add.list');
             Route::post('reason','Admins\DeliveryController@receive_delivery_reason')->name('reason');
+            Route::post('reason_all','Admins\DeliveryController@receive_delivery_reason_all')->name('reason_all');
             Route::post('delivered','Admins\DeliveryController@receive_delivery_status_delivered')->name('delivered');
             Route::post('shipmentstatuscheck','Admins\DeliveryController@receive_delivery_status_check')->name('shipmentstatuscheck');
             Route::post('replacements','Admins\DeliveryController@receive_delivery_get_replacements')->name('replacements');
