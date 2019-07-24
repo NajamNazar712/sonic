@@ -20,8 +20,9 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\AutoDisableShipperAccount',
         '\App\Console\Commands\DailyPickupSalesEmail',
         '\App\Console\Commands\GenerateInvoice',
-        '\App\Console\Commands\ClearSMS'
-        '\App\Console\Commands\OperationForecastHourlyUpdate'        '\App\Console\Commands\ReturnNoteImageArchive'
+        '\App\Console\Commands\ClearSMS',
+        '\App\Console\Commands\OperationForecastHourlyUpdate',
+        '\App\Console\Commands\ReturnNoteImageArchive'
     ];
 
     /**

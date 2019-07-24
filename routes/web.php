@@ -253,11 +253,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@index')->name('index');
         Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
         Route::get('incoming_list','Admins\AdminDashboardController@incoming_list')->name('incoming_list');
+        Route::get('outgoing_top_customers_list','Admins\AdminDashboardController@outgoing_top_customers_list')->name('outgoing_top_customers_list');
         Route::get('incoming_weight_range_list','Admins\AdminDashboardController@incoming_weight_range_list')->name('incoming_weight_range_list');
-        Route::get('{operation_forecasting?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
+        Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
+        Route::get('operation_forecast_search','Admins\AdminDashboardController@operation_forecast_search')->name('operation_forecast_search');
     });
     Route::prefix('operation_forecasting')->name('operation_forecasting.')->group(function () {
-        Route::get('{operation_forecasting?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
+        Route::prefix('incoming')->name('incoming.')->group(function () {
+            Route::get('{operation_forecasting?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
+        });
+        Route::prefix('outgoing')->name('outgoing.')->group(function () {
+            Route::get('{customer_id?}', 'Admins\AdminDashboardController@outgoing_shipments_list')->name('shipments_list');
+        });
     });
 
 

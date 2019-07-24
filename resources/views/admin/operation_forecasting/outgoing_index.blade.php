@@ -1,19 +1,15 @@
-
 @extends('admin.layout.master')
-@section('title','Operation Incoming Forecasting Shipments')
+@section('title','Operation Outgoing Forecasting Shipments')
 
 @section('content')
     <h1 class="mb-1">
-        Operation Incoming Forecasting Shipments List
+        Operation Outgoing Forecasting Shipments List
     </h1>
     <div class="row justify-content-center">
         <div class="col-4">
             <div class="card">
                 <div class="card-content" aria-expanded="true">
                     <div class="card-body">
-                        <div class="text-center">
-                            <h4>{{$status}}</h4>
-                        </div>
                         <div id="shipments_link" class="text-center">
                             @foreach($shipments as $shipment)
                                 <div>

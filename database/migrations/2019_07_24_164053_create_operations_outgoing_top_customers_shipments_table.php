@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateOperationForecastsTable extends Migration
+class CreateOperationsOutgoingTopCustomersShipmentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateOperationForecastsTable extends Migration
      */
     public function up()
     {
-        Schema::create('operation_forecasts', function (Blueprint $table) {
+        Schema::create('operations_outgoing_top_customers_shipments', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('shipper_status_id');
-            $table->integer('booking_type_id');
-            $table->integer('hub_id');
-            $table->integer('count');
+            $table->integer('customer_id');
+            $table->integer('shipment_id');
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ class CreateOperationForecastsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('operation_forecasts');
+        Schema::dropIfExists('operations_outgoing_top_customers_shipments');
     }
 }
