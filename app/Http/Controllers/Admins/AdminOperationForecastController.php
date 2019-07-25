@@ -1252,10 +1252,12 @@ class AdminOperationForecastController extends Controller
 
         foreach ($pickup_requests as $pickup_request) {
             if (array_key_exists($pickup_request->user_id, $top_customers)) {
-                $top_customer_shipments[$pickup_request->user_id] = new OperationsOutgoingTopCustomersShipments();
-                $top_customer_shipments[$pickup_request->user_id]->customer_id = $top_customers[$pickup_request->user_id]->id;
-                $top_customer_shipments[$pickup_request->user_id]->shipment_id = $pickup_request->shipment_id;
-                $top_customer_shipments[$pickup_request->user_id]->save();
+                if(!empty($top_customers[$pickup_request->user_id])){
+                    $top_customer_shipments[$pickup_request->user_id] = new OperationsOutgoingTopCustomersShipments();
+                    $top_customer_shipments[$pickup_request->user_id]->customer_id = $top_customers[$pickup_request->user_id]->id;
+                    $top_customer_shipments[$pickup_request->user_id]->shipment_id = $pickup_request->shipment_id;
+                    $top_customer_shipments[$pickup_request->user_id]->save();
+                }
             }
         }
     }
