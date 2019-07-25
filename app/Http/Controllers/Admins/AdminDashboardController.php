@@ -308,8 +308,8 @@ class AdminDashboardController extends Controller
         }
         $operation_outgoing['per_rider_loads'] = $outgoing_per_rider_loads;
         $operation_outgoing['day_wise_growth'] = $outgoing_day_wise_growth_percentage . '%';
-        $operation_outgoing['heavy_deliveries'] = $outgoing_light_deliveries;
-        $operation_outgoing['light_deliveries'] = $outgoing_heavy_deliveries;
+        $operation_outgoing['heavy_deliveries'] = $outgoing_heavy_deliveries;
+        $operation_outgoing['light_deliveries'] = $outgoing_light_deliveries;
 
         $last_updated_at = OperationsOutgoingTopCustomers::latest('updated_at')->first();
 
@@ -827,8 +827,8 @@ class AdminDashboardController extends Controller
         }
         $operation_incoming['per_rider_loads'] = $per_rider_loads;
         $operation_incoming['day_wise_growth'] = $day_wise_growth_percentage . '%';
-        $operation_incoming['heavy_deliveries'] = $light_deliveries;
-        $operation_incoming['light_deliveries'] = $heavy_deliveries;
+        $operation_incoming['heavy_deliveries'] = $heavy_deliveries;
+        $operation_incoming['light_deliveries'] = $light_deliveries;
 
         //outgoing
         $operation_outgoing_pickups['no_of_shipments'] = OperationsOutgoingPickupRequests::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
@@ -906,8 +906,8 @@ class AdminDashboardController extends Controller
         }
         $operation_outgoing['per_rider_loads'] = $outgoing_per_rider_loads;
         $operation_outgoing['day_wise_growth'] = $outgoing_day_wise_growth_percentage . '%';
-        $operation_outgoing['heavy_deliveries'] = $outgoing_light_deliveries;
-        $operation_outgoing['light_deliveries'] = $outgoing_heavy_deliveries;
+        $operation_outgoing['heavy_deliveries'] = $outgoing_heavy_deliveries;
+        $operation_outgoing['light_deliveries'] = $outgoing_light_deliveries;
 
         return response()->json(['status'=>1, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_incoming' => $operation_incoming, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing]);
     }
