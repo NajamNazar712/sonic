@@ -17,7 +17,7 @@
                         <div id="shipments_link" class="text-center">
                             @foreach($shipments as $shipment)
                                 <div>
-                                    <a href='{{route('admin.tracking.index')}}?tracking_number={{$shipment->tracking_number}}' class='tracking' target='_blank'>{{$shipment->tracking_number}}</a>
+                                    <u><a href='{{route('admin.tracking.index')}}?tracking_number={{$shipment->tracking_number}}' class='tracking' target='_blank'>{{$shipment->tracking_number}}</a></u>
                                 </div>
                             @endforeach
                         </div>

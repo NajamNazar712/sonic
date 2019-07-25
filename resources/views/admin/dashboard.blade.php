@@ -258,7 +258,7 @@
 
                                   <div class="row ml-1 mr-1">
                                       <div class="col-6">
-                                          <div class="card bg-gradient-directional-info">
+                                          <div class="card bg-gradient-directional-info pull-up">
                                               <div class="card-content">
                                                   <div class="card-body justify-content-center">
                                                       <div class="text-white text-center">
@@ -274,7 +274,7 @@
                                           </div>
                                       </div>
                                       <div class="col-6">
-                                          <div class="card bg-gradient-directional-info">
+                                          <div class="card bg-gradient-directional-info pull-up">
                                               <div class="card-content">
                                                   <div class="card-body justify-content-center">
                                                       <div class="text-white text-center">
@@ -293,7 +293,7 @@
 
                                   <div class="row ml-1 mr-1">
                                       <div class="col-6">
-                                          <div class="card bg-gradient-directional-info">
+                                          <div class="card bg-gradient-directional-info pull-up">
                                               <div class="card-content">
                                                   <div class="card-body justify-content-center">
                                                       <div class="text-white text-center">
@@ -309,7 +309,7 @@
                                           </div>
                                       </div>
                                       <div class="col-6">
-                                          <div class="card bg-gradient-directional-info">
+                                          <div class="card bg-gradient-directional-info pull-up">
                                               <div class="card-content">
                                                   <div class="card-body justify-content-center">
                                                       <div class="text-white text-center">
@@ -382,7 +382,7 @@
                                   </div>
                                   <div class="row ml-1 mr-1">
                                       <div class="col-6">
-                                          <div class="card bg-gradient-directional-info">
+                                          <div class="card bg-gradient-directional-info pull-up">
                                               <div class="card-content">
                                                   <div class="card-body justify-content-center">
                                                       <div class="text-white text-center">
@@ -398,7 +398,7 @@
                                           </div>
                                       </div>
                                       <div class="col-6">
-                                          <div class="card bg-gradient-directional-info">
+                                          <div class="card bg-gradient-directional-info pull-up">
                                               <div class="card-content">
                                                   <div class="card-body justify-content-center">
                                                       <div class="text-white text-center">
@@ -417,7 +417,7 @@
 
                                   <div class="row ml-1 mr-1">
                                       <div class="col-6">
-                                          <div class="card bg-gradient-directional-info">
+                                          <div class="card bg-gradient-directional-info pull-up">
                                               <div class="card-content">
                                                   <div class="card-body justify-content-center">
                                                       <div class="text-white text-center">
@@ -433,7 +433,7 @@
                                           </div>
                                       </div>
                                       <div class="col-6">
-                                          <div class="card bg-gradient-directional-info">
+                                          <div class="card bg-gradient-directional-info pull-up">
                                               <div class="card-content">
                                                   <div class="card-body justify-content-center">
                                                       <div class="text-white text-center">
