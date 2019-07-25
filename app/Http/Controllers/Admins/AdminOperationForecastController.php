@@ -1082,7 +1082,7 @@ class AdminOperationForecastController extends Controller
             if (array_key_exists($outgoing_user->id, $outgoing_shipment_count)) {
                 if (array_key_exists($outgoing_user->city_id, $outgoing_shipment_count[$outgoing_user->id])) {
                     if (array_key_exists('regular', $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id])) {
-                        $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['regular'])->where('hub_id', $outgoing_user->id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
+                        $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['regular'])->where('hub_id', $outgoing_user->city_id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
                         if ($operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular']->exists()) {
                             $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular'] = $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular']->first();
                             $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular']->shipments_count = $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['regular'];
@@ -1099,7 +1099,7 @@ class AdminOperationForecastController extends Controller
                         }
                     }
                     if (array_key_exists('replacement', $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id])) {
-                        $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['replacement'])->where('hub_id', $outgoing_user->id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
+                        $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['replacement'])->where('hub_id', $outgoing_user->city_id)->where('booking_type_id', 2)->whereBetween('updated_at', [$from, $to]);
                         if ($operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement']->exists()) {
                             $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement'] = $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement']->first();
                             $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement']->shipments_count = $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['replacement'];
@@ -1116,7 +1116,7 @@ class AdminOperationForecastController extends Controller
                         }
                     }
                     if (array_key_exists('try_and_buy', $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id])) {
-                        $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'])->where('hub_id', $outgoing_user->id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
+                        $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'])->where('hub_id', $outgoing_user->city_id)->where('booking_type_id', 3)->whereBetween('updated_at', [$from, $to]);
                         if ($operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy']->exists()) {
                             $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'] = $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy']->first();
                             $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy']->shipments_count = $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'];
@@ -1133,7 +1133,7 @@ class AdminOperationForecastController extends Controller
                         }
                     }
                     if (array_key_exists('reverse_pickup', $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id])) {
-                        $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'])->where('hub_id', $outgoing_user->id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
+                        $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'])->where('hub_id', $outgoing_user->city_id)->where('booking_type_id', 5)->whereBetween('updated_at', [$from, $to]);
                         if ($operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup']->exists()) {
                             $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'] = $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup']->first();
                             $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup']->shipments_count = $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'];

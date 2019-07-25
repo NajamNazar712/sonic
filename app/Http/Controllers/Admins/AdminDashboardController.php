@@ -225,8 +225,8 @@ class AdminDashboardController extends Controller
         $operation_incoming['heavy_deliveries'] = $heavy_deliveries;
         $operation_incoming['light_deliveries'] = $light_deliveries;
 
-        $operation_outgoing_pickups['no_of_shipments'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
-        $operation_outgoing_pickups['pickups'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->count('operations_outgoing_pickup_requests.id');
+//        $operation_outgoing_pickups['no_of_shipments'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
+//        $operation_outgoing_pickups['pickups'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->count('operations_outgoing_pickup_requests.id');
 
 
         $operation_dates['from'] = $graph_dates['old_date'];
@@ -234,7 +234,11 @@ class AdminDashboardController extends Controller
 
         //outgoing
         $operation_outgoing_pickups['no_of_shipments'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
-        $operation_outgoing_pickups['pickups'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->count('operations_outgoing_pickup_requests.pickup_request_id');
+        $operation_outgoing_pickups['pickups_count'] = OperationsOutgoingPickupRequests::select(DB::raw('count(operations_outgoing_pickup_requests.id) as count'))->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->get();
+        $operation_outgoing_pickups['pickups'] = 0;
+        foreach ($operation_outgoing_pickups['pickups_count'] as $pickups_count){
+            $operation_outgoing_pickups['pickups'] = $operation_outgoing_pickups['pickups'] + $pickups_count->count;
+        }
 
         $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('u.name as name', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "'. $thirtyDays .'" AND "'. $today .'") AS count'))
             ->whereBetween('operations_outgoing_top_customers.created_at',[$thirtyDays,$today])
@@ -828,7 +832,11 @@ class AdminDashboardController extends Controller
 
         //outgoing
         $operation_outgoing_pickups['no_of_shipments'] = OperationsOutgoingPickupRequests::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
-        $operation_outgoing_pickups['pickups'] = OperationsOutgoingPickupRequests::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->count('operations_outgoing_pickup_requests.pickup_request_id');
+        $operation_outgoing_pickups['pickups_count'] = OperationsOutgoingPickupRequests::select(DB::raw('count(operations_outgoing_pickup_requests.id) as count'))->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->get();
+        $operation_outgoing_pickups['pickups'] = 0;
+        foreach ($operation_outgoing_pickups['pickups_count'] as $pickups_count){
+            $operation_outgoing_pickups['pickups'] = $operation_outgoing_pickups['pickups'] + $pickups_count->count;
+        }
 
         $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('u.name as name', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))
             ->whereBetween('operations_outgoing_top_customers.created_at',[$from,$to])

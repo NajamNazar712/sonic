@@ -216,7 +216,7 @@
                                       Last updated at:
                                   </b>
                                   <u>
-                                      @if(!empty($last_update_at))
+                                      @if(!empty($last_updated_at))
                                         {{$last_updated_at->updated_at}}
                                       @else
                                         0000-00-00 00:00:00
