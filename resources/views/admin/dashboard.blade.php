@@ -586,14 +586,13 @@
                     $('#from_date_operations_root').css('top', '-350px');
                 },
                 onSet: function(context) {
-                    // console.log($('input[name="search_hub"]').val());
-                    // var old_date_formatted = $('input[name="from_date_operations_formatted"]').val();
-                    // var current_date_formatted = $('input[name="to_date_operations_formatted"]').val();
-                    // var contractMoment = moment(old_date_formatted);
-                    // var current = moment(contractMoment).add(29, 'days');
-                    // if(contractMoment._i > current_date_formatted || current_date_formatted > current._i){
-                    //     to_date_operations.pickadate('picker').set({'select': current.toDate()},{muted: true});
-                    // }
+                    var old_date_formatted = $('input[name="from_date_operations_formatted"]').val();
+                    var current_date_formatted = $('input[name="to_date_operations_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(29, 'days');
+                    if(current._i < current_date_formatted || current_date_formatted < contractMoment._i){
+                        to_date_operations.pickadate('picker').set({'select': current.toDate()},{muted: true});
+                    }
                 }
             });
 
@@ -610,13 +609,13 @@
                     $('#to_date_operations_root').css('top', '-350px');
                 },
                 onSet: function(context) {
-                    // var current_date_formatted = $('input[name="to_date_operations_formatted"]').val();
-                    // var old_date_formatted = $('input[name="from_date_operations_formatted"]').val();
-                    // var currentMoment = moment(current_date_formatted);
-                    // var currentDate = moment(currentMoment).subtract(29, 'days');
-                    // if(old_date_formatted > currentMoment._i || currentDate._i > old_date_formatted) {
-                    //     from_date_operations.pickadate('picker').set({'select': currentDate.toDate()}, {muted: true});
-                    // }
+                    var current_date_formatted = $('input[name="to_date_operations_formatted"]').val();
+                    var old_date_formatted = $('input[name="from_date_operations_formatted"]').val();
+                    var currentMoment = moment(current_date_formatted);
+                    var currentDate = moment(currentMoment).subtract(29, 'days');
+                    if(currentDate._i > old_date_formatted || old_date_formatted > current_date_formatted) {
+                        from_date_operations.pickadate('picker').set({'select': currentDate.toDate()}, {muted: true});
+                    }
                 }
             });
 

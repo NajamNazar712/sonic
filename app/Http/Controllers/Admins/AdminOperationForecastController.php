@@ -1229,13 +1229,14 @@ class AdminOperationForecastController extends Controller
         }
 
         foreach ($user_shipments as $user_id => $count) {
-//            if (array_key_exists($user_id, $pickup_request_id)) {
                 $existing_top_customers[$user_id] = OperationsOutgoingTopCustomers::where('user_id', $user_id)->whereBetween('updated_at', [$from, $to]);
 
                 if ($existing_top_customers[$user_id]->exists()) {
-                    $top_customers[$user_id] = $existing_top_customers[$user_id]->first();
-                    $top_customers[$user_id]->shipments_count = $count;
-                    $top_customers[$user_id]->save();
+                    if ($count > 0) {
+                        $top_customers[$user_id] = $existing_top_customers[$user_id]->first();
+                        $top_customers[$user_id]->shipments_count = $count;
+                        $top_customers[$user_id]->save();
+                    }
                 } else {
                     if ($count > 0) {
                         $top_customers[$user_id] = new OperationsOutgoingTopCustomers();
@@ -1248,7 +1249,6 @@ class AdminOperationForecastController extends Controller
 //            }
         }
 
-        OperationsOutgoingTopCustomersShipments::whereBetween('created_at', [$from, $to])->delete();
 
         foreach ($pickup_requests as $pickup_request) {
             if (array_key_exists($pickup_request->user_id, $top_customers)) {
