@@ -158,7 +158,7 @@
                                   </select>
                               </div>
                               <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">
-                                  <button type="button" class="btn round btn-primary btn-glow statistics_search">Search <i class="ft-bar-chart"></i></button>
+                                  <button type="button" class="btn round btn-primary statistics_search">Search <i class="ft-bar-chart"></i></button>
                               </div>
                           </div>
 
@@ -207,10 +207,10 @@
                                   {{--</select>--}}
                               {{--</div>--}}
                               <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">
-                                  <button type="button" class="btn round btn-primary btn-glow operations_forecast_search">Search <i class="ft-bar-chart"></i></button>
+                                  <button type="button" class="btn round btn-primary operations_forecast_search">Search <i class="ft-bar-chart"></i></button>
                               </div>
                           </div>
-                          <div class="text-right">
+                          <div class="text-right mt-2">
                               <h5>
                                   <b>
                                       Last updated at:
@@ -226,16 +226,16 @@
                           </div>
                           <div class="row">
                               <div class="div_border" style="width: 50%">
-                                  <div class="text-center">
+                                  <div class="text-center mt-1">
                                       <h3>Operations Incoming Loads Forecast</h3>
                                   </div>
-                                  <div class="row ml-1 mt-3" style="width: 95%">
+                                  <div class="row ml-1 mt-2" style="width: 95%">
                                       <div id="incoming_table">
                                           <table class="table table-sm table-bordered datatable" id="datatable_incoming" style="z-index: 3;">
                                               <thead>
                                               <tr role="row" class="black">
-                                                  <th class="black border-darken-1">Description</th>
-                                                  <th class="black border-darken-1">Shipments</th>
+                                                  <th class="black text-center border-darken-1">Description</th>
+                                                  <th class="black text-center border-darken-1">Shipments</th>
                                               </tr>
                                               </thead>
                                           </table>
@@ -327,7 +327,7 @@
                                   </div>
                               </div>
                               <div class="float-right div_border" style="width: 49%; margin-left: 1px">
-                                  <div class="text-center">
+                                  <div class="text-center mt-1">
                                       <h3>Operations Outgoing Loads Forecast</h3>
                                   </div>
 
@@ -335,8 +335,8 @@
                                       <div class="mt-1 width-300">
                                           <table class="table table-sm table-bordered datatable" style="z-index: 3;"><thead>
                                               <tr role="row">
-                                                  <th>Description</th>
-                                                  <th>Nos</th>
+                                                  <th class="black text-center">Description</th>
+                                                  <th class="black text-center">Numbers</th>
                                               </tr>
                                               </thead>
                                               <tbody id="outgoing_pickups_tbody">
@@ -484,7 +484,7 @@
         }
 
         .div_border{
-            border-style: solid;
+            border-style: double;
         }
 
         .statusBooked{
@@ -625,7 +625,7 @@
 
             $('#graph_destination').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Select a Destination",
+                placeholder:"Select Destination",
                 allowClear:true
             });
 
@@ -643,7 +643,7 @@
 
             $('#graph_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Select a Shipper",
+                placeholder:"Select Shipper",
                 allowClear:true
             });
 
