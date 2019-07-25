@@ -1056,7 +1056,9 @@ class AdminDashboardController extends Controller
             ->select('s.tracking_number as tracking_number')
             ->where('operation_forecast_id', $request->operation_forecasting)
             ->get();
-        return view('admin.operation_forecasting.index')->with(['status'=>$operation_forecasting_shipments_status->status, 'shipments'=>$operation_forecasting_shipments_list]);
+        if(!empty($operation_forecasting_shipments_status) && !empty($operation_forecasting_shipments_list)){
+            return view('admin.operation_forecasting.index')->with(['status'=>$operation_forecasting_shipments_status->status, 'shipments'=>$operation_forecasting_shipments_list]);
+        }
     }
     public function outgoing_shipments_list(Request $request){
         $operation_outgoing_top_customer = OperationsOutgoingTopCustomersShipments::leftjoin('shipments as s', 's.id', '=', 'operations_outgoing_top_customers_shipments.shipment_id')->where('customer_id', $request->customer_id)->get();
