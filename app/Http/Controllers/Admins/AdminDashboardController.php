@@ -226,7 +226,7 @@ class AdminDashboardController extends Controller
         $operation_incoming['light_deliveries'] = $light_deliveries;
 
         $operation_outgoing_pickups['no_of_shipments'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
-        $operation_outgoing_pickups['pickups'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->count('operations_outgoing_pickup_requests.pickup_request_id');
+        $operation_outgoing_pickups['pickups'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->count('operations_outgoing_pickup_requests.id');
 
 
         $operation_dates['from'] = $graph_dates['old_date'];

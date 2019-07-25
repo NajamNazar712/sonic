@@ -1041,15 +1041,16 @@ class AdminOperationForecastController extends Controller
         }
 
         $pickup_hubs = City::where('hub', 1)->get();
-        foreach ($pickup_hubs as $pickup_hub) {
-            $outgoing_shipment_count[$pickup_hub->id]['regular'] = 0;
-            $pickup_request_id[$pickup_hub->id]['regular'] = 0;
-            $outgoing_shipment_count[$pickup_hub->id]['replacement'] = 0;
-            $pickup_request_id[$pickup_hub->id]['replacement'] = 0;
-            $outgoing_shipment_count[$pickup_hub->id]['try_and_buy'] = 0;
-            $pickup_request_id[$pickup_hub->id]['try_and_buy'] = 0;
-            $outgoing_shipment_count[$pickup_hub->id]['reverse_pickup'] = 0;
-            $pickup_request_id[$pickup_hub->id]['reverse_pickup'] = 0;
+        $outgoing_users = User::where('status', 3)->get();
+        foreach ($outgoing_users as $outgoing_user) {
+            $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['regular'] = 0;
+            $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['regular'] = 0;
+            $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['replacement'] = 0;
+            $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['replacement'] = 0;
+            $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'] = 0;
+            $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'] = 0;
+            $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'] = 0;
+            $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'] = 0;
         }
         $pickup_requests = PickupRequest::leftjoin('pickup_request_assigned_shipments as pras', 'pras.pickup_request_id', '=', 'pickup_requests.id')
             ->leftjoin('shipments as s', 's.id', 'pras.shipment_id', '=', 's.id')->select('pickup_requests.id as pickup_request_id', 's.id as shipment_id', 's.booking_type_id as booking_type_id', 's.pickup_address_id as pickup_address_id', 's.shipper_status_id as shipper_status_id', 's.actual_weight as actual_weight', 's.estimated_weight as estimated_weight', 's.user_id as user_id')
@@ -1060,90 +1061,92 @@ class AdminOperationForecastController extends Controller
         foreach ($pickup_requests as $pickup_request) {
             $user_shipping_info = UserShippingInfo::find($pickup_request->pickup_address_id);
             if ($pickup_request->booking_type_id == 1) {
-                $outgoing_shipment_count[$user_shipping_info->city_id]['regular'] = $outgoing_shipment_count[$user_shipping_info->city_id]['regular'] + 1;
-                $pickup_request_id[$user_shipping_info->city_id]['regular'] = $pickup_request->pickup_request_id;
+                $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['regular'] = $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['regular'] + 1;
+                $pickup_request_id[$pickup_request->user_id][$user_shipping_info->city_id]['regular'] = $pickup_request->pickup_request_id;
             }
             if ($pickup_request->booking_type_id == 2) {
-                $outgoing_shipment_count[$user_shipping_info->city_id]['replacement'] = $outgoing_shipment_count[$user_shipping_info->city_id]['replacement'] + 1;
-                $pickup_request_id[$user_shipping_info->city_id]['replacement'] = $pickup_request->pickup_request_id;
+                $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['replacement'] = $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['replacement'] + 1;
+                $pickup_request_id[$pickup_request->user_id][$user_shipping_info->city_id]['replacement'] = $pickup_request->pickup_request_id;
             }
             if ($pickup_request->booking_type_id == 3) {
-                $outgoing_shipment_count[$user_shipping_info->city_id]['try_and_buy'] = $outgoing_shipment_count[$user_shipping_info->city_id]['try_and_buy'] + 1;
-                $pickup_request_id[$user_shipping_info->city_id]['try_and_buy'] = $pickup_request->pickup_request_id;
+                $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['try_and_buy'] = $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['try_and_buy'] + 1;
+                $pickup_request_id[$pickup_request->user_id][$user_shipping_info->city_id]['try_and_buy'] = $pickup_request->pickup_request_id;
             }
             if ($pickup_request->booking_type_id == 5) {
-                $outgoing_shipment_count[$user_shipping_info->city_id]['reverse_pickup'] = $outgoing_shipment_count[$user_shipping_info->city_id]['reverse_pickup'] + 1;
-                $pickup_request_id[$user_shipping_info->city_id]['reverse_pickup'] = $pickup_request->pickup_request_id;
+                $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup'] = $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup'] + 1;
+                $pickup_request_id[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup'] = $pickup_request->pickup_request_id;
             }
         }
 
-        foreach ($pickup_hubs as $pickup_hub) {
-            if (array_key_exists($pickup_hub->id, $outgoing_shipment_count)) {
-                if (array_key_exists('regular', $outgoing_shipment_count[$pickup_hub->id])) {
-                    $operation_outgoing_forecast[$pickup_hub->id]['regular'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$pickup_hub->id]['regular'])->where('hub_id', $pickup_hub->id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
-                    if ($operation_outgoing_forecast[$pickup_hub->id]['regular']->exists()) {
-                        $new_operation_outgoing_forecast[$pickup_hub->id]['regular'] = $operation_outgoing_forecast[$pickup_hub->id]['regular']->first();
-                        $new_operation_outgoing_forecast[$pickup_hub->id]['regular']->shipments_count = $outgoing_shipment_count[$pickup_hub->id]['regular'];
-                        $new_operation_outgoing_forecast[$pickup_hub->id]['regular']->save();
-                    } else {
-                        if ($outgoing_shipment_count[$pickup_hub->id]['regular'] > 0) {
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['regular'] = new OperationsOutgoingPickupRequests();
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['regular']->pickup_request_id = $pickup_request_id[$pickup_hub->id]['regular'];
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['regular']->hub_id = $pickup_hub->id;
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['regular']->booking_type_id = 1;
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['regular']->shipments_count = $outgoing_shipment_count[$pickup_hub->id]['regular'];
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['regular']->save();
+        foreach ($outgoing_users as $outgoing_user) {
+            if (array_key_exists($outgoing_user->id, $outgoing_shipment_count)) {
+                if (array_key_exists($outgoing_user->city_id, $outgoing_shipment_count[$outgoing_user->id])) {
+                    if (array_key_exists('regular', $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id])) {
+                        $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['regular'])->where('hub_id', $outgoing_user->id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
+                        if ($operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular']->exists()) {
+                            $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular'] = $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular']->first();
+                            $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular']->shipments_count = $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['regular'];
+                            $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular']->save();
+                        } else {
+                            if ($outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['regular'] > 0) {
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular'] = new OperationsOutgoingPickupRequests();
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular']->pickup_request_id = $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['regular'];
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular']->hub_id = $outgoing_user->city_id;
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular']->booking_type_id = 1;
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular']->shipments_count = $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['regular'];
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['regular']->save();
+                            }
                         }
                     }
-                }
-                if (array_key_exists('replacement', $outgoing_shipment_count[$pickup_hub->id])) {
-                    $operation_outgoing_forecast[$pickup_hub->id]['replacement'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$pickup_hub->id]['replacement'])->where('hub_id', $pickup_hub->id)->where('booking_type_id', 2)->whereBetween('updated_at', [$from, $to]);
-                    if ($operation_outgoing_forecast[$pickup_hub->id]['replacement']->exists()) {
-                        $new_operation_outgoing_forecast[$pickup_hub->id]['replacement'] = $operation_outgoing_forecast[$pickup_hub->id]['replacement']->first();
-                        $new_operation_outgoing_forecast[$pickup_hub->id]['replacement']->shipments_count = $outgoing_shipment_count[$pickup_hub->id]['replacement'];
-                        $new_operation_outgoing_forecast[$pickup_hub->id]['replacement']->save();
-                    } else {
-                        if ($outgoing_shipment_count[$pickup_hub->id]['replacement'] > 0) {
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['replacement'] = new OperationsOutgoingPickupRequests();
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['replacement']->pickup_request_id = $pickup_request_id[$pickup_hub->id]['replacement'];
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['replacement']->hub_id = $pickup_hub->id;
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['replacement']->booking_type_id = 2;
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['replacement']->shipments_count = $outgoing_shipment_count[$pickup_hub->id]['replacement'];
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['replacement']->save();
+                    if (array_key_exists('replacement', $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id])) {
+                        $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['replacement'])->where('hub_id', $outgoing_user->id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
+                        if ($operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement']->exists()) {
+                            $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement'] = $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement']->first();
+                            $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement']->shipments_count = $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['replacement'];
+                            $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement']->save();
+                        } else {
+                            if ($outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['replacement'] > 0) {
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement'] = new OperationsOutgoingPickupRequests();
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement']->pickup_request_id = $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['replacement'];
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement']->hub_id = $outgoing_user->city_id;
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement']->booking_type_id = 2;
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement']->shipments_count = $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['replacement'];
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['replacement']->save();
+                            }
                         }
                     }
-                }
-                if (array_key_exists('try_and_buy', $outgoing_shipment_count[$pickup_hub->id])) {
-                    $operation_outgoing_forecast[$pickup_hub->id]['try_and_buy'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$pickup_hub->id]['try_and_buy'])->where('hub_id', $pickup_hub->id)->where('booking_type_id', 3)->whereBetween('updated_at', [$from, $to]);
-                    if ($operation_outgoing_forecast[$pickup_hub->id]['try_and_buy']->exists()) {
-                        $new_operation_outgoing_forecast[$pickup_hub->id]['try_and_buy'] = $operation_outgoing_forecast[$pickup_hub->id]['try_and_buy']->first();
-                        $new_operation_outgoing_forecast[$pickup_hub->id]['try_and_buy']->shipments_count = $outgoing_shipment_count[$pickup_hub->id]['try_and_buy'];
-                        $new_operation_outgoing_forecast[$pickup_hub->id]['try_and_buy']->save();
-                    } else {
-                        if ($outgoing_shipment_count[$pickup_hub->id]['try_and_buy'] > 0) {
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['try_and_buy'] = new OperationsOutgoingPickupRequests();
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['try_and_buy']->pickup_request_id = $pickup_request_id[$pickup_hub->id]['try_and_buy'];
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['try_and_buy']->hub_id = $pickup_hub->id;
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['try_and_buy']->booking_type_id = 3;
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['try_and_buy']->shipments_count = $outgoing_shipment_count[$pickup_hub->id]['try_and_buy'];
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['try_and_buy']->save();
+                    if (array_key_exists('try_and_buy', $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id])) {
+                        $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'])->where('hub_id', $outgoing_user->id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
+                        if ($operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy']->exists()) {
+                            $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'] = $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy']->first();
+                            $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy']->shipments_count = $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'];
+                            $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy']->save();
+                        } else {
+                            if ($outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'] > 0) {
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'] = new OperationsOutgoingPickupRequests();
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy']->pickup_request_id = $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'];
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy']->hub_id = $outgoing_user->city_id;
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy']->booking_type_id = 3;
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy']->shipments_count = $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy'];
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['try_and_buy']->save();
+                            }
                         }
                     }
-                }
-                if (array_key_exists('reverse_pickup', $outgoing_shipment_count[$pickup_hub->id])) {
-                    $operation_outgoing_forecast[$pickup_hub->id]['reverse_pickup'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$pickup_hub->id]['reverse_pickup'])->where('hub_id', $pickup_hub->id)->where('booking_type_id', 4)->whereBetween('updated_at', [$from, $to]);
-                    if ($operation_outgoing_forecast[$pickup_hub->id]['reverse_pickup']->exists()) {
-                        $new_operation_outgoing_forecast[$pickup_hub->id]['reverse_pickup'] = $operation_outgoing_forecast[$pickup_hub->id]['reverse_pickup']->first();
-                        $new_operation_outgoing_forecast[$pickup_hub->id]['reverse_pickup']->shipments_count = $outgoing_shipment_count[$pickup_hub->id]['reverse_pickup'];
-                        $new_operation_outgoing_forecast[$pickup_hub->id]['reverse_pickup']->save();
-                    } else {
-                        if ($outgoing_shipment_count[$pickup_hub->id]['reverse_pickup'] > 0) {
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['reverse_pickup'] = new OperationsOutgoingPickupRequests();
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['reverse_pickup']->pickup_request_id = $pickup_request_id[$pickup_hub->id]['reverse_pickup'];
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['reverse_pickup']->hub_id = $pickup_hub->id;
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['reverse_pickup']->booking_type_id = 4;
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['reverse_pickup']->shipments_count = $outgoing_shipment_count[$pickup_hub->id]['reverse_pickup'];
-                            $new_operation_outgoing_forecast[$pickup_hub->id]['reverse_pickup']->save();
+                    if (array_key_exists('reverse_pickup', $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id])) {
+                        $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'])->where('hub_id', $outgoing_user->id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
+                        if ($operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup']->exists()) {
+                            $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'] = $operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup']->first();
+                            $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup']->shipments_count = $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'];
+                            $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup']->save();
+                        } else {
+                            if ($outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'] > 0) {
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'] = new OperationsOutgoingPickupRequests();
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup']->pickup_request_id = $pickup_request_id[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'];
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup']->hub_id = $outgoing_user->city_id;
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup']->booking_type_id = 5;
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup']->shipments_count = $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup'];
+                                $new_operation_outgoing_forecast[$outgoing_user->id][$outgoing_user->city_id]['reverse_pickup']->save();
+                            }
                         }
                     }
                 }
@@ -1185,7 +1188,7 @@ class AdminOperationForecastController extends Controller
 
             if ($pickup_request->booking_type_id == 1) {
                 $new_operation_outgoing_forecast_shipments = new OperationsOutgoingPickupRequestShipments();
-                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$user_shipping_info->city_id]['regular']->id;
+                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['regular']->id;
                 $new_operation_outgoing_forecast_shipments->weight_range_id = $weight_range_id;
                 $new_operation_outgoing_forecast_shipments->shipment_id = $pickup_request->shipment_id;
                 $new_operation_outgoing_forecast_shipments->hub_id = $user_shipping_info->city_id;
@@ -1194,7 +1197,7 @@ class AdminOperationForecastController extends Controller
             }
             if ($pickup_request->booking_type_id == 2) {
                 $new_operation_outgoing_forecast_shipments = new OperationsOutgoingPickupRequestShipments();
-                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$user_shipping_info->city_id]['replacement']->id;
+                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['replacement']->id;
                 $new_operation_outgoing_forecast_shipments->weight_range_id = $weight_range_id;
                 $new_operation_outgoing_forecast_shipments->shipment_id = $pickup_request->shipment_id;
                 $new_operation_outgoing_forecast_shipments->hub_id = $user_shipping_info->city_id;
@@ -1203,7 +1206,7 @@ class AdminOperationForecastController extends Controller
             }
             if ($pickup_request->booking_type_id == 3) {
                 $new_operation_outgoing_forecast_shipments = new OperationsOutgoingPickupRequestShipments();
-                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$user_shipping_info->city_id]['try_and_buy']->id;
+                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['try_and_buy']->id;
                 $new_operation_outgoing_forecast_shipments->weight_range_id = $weight_range_id;
                 $new_operation_outgoing_forecast_shipments->shipment_id = $pickup_request->shipment_id;
                 $new_operation_outgoing_forecast_shipments->hub_id = $user_shipping_info->city_id;
@@ -1212,7 +1215,7 @@ class AdminOperationForecastController extends Controller
             }
             if ($pickup_request->booking_type_id == 5) {
                 $new_operation_outgoing_forecast_shipments = new OperationsOutgoingPickupRequestShipments();
-                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$user_shipping_info->city_id]['reverse_pickup']->id;
+                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup']->id;
                 $new_operation_outgoing_forecast_shipments->weight_range_id = $weight_range_id;
                 $new_operation_outgoing_forecast_shipments->shipment_id = $pickup_request->shipment_id;
                 $new_operation_outgoing_forecast_shipments->hub_id = $user_shipping_info->city_id;
