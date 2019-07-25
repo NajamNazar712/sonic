@@ -613,7 +613,7 @@
                     var old_date_formatted = $('input[name="from_date_operations_formatted"]').val();
                     var currentMoment = moment(current_date_formatted);
                     var currentDate = moment(currentMoment).subtract(29, 'days');
-                    if(currentDate._i > old_date_formatted || old_date_formatted > current_date_formatted) {
+                    if(currentDate._i > old_date_formatted || old_date_formatted > currentMoment._i) {
                         from_date_operations.pickadate('picker').set({'select': currentDate.toDate()}, {muted: true});
                     }
                 }
