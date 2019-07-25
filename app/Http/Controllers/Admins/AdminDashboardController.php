@@ -1062,7 +1062,9 @@ class AdminDashboardController extends Controller
     }
     public function outgoing_shipments_list(Request $request){
         $operation_outgoing_top_customer = OperationsOutgoingTopCustomersShipments::leftjoin('shipments as s', 's.id', '=', 'operations_outgoing_top_customers_shipments.shipment_id')->where('customer_id', $request->customer_id)->get();
-        return view('admin.operation_forecasting.outgoing_index')->with('shipments', $operation_outgoing_top_customer);
+        if(!empty($operation_outgoing_top_customer)) {
+            return view('admin.operation_forecasting.outgoing_index')->with('shipments', $operation_outgoing_top_customer);
+        }
     }
 
     public function ecommerce(){
