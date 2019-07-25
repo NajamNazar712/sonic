@@ -1519,20 +1519,22 @@ class AdminFinanceController extends Controller
         $account_type_id = $shipment->user->account_type_id;
 
         if ($account_type_id == 1) {
-            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
+            if($shipment->charges_mode_id != 1){
+                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
 
-            if ($pending_payment_shipment->exists()) {
-                $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+                if ($pending_payment_shipment->exists()) {
+                    $pending_payment_shipment = $pending_payment_shipment->latest()->first();
 
-                self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0);
-            }
-            else {
-                $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+                    self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0);
+                }
+                else {
+                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
 
-                if ($done_payment_shipment->exists()) {
-                    $done_payment_shipment = $done_payment_shipment->latest()->first();
+                    if ($done_payment_shipment->exists()) {
+                        $done_payment_shipment = $done_payment_shipment->latest()->first();
 
-                    self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1);
+                        self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1);
+                    }
                 }
             }
         }
