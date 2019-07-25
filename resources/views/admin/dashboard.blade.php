@@ -210,6 +210,7 @@
                                   <button type="button" class="btn round btn-primary btn-glow operations_forecast_search">Search <i class="ft-bar-chart"></i></button>
                               </div>
                           </div>
+                          <div class="text-right"><h5><b>Last updated at: </b><u>{{$last_update_at->updated_at}}</u></h5></div>
                           <div class="row">
                               <div class="div_border" style="width: 50%">
                                   <div class="text-center">
