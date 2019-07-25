@@ -934,7 +934,12 @@ class AdminDashboardController extends Controller
             $service_type_id = 1;
         }
         $operation_incoming = OperationForecast::leftjoin('shipment_status as ss', 'ss.id', '=', 'operation_forecasts.shipper_status_id')
-            ->select('operation_forecasts.id as opfs_id', 'ss.id as shipper_status_id', 'ss.name as status', DB::raw('(SELECT SUM(count) FROM operation_forecasts AS opfs WHERE opfs.shipper_status_id = operation_forecasts.shipper_status_id AND opfs.hub_id = "' . $hub . '" AND opfs.booking_type_id = "' . $service_type_id . '" AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))->where('operation_forecasts.hub_id', $hub)->where('operation_forecasts.booking_type_id', $service_type_id)->groupBy('shipper_status_id')->orderBy('shipper_status_id', 'asc');
+            ->select('operation_forecasts.id as opfs_id', 'ss.id as shipper_status_id', 'ss.name as status', DB::raw('(SELECT SUM(count) FROM operation_forecasts AS opfs WHERE opfs.shipper_status_id = operation_forecasts.shipper_status_id AND opfs.hub_id = "' . $hub . '" AND opfs.booking_type_id = "' . $service_type_id . '" AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))
+            ->where('operation_forecasts.hub_id', $hub)
+            ->where('operation_forecasts.booking_type_id', $service_type_id)
+            ->whereBetween('operation_forecasts.updated_at', [$from, $to])
+            ->groupBy('shipper_status_id')
+            ->orderBy('shipper_status_id', 'asc');
         $datatable = Datatables::of($operation_incoming)
             ->setRowAttr([
                 'class' => function ($statuses) {
