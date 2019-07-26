@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Models\City;
 use App\Http\Models\Operataions\OperationForecast;
 use App\Http\Models\Operataions\OperationForecastShipments;
+use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequests;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomers;
@@ -1040,7 +1041,6 @@ class AdminOperationForecastController extends Controller
             }
         }
 
-        $pickup_hubs = City::where('hub', 1)->get();
         $outgoing_users = User::where('status', 3)->get();
         foreach ($outgoing_users as $outgoing_user) {
             $outgoing_shipment_count[$outgoing_user->id][$outgoing_user->city_id]['regular'] = 0;
@@ -1184,41 +1184,41 @@ class AdminOperationForecastController extends Controller
                 }
             }
 
-            $user_shipping_info = UserShippingInfo::find($pickup_request->pickup_address_id);
+            $user = User::find($pickup_request->user_id);
 
             if ($pickup_request->booking_type_id == 1) {
                 $new_operation_outgoing_forecast_shipments = new OperationsOutgoingPickupRequestShipments();
-                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['regular']->id;
+                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$pickup_request->user_id][$user->city_id]['regular']->id;
                 $new_operation_outgoing_forecast_shipments->weight_range_id = $weight_range_id;
                 $new_operation_outgoing_forecast_shipments->shipment_id = $pickup_request->shipment_id;
-                $new_operation_outgoing_forecast_shipments->hub_id = $user_shipping_info->city_id;
+                $new_operation_outgoing_forecast_shipments->hub_id = $user->city_id;
                 $new_operation_outgoing_forecast_shipments->booking_type_id = $pickup_request->booking_type_id;
                 $new_operation_outgoing_forecast_shipments->save();
             }
             if ($pickup_request->booking_type_id == 2) {
                 $new_operation_outgoing_forecast_shipments = new OperationsOutgoingPickupRequestShipments();
-                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['replacement']->id;
+                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$pickup_request->user_id][$user->city_id]['replacement']->id;
                 $new_operation_outgoing_forecast_shipments->weight_range_id = $weight_range_id;
                 $new_operation_outgoing_forecast_shipments->shipment_id = $pickup_request->shipment_id;
-                $new_operation_outgoing_forecast_shipments->hub_id = $user_shipping_info->city_id;
+                $new_operation_outgoing_forecast_shipments->hub_id = $user->city_id;
                 $new_operation_outgoing_forecast_shipments->booking_type_id = $pickup_request->booking_type_id;
                 $new_operation_outgoing_forecast_shipments->save();
             }
             if ($pickup_request->booking_type_id == 3) {
                 $new_operation_outgoing_forecast_shipments = new OperationsOutgoingPickupRequestShipments();
-                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['try_and_buy']->id;
+                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$pickup_request->user_id][$user->city_id]['try_and_buy']->id;
                 $new_operation_outgoing_forecast_shipments->weight_range_id = $weight_range_id;
                 $new_operation_outgoing_forecast_shipments->shipment_id = $pickup_request->shipment_id;
-                $new_operation_outgoing_forecast_shipments->hub_id = $user_shipping_info->city_id;
+                $new_operation_outgoing_forecast_shipments->hub_id = $user->city_id;
                 $new_operation_outgoing_forecast_shipments->booking_type_id = $pickup_request->booking_type_id;
                 $new_operation_outgoing_forecast_shipments->save();
             }
             if ($pickup_request->booking_type_id == 5) {
                 $new_operation_outgoing_forecast_shipments = new OperationsOutgoingPickupRequestShipments();
-                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup']->id;
+                $new_operation_outgoing_forecast_shipments->operation_outgoing_forecast_id = $new_operation_outgoing_forecast[$pickup_request->user_id][$user->city_id]['reverse_pickup']->id;
                 $new_operation_outgoing_forecast_shipments->weight_range_id = $weight_range_id;
                 $new_operation_outgoing_forecast_shipments->shipment_id = $pickup_request->shipment_id;
-                $new_operation_outgoing_forecast_shipments->hub_id = $user_shipping_info->city_id;
+                $new_operation_outgoing_forecast_shipments->hub_id = $user->city_id;
                 $new_operation_outgoing_forecast_shipments->booking_type_id = $pickup_request->booking_type_id;
                 $new_operation_outgoing_forecast_shipments->save();
             }
@@ -1260,5 +1260,13 @@ class AdminOperationForecastController extends Controller
                 }
             }
         }
+
+//        $operation_last_updated = OperationsForecastLastUpdatedTime::first();
+//        if($operation_last_updated != null){
+//            $operation_last_updated->delete();
+//        }
+
+        $last_updated_at = new OperationsForecastLastUpdatedTime();
+        $last_updated_at->save();
     }
 }

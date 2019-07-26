@@ -118,7 +118,7 @@
                                         <div>
                                             <button type="button" class="btn btn-outline-success mb-1" title="Add more ratios" id="add_row_btn"><i class="la la-plus"></i></button>
                                         </div>
-                                        <button type="submit" class="btn btn-primary">Update</button>
+                                        <button type="submit" class="btn btn-primary width-200">Update</button>
                                     </form>
                                 </div>
                             </div>
