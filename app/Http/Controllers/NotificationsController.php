@@ -2723,11 +2723,31 @@ class NotificationsController extends Controller
             if (strpos($body, '[remarks]') !== FALSE) {
                 $body = str_replace('[remarks]', $journey->remarks, $body);
             }
+
+            $hub_id = $nsa_shipment->consignee_city->hub_id;
+
             if(ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->exists()){
                 $to = ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->pluck('email')->toArray();
             }else{
                 $to = $nsa_shipment->user->email;
             }
+
+            $cc = array();
+
+            $general_admins = Admin::whereIn('role_id', [15, 3, 7, 14])->where('status', 1);
+
+            if ($general_admins->exists()) {
+              $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
+            }
+
+            $related_admins = Admin::whereIn('role_id', [8, 9])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+              $query->where('hub_id', $hub_id);
+            });
+
+            if ($related_admins->exists()) {
+              $cc = array_merge($cc, $related_admins->pluck('email')->toArray());
+            }
+
             self::email($subject, $body, $to);
         }
         else if($id == 34){

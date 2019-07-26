@@ -860,8 +860,10 @@
                 //
                 // }
 
-
-            });
+                var shipment_status = $('#track_form #shipment_status').val();
+                if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '') || shipment_status != '') {
+                    table.draw();
+                }
 
             // $('#track_form').validate({
             //
@@ -1267,5 +1269,6 @@
             });
 
         });
+    });
     </script>
 @endsection
