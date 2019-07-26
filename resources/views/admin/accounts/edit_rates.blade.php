@@ -24,6 +24,84 @@
                     <div class="card-content">
                         <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.edit.rates.submit',['id'=>$shipper->id])}}" method="post" novalidate="novalidate">
                             @csrf
+
+                            <div class="card">
+
+                                <div class="">
+                                    @if(count($packaging_material_types) > 0)
+
+                                        @php
+                                            $packaging_switch = '';
+                                        if(count($packaging_charges) > 0){
+                                            $packaging_switch = 'checked';
+                                             }else{
+                                            $packaging_switch = '';
+                                            }
+                                        @endphp
+                                        <div class="card-header border-primary">
+                                            <div class="row">
+                                                <div class="col-6"><h3 class="card-title lead primary">Packaging Material Charges</h3></div>
+                                                <div class="col-6"><a href="javascript:void(0);" class="pull-right" id="packaging_main_switch"><input type="checkbox" name="packaging_switch" class="switchery pull-right packagingChargesSwitch" data-color="info" data-size="sm" {{$packaging_switch}}/></a></div>
+
+                                            </div>
+                                        </div>
+
+                                        <div id="packaging_material_charges_div" class="card border-primary p-1 {{$packaging_switch == 'checked'? '':'hide'}}">
+                                            @foreach($packaging_material_types as $index => $type)
+                                                @php
+                                                $packaging_type_switch = '';
+                                                if(in_array($type->id, $packaging_type_ids)){
+                                                    $packaging_type_switch = 'checked';
+                                                }
+                                                @endphp
+                                                <div class="card-header border-primary">
+                                                    <div class="row">
+                                                        <div class="col-6"><h4 class="card-title lead primary">{{$type->type}}</h4></div>
+                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="packaging_type_{{$type->id}}"><input name="packaging_type_{{$type->id}}" type="checkbox"  class="switchery packaging_type_{{$type->id}}" data-color="info" data-size="sm" {{$packaging_type_switch}}/></a></a></div>
+
+                                                    </div>
+                                                </div>
+
+                                                <div id="package_type_{{$type->id}}" class="card border-primary {{$packaging_type_switch == 'checked'? '':'hide'}}" aria-expanded="true">
+                                                    <div class="card-content">
+                                                        <div class="card-body packaging-charges-div">
+                                                            <div class="row">
+                                                                @foreach($type->sizes as $ind => $size)
+
+                                                                    @if(isset($packaging_charges[$type->id][$ind]) && $packaging_charges[$type->id][$ind]->size_id == $size->id)
+                                                                        <div class="col-md-3 text-center">
+                                                                            <label class="card-title">{{$size->size}}</label>
+                                                                            <fieldset class="form-group">
+                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging_charges[$type->id][$ind]->charges}}">
+                                                                            </fieldset>
+                                                                        </div>
+                                                                    @else
+                                                                        <div class="col-md-3 text-center">
+                                                                            <label class="card-title">{{$size->size}}</label>
+                                                                            <fieldset class="form-group">
+                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
+                                                                            </fieldset>
+                                                                        </div>
+                                                                    @endif
+
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            @endforeach
+                                        </div>
+
+
+                                    @endif
+
+                                </div>
+
+                            </div>
+
+
+
                             <input type="hidden" name="_method" value="PUT"/>
 
                             <div id="headingCollapse61" class="card-header border-success">
@@ -515,57 +593,8 @@
 
                                         </div>
 
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Packaging Charges</h3>
-                                            </div>
-                                            @php
-                                                $on_packaging_sw = '';
-                                                $on_packaging_switch = '';
-                                            if((isset($switches[1][0]) && $switches[1][0]->packaging_charges == 1)){
-                                            $on_packaging_sw = '';
-                                            $on_packaging_switch = 'checked';
-                                             }else{
-                                            $on_packaging_sw = 'disabled';
-                                            $on_packaging_switch = '';
-                                            }
-                                            @endphp
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="on_packaging_switch" class="switchery packagingChargesOvernight" data-color="success" data-size="sm" {{$on_packaging_switch}}/>
-                                                </div>
-                                            </div>
-                                        </div>
 
-                                        <div class="row packaging-charges-div-overnight">
-                                            <input type="hidden" name="on_packaging_record" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->id != '')? $packagingCharges[1][0]->id : ''}}">
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Small Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="on_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->sm_flyer != '')? $packagingCharges[1][0]->sm_flyer : ''}}" {{$on_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Medium Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="on_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->md_flyer != '')? $packagingCharges[1][0]->md_flyer : ''}}" {{$on_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
 
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Large Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="on_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->lg_flyer != '')? $packagingCharges[1][0]->lg_flyer : ''}}" {{$on_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Box</label>
-                                                <fieldset class="form-group">
-                                                    <input name="on_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->box_flyer != '')? $packagingCharges[1][0]->box_flyer : ''}}" {{$on_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                        </div>
 
                                         <hr>
                                         <div class="">
@@ -1271,58 +1300,6 @@
 
                                         </div>
 
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Packaging Charges</h3>
-                                            </div>
-                                            @php
-                                                $ol_packaging_sw = '';
-                                                $ol_packaging_switch = '';
-                                            if((isset($switches[2][0]) && $switches[2][0]->packaging_charges == 1)){
-                                            $ol_packaging_sw = '';
-                                            $ol_packaging_switch = 'checked';
-                                             }else{
-                                            $ol_packaging_sw = 'disabled';
-                                            $ol_packaging_switch = '';
-                                            }
-                                            @endphp
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="ol_packaging_switch" class="switchery packagingChargesOverland" data-color="success" data-size="sm" {{$ol_packaging_switch}}/>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row packaging-charges-div-overland">
-                                            <input type="hidden" name="ol_packaging_record" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->id != '')? $packagingCharges[2][0]->id : ''}}">
-
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Small Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="ol_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->sm_flyer != '')? $packagingCharges[2][0]->sm_flyer : ''}}" {{$ol_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Medium Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="ol_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->md_flyer != '')? $packagingCharges[2][0]->md_flyer : ''}}" {{$ol_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Large Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="ol_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->lg_flyer != '')? $packagingCharges[2][0]->lg_flyer : ''}}" {{$ol_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Box</label>
-                                                <fieldset class="form-group">
-                                                    <input name="ol_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->box_flyer != '')? $packagingCharges[2][0]->box_flyer : ''}}" {{$ol_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                        </div>
 
                                         <hr>
                                         <div class="">
@@ -2032,58 +2009,6 @@
 
                                         </div>
 
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Packaging Charges</h3>
-                                            </div>
-                                            @php
-                                                $det_packaging_sw = '';
-                                                $det_packaging_switch = '';
-                                            if((isset($switches[3][0]) && $switches[3][0]->packaging_charges == 1)){
-                                            $det_packaging_sw = '';
-                                            $det_packaging_switch = 'checked';
-                                             }else{
-                                            $det_packaging_sw = 'disabled';
-                                            $det_packaging_switch = '';
-                                            }
-                                            @endphp
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="detain_packaging_switch" class="switchery packagingChargesDetain" data-color="success" data-size="sm" {{$det_packaging_switch}}/>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row packaging-charges-div-detain">
-                                       <input type="hidden" name="detain_packaging_record" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->id != '')? $packagingCharges[3][0]->id : ''}}">
-
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Small Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="detain_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->sm_flyer != '')? $packagingCharges[3][0]->sm_flyer : ''}}" {{$det_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Medium Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="detain_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->md_flyer != '')? $packagingCharges[3][0]->md_flyer : ''}}" {{$det_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Large Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="detain_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->lg_flyer != '')? $packagingCharges[3][0]->lg_flyer : ''}}" {{$det_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Box</label>
-                                                <fieldset class="form-group">
-                                                    <input name="detain_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->box_flyer != '')? $packagingCharges[3][0]->box_flyer : ''}}" {{$det_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                        </div>
 
                                         <hr>
                                         <div class="">
@@ -2743,59 +2668,6 @@
                                         </div>
 
                                         <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Packaging Charges</h3>
-                                            </div>
-                                            @php
-                                                $same_packaging_sw = '';
-                                                $same_packaging_switch = '';
-                                            if((isset($switches[4][0]) && $switches[4][0]->packaging_charges == 1)){
-                                            $same_packaging_sw = '';
-                                            $same_packaging_switch = 'checked';
-                                             }else{
-                                            $same_packaging_sw = 'disabled';
-                                            $same_packaging_switch = '';
-                                            }
-                                            @endphp
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="sameday_packaging_switch" class="switchery packagingChargesSameday" data-color="success" data-size="sm" {{$same_packaging_switch}}/>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row packaging-charges-div-sameday">
-                                        <input type="hidden" name="sameday_packaging_record" value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->id != '')? $packagingCharges[4][0]->id : ''}}">
-
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Small Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="sameday_flyer_sm" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->sm_flyer != '')? $packagingCharges[4][0]->sm_flyer : ''}}" {{$same_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Medium Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="sameday_flyer_md" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->md_flyer != '')? $packagingCharges[4][0]->md_flyer : ''}}" {{$same_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Large Flyer</label>
-                                                <fieldset class="form-group">
-                                                    <input name="sameday_flyer_lg" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->lg_flyer != '')? $packagingCharges[4][0]->lg_flyer : ''}}" {{$same_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-md-3 text-center">
-                                                <label class="card-title">Box</label>
-                                                <fieldset class="form-group">
-                                                    <input name="sameday_flyer_box" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->box_flyer != '')? $packagingCharges[4][0]->box_flyer : ''}}" {{$same_packaging_sw}}>
-                                                </fieldset>
-                                            </div>
-                                        </div>
-
-                                        <hr>
                                         <div class="">
                                             <h3 class="card-title">Discount Rates</h3>
                                         </div>
@@ -3294,7 +3166,7 @@
         var insuranceChargesSwitch = document.querySelector('.switchery.insuranceChargesOvernight');
         var returnChargesSwitch = document.querySelector('.switchery.returnChargesOvernight');
         var fuelChargesSwitch = document.querySelector('.switchery.fuelSurchargeOvernight');
-        var packagingChargesSwitch = document.querySelector('.switchery.packagingChargesOvernight');
+        var packagingChargesSwitch = document.querySelector('.switchery.packagingChargesSwitch');
 
         $('.weightAdditionOvernight').on('change',function(){
             var wid = $(this).attr('id');
@@ -3499,12 +3371,38 @@
         // Packaging Charges Overnight
         packagingChargesSwitch.onchange = function () {
             if(packagingChargesSwitch.checked === true){
+                $('#packaging_material_charges_div').slideDown('slow');
                 $('.packaging-charges-div-overnight').find('input').prop('disabled',false);
             }else if(packagingChargesSwitch.checked === false){
+                $('#packaging_material_charges_div').slideUp('slow');
                 $('.packaging-charges-div-overnight').find('input').prop('disabled',true);
 
             }
         };
+
+        @if(count($packaging_material_types) > 0)
+
+
+        @foreach($packaging_material_types as $index => $type)
+            var PackageSwitch = [];
+            var type_id_{{$index}} = '{{$type->id}}';
+            var type_id = '{{$type->id}}';
+            PackageSwitch[type_id] = document.querySelector('.packaging_type_'+type_id);
+            PackageSwitch[type_id].onchange = function () {
+
+                if ($(this).is(':checked') === true) {
+                    $('#package_type_'+type_id_{{$index}}).slideDown('slow');
+
+                } else if ($(this).is(':checked') === false) {
+                    $('#package_type_'+type_id_{{$index}}).slideUp('slow');
+
+                }
+            };
+
+        @endforeach
+
+        @endif
+
 
 
         //Overland
@@ -3512,7 +3410,7 @@
         var cashhandlingswitchOverland = document.querySelector('.switchery.cashChargesOverland');
         var insuranceChargesSwitchOverland = document.querySelector('.switchery.insuranceChargesoverland');
         var returnChargesSwitchOverland = document.querySelector('.switchery.returnChargesOverland');
-        var packagingChargesSwitchOverland = document.querySelector('.switchery.packagingChargesOverland');
+
         var fuelChargesSwitchOL = document.querySelector('.switchery.fuelSurchargeOverland');
 
         $('.weightAdditionOverland').on('change',function() {
@@ -3528,18 +3426,7 @@
 
             }
         });
-        // weightAdditionOverland.onchange = function () {
-        //     if (weightAdditionOverland.checked === true) {
-        //         // $(this).next('.spkg').attr('disabled','');
-        //         // $(this).closest('div.col-md-2').find('input.spkg').attr('disabled','');
-        //         $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-        //
-        //     } else if (weightAdditionOverland.checked === false) {
-        //         $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-        //
-        //     }
-        // };
-        //Overland
+
 
 
         var overland_count = $('.ol_weight_row').length;
@@ -3689,23 +3576,14 @@
 
             }
         };
-        // Packaging Charges Overnight
-        packagingChargesSwitchOverland.onchange = function () {
-            if(packagingChargesSwitchOverland.checked === true){
-                // $('.cash-handling-div').
-                $('.packaging-charges-div-overland').find('input').prop('disabled',false);
-            }else if(packagingChargesSwitchOverland.checked === false){
-                $('.packaging-charges-div-overland').find('input').prop('disabled',true);
 
-            }
-        };
         //overland end
         //detain
         //var weightAdditionDetain = document.querySelector('.switchery.weightAdditionDetain0');
         var cashhandlingswitchDetain = document.querySelector('.switchery.cashChargesDetain');
         var insuranceChargesSwitchDetain = document.querySelector('.switchery.insuranceChargesdetain');
         var returnChargesSwitchDetain = document.querySelector('.switchery.returnChargesDetain');
-        var packagingChargesSwitchDetain = document.querySelector('.switchery.packagingChargesDetain');
+
         var fuelChargesSwitchDetain = document.querySelector('.switchery.fuelSurchargeDetain');
 
         $('.weightAdditionDetain').on('change',function() {
@@ -3721,18 +3599,7 @@
 
             }
         });
-        // weightAdditionDetain.onchange = function () {
-        //     if (weightAdditionDetain.checked === true) {
-        //         // $(this).next('.spkg').attr('disabled','');
-        //         // $(this).closest('div.col-md-2').find('input.spkg').attr('disabled','');
-        //         $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-        //
-        //     } else if (weightAdditionDetain.checked === false) {
-        //         $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-        //
-        //     }
-        // };
-        //detain
+
 
 
         var detain_count = $('.det_weight_row').length;
@@ -3882,16 +3749,6 @@
 
             }
         };
-        // Packaging Charges Overnight
-        packagingChargesSwitchDetain.onchange = function () {
-            if(packagingChargesSwitchDetain.checked === true){
-                // $('.cash-handling-div').
-                $('.packaging-charges-div-detain').find('input').prop('disabled',false);
-            }else if(packagingChargesSwitchDetain.checked === false){
-                $('.packaging-charges-div-detain').find('input').prop('disabled',true);
-
-            }
-        };
 
         //Detain end
         //sameday start
@@ -3899,7 +3756,7 @@
         var cashhandlingswitchSameday = document.querySelector('.switchery.cashChargesSameday');
         var insuranceChargesSwitchSameday = document.querySelector('.switchery.insuranceChargessameday');
         var returnChargesSwitchSameday = document.querySelector('.switchery.returnChargesSameday');
-        var packagingChargesSwitchSameday = document.querySelector('.switchery.packagingChargesSameday');
+
         var fuelChargesSwitchSameday = document.querySelector('.switchery.fuelSurchargeSameday');
 
         $('.weightAdditionSameday').on('change',function() {
@@ -4072,16 +3929,6 @@
                 $('.fuel-surcharge-div-sameday').find('input').prop('disabled',false);
             }else if(fuelChargesSwitchSameday.checked === false){
                 $('.fuel-surcharge-div-sameday').find('input').prop('disabled',true);
-
-            }
-        };
-        // Packaging Charges Overnight
-        packagingChargesSwitchSameday.onchange = function () {
-            if(packagingChargesSwitchSameday.checked === true){
-                // $('.cash-handling-div').
-                $('.packaging-charges-div-sameday').find('input').prop('disabled',false);
-            }else if(packagingChargesSwitchSameday.checked === false){
-                $('.packaging-charges-div-sameday').find('input').prop('disabled',true);
 
             }
         };

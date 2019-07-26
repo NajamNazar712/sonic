@@ -14,7 +14,7 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                                <div class="row justify-content-center mb-2">
+                                <div class="row justify-content-center mb-2" id="search_form">
                                     <div class="col-3">
                                         <fieldset>
                                             <input type="text" class="form-control" placeholder="Tracking Number" id="search_tracking_number">
@@ -160,6 +160,13 @@
                 width: '100%',
                 allowClear: true
             });
+
+            $("#search_form").keyup(function(event) {
+                if (event.keyCode === 13) {
+                    $("#search_filter_btn").click();
+                }
+            });
+
             var table;
             function init(){
                 jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {

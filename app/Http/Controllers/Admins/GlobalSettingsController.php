@@ -989,8 +989,40 @@ class GlobalSettingsController extends Controller
             return $charges;
         }
     }
+	public function stock_movement_index(Request $request){
+        $settings = GlobalSettings::where('type', 'packaging_material_stock_movement_account_id')->first();
+        $account_id = '';
+        $account_name = '';
+        if($settings){
+            $account_id = $settings->setting_value;
+            $account_name = User::find($account_id)->name;
+        }
+        return view('admin.settings.stock_movement')->with(['account_id' => $account_id, 'account_name' => $account_name]);
+    }
+public function stock_movement_update(Request $request){
 
-    public function delivery_call_verification_ratio_index(){
+        $stock_movement_account_id = $request->stock_movement_account_id;
+        if ($stock_movement_account_id != null) {
+            $settings = GlobalSettings::where('type', 'packaging_material_stock_movement_account_id');
+            if($settings->exists()){
+                $settings = $settings->first();
+                $settings->setting_value = $stock_movement_account_id;
+                $settings->save();
+            }else{
+                $global_settings = new GlobalSettings();
+                $global_settings->setting_value = $stock_movement_account_id;
+                $global_settings->type = 'packaging_material_stock_movement_account_id';
+                $global_settings->save();
+
+            }
+
+            return redirect()->back()->with('success', 'Packaging Material Stock Movement Account Updated!');
+
+        }
+        return redirect()->back()->with('error', 'Settings can\'t be updated');
+
+    }
+public function delivery_call_verification_ratio_index(){
         $settings = DeliveryCallVerificationRatio::get();
         return view('admin.settings.delivery_call_verification_ratio')->with(['settings' => $settings]);
     }
@@ -1007,7 +1039,4 @@ class GlobalSettingsController extends Controller
         }
         $new_ratios = new DeliveryCallVerificationRatio();
         return redirect()->back()->with('success', 'Call verification ratio is Updated Successfully!');
-    }
-
-
-}
+    }}

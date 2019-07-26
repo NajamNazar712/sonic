@@ -16,7 +16,7 @@ class UpdateDeliveryNoteForCashCollectionTable extends Migration
         Schema::table('delivery_notes', function (Blueprint $table) {
             $table->integer('cash_collected_by')->nullable();
             $table->timestamp('cash_collected_at')->nullable();
-            });
+        });
     }
 
     /**
@@ -27,8 +27,8 @@ class UpdateDeliveryNoteForCashCollectionTable extends Migration
     public function down()
     {
         Schema::table('delivery_notes', function (Blueprint $table) {
-             $table->dropColumn('cash_collected_by');
-             $table->dropColumn('cash_collected_at');
-            });
+            $table->dropColumn('cash_collected_by');
+            $table->dropColumn('cash_collected_at');
+        });
     }
 }
