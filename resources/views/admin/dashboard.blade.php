@@ -131,7 +131,7 @@
                   </div>
               </div>
           </div>
-          <div class="row">
+          <div class="row mt-2">
               <div class="card col-12">
                   <div class="card-content collapse show">
                       <div class="card-body">
@@ -168,7 +168,7 @@
           </div>
 
           @if (session('role_id') == 1 || session('department_id') == 6)
-            <div class="row">
+            <div class="row mt-2">
               <div class="card col-12">
                   <div class="card-content collapse show">
                       <div class="card-body">
@@ -538,9 +538,6 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#from_date_root').css('top', '-350px');
-                },
                 onSet: function(context) {
                     var old_date_formatted = $('input[name="from_date_formatted"]').val();
                     var contractMoment = moment(old_date_formatted);
@@ -558,9 +555,6 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#to_date_root').css('top', '-350px');
-                },
                 onSet: function(context) {
                     var current_date_formatted = $('input[name="to_date_formatted"]').val();
                     var currentMoment = moment(current_date_formatted);
@@ -711,9 +705,6 @@
                     selectMonths: true,
                     formatSubmit: 'yyyy-mm-dd 00:00:00',
                     hiddenSuffix: '_formatted',
-                    onOpen: function() {
-                        $('#from_date_operations_root').css('top', '-350px');
-                    },
                     onSet: function(context) {
                         var old_date_formatted = $('input[name="from_date_operations_formatted"]').val();
                         var current_date_formatted = $('input[name="to_date_operations_formatted"]').val();
@@ -733,9 +724,6 @@
                     selectMonths: true,
                     formatSubmit: 'yyyy-mm-dd 23:59:59',
                     hiddenSuffix: '_formatted',
-                    onOpen: function() {
-                        $('#to_date_operations_root').css('top', '-350px');
-                    },
                     onSet: function(context) {
                         var current_date_formatted = $('input[name="to_date_operations_formatted"]').val();
                         var old_date_formatted = $('input[name="from_date_operations_formatted"]').val();
