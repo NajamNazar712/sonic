@@ -20,6 +20,7 @@ use App\Http\Models\InvoicingCycle;
 use App\Http\Models\Operataions\OperationForecast;
 use App\Http\Models\Operataions\OperationForecastShipments;
 use App\Http\Models\Operataions\OperationForecastWeightRange;
+use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequests;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomers;
@@ -311,7 +312,7 @@ class AdminDashboardController extends Controller
         $operation_outgoing['heavy_deliveries'] = $outgoing_heavy_deliveries;
         $operation_outgoing['light_deliveries'] = $outgoing_light_deliveries;
 
-        $last_updated_at = OperationsOutgoingTopCustomers::latest('updated_at')->first();
+        $last_updated_at = OperationsForecastLastUpdatedTime::latest('created_at')->first();
 
         return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_dates' => $operation_dates, 'default_hub_id' => $admin->default_hub_id, 'operation_incoming' => $operation_incoming, 'service_types' => $service_type, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing, 'last_updated_at' => $last_updated_at]);
     }

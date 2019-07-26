@@ -166,7 +166,9 @@
                   </div>
               </div>
           </div>
-          <div class="row">
+
+          @if (session('role_id') == 1 || session('department_id') == 6)
+            <div class="row">
               <div class="card col-12">
                   <div class="card-content collapse show">
                       <div class="card-body">
@@ -199,13 +201,6 @@
                                       @endforeach
                                   </select>
                               </div>
-                              {{--<div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">--}}
-                                  {{--<select name="graph_shipper" id="graph_shipper" class="select2 form-control">--}}
-                                      {{--@foreach($shippers as $shipper)--}}
-                                          {{--<option value="{{$shipper->id}}">{{$shipper->name}}</option>--}}
-                                      {{--@endforeach--}}
-                                  {{--</select>--}}
-                              {{--</div>--}}
                               <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">
                                   <button type="button" class="btn round btn-primary operations_forecast_search">Search <i class="ft-bar-chart"></i></button>
                               </div>
@@ -455,6 +450,7 @@
                   </div>
               </div>
           </div>
+          @endif
       </div>
     </div>
   </div>
@@ -572,55 +568,6 @@
                     from_date.pickadate('picker').set({'select': currentDate.toDate()},{muted: true});
                 }
             });
-
-            var from_date_operations = $('#from_date_operations').pickadate({
-                firstDay: 1,
-                clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#from_date_operations_root').css('top', '-350px');
-                },
-                onSet: function(context) {
-                    var old_date_formatted = $('input[name="from_date_operations_formatted"]').val();
-                    var current_date_formatted = $('input[name="to_date_operations_formatted"]').val();
-                    var contractMoment = moment(old_date_formatted);
-                    var current = moment(contractMoment).add(29, 'days');
-                    if(current._i < current_date_formatted || current_date_formatted < contractMoment._i){
-                        to_date_operations.pickadate('picker').set({'select': current.toDate()},{muted: true});
-                    }
-                }
-            });
-
-            var to_date_operations = $('#to_date_operations').pickadate({
-                firstDay: 1,
-                clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#to_date_operations_root').css('top', '-350px');
-                },
-                onSet: function(context) {
-                    var current_date_formatted = $('input[name="to_date_operations_formatted"]').val();
-                    var old_date_formatted = $('input[name="from_date_operations_formatted"]').val();
-                    var currentMoment = moment(current_date_formatted);
-                    var currentDate = moment(currentMoment).subtract(29, 'days');
-                    if(currentDate._i > old_date_formatted || old_date_formatted > currentMoment._i) {
-                        from_date_operations.pickadate('picker').set({'select': currentDate.toDate()}, {muted: true});
-                    }
-                }
-            });
-
-
-
 
             $('#graph_destination').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
@@ -752,398 +699,438 @@
                 });
             };
 
-            //incoming
-            var table_incoming = $('#datatable_incoming').DataTable({
-                searching: false,
-                paging: false,
-                info: false,
-                scrollX: false, scrollY: false,
-                autoWidth: false,
-                pageLength: 50,
-                pagingType: 'full_numbers',
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: '{{ route('admin.dashboard.incoming_list') }}',
-                    data: function (d) {
-                        d.search_date_from = $('input[name="from_date_operations_formatted"]').val();
-                        d.search_date_to = $('input[name="to_date_operations_formatted"]').val();
-                        d.search_hub = $('#search_hub').val();
-                        d.search_service_type = $('#search_service_type').val();
+            //Operation Forecasting
+
+            @if (session('role_id') == 1 || session('department_id') == 6)
+                var from_date_operations = $('#from_date_operations').pickadate({
+                    firstDay: 1,
+                    clear: '',
+                    max: '{{ Carbon\Carbon::now() }}',
+                    format:'dd mmmm, yyyy',
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd 00:00:00',
+                    hiddenSuffix: '_formatted',
+                    onOpen: function() {
+                        $('#from_date_operations_root').css('top', '-350px');
+                    },
+                    onSet: function(context) {
+                        var old_date_formatted = $('input[name="from_date_operations_formatted"]').val();
+                        var current_date_formatted = $('input[name="to_date_operations_formatted"]').val();
+                        var contractMoment = moment(old_date_formatted);
+                        var current = moment(contractMoment).add(29, 'days');
+                        if(current._i < current_date_formatted || current_date_formatted < contractMoment._i){
+                            to_date_operations.pickadate('picker').set({'select': current.toDate()},{muted: true});
+                        }
                     }
-                },
-                rowId: 'opfs_id',
-                columns: [
-                    {data: 'status', name: 'ss.name', class: 'white align-middle status',orderable: false, searchable: false},
-                    {data: 'count_link', name: 'count_link', class: 'text-center white align-middle count', orderable: false, searchable: false },
-
-                ]
-            });
-            var table_bar_incoming = $('#datatable_incoming_weight_range').DataTable({
-                searching: false,
-                paging: false,
-                info: false,
-                scrollX: false, scrollY: false,
-                autoWidth: false,
-                pageLength: 50,
-                pagingType: 'full_numbers',
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: '{{ route('admin.dashboard.incoming_weight_range_list') }}',
-                    data: function (d) {
-                        d.search_date_from = $('input[name="from_date_operations_formatted"]').val();
-                        d.search_date_to = $('input[name="to_date_operations_formatted"]').val();
-                        d.search_hub = $('#search_hub').val();
-                        d.search_service_type = $('#search_service_type').val();
+                });
+                var to_date_operations = $('#to_date_operations').pickadate({
+                    firstDay: 1,
+                    clear: '',
+                    max: '{{ Carbon\Carbon::now() }}',
+                    format:'dd mmmm, yyyy',
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd 23:59:59',
+                    hiddenSuffix: '_formatted',
+                    onOpen: function() {
+                        $('#to_date_operations_root').css('top', '-350px');
+                    },
+                    onSet: function(context) {
+                        var current_date_formatted = $('input[name="to_date_operations_formatted"]').val();
+                        var old_date_formatted = $('input[name="from_date_operations_formatted"]').val();
+                        var currentMoment = moment(current_date_formatted);
+                        var currentDate = moment(currentMoment).subtract(29, 'days');
+                        if(currentDate._i > old_date_formatted || old_date_formatted > currentMoment._i) {
+                            from_date_operations.pickadate('picker').set({'select': currentDate.toDate()}, {muted: true});
+                        }
                     }
-                },
-                columns: [
-                    {data: 'range', name: 'operation_forecast_weight_ranges.name', class: 'align-middle status',orderable: false, searchable: false},
-                    {data: 'count', name: 'count', class: 'text-center align-middle count',orderable: false, searchable: false },
-                ],
-            });
+                });
 
-            var ctx = document.getElementById('myChartincoming').getContext('2d');
+                //incoming
+                var table_incoming = $('#datatable_incoming').DataTable({
+                    searching: false,
+                    paging: false,
+                    info: false,
+                    scrollX: false, scrollY: false,
+                    autoWidth: false,
+                    pageLength: 50,
+                    pagingType: 'full_numbers',
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: '{{ route('admin.dashboard.incoming_list') }}',
+                        data: function (d) {
+                            d.search_date_from = $('input[name="from_date_operations_formatted"]').val();
+                            d.search_date_to = $('input[name="to_date_operations_formatted"]').val();
+                            d.search_hub = $('#search_hub').val();
+                            d.search_service_type = $('#search_service_type').val();
+                        }
+                    },
+                    rowId: 'opfs_id',
+                    columns: [
+                        {data: 'status', name: 'ss.name', class: 'white align-middle status',orderable: false, searchable: false},
+                        {data: 'count_link', name: 'count_link', class: 'text-center white align-middle count', orderable: false, searchable: false },
 
-            var doughnut_chart_shipments = @json($doughnut_chart_shipments_count);
-            var incoming_bar_chart_shipments = @json($incoming_bar_chart_shipments);
-            var piedata = {
-                datasets: [{
-                    data: [((doughnut_chart_shipments.booked/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.arrived_at_origin/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.in_transit/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.arrived_at_destination/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.not_attempted/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.delivery_unsuccessful/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.on_hold/doughnut_chart_shipments.total)*100).toFixed(2)],
-                    backgroundColor: [
-                        '#5DADE2',
-                        '#E67E22',
-                        '#7F8C8D',
-                        '#F1C40F',
-                        '#1F618D',
-                        '#28B463',
-                        '#154360'
+                    ]
+                });
+                var table_bar_incoming = $('#datatable_incoming_weight_range').DataTable({
+                    searching: false,
+                    paging: false,
+                    info: false,
+                    scrollX: false, scrollY: false,
+                    autoWidth: false,
+                    pageLength: 50,
+                    pagingType: 'full_numbers',
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: '{{ route('admin.dashboard.incoming_weight_range_list') }}',
+                        data: function (d) {
+                            d.search_date_from = $('input[name="from_date_operations_formatted"]').val();
+                            d.search_date_to = $('input[name="to_date_operations_formatted"]').val();
+                            d.search_hub = $('#search_hub').val();
+                            d.search_service_type = $('#search_service_type').val();
+                        }
+                    },
+                    columns: [
+                        {data: 'range', name: 'operation_forecast_weight_ranges.name', class: 'align-middle status',orderable: false, searchable: false},
+                        {data: 'count', name: 'count', class: 'text-center align-middle count',orderable: false, searchable: false },
                     ],
-                }],
+                });
 
-                // These labels appear in the legend and in the tooltips when hovering different arcs
+                var ctx = document.getElementById('myChartincoming').getContext('2d');
+                var doughnut_chart_shipments = @json($doughnut_chart_shipments_count);
+                var incoming_bar_chart_shipments = @json($incoming_bar_chart_shipments);
+                var piedata = {
+                    datasets: [{
+                        data: [((doughnut_chart_shipments.booked/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.arrived_at_origin/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.in_transit/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.arrived_at_destination/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.not_attempted/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.delivery_unsuccessful/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.on_hold/doughnut_chart_shipments.total)*100).toFixed(2)],
+                        backgroundColor: [
+                            '#5DADE2',
+                            '#E67E22',
+                            '#7F8C8D',
+                            '#F1C40F',
+                            '#1F618D',
+                            '#28B463',
+                            '#154360'
+                        ],
+                    }],
 
-                labels: [
-                    "Booked",
-                    "Arrived at Origin",
-                    "In Transit",
-                    "Arrived at Destination",
-                    "Not Attempted",
-                    "Delivery Unsuccessful",
-                    "On Hold",
-                ]
+                    // These labels appear in the legend and in the tooltips when hovering different arcs
 
-            };
+                    labels: [
+                        "Booked",
+                        "Arrived at Origin",
+                        "In Transit",
+                        "Arrived at Destination",
+                        "Not Attempted",
+                        "Delivery Unsuccessful",
+                        "On Hold",
+                    ]
 
-            var myDoughnutChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: piedata,
-                options: {
-                    legend: {
-                        display: false,
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    tooltips: {
-                        callbacks: {
-                            label: function (tooltipItem, data) {
-                                var dataset = data.datasets[tooltipItem.datasetIndex];
-                                var currentValue = dataset.data[tooltipItem.index];
-                                return currentValue + "%";
-                            }
+                };
+                var myDoughnutChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: piedata,
+                    options: {
+                        legend: {
+                            display: false,
                         },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function (tooltipItem, data) {
+                                    var dataset = data.datasets[tooltipItem.datasetIndex];
+                                    var currentValue = dataset.data[tooltipItem.index];
+                                    return currentValue + "%";
+                                }
+                            },
+                        }
                     }
-                }
-            });
-            Chart.pluginService.register({
-                beforeDraw: function(chart) {
-                    var width = myDoughnutChart.width,
-                        height = myDoughnutChart.height,
-                        ctx = myDoughnutChart.ctx;
+                });
+                Chart.pluginService.register({
+                    beforeDraw: function(chart) {
+                        var width = myDoughnutChart.width,
+                            height = myDoughnutChart.height,
+                            ctx = myDoughnutChart.ctx;
 
-                    ctx.restore();
-                    var fontSize = (height / 114).toFixed(2);
-                    ctx.font = fontSize + "em sans-serif";
-                    ctx.textBaseline = "middle";
+                        ctx.restore();
+                        var fontSize = (height / 114).toFixed(2);
+                        ctx.font = fontSize + "em sans-serif";
+                        ctx.textBaseline = "middle";
 
-                    var text = doughnut_chart_shipments.total,
-                        textX = Math.round((width - ctx.measureText(text).width) / 2),
-                        textY = height / 2;
+                        var text = doughnut_chart_shipments.total,
+                            textX = Math.round((width - ctx.measureText(text).width) / 2),
+                            textY = height / 2;
 
-                    if(text != 0) {
-                        ctx.fillText(text, textX, textY);
-                        ctx.save();
+                        if(text != 0) {
+                            ctx.fillText(text, textX, textY);
+                            ctx.save();
+                        }
                     }
-                }
-            });
+                });
 
-            ctxbarchart = document.getElementById('mybarchartincoming').getContext('2d');
+                ctxbarchart = document.getElementById('mybarchartincoming').getContext('2d');
+                var bardata = {
+                        datasets: [
+                            {
+                                label: "0.5 KG",
+                                data: [incoming_bar_chart_shipments.one],
+                                backgroundColor: ["#669911", "#119966" ],
+                                hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
+                            },
+                            {
+                                label: "Upto 2 KG",
+                                data: [incoming_bar_chart_shipments.two],
+                                backgroundColor: ["#669911", "#119966" ],
+                                hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
+                            },
+                            {
+                                label: "Upto 5 KG",
+                                data: [incoming_bar_chart_shipments.three],
+                                backgroundColor: ["#669911", "#119966" ],
+                                hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
+                            },
+                            {
+                                label: "Above 5 KG",
+                                data: [incoming_bar_chart_shipments.four],
+                                backgroundColor: ["#669911", "#119966" ],
+                                hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
+                            }
+                        ],
 
-            var bardata = {
+                    // These labels appear in the legend and in the tooltips when hovering different arcs
+
+                };
+                var myBarChart = new Chart(ctxbarchart, {
+                    type: 'horizontalBar',
+                    data: bardata,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                barPercentage: 0.5,
+                                barThickness: 6,
+                                maxBarThickness: 8,
+                                minBarLength: 2,
+                                gridLines: {
+                                    offsetGridLines: true
+                                }
+                            }]
+                        },
+                        legend: {
+                            display: false,
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        tooltips: {
+                            callbacks: {
+                                title: function() {}
+                            }
+                        }
+                    }
+                });
+
+                //outgoing
+
+                var table_outgoing = $('#datatable_top_five').DataTable({
+                    searching: false,
+                    paging: false,
+                    info: false,
+                    scrollX: false, scrollY: false,
+                    autoWidth: false,
+                    pageLength: 50,
+                    pagingType: 'full_numbers',
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: '{{ route('admin.dashboard.outgoing_top_customers_list') }}',
+                        data: function (d) {
+                            d.search_date_from = $('input[name="from_date_operations_formatted"]').val();
+                            d.search_date_to = $('input[name="to_date_operations_formatted"]').val();
+                        }
+                    },
+                    columns: [
+                        {data: 'name', name: 'ss.name', class: 'align-middle white status',orderable: false, searchable: false},
+                        {data: 'count', name: 'count', class: 'text-center align-middle white count', orderable: false, searchable: false },
+
+                    ],
+                    'rowCallback': function(row, data, index){
+                        if(index == 0){
+                            $('td', row).css('background-color', '#5DADE2');
+                        }
+                        else if(index == 1){
+                            $('td', row).css('background-color', '#E67E22');
+                        }
+                        else if(index == 2){
+                            $('td', row).css('background-color', '#7F8C8D');
+                        }
+                        else if(index == 3){
+                            $('td', row).css('background-color', '#F1C40F');
+                        }
+                        else if(index == 4){
+                            $('td', row).css('background-color', '#1F618D');
+                        }
+                    }
+                });
+                var table_bar_outgoing = $('#datatable_outgoing_weight_range').DataTable({
+                    searching: false,
+                    paging: false,
+                    info: false,
+                    scrollX: false, scrollY: false,
+                    autoWidth: false,
+                    pageLength: 50,
+                    pagingType: 'full_numbers',
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: '{{ route('admin.dashboard.outgoing_weight_range_list') }}',
+                        data: function (d) {
+                            d.search_date_from = $('input[name="from_date_operations_formatted"]').val();
+                            d.search_date_to = $('input[name="to_date_operations_formatted"]').val();
+                            d.search_hub = $('#search_hub').val();
+                            d.search_service_type = $('#search_service_type').val();
+                        }
+                    },
+                    columns: [
+                        {data: 'range', name: 'operation_forecast_weight_ranges.name', class: 'align-middle status',orderable: false, searchable: false},
+                        {data: 'count', name: 'count', class: 'text-center align-middle count',orderable: false, searchable: false },
+                    ],
+                });
+
+                var outgoing_bar_chart_shipments = @json($outgoing_bar_chart_shipments);
+                var outgoing_doughnut_top_five_customers = @json($outgoing_doughnut_top_five_customers);
+                var ctx_2 = document.getElementById('myChartoutgoing').getContext('2d');
+                var piedata_2 = {
+                    datasets: [{
+                        data: [((outgoing_doughnut_top_five_customers.first.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2), ((outgoing_doughnut_top_five_customers.second.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2), ((outgoing_doughnut_top_five_customers.third.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2), ((outgoing_doughnut_top_five_customers.fourth.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2), ((outgoing_doughnut_top_five_customers.fifth.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2)],
+                        backgroundColor: [
+                            '#5DADE2',
+                            '#E67E22',
+                            '#7F8C8D',
+                            '#F1C40F',
+                            '#1F618D',
+                        ],
+                    }],
+
+                    // These labels appear in the legend and in the tooltips when hovering different arcs
+
+                    labels: [
+                        outgoing_doughnut_top_five_customers.first.name,
+                        outgoing_doughnut_top_five_customers.second.name,
+                        outgoing_doughnut_top_five_customers.third.name,
+                        outgoing_doughnut_top_five_customers.fourth.name,
+                        outgoing_doughnut_top_five_customers.fifth.name
+                    ]
+
+                };
+                var myDoughnutChart_2 = new Chart(ctx_2, {
+                    type: 'doughnut',
+                    data: piedata_2,
+                    options: {
+                        legend: {
+                            display: false,
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function (tooltipItem, data) {
+                                    var dataset = data.datasets[tooltipItem.datasetIndex];
+                                    var currentValue = dataset.data[tooltipItem.index];
+                                    return currentValue + "%";
+                                }
+                            },
+                        }
+                    },
+                });
+                Chart.pluginService.register({
+                    beforeDraw: function(chart) {
+                        var width = myDoughnutChart_2.width,
+                            height = myDoughnutChart_2.height,
+                            ctx = myDoughnutChart_2.ctx;
+
+                        ctx.restore();
+                        var fontSize = (height / 114).toFixed(2);
+                        ctx.font = fontSize + "em sans-serif";
+                        ctx.textBaseline = "middle";
+
+                        var text = outgoing_doughnut_top_five_customers.total,
+                            textX = Math.round((width - ctx.measureText(text).width) / 2),
+                            textY = height / 2;
+
+                        if(text != 0) {
+                            ctx.fillText(text, textX, textY);
+                            ctx.save();
+                        }
+                    }
+                });
+
+                ctxbarchart_2 = document.getElementById('mybarchartoutgoing').getContext('2d');
+                var bardata_2 = {
                     datasets: [
                         {
                             label: "0.5 KG",
-                            data: [incoming_bar_chart_shipments.one],
+                            data: [outgoing_bar_chart_shipments.one],
                             backgroundColor: ["#669911", "#119966" ],
                             hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
                         },
                         {
                             label: "Upto 2 KG",
-                            data: [incoming_bar_chart_shipments.two],
+                            data: [outgoing_bar_chart_shipments.two],
                             backgroundColor: ["#669911", "#119966" ],
                             hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
                         },
                         {
                             label: "Upto 5 KG",
-                            data: [incoming_bar_chart_shipments.three],
+                            data: [outgoing_bar_chart_shipments.three],
                             backgroundColor: ["#669911", "#119966" ],
                             hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
                         },
                         {
                             label: "Above 5 KG",
-                            data: [incoming_bar_chart_shipments.four],
+                            data: [outgoing_bar_chart_shipments.four],
                             backgroundColor: ["#669911", "#119966" ],
                             hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
                         }
                     ],
 
-                // These labels appear in the legend and in the tooltips when hovering different arcs
+                    // These labels appear in the legend and in the tooltips when hovering different arcs
 
-            };
-
-            var myBarChart = new Chart(ctxbarchart, {
-                type: 'horizontalBar',
-                data: bardata,
-                options: {
-                    scales: {
-                        xAxes: [{
-                            barPercentage: 0.5,
-                            barThickness: 6,
-                            maxBarThickness: 8,
-                            minBarLength: 2,
-                            gridLines: {
-                                offsetGridLines: true
-                            }
-                        }]
-                    },
-                    legend: {
-                        display: false,
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    tooltips: {
-                        callbacks: {
-                            title: function() {}
-                        }
-                    }
-                }
-            });
-
-            //outgoing
-
-            var table_outgoing = $('#datatable_top_five').DataTable({
-                searching: false,
-                paging: false,
-                info: false,
-                scrollX: false, scrollY: false,
-                autoWidth: false,
-                pageLength: 50,
-                pagingType: 'full_numbers',
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: '{{ route('admin.dashboard.outgoing_top_customers_list') }}',
-                    data: function (d) {
-                        d.search_date_from = $('input[name="from_date_operations_formatted"]').val();
-                        d.search_date_to = $('input[name="to_date_operations_formatted"]').val();
-                    }
-                },
-                columns: [
-                    {data: 'name', name: 'ss.name', class: 'align-middle white status',orderable: false, searchable: false},
-                    {data: 'count', name: 'count', class: 'text-center align-middle white count', orderable: false, searchable: false },
-
-                ],
-                'rowCallback': function(row, data, index){
-                    if(index == 0){
-                        $('td', row).css('background-color', '#5DADE2');
-                    }
-                    else if(index == 1){
-                        $('td', row).css('background-color', '#E67E22');
-                    }
-                    else if(index == 2){
-                        $('td', row).css('background-color', '#7F8C8D');
-                    }
-                    else if(index == 3){
-                        $('td', row).css('background-color', '#F1C40F');
-                    }
-                    else if(index == 4){
-                        $('td', row).css('background-color', '#1F618D');
-                    }
-                }
-            });
-            var table_bar_outgoing = $('#datatable_outgoing_weight_range').DataTable({
-                searching: false,
-                paging: false,
-                info: false,
-                scrollX: false, scrollY: false,
-                autoWidth: false,
-                pageLength: 50,
-                pagingType: 'full_numbers',
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: '{{ route('admin.dashboard.outgoing_weight_range_list') }}',
-                    data: function (d) {
-                        d.search_date_from = $('input[name="from_date_operations_formatted"]').val();
-                        d.search_date_to = $('input[name="to_date_operations_formatted"]').val();
-                        d.search_hub = $('#search_hub').val();
-                        d.search_service_type = $('#search_service_type').val();
-                    }
-                },
-                columns: [
-                    {data: 'range', name: 'operation_forecast_weight_ranges.name', class: 'align-middle status',orderable: false, searchable: false},
-                    {data: 'count', name: 'count', class: 'text-center align-middle count',orderable: false, searchable: false },
-                ],
-            });
-            var outgoing_bar_chart_shipments = @json($outgoing_bar_chart_shipments);
-            var outgoing_doughnut_top_five_customers = @json($outgoing_doughnut_top_five_customers);
-            var ctx_2 = document.getElementById('myChartoutgoing').getContext('2d');
-
-            var piedata_2 = {
-                datasets: [{
-                    data: [((outgoing_doughnut_top_five_customers.first.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2), ((outgoing_doughnut_top_five_customers.second.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2), ((outgoing_doughnut_top_five_customers.third.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2), ((outgoing_doughnut_top_five_customers.fourth.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2), ((outgoing_doughnut_top_five_customers.fifth.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2)],
-                    backgroundColor: [
-                        '#5DADE2',
-                        '#E67E22',
-                        '#7F8C8D',
-                        '#F1C40F',
-                        '#1F618D',
-                    ],
-                }],
-
-                // These labels appear in the legend and in the tooltips when hovering different arcs
-
-                labels: [
-                    outgoing_doughnut_top_five_customers.first.name,
-                    outgoing_doughnut_top_five_customers.second.name,
-                    outgoing_doughnut_top_five_customers.third.name,
-                    outgoing_doughnut_top_five_customers.fourth.name,
-                    outgoing_doughnut_top_five_customers.fifth.name
-                ]
-
-            };
-
-            var myDoughnutChart_2 = new Chart(ctx_2, {
-                type: 'doughnut',
-                data: piedata_2,
-                options: {
-                    legend: {
-                        display: false,
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    tooltips: {
-                        callbacks: {
-                            label: function (tooltipItem, data) {
-                                var dataset = data.datasets[tooltipItem.datasetIndex];
-                                var currentValue = dataset.data[tooltipItem.index];
-                                return currentValue + "%";
-                            }
+                };
+                var myBarChart_2 = new Chart(ctxbarchart_2, {
+                    type: 'horizontalBar',
+                    data: bardata_2,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                barPercentage: 0.5,
+                                barThickness: 6,
+                                maxBarThickness: 8,
+                                minBarLength: 2,
+                                gridLines: {
+                                    offsetGridLines: true
+                                }
+                            }]
                         },
-                    }
-                },
-            });
-
-            Chart.pluginService.register({
-                beforeDraw: function(chart) {
-                    var width = myDoughnutChart_2.width,
-                        height = myDoughnutChart_2.height,
-                        ctx = myDoughnutChart_2.ctx;
-
-                    ctx.restore();
-                    var fontSize = (height / 114).toFixed(2);
-                    ctx.font = fontSize + "em sans-serif";
-                    ctx.textBaseline = "middle";
-
-                    var text = outgoing_doughnut_top_five_customers.total,
-                        textX = Math.round((width - ctx.measureText(text).width) / 2),
-                        textY = height / 2;
-
-                    if(text != 0) {
-                        ctx.fillText(text, textX, textY);
-                        ctx.save();
-                    }
-                }
-            });
-
-            ctxbarchart_2 = document.getElementById('mybarchartoutgoing').getContext('2d');
-
-
-            var bardata_2 = {
-                datasets: [
-                    {
-                        label: "0.5 KG",
-                        data: [outgoing_bar_chart_shipments.one],
-                        backgroundColor: ["#669911", "#119966" ],
-                        hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
-                    },
-                    {
-                        label: "Upto 2 KG",
-                        data: [outgoing_bar_chart_shipments.two],
-                        backgroundColor: ["#669911", "#119966" ],
-                        hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
-                    },
-                    {
-                        label: "Upto 5 KG",
-                        data: [outgoing_bar_chart_shipments.three],
-                        backgroundColor: ["#669911", "#119966" ],
-                        hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
-                    },
-                    {
-                        label: "Above 5 KG",
-                        data: [outgoing_bar_chart_shipments.four],
-                        backgroundColor: ["#669911", "#119966" ],
-                        hoverBackgroundColor: ["#66A2EB", "#FCCE56"]
-                    }
-                ],
-
-                // These labels appear in the legend and in the tooltips when hovering different arcs
-
-            };
-
-            var myBarChart_2 = new Chart(ctxbarchart_2, {
-                type: 'horizontalBar',
-                data: bardata_2,
-                options: {
-                    scales: {
-                        xAxes: [{
-                            barPercentage: 0.5,
-                            barThickness: 6,
-                            maxBarThickness: 8,
-                            minBarLength: 2,
-                            gridLines: {
-                                offsetGridLines: true
+                        legend: {
+                            display: false,
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        tooltips: {
+                            callbacks: {
+                                title: function() {}
                             }
-                        }]
-                    },
-                    legend: {
-                        display: false,
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    tooltips: {
-                        callbacks: {
-                            title: function() {}
                         }
                     }
-                }
-            });
-            $('.operations_forecast_search').on('click',function() {
+                });
+
+                $('.operations_forecast_search').on('click',function() {
                 var current_date = $('input[name="to_date_operations_formatted"]').val();
                 var old_date = $('input[name="from_date_operations_formatted"]').val();
                 var hub = $('#search_hub').val();
@@ -1196,6 +1183,7 @@
                     var incoming_bar_chart_shipments = data.incoming_bar_chart_shipments;
                     var outgoing_bar_chart_shipments = data.outgoing_bar_chart_shipments;
                     var outgoing_doughnut_top_five_customers = data.outgoing_doughnut_top_five_customers;
+
                     var piedata = {
                         datasets: [{
                             data: [((doughnut_chart_shipments.booked/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.arrived_at_origin/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.in_transit/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.arrived_at_destination/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.not_attempted/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.delivery_unsuccessful/doughnut_chart_shipments.total)*100).toFixed(2), ((doughnut_chart_shipments.on_hold/doughnut_chart_shipments.total)*100).toFixed(2)],
@@ -1223,7 +1211,6 @@
                         ]
 
                     };
-
                     var myDoughnutChart = new Chart(ctx, {
                         type: 'doughnut',
                         data: piedata,
@@ -1252,7 +1239,6 @@
                             }
                         }
                     });
-
                     Chart.pluginService.register({
                         beforeDraw: function(chart) {
                             var width = myDoughnutChart.width,
@@ -1274,12 +1260,10 @@
                         }
                     });
 
-
                     $('#mybarchartincoming').remove(); // this is my <canvas> element
                     $('#incoming_bar_chart').append('<canvas id="mybarchartincoming" height="230px"><canvas>');
 
                     ctxbarchart = document.getElementById('mybarchartincoming').getContext('2d');
-
                     var bardata = {
                         datasets: [
                             {
@@ -1311,7 +1295,6 @@
                         // These labels appear in the legend and in the tooltips when hovering different arcs
 
                     };
-
                     var myBarChart = new Chart(ctxbarchart, {
                         type: 'horizontalBar',
                         data: bardata,
@@ -1383,7 +1366,6 @@
                     $('#outgoing_chart').append('<canvas id="myChartoutgoing" height="230px"><canvas>');
 
                     var ctx_2 = document.getElementById('myChartoutgoing').getContext('2d');
-
                     var piedata_2 = {
                         datasets: [{
                             data: [((outgoing_doughnut_top_five_customers.first.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2), ((outgoing_doughnut_top_five_customers.second.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2), ((outgoing_doughnut_top_five_customers.third.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2), ((outgoing_doughnut_top_five_customers.fourth.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2), ((outgoing_doughnut_top_five_customers.fifth.count/outgoing_doughnut_top_five_customers.total)*100).toFixed(2)],
@@ -1407,7 +1389,6 @@
                         ]
 
                     };
-
                     var myDoughnutChart_2 = new Chart(ctx_2, {
                         type: 'doughnut',
                         data: piedata_2,
@@ -1429,8 +1410,6 @@
                             }
                         },
                     });
-
-
                     Chart.pluginService.register({
                         beforeDraw: function(chart) {
                             var width = myDoughnutChart_2.width,
@@ -1457,7 +1436,6 @@
                     $('#outgoing_bar_chart').append('<canvas id="mybarchartoutgoing" height="230px"><canvas>');
 
                     ctxbarchart_2 = document.getElementById('mybarchartoutgoing').getContext('2d');
-
                     var bardata_2 = {
                         datasets: [
                             {
@@ -1489,7 +1467,6 @@
                         // These labels appear in the legend and in the tooltips when hovering different arcs
 
                     };
-
                     var myBarChart_2 = new Chart(ctxbarchart_2, {
                         type: 'horizontalBar',
                         data: bardata_2,
@@ -1522,6 +1499,7 @@
                 });
 
             });
+            @endif
         });
     </script>
 @endsection
