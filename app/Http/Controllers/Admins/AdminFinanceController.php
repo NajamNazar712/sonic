@@ -1512,6 +1512,7 @@ class AdminFinanceController extends Controller
         $shipment = Shipment::find($shipment_id);
         if($shipment->booking_type_id == 4){
             $shipment->amount = $shipment->amount - $shipment->return_charges;
+            $shipment->received_amount = $shipment->received_amount - $shipment->return_charges;
             $shipment->return_charges = NULL;
             $shipment->payment_status_id = 4;
 
