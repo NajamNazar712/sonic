@@ -1119,9 +1119,18 @@ class ShipmentChargesController extends Controller
 
         $shipment->return_charges = $charges;
 
-        $shipment->amount = $shipment->amount + $charges;
+        if($shipment->charges_mode_id == 1) {
+            $total_amount = $shipment->received_amount + $charges;
 
-        $shipment->received_amount = $shipment->amount + $charges;
+            $shipment->amount = $total_amount;
+            $shipment->received_amount = $total_amount;
+        }
+        else {
+            $total_amount = $shipment->amount + $charges;
+
+            $shipment->amount = $total_amount;
+            $shipment->received_amount = $total_amount;
+        }
 
         $shipment->save();
     }

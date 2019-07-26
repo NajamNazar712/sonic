@@ -1511,8 +1511,19 @@ class AdminFinanceController extends Controller
     static public function return_confirmed_revert($shipment_id) {
         $shipment = Shipment::find($shipment_id);
         if($shipment->booking_type_id == 4){
-            $shipment->amount = $shipment->amount - $shipment->return_charges;
-            $shipment->received_amount = $shipment->received_amount - $shipment->return_charges;
+            $receivable = ROUND(($shipment->fuel_surcharge + $shipment->weight_charges + $shipment->gst), 0, PHP_ROUND_HALF_DOWN);
+
+            if ($shipment->charges_mode_id == 1) {
+                $shipment->amount = 0;
+
+                $shipment->received_amount = $receivable;
+            }
+            else {
+                $shipment->amount = $receivable;
+
+                $shipment->received_amount = NULL;
+            }
+
             $shipment->return_charges = NULL;
             $shipment->payment_status_id = 4;
 
