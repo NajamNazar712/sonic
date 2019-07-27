@@ -547,7 +547,7 @@ class AdminPettyCashController extends Controller
                     Storage::disk('public')->delete('petty_cash_statement_details/'.$filename);
                     Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
 
-                    $petty_detail->reference_document = $filename;
+                    $petty_detail->return = $filename;
                     $petty_detail->save();
                 }
             }

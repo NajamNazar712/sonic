@@ -186,7 +186,7 @@ class AdminReportsController extends Controller
             })
             ->editColumn('image', function ($return_note) {
                 $now = Carbon::now();
-                if ($return_note->image != null && ($now->diffInDays($return_note->created_at) < 30)) {
+                if ($return_note->image != null && ($now->diffInDays($return_note->updated_at) < 30)) {
                     $img = asset('uploads/return_notes/' . $return_note->image);
                     return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
 
