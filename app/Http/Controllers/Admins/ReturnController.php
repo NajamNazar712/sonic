@@ -1895,7 +1895,7 @@ class ReturnController extends Controller
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins','admins.id','=','return_notes.admin_id')
             ->join('admins as sb','sb.id','=','return_notes.updated_by')
-            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assigned_by','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status','sb.name as submitted_by','return_notes.updated_at as submitted_at','return_notes.image']);
+            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assigned_by','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status','sb.name as submitted_by','return_notes.updated_at','return_notes.updated_at as submitted_at','return_notes.image']);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
@@ -1910,7 +1910,7 @@ class ReturnController extends Controller
             })
             ->editColumn('image', function ($deliveries) {
                 $now = Carbon::now();
-                if ($deliveries->image != null && ($now->diffInDays($deliveries->created_at) < 30)) {
+                if ($deliveries->image != null && ($now->diffInDays($deliveries->updated_at) < 30)) {
                     $img = asset('uploads/return_notes/' . $deliveries->image);
                     return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
 
