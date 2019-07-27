@@ -165,7 +165,7 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments','shipments.id', '=', 'rns.shipment_id')
             ->join('admins as cr','cr.id','=','return_notes.admin_id')
             ->leftjoin('admins as up','up.id','=','return_notes.updated_by')
-            ->select(['return_notes.id','return_notes.id as return_note_id','return_notes.id as return_note_link','up.name as updated_by','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at as created_at','return_notes.image'])->groupBy('return_notes.id');
+            ->select(['return_notes.id','return_notes.id as return_note_id','return_notes.id as return_note_link','up.name as updated_by','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.updated_at','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at as created_at','return_notes.image'])->groupBy('return_notes.id');
         if (session('role_id') != 1) {
             $return_note = $return_note->whereIn('return_notes.hub_id', session('hubs'));
         }
