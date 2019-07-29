@@ -231,7 +231,41 @@
         </div>
     </div>
     <!--Non Service Modal -->
+	<div class="modal fade text-left" id="DateModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DateModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Update Shipment(s) Receiving Date</h4>
+                </div>
+                <div class="modal-body  text-center">
 
+                        <div class="row justify-content-center">
+                            <div class="col-8" id="receiving_date_div">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                      <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                      </span>
+                                    </div>
+                                    <input type="text" name="receiving_date"
+                                           class="form-control bg-primary border-primary white rounded-right"
+                                           id="receiving_date" placeholder="Receiving Date">
+                                </div>
+                            </div>
+
+                        </div>
+                        <input type="hidden" name="date_shipment_id" id="date_shipment_id">
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="DateUpdate" type="button" class="btn btn-primary btn-block">Update</button>
+                            </div>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
     <!--Incomplete Address Modal -->
     <div class="modal fade text-left" id="IncompleteAddressModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="IncompleteAddressModal"
          aria-hidden="true">
@@ -243,94 +277,94 @@
                 </div>
                 <div class="modal-body  text-center">
 
-                        <input type="hidden" name="iad_shipment_id" id="iad_shipment_id">
-                        <input type="hidden" name="iad_status" id="iad_status">
-                        <div class="row justify-content-center mb-2">
-                            <div class="col-9 text-left">
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio1" status="Need House No.">
-                                        <label class="custom-control-label" for="customRadio1">Need House No.</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio2" status="Need Plot No.">
-                                        <label class="custom-control-label" for="customRadio2">Need Plot No.</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio3" status="Need Area Name">
-                                        <label class="custom-control-label" for="customRadio3">Need Area Name</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio4" status="Need Street No.">
-                                        <label class="custom-control-label" for="customRadio4">Need Street No.</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio5" status="Need Street Name">
-                                        <label class="custom-control-label" for="customRadio5">Need Street Name</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio6" status="Need Sector No.">
-                                        <label class="custom-control-label" for="customRadio6">Need Sector No.</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio7" status="Need Floor No.">
-                                        <label class="custom-control-label" for="customRadio7">Need Floor No.</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio8" status="Need Office No.">
-                                        <label class="custom-control-label" for="customRadio8">Need Office No.</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio9" status="Need Building No.">
-                                        <label class="custom-control-label" for="customRadio9">Need Building No.</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio10">
-                                        <label class="custom-control-label" for="customRadio10">Other</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset class="d-none">
-                                    <textarea name="other_description" class="form-control" id="other_description" cols="30" rows="10"></textarea>
-                                </fieldset>
-                            </div>
+                    <input type="hidden" name="iad_shipment_id" id="iad_shipment_id">
+                    <input type="hidden" name="iad_status" id="iad_status">
+                    <div class="row justify-content-center mb-2">
+                        <div class="col-9 text-left">
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio1" status="Need House No.">
+                                    <label class="custom-control-label" for="customRadio1">Need House No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio2" status="Need Plot No.">
+                                    <label class="custom-control-label" for="customRadio2">Need Plot No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio3" status="Need Area Name">
+                                    <label class="custom-control-label" for="customRadio3">Need Area Name</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio4" status="Need Street No.">
+                                    <label class="custom-control-label" for="customRadio4">Need Street No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio5" status="Need Street Name">
+                                    <label class="custom-control-label" for="customRadio5">Need Street Name</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio6" status="Need Sector No.">
+                                    <label class="custom-control-label" for="customRadio6">Need Sector No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio7" status="Need Floor No.">
+                                    <label class="custom-control-label" for="customRadio7">Need Floor No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio8" status="Need Office No.">
+                                    <label class="custom-control-label" for="customRadio8">Need Office No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio9" status="Need Building No.">
+                                    <label class="custom-control-label" for="customRadio9">Need Building No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio10">
+                                    <label class="custom-control-label" for="customRadio10">Other</label>
+                                </div>
+                            </fieldset>
+                            <fieldset class="d-none">
+                                <textarea name="other_description" class="form-control" id="other_description" cols="30" rows="10"></textarea>
+                            </fieldset>
+                        </div>
 
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-3">
+                            <button id="AICUpdate" type="button" disabled class="btn btn-primary btn-block">Update</button>
                         </div>
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="AICUpdate" type="button" disabled class="btn btn-primary btn-block">Update</button>
-                            </div>
-                        </div>
+                    </div>
 
                 </div>
             </div>
         </div>
     </div>
     <!--Incomplete Address Modal -->
-
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style>
         table.dataTable {
             font-size: 12px;
@@ -404,6 +438,9 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -436,78 +473,7 @@
                 scrollX: true,
                 buttons: [
                         @if(!$delivery_note_status == 1)
-                        {{--{--}}
-                        {{--text: 'Delivered',--}}
-                        {{--className: 'btn btn-primary delivered',--}}
-                        {{--enabled: false,--}}
-                        {{--action: function (e, dt, node, config) {--}}
-                        {{--if(selected_rows !== ''){--}}
-                        {{--swal({--}}
-                        {{--title: 'Are You Sure?',--}}
-                        {{--text: 'Select Yes to mark shipments as Delivered!',--}}
-                        {{--icon: 'warning',--}}
-                        {{--buttons: {--}}
-                        {{--cancel: {--}}
-                        {{--text: 'No',--}}
-                        {{--value: null,--}}
-                        {{--visible: true,--}}
-                        {{--closeModal: true,--}}
-                        {{--},--}}
-                        {{--confirm: {--}}
-                        {{--text: 'Yes',--}}
-                        {{--value: true,--}}
-                        {{--visible: true,--}}
-                        {{--closeModal: true--}}
-                        {{--}--}}
-                        {{--},--}}
-                        {{--closeOnClickOutside: false,--}}
-                        {{--closeOnEsc: false,--}}
-                        {{--dangerMode: true--}}
-                        {{--}).then(function (confirm) {--}}
-                        {{--if (confirm) {--}}
 
-                        {{--table.rows().nodes().each(function(index) {--}}
-                        {{--var row = table.row(index);--}}
-                        {{--if ($(row.node()).hasClass('selected')) {--}}
-                        {{--var id = parseInt(row.id());--}}
-                        {{--var remarks = $(row.node()).find('td.remarks input').val();--}}
-                        {{--shipment_remarks[id] = remarks;--}}
-                        {{--}--}}
-                        {{--});--}}
-
-                        {{--$.ajax({--}}
-                        {{--url: '{!! route('admin.delivery.receive.delivered') !!}',--}}
-                        {{--method: 'POST',--}}
-                        {{--data: {--}}
-                        {{--'shipment_ids': selected_rows,--}}
-                        {{--'delivery_note_id': note_id,--}}
-                        {{--'_token': '{{ csrf_token() }}',--}}
-                        {{--'remark': shipment_remarks--}}
-                        {{--}--}}
-                        {{--}).done(function (data) {--}}
-                        {{--if(data.status === 0){--}}
-
-                        {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-
-                        {{--}else{--}}
-                        {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-
-                        {{--}--}}
-                        {{--location.reload();--}}
-
-                        {{--});--}}
-                        {{--}--}}
-                        {{--});--}}
-
-
-                        {{--}else{--}}
-                        {{--var error = "Something went wrong please refresh page and try again!";--}}
-                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-
-                        {{--}--}}
-                        {{--}--}}
-
-                        {{--}, --}}
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -755,11 +721,47 @@
                 var reason_status = reasonSelection.val();
 
                 shipment_reason[rowid] = reason_status;
-                if(reason_status == 3){
+				if(reason_status == 3){
                     $('#IncompleteAddressModal').modal('show');
                     $('#iad_shipment_id').val(rowid);
+                }                if(reason_status == 16){
+                    $('#DateModal').modal('show');
+                    $('#date_shipment_id').val(rowid);
+                    $('#receiving_date').pickadate({
+                        firstDay: 1,
+                        clear: '',
+                        disable: [7],
+                        min: new Date('{{$tomorrow}}'),
+                        max: new Date('{{$next3days}}'),
+                        format:'dd mmmm, yyyy',
+                        selectYears: true,
+                        selectMonths: true,
+                        formatSubmit: 'yyyy-mm-dd 23:59:59',
+                        hiddenSuffix: '_formatted',
+                        onOpen: function() {
+                            $('#receiving_date_root').css('top','40px');
+                        },
+                    });
                 }
             });
+
+            $('#DateUpdate').on('click', function () {
+                var receiving_date = $('input[name="receiving_date_formatted"]').val();
+                if(receiving_date === '' || receiving_date === null){
+                    var error = '<p class="danger">Please select a date</p>';
+                    $('#receiving_date_div').append(error);
+                }else{
+                    $('#receiving_date_div p.danger').remove();
+                    var shipment_id = $('#date_shipment_id').val();
+                    var remarks_input = $('tr#'+shipment_id).find('td.remarks input');
+                    remarks = remarks_input.val();
+                    remarks = remarks+ ' ' + receiving_date;
+                    remarks_input.val(remarks);
+                    $('#DateModal').modal('hide');
+                    $('#receiving_date').pickadate('picker').set('clear');
+                }
+            });
+
             $('body').on('click','.clear',function () {
                 var status = $(this).parents().closest('tr').find('.statusDrop');
                 var reason = $(this).parents().closest('tr').find('.reasonDrop');

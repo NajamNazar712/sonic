@@ -1711,12 +1711,12 @@ class AdminReportsController extends Controller
                     $pickup_request_shippers_ids = array_unique($pickup_request_shippers_ids);
 
                     if(session('department_id') != 7){
-                        $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
+                        $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
                     }else{
                         if(session('role_id') != 4){
-                            $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->whereIn('id', session('tagged_shippers'))->get();
+                            $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->whereIn('id', session('tagged_shippers'))->get();
                         }else{
-                            $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
+                            $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
                         }
                     }
 
@@ -1800,7 +1800,7 @@ class AdminReportsController extends Controller
 
                     $pickup_request_shippers_ids = array_unique($pickup_request_shippers_ids);
 
-                    $shippers[$hub->name] = DB::connection('reports')->table('users')->select('id', 'name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status', [3, 4])->get();
+                    $shippers[$hub->id] = DB::connection('reports')->table('users')->select('id', 'name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status', [3, 4])->get();
                 }
 
             }
@@ -1825,16 +1825,25 @@ class AdminReportsController extends Controller
 
 
         if(count($shippers) > 0) {
+            if($search_city != null){
+                $origin_name =  DB::connection('reports')->table('cities')->where('id', $search_city_hub)->select('name')->first();
+                $origin_name = $origin_name->name;
+
+            }
             foreach ($shippers as $origin => $shipper_row) {
                     foreach ($shipper_row as $shipper) {
+
                         $shipper_booked = 0;
                         $shipper_received = 0;
                         $shipper_rev_wo_gst = 0;
                         $shipper_cod = 0;
                         $shipper_actual_weight = 0;
                         $shipper_chargeable_weight = 0;
+                        if($search_city == null){
+                            $origin_name =  DB::connection('reports')->table('cities')->where('id', $search_city_hub)->select('name')->first();
+                            $origin_name = $origin_name->name;
+                        }
 
-                        $origin_name = City::find($origin)->name;
                         $shipper_sales_person_name = '';
                         $shipper_sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0);
                         if ($shipper_sales_person->exists()) {
