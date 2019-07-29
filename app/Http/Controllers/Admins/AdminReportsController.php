@@ -1825,7 +1825,11 @@ class AdminReportsController extends Controller
 
 
         if(count($shippers) > 0) {
-            return $shippers;
+            if($search_city != null){
+                $origin_name =  DB::connection('reports')->table('cities')->where('id', $search_city_hub)->select('name')->first();
+                $origin_name = $origin_name->name;
+
+            }
             foreach ($shippers as $origin => $shipper_row) {
                     foreach ($shipper_row as $shipper) {
 
@@ -1835,8 +1839,10 @@ class AdminReportsController extends Controller
                         $shipper_cod = 0;
                         $shipper_actual_weight = 0;
                         $shipper_chargeable_weight = 0;
-
-                        $origin_name = City::find($origin)->name;
+                        if($search_city == null){
+                            $origin_name =  DB::connection('reports')->table('cities')->where('id', $search_city_hub)->select('name')->first();
+                            $origin_name = $origin_name->name;
+                        }
 
                         $shipper_sales_person_name = '';
                         $shipper_sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0);
