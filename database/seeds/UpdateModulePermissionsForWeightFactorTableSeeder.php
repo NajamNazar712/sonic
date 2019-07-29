@@ -12,7 +12,7 @@ class UpdateModulePermissionsForWeightFactorTableSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 229, 'name' => 'Weight Charges Factor - View ', 'module_id' => 10),
+            array('id' => 229, 'name' => 'Weight Charges Factor - View ', 'module_id' => 14),
         ));
 
     }
