@@ -1711,12 +1711,12 @@ class AdminReportsController extends Controller
                     $pickup_request_shippers_ids = array_unique($pickup_request_shippers_ids);
 
                     if(session('department_id') != 7){
-                        $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
+                        $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
                     }else{
                         if(session('role_id') != 4){
-                            $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->whereIn('id', session('tagged_shippers'))->get();
+                            $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->whereIn('id', session('tagged_shippers'))->get();
                         }else{
-                            $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
+                            $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
                         }
                     }
 
@@ -1800,7 +1800,7 @@ class AdminReportsController extends Controller
 
                     $pickup_request_shippers_ids = array_unique($pickup_request_shippers_ids);
 
-                    $shippers[$hub->name] = DB::connection('reports')->table('users')->select('id', 'name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status', [3, 4])->get();
+                    $shippers[$hub->id] = DB::connection('reports')->table('users')->select('id', 'name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status', [3, 4])->get();
                 }
 
             }
