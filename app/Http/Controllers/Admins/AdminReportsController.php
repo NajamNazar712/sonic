@@ -1825,6 +1825,7 @@ class AdminReportsController extends Controller
 
 
         if(count($shippers) > 0) {
+            return $shippers;
             foreach ($shippers as $origin => $shipper_row) {
                     foreach ($shipper_row as $shipper) {
 
@@ -1836,7 +1837,7 @@ class AdminReportsController extends Controller
                         $shipper_chargeable_weight = 0;
 
                         $origin_name = City::find($origin)->name;
-                        return $origin;
+
                         $shipper_sales_person_name = '';
                         $shipper_sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0);
                         if ($shipper_sales_person->exists()) {
