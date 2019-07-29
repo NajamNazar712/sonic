@@ -256,12 +256,6 @@
                                                 },
                                                 icon: 'warning',
                                                 buttons: {
-                                                    cancel: {
-                                                        text: 'Cancel',
-                                                        value: null,
-                                                        visible: true,
-                                                        closeModal: true,
-                                                    },
                                                     confirm: {
                                                         text: 'Update',
                                                         value: true,
@@ -655,12 +649,6 @@
                                             },
                                             icon: 'warning',
                                             buttons: {
-                                                cancel: {
-                                                    text: 'Cancel',
-                                                    value: null,
-                                                    visible: true,
-                                                    closeModal: true,
-                                                },
                                                 confirm: {
                                                     text: 'Update',
                                                     value: true,
@@ -738,12 +726,6 @@
                                         },
                                         icon: 'warning',
                                         buttons: {
-                                            cancel: {
-                                                text: 'Cancel',
-                                                value: null,
-                                                visible: true,
-                                                closeModal: true,
-                                            },
                                             confirm: {
                                                 text: 'Update',
                                                 value: true,

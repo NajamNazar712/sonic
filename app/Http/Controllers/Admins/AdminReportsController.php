@@ -165,7 +165,7 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments','shipments.id', '=', 'rns.shipment_id')
             ->join('admins as cr','cr.id','=','return_notes.admin_id')
             ->leftjoin('admins as up','up.id','=','return_notes.updated_by')
-            ->select(['return_notes.id','return_notes.id as return_note_id','return_notes.id as return_note_link','up.name as updated_by','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at as created_at','return_notes.image'])->groupBy('return_notes.id');
+            ->select(['return_notes.id','return_notes.id as return_note_id','return_notes.id as return_note_link','up.name as updated_by','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.updated_at','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at as created_at','return_notes.image'])->groupBy('return_notes.id');
         if (session('role_id') != 1) {
             $return_note = $return_note->whereIn('return_notes.hub_id', session('hubs'));
         }
@@ -186,7 +186,7 @@ class AdminReportsController extends Controller
             })
             ->editColumn('image', function ($return_note) {
                 $now = Carbon::now();
-                if ($return_note->image != null && ($now->diffInDays($return_note->created_at) < 30)) {
+                if ($return_note->image != null && ($now->diffInDays($return_note->updated_at) < 30)) {
                     $img = asset('uploads/return_notes/' . $return_note->image);
                     return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
 
@@ -1711,12 +1711,12 @@ class AdminReportsController extends Controller
                     $pickup_request_shippers_ids = array_unique($pickup_request_shippers_ids);
 
                     if(session('department_id') != 7){
-                        $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
+                        $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
                     }else{
                         if(session('role_id') != 4){
-                            $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->whereIn('id', session('tagged_shippers'))->get();
+                            $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->whereIn('id', session('tagged_shippers'))->get();
                         }else{
-                            $shippers = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
+                            $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
                         }
                     }
 
@@ -1800,7 +1800,7 @@ class AdminReportsController extends Controller
 
                     $pickup_request_shippers_ids = array_unique($pickup_request_shippers_ids);
 
-                    $shippers[$hub->name] = DB::connection('reports')->table('users')->select('id', 'name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status', [3, 4])->get();
+                    $shippers[$hub->id] = DB::connection('reports')->table('users')->select('id', 'name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status', [3, 4])->get();
                 }
 
             }
@@ -1825,16 +1825,25 @@ class AdminReportsController extends Controller
 
 
         if(count($shippers) > 0) {
+            if($search_city != null){
+                $origin_name =  DB::connection('reports')->table('cities')->where('id', $search_city_hub)->select('name')->first();
+                $origin_name = $origin_name->name;
+
+            }
             foreach ($shippers as $origin => $shipper_row) {
                     foreach ($shipper_row as $shipper) {
+
                         $shipper_booked = 0;
                         $shipper_received = 0;
                         $shipper_rev_wo_gst = 0;
                         $shipper_cod = 0;
                         $shipper_actual_weight = 0;
                         $shipper_chargeable_weight = 0;
+                        if($search_city == null){
+                            $origin_name =  DB::connection('reports')->table('cities')->where('id', $search_city_hub)->select('name')->first();
+                            $origin_name = $origin_name->name;
+                        }
 
-                        $origin_name = City::find($origin)->name;
                         $shipper_sales_person_name = '';
                         $shipper_sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0);
                         if ($shipper_sales_person->exists()) {

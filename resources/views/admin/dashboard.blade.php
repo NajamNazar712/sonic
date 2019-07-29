@@ -168,7 +168,7 @@
           </div>
 
           @if (session('role_id') == 1 || session('department_id') == 6)
-            <div class="row mt-2">
+            <div class="row mt-2o">
               <div class="card col-12">
                   <div class="card-content collapse show">
                       <div class="card-body">

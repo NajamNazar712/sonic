@@ -617,10 +617,13 @@ class APIController extends Controller
       $user_id = $request->user_id;
 
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })],
-        'type' => ['nullable', 'boolean']
+        'tracking_numbers' => ['required_without:tracking_number', 'array', 'min:1'],
+        'tracking_numbers.*' => ['required_without:tracking_number', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })]
       ];
 
       $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -632,23 +635,40 @@ class APIController extends Controller
       }
       else {
         $tracking_number = $request->tracking_number;
+        $tracking_numbers = $request->tracking_numbers;
 
-        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+        if ($tracking_number) {
+          $shipments = Shipment::where('tracking_number', $tracking_number)->get();
+        }
+        else {
+          $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->get();
+        }
 
-        if ($shipment->shipper_status_id == 1) {
-          $air_waybill = ShipperShipmentBookController::air_waybill(4, $user_id, [$shipment->id]);
+        $air_waybill = '';
+        $valid = FALSE;
+
+        foreach ($shipments as $shipment) {
+          if ($shipment->shipper_status_id == 1) {
+            $air_waybill .= ShipperShipmentBookController::air_waybill(4, $user_id, [$shipment->id]);
+
+            $valid = TRUE;
+          }
+        }
+
+        if ($valid) {
+          $filename = 'air_waybill.jpg';
 
           if (!isset($request->type) || $request->type == 0) {
             $image = SnappyImage::loadHTML($air_waybill);
 
-            $filename = 'air_waybill_' . $tracking_number . '.jpg';
+            $filename = 'air_waybill' . '.jpg';
 
             return $image->download($filename);
           }
           else {
             $pdf = SnappyPDF::loadHTML($air_waybill);
 
-            $filename = 'air_waybill_' . $tracking_number . '.pdf';
+            $filename = 'air_waybill' . '.pdf';
 
             return $pdf->download($filename);
           }
