@@ -22,7 +22,7 @@ class AdminOperationForecastController extends Controller
 {
     static public function update_operation_forecast()
     {
-        $to = Carbon::now();
+        $to = Carbon::now()->endOfDay();
         $from = Carbon::now()->startOfDay();
         $hubs = City::get();
         foreach ($hubs as $hub) {
