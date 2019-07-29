@@ -1101,7 +1101,6 @@ class AdminOperationForecastController extends Controller
                                 $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['regular']->save();
                             }
                         }
-                        var_dump($operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['regular']);exit();
                     }
                     if (array_key_exists('replacement', $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id])) {
                         $operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['replacement'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$pickup_request->user_id][$user_shipping_info->city_id]['replacement'])->where('hub_id', $user_shipping_info->city_id)->where('booking_type_id', 2)->whereBetween('updated_at', [$from, $to]);
