@@ -1827,6 +1827,7 @@ class AdminReportsController extends Controller
         if(count($shippers) > 0) {
             foreach ($shippers as $origin => $shipper_row) {
                     foreach ($shipper_row as $shipper) {
+
                         $shipper_booked = 0;
                         $shipper_received = 0;
                         $shipper_rev_wo_gst = 0;
@@ -1835,6 +1836,7 @@ class AdminReportsController extends Controller
                         $shipper_chargeable_weight = 0;
 
                         $origin_name = City::find($origin)->name;
+                        return $origin;
                         $shipper_sales_person_name = '';
                         $shipper_sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0);
                         if ($shipper_sales_person->exists()) {
