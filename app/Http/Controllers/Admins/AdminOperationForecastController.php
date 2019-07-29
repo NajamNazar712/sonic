@@ -1059,22 +1059,22 @@ class AdminOperationForecastController extends Controller
             ->get();
 
         foreach ($pickup_requests as $pickup_request) {
-            $user_shipping_info = UserShippingInfo::find($pickup_request->pickup_address_id);
+            $user = User::find($pickup_request->user_id);
             if ($pickup_request->booking_type_id == 1) {
-                $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['regular'] = $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['regular'] + 1;
-                $pickup_request_id[$pickup_request->user_id][$user_shipping_info->city_id]['regular'] = $pickup_request->pickup_request_id;
+                $outgoing_shipment_count[$pickup_request->user_id][$user->city_id]['regular'] = $outgoing_shipment_count[$pickup_request->user_id][$user->city_id]['regular'] + 1;
+                $pickup_request_id[$pickup_request->user_id][$user->city_id]['regular'] = $pickup_request->pickup_request_id;
             }
             if ($pickup_request->booking_type_id == 2) {
-                $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['replacement'] = $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['replacement'] + 1;
-                $pickup_request_id[$pickup_request->user_id][$user_shipping_info->city_id]['replacement'] = $pickup_request->pickup_request_id;
+                $outgoing_shipment_count[$pickup_request->user_id][$user->city_id]['replacement'] = $outgoing_shipment_count[$pickup_request->user_id][$user->city_id]['replacement'] + 1;
+                $pickup_request_id[$pickup_request->user_id][$user->city_id]['replacement'] = $pickup_request->pickup_request_id;
             }
             if ($pickup_request->booking_type_id == 3) {
-                $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['try_and_buy'] = $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['try_and_buy'] + 1;
-                $pickup_request_id[$pickup_request->user_id][$user_shipping_info->city_id]['try_and_buy'] = $pickup_request->pickup_request_id;
+                $outgoing_shipment_count[$pickup_request->user_id][$user->city_id]['try_and_buy'] = $outgoing_shipment_count[$pickup_request->user_id][$user->city_id]['try_and_buy'] + 1;
+                $pickup_request_id[$pickup_request->user_id][$user->city_id]['try_and_buy'] = $pickup_request->pickup_request_id;
             }
             if ($pickup_request->booking_type_id == 5) {
-                $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup'] = $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup'] + 1;
-                $pickup_request_id[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup'] = $pickup_request->pickup_request_id;
+                $outgoing_shipment_count[$pickup_request->user_id][$user->city_id]['reverse_pickup'] = $outgoing_shipment_count[$pickup_request->user_id][$user->city_id]['reverse_pickup'] + 1;
+                $pickup_request_id[$pickup_request->user_id][$user->city_id]['reverse_pickup'] = $pickup_request->pickup_request_id;
             }
         }
 
