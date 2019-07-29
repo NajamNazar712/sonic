@@ -1087,7 +1087,6 @@ class AdminOperationForecastController extends Controller
                 if (array_key_exists($user_shipping_info->city_id, $outgoing_shipment_count[$pickup_request->user_id])) {
                     if (array_key_exists('regular', $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id])) {
                         $operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['regular'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$pickup_request->user_id][$user_shipping_info->city_id]['regular'])->where('hub_id', $user_shipping_info->city_id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
-                        dd($operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['regular']);
                             $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['regular'] = $operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['regular']->first();
                         if ($operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['regular']->exists()) {
                             $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['regular']->shipments_count = $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['regular'];
