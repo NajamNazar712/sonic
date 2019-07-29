@@ -230,6 +230,7 @@
                     {
                         extend: 'excel',
                         title: 'Receive Return Deliveries',
+                        className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'

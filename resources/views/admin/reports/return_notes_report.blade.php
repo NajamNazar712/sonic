@@ -329,6 +329,7 @@
                     {
                     extend: 'excelHtml5',
                     title: 'Completed Return Notes Report',
+                    className:'btn-primary',
                     text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -355,7 +356,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[4, 'asc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'return_note_link', name: 'return_notes.id', class: 'align-middle return_note_link text-center'},

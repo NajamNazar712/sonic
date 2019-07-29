@@ -805,10 +805,11 @@
             });
             var return_note_status = {{$return_note_status}};
             var return_note_image_status = '{{$return_note_image_status}}';
+            var return_image = '{{$return_image}}';
             var return_note_id = {{$return_note_id}};
-            console.log(return_note_image_status);
+
             function upload_return_note_image() {
-                if(return_note_status == 1 && return_note_image_status == ''){
+                if(return_note_image_status == '' && return_image == false){
                     $('#image_return_note_id').val(return_note_id);
                     $('#uploadReturnNote').modal('show');
                 }

@@ -18,7 +18,7 @@
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
 
                     <div class="row justify-content-center">
-                        <div class="col-3">
+                        <div class="col-12 mb-2">
                             <h3>Delivery Ratio {{$percentage}}%</h3>
                         </div>
                         <div class="col-4">
@@ -27,6 +27,12 @@
                                     @foreach($shipment_statuses as $status)
                                         <option value="{{$status->id}}">{{$status->name}}</option>
                                     @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        <div class="col-4">
+                            <fieldset class="form-group">
+                                <select name="select_all_reason" id="select_all_reason" class="form-control select2">
                                 </select>
                             </fieldset>
                         </div>
@@ -225,8 +231,7 @@
         </div>
     </div>
     <!--Non Service Modal -->
-
-    <div class="modal fade text-left" id="DateModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DateModal"
+	<div class="modal fade text-left" id="DateModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DateModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
@@ -261,7 +266,41 @@
             </div>
         </div>
     </div>
+    <!--Incomplete Address Modal -->
+    <div class="modal fade text-left" id="IncompleteAddressModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="IncompleteAddressModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Incomplete Address Details</h4>
 
+                </div>
+                <div class="modal-body  text-center">
+
+                        <input type="hidden" name="iad_shipment_id" id="iad_shipment_id">
+                        <input type="hidden" name="iad_status" id="iad_status">
+                        <div class="row justify-content-center mb-2">
+                            <div class="col-9 text-left">
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio1" status="Need House No.">
+                                        <label class="custom-control-label" for="customRadio1">Need House No.</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio2" status="Need Plot No.">
+                                        <label class="custom-control-label" for="customRadio2">Need Plot No.</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio3" status="Need Area Name">
+                                        <label class="custom-control-label" for="customRadio3">Need Area Name</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="custom-control custom-radio">
 @endsection
 
 @section('css')
@@ -353,6 +392,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#select_all_reason').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Selected reason Update',
+                width:'100%'
+            });
+
             $('.decimal').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -454,8 +498,8 @@
                     {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data:'consignee_name',name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data:'collection_amount',name: 'shipments.amount', class: 'align-middle amount'},
-                    {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
-                    {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
+                    {data:'status',name: 'status', class: 'align-middle status form-group statusOnChange',orderable: false, searchable: false},
+                    {data:'reason',name: 'reason', class: 'align-middle reason form-group reasonSelect',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                     {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
@@ -579,6 +623,8 @@
                         $.each(data.reasons,function (key,value) {
                             var newOption = new Option(value.name, value.id, false, false);
                             reason.append(newOption).trigger('change');
+                            reason.attr('data-rule-required', 'true');
+                            reason.attr('data-msg-required', 'Reason is required');
                         });
                         reason.val('').trigger('change');
                     }else{
@@ -587,13 +633,41 @@
                     }
                 });
             });
+            $('.iad_radio').on('click', function () {
+                var id = $(this).attr('id');
+                var status = $(this).attr('status');
+                if(id == 'customRadio10'){
+                    $('#other_description').parent('fieldset').removeClass('d-none');
+                    $('#AICUpdate').attr('disabled', true);
 
+                }else{
+                    $('#other_description').parent('fieldset').addClass('d-none');
+                    $('#AICUpdate').attr('disabled', false);
+                    $('#iad_status').val(status);
+                }
+
+            });
+            $('#other_description').on('input', function () {
+               var description = $.trim($(this).val());
+               if(description != ''){
+                   $('#AICUpdate').attr('disabled', false);
+                   $('#iad_status').val(description);
+               }
+               if(description == ''){
+                   $('#AICUpdate').attr('disabled', true);
+                   $('#iad_status').val('');
+               }
+            });
             $('body').on('select2:select','.reasonSelect .reasonDrop',function (e) {
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var reasonSelection = $(this).find(':selected');
                 var reason_status = reasonSelection.val();
+
                 shipment_reason[rowid] = reason_status;
-                if(reason_status == 16){
+				if(reason_status == 3){
+                    $('#IncompleteAddressModal').modal('show');
+                    $('#iad_shipment_id').val(rowid);
+                }                if(reason_status == 16){
                     $('#DateModal').modal('show');
                     $('#date_shipment_id').val(rowid);
                     $('#receiving_date').pickadate({
@@ -643,49 +717,154 @@
                     e.preventDefault();
                 }
             });
-            var shipments = [];
-            $('#status_update_form').bind('submit', function(event) {
-                event.preventDefault();
-                var this_form = this;
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to change the status of shipments!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
 
-                        var shipment = $('#shipment_ids');
-                        event.preventDefault();
-                        var id = '';
-                        var count = table.data().count();
-                        for(var i = 0;i<count;i++){
-                            id = table.row( i ).id();
-                            shipments.push(id);
-                        }
-                        shipment.val(shipments);
-                        blockPagePermanently();
-                        this_form.submit();
+
+            $('body').on('select2:select','#select_all_status',function (e) {
+
+                var statusSelection = $(this).find(':selected');
+                var status = statusSelection.val();
+                var all_reason = $('#select_all_reason');
+                $.ajax({
+                    url:'{!! route('admin.delivery.receive.reason_all') !!}',
+                    type:'POST',
+                    dataType:'json',
+                    data: {
+                        'status':status,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 0){
+                        all_reason.empty().trigger('change');
+                        $.each(data.reasons,function (key,value) {
+                            var newOption = new Option(value.name, value.id, false, false);
+                            all_reason.append(newOption).trigger('change');
+                            if(all_reason != 14){
+                                all_reason.attr('data-rule-required', 'true');
+                                all_reason.attr('data-msg-required', 'Reason is required');
+                            }
+                        });
+                        all_reason.val('').trigger('change');
+                    }else{
+                        all_reason.empty().trigger('change');
+                        toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });
-
             });
+
+            $('#AICUpdate').on('click', function () {
+                var status = $('#iad_status').val();
+                var id = $('#iad_shipment_id').val();
+                var remark_input = $('#datatable tr#'+id).find('td.remarks input');
+                var remark = remark_input.val();
+                remark = remark+ ' ' + status;
+                remark_input.val(remark);
+                $('#IncompleteAddressModal').modal('hide');
+            });
+
+            $('#IncompleteAddressModal').on('hide.bs.modal', function () {
+                $('#iad_status').val('');
+                $('#iad_shipment_id').val('');
+                $('.iad_radio').prop('checked', false);
+                $('#AICUpdate').attr('disabled', true);
+                $('#other_description').parent('fieldset').addClass('d-none');
+                $('#other_description').val('');
+            });
+
+            var shipments = [];
+            // $('#status_update_form').bind('submit', function(event) {
+            //     event.preventDefault();
+            //     var this_form = this;
+            //     swal({
+            //         title: 'Are You Sure?',
+            //         text: 'Select Yes to change the status of shipments!',
+            //         icon: 'warning',
+            //         buttons: {
+            //             cancel: {
+            //                 text: 'No',
+            //                 value: null,
+            //                 visible: true,
+            //                 closeModal: true,
+            //             },
+            //             confirm: {
+            //                 text: 'Yes',
+            //                 value: true,
+            //                 visible: true,
+            //                 closeModal: true
+            //             }
+            //         },
+            //         closeOnClickOutside: false,
+            //         closeOnEsc: false,
+            //         dangerMode: true
+            //     }).then(function (confirm) {
+            //         if (confirm) {
+            //
+            //             var shipment = $('#shipment_ids');
+            //             event.preventDefault();
+            //             var id = '';
+            //             var count = table.data().count();
+            //             for(var i = 0;i<count;i++){
+            //                 id = table.row( i ).id();
+            //                 shipments.push(id);
+            //             }
+            //             shipment.val(shipments);
+            //             blockPagePermanently();
+            //             this_form.submit();
+            //         }
+            //     });
+            //
+            // });
+                $('#status_update_form').validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function (form) {
+                    var this_form = form;
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to change the status of shipments!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+
+                            var shipment = $('#shipment_ids');
+                            event.preventDefault();
+                            var id = '';
+                            var count = table.data().count();
+                            for(var i = 0;i<count;i++){
+                                id = table.row( i ).id();
+                                shipments.push(id);
+                            }
+                            shipment.val(shipments);
+                            blockPagePermanently();
+                            this_form.submit();
+                        }
+                    });
+
+
+                }
+            });
+
+
+
+
             //on page load ajax
             var trybuy_ids = [];
             var shipment_id_list = [];
@@ -1065,8 +1244,13 @@
             $('#submit_selected_status').on('click', function () {
                 var select_all_status = $('#select_all_status').val();
                 var delivery_note = $('#delivery_note').val();
+                var select_all_reason = $('#select_all_reason').val();
+                console.log(select_all_reason)
+                console.log(select_all_status)
                 if(selected_rows.length > 0){
-                    if(select_all_status != ''){
+                    if(select_all_status != null) {
+                        if ((select_all_reason != null) || (select_all_reason == null && select_all_status == 14)) {
+
                         swal({
                             title: 'Are You Sure?',
                             text: 'Select Yes to change the status of shipments!',
@@ -1095,20 +1279,20 @@
                                 var shipment_received_refused_obj = {};
                                 // blockPagePermanently();
                                 submit_all_status_flag = true;
-                                if(select_all_status == 14){
-                                    table.rows().nodes().each(function(index) {
+                                if (select_all_status == 14) {
+                                    table.rows().nodes().each(function (index) {
                                         var row = table.row(index);
                                         if ($(row.node()).hasClass('selected')) {
                                             var id = parseInt(row.id());
                                             var amount = parseInt($(row.node()).attr('amount'));
                                             var remarks = $(row.node()).find('td.remarks input').val();
                                             shipment_remarks_obj[id] = remarks;
-                                            if(amount == 0){
-                                                var receiver_name =  $(row.node()).find('td.received_or_refused_by input').val();
-                                                if($.trim(receiver_name) == ''){
-                                                    not_updated_shipments.push($(row.node()).find('td.tracking_number').text()) ;
+                                            if (amount == 0) {
+                                                var receiver_name = $(row.node()).find('td.received_or_refused_by input').val();
+                                                if ($.trim(receiver_name) == '') {
+                                                    not_updated_shipments.push($(row.node()).find('td.tracking_number').text());
                                                     submit_all_status_flag = false;
-                                                }else{
+                                                } else {
                                                     shipment_received_refused_obj[id] = receiver_name;
                                                 }
                                             }
@@ -1116,10 +1300,10 @@
 
                                         }
                                     });
-                                    if(submit_all_status_flag == false){
+                                    if (submit_all_status_flag == false) {
 
                                         var html = '';
-                                        $.each(not_updated_shipments, function(index, tracking_number) {
+                                        $.each(not_updated_shipments, function (index, tracking_number) {
                                             html += tracking_number + '<br/>';
                                         });
 
@@ -1145,8 +1329,8 @@
                                         });
                                     }
 
-                                }else{
-                                    table.rows().nodes().each(function(index) {
+                                } else {
+                                    table.rows().nodes().each(function (index) {
                                         var row = table.row(index);
                                         if ($(row.node()).hasClass('selected')) {
                                             var id = parseInt(row.id());
@@ -1157,7 +1341,7 @@
                                     });
                                 }
 
-                                if(submit_all_status_flag){
+                                if (submit_all_status_flag) {
                                     swal({
                                         title: 'Please Wait!',
                                         text: 'Shipment(s) are being updated!',
@@ -1172,19 +1356,26 @@
                                         data: {
                                             'shipment_ids': selected_rows,
                                             'selected_status': select_all_status,
+                                            'selected_reason': select_all_reason,
                                             'delivery_note_id': delivery_note,
                                             'remarks': shipment_remarks_obj,
                                             'received_or_refused_by': shipment_received_refused_obj,
                                             '_token': '{{ csrf_token() }}',
                                         }
                                     }).done(function (data) {
-                                        if(data.status === 1){
+                                        if (data.status === 1) {
                                             UnblockPagePermanently();
-                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
 
-                                        }else{
+                                        } else {
                                             UnblockPagePermanently();
-                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
 
                                         }
                                         location.reload();
@@ -1193,6 +1384,10 @@
                                 }
                             }
                         });
+                    }else{
+                            var error = "Please Select A Reason!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
                     }
                     else{
                         var error = "Please Select A Status!";

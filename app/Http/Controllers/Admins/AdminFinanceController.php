@@ -1037,7 +1037,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_shipments_adjust_in_payment(Request $request) {
-        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->whereIn('status', [4, 5, 6]);
+        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->whereIn('status', [4, 5, 6])->where('delivery_note_id', $request->dncc);
 
         if ($delivery_note_shipment->exists()) {
             $delivery_note_shipment = $delivery_note_shipment->first();
@@ -1510,82 +1510,98 @@ class AdminFinanceController extends Controller
 
     static public function return_confirmed_revert($shipment_id) {
         $shipment = Shipment::find($shipment_id);
+        if($shipment->booking_type_id == 4){
+            $receivable = ROUND(($shipment->fuel_surcharge + $shipment->weight_charges + $shipment->gst), 0, PHP_ROUND_HALF_DOWN);
 
-        $shipment->return_charges = NULL;
-        $shipment->payment_status_id = 4;
+            if ($shipment->charges_mode_id == 1) {
+                $shipment->amount = 0;
 
-        $shipment->save();
-
-        $account_type_id = $shipment->user->account_type_id;
-
-        if ($account_type_id == 1) {
-            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
-
-            if ($pending_payment_shipment->exists()) {
-                $pending_payment_shipment = $pending_payment_shipment->latest()->first();
-
-                self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0);
+                $shipment->received_amount = $receivable;
             }
             else {
-                $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+                $shipment->amount = $receivable;
 
-                if ($done_payment_shipment->exists()) {
-                    $done_payment_shipment = $done_payment_shipment->latest()->first();
-
-                    self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1);
-                }
+                $shipment->received_amount = NULL;
             }
+
+            $shipment->return_charges = NULL;
+            $shipment->payment_status_id = 4;
+
+            $shipment->save();
         }
         else {
-            $payment_shipment_id = NULL;
-            $payment_type = NULL;
-            $invoice_shipment_id = NULL;
-            $invoice_type = NULL;
+            $shipment->return_charges = NULL;
+            $shipment->payment_status_id = 4;
 
-            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
+            $shipment->save();
 
-            if ($pending_payment_shipment->exists()) {
-                $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+            $account_type_id = $shipment->user->account_type_id;
 
-                $payment_shipment_id = $pending_payment_shipment->id;
-                $payment_type = 0;
-            }
-            else {
-                $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+            if ($account_type_id == 1) {
+                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
 
-                if ($done_payment_shipment->exists()) {
-                    $done_payment_shipment = $done_payment_shipment->latest()->first();
+                if ($pending_payment_shipment->exists()) {
+                    $pending_payment_shipment = $pending_payment_shipment->latest()->first();
 
-                    $payment_shipment_id = $done_payment_shipment->id;
-                    $payment_type = 1;
+                    self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0);
+                } else {
+                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+
+                    if ($done_payment_shipment->exists()) {
+                        $done_payment_shipment = $done_payment_shipment->latest()->first();
+
+                        self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1);
+                    }
+                }
+            } else {
+                $payment_shipment_id = NULL;
+                $payment_type = NULL;
+                $invoice_shipment_id = NULL;
+                $invoice_type = NULL;
+
+                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
+
+                if ($pending_payment_shipment->exists()) {
+                    $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+
+                    $payment_shipment_id = $pending_payment_shipment->id;
+                    $payment_type = 0;
+                } else {
+                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+
+                    if ($done_payment_shipment->exists()) {
+                        $done_payment_shipment = $done_payment_shipment->latest()->first();
+
+                        $payment_shipment_id = $done_payment_shipment->id;
+                        $payment_type = 1;
+                    }
+                }
+
+                $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id);
+
+                if ($pending_invoice_shipment->exists()) {
+                    $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
+
+                    $invoice_shipment_id = $pending_invoice_shipment->id;
+                    $invoice_type = 0;
+                } else {
+                    $done_invoice_shipment = InvoiceShipment::where('shipment_id', $shipment_id);
+
+                    if ($done_invoice_shipment->exists()) {
+                        $done_invoice_shipment = $done_invoice_shipment->latest()->first();
+
+                        $invoice_shipment_id = $done_invoice_shipment->id;
+                        $invoice_type = 1;
+                    }
+                }
+
+                if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
+                    self::adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type);
                 }
             }
 
-            $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id);
-
-            if ($pending_invoice_shipment->exists()) {
-                $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
-
-                $invoice_shipment_id = $pending_invoice_shipment->id;
-                $invoice_type = 0;
-            }
-            else {
-                $done_invoice_shipment = InvoiceShipment::where('shipment_id', $shipment_id);
-
-                if ($done_invoice_shipment->exists()) {
-                    $done_invoice_shipment = $done_invoice_shipment->latest()->first();
-
-                    $invoice_shipment_id = $done_invoice_shipment->id;
-                    $invoice_type = 1;
-                }
-            }
-
-            if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
-                self::adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type);
-            }
+            ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id());
         }
-
-        ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id());
     }
 
     static public function add_payment($shipment_id, $type) {
@@ -3582,7 +3598,7 @@ class AdminFinanceController extends Controller
         ';
 
         $html .= '
-            <style>@page{size:A4 portrait}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.9rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
+            <style>@page{size:A4 portrait; margin-top: 10rem; margin-bottom: 8rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.9rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
         ';
 
         if (!$email) {
@@ -3595,20 +3611,6 @@ class AdminFinanceController extends Controller
         $html .= '
                 <div>
                   <div class="p-1">
-                    <table class="table table-sm table-bordered border">
-                      <tbody>
-                        <tr>
-                          <td class="text-left align-middle">
-                            <img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mb-1">
-                            <div><strong>TRAX ONLINE PRIVATE LIMITED</strong></div>
-                            <div><strong>Address:</strong> Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi.</div>
-                            <div><strong>NTN:</strong> 7930679-5</div>
-                          </td>
-                          <td class="text-center align-middle color primary"><strong>INVOICE</strong></td>
-                        </tr>
-                      </tbody>
-                    </table>
-
                     <div class="row align-items-start justify-content-between summary">
                         <div class="col-6">
                             <table class="table table-sm table-bordered border">
@@ -3643,6 +3645,10 @@ class AdminFinanceController extends Controller
                         <div class="col-4">
                             <table class="table table-sm table-bordered border">
                               <tbody>
+                                <tr>
+                                    <td class="color primary"><strong>NTN</strong></td>
+                                    <td>7930679-5</td>
+                                </tr>
                                 <tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
                                     <td>' . Carbon::parse($invoice->from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->to_date)->format('Y-m-d') . '</td>
