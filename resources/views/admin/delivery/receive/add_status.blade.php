@@ -277,30 +277,87 @@
                 </div>
                 <div class="modal-body  text-center">
 
-                        <input type="hidden" name="iad_shipment_id" id="iad_shipment_id">
-                        <input type="hidden" name="iad_status" id="iad_status">
-                        <div class="row justify-content-center mb-2">
-                            <div class="col-9 text-left">
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio1" status="Need House No.">
-                                        <label class="custom-control-label" for="customRadio1">Need House No.</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio2" status="Need Plot No.">
-                                        <label class="custom-control-label" for="customRadio2">Need Plot No.</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio3" status="Need Area Name">
-                                        <label class="custom-control-label" for="customRadio3">Need Area Name</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <div class="custom-control custom-radio">
+                    <input type="hidden" name="iad_shipment_id" id="iad_shipment_id">
+                    <input type="hidden" name="iad_status" id="iad_status">
+                    <div class="row justify-content-center mb-2">
+                        <div class="col-9 text-left">
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio1" status="Need House No.">
+                                    <label class="custom-control-label" for="customRadio1">Need House No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio2" status="Need Plot No.">
+                                    <label class="custom-control-label" for="customRadio2">Need Plot No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio3" status="Need Area Name">
+                                    <label class="custom-control-label" for="customRadio3">Need Area Name</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio4" status="Need Street No.">
+                                    <label class="custom-control-label" for="customRadio4">Need Street No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio5" status="Need Street Name">
+                                    <label class="custom-control-label" for="customRadio5">Need Street Name</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio6" status="Need Sector No.">
+                                    <label class="custom-control-label" for="customRadio6">Need Sector No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio7" status="Need Floor No.">
+                                    <label class="custom-control-label" for="customRadio7">Need Floor No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio8" status="Need Office No.">
+                                    <label class="custom-control-label" for="customRadio8">Need Office No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio9" status="Need Building No.">
+                                    <label class="custom-control-label" for="customRadio9">Need Building No.</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input iad_radio" name="customRadio" id="customRadio10">
+                                    <label class="custom-control-label" for="customRadio10">Other</label>
+                                </div>
+                            </fieldset>
+                            <fieldset class="d-none">
+                                <textarea name="other_description" class="form-control" id="other_description" cols="30" rows="10"></textarea>
+                            </fieldset>
+                        </div>
+
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-3">
+                            <button id="AICUpdate" type="button" disabled class="btn btn-primary btn-block">Update</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Incomplete Address Modal -->
 @endsection
 
 @section('css')
