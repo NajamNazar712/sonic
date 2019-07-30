@@ -2811,26 +2811,28 @@ class AdminFinanceController extends Controller
         foreach ($request->ids as $done_payment_id) {
             $done_payment = DonePayment::find($done_payment_id);
 
-            $done_payment->status = 1;
+            if ($done_payment->status != 1) {
+                $done_payment->status = 1;
 
-            $done_payment->save();
+                $done_payment->save();
 
-            foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
-                $shipment = $done_payment_shipment->shipment;
+                foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                    $shipment = $done_payment_shipment->shipment;
 
-                if ($done_payment_shipment->type == 1) {
-                    $shipment->payment_status_id = 7;
+                    if ($done_payment_shipment->type == 1) {
+                        $shipment->payment_status_id = 7;
 
-                    $shipment->save();
+                        $shipment->save();
 
-                    ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id());
-                }
-                else {
-                    $shipment->payment_status_id = 3;
+                        ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id());
+                    }
+                    else {
+                        $shipment->payment_status_id = 3;
 
-                    $shipment->save();
+                        $shipment->save();
 
-                    ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id());
+                        ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id());
+                    }
                 }
             }
         }
@@ -2842,26 +2844,28 @@ class AdminFinanceController extends Controller
         foreach ($request->ids as $done_payment_id) {
             $done_payment = DonePayment::find($done_payment_id);
 
-            $done_payment->status = 2;
+            if ($done_payment->status != 2) {
+                $done_payment->status = 2;
 
-            $done_payment->save();
+                $done_payment->save();
 
-            foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
-                $shipment = $done_payment_shipment->shipment;
+                foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                    $shipment = $done_payment_shipment->shipment;
 
-                if ($done_payment_shipment->type == 1) {
-                    $shipment->payment_status_id = 6;
+                    if ($done_payment_shipment->type == 1) {
+                        $shipment->payment_status_id = 6;
 
-                    $shipment->save();
+                        $shipment->save();
 
-                    ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id());
-                }
-                else {
-                    $shipment->payment_status_id = 2;
+                        ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id());
+                    }
+                    else {
+                        $shipment->payment_status_id = 2;
 
-                    $shipment->save();
+                        $shipment->save();
 
-                    ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id());
+                        ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id());
+                    }
                 }
             }
         }
