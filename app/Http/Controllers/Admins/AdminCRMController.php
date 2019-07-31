@@ -311,15 +311,15 @@ class AdminCRMController extends Controller
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
             ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
-            ->leftJoin('admins as a', function ($join) {
+            ->leftjoin('admins as a', function ($join) {
                 $join->on('a.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(0));
             })
-            ->leftJoin('users as u', function ($join) {
+            ->leftjoin('users as u', function ($join) {
                 $join->on('u.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(1));
             })
-            ->leftJoin('substitute_users as su', function ($join) {
+            ->leftjoin('substitute_users as su', function ($join) {
                 $join->on('su.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(2));
             })
@@ -329,7 +329,7 @@ class AdminCRMController extends Controller
             ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
-            ->leftJoin('crm_request_agent_histories as res', function ($join) {
+            ->leftjoin('crm_request_agent_histories as res', function ($join) {
                 $join->on('res.crm_request_id', '=', 'crm_requests.id')
                     ->where('res.created_at','=',
                         DB::raw('(select max(created_at) from crm_request_agent_histories where crm_request_agent_histories.crm_request_id = crm_requests.id and crm_request_agent_histories.agent_id = crm_requests.agent_id)'));
@@ -341,7 +341,8 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper')
-            ->whereIn('crm_requests.status_id', [1, 5]);
+            ->whereIn('crm_requests.status_id', [1, 5])
+            ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $launched_request = $launched_request->where('crm_requests.agent_id', Auth::id());
@@ -534,15 +535,15 @@ class AdminCRMController extends Controller
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
-            ->leftJoin('admins as a', function ($join) {
+            ->leftjoin('admins as a', function ($join) {
                 $join->on('a.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(0));
             })
-            ->leftJoin('users as u', function ($join) {
+            ->leftjoin('users as u', function ($join) {
                 $join->on('u.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(1));
             })
-            ->leftJoin('substitute_users as su', function ($join) {
+            ->leftjoin('substitute_users as su', function ($join) {
                 $join->on('su.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(2));
             })
@@ -560,7 +561,7 @@ class AdminCRMController extends Controller
                 $join->on('spt.user_id', '=', 's.user_id')
                     ->where('spt.status', '=', 0);
             })
-            ->leftJoin('crm_request_status_histories as res', function ($join) {
+            ->leftjoin('crm_request_status_histories as res', function ($join) {
                 $join->on('res.crm_request_id', '=', 'crm_requests.id')
                     ->where('res.created_at','=',
                         DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 2)'));
@@ -572,7 +573,8 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'dh.name as destination_hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper')
-            ->where('crm_requests.status_id', 2);
+            ->where('crm_requests.status_id', 2)
+            ->groupBy('crm_requests.id');
         if (!in_array(session('role_id'), [1, 4, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $in_process_request = $in_process_request->where(function ($query) {
                 $query->where(function ($sub_query) {
@@ -802,15 +804,15 @@ class AdminCRMController extends Controller
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
-            ->leftJoin('admins as a', function ($join) {
+            ->leftjoin('admins as a', function ($join) {
                 $join->on('a.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(0));
             })
-            ->leftJoin('users as u', function ($join) {
+            ->leftjoin('users as u', function ($join) {
                 $join->on('u.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(1));
             })
-            ->leftJoin('substitute_users as su', function ($join) {
+            ->leftjoin('substitute_users as su', function ($join) {
                 $join->on('su.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(2));
             })
@@ -820,12 +822,12 @@ class AdminCRMController extends Controller
             ->leftjoin('users as user', 'user.id', '=', 'crm_requests.shipper_id')
             ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
-            ->leftJoin('crm_request_status_histories as inp', function ($join) {
+            ->leftjoin('crm_request_status_histories as inp', function ($join) {
                 $join->on('inp.crm_request_id', '=', 'crm_requests.id')
                     ->where('inp.id', '=',
                         DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 2)'));
             })
-            ->leftJoin('crm_request_status_histories as res', function ($join) {
+            ->leftjoin('crm_request_status_histories as res', function ($join) {
                 $join->on('res.crm_request_id', '=', 'crm_requests.id')
                     ->where('res.id', '=',
                         DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 3)'));
@@ -838,7 +840,8 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'ra.name as resolved_by', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper')
-            ->where('crm_requests.status_id', 3);
+            ->where('crm_requests.status_id', 3)
+            ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $resolved_request = $resolved_request->where('crm_requests.agent_id', Auth::id());
@@ -1011,15 +1014,15 @@ class AdminCRMController extends Controller
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
-            ->leftJoin('admins as a', function ($join) {
+            ->leftjoin('admins as a', function ($join) {
                 $join->on('a.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(0));
             })
-            ->leftJoin('users as u', function ($join) {
+            ->leftjoin('users as u', function ($join) {
                 $join->on('u.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(1));
             })
-            ->leftJoin('substitute_users as su', function ($join) {
+            ->leftjoin('substitute_users as su', function ($join) {
                 $join->on('su.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(2));
             })
@@ -1029,18 +1032,19 @@ class AdminCRMController extends Controller
             ->leftjoin('users as user', 'user.id', '=', 'crm_requests.shipper_id')
             ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
-            ->leftJoin('crm_request_status_histories as inp', function ($join) {
+            ->leftjoin('crm_request_status_histories as inp', function ($join) {
                 $join->on('inp.crm_request_id', '=', 'crm_requests.id')
                     ->where('inp.id', '=',
                         DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 1)'));
             })
-            ->leftJoin('crm_request_status_histories as res', function ($join) {
+            ->leftjoin('crm_request_status_histories as res', function ($join) {
                 $join->on('res.crm_request_id', '=', 'crm_requests.id')
                     ->where('res.id', '=',
                         DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 4)'));
             })
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination')
-            ->where('crm_requests.status_id', 4);
+            ->where('crm_requests.status_id', 4)
+            ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $closed_request = $closed_request->where('crm_requests.agent_id', Auth::id());
