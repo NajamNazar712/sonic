@@ -83,7 +83,7 @@
                                             </div>
                                             <div class="media-body text-right">
                                                 <h3 id="total">0</h3>
-                                                <span>Total Booked Shipment(s)</span>
+                                                <span>Total Shipment(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -100,7 +100,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="booked">0</h3>
-                                                <span>Pending Shipment(s)</span>
+                                                <span>Booked Shipment(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -117,7 +117,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="received">0</h3>
-                                                <span>Received Shipment(s)</span>
+                                                <span>Received / In-Transit Shipment(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -141,6 +141,23 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-inprocess pull-up">
+                            <div class="card-content" id="total_inprocess">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-shuffle text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white" id="in_process">0</h3>
+                                            <span>In Process Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="row justify-content-center">
                         <div class="col-3">
                             <div class="card bg-gradient-directional-warning pull-up">
@@ -153,23 +170,6 @@
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="return">0</h3>
                                                 <span>Returned Shipment(s)</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="card bg-gradient-directional-inprocess pull-up">
-                                <div class="card-content" id="total_inprocess">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-shuffle text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="in_process">0</h3>
-                                                <span>In Process Shipment(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -204,7 +204,7 @@
                             <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Payment Status</th>
-                            <th class="border-primary border-darken-1">Description</th>
+                            <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Arrival Date</th>
                             <th class="border-primary border-darken-1">Origin</th>
                             <th class="border-primary border-darken-1">Destination</th>
@@ -433,6 +433,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
+                        className: 'btn btn-primary',
                         title: 'Summary Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -456,7 +457,7 @@
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[8, 'desc']],
+                order: [[7, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},

@@ -69,7 +69,7 @@
                                         </div>
                                         <div class="media-body text-right">
                                             <h3 id="total">{{$stats['total']}}</h3>
-                                            <span>Total Booked Shipment(s)</span>
+                                            <span>Total Shipment(s)</span>
                                         </div>
                                     </div>
                                 </div>
@@ -86,7 +86,7 @@
                                         </div>
                                         <div class="media-body text-white text-right">
                                             <h3 class="text-white" id="booked">{{$stats['booked']}}</h3>
-                                            <span>Pending Shipment(s)</span>
+                                            <span>Booked Shipment(s)</span>
                                         </div>
                                     </div>
                                 </div>
@@ -103,7 +103,7 @@
                                         </div>
                                         <div class="media-body text-white text-right">
                                             <h3 class="text-white" id="received">{{$stats['received']}}</h3>
-                                            <span>Received Shipment(s)</span>
+                                            <span>Received / In-Transit Shipment(s)</span>
                                         </div>
                                     </div>
                                 </div>
@@ -127,6 +127,23 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-3">
+                    <div class="card bg-gradient-directional-inprocess pull-up">
+                        <div class="card-content" id="total_inprocess">
+                            <div class="card-body">
+                                <div class="media d-flex">
+                                    <div class="align-self-center">
+                                        <i class="icon-shuffle text-white font-large-2 float-left"></i>
+                                    </div>
+                                    <div class="media-body text-white text-right">
+                                        <h3 class="text-white" id="in_process">{{$stats['in_process']}}</h3>
+                                        <span>In Process Shipment(s)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row justify-content-center">
                     <div class="col-3">
                         <div class="card bg-gradient-directional-warning pull-up">
@@ -139,23 +156,6 @@
                                         <div class="media-body text-white text-right">
                                             <h3 class="text-white" id="return">{{$stats['return']}}</h3>
                                             <span>Returned Shipment(s)</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="card bg-gradient-directional-inprocess pull-up">
-                            <div class="card-content" id="total_inprocess">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-shuffle text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white" id="in_process">{{$stats['in_process']}}</h3>
-                                            <span>In Process Shipment(s)</span>
                                         </div>
                                     </div>
                                 </div>
@@ -273,6 +273,14 @@
         .bg-gradient-directional-inprocess {
             background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
             background-repeat: repeat-x;
+        }
+        .show_active{
+            -webkit-box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
+            -moz-box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
+            box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
         }
     </style>
 @endsection
@@ -510,23 +518,31 @@
                     this.api().table().columns.adjust();
                 }
             });
+            function add_animation(box) {
+                $("#report_data div").removeClass("show_active");
+                box.addClass('show_active');
+            }
             $('#search_filter_btn').on('click',function () {
                 table.draw();
                 get_summary_cards_data();
             });
             $('#total_shipments').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('total');
                 table.draw();
             });
             $('#total_pending').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('booked');
                 table.draw();
             });
             $('#total_received').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('received');
                 table.draw();
             });
             $('#total_delivered').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('delivered');
                 table.draw();
             });
@@ -535,10 +551,12 @@
                 table.draw();
             });
             $('#total_inprocess').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('in_process');
                 table.draw();
             });
             $('#total_cancelled').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('cancelled');
                 table.draw();
             });
