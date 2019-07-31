@@ -23,8 +23,8 @@
                                     <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
                                            placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
                                 </div>
-                                <div class="form-group col-md-5 mt-2 justify-content-center">
-                                    <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i
+                                <div class="form-group justify-content-center">
+                                    <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
                                                 class="la la-search"></i> Search
                                     </button>
                                 </div>
