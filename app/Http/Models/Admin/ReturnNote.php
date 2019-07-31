@@ -34,4 +34,8 @@ class ReturnNote extends Model
         return $this->hasMany('App\Http\Models\Admin\ReturnNoteShipment');
     }
 
+    public function admin(){
+        return $this->belongsTo('App\Http\Models\Admin\Admin','admin_id');
+    }
+
 }
