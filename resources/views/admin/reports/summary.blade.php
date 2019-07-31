@@ -117,7 +117,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="received">0</h3>
-                                                <span>Received / In-Transit Shipment(s)</span>
+                                                <span class="font-13">Received / In-Transit Shipment(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -243,6 +243,9 @@
             -webkit-border-radius: 5px;
             -moz-border-radius: 5px;
             border-radius: 5px;
+        }
+        span.font-13{
+            font-size: 13px;
         }
     </style>
 

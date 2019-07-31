@@ -103,7 +103,7 @@
                                         </div>
                                         <div class="media-body text-white text-right">
                                             <h3 class="text-white" id="received">{{$stats['received']}}</h3>
-                                            <span>Received / In-Transit Shipment(s)</span>
+                                            <span class="font-13">Received / In-Transit Shipment(s)</span>
                                         </div>
                                     </div>
                                 </div>
@@ -275,6 +275,9 @@
         .bg-gradient-directional-inprocess {
             background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
             background-repeat: repeat-x;
+        }
+        span.font-13{
+            font-size: 13px;
         }
         .show_active{
             -webkit-box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
