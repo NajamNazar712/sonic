@@ -926,7 +926,9 @@ class DeliveryController extends Controller
     {
         $tomorrow = Carbon::tomorrow();
         $next3days = Carbon::today()->addDays(3)->addWeekday();
-        
+        $dayAfterTomorrow = Carbon::today()->addDays(2)->toDateString();
+        $days15fromNow = Carbon::parse($dayAfterTomorrow)->addDays(15)->toDateString();
+
         $note_data = DeliveryNote::where('id', $id)->first();
         if ($note_data) {
             $updates_count = DeliveryNoteShipment::where('delivery_note_id', $id)->where('status', '>', 0)->count();
@@ -956,7 +958,7 @@ class DeliveryController extends Controller
                 $where = array(7, 8, 9, 10, 12, 14, 15, 18, 56);
                 $statuses = ShipmentStatus::whereIn('id', $where)->select('id','name')->where('status', 1)->get();
 
-                return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->pending_status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed, 'shipment_statuses' => $statuses, 'percentage' => $percentage, 'tomorrow' => $tomorrow, 'next3days' => $next3days]);
+                return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->pending_status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed, 'shipment_statuses' => $statuses, 'percentage' => $percentage, 'tomorrow' => $tomorrow, 'next3days' => $next3days, 'dayAfterTomorrow' => $dayAfterTomorrow, 'days15FromNow' => $days15fromNow]);
             }else{
                 return redirect(route('admin.delivery.receive.index'));
             }

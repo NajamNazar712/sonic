@@ -715,6 +715,7 @@
                    $('#iad_status').val('');
                }
             });
+            var receiving_date_picker;
             $('body').on('select2:select','.reasonSelect .reasonDrop',function (e) {
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var reasonSelection = $(this).find(':selected');
@@ -724,7 +725,27 @@
 				if(reason_status == 3){
                     $('#IncompleteAddressModal').modal('show');
                     $('#iad_shipment_id').val(rowid);
-                }                if(reason_status == 16){
+                }
+                if(reason_status == 5){
+                    $('#DateModal').modal('show');
+                    $('#date_shipment_id').val(rowid);
+                    $('#receiving_date').pickadate({
+                        firstDay: 1,
+                        clear: '',
+                        disable: [7],
+                        min: new Date('{{$dayAfterTomorrow}}'),
+                        max: new Date('{{$days15FromNow}}'),
+                        format:'dd mmmm, yyyy',
+                        selectYears: true,
+                        selectMonths: true,
+                        formatSubmit: 'yyyy-mm-dd',
+                        hiddenSuffix: '_formatted',
+                        onOpen: function() {
+                            $('#receiving_date_root').css('top','40px');
+                        },
+                    });
+                }
+                if(reason_status == 16){
                     $('#DateModal').modal('show');
                     $('#date_shipment_id').val(rowid);
                     $('#receiving_date').pickadate({
@@ -736,7 +757,7 @@
                         format:'dd mmmm, yyyy',
                         selectYears: true,
                         selectMonths: true,
-                        formatSubmit: 'yyyy-mm-dd 23:59:59',
+                        formatSubmit: 'yyyy-mm-dd',
                         hiddenSuffix: '_formatted',
                         onOpen: function() {
                             $('#receiving_date_root').css('top','40px');
@@ -761,6 +782,10 @@
                     $('#receiving_date').pickadate('picker').set('clear');
                 }
             });
+            $('#DateModal').on('hidden.bs.modal', function () {
+                $('#receiving_date').pickadate('picker').stop();
+            });
+
 
             $('body').on('click','.clear',function () {
                 var status = $(this).parents().closest('tr').find('.statusDrop');
@@ -1021,7 +1046,7 @@
 
 
                         }else if (data.status == 9){
-                            console.log(data.non_service_area_shipments)
+
                             $('#NonServiceModal').modal('show');
 
                             var nsatable = $('#nsatable').DataTable({
