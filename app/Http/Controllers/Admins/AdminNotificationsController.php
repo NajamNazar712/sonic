@@ -232,6 +232,9 @@ class AdminNotificationsController extends Controller
         else if ($id == 34) {
              $details['fields'] = ['user_id', 'updated_at', 'tagged_sales_person'];
         }
+        else if ($id == 35) {
+             $details['fields'] = ['consignee_name', 'shipper_name', 'tracking_number', 'receiver_name'];
+        }
 
         return $details;
     }
