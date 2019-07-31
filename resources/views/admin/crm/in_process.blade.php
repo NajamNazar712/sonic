@@ -27,6 +27,7 @@
                                     <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
+                                    <th class="border-primary border-darken-1">Destination Hub</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
@@ -103,6 +104,7 @@
                             head.push('Shipper Name');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Destination Hub');
                             head.push('Shipment Status');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
@@ -129,6 +131,7 @@
                                 row.push(values.shipper_name);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.destination_hub);
                                 row.push(values.status);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
@@ -405,6 +408,7 @@
                     {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'destination_hub', name: 'dh.name', class: 'align-middle destination_hub'},
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
