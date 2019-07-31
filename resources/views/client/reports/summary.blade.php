@@ -109,7 +109,8 @@
                                 </div>
                             </div>
                         </div>
-                    </div><div class="col-3">
+                    </div>
+                    <div class="col-3">
                         <div class="card bg-gradient-directional-success pull-up">
                             <div class="card-content" id="total_delivered">
                                 <div class="card-body">
@@ -127,6 +128,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="row justify-content-center">
                 <div class="col-3">
                     <div class="card bg-gradient-directional-inprocess pull-up">
                         <div class="card-content" id="total_inprocess">
@@ -144,7 +146,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="row justify-content-center">
+
                     <div class="col-3">
                         <div class="card bg-gradient-directional-warning pull-up">
                             <div class="card-content" id="total_return">
