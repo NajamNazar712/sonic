@@ -17,6 +17,18 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
+                            <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                <div class="form-group">
+                                    <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
+                                           placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                                </div>
+                                <div class="form-group col-md-5 mt-2 justify-content-center">
+                                    <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i
+                                                class="la la-search"></i> Search
+                                    </button>
+                                </div>
+                            </form>
+
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
@@ -80,12 +92,25 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <style type="text/css">
+        .selectize-control {
+            width: 300px !important;
+        }
+
+        .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #64a0d2 !important;
+            border-color: #5587b4 !important;
+            color: #FFFFFF;
+        }
+    </style>
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
@@ -95,6 +120,10 @@
 
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.crm.in_process.list') }}',
+                        data: {
+                            'page': 'all',
+                            'tracking_numbers': $('#track_form .tracking_numbers').val(),
+                        },
                         success: function (result) {
                             head = [];
 
@@ -397,9 +426,14 @@
                 language: {
                     processing: data_table_loader
                 },
-                ajax: '{{ route('admin.crm.in_process.list') }}',
+                ajax: {
+                    url: '{{ route('admin.crm.in_process.list') }}',
+                    data: function (d) {
+                        d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                    }
+                },
                 rowId: 'id',
-                order: [[17, 'desc']],
+                order: [[18, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -637,6 +671,42 @@
                     table.button('.assign').disable();
                     table.button('.close_request').disable();
                 }
+            });
+
+            //Selectize
+            var select = $('#track_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                onType: function(str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function(input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                },
+            });
+
+
+            $('#track_form').bind('submit',function (e) {
+                e.preventDefault();
+                table.draw();
             });
         });
     </script>

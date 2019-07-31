@@ -489,6 +489,9 @@ class AdminCRMController extends Controller
 
                     return $dropdown;
             });
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
 
         return $datatables->make(true);
     }
@@ -753,6 +756,10 @@ class AdminCRMController extends Controller
                     return $dropdown;
             });
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
+
         return $datatables->make(true);
     }
 
@@ -961,6 +968,10 @@ class AdminCRMController extends Controller
                     return $dropdown;
             });
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
+
         return $datatables->make(true);
     }
     public function closed_index(){
@@ -1113,6 +1124,10 @@ class AdminCRMController extends Controller
 
                     return $dropdown;
             });
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
 
         return $datatables->make(true);
     }
