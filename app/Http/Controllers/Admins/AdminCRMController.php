@@ -48,12 +48,18 @@ class AdminCRMController extends Controller
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $channel_id = $request->channel_id;
-        $shipment_ids = $request->shipment_ids;
+        if ($request->has('shipment_ids')) {
+            $shipment_ids = $request->shipment_ids;
+        }
+        else{
+            $shipment_ids = null;
+            $shipment_id = $request->shipment_id;
+        }
         $description = $request->description;
         $flag = false;
         $present_shipments = array();
-        if(!empty($shipment_ids)){
-            foreach ($shipment_ids as $shipment_id) {
+        if($shipment_ids == null){
+            if(!empty($shipment_id)){
                 $shipment = Shipment::find($shipment_id);
                 if($shipment){
                     $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
@@ -68,10 +74,33 @@ class AdminCRMController extends Controller
                         CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
                     }
                 }
+                return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+            }else{
+                return ['status' => 0, 'error' => 'No shipments selected!'];
             }
-            return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
-        }else{
-            return ['status' => 0, 'error' => 'No shipments selected!'];
+        }
+        else{
+            if(!empty($shipment_ids)){
+                foreach ($shipment_ids as $shipment_id) {
+                    $shipment = Shipment::find($shipment_id);
+                    if($shipment){
+                        $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
+                        if($is_shipment){
+                            if($is_shipment->case_nature_id != $nature_id){
+                                CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                            }else{
+                                $present_shipments[] = $shipment->tracking_number;
+                                $flag = true;
+                            }
+                        }else{
+                            CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                        }
+                    }
+                }
+                return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+            }else{
+                return ['status' => 0, 'error' => 'No shipments selected!'];
+            }
         }
     }
 
