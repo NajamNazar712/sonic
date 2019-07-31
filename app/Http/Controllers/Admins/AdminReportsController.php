@@ -4941,8 +4941,7 @@ public function revenue_index(){
                 $join->on('si.shipment_id', '=', 'shipments.id')
                     ->where('si.type','=',0);
             })
-            ->leftjoin('products as p','p.id','=','si.product_type_id')
-            ->select(['shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','p.product_name','si.description','sj.created_at as arrival_date','oc.name as origin','dc.name as destination']);
+            ->select(['shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','u.name as shipper','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.created_at as booking_date']);
         if( $request->get('search_shipper')){
             $shipments->where('shipments.user_id', '=',$request->get('search_shipper'));
         }else{
@@ -4961,6 +4960,26 @@ public function revenue_index(){
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->editColumn('phone',function ($shipments){
+                return $shipments->phone1."<br>".$shipments->phone2;
+            })
+            ->filterColumn('phone', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                $keyword = str_replace('-', '', $keyword);
+
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')
+                            ->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
+                    });
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
             ->editColumn('collection_amount', function ($shipments){
                 return number_format($shipments->collection_amount);
             });
