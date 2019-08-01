@@ -345,7 +345,11 @@ class AdminCRMController extends Controller
             ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
-            $launched_request = $launched_request->where('crm_requests.agent_id', Auth::id());
+            $launched_request = $launched_request
+                ->where(function ($sub_query) {
+                    $sub_query->where('crm_requests.agent_id', Auth::id())
+                        ->orWhere('crm_requests.launched_by', Auth::id());
+                });
         }
 
         $datatables = Datatables::of($launched_request)
@@ -578,7 +582,8 @@ class AdminCRMController extends Controller
         if (!in_array(session('role_id'), [1, 4, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $in_process_request = $in_process_request->where(function ($query) {
                 $query->where(function ($sub_query) {
-                    $sub_query->where('crm_requests.agent_id', Auth::id());
+                    $sub_query->where('crm_requests.agent_id', Auth::id())
+                        ->orWhere('crm_requests.launched_by', Auth::id());
                 })
                 ->orWhere(function ($sub_query) {
                     $sub_query->where('spt.admin_id', '=', Auth::id());
@@ -839,12 +844,36 @@ class AdminCRMController extends Controller
             })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
+            ->leftjoin('crm_request_tagging_histories as crth', function ($join) {
+                $join->on('crth.crm_request_id', '=', 'crm_requests.id')
+                    ->where('crth.id', '=',
+                        DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)'));
+            })
+            ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crth.tagged_id')
+            ->leftjoin('admins as at', 'at.id', '=', 'crth.tagged_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'ra.name as resolved_by', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper')
             ->where('crm_requests.status_id', 3)
             ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
-            $resolved_request = $resolved_request->where('crm_requests.agent_id', Auth::id());
+            $resolved_request = $resolved_request->where(function ($sub_query) {
+                $sub_query->where('crm_requests.agent_id', Auth::id())
+                    ->orWhere('crm_requests.launched_by', Auth::id())
+                ->orWhere(function ($parent_sub_query){
+                    $parent_sub_query->orWhere(function ($sub_query) {
+                            $sub_query->where('crth.crm_request_tagging_type_id', 2)
+                                ->where('crth.tagged_id', '=', Auth::id());
+                    })
+                        ->orWhere(function ($sub_query) {
+                            $sub_query->where('crth.crm_request_tagging_type_id', 1)
+                                ->where('adp.id', '=', session('department_id'))
+                                ->where(function ($sub_sub_query) {
+                                    $sub_sub_query->whereIn('oc.hub_id', session('hubs'))
+                                        ->orWhereIn('dc.hub_id', session('hubs'));
+                                });
+                        });
+                });
+            });
         }
 
         $datatables = Datatables::of($resolved_request)
@@ -1042,12 +1071,36 @@ class AdminCRMController extends Controller
                     ->where('res.id', '=',
                         DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 4)'));
             })
+            ->leftjoin('crm_request_tagging_histories as crth', function ($join) {
+                $join->on('crth.crm_request_id', '=', 'crm_requests.id')
+                    ->where('crth.id', '=',
+                        DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)'));
+            })
+            ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crth.tagged_id')
+            ->leftjoin('admins as at', 'at.id', '=', 'crth.tagged_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination')
             ->where('crm_requests.status_id', 4)
             ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
-            $closed_request = $closed_request->where('crm_requests.agent_id', Auth::id());
+            $closed_request = $closed_request->where(function ($sub_query) {
+                $sub_query->where('crm_requests.agent_id', Auth::id())
+                    ->orWhere('crm_requests.launched_by', Auth::id())
+                    ->orWhere(function ($parent_sub_query){
+                        $parent_sub_query->orWhere(function ($sub_query) {
+                            $sub_query->where('crth.crm_request_tagging_type_id', 2)
+                                ->where('crth.tagged_id', '=', Auth::id());
+                        })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->where('crth.crm_request_tagging_type_id', 1)
+                                    ->where('adp.id', '=', session('department_id'))
+                                    ->where(function ($sub_sub_query) {
+                                        $sub_sub_query->whereIn('oc.hub_id', session('hubs'))
+                                            ->orWhereIn('dc.hub_id', session('hubs'));
+                                    });
+                            });
+                    });
+            });
         }
 
         $datatables = Datatables::of($closed_request)
