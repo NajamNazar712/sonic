@@ -241,6 +241,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('update','Shippers\ShipperInterceptReBookController@intercept_re_book_update')->name('update');
     });
 
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::prefix('air_waybill_printing')->name('air_waybill_printing.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@air_waybill_printing_count_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@air_waybill_printing_count_store')->name('store');
+        });
+    });
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {

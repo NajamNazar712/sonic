@@ -670,6 +670,7 @@
                         <li><a class="menu-item" href="{{ route('admin.settings.delivery_call_verification_ratio.index') }}">Delivery Call Verification Ratio</a></li>
                     @endif
             @endif
+            </ul>
         </ul>
     </div>
 </div>

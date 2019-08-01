@@ -557,6 +557,9 @@ class Permission
 
             'crm.request.index' => 10,
 
+            'settings.air_waybill_printing.index' => 11,
+            'settings.air_waybill_printing.store' => 11,
+
         ]
     ];
 
