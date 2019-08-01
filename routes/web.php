@@ -854,6 +854,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
            Route::get('list', 'Admins\AdminPettyCashController@petty_cash_statements_list')->name('list');
             Route::post('print', 'Admins\AdminPettyCashController@statement_print')->name('print');
             Route::post('approve', 'Admins\AdminPettyCashController@petty_cash_statements_approve')->name('approve');
+            Route::post('reject_all', 'Admins\AdminPettyCashController@petty_cash_statements_reject_all')->name('reject_all');
             Route::get('{id}/edit', 'Admins\AdminPettyCashController@edit_petty_cash_statement_index')->name('edit');
             Route::get('{id}/edit/list', 'Admins\AdminPettyCashController@edit_petty_cash_statement_list')->name('edit.list');
             Route::post('edit/approve', 'Admins\AdminPettyCashController@edit_petty_cash_statements_approve')->name('edit.approve');

@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Edit Petty Cash Statement # {{$petty_statement_details->id}}
+        Edit Petty Cash Statement # {{$petty_statement->id}}
     </h1>
 
     <div class="card">
@@ -14,7 +14,7 @@
                     @method('PUT')
                     @csrf
                     <input type="hidden" name="selected_rows" id="selected_rows">
-                    <input type="hidden" name="petty_statement_id" id="petty_statement_id" value="{{$petty_statement_details->id}}">
+                    <input type="hidden" name="petty_statement_id" id="petty_statement_id" value="{{$petty_statement->id}}">
                     <div class="row">
                         <div class="col">
                             <fieldset class="form-group">
@@ -33,7 +33,7 @@
                             </span>
                                 </div>
 
-                                <input type="text" name="select_date_from" disabled class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_from" placeholder="Date (From)" data-rule-required="true" data-msg-required="Date (From) is required" data-value="{{$petty_statement_details->from}}">
+                                <input type="text" name="select_date_from" disabled class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_from" placeholder="Date (From)" data-rule-required="true" data-msg-required="Date (From) is required" data-value="{{$petty_statement->from}}">
                             </div>
                         </div>
                         <div class="col ">
@@ -44,18 +44,18 @@
                             </span>
                                 </div>
 
-                                <input type="text" name="select_date_to" disabled class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date (To) is required" data-value="{{$petty_statement_details->to}}">
+                                <input type="text" name="select_date_to" disabled class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date (To) is required" data-value="{{$petty_statement->to}}">
                             </div>
                         </div>
                         <div class="col">
                             <fieldset class="form-group">
-                                <input type="text" class="form-control reference_no" disabled name="reference_no" id="reference_no" placeholder="Statement Reference No." data-rule-required="true" data-msg-required="Statement Reference No. is required" value="{{$petty_statement_details->reference_no}}">
+                                <input type="text" class="form-control reference_no" disabled name="reference_no" id="reference_no" placeholder="Statement Reference No." data-rule-required="true" data-msg-required="Statement Reference No. is required" value="{{$petty_statement->reference_no}}">
                             </fieldset>
                         </div>
                     </div>
                     <div class="row text-center">
                         <div class="col">
-                            <b class="total_amount_span"> Total Amount : <span id="statements_total_amount">{{$petty_statement_details->total_amount}}</span></b>
+                            <b class="total_amount_span"> Total Amount : <span id="statements_total_amount">{{$petty_statement->total_amount}}</span></b>
                         </div>
                     </div>
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -83,9 +83,12 @@
                             <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" disabled>Update Details</button>
                         </div>
                             @if((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions')))
-                                @if((session('role_id') == 1) || ($petty_statement_details->status == 0 && session('department_id') == 6) || ($petty_statement_details->status == 1 && (session('department_id') == 6)) || ($petty_statement_details->status == 2 && session('department_id') == 4))
+                                @if((session('role_id') == 1) || ($petty_statement->status == 0 && session('department_id') == 6) || ($petty_statement->status == 1 && (session('department_id') == 6)) || ($petty_statement->status == 2 && session('department_id') == 4))
                                 <div class="ml-1">
                                     <button id="statement_approve" type="button"  class="btn btn-primary btn-block">Approve</button>
+                                </div>
+                                <div class="ml-1">
+                                    <button id="statement_reject" type="button"  class="btn btn-danger btn-block">Reject</button>
                                 </div>
                             @endif
                         @endif
@@ -171,7 +174,7 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#select_statement_hub').val('{!! $petty_statement_details->hub_id!!}').trigger('change');
+            $('#select_statement_hub').val('{!! $petty_statement->hub_id!!}').trigger('change');
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(2)->toDateString() }}';
             var future_date_limit = '{{ Carbon\Carbon::now()->addDays(28)->toDateString() }}';
 
@@ -209,7 +212,7 @@
             var selected_rows = [];
             var rows_count = 0;
             var table = $('#datatable').DataTable({
-                @if(($petty_statement_details->status == 0 && session('department_id') == 6) || ($petty_statement_details->status == 1 && session('department_id') == 6))
+                @if(($petty_statement->status == 0 && session('department_id') == 6) || ($petty_statement->status == 1 && session('department_id') == 6))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     title: 'Edit Details',
@@ -220,7 +223,7 @@
                         $('#statement_submit').attr('disabled', false);
                     }
                 }],
-                @elseif(session('role_id') == 1 || ($petty_statement_details->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
+                @elseif(session('role_id') == 1 || ($petty_statement->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     title: 'Edit Details',
@@ -238,7 +241,7 @@
                 @endif
                 autoWidth: false,
                 scrollX: true, scrollY:'200px',
-                ajax: '{{ route('admin.petty_cash.statements.edit.list',['id'=>$petty_statement_details->id]) }}',
+                ajax: '{{ route('admin.petty_cash.statements.edit.list',['id'=>$petty_statement->id]) }}',
                 processing: true,
                 language: {
                     processing: data_table_loader
@@ -656,8 +659,8 @@
             $('#statement_approve').on('click', function (e) {
                 e.preventDefault();
                 var current = $(this);
-                var id = '{{$petty_statement_details->id}}';
-                var status = parseInt({{$petty_statement_details->status}});
+                var id = '{{$petty_statement->id}}';
+                var status = parseInt({{$petty_statement->status}});
                 if(status == 0 || status == 1 || status == 2) {
                     $('#statement_approve').attr('disabled', true);
 
@@ -674,7 +677,7 @@
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                             setTimeout(function() {
-                                window.location = '{{ route('admin.petty_cash.statements.edit',['id' => $petty_statement_details->id]) }}';
+                                window.location = '{{ route('admin.petty_cash.statements.edit',['id' => $petty_statement->id]) }}';
                             }, 2500);
                         }
                         else{
@@ -692,6 +695,8 @@
                     });
                 }
             });
+
+
 
             $('#datatable').on('click', 'td .amount_log', function(){
                 var id = $(this).parents('tr').attr('id');
@@ -744,6 +749,43 @@
                 }
             });
 
+            $('#statement_reject').on('click',  function (e) {
+                e.preventDefault();
+                var id = '{{$petty_statement->id}}';
+                var status = parseInt({{$petty_statement->status}});
+                if(status == 0 || status == 1 || status == 2) {
+                    $('#statement_reject').attr('disabled', true);
+
+                    $.ajax({
+                        url: '{!! route('admin.petty_cash.statements.reject_all') !!}',
+                        method: 'POST',
+                        data: {
+                            'statement_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status == 0) {
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                            setTimeout(function() {
+                                window.location = '{{ route('admin.petty_cash.statements.index') }}';
+                            }, 2500);
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }else{
+                    var error = 'Current Petty Cash Statement Detail already updated!';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            });
         });
     </script>
 @endsection

@@ -76,8 +76,12 @@
                     </thead>
                 </table>
                 <div class="row justify-content-center">
-                    <div class="">
+                    <div class="col-3">
                         <button id="statement_submit" type="submit"  class="btn btn-primary btn-block">Make Statement</button>
+                    </div>
+                    <div class="col-3">
+
+                        <button id="statement_draft" type="submit"  class="btn btn-success btn-block">Save Draft</button>
                     </div>
                 </div>
                 </form>

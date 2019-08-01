@@ -23,6 +23,8 @@ class AdminPettyCashController extends Controller
         $this->middleware('auth:admin');
         $this->middleware('Permission');
     }
+
+    //Petty Cash Statement Status 0 -> Pending,  1 -> Station Approved,  2 -> Operation Approved,  3 -> Finance Approved,  4 -> Paid, 5 -> Adjusted, 6 -> Rejected
     public function make_petty_cash_statement_index(){
         $head = PettyCashAccountHead::where('status',1)->select('id','name')->get();
         if(session('role_id') == 1){
@@ -97,10 +99,14 @@ class AdminPettyCashController extends Controller
 
     public function edit_petty_cash_statement_index(Request $request, $id){
         $petty = PettyCashStatement::find($id);
-        $head = PettyCashAccountHead::select('id','name')->get();
-        $hubs = City::where('hub',1)->where('status',1)->select('id','name')->get();
-        $cities = City::where('status',1)->select('id','name')->get();
-        return view('admin.petty_cash.edit')->with(['heads' => $head,'hubs' => $hubs, 'cities' => $cities , 'petty_statement_details' => $petty]);
+        if($petty->status != 6){
+            $head = PettyCashAccountHead::select('id','name')->get();
+            $hubs = City::where('hub',1)->where('status',1)->select('id','name')->get();
+            $cities = City::where('status',1)->select('id','name')->get();
+            return view('admin.petty_cash.edit')->with(['heads' => $head,'hubs' => $hubs, 'cities' => $cities , 'petty_statement' => $petty]);
+        }else{
+            return redirect()->route('admin.petty_cash.statements.index')->with('error', 'Statement is rejected so it can\'t be edited');
+        }
     }
 
     public function edit_petty_cash_statement_list(Request $request, $id){
@@ -478,13 +484,23 @@ class AdminPettyCashController extends Controller
         if($id){
             $petty_details = PettyCashStatementDetail::find($id);
             if($petty_details){
+                $sub_amount = 0;
+                if($petty_details->finance_amount != null){
+                    $sub_amount = $petty_details->finance_amount;
+                }else if($petty_details->operation_amount != null){
+                    $sub_amount = $petty_details->operation_amount;
+                }else if($petty_details->station_amount != null){
+                    $sub_amount = $petty_details->station_amount;
+                }else{
+                    $sub_amount = $petty_details->amount;
+                }
                 if($petty_details->status == 0 || $petty_details->status == 2){
                     $petty_details->status = 1;
                     $petty_details->updated_by = Auth::id();
                     $petty_details->save();
                     $statement_id = $petty_details->petty_cash_statement_id;
                     $statement = PettyCashStatement::find($statement_id);
-                    $statement->total_amount = $statement->total_amount - $petty_details->amount;
+                    $statement->total_amount = $statement->total_amount - $sub_amount;
                     $statement->save();
                     return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Rejected!']);
                 }else if($petty_details->status == 1){
@@ -889,6 +905,27 @@ class AdminPettyCashController extends Controller
         }else{
             return response()->json(['status' => 1, 'error' => 'No Petty Cash Statement Detail ID selected!']);
 
+        }
+    }
+
+    public function petty_cash_statements_reject_all(Request $request){
+        $statement_id = $request->statement_id;
+        $statement = PettyCashStatement::find($statement_id);
+        if(in_array($statement->status, [0,1,2])){
+            $statement->status = 6;
+            $statement->rejected_by = Auth::id();
+            $statement->rejected_at = Carbon::now();
+            $statement->save();
+
+            $details = PettyCashStatementDetail::where('petty_cash_statement_id', $statement->id)->get();
+            if($details){
+                foreach ($details as $detail) {
+                    PettyCashStatementDetail::where('id', $detail->id)->update(['status' => 1]);
+                }
+            }
+            return response()->json(['status' => 0, 'success' => 'Statement Successfully rejected']);
+        }else{
+            return response()->json(['status' => 1, 'error' => 'Statement is already updated and can\'t be rejected!']);
         }
     }
 }
