@@ -6308,6 +6308,7 @@ class AdminDashboardController extends Controller
     }
 
     public function updateCity(Request $request,$id){
+
         $city_id = City::where('id',$id)->first();
         if($request->postType == 'city'){
             City::where('id',$id)->update([
@@ -6487,25 +6488,41 @@ class AdminDashboardController extends Controller
         if($status == 'cityInactive'){
             $city = City::find($id);
             if($city->status == 1 && $city->hub == 1){
-                $citylist = City::where('hub_id',$id)->where('id','!=',$id)->get();
-                if(count($citylist) > 0){
-
-                    return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
-                }elseif (count($citylist) == 0){
-                    $action = City::where('id',$city->id)->update(['status'=>0]);
-                    return redirect()->route('admin.management.city')->with('danger', 'There is some problem please try again.');
-                }
-            }elseif ($city->status == 1){
-                $action = City::where('id',$city->id)->update(['status'=>0]);
-                if($action == 1){
+                $citylist = City::where('hub_id',$id)->where('id','!=',$id)->where('status', 1)->count();
+                if($citylist == 0){
+                    City::where('id',$city->id)->update(['status'=>0]);
                     return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
                 }else{
-                    return redirect()->route('admin.management.city')->with('danger', 'There is some problem please try again.');
+                    return redirect()->route('admin.management.city')->with('error', 'There are some active cities in hub, please deactivate those cities first!');
                 }
-
+            }elseif ($city->status == 1){
+                $city->status = 0;
+                $city->save();
+                return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
             }
         }elseif($status == 'cityactive'){
             $city = City::find($id);
+            if($city->hub == 1){
+                if($city->status == 0){
+                    $city->status = 1;
+                    $city->save();
+                    return redirect()->route('admin.management.city')->with('success', 'City is active now.');
+                }
+            }else{
+                $hub = City::where('id', $city->hub_id)->where('status','=', 1);
+                if($hub->exists()){
+                    $city->status = 1;
+                    $city->save();
+                    return redirect()->route('admin.management.city')->with('success', 'City is active now.');
+
+                }else{
+                    return redirect()->route('admin.management.city')->with('error', 'Please, activate or change hub for city first!');
+
+                }
+            }
+
+
+
             if($city->status == 0){
                 $action = City::where('id',$city->id)->update(['status'=>1]);
                 if($action == 1){
@@ -6522,7 +6539,7 @@ class AdminDashboardController extends Controller
     }
 
     public function CityStatusCheck($id){
-        $hubs = City::select('name')->where('hub_id',$id)->where('id','!=',$id)->get();
+        $hubs = City::select('name')->where('hub_id',$id)->where('id','!=',$id)->where('status', 1)->get();
 
         return response()->json($hubs);
     }

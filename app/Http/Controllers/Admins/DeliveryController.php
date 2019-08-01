@@ -3484,9 +3484,6 @@ class DeliveryController extends Controller
             ->make(true);
     }
 
-
-
-
     public function sdn_dncc_list(Request $request){
         $sdn_id = $request->input('sdn_id');
         $sdn_details = StationDepositNote::find($sdn_id);
