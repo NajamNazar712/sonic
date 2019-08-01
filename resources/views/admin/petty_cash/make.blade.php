@@ -76,12 +76,11 @@
                     </thead>
                 </table>
                 <div class="row justify-content-center">
-                    <div class="col-3">
-                        <button id="statement_submit" type="submit"  class="btn btn-primary btn-block">Make Statement</button>
+                    <div class="col-2">
+                        <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" name="submit_button" value="create"><i class="la la-list"></i> Make Statement</button>
                     </div>
-                    <div class="col-3">
-
-                        <button id="statement_draft" type="submit"  class="btn btn-success btn-block">Save Draft</button>
+                    <div class="col-2">
+                        <button id="statement_draft" type="submit"  class="btn btn-success btn-block" name="submit_button" value="draft"><i class="la la-save"></i> Save Draft</button>
                     </div>
                 </div>
                 </form>
@@ -267,6 +266,7 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
+                    var pressed_button = $(this.submitButton);
                     swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to change make petty cash statement!',
@@ -290,6 +290,9 @@
                         dangerMode: true
                     }).then(function (confirm) {
                         if (confirm) {
+
+
+                            $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
                             $('#selected_rows').val(selected_rows);
                             // console.log($('#upload_image').val());
                             form.submit();

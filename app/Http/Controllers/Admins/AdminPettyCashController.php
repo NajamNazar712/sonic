@@ -8,6 +8,8 @@ use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\PettyCashStatementAmountLog;
 use App\Http\Models\Admin\PettyCashStatementDetail;
+use App\Http\Models\Admin\PettyCashStatementDetailDraft;
+use App\Http\Models\Admin\PettyCashStatementDraft;
 use App\Http\Models\City;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -53,48 +55,95 @@ class AdminPettyCashController extends Controller
         return response()->json(['status' => 1, 'titles'=>$titles]);
     }
     public function make_petty_cash_statement_submit(Request $request){
-        $total_amount = 0;
-        if(PettyCashStatement::where('reference_no','=',$request->reference_no)->exists()){
-            return ['status' => 0, 'error' => 'Reference No. not Unique'];
-        }
-
-        $selected_ids = explode(',', $request->input('selected_rows'));
-        $petty_cash = new PettyCashStatement();
-        $petty_cash->hub_id = $request->select_statement_hub;
-        $petty_cash->reference_no = $request->reference_no;
-        $petty_cash->from = $request->select_date_from_formatted;
-        $petty_cash->to = $request->select_date_to_formatted;
-        $petty_cash->created_by = Auth::id();
-        $petty_cash->save();
-        foreach ($selected_ids as $selected_id) {
-            $total_amount += $request->amount[$selected_id];
-
-            $petty_detail = new PettyCashStatementDetail();
-            $petty_detail->petty_cash_statement_id = $petty_cash->id;
-            $petty_detail->account_head_id = $request->head[$selected_id];
-            $petty_detail->account_title_id = $request->title[$selected_id];
-            $petty_detail->hub_id = $request->hub[$selected_id];
-            $petty_detail->date = $request->date[$selected_id];
-            $petty_detail->expense_details = $request->expense[$selected_id];
-            $petty_detail->amount = $request->amount[$selected_id];
-            $petty_detail->reference_no = $request->reference[$selected_id];
-            $petty_detail->remarks = $request->remarks[$selected_id];
-            $petty_detail->save();
-
-            if($request->hasFile('upload_image'.$selected_id)) {
-                $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.png';
-
-                $file = $request->file('upload_image'.$selected_id);
-
-                Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
-
-                $petty_detail->reference_document = $filename;
-                $petty_detail->save();
+        if($request->has('submit_button')) {
+            $total_amount = 0;
+            if (PettyCashStatement::where('reference_no', '=', $request->reference_no)->exists()) {
+                return ['status' => 0, 'error' => 'Reference No. not Unique'];
             }
 
+            $selected_ids = explode(',', $request->input('selected_rows'));
+
+            if($request->input('submit_button') == 'create'){
+
+                $petty_cash = new PettyCashStatement();
+                $petty_cash->hub_id = $request->select_statement_hub;
+                $petty_cash->reference_no = $request->reference_no;
+                $petty_cash->from = $request->select_date_from_formatted;
+                $petty_cash->to = $request->select_date_to_formatted;
+                $petty_cash->created_by = Auth::id();
+                $petty_cash->save();
+                foreach ($selected_ids as $selected_id) {
+                    $total_amount += $request->amount[$selected_id];
+
+                    $petty_detail = new PettyCashStatementDetail();
+                    $petty_detail->petty_cash_statement_id = $petty_cash->id;
+                    $petty_detail->account_head_id = $request->head[$selected_id];
+                    $petty_detail->account_title_id = $request->title[$selected_id];
+                    $petty_detail->hub_id = $request->hub[$selected_id];
+                    $petty_detail->date = $request->date[$selected_id];
+                    $petty_detail->expense_details = $request->expense[$selected_id];
+                    $petty_detail->amount = $request->amount[$selected_id];
+                    $petty_detail->reference_no = $request->reference[$selected_id];
+                    $petty_detail->remarks = $request->remarks[$selected_id];
+                    $petty_detail->save();
+
+                    if ($request->hasFile('upload_image' . $selected_id)) {
+                        $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.png';
+
+                        $file = $request->file('upload_image' . $selected_id);
+
+                        Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
+
+                        $petty_detail->reference_document = $filename;
+                        $petty_detail->save();
+                    }
+
+                }
+                PettyCashStatement::where('id', $petty_cash->id)->update(['total_amount' => $total_amount]);
+
+            }else{
+
+                $petty_cash_draft = new PettyCashStatementDraft();
+                $petty_cash_draft->hub_id = $request->select_statement_hub;
+                $petty_cash_draft->reference_no = $request->reference_no;
+                $petty_cash_draft->from = $request->select_date_from_formatted;
+                $petty_cash_draft->to = $request->select_date_to_formatted;
+                $petty_cash_draft->created_by = Auth::id();
+                $petty_cash_draft->save();
+                foreach ($selected_ids as $selected_id) {
+                    $total_amount += $request->amount[$selected_id];
+
+                    $petty_detail = new PettyCashStatementDetailDraft();
+                    $petty_detail->petty_cash_statement_id = $petty_cash_draft->id;
+                    $petty_detail->account_head_id = $request->head[$selected_id];
+                    $petty_detail->account_title_id = $request->title[$selected_id];
+                    $petty_detail->hub_id = $request->hub[$selected_id];
+                    $petty_detail->date = $request->date[$selected_id];
+                    $petty_detail->expense_details = $request->expense[$selected_id];
+                    $petty_detail->amount = $request->amount[$selected_id];
+                    $petty_detail->reference_no = $request->reference[$selected_id];
+                    $petty_detail->remarks = $request->remarks[$selected_id];
+                    $petty_detail->save();
+
+                    if ($request->hasFile('upload_image' . $selected_id)) {
+                        $filename = 'statement_' . $petty_cash_draft->id . '_detail_' . $petty_detail->id . '.png';
+
+                        $file = $request->file('upload_image' . $selected_id);
+                        $file->move(public_path('uploads/petty_cash'), $filename);
+
+                        $petty_detail->reference_document = $filename;
+                        $petty_detail->save();
+                    }
+
+                }
+                PettyCashStatementDraft::where('id', $petty_cash_draft->id)->update(['total_amount' => $total_amount]);
+            }
+            return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
+
         }
-        PettyCashStatement::where('id' , $petty_cash->id)->update(['total_amount' => $total_amount]);
-        return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
+        else{
+            return redirect()->back()->with(['error' => 'Request not submitted properly!']);
+        }
     }
 
     public function edit_petty_cash_statement_index(Request $request, $id){

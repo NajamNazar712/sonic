@@ -152,7 +152,6 @@
                         $.each(result.data, function(index, values) {
                             row = [];
 
-
                             row.push(index + 1);
                             row.push(values.tracking_number);
                             row.push(values.shipper);
