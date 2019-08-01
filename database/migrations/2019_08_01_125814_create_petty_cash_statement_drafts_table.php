@@ -16,12 +16,11 @@ class CreatePettyCashStatementDraftsTable extends Migration
         Schema::create('petty_cash_statement_drafts', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('hub_id');
-            $table->bigInteger('reference_no')->unique();
+            $table->string('reference_no')->unique();
             $table->timestamp('from');
             $table->timestamp('to');
             $table->float('total_amount');
             $table->integer('created_by');
-            $table->tinyInteger('status')->default(0);
             $table->timestamps();
         });
     }

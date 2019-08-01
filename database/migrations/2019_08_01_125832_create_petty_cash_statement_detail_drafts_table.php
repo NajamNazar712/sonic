@@ -15,7 +15,7 @@ class CreatePettyCashStatementDetailDraftsTable extends Migration
     {
         Schema::create('petty_cash_statement_detail_drafts', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('petty_cash_statement_id');
+            $table->integer('petty_cash_statement_draft_id');
             $table->integer('account_head_id');
             $table->integer('account_title_id');
             $table->integer('hub_id')->nullable();
@@ -23,8 +23,8 @@ class CreatePettyCashStatementDetailDraftsTable extends Migration
             $table->string('expense_details');
             $table->double('amount');
             $table->integer('reference_no');
+            $table->string('reference_document')->nullable();
             $table->string('remarks')->nullable();
-            $table->boolean('status')->default(0);
             $table->timestamps();
         });
     }

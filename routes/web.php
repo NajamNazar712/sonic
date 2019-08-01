@@ -870,6 +870,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('paid', 'Admins\AdminPettyCashController@approved_petty_cash_statements_paid')->name('paid');
             Route::post('adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_adjusted')->name('adjusted');
         });
+        Route::prefix('draft')->name('draft.')->group(function (){
+            Route::get('', 'Admins\AdminPettyCashController@draft_petty_cash_statements_index')->name('index');
+            Route::get('list', 'Admins\AdminPettyCashController@draft_petty_cash_statements_list')->name('list');
+        });
     });
 
     Route::prefix('month_closing')->name('month_closing.')->group(function (){

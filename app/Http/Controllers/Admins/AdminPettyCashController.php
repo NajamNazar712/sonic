@@ -100,6 +100,7 @@ class AdminPettyCashController extends Controller
 
                 }
                 PettyCashStatement::where('id', $petty_cash->id)->update(['total_amount' => $total_amount]);
+                return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
 
             }else{
 
@@ -113,32 +114,34 @@ class AdminPettyCashController extends Controller
                 foreach ($selected_ids as $selected_id) {
                     $total_amount += $request->amount[$selected_id];
 
-                    $petty_detail = new PettyCashStatementDetailDraft();
-                    $petty_detail->petty_cash_statement_id = $petty_cash_draft->id;
-                    $petty_detail->account_head_id = $request->head[$selected_id];
-                    $petty_detail->account_title_id = $request->title[$selected_id];
-                    $petty_detail->hub_id = $request->hub[$selected_id];
-                    $petty_detail->date = $request->date[$selected_id];
-                    $petty_detail->expense_details = $request->expense[$selected_id];
-                    $petty_detail->amount = $request->amount[$selected_id];
-                    $petty_detail->reference_no = $request->reference[$selected_id];
-                    $petty_detail->remarks = $request->remarks[$selected_id];
-                    $petty_detail->save();
+                    $petty_detail_draft = new PettyCashStatementDetailDraft();
+                    $petty_detail_draft->petty_cash_statement_id = $petty_cash_draft->id;
+                    $petty_detail_draft->account_head_id = $request->head[$selected_id];
+                    $petty_detail_draft->account_title_id = $request->title[$selected_id];
+                    $petty_detail_draft->hub_id = $request->hub[$selected_id];
+                    $petty_detail_draft->date = $request->date[$selected_id];
+                    $petty_detail_draft->expense_details = $request->expense[$selected_id];
+                    $petty_detail_draft->amount = $request->amount[$selected_id];
+                    $petty_detail_draft->reference_no = $request->reference[$selected_id];
+                    $petty_detail_draft->remarks = $request->remarks[$selected_id];
+                    $petty_detail_draft->save();
 
                     if ($request->hasFile('upload_image' . $selected_id)) {
-                        $filename = 'statement_' . $petty_cash_draft->id . '_detail_' . $petty_detail->id . '.png';
+                        $filename = 'statement_' . $petty_cash_draft->id . '_detail_' . $petty_detail_draft->id . '.png';
 
                         $file = $request->file('upload_image' . $selected_id);
-                        $file->move(public_path('uploads/petty_cash'), $filename);
+                        Storage::disk('public')->putFileAs('petty_cash_statement_details_draft', $file, $filename);
+//                        $file->move(public_path('uploads/petty_cash'), $filename);
 
-                        $petty_detail->reference_document = $filename;
-                        $petty_detail->save();
+                        $petty_detail_draft->reference_document = $filename;
+                        $petty_detail_draft->save();
                     }
 
                 }
                 PettyCashStatementDraft::where('id', $petty_cash_draft->id)->update(['total_amount' => $total_amount]);
+                return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement saved to Drafts Successfully!']);
+
             }
-            return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
 
         }
         else{
@@ -976,5 +979,9 @@ class AdminPettyCashController extends Controller
         }else{
             return response()->json(['status' => 1, 'error' => 'Statement is already updated and can\'t be rejected!']);
         }
+    }
+
+    public function draft_petty_cash_statements_index(){
+        return view('admin.petty_cash.draf');
     }
 }

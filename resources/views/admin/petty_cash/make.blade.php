@@ -269,7 +269,7 @@
                     var pressed_button = $(this.submitButton);
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to change make petty cash statement!',
+                        text: 'Select Yes to '+ pressed_button.attr('value') +' petty cash statement!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
