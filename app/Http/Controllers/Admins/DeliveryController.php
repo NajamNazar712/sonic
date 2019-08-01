@@ -2083,7 +2083,9 @@ class DeliveryController extends Controller
                                     } else {
                                         ShipmentsJourneyController::add($shipment, $shipper_status_details->shipper_status_id, $shipper_status_details->consignee_status_id, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                     }
-
+                                    if($parcel->amount == 0){
+                                        NotificationsController::send(35, $parcel->id);
+                                    }
                                 }
                             }
                         }
