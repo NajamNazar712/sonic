@@ -248,6 +248,9 @@
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
+                language: {
+                    processing: data_table_loader
+                },
                 processing: true,
                 serverSide: true,
                 ajax: {
