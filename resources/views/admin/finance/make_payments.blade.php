@@ -788,6 +788,8 @@
 				}
 			});
 
+            var route = '{!! route('admin.tracking.index') !!}';
+
 			$('#datatable tbody').on('click', 'tr td.delivered_shipments button', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
 
@@ -806,7 +808,7 @@
 						var tracking_numbers = '';
 
 						$.each(data, function(index, tracking_number) {
-							tracking_numbers += tracking_number + '<br/>';
+							tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
 						});
 
 						$('#delivered_shipments .modal-body').html(tracking_numbers);
@@ -834,7 +836,7 @@
 						var tracking_numbers = '';
 
 						$.each(data, function(index, tracking_number) {
-							tracking_numbers += tracking_number + '<br/>';
+							tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
 						});
 
 						$('#returned_shipments .modal-body').html(tracking_numbers);
@@ -862,7 +864,7 @@
 						var tracking_numbers = '';
 
 						$.each(data, function(index, tracking_number) {
-							tracking_numbers += tracking_number + '<br/>';
+							tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
 						});
 
 						$('#adjusted_shipments .modal-body').html(tracking_numbers);
