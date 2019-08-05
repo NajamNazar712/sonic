@@ -294,7 +294,7 @@
                                                         </fieldset>
                                                         <div class="display-inline-block col">
                                                             <fieldset
-                                                                    class="form-group position-relative has-icon-left m-0 mb-1">
+                                                                    class="form-group has-icon-left m-0 mb-1">
                                                                 <button id="chat_send" type="button"
                                                                         class="btn btn-block btn-purple chat_send" to="1"><i
                                                                             class="la la-paper-plane-o d-lg-none"></i>
