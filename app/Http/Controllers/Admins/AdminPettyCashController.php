@@ -1009,8 +1009,8 @@ class AdminPettyCashController extends Controller
             ->filterColumn('date',function ($query,$keyword){
                 if ($keyword != '') {
                     $query->where(function ($sub_query) use ($keyword) {
-                        $sub_query->where('petty_cash_statements.from', 'like', '%' . $keyword . '%')
-                            ->orWhere('petty_cash_statements.to', 'like', '%' . $keyword . '%');
+                        $sub_query->where('petty_cash_statement_drafts.from', 'like', '%' . $keyword . '%')
+                            ->orWhere('petty_cash_statement_drafts.to', 'like', '%' . $keyword . '%');
                     });
                 }
 
