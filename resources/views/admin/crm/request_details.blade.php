@@ -292,7 +292,7 @@
                                                                    {{--placeholder="Type your message">--}}
                                                             <textarea id="chat_input" class="form-control height-100" placeholder="Type your message" row="4"></textarea>
                                                         </fieldset>
-                                                        <div class="display-inline-block col">
+                                                        <div class="display-inline-block col-2">
                                                             <fieldset
                                                                     class="form-group has-icon-left m-0 mb-1">
                                                                 <button id="chat_send" type="button"
