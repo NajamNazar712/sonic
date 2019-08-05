@@ -1164,7 +1164,9 @@ class AdminPettyCashController extends Controller
             $selected_ids = explode(',', $request->input('selected_rows'));
             $draft_id = $request->petty_draft_id;
             $petty_cash_draft = PettyCashStatementDraft::find($draft_id);
-            $petty_cash_draft->petty_cash_statement_draft_details()->delete();
+            if($petty_cash_draft){
+                $petty_cash_draft->petty_cash_statement_draft_details()->delete();
+            }
             $total_amount = 0;
 
         if ($petty_cash_draft) {
