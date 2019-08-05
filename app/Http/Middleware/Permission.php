@@ -467,14 +467,16 @@ class Permission
 			'settings.debriefing_report_cut_off_time.index' => 175,
             'settings.debriefing_report_cut_off_time.store' => 175,
             'settings.return_note_restriction_bypass.index' => 192,
-
             'settings.cod_cap_zones.index' => 197,
             'settings.cod_cap_zones.update' => 197,
-
 			'settings.stock_movement.index' => 228,
             'settings.stock_movement.update' => 228,
             'settings.delivery_call_verification_ratio.index' => 231,
             'settings.delivery_call_verification_ratio.update' => 231,
+            'settings.crm_cut_off_time_and_holidays.index' => 237,
+            'settings.delivery_call_verification_ratio.list' => 237,
+            'settings.crm_cut_off_time_and_holidays.update' => 237,
+            'settings.delivery_call_verification_ratio.add' => 237,
 
 
 
@@ -556,6 +558,9 @@ class Permission
             'reports.sales.list' => 8,
 
             'crm.request.index' => 10,
+
+            'settings.air_waybill_printing.index' => 11,
+            'settings.air_waybill_printing.store' => 11,
 
         ]
     ];

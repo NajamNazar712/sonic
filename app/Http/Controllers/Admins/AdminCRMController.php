@@ -17,6 +17,8 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\CRM\CrmRequestTaggingHistory;
 use App\Http\Models\CRM\CrmRequestTaggingTypes;
+use App\http\Models\CRM\CrmSettings;
+use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\SubstituteUser;
@@ -293,6 +295,36 @@ class AdminCRMController extends Controller
 
 
     public function launched_re_open_index(){
+//        $requests = CrmRequest::where('id', 20)->first();
+//        $launched = Carbon::parse($requests->created_at);
+//        $current = Carbon::now();
+//        $time_format = 'H:i';
+//        $time_from = CrmSettings::where('name','TAT Cut-Off Time From')->first();
+//        $time_to = CrmSettings::where('name','TAT Cut-Off Time To')->first();
+//        $from_formatted = date($time_format, strtotime($time_from->setting_value));
+//        $to_formatted = date($time_format, strtotime($time_to->setting_value));
+//        $cut_off_check = $requests->created_at->format($time_format);
+//        $current_tat = $current->diffInWeekdays($launched);
+//        if($from_formatted > $cut_off_check || $to_formatted < $cut_off_check){
+//            $after_cut_off = $current_tat - 1;
+//            $current_tat = $after_cut_off;
+//        }
+//        $holidays = CrmTatHolidays::get();
+//        foreach($holidays as $holiday){
+//            $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+//            if($launched < $holiday_formatted || $current > $holiday_formatted){
+//                $after_holidays = $current_tat - 1;
+//                $current_tat = $after_holidays;
+//            }
+//        }
+//        dd($current_tat);
+//
+//        $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+//        if(date('Y-m-d H:i:s', strtotime($launched)) < $holiday_formatted || date('Y-m-d H:i:s', strtotime($current)) > $holiday_formatted){
+//            $after_holidays = $current_tat - 1;
+//            $current_tat = $after_holidays;
+//            dd($current_tat);
+//        }
         $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
@@ -340,12 +372,19 @@ class AdminCRMController extends Controller
             })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id')
             ->whereIn('crm_requests.status_id', [1, 5])
             ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
-            $launched_request = $launched_request->where('crm_requests.agent_id', Auth::id());
+            $launched_request = $launched_request
+                ->where(function ($sub_query) {
+                    $sub_query->where('crm_requests.agent_id', Auth::id())
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('crm_requests.launched_by', 0)
+                            ->where('crm_requests.launched_by_id', Auth::id());
+                    });
+                });
         }
 
         $datatables = Datatables::of($launched_request)
@@ -426,7 +465,34 @@ class AdminCRMController extends Controller
                 if($requests->created_at){
                     $launched = Carbon::parse($requests->created_at);
                     $current = Carbon::now();
-                    return $current->diffInWeekdays($launched);
+                    $time_format = 'H:i';
+                    $time_from = CrmSettings::where('name','TAT Cut-Off Time From')->first();
+                    $time_to = CrmSettings::where('name','TAT Cut-Off Time To')->first();
+                    $from_formatted = date($time_format, strtotime($time_from->setting_value));
+                    $to_formatted = date($time_format, strtotime($time_to->setting_value));
+                    $cut_off_check = $requests->created_at->format($time_format);
+                    $current_tat = $current->diffInWeekdays($launched);
+                    if($from_formatted > $cut_off_check || $to_formatted < $cut_off_check){
+                        $after_cut_off = $current_tat - 1;
+                        $current_tat = $after_cut_off;
+                    }
+                    $holidays = CrmTatHolidays::get();
+                    foreach($holidays as $holiday){
+                        $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                        $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                        $launched_formatted_check = date('Y-m-d', strtotime($launched));
+                        if($launched < $holiday_formatted || $current > $holiday_formatted){
+                            if($holiday_formatted_check == $launched_formatted_check){
+                                if($from_formatted > $cut_off_check || $to_formatted < $cut_off_check){
+                                    $after_cut_off = $current_tat + 1;
+                                    $current_tat = $after_cut_off;
+                                }
+                            }
+                            $after_holidays = $current_tat - 1;
+                            $current_tat = $after_holidays;
+                        }
+                    }
+                    return $current_tat;
                 }
                 return "-";
             })
@@ -572,13 +638,17 @@ class AdminCRMController extends Controller
             })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'dh.name as destination_hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'dh.name as destination_hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id')
             ->where('crm_requests.status_id', 2)
             ->groupBy('crm_requests.id');
         if (!in_array(session('role_id'), [1, 4, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $in_process_request = $in_process_request->where(function ($query) {
                 $query->where(function ($sub_query) {
-                    $sub_query->where('crm_requests.agent_id', Auth::id());
+                    $sub_query->where('crm_requests.agent_id', Auth::id())
+                        ->orWhere(function ($sub_query) {
+                            $sub_query->where('crm_requests.launched_by', 0)
+                                ->where('crm_requests.launched_by_id', Auth::id());
+                        });
                 })
                 ->orWhere(function ($sub_query) {
                     $sub_query->where('spt.admin_id', '=', Auth::id());
@@ -634,7 +704,34 @@ class AdminCRMController extends Controller
                 if($requests->created_at){
                     $launched = Carbon::parse($requests->created_at);
                     $current = Carbon::now();
-                    return $current->diffInWeekdays($launched);
+                    $time_format = 'H:i';
+                    $time_from = CrmSettings::where('name','TAT Cut-Off Time From')->first();
+                    $time_to = CrmSettings::where('name','TAT Cut-Off Time To')->first();
+                    $from_formatted = date($time_format, strtotime($time_from->setting_value));
+                    $to_formatted = date($time_format, strtotime($time_to->setting_value));
+                    $cut_off_check = $requests->created_at->format($time_format);
+                    $current_tat = $current->diffInWeekdays($launched);
+                    if($from_formatted > $cut_off_check || $to_formatted < $cut_off_check){
+                        $after_cut_off = $current_tat - 1;
+                        $current_tat = $after_cut_off;
+                    }
+                    $holidays = CrmTatHolidays::get();
+                    foreach($holidays as $holiday){
+                        $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                        $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                        $launched_formatted_check = date('Y-m-d', strtotime($launched));
+                        if($launched < $holiday_formatted || $current > $holiday_formatted){
+                            if($holiday_formatted_check == $launched_formatted_check){
+                                if($from_formatted > $cut_off_check || $to_formatted < $cut_off_check){
+                                    $after_cut_off = $current_tat + 1;
+                                    $current_tat = $after_cut_off;
+                                }
+                            }
+                            $after_holidays = $current_tat - 1;
+                            $current_tat = $after_holidays;
+                        }
+                    }
+                    return $current_tat;
                 }
                 return "-";
             })
@@ -839,12 +936,39 @@ class AdminCRMController extends Controller
             })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'ra.name as resolved_by', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper')
+            ->leftjoin('crm_request_tagging_histories as crth', function ($join) {
+                $join->on('crth.crm_request_id', '=', 'crm_requests.id')
+                    ->where('crth.id', '=',
+                        DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)'));
+            })
+            ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crth.tagged_id')
+            ->leftjoin('admins as at', 'at.id', '=', 'crth.tagged_id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'ra.name as resolved_by', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id')
             ->where('crm_requests.status_id', 3)
             ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
-            $resolved_request = $resolved_request->where('crm_requests.agent_id', Auth::id());
+            $resolved_request = $resolved_request->where(function ($sub_query) {
+                $sub_query->where('crm_requests.agent_id', Auth::id())
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('crm_requests.launched_by', 0)
+                            ->where('crm_requests.launched_by_id', Auth::id());
+                    })
+                ->orWhere(function ($parent_sub_query){
+                    $parent_sub_query->orWhere(function ($sub_query) {
+                            $sub_query->where('crth.crm_request_tagging_type_id', 2)
+                                ->where('crth.tagged_id', '=', Auth::id());
+                    })
+                        ->orWhere(function ($sub_query) {
+                            $sub_query->where('crth.crm_request_tagging_type_id', 1)
+                                ->where('adp.id', '=', session('department_id'))
+                                ->where(function ($sub_sub_query) {
+                                    $sub_sub_query->whereIn('oc.hub_id', session('hubs'))
+                                        ->orWhereIn('dc.hub_id', session('hubs'));
+                                });
+                        });
+                });
+            });
         }
 
         $datatables = Datatables::of($resolved_request)
@@ -869,12 +993,18 @@ class AdminCRMController extends Controller
                 }
             })
             ->editColumn('in_process_resolved_tat', function ($requests){
-                if($requests->inprocess && $requests->resolved){
                     $process = Carbon::parse($requests->inprocess);
                     $resolved = Carbon::parse($requests->resolved);
-                    return $resolved->diffInWeekdays($process);
-                }
-                return "-";
+                    $resolved_tat = $resolved->diffInWeekdays($process);
+                    $holidays = CrmTatHolidays::get();
+                    foreach($holidays as $holiday){
+                        $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                        if($process < $holiday_formatted || $resolved > $holiday_formatted){
+                            $after_holidays = $resolved_tat - 1;
+                            $resolved_tat = $after_holidays;
+                        }
+                    }
+                    return $resolved_tat;
             })
             ->addColumn('launched_by_name', function ($requests){
                 $name = '';
@@ -1042,12 +1172,39 @@ class AdminCRMController extends Controller
                     ->where('res.id', '=',
                         DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 4)'));
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination')
+            ->leftjoin('crm_request_tagging_histories as crth', function ($join) {
+                $join->on('crth.crm_request_id', '=', 'crm_requests.id')
+                    ->where('crth.id', '=',
+                        DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)'));
+            })
+            ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crth.tagged_id')
+            ->leftjoin('admins as at', 'at.id', '=', 'crth.tagged_id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'crm_requests.launched_by_id')
             ->where('crm_requests.status_id', 4)
             ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
-            $closed_request = $closed_request->where('crm_requests.agent_id', Auth::id());
+            $closed_request = $closed_request->where(function ($sub_query) {
+                $sub_query->where('crm_requests.agent_id', Auth::id())
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('crm_requests.launched_by', 0)
+                            ->where('crm_requests.launched_by_id', Auth::id());
+                    })
+                    ->orWhere(function ($parent_sub_query){
+                        $parent_sub_query->orWhere(function ($sub_query) {
+                            $sub_query->where('crth.crm_request_tagging_type_id', 2)
+                                ->where('crth.tagged_id', '=', Auth::id());
+                        })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->where('crth.crm_request_tagging_type_id', 1)
+                                    ->where('adp.id', '=', session('department_id'))
+                                    ->where(function ($sub_sub_query) {
+                                        $sub_sub_query->whereIn('oc.hub_id', session('hubs'))
+                                            ->orWhereIn('dc.hub_id', session('hubs'));
+                                    });
+                            });
+                    });
+            });
         }
 
         $datatables = Datatables::of($closed_request)
@@ -1072,12 +1229,36 @@ class AdminCRMController extends Controller
                 }
             })
             ->editColumn('total_tat', function ($requests){
-                if($requests->inprocess && $requests->closed){
-                    $process = Carbon::parse($requests->inprocess);
-                    $closed = Carbon::parse($requests->closed);
-                    return $closed->diffInWeekdays($process);
-                }
-                return "-";
+                    $launched = Carbon::parse($requests->created_at);
+                    $closed = Carbon::parse($requests->closed_date);
+                    $time_format = 'H:i';
+                    $time_from = CrmSettings::where('name','TAT Cut-Off Time From')->first();
+                    $time_to = CrmSettings::where('name','TAT Cut-Off Time To')->first();
+                    $from_formatted = date($time_format, strtotime($time_from->setting_value));
+                    $to_formatted = date($time_format, strtotime($time_to->setting_value));
+                    $cut_off_check = $requests->created_at->format($time_format);
+                    $current_tat = $closed->diffInWeekdays($launched);
+                    if($from_formatted > $cut_off_check || $to_formatted < $cut_off_check){
+                        $after_cut_off = $current_tat - 1;
+                        $current_tat = $after_cut_off;
+                    }
+                    $holidays = CrmTatHolidays::get();
+                    foreach($holidays as $holiday){
+                        $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                        $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                        $launched_formatted_check = date('Y-m-d', strtotime($launched));
+                        if($launched < $holiday_formatted || $current > $holiday_formatted){
+                            if($holiday_formatted_check == $launched_formatted_check){
+                                if($from_formatted > $cut_off_check || $to_formatted < $cut_off_check){
+                                    $after_cut_off = $current_tat + 1;
+                                    $current_tat = $after_cut_off;
+                                }
+                            }
+                            $after_holidays = $current_tat - 1;
+                            $current_tat = $after_holidays;
+                        }
+                    }
+                    return $current_tat;
             })
             ->addColumn('launched_by_name', function ($requests){
                 $name = '';

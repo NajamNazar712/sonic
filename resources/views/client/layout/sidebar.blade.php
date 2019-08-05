@@ -69,6 +69,14 @@
             @endif
 
             <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title">Tracking</span></a></li>
+
+            @if (session('user_type') == 1 || in_array(9, session('permissions')))
+                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Settings</span></a>
+                    <ul class="menu-content">
+                        <li><a class="menu-item" href="{{route('cod.settings.air_waybill_printing.index')}}">Air Waybill Print Count</a></li>
+                    </ul>
+                </li>
+            @endif
         </ul>
     </div>
 </div>

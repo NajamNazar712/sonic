@@ -14,6 +14,7 @@ use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
+use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
@@ -999,7 +1000,7 @@ class GlobalSettingsController extends Controller
         }
         return view('admin.settings.stock_movement')->with(['account_id' => $account_id, 'account_name' => $account_name]);
     }
-public function stock_movement_update(Request $request){
+    public function stock_movement_update(Request $request){
 
         $stock_movement_account_id = $request->stock_movement_account_id;
         if ($stock_movement_account_id != null) {
@@ -1022,7 +1023,7 @@ public function stock_movement_update(Request $request){
         return redirect()->back()->with('error', 'Settings can\'t be updated');
 
     }
-public function delivery_call_verification_ratio_index(){
+    public function delivery_call_verification_ratio_index(){
         $settings = DeliveryCallVerificationRatio::get();
         return view('admin.settings.delivery_call_verification_ratio')->with(['settings' => $settings]);
     }
@@ -1039,4 +1040,5 @@ public function delivery_call_verification_ratio_index(){
         }
         $new_ratios = new DeliveryCallVerificationRatio();
         return redirect()->back()->with('success', 'Call verification ratio is Updated Successfully!');
-    }}
+    }
+}

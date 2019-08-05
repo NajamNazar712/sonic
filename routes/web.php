@@ -241,6 +241,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('update','Shippers\ShipperInterceptReBookController@intercept_re_book_update')->name('update');
     });
 
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::prefix('air_waybill_printing')->name('air_waybill_printing.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@air_waybill_printing_count_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@air_waybill_printing_count_store')->name('store');
+        });
+    });
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -1198,7 +1205,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 		Route::prefix('stock_movement')->name('stock_movement.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@stock_movement_index')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@stock_movement_update')->name('update');
-        });    });
+        });
+
+		Route::prefix('crm_cut_off_time_and_holidays')->name('crm_cut_off_time_and_holidays.')->group(function () {
+            Route::get('', 'Admins\AdminCrmSettingsController@crm_cut_off_time_and_holidays_index')->name('index');
+            Route::post('update', 'Admins\AdminCrmSettingsController@crm_cut_off_time_and_holidays_update')->name('update');
+            Route::post('list', 'Admins\AdminCrmSettingsController@crm_cut_off_time_and_holidays_list')->name('list');
+            Route::post('add', 'Admins\AdminCrmSettingsController@crm_cut_off_time_and_holidays_add')->name('add');
+        });
+    });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@index')->name('walk_in');

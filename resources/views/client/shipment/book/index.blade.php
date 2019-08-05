@@ -428,8 +428,7 @@
 				method: 'POST',
 				data: {
 					'_token': '{{ csrf_token() }}',
-					'ids[]': '{{ session('print') }}',
-					'twice': true
+					'ids[]': '{{ session('print') }}'
 				}
 			})
 					.done(function(data) {
