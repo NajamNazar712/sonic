@@ -165,19 +165,22 @@
                                                 </section>
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input d-flex" id="chat_form">
-                                                        <fieldset class="form-group position-relative has-icon-left col-10 m-0">
+                                                        <fieldset class="form-group position-relative col-10 has-icon-left">
                                                             <input type="hidden" id="last_comment_id" value="{{$last_comment_id}}">
                                                             <div class="form-control-position">
                                                                 <i class="la la-chevron-right"></i>
                                                             </div>
                                                             {{--<input type="text" class="form-control" id="chat_input" placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control width-500 height-75" placeholder="Type your message"></textarea>
+                                                            <textarea id="chat_input" class="form-control width-400 height-75" placeholder="Type your message"></textarea>
                                                         </fieldset>
-                                                        <fieldset class="form-group position-relative has-icon-left col-2 m-0">
-                                                            <button id="chat_send" type="button" class="btn btn-block btn-info" ><i class="la la-paper-plane-o d-lg-none"></i>
-                                                                <span class="d-none d-lg-block">Send</span>
-                                                            </button>
-                                                        </fieldset>
+
+                                                        <div class="display-inline-block col">
+                                                            <fieldset class="form-group position-relative has-icon-left m-0">
+                                                                <button id="chat_send" type="button" class="btn btn-block btn-info" ><i class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="d-none d-lg-block">Send</span>
+                                                                </button>
+                                                            </fieldset>
+                                                        </div>
                                                     </form>
                                                 </section>
                                             </div>
