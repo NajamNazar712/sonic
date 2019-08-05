@@ -326,7 +326,7 @@
                                                                    {{--placeholder="Type your message">--}}
                                                             <textarea id="chat_input" class="form-control height-100" placeholder="Type your message"></textarea>
                                                         </fieldset>
-                                                        <div class="display-inline-block col">
+                                                        <div class="display-inline-block col-2">
                                                             <fieldset
                                                                     class="form-group position-relative has-icon-left m-0 mb-1">
                                                                 <button id="chat_send" type="button"
@@ -336,7 +336,7 @@
                                                                 </button>
                                                             </fieldset>
                                                             <fieldset
-                                                                    class="form-group position-relative has-icon-left col-2 m-0">
+                                                                    class="form-group position-relative has-icon-left m-0">
                                                                 <button id="chat_send" type="button"
                                                                         class="btn btn-block btn-default chat_send" to="0">
                                                                     <i class="la la-paper-plane-o d-lg-none"></i>
