@@ -1266,9 +1266,9 @@ class AdminPettyCashController extends Controller
                     }
 
                 }
-                
+                $petty_cash_draft->delete();
                 PettyCashStatement::where('id', $petty_cash->id)->update(['total_amount' => $total_amount]);
-                return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
+                return redirect()->route('admin.petty_cash.statements.index')->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
             }
         } else {
             return redirect()->back()->with(['status' => 0, 'error' => 'Petty Cash Statement Draft With This ID Not Found!']);
