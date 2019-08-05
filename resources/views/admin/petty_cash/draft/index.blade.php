@@ -119,7 +119,7 @@
                 serverSide: true,
                 {{--ajax: '{{ route('admin.petty_cash.statements.list') }}',--}}
                 ajax: {
-                    url: '{{ route('admin.petty_cash.statements.list') }}',
+                    url: '{{ route('admin.petty_cash.draft.list') }}',
                     data: function (d) {
                         d.search_hub = $('#search_hub').val();
                         d.search_creation_date = $('input[name="creation_date_formatted"]').val();
@@ -127,22 +127,17 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                rowId: 'statement_id',
+                rowId: 'draft_id',
                 order: [1, 'asc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'statement_link', name: 'petty_cash_statements.id', class: 'align-middle statement_link'},
+                    {data: 'draft_id', name: 'petty_cash_statement_drafts.id', class: 'align-middle draft_id'},
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
-                    {data: 'reference_no', name: 'petty_cash_statements.reference_no', class: 'align-middle reference_no'},
+                    {data: 'reference_no', name: 'petty_cash_statement_drafts.reference_no', class: 'align-middle reference_no'},
                     {data: 'date', name: 'date', class: 'align-middle date', orderable:false},
-                    {data: 'total_amount', name: 'petty_cash_statements.total_amount', class: 'align-middle total_amount'},
+                    {data: 'total_amount', name: 'petty_cash_statement_drafts.total_amount', class: 'align-middle total_amount'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
-                    {data: 'created_at', name: 'petty_cash_statements.created_at', class: 'align-middle created_at'},
-                    {data: 'station_approved_by', name: 'sab.name', class: 'align-middle station_approved_by'},
-                    {data: 'station_approved_at', name: 'petty_cash_statements.station_approved_at', class: 'align-middle station_approved_at'},
-                    {data: 'operation_approved_by', name: 'oab.name', class: 'align-middle operation_approved_by'},
-                    {data: 'operation_approved_at', name: 'petty_cash_statements.operation_approved_at', class: 'align-middle operation_approved_at'},
-                    {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
+                    {data: 'created_at', name: 'petty_cash_statement_drafts.created_at', class: 'align-middle created_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],

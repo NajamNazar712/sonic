@@ -363,6 +363,11 @@
                                         <li><a class="menu-item" href="{{ route('admin.petty_cash.approved.index') }}">Approved</a>
                                         </li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(238, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.petty_cash.draft.index') }}">Draft</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif

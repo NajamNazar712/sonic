@@ -1,20 +1,20 @@
 @extends('admin.layout.master')
-@section('title','Edit Petty Cash Statement')
+@section('title','Edit Petty Cash Statement Draft')
 
 @section('content')
     <h1 class="mb-1">
-        Edit Petty Cash Statement # {{$petty_statement->id}}
+        Edit Petty Cash Statement Draft # {{$petty_statement_draft->id}}
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="edit_statement_form" action="{{route('admin.petty_cash.statements.edit.submit')}}" method="post" enctype="multipart/form-data">
+                <form id="edit_statement_form" action="{{route('admin.petty_cash.draft.edit.submit')}}" method="post" enctype="multipart/form-data">
                     @method('PUT')
                     @csrf
                     <input type="hidden" name="selected_rows" id="selected_rows">
-                    <input type="hidden" name="petty_statement_id" id="petty_statement_id" value="{{$petty_statement->id}}">
+                    <input type="hidden" name="petty_draft_id" id="petty_draft_id" value="{{$petty_statement_draft->id}}">
                     <div class="row">
                         <div class="col">
                             <fieldset class="form-group">
@@ -33,7 +33,7 @@
                             </span>
                                 </div>
 
-                                <input type="text" name="select_date_from" disabled class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_from" placeholder="Date (From)" data-rule-required="true" data-msg-required="Date (From) is required" data-value="{{$petty_statement->from}}">
+                                <input type="text" name="select_date_from" disabled class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_from" placeholder="Date (From)" data-rule-required="true" data-msg-required="Date (From) is required" data-value="{{$petty_statement_draft->from}}">
                             </div>
                         </div>
                         <div class="col ">
@@ -44,18 +44,18 @@
                             </span>
                                 </div>
 
-                                <input type="text" name="select_date_to" disabled class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date (To) is required" data-value="{{$petty_statement->to}}">
+                                <input type="text" name="select_date_to" disabled class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date (To) is required" data-value="{{$petty_statement_draft->to}}">
                             </div>
                         </div>
                         <div class="col">
                             <fieldset class="form-group">
-                                <input type="text" class="form-control reference_no" disabled name="reference_no" id="reference_no" placeholder="Statement Reference No." data-rule-required="true" data-msg-required="Statement Reference No. is required" value="{{$petty_statement->reference_no}}">
+                                <input type="text" class="form-control reference_no" disabled name="reference_no" id="reference_no" placeholder="Statement Reference No." data-rule-required="true" data-msg-required="Statement Reference No. is required" value="{{$petty_statement_draft->reference_no}}">
                             </fieldset>
                         </div>
                     </div>
                     <div class="row text-center">
                         <div class="col">
-                            <b class="total_amount_span"> Total Amount : <span id="statements_total_amount">{{$petty_statement->total_amount}}</span></b>
+                            <b class="total_amount_span"> Total Amount : <span id="statements_total_amount">{{$petty_statement_draft->total_amount}}</span></b>
                         </div>
                     </div>
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -68,53 +68,24 @@
                             <th class="border-primary border-darken-1">City / Location</th>
                             <th class="border-primary border-darken-1">Date</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
-                            <th class="border-primary border-darken-1"> Amount </th>
+                            <th class="border-primary border-darken-1">Amount </th>
                             <th class="border-primary border-darken-1">Reference No.</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Reference Document</th>
-                            <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1"></th>
 
                         </tr>
                         </thead>
                     </table>
                     <div class="row justify-content-center">
-                        <div class="">
-                            <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" disabled>Update Details</button>
+                        <div class="col-2">
+                            <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" name="submit_button" value="create"><i class="la la-list"></i> Make Statement</button>
                         </div>
-                            @if((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions')))
-                                @if((session('role_id') == 1) || ($petty_statement->status == 0 && session('department_id') == 6) || ($petty_statement->status == 1 && (session('department_id') == 6)) || ($petty_statement->status == 2 && session('department_id') == 4))
-                                <div class="ml-1">
-                                    <button id="statement_approve" type="button"  class="btn btn-primary btn-block">Approve</button>
-                                </div>
-                                <div class="ml-1">
-                                    <button id="statement_reject" type="button"  class="btn btn-danger btn-block">Reject</button>
-                                </div>
-                            @endif
-                        @endif
+                        <div class="col-2">
+                            <button id="statement_draft" type="submit"  class="btn btn-success btn-block" name="submit_button" value="draft"><i class="la la-save"></i> Save Draft</button>
+                        </div>
                     </div>
                 </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade text-left" id="AmountLogModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AmountLogModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Petty Cash Statement Detail Amount</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body  text-center" id="amount_log_table">
-
-                </div>
-                <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                </div>
-
             </div>
         </div>
     </div>
@@ -129,7 +100,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style type="text/css">
         /*.custom-col-width{*/
-            /*min-width: 100px;*/
+            /*max-width: 150px !important;*/
         /*}*/
         /*th.expense_amount, th.reference_no{*/
             /*width: 80px;*/
@@ -137,9 +108,12 @@
         /*.custom-hub-col-width{*/
             /*min-width: 80px;*/
         /*}*/
-        /*.date-col-width{*/
-            /*min-width: 190px;*/
-        /*}*/
+        .date-col-width{
+            min-width: 150px;
+        }
+        div.picker .picker__holder{
+            width: 250px;
+        }
         /*.date-col-width{*/
             /*min-width: 200px;*/
         /*}*/
@@ -169,12 +143,14 @@
                 'allowPlus': false,
                 'rightAlign': false,
             });
+
+
             $('#select_statement_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Hub',
                 width:'100%',
                 allowClear:true
             });
-            $('#select_statement_hub').val('{!! $petty_statement->hub_id!!}').trigger('change');
+            $('#select_statement_hub').val('{!! $petty_statement_draft->hub_id!!}').trigger('change');
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(2)->toDateString() }}';
             var future_date_limit = '{{ Carbon\Carbon::now()->addDays(28)->toDateString() }}';
 
@@ -212,57 +188,29 @@
             var selected_rows = [];
             var rows_count = 0;
             var table = $('#datatable').DataTable({
-                @if(($petty_statement->status == 0 && session('department_id') == 6) || ($petty_statement->status == 1 && session('department_id') == 6))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
-                    title: 'Edit Details',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-plus"></i> Edit Details',
+                    title: 'Add Row',
+                    className: 'btn btn-primary mb-1',
+                    text: '<i class="la la-plus"></i> Add Row',
                     action:function (e) {
-                        edit_ops();
-                        $('#statement_submit').attr('disabled', false);
+                        add_row();
                     }
                 }],
-                @elseif(session('role_id') == 1 || ($petty_statement->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons:[{
-                    title: 'Edit Details',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-plus"></i> Edit Details',
-                    action:function (e) {
-                        edit_finance();
-                        $('#statement_submit').attr('disabled', false);
-
-                    }
-                },'reset'],
-                @else
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: ['reset'],
-                @endif
-                autoWidth: false,
-                scrollX: true, scrollY:'200px',
-                ajax: '{{ route('admin.petty_cash.statements.edit.list',['id'=>$petty_statement->id]) }}',
-                processing: true,
-                language: {
-                    processing: data_table_loader
-                },
-                serverSide: false,
-                rowId: 'statement_detail_id',
+                ordering:false,
                 paging:false,
-                ordering: false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data:'account_head' ,name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
-                    {data:'account_title' ,name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
-                    {data:'hub_name' ,name: 'h.name', class: 'align-middle hub_name custom-col-width form-group'},
-                    {data:'date' ,name: 'date', class: 'align-middle date form-group'},
-                    {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense form-group'},
-                    {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount form-group'},
-                    {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle reference_no form-group'},
-                    {data:'remarks' ,name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},
-                    {data:'reference_document' ,name: 'reference_document', class: 'align-middle reference_document form-group'},
-                    {data:'status' ,name: 'petty_cash_statement_details.status', class: 'align-middle status'},
-                    {data:'action' ,name: 'action', class: 'align-middle action'}
+                    {name: 'account_head', class: 'align-middle account_head  form-group'},
+                    {name: 'account_title', class: 'align-middle account_title  form-group'},
+                    {name: 'hub', class: 'align-middle hub custom-hub-col-width form-group'},
+                    {name: 'date', class: 'align-middle date date-col-width form-group'},
+                    {name: 'details_of_expense', class: 'align-middle details_of_expense form-group'},
+                    {name: 'amount', class: 'align-middle expense_amount form-group'},
+                    {name: 'reference_no', class: 'align-middle reference_no form-group'},
+                    {name: 'remarks', class: 'align-middle remarks'},
+                    {name: 'image', class: 'align-middle image form-group'},
+                    {name: 'action', class: 'align-middle action'},
                 ],
 
                 rowCallback: function(row, data, index) {
@@ -271,73 +219,9 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
                 },
-                drawCallback: function (settings) {
-                    var this_table = this;
-
-                    $(".head_select").select2({
-                        placeholder: "Select Account Head",
-                        width:'100%'
-                    }).bind('change', function() {
-                        this_table.api().table().columns.adjust();
-                    });
-
-                    $(".title_select").select2({
-                        placeholder: "Select Account Title",
-                        width:'100%'
-                    }).bind('change', function() {
-                        this_table.api().table().columns.adjust();
-                    });
-
-                    $(".hub_select").select2({
-                        placeholder: "Select Hub",
-                        width:'100%'
-                    }).bind('change', function() {
-                        this_table.api().table().columns.adjust();
-                    });
-                    // $(".statusDrop").prepend('<option value="" selected="selected"></option>').select2({
-                    //     placeholder: "Select a Status",
-                    //     width:'100%'
-                    // });
-                    // var api = new $.fn.dataTable.Api( settings );
-                    // var data = api.rows( {page:'current'} ).data();
-                    // $.each(data,function (key,value) {
-                    //     if(shipment_status.length !== 0){
-                    //         $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
-                    //     }
-                    //     if(shipment_reason.length !== 0){
-                    //         $('select[name="reason_drop['+value.shId+']"]').val(shipment_reason[value.shId]).trigger('change');
-                    //     }
-                    // });
-                },
                 initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    // var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                    //     '<option value="0">Pending</option>' +
-                    //     '<option value="1">Rejected</option>' +
-                    //     '<option value="2">Approved</option>' +
-                    //     '</select>';
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-                        if ($(header).is('.serial_number') || $(header).is('.status') || $(header).is('.date') || $(header).is('.hub_name') || $(header).is('.account_head') || $(header).is('.account_title') || $(header).is('.action') || $(header).is('.reference_document')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change keypress', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
-                    this.api().table().columns.adjust();
+                    // this.api().table().columns.adjust();
                 }
             });
 
@@ -354,30 +238,96 @@
                     form.submit();
                 }
             });
-            var result;
-            $.validator.addMethod("reference_no",
-                function(value, element) {
-                    if(value > 3) {
 
-                        $.ajax({
-                            type: "POST",
-                            url: '{!! route('admin.petty_cash.make.reference') !!}', // script to validate in server side
-                            data: {reference_id: value,'_token': '{!! csrf_token() !!}'},
-                            success: function (data) {
-                                if(data === 'true'){
-                                    result = false;
-                                }else{
-                                    result = true;
-                                }
-                            }
-                        });
-                        return result;
-                    }
-                },
-                "Statement Reference Number already exists."
-            );
+            var min_date = '{{$petty_statement_draft->from}}';
+            var max_date = '{{$petty_statement_draft->to}}';
+            rows_count = 0;
+            function add_row() {
 
+                rows_count++;
+                selected_rows.push(rows_count);
+                var heads_select = '<select class="form-control select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
+                var titles_select = '<select class="form-control select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
+                var hub_select = '<select class="form-control hub_select select2" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
+                var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required"></div>';
 
+                var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
+                var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount">';
+                var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Reference No" data-rule-required="true" data-msg-required="Amount is required">';
+                var remarks_input = '<input class="form-control form-control-sm" name="remarks['+rows_count+']" placeholder="Remarks">';
+
+                var upload_image = '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
+                if(rows_count == 1){
+                    var remove = '';
+                }else{
+                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+
+                }
+
+                var heads = $.map({!! $heads !!}, function (obj) {
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+                    return obj;
+                });
+                var hubs_select = $.map({!! $cities !!}, function (obj) {
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+                    return obj;
+                });
+                // var trow = '<tr><td>'+rows_count+'</td><td>'+heads_select+'</td><td>'+titles_select+'</td><td>'+hub_select+'</td><td>'+date_input+'</td><td>'+expense_detail_input+'</td><td>'+amount_input+'</td><td>'+reference_input+'</td><td>'+remarks_input+'</td><td>'+upload_image+'</td><td>'+remove+'</td></tr>';
+                // $('#datatable tbody').append(trow);
+                table.row.add([0, heads_select,titles_select,hub_select,date_input,expense_detail_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
+                table.draw(true);
+                $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    data:heads,
+                    placeholder:'Select Account Head',
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $('select[name="title['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    placeholder:'Select Account Title',
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $('select[name="hub['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    data: hubs_select,
+                    placeholder:'Select Hub',
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $('.reference_row').inputmask({
+                    'alias': 'integer',
+                    'allowMinus': false,
+                    'allowPlus': false,
+                    'rightAlign': false,
+                });
+                $('#expense_date_' + rows_count).pickadate({
+                    firstDay: 1,
+                    today: '',
+                    clear: '',
+                    close: '',
+                    min: new Date(min_date),
+                    max: new Date(max_date),
+                    weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
+                    showMonthsShort: true,
+                    formatSubmit: 'yyyy-mm-dd 00:00:00',
+                    hiddenSuffix: '_formatted',
+                    onOpen: function() {
+                        $('#expense_date_' + rows_count+'_root').css('top', '-262px');
+                    },
+                });
+
+                $('.amount').inputmask({
+                    'alias': 'decimal',
+                    'allowMinus': false,
+                    'allowPlus': false,
+                    'rightAlign': false,
+                    'digits': 2,
+                    'min': 0.00,
+                    'max': 1000000.00
+                });
+
+            }
 
 
             $('body').on('select2:select','.account_head .head_select',function () {
@@ -415,6 +365,31 @@
                 }
             });
 
+            $('body').on('click', 'a.remove_row',function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, selected_rows);
+
+                if (index !== -1) {
+                    selected_rows.splice(index, 1);
+                }
+
+                table.row( $(this).parents('tr') ).remove().draw();
+                calculate_amount();
+
+            });
+            function calculate_amount() {
+                var total_amount = 0;
+                table.rows().nodes().each(function(index) {
+                    var row = table.row(index);
+                    if($(row.node()).find('td.expense_amount input').val() != ''){
+
+                        total_amount += parseInt($(row.node()).find('td.expense_amount input').val());
+                    }
+
+
+                });
+                $('#statements_total_amount').text(total_amount);
+            }
             $('body').on('click','.action button.approve', function () {
                 var current = $(this);
                 var id = parseInt($(this).parents('tr').attr('id'));
@@ -588,8 +563,8 @@
             $('#statement_approve').on('click', function (e) {
                 e.preventDefault();
                 var current = $(this);
-                var id = '{{$petty_statement->id}}';
-                var status = parseInt({{$petty_statement->status}});
+                var id = '{{$petty_statement_draft->id}}';
+                var status = parseInt({{$petty_statement_draft->status}});
                 if(status == 0 || status == 1 || status == 2) {
                     $('#statement_approve').attr('disabled', true);
 
@@ -606,7 +581,7 @@
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                             setTimeout(function() {
-                                window.location = '{{ route('admin.petty_cash.statements.edit',['id' => $petty_statement->id]) }}';
+                                window.location = '{{ route('admin.petty_cash.statements.edit',['id' => $petty_statement_draft->id]) }}';
                             }, 2500);
                         }
                         else{
@@ -626,62 +601,10 @@
             });
 
 
-
-            $('#datatable').on('click', 'td .amount_log', function(){
-                var id = $(this).parents('tr').attr('id');
-                if(id){
-                    $.ajax({
-                        url: '{!! route('admin.petty_cash.statements.view.amount') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-
-                        if(data.status){
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }else{
-                            var log_table = '';
-                            if(data.amount){
-                                log_table += '<table class="table table-sm datatable">';
-                                log_table += '<thead>';
-                                log_table += '<tr role="row">';
-                                log_table += '<th><strong>Actual Amount</strong></th>';
-                                log_table += '<th><strong>Station Amount</strong></th>';
-                                log_table += '<th><strong>Operation Amount</strong></th>';
-                                log_table += '<th><strong>Finance Amount</strong></th>';
-
-                                log_table += '</tr>';
-                                log_table += '</thead>';
-                                log_table += '<tbody>';
-
-                                log_table += '<tr>';
-                                log_table += '<td>' + data.amount.actual + '</td>';
-                                log_table += '<td>' + data.amount.station + '</td>';
-                                log_table += '<td>' + data.amount.ope + '</td>';
-                                log_table += '<td>' + data.amount.finance + '</td>';
-                                log_table += '</tr>';
-
-                                log_table += '</tbody>';
-                                log_table += '</table>';
-                            }
-
-
-                            $('#amount_log_table').html(log_table);
-                            $('#AmountLogModal').modal('show');
-                        }
-                    });
-                }
-            });
-
             $('#statement_reject').on('click',  function (e) {
                 e.preventDefault();
-                var id = '{{$petty_statement->id}}';
-                var status = parseInt({{$petty_statement->status}});
+                var id = '{{$petty_statement_draft->id}}';
+                var status = parseInt({{$petty_statement_draft->status}});
                 if(status == 0 || status == 1 || status == 2) {
                     $('#statement_reject').attr('disabled', true);
 
@@ -715,6 +638,127 @@
                     });
                 }
             });
+
+            function load_data() {
+
+                @foreach($petty_statement_draft->petty_cash_statement_draft_details as $data)
+                        var head = '{{$data->account_head_id}}';
+                        var title = '{{$data->account_title_id}}';
+                        var hub = '{{$data->hub_id}}';
+                        var date = '{{$data->date}}';
+                        var expense = '{{$data->expense_details}}';
+                        var amount = '{{$data->amount}}';
+                        var reference_no = '{{$data->reference_no}}';
+                        var remarks = '{{$data->remarks}}';
+                        var reference_document = $.trim('{{$data->reference_document}}');
+
+                    load_row(head, title, hub, date, expense, amount, reference_no, remarks, reference_document);
+                @endforeach
+            }
+            load_data();
+
+            function load_row(head, title, hub, date, expense, amount, reference, remarks, reference_document) {
+                var image_url = '{{asset('/storage/petty_cash_statement_details_draft')}}';
+                rows_count++;
+                selected_rows.push(rows_count);
+                var heads_select = '<select class="form-control select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
+                var titles_select = '<select class="form-control select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
+                var hub_select = '<select class="form-control hub_select select2" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
+                var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required" data-value="'+ date +'"></div>';
+
+                var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required">'+ expense +'</textarea>';
+                var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount" value="'+ amount +'" data-rule-required="true" data-msg-required="Amount is required">';
+                var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Reference No" data-rule-required="true" data-msg-required="Reference No. is required" value="'+reference+'">';
+                var remarks_input = '<input class="form-control form-control-sm" name="remarks['+rows_count+']" placeholder="Remarks" value="'+ remarks +'">';
+                var upload_image = '<div class="text-center">';
+                if(reference_document != ''){
+                    upload_image += '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="'+ image_url +'/'+ reference_document +'" target="_blank">View</a></button><input type="hidden" name="image_'+ rows_count +'" value="'+reference_document+'">';
+                }
+                upload_image += '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." value="'+reference_document+'" value=""></div>';
+                if(rows_count == 1){
+                    var remove = '';
+                }else{
+                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+
+                }
+
+                var heads = $.map({!! $heads !!}, function (obj) {
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+                    return obj;
+                });
+                var titles_array = @json($titles);
+
+                var head_title = $.map(titles_array[head], function (obj) {
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+                    return obj;
+                });
+
+                var hubs_select = $.map({!! $cities !!}, function (obj) {
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+                    return obj;
+                });
+                // var trow = '<tr><td>'+rows_count+'</td><td>'+heads_select+'</td><td>'+titles_select+'</td><td>'+hub_select+'</td><td>'+date_input+'</td><td>'+expense_detail_input+'</td><td>'+amount_input+'</td><td>'+reference_input+'</td><td>'+remarks_input+'</td><td>'+upload_image+'</td><td>'+remove+'</td></tr>';
+                // $('#datatable tbody').append(trow);
+                table.row.add([0, heads_select,titles_select,hub_select,date_input,expense_detail_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
+                table.draw(true);
+                $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    data:heads,
+                    placeholder:'Select Account Head',
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $('select[name="head['+rows_count+']"]').val(head).trigger('change');
+                $('select[name="title['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    data:head_title,
+                    placeholder:'Select Account Title',
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $('select[name="title['+rows_count+']"]').val(title).trigger('change');
+                $('select[name="hub['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    data: hubs_select,
+                    placeholder:'Select Hub',
+                    allowClear:true,
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $('select[name="hub['+rows_count+']"]').val(hub).trigger('change');
+                $('.reference_row').inputmask({
+                    'alias': 'integer',
+                    'allowMinus': false,
+                    'allowPlus': false,
+                    'rightAlign': false,
+                });
+                $('#expense_date_' + rows_count).pickadate({
+                    firstDay: 1,
+                    today: '',
+                    clear: '',
+                    close: '',
+                    min: new Date(min_date),
+                    max: new Date(max_date),
+                    weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
+                    showMonthsShort: true,
+                    formatSubmit: 'yyyy-mm-dd 00:00:00',
+                    hiddenSuffix: '_formatted',
+                    onOpen: function() {
+                        $('#expense_date_' + rows_count+'_root').css('top', '-262px');
+                    },
+                });
+
+                $('.amount').inputmask({
+                    'alias': 'decimal',
+                    'allowMinus': false,
+                    'allowPlus': false,
+                    'rightAlign': false,
+                    'digits': 2,
+                    'min': 0.00,
+                    'max': 1000000.00
+                });
+
+            }
+
         });
     </script>
 @endsection

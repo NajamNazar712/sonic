@@ -873,6 +873,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('draft')->name('draft.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@draft_petty_cash_statements_index')->name('index');
             Route::get('list', 'Admins\AdminPettyCashController@draft_petty_cash_statements_list')->name('list');
+            Route::get('{id}/edit', 'Admins\AdminPettyCashController@draft_edit_petty_cash_statement_index')->name('edit');
+            Route::get('{id}/edit/list', 'Admins\AdminPettyCashController@draft_edit_petty_cash_statement_list')->name('edit.list');
+            Route::put('edit/submit', 'Admins\AdminPettyCashController@draft_edit_petty_cash_statements_submit')->name('edit.submit');
+            Route::get('reference_document/{reference_document}', 'Admins\AdminPettyCashController@draft_reference_document')->name('reference_document');
+
         });
     });
 
