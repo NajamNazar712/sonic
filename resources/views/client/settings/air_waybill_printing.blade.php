@@ -18,7 +18,7 @@
 
                             <div class="form-group">
                                 <div class="input-group">
-                                    <input type="text" name="air_waybill_printing_count" class="form-control air_waybill_printing_count" placeholder="Air Waybill Print Count*" data-rule-required="true" data-msg-required="Air Waybill Print Count is required" value="{{ $air_waybill_printing_count->setting_value }}" data-rule-min="1" data-msg-min="Air Waybill Print Count can not be less than 1" data-rule-max="3" data-msg-min="Air Waybill Print Count can not be more than 3">
+                                    <input type="text" name="air_waybill_printing_count" class="form-control air_waybill_printing_count" placeholder="Air Waybill*" data-rule-required="true" data-msg-required="Air Waybill Print Count is required" value="{{ $air_waybill_printing_count->setting_value }}" data-rule-min="1" data-msg-min="Air Waybill Print Count can not be less than 1" data-rule-max="3" data-msg-min="Air Waybill Print Count can not be more than 3">
                                     <div class="input-group-append">
                                         <span class="input-group-text">Print</span>
                                     </div>
