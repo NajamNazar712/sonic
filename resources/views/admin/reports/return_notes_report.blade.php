@@ -111,6 +111,7 @@
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Creation Date</th>
                         <th class="border-primary border-darken-1">Aging</th>
+                        <th class="border-primary border-darken-1">Image</th>
                     </tr>
                     </thead>
                 </table>
@@ -328,6 +329,7 @@
                     {
                     extend: 'excelHtml5',
                     title: 'Completed Return Notes Report',
+                    className:'btn-primary',
                     text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -354,7 +356,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[4, 'asc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'return_note_link', name: 'return_notes.id', class: 'align-middle return_note_link text-center'},
@@ -364,7 +366,8 @@
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
                     {data: 'created_by', name: 'cr.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'return_notes.created_at', class: 'align-middle created_at'},
-                    {orderable: false, searchable: false,data: 'aging', name: 'aging', class: 'align-middle aging'}
+                    {orderable: false, searchable: false,data: 'aging', name: 'aging', class: 'align-middle aging'},
+                    {orderable: false, searchable: false,data: 'image', name: 'image', class: 'align-middle image'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

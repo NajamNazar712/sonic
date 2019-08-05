@@ -2750,6 +2750,37 @@ class NotificationsController extends Controller
 
             self::email($subject, $body, $to);
         }
+        else if($id == 34){
+            $user_id = str_pad($reference_1_id, 6, '0', STR_PAD_LEFT);
+            $updated_at = Carbon::now();
+            $sale_person = Admin::where('id', $reference_2_id)->first();
+
+             if (strpos($subject, '[user_id]') !== FALSE) {
+                $subject = str_replace('[user_id]', $user_id, $subject);
+             }
+             if (strpos($body, '[user_id]') !== FALSE) {
+                $body = str_replace('[user_id]', $user_id, $body);
+             }
+            if (strpos($subject, '[updated_at]') !== FALSE) {
+                $subject = str_replace('[updated_at]', $updated_at, $subject);
+            }
+            if (strpos($body, '[updated_at]') !== FALSE) {
+                $body = str_replace('[updated_at]', $updated_at, $body);
+            }
+
+            if (strpos($body, '[tagged_sales_person]') !== FALSE) {
+                $body = str_replace('[tagged_sales_person]', $sale_person->name, $body);
+            }
+            $to = array();
+
+            $admins = Admin::whereIn('role_id', [2, 4])->where('status', 1);
+
+            if ($admins->exists()) {
+                $to = array_merge($to, $admins->pluck('email')->toArray());
+            }
+
+            self::email($subject, $body, $to);
+        }
         }
       }
     }

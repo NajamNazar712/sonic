@@ -34,6 +34,7 @@
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Amount</th>
+                            <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Shipping Mode</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1"></th>
@@ -88,6 +89,7 @@
                     {name: 'destination', class: 'align-middle destination form-group', orderable: false},
                     {name: 'hub', class: 'align-middle hub form-group', orderable: false},
                     {name: 'amount', class: 'align-middle amount', orderable: false},
+                    {name: 'remarks', class: 'align-middle remarks', orderable: false},
                     {name: 'mode', class: 'align-middle mode', orderable: false},
                     {name: 'service_type', class: 'align-middle service_type', orderable: false},
                     {name: 'action', class: 'align-middle action', orderable: false},
@@ -144,7 +146,7 @@
                                         var rowNo = table.rows().count();
 
                                         var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount,data.details.mode,data.details.service_type, action]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, data.details.remarks,data.details.mode,data.details.service_type, action]).node().id = data.details.id;
                                         table.draw(false);
                                         scan_sound(1);
                                         table.order([0, 'desc']).draw();

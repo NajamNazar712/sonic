@@ -347,6 +347,22 @@ class Permission
             'packaging.requests.index' => 79,
             'packaging.requests.list' => 79,
             'packaging.requests.dispatch' => 80,
+            'packaging.requests.confirm' => 226,
+            'packaging.requests.cancel' => 227,
+            'packaging.types.index' => 214,
+            'packaging.types.list' => 214,
+            'packaging.types.add' => 215,
+            'packaging.types.edit' => 215,
+            'packaging.types.details' => 215,
+            'packaging.types.enable_disable' => 216,
+            'packaging.warehouse.index' => 217,
+            'packaging.warehouse.list' => 217,
+            'packaging.warehouse.enable_disable' => 218,
+            'packaging.warehouse.add' => 219,
+            'packaging.warehouse.edit' => 219,
+            'packaging.warehouse.master_add' => 220,
+            'packaging.inventory.index' => 221,
+            'packaging.inventory.list' => 221,
 
             'user_management.users.index' => 81,
             'user_management.users.list' => 81,
@@ -446,6 +462,11 @@ class Permission
 
             'settings.cod_cap_zones.index' => 197,
             'settings.cod_cap_zones.update' => 197,
+
+			'settings.stock_movement.index' => 228,
+            'settings.stock_movement.update' => 228,
+            'settings.delivery_call_verification_ratio.index' => 231,
+            'settings.delivery_call_verification_ratio.update' => 231,
 
 
 

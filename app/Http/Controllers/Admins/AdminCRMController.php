@@ -1157,7 +1157,12 @@ class AdminCRMController extends Controller
             if ($request->prev_status == 1 || $request->prev_status == 5) {
                 if ($crm_request['status_id'] != 2) {
                     CrmRequest::where('id', $request->req_id)->update([
-                        'status_id' => 2
+                        'status_id' => 2,
+                    ]);
+                    CrmRequestStatusHistory::create([
+                        'crm_request_id' => $request->req_id,
+                        'status_id' => 6,
+                        'agent_id' => Auth::id()
                     ]);
                     CrmRequestStatusHistory::create([
                         'crm_request_id' => $request->req_id,
@@ -1228,7 +1233,12 @@ class AdminCRMController extends Controller
         if ($crm_request['agent_id'] != null) {
             if ($crm_request['status_id'] != 4) {
                 CrmRequest::where('id', $request->req_id)->update([
-                    'status_id' => 4
+                    'status_id' => 4,
+                ]);
+                CrmRequestStatusHistory::create([
+                    'crm_request_id' => $request->req_id,
+                    'status_id' => 7,
+                    'agent_id' => Auth::id()
                 ]);
                 CrmRequestStatusHistory::create([
                     'crm_request_id' => $request->req_id,
