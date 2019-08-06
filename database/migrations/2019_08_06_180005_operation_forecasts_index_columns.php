@@ -55,10 +55,10 @@ class OperationForecastsIndexColumns extends Migration
             $table->index('created_at');
             $table->index('updated_at');
             $table->index('operation_outgoing_forecast_id', 'operation_outgoing_forecast_id_index');
-            $table->index('booking_type_id');
+            $table->index('booking_type_id', 'booking_type_id_index');
             $table->index('hub_id');
-            $table->index('weight_range_id');
-            $table->index('shipment_id');
+            $table->index('weight_range_id', 'weight_range_id_index');
+            $table->index('shipment_id', 'shipment_id_index');
         });
 
         Schema::table('operations_outgoing_top_customers', function (Blueprint $table) {
