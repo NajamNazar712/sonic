@@ -662,7 +662,7 @@
                             }
                         },
                     @endif
-                    @if (session('role_id') == 1 || in_array(222, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(240, session('permissions')))
                         {
                             text: '<i class="la la-send"></i> Request Stock',
                             className: 'btn btn-primary request_stock',
