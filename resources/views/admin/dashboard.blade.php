@@ -569,11 +569,19 @@
                 allowClear:true
             });
 
+            @if($default_hub_id === null)
+                $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                    width:'100%',
+                    placeholder:"Select Hub",
+                    allowClear:true
+                });
+            @else
             $('#search_hub').prepend('<option value="""></option>').select2({
                 width:'100%',
                 placeholder:"Select Hub",
                 allowClear:true
             });
+            @endif
 
             $('#search_service_type').prepend('<option value="""></option>').select2({
                 width:'100%',
@@ -588,6 +596,7 @@
             });
 
             var myChart;
+            var echart_search = false;
 
             $('.statistics_search').on('click',function(){
                 var search_btn = $(this);
@@ -608,6 +617,7 @@
                     }
                 }).done(function(data){
                     if(data.status == 1){
+                        echart_search = true;
                         $('#shipment_statistics_chart').removeClass('d-none');
 
                         if (!myChart) {
@@ -689,7 +699,9 @@
             window.onresize = function() {
                 $(".echart-container").each(function(){
                     var id = $(this).attr('_echarts_instance_');
-                    window.echarts.getInstanceById(id).resize();
+                    if(echart_search == true){
+                        window.echarts.getInstanceById(id).resize();
+                    }
                 });
             };
 

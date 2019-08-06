@@ -125,10 +125,18 @@
 				width: '100%',
 				placeholder: 'Role*'
 			});
-			$('#user_form #default_hub').select2({
-				width: '100%',
-				placeholder: 'Default Hub*'
-			});
+
+			@if ($user->default_hub_id === null)
+				$('#user_form #default_hub').prepend('<option value="" selected="selected"></option>').select2({
+					width: '100%',
+					placeholder: 'Default Hub*'
+				});
+			@else
+				$('#user_form #default_hub').select2({
+					width: '100%',
+					placeholder: 'Default Hub*'
+				});
+			@endif
 
 			$('#user_form #phone_number').inputmask({
 				'mask': '9999-9999999',

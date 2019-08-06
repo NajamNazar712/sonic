@@ -162,7 +162,7 @@
                             row.push(values.phone);
                             row.push(values.consignee_address);
                             row.push(values.amount);
-                            row.push(values.mode);
+                            row.push(values.shipping_mode);
                             row.push(values.service_type);
                             row.push(values.status);
                             row.push(values.reason);

@@ -1555,7 +1555,7 @@ class AdminPickupsController extends Controller
       }
 
       foreach ($shipment_ids as $shipment_id) {
-        ShipmentsPickupJourneyController::add($shipment_id, 4, Auth::id(), $pickup_note);
+        ShipmentsPickupJourneyController::add($shipment_id, 4, Auth::id(), $request->pickup_receive_pickup_note_id);
       }
 
       NotificationsController::send(4, $request->pickup_receive_pickup_note_id, $shipment_ids);

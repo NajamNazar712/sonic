@@ -318,8 +318,8 @@
                             scan_sound(2);
                             var error = 'Tracking Number already scanned!';
                             toastr.error(error, 'Error!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
                             });
 
                             scan.val('');
