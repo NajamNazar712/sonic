@@ -54,7 +54,7 @@ class OperationForecastsIndexColumns extends Migration
         Schema::table('operations_outgoing_pickup_request_shipments', function (Blueprint $table) {
             $table->index('created_at');
             $table->index('updated_at');
-            $table->index('operation_outgoing_forecast_id');
+            $table->index('operation_outgoing_forecast_id', 'operation_outgoing_forecast_id_index');
             $table->index('booking_type_id');
             $table->index('hub_id');
             $table->index('weight_range_id');
