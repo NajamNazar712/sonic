@@ -459,6 +459,14 @@ class AdminPackagingMaterialController extends Controller
                     return $days;
                 }
             })
+            ->filterColumn('status',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('packaging_material_requests.status_id','=',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
             })
