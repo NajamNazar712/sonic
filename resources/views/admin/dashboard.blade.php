@@ -569,11 +569,19 @@
                 allowClear:true
             });
 
+            @if($default_hub_id === null)
+                $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                    width:'100%',
+                    placeholder:"Select Hub",
+                    allowClear:true
+                });
+            @else
             $('#search_hub').prepend('<option value="""></option>').select2({
                 width:'100%',
                 placeholder:"Select Hub",
                 allowClear:true
             });
+            @endif
 
             $('#search_service_type').prepend('<option value="""></option>').select2({
                 width:'100%',
