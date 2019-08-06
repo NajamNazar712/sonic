@@ -190,6 +190,7 @@
                     {
                         extend: 'excel',
                         title: 'Receive Return Deliveries',
+                        className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'
@@ -219,7 +220,7 @@
                     { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
-                    {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
+                    {data:'action' ,name: 'action', class: 'align-middle action text-center',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

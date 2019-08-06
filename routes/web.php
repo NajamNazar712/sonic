@@ -256,6 +256,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@index')->name('index');
         Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
+        Route::get('incoming_list','Admins\AdminDashboardController@incoming_list')->name('incoming_list');
+        Route::get('outgoing_top_customers_list','Admins\AdminDashboardController@outgoing_top_customers_list')->name('outgoing_top_customers_list');
+        Route::get('incoming_weight_range_list','Admins\AdminDashboardController@incoming_weight_range_list')->name('incoming_weight_range_list');
+        Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
+        Route::get('operation_forecast_search','Admins\AdminDashboardController@operation_forecast_search')->name('operation_forecast_search');
+    });
+    Route::prefix('operation_forecasting')->name('operation_forecasting.')->group(function () {
+        Route::prefix('incoming')->name('incoming.')->group(function () {
+            Route::get('{operation_forecasting?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
+        });
+        Route::prefix('outgoing')->name('outgoing.')->group(function () {
+            Route::get('{customer_id?}', 'Admins\AdminDashboardController@outgoing_shipments_list')->name('shipments_list');
+        });
     });
 
 
@@ -460,6 +473,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add/status/all','Admins\DeliveryController@receive_delivery_status_submit_all')->name('add.status.all');
             Route::get('{id}/add/list','Admins\DeliveryController@receive_delivery_status_list')->name('add.list');
             Route::post('reason','Admins\DeliveryController@receive_delivery_reason')->name('reason');
+            Route::post('reason_all','Admins\DeliveryController@receive_delivery_reason_all')->name('reason_all');
             Route::post('delivered','Admins\DeliveryController@receive_delivery_status_delivered')->name('delivered');
             Route::post('shipmentstatuscheck','Admins\DeliveryController@receive_delivery_status_check')->name('shipmentstatuscheck');
             Route::post('replacements','Admins\DeliveryController@receive_delivery_get_replacements')->name('replacements');
@@ -606,11 +620,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('update/remove','Admins\ReturnController@return_receive_update_remove')->name('update.remove');
             Route::get('{id}/status','Admins\ReturnController@return_receive_status')->name('status');
             Route::post('status/submit','Admins\ReturnController@receive_return_status_submit')->name('status.submit');
+            Route::post('status/submit_all','Admins\ReturnController@receive_return_status_submit_all')->name('status.submit_all');
             Route::post('status/delivered','Admins\ReturnController@return_status_delivered')->name('status.delivered');
             Route::get('status/list','Admins\ReturnController@return_receive_status_list')->name('status.list');
             Route::post('reason','Admins\ReturnController@receive_return_reason')->name('reason');
             Route::post('rn.print','Admins\ReturnController@rrd_print')->name('rn.print');
             Route::post('shipments','Admins\ReturnController@receive_return_shipments')->name('shipments');
+            Route::post('upload_image','Admins\ReturnController@receive_return_note_image_upload')->name('upload_image');
 
         });
         Route::prefix('history')->name('history.')->group(function () {
@@ -1163,6 +1179,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('weight_factor')->name('weight_factor.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@weight_factor_index')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@weight_factor_update')->name('update');
+        });
+        Route::prefix('delivery_call_verification_ratio')->name('delivery_call_verification_ratio.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@delivery_call_verification_ratio_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@delivery_call_verification_ratio_update')->name('update');
         });
 
 		Route::prefix('stock_movement')->name('stock_movement.')->group(function () {

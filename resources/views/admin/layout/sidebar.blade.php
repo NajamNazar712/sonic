@@ -588,7 +588,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175, 189, 192, 197, 230], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175, 189, 192, 197, 230, 231], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Settings</span></a>
                 <ul class="menu-content">
                     @if (session('role_id') == 1 || in_array(104, session('permissions')))
@@ -662,8 +662,9 @@
 					@if (session('role_id') == 1 || in_array(228, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.settings.stock_movement.index') }}">Packaging Material Stock Movement Account</a></li>
                     @endif
-                </ul>
-			</li>
+					@if (session('role_id') == 1 || in_array(231, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.settings.delivery_call_verification_ratio.index') }}">Delivery Call Verification Ratio</a></li>
+                    @endif
             @endif
         </ul>
     </div>

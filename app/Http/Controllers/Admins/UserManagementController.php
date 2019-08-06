@@ -35,7 +35,8 @@ class UserManagementController extends Controller
         $users = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')
         ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
         ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status')
+            ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub')
         ->where('ar.id', '!=', 1);
 
         $datatables = Datatables::of($users)
@@ -161,6 +162,7 @@ class UserManagementController extends Controller
         $admin->phone_number = $request->input('phone_number');
         $admin->cnic = $request->input('cnic');
         $admin->role_id = $request->input('role_id');
+        $admin->default_hub_id = $request->input('default_hub');
         $admin->password = bcrypt($request->input('password'));
 
         $admin->save();
@@ -202,6 +204,7 @@ class UserManagementController extends Controller
             $admin->phone_number = $request->input('phone_number');
             $admin->cnic = $request->input('cnic');
             $admin->role_id = $request->input('role_id');
+            $admin->default_hub_id = $request->input('default_hub');
             $admin->updated_by = Auth::id();
 
             if ($request->filled('password')) {

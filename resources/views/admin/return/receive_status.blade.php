@@ -15,6 +15,24 @@
                     <input type="hidden" value="{{$return_note_id}}" id="return_note" name="return_note_id">
                     <input type="hidden" value="{{$shipments_count}}" id="shipments_count" name="shipments_count">
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
+
+                    <div class="row justify-content-center">
+                        <div class="col-4">
+                            <fieldset class="form-group">
+                                <select name="select_all_status" id="select_all_status" class="form-control select2">
+                                    @foreach($shipment_statuses as $status)
+                                        <option value="{{$status->id}}">{{$status->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        @if(!$return_note_status == 1)
+                            <div class="col-3">
+                                <button type="button" id="submit_selected_status" disabled class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-list-alt"></i> Bulk Update </button>
+                            </div>
+                        @endif
+                    </div>
+
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                         <thead>
                         <tr role="row" class="bg-primary white">
@@ -48,7 +66,33 @@
     </div>
 
 
+    <div class="modal fade text-left" id="uploadReturnNote" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadReturnNote"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Return Note Image Upload</h4>
 
+                </div>
+                <div class="modal-body  text-center">
+                    <form id="return_note_upload_form" class="form" action="{{route('admin.return.receive.upload_image')}}" method="post" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="image_return_note_id" id="image_return_note_id"/>
+                        <fieldset class="form-group">
+                            <input type="file" class="form-control-file" id="return_note_image" name="return_note_image" accept="image/*" data-rule-required="true" data-msg-required="Image File is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2048000" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                        </fieldset>
+
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="ReturnNoteImageSubmitButton" type="submit" class="btn btn-primary btn-block">Upload</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -117,7 +161,8 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-    {{-- <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
@@ -131,6 +176,12 @@
                 'digits': 3,
                 'min': 0.00,
                 'max': 1000
+            });
+
+            $('#select_all_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Selected Status Update',
+                width:'100%',
+                allowClear:true
             });
 
             var selected_rows = [];
@@ -205,12 +256,6 @@
                                                 },
                                                 icon: 'warning',
                                                 buttons: {
-                                                    cancel: {
-                                                        text: 'Cancel',
-                                                        value: null,
-                                                        visible: true,
-                                                        closeModal: true,
-                                                    },
                                                     confirm: {
                                                         text: 'Update',
                                                         value: true,
@@ -304,6 +349,8 @@
                                     }
 
                                     table.button('.returned').enable();
+                                    $('#submit_selected_status').attr('disabled', false);
+
                                 }
                             });
                         }
@@ -331,6 +378,7 @@
                                 if (selected_rows.length == 0) {
                                     table.button('.returned').disable();
                                 }
+                                  $('#submit_selected_status').attr('disabled', true);
                               }
                             });
                         }
@@ -439,11 +487,11 @@
 
                 if (selected_rows.length > 0) {
                     table.button('.returned').enable();
-                    // table.button(1).enable();
+                    $('#submit_selected_status').attr('disabled', false);
                 }
                 else {
                     table.button('.returned').disable();
-                    // table.button(1).disable();
+                    $('#submit_selected_status').attr('disabled', true);
                 }
             });
 
@@ -475,13 +523,11 @@
                 });
             });
             $('body').on('click','.clear',function () {
-                // console.log();
                 var status = $(this).parents().closest('tr').find('.statusDrop');
                 var reason = $(this).parents().closest('tr').find('.reasonDrop');
                 status.val('').trigger("change");
                 reason.val('').trigger("change");
                 $('.remarks input').val('');
-                // $('.reasonDrop').val('').trigger("change");
             });
             $('#status_update_form').on('keypress',function (e) {
                 if(e.which == 13) {
@@ -531,6 +577,267 @@
 
 
 
+            var shipment_remarks_obj = {};
+            var shipment_received_refused_obj = {};
+            var submit_all_status_flag = true;
+            $('#submit_selected_status').on('click', function () {
+                var select_all_status = $('#select_all_status').val();
+                var return_note = $('#return_note').val();
+                var errros = 'Something went wrong, Refresh page and try again';
+                console.log(select_all_status)
+                if(selected_rows.length > 0){
+                    if(select_all_status != ''){
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to change the status of shipments!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                var not_updated_shipments = [];
+                                var shipment_remarks_obj = {};
+                                var shipment_received_refused_obj = {};
+                                var not_updated_shipment_ids = [];
+                                // blockPagePermanently();
+                                submit_all_status_flag = true;
+                                if(select_all_status == 25){
+                                    table.rows().nodes().each(function(index) {
+                                        var row = table.row(index);
+                                        if ($(row.node()).hasClass('selected')) {
+                                            var id = parseInt(row.id());
+                                            var remarks = $(row.node()).find('td.remarks input').val();
+                                            shipment_remarks_obj[id] = remarks;
+
+                                            var receiver_name =  $(row.node()).find('td.received_or_refused_by input').val();
+
+                                            if ($.trim(receiver_name) == '') {
+                                                not_updated_shipments.push($(row.node()).find('td.tracking_number').text());
+                                                not_updated_shipment_ids.push(id);
+                                                submit_all_status_flag = false;
+                                            }
+                                            else {
+                                                shipment_received_refused_obj[id] = receiver_name;
+                                            }
+
+                                        }
+                                    });
+                                    if (submit_all_status_flag == false) {
+                                        swal({
+                                            title: 'Enter Receiver Name for remaining Returned Shipment(s)',
+                                            content: {
+                                                element: 'input',
+                                                attributes: {
+                                                    placeholder: 'Receiver Name',
+                                                    type: 'text'
+                                                }
+                                            },
+                                            icon: 'warning',
+                                            buttons: {
+                                                confirm: {
+                                                    text: 'Update',
+                                                    value: true,
+                                                    visible: true,
+                                                    closeModal: true
+                                                }
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        }).then(function (receiver_name) {
+                                            if (receiver_name) {
+                                                $.each(not_updated_shipment_ids, function(index, id) {
+                                                    shipment_received_refused_obj[id] = receiver_name;
+                                                });
+
+                                                $.ajax({
+                                                    url: '{!! route('admin.return.receive.status.submit_all') !!}',
+                                                    method: 'POST',
+                                                    data: {
+                                                        'shipment_ids': selected_rows,
+                                                        'return_note_id': note_id,
+                                                        'shipment_status':select_all_status,
+                                                        'remarks': shipment_remarks_obj,
+                                                        'received_or_refused_by': shipment_received_refused_obj,
+                                                        '_token': '{{ csrf_token() }}'
+                                                    }
+                                                }).done(function (data) {
+                                                    if(data.status === 0){
+                                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                                    }else{
+                                                        toastr.error(errros, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                                    }
+                                                    location.reload();
+                                                });
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        $.ajax({
+                                            url: '{!! route('admin.return.receive.status.delivered') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'shipment_ids': selected_rows,
+                                                'return_note_id': note_id,
+                                                'shipment_status':select_all_status,
+                                                'remarks': shipment_remarks_obj,
+                                                'received_or_refused_by': shipment_received_refused_obj,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        }).done(function (data) {
+                                            if(data.status === 0){
+
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                            }else{
+                                                toastr.error(errros, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                            }
+                                            location.reload();
+                                        });
+                                    }
+
+                                }else{
+                                    swal({
+                                        title: 'Enter Remarks for Returned Shipment(s)',
+                                        content: {
+                                            element: 'input',
+                                            attributes: {
+                                                placeholder: 'Shipment Remarks',
+                                                type: 'text'
+                                            }
+                                        },
+                                        icon: 'warning',
+                                        buttons: {
+                                            confirm: {
+                                                text: 'Update',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    }).then(function (shipment_remarks) {
+                                        if (shipment_remarks != '') {
+                                            swal({
+                                                title: 'Please Wait!',
+                                                text: 'Shipment(s) are being updated!',
+                                                icon: 'info',
+                                                buttons: false,
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false
+                                            });
+                                            $.ajax({
+                                                url: '{!! route('admin.return.receive.status.submit_all') !!}',
+                                                method: 'POST',
+                                                data: {
+                                                    'shipment_ids': selected_rows,
+                                                    'return_note_id': note_id,
+                                                    'shipment_status':select_all_status,
+                                                    'remarks': shipment_remarks,
+                                                    'received_or_refused_by': null,
+                                                    '_token': '{{ csrf_token() }}'
+                                                }
+                                            }).done(function (data) {
+                                                if(data.status === 0){
+                                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                                }else{
+                                                    toastr.error(errros, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                                }
+                                                location.reload();
+                                            });
+                                        }
+                                    });
+                                }
+
+                            }
+                        });
+                    }
+                    else{
+                        var error = "Please Select A Status!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                }
+                else{
+                    var error = "Select at-least one shipment!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
+            });
+            var return_note_status = {{$return_note_status}};
+            var return_note_image_status = '{{$return_note_image_status}}';
+            var return_image = '{{$return_image}}';
+            var return_note_id = {{$return_note_id}};
+
+            function upload_return_note_image() {
+                if(return_note_image_status == '' && return_image == false){
+                    $('#image_return_note_id').val(return_note_id);
+                    $('#uploadReturnNote').modal('show');
+                }
+            }
+            upload_return_note_image();
+
+
+            $.validator.addMethod('maxsize', function(value, element, params) {
+                if ($(element).attr('type') === 'file') {
+                    if (element.files && element.files.length) {
+                        console.log(element.files);
+                        for (var c = 0; c < element.files.length; c++) {
+                            if (element.files[c].size > params) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }, $.validator.format("File Size must not exceed {0} bytes."));
+
+            $('#return_note_upload_form').validate({
+
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Image is being uploaded!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
+            });
         });
     </script>
 @endsection

@@ -30,6 +30,7 @@ use App\Http\Models\CorporateRateStatus;
 use Carbon\Carbon;
 
 use SnappyImage;
+use SnappyPDF;
 
 class APIController extends Controller
 {
@@ -602,8 +603,8 @@ class APIController extends Controller
 
           if ($msg_string != null) {
               NotificationsController::send(32, $shipment_id, $msg_string);
-              $msg_string = $msg_string . " Detected!";
-              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => 'Possible NSA ' . $msg_string . ' In case of, Out of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
+              $msg_string = "A Possible Address Anomaly: " . $msg_string . " Detected!";
+              return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
           }
           else{
               NotificationsController::send(2, $shipment_id);
@@ -616,7 +617,11 @@ class APIController extends Controller
       $user_id = $request->user_id;
 
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+        'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })],
+        'tracking_numbers' => ['required_without:tracking_number', 'array', 'min:1'],
+        'tracking_numbers.*' => ['required_without:tracking_number', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })]
       ];
@@ -630,17 +635,43 @@ class APIController extends Controller
       }
       else {
         $tracking_number = $request->tracking_number;
+        $tracking_numbers = $request->tracking_numbers;
 
-        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+        if ($tracking_number) {
+          $shipments = Shipment::where('tracking_number', $tracking_number)->get();
+        }
+        else {
+          $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->get();
+        }
 
-        if ($shipment->shipper_status_id == 1) {
-          $air_waybill = ShipperShipmentBookController::air_waybill(4, $user_id, [$shipment->id]);
+        $air_waybill = '';
+        $valid = FALSE;
 
-          $image = SnappyImage::loadHTML($air_waybill);
+        foreach ($shipments as $shipment) {
+          if ($shipment->shipper_status_id == 1) {
+            $air_waybill .= ShipperShipmentBookController::air_waybill(4, $user_id, [$shipment->id]);
 
-          $filename = 'air_waybill_' . $tracking_number . '.jpg';
+            $valid = TRUE;
+          }
+        }
 
-          return $image->download($filename);
+        if ($valid) {
+          $filename = 'air_waybill.jpg';
+
+          if (!isset($request->type) || $request->type == 0) {
+            $image = SnappyImage::loadHTML($air_waybill);
+
+            $filename = 'air_waybill' . '.jpg';
+
+            return $image->download($filename);
+          }
+          else {
+            $pdf = SnappyPDF::loadHTML($air_waybill);
+
+            $filename = 'air_waybill' . '.pdf';
+
+            return $pdf->download($filename);
+          }
         }
         else {
           return response()->json(['status' => 1, 'message' => 'Already Received']);
@@ -1166,7 +1197,8 @@ class APIController extends Controller
       $rules = [
         'receiving_sheet_id' => ['required', 'integer', Rule::exists('receiving_sheets', 'id')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
-        })]
+        })],
+        'type' => ['nullable', 'boolean']
       ];
 
       $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -1181,11 +1213,20 @@ class APIController extends Controller
 
         $receiving_sheet = ShipperReceivingSheetController::view($receiving_sheet_id, 4);
 
-        $image = SnappyImage::loadHTML($receiving_sheet);
+        if (!isset($request->type) || $request->type == 0) {
+          $image = SnappyImage::loadHTML($receiving_sheet);
 
-        $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
+          $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
 
-        return $image->download($filename);
+          return $image->download($filename);
+        }
+        else {
+          $pdf = SnappyPDF::loadHTML($receiving_sheet);
+
+          $filename = 'receiving_sheet_' . $receiving_sheet_id . '.pdf';
+
+          return $pdf->download($filename);
+        }
       }
     }
 

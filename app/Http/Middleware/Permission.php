@@ -463,8 +463,10 @@ class Permission
             'settings.cod_cap_zones.index' => 197,
             'settings.cod_cap_zones.update' => 197,
 
-            'settings.stock_movement.index' => 228,
+			'settings.stock_movement.index' => 228,
             'settings.stock_movement.update' => 228,
+            'settings.delivery_call_verification_ratio.index' => 231,
+            'settings.delivery_call_verification_ratio.update' => 231,
 
 
 

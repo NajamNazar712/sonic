@@ -11,4 +11,5 @@ class ShipmentStatusReason extends Model
     public function status(){
         return $this->belongsToMany('App\Http\Models\ShipmentStatus');
     }
+
 }

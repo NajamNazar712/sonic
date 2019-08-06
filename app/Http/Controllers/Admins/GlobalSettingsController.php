@@ -14,6 +14,7 @@ use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
@@ -998,8 +999,7 @@ class GlobalSettingsController extends Controller
         }
         return view('admin.settings.stock_movement')->with(['account_id' => $account_id, 'account_name' => $account_name]);
     }
-
-    public function stock_movement_update(Request $request){
+public function stock_movement_update(Request $request){
 
         $stock_movement_account_id = $request->stock_movement_account_id;
         if ($stock_movement_account_id != null) {
@@ -1022,5 +1022,21 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('error', 'Settings can\'t be updated');
 
     }
-
-}
+public function delivery_call_verification_ratio_index(){
+        $settings = DeliveryCallVerificationRatio::get();
+        return view('admin.settings.delivery_call_verification_ratio')->with(['settings' => $settings]);
+    }
+    public function delivery_call_verification_ratio_update(Request $request){
+//        dd($request);
+        $settings = DeliveryCallVerificationRatio::truncate();
+        foreach($request->verification as $index => $call_verification){
+            $new_ratios = new DeliveryCallVerificationRatio();
+            $new_ratios->id = $index;
+            $new_ratios->min = $request->min[$index];
+            $new_ratios->max = $request->max[$index];
+            $new_ratios->verification = $call_verification;
+            $new_ratios->save();
+        }
+        $new_ratios = new DeliveryCallVerificationRatio();
+        return redirect()->back()->with('success', 'Call verification ratio is Updated Successfully!');
+    }}

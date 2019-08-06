@@ -11,6 +11,14 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <div class="row justify-content-center">
+                    <div class="col-5">
+                        <h3>Delivery Ratio {{$percentage}}%</h3>
+                    </div>
+                    <div class="col-4">
+                        <h3>Call Verification Ratio {{$verification_percentage}}% = {{$verification_shipments_count}} Parcels</h3>
+                    </div>
+                </div>
                 <form id="status_update_form" action="{{route('admin.delivery.receive.verify.status.submit')}}" method="post">
                     @csrf
                     @method('PUT')

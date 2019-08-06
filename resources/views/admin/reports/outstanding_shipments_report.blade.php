@@ -315,7 +315,7 @@
                 order: [[13, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data:'tracking_number', name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
+                    {data:'tracking_number_link', name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
                     {data:'consignee', name: 's.consignee_name', class: 'align-middle text-center consignee'},
                     {data:'address', name: 's.consignee_address', class: 'align-middle text-center address'},
                     {data:'destination', name: 'dc.name', class: 'align-middle text-center destination'},
