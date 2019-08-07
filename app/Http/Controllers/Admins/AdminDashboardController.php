@@ -41,6 +41,8 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
+use App\Http\Models\Sister_account\MergedAccountHead;
+use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
 use Illuminate\Support\Facades\DB;
@@ -5788,6 +5790,7 @@ class AdminDashboardController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
+                $sale_check= SalePersonTag::where('user_id',$result->id)->first();
                 $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -5835,6 +5838,11 @@ class AdminDashboardController extends Controller
                 if(session('role_id') == 1 || in_array(110, session('permissions')))
                 {
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
+                }
+
+                if(session('role_id') == 1 || session('role_id') == 4 || ($sale_check != null && $sale_check->user_id == Auth::id()))
+                {
+                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                 }
 
                 $dropdown .= '
@@ -5985,6 +5993,10 @@ class AdminDashboardController extends Controller
                 if(session('role_id') == 1 || in_array(110, session('permissions')))
                 {
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
+                }
+                if(session('role_id') == 1 || session('role_id') == 4 || ($sale_check != null && $sale_check->user_id == Auth::id()))
+                {
+                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                 }
 
                 $dropdown .= '
@@ -6926,6 +6938,144 @@ class AdminDashboardController extends Controller
             }
             return ['status' => 1, 'min_charges' => $min_charges];
         }
+    }
+
+    public function add_sister_account_view(Request $request){
+        $user = User::leftjoin('cities as c', 'c.id', '=', 'users.city_id')->leftjoin('products as p', 'p.id', '=', 'users.product_id')->leftjoin('sale_person_tags as spt', 'spt.user_id', '=', 'user_id')->leftjoin('admins as a', 'a.id', '=', 'spt.admin_id')->select('users.id as id', 'users.name as company_name', 'c.name as city', 'users.poc as contact_name', 'users.phone as phone', 'users.address as address', 'users.email as email', 'users.status as status', 'p.product_name as product_type', 'a.name as tagged_to')->where('users.id', $request->id)->first();
+        return view('admin.accounts.sister_accounts.add')->with(['first_account' => $user]);
+    }
+
+    public function get_account_info(Request $request){
+        $user_id = $request->id;
+        $check_user = User::where('id', $user_id);
+        if($check_user->exists()){
+            $check_merged_accounts = MergedSisterAccount::where('user_id', $user_id);
+
+            if(!$check_merged_accounts->exists()){
+                $user = User::leftjoin('cities as c', 'c.id', '=', 'users.city_id')->leftjoin('products as p', 'p.id', '=', 'users.product_id')->leftjoin('sale_person_tags as spt', 'spt.user_id', '=', 'users.id')->leftjoin('admins as a', 'a.id', '=', 'spt.admin_id')->select('users.id as id', 'users.name as company_name', 'c.name as city', 'users.poc as contact_name', 'users.phone as phone', 'users.address as address', 'users.email as email', 'users.status as status', 'p.product_name as product_type', 'a.name as tagged_to')->where('users.id', $request->id)->first();
+
+                return ['status' => 0, 'info' => $user];
+            }
+            else{
+                return ['status' => 1, 'error' => "Already registered as a sister account"];
+            }
+        }
+        else{
+            return ['status' => 1, 'error' => "Account id does'nt exists!"];
+        }
+    }
+
+    public function add_sister_account_submit(Request $request){
+        $account_ids = explode(',',$request->account_ids);
+        if(count($account_ids) > 1){
+            $merge_account_head = new MergedAccountHead();
+            $merge_account_head->name = $request->group_name;
+            $merge_account_head->created_by = Auth::id();
+            $merge_account_head->save();
+            foreach ($account_ids as $account_id){
+                $sister_account = new MergedSisterAccount();
+                $sister_account->merged_head_id = $merge_account_head->id;
+                $sister_account->user_id = $account_id;
+                $sister_account->save();
+            }
+            $user = User::where('id', $account_ids[0])->first();
+            if($user->status == 3){
+
+                return redirect()->route('admin.accounts.active')->with(['success'=>"Accounts merged successfully."]);
+            }
+            else{
+                return redirect()->route('admin.accounts.pending')->with(['success'=>"Accounts merged successfully."]);
+            }
+        }
+        else{
+            return redirect()->back()->with('error', "Sister accounts are not selected!");
+        }
+    }
+
+
+    public function edit_sister_account_view(Request $request){
+        $group_name = MergedAccountHead::where('id', $request->id)->first();
+        $merged_accounts = MergedAccountHead::leftjoin('merged_sister_accounts as msa', 'msa.merged_head_id', '=', 'merged_account_heads.id')->leftjoin('users as u', 'u.id', '=', 'msa.user_id')->leftjoin('cities as c', 'c.id', '=', 'u.city_id')->leftjoin('products as p', 'p.id', '=', 'u.product_id')->leftjoin('sale_person_tags as spt', 'spt.user_id', '=', 'u.id')->leftjoin('admins as a', 'a.id', '=', 'spt.admin_id')->select('u.id as id', 'u.name as company_name', 'c.name as city', 'u.poc as contact_name', 'u.phone as phone', 'u.address as address', 'u.email as email', 'u.status as status', 'p.product_name as product_type', 'a.name as tagged_to')->where('merged_account_heads.id', $request->id)->get();
+        return view('admin.accounts.sister_accounts.edit')->with(['merged_accounts' => $merged_accounts, 'group_name' => $group_name]);
+    }
+    public function edit_sister_account_submit(Request $request){
+        $account_ids = explode(',',$request->account_ids);
+        if(count($account_ids) > 1){
+            $merge_account_head = MergedAccountHead::where('id', $request->merged_id)->first();
+            $merge_account_head->name = $request->group_name;
+            $merge_account_head->updated_by = Auth::id();
+            $merge_account_head->save();
+            MergedSisterAccount::where('merged_head_id', $merge_account_head->id)->delete();
+            foreach ($account_ids as $account_id){
+                $sister_account = new MergedSisterAccount();
+                $sister_account->merged_head_id = $merge_account_head->id;
+                $sister_account->user_id = $account_id;
+                $sister_account->save();
+            }
+
+            return redirect()->back()->with('success', "Sister accounts updated successfully!");
+        }
+        else{
+            return redirect()->back()->with('error', "Sister accounts are not selected!");
+        }
+    }
+
+    public function merged_accounts_index(){
+        return view('admin.accounts.sister_accounts.merged_accounts.index');
+    }
+    public function merged_accounts_list(Request $request){
+        $merged_accounts = MergedAccountHead::leftjoin('admins as ac', 'ac.id', '=', 'merged_account_heads.created_by')
+            ->leftjoin('admins as au', 'au.id', '=', 'merged_account_heads.updated_by')
+            ->select('merged_account_heads.id as id', 'merged_account_heads.name as name', 'merged_account_heads.created_at as created_at', 'merged_account_heads.updated_at as updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('(select count(id) from merged_sister_accounts where merged_sister_accounts.merged_head_id = merged_account_heads.id) as accounts'));
+        return Datatables::of($merged_accounts)
+
+            ->editColumn('accounts_button', function ($users){
+                    return '<div class="text-center"><button type="button" class="btn btn-sm btn-outline-info accounts_button">' . $users->accounts . '</button></div>';
+            })
+            ->editColumn('updated_by', function($users){
+                if($users->updated_by != null){
+                    return $users->updated_by;
+                }
+                else{
+                    return "-";
+                }
+            })
+            ->editColumn('updated_at', function($users){
+                if($users->updated_by != null){
+                    return $users->updated_at;
+                }
+                else{
+                    return "-";
+                }
+            })
+            ->addColumn("action", function ($users) {
+                $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.edit.index', ['id' => $users->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Sister Account</div></button>';
+//                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id' => $users->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mapping</div></button>';
+
+
+                $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+                return $dropdown;
+            })
+            ->make(true);
+
+    }
+
+    public function merged_accounts_info(Request $request){
+        $merged_head_id = $request->id;
+        $accounts = MergedSisterAccount::leftjoin('users as u', 'u.id', '=', 'merged_sister_accounts.user_id')
+            ->leftjoin('cities as c', 'c.id', '=', 'u.city_id')
+            ->select('u.id as id', 'u.name as name', 'u.poc as poc', 'u.phone as phone', 'u.address as address', 'c.name as city')
+            ->where('merged_head_id', $merged_head_id)
+            ->get();
+        return response(['accounts' => $accounts]);
     }
 }
 

@@ -308,6 +308,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/updatebankinfo','Admins\AdminDashboardController@updateBankInfo')->name('update.bank');
         Route::post('edit/emails','Admins\AdminDashboardController@edit_notification_emails')->name('edit.emails');
         Route::post('add/emails','Admins\AdminDashboardController@add_notification_emails')->name('add.emails');
+
+
+        Route::prefix('sister_account')->name('sister_account.')->group(function(){
+            Route::get('{id}/add/sister_account','Admins\AdminDashboardController@add_sister_account_view')->name('add.account');
+            Route::post('add/submit','Admins\AdminDashboardController@add_sister_account_submit')->name('add.submit');
+            Route::get('{id}','Admins\AdminDashboardController@edit_sister_account_view')->name('edit.index');
+            Route::post('edit/submit','Admins\AdminDashboardController@edit_sister_account_submit')->name('edit.submit');
+            Route::post('account/info','Admins\AdminDashboardController@get_account_info')->name('info');
+            Route::prefix('merged_account')->name('merged_account.')->group(function(){
+                Route::get('index','Admins\AdminDashboardController@merged_accounts_index')->name('index');
+                Route::get('list','Admins\AdminDashboardController@merged_accounts_list')->name('list');
+                Route::post('info','Admins\AdminDashboardController@merged_accounts_info')->name('info');
+            });
+        });
     });
 
     //Datatables data using ajax calls
