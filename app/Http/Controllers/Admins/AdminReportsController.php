@@ -3563,6 +3563,10 @@ class AdminReportsController extends Controller
         if ($hub = $request->get('search_hub')) {
             $petty->where('h.id', '=', $hub);
         }
+        if ($status = $request->get('search_status')) {
+            $petty->where('petty_cash_statement_details.status', $status);
+
+        }
         if ($search_date = $request->get('search_date_created')) {
             $petty->whereDate('pcs.created_at', $search_date);
         }
@@ -3571,6 +3575,11 @@ class AdminReportsController extends Controller
         }
         if($title = $request->get('search_title')){
             $petty->where('pct.id','=',$title);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $petty->whereBetween('petty_cash_statement_details.created_at', [$from,$to]);
         }
         return $petty->make(true);
     }
