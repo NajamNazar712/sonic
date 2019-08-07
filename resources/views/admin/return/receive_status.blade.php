@@ -85,8 +85,12 @@
                         <hr>
                         <div class="row justify-content-center">
                             <div class="col-3">
+                                <button id="" type="button" class="btn btn-danger btn-block" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-3">
                                 <button id="ReturnNoteImageSubmitButton" type="submit" class="btn btn-primary btn-block">Upload</button>
                             </div>
+
                         </div>
                     </form>
                 </div>
@@ -785,7 +789,7 @@
                 }
 
             });
-            var return_note_status = {{$return_note_status}};
+            {{--var return_note_status = {{$return_note_status}};--}}
             var return_note_image_status = '{{$return_note_image_status}}';
             var return_image = '{{$return_image}}';
             var return_note_id = {{$return_note_id}};
