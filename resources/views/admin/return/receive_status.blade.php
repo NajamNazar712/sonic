@@ -588,7 +588,7 @@
                 var select_all_status = $('#select_all_status').val();
                 var return_note = $('#return_note').val();
                 var errros = 'Something went wrong, Refresh page and try again';
-                console.log(select_all_status)
+
                 if(selected_rows.length > 0){
                     if(select_all_status != ''){
                         swal({

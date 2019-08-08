@@ -1112,8 +1112,8 @@ class DeliveryController extends Controller
         $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
         $selected_status = $request->selected_status;
-        if($selected_status != 0 || $selected_status != null || $selected_status != ''){
-            return response()->json(['status'=>1, 'error' => 'Status not selected!']);
+        if($selected_status == 0 || $selected_status == null || $selected_status == ''){
+            return response()->json(['status'=>0, 'error' => 'Status not selected!']);
         }
         $selected_reason = $request->selected_reason;
 
@@ -1305,7 +1305,7 @@ class DeliveryController extends Controller
 
             return response()->json(['status'=>1, 'success' => 'Statuses updated successfully!']);
         } else {
-            return response()->json(['status'=>0, 'success' => 'Delivery note not found!']);
+            return response()->json(['status'=>0, 'error' => 'Delivery note not found!']);
         }
     }
 
