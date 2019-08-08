@@ -128,7 +128,7 @@
                     }
                 },
                 rowId: 'draft_id',
-                order: [1, 'asc'],
+                order: [1, 'desc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'draft_id', name: 'petty_cash_statement_drafts.id', class: 'align-middle draft_id'},
@@ -153,22 +153,12 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Created</option>' +
-                        '<option value="1">Station Approved</option>' +
-                        '<option value="2">Operation Approved</option>' +
-                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') ||  $(header).is('.action') ) {
+                        if ($(header).is('.serial_number')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.status')){
-                            $(drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {

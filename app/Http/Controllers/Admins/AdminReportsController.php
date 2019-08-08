@@ -3564,7 +3564,11 @@ class AdminReportsController extends Controller
             $petty->where('h.id', '=', $hub);
         }
         if ($status = $request->get('search_status')) {
-            $petty->where('petty_cash_statement_details.status', $status);
+            if($status == 3){
+                $petty->where('petty_cash_statement_details.status', '=',0);
+            }else{
+                $petty->where('petty_cash_statement_details.status', $status);
+            }
 
         }
         if ($search_date = $request->get('search_date_created')) {

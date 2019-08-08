@@ -81,7 +81,7 @@
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_status" id="search_status" class="form-control select2">
-                                    <option value="0">Created</option>
+                                    <option value="3">Created</option>
                                     <option value="2">Approved</option>
                                     <option value="1">Rejected</option>
                             </select>
@@ -354,7 +354,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                order: [[10, 'asc']],
+                order: [[13, 'desc']],
                 rowId:'statement_id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
