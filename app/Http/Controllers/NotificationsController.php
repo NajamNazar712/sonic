@@ -2800,6 +2800,35 @@ class NotificationsController extends Controller
                 $to = $shipment->consignee_phone_number_1;
                 self::sms($body, $to);
             }
+            else if($id == 36 || $id == 37){
+                $account_a = User::where('id', $reference_1_id)->first();
+                $account_b = User::where('id', $reference_2_id)->first();
+//                $account_id_a = str_pad($account_a->id, 6, '0', STR_PAD_LEFT);
+                $account_id_b = str_pad($account_b->id, 6, '0', STR_PAD_LEFT);
+                $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+                if (strpos($subject, '[account_id]') !== FALSE) {
+                    $subject = str_replace('[account_id]', $account_id_b, $subject);
+                }
+                if (strpos($body, '[account_id]') !== FALSE) {
+                    $body = str_replace('[account_id]', $account_id_b, $body);
+                }
+                if (strpos($subject, '[company_name_b]') !== FALSE) {
+                    $subject = str_replace('[company_name_b]', $account_b->name, $subject);
+                }
+                if (strpos($body, '[company_name_b]') !== FALSE) {
+                    $body = str_replace('[company_name_b]', $account_b->name, $body);
+                }
+
+                if (strpos($body, '[company_name_a]') !== FALSE) {
+                    $body = str_replace('[company_name_a]', $account_a->name, $body);
+                }
+                if (strpos($body, '[trax_logo]') !== FALSE) {
+                    $body = str_replace('[trax_logo]', $logo, $body);
+                }
+                $to = $account_a->email;
+
+                self::email($subject, $body, $to);
+            }
         }
       }
     }

@@ -6972,11 +6972,17 @@ class AdminDashboardController extends Controller
             $merge_account_head->name = $request->group_name;
             $merge_account_head->created_by = Auth::id();
             $merge_account_head->save();
-            foreach ($account_ids as $account_id){
+            foreach ($account_ids as $index => $account_id){
                 $sister_account = new MergedSisterAccount();
                 $sister_account->merged_head_id = $merge_account_head->id;
                 $sister_account->user_id = $account_id;
                 $sister_account->save();
+
+                foreach ($account_ids as $notify_index => $notify_account_id){
+                    if($index != $notify_index){
+                        NotificationsController::send(36, $notify_account_id, $account_id);
+                    }
+                }
             }
             $user = User::where('id', $account_ids[0])->first();
             if($user->status == 3){
@@ -7000,17 +7006,29 @@ class AdminDashboardController extends Controller
     }
     public function edit_sister_account_submit(Request $request){
         $account_ids = explode(',',$request->account_ids);
+        $merged_accounts = MergedSisterAccount::where('merged_head_id', $request->merged_id)->pluck('user_id')->toArray();
+        $new_merged = array_diff($account_ids, $merged_accounts);
+        $remove_merged = array_diff($merged_accounts, $account_ids);
+        $previous_accounts = array_diff($merged_accounts, $new_merged, $remove_merged);
         if(count($account_ids) > 1){
             $merge_account_head = MergedAccountHead::where('id', $request->merged_id)->first();
             $merge_account_head->name = $request->group_name;
             $merge_account_head->updated_by = Auth::id();
             $merge_account_head->save();
-            MergedSisterAccount::where('merged_head_id', $merge_account_head->id)->delete();
-            foreach ($account_ids as $account_id){
+            MergedSisterAccount::where('merged_head_id', $merge_account_head->id)->whereIn('user_id', $remove_merged)->delete();
+            foreach($remove_merged as $remove_account_id){
+                foreach ($previous_accounts as $previous){
+                    NotificationsController::send(37, $previous, $remove_account_id);
+                }
+            }
+            foreach ($new_merged as $account_id){
                 $sister_account = new MergedSisterAccount();
                 $sister_account->merged_head_id = $merge_account_head->id;
                 $sister_account->user_id = $account_id;
                 $sister_account->save();
+                foreach ($previous_accounts as $previous){
+                    NotificationsController::send(36, $previous, $account_id);
+                }
             }
 
             return redirect()->back()->with('success', "Sister accounts updated successfully!");
