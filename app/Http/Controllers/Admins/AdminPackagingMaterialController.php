@@ -580,6 +580,11 @@ class AdminPackagingMaterialController extends Controller
 
             $details = '';
 
+            foreach ($request_details->items as $item){
+                $type = PackagingMaterialTypes::find($item->type_id)->type;
+                $size = PackagingMaterialTypeSizes::find($item->type_size_id)->size;
+                $details .= $item->quantity . ' ' . $size . ' ' . $type;
+            }
             $details = substr($details, 0, -2);
 
             $shipper_details = User::where('id', $user_id)->select('name', 'poc', 'phone', 'email')->first();
@@ -1518,13 +1523,10 @@ class AdminPackagingMaterialController extends Controller
             if($stock_request->status_id != 6){
                 $details = '';
                 foreach ($stock_request->stock_request_details as $item){
-                    $details .= $item->packaging_type->type. ' : '. $item->packaging_size->size. ' : '.$item->quantity;
+                    $details .= $item->quantity . ' ' .$item->packaging_size->size. ' ' . $item->packaging_type->type;
                 }
                 $pickup_hub_id = $stock_request->request_send_by->hub_id;
                 $consignee_hub_id = $stock_request->request_requested_by->hub_id;
-
-
-
 
                 $request_status = $this->request_booked($request_id, $details, $pickup_hub_id, $consignee_hub_id);
 
