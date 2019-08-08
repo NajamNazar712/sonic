@@ -1112,6 +1112,9 @@ class DeliveryController extends Controller
         $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
         $selected_status = $request->selected_status;
+        if($selected_status != 0 || $selected_status != null || $selected_status != ''){
+            return response()->json(['status'=>1, 'error' => 'Status not selected!']);
+        }
         $selected_reason = $request->selected_reason;
 
         if($delivery_note_id != ''){
@@ -1235,16 +1238,14 @@ class DeliveryController extends Controller
                     else{
                         if ($shipment_details->shipper_status_id != $selected_status) {
                             if($shipment_details->packaging_material_request == 0){
-                                ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, NULL, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                                ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, $selected_reason, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
                             }else if($shipment_details->packaging_material_charges != '' && $shipment_details->packaging_material_request == 1){
-                                ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, NULL, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                                ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, $selected_reason, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
                             }else if($shipment_details->packaging_material_charges == null && $shipment_details->packaging_material_request == 1){
                                 if($selected_status != 12){
-                                    ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, NULL, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                                    ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, $selected_reason, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
                                 }
                             }
-
-                            ShipmentsJourneyController::add($shipment, $selected_status,$selected_status, $selected_reason, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
 
                         }
                         if ($shipment_details->booking_type_id != 4) {
@@ -1655,7 +1656,7 @@ class DeliveryController extends Controller
 
         $note_data = DeliveryNote::where('id', $id)->first();
         if($note_data && ($note_data->pending_status ==1)){
-            $note_data_shipments = DeliveryNoteShipment::where('delivery_note_id', $id)->pluck('shipment_id')->toArray();;
+            $note_data_shipments = DeliveryNoteShipment::where('delivery_note_id', $id)->pluck('shipment_id')->toArray();
             $delivered_count = 0;
             $total_count = 0;
             foreach ($note_data_shipments as $shipment_id){
