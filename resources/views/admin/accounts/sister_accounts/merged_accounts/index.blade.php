@@ -15,7 +15,7 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Name.</th>
+                        <th class="border-primary border-darken-1">Name</th>
                         <th class="border-primary border-darken-1">Accounts</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
@@ -144,7 +144,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.accounts.sister_account.merged_account.list') }}',
+                        url: '{{ route('admin.accounts.merged_account.list') }}',
                         success: function (result) {
                             head = [];
 
@@ -197,13 +197,13 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.accounts.sister_account.merged_account.list') }}',
+                    url: '{{ route('admin.accounts.merged_account.list') }}',
                 },
                 rowId: 'id',
-                order: [[1, 'desc']],
+                order: [[5, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'name' ,name: 'merged_account_heads.id', class: 'align-middle name'},
+                    { data:'name' ,name: 'merged_account_heads.name', class: 'align-middle name'},
                     { data:'accounts_button' ,name: 'accounts_button', class: 'align-middle accounts_button', orderable: false, searchable: false},
                     { data:'created_at' ,name: 'merged_account_heads.created_at', class: 'align-middle created_at'},
                     { data:'created_by' ,name: 'ac.name', class: 'align-middle created_by'},
@@ -246,7 +246,7 @@
                 $('#mapping_modal .modal-body').html('');
                 $('#mapping_modal').modal('show');
                 $.ajax({
-                    url: '{!! route('admin.accounts.sister_account.merged_account.mapping.info') !!}',
+                    url: '{!! route('admin.accounts.merged_account.mapping.info') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
@@ -258,7 +258,7 @@
                         if (data) {
                             if (data.merged_accounts) {
                                 var html = '';
-                                var route = '{!! route('admin.accounts.sister_account.merged_account.mapping.submit') !!}';
+                                var route = '{!! route('admin.accounts.merged_account.mapping.submit') !!}';
                                 var csrf = '{!!csrf_field()!!}';
                                 html += '<form  action="' + route + '" method="post" id="mapping_form">' + csrf +'<table class="table table-sm datatable">';
                                 html += '<thead class="d-none"></thead>';
@@ -319,7 +319,7 @@
                 $('#accounts_modal').modal('show');
 
                 $.ajax({
-                    url: '{!! route('admin.accounts.sister_account.merged_account.info') !!}',
+                    url: '{!! route('admin.accounts.merged_account.info') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',

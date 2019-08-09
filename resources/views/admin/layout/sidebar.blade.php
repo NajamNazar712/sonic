@@ -81,7 +81,7 @@
                             <li><a class="menu-item" href="{{route('admin.accounts.block')}}">Block</a></li>
                         @endif
                         @if (session('role_id') == 1 || session('role_id') == 4 || in_array(242, session('permissions')))
-                            <li><a class="menu-item" href="{{route('admin.accounts.sister_account.merged_account.index')}}">Merged Accounts</a></li>
+                            <li><a class="menu-item" href="{{route('admin.accounts.merged_account.index')}}">Merged Accounts</a></li>
                         @endif
                     </ul>
                 </li>

@@ -311,19 +311,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         Route::prefix('sister_account')->name('sister_account.')->group(function(){
-            Route::get('{id}/add/sister_account','Admins\AdminDashboardController@add_sister_account_view')->name('add.account');
+            Route::get('{id}/add/','Admins\AdminDashboardController@add_sister_account_view')->name('add.account');
             Route::post('add/submit','Admins\AdminDashboardController@add_sister_account_submit')->name('add.submit');
             Route::get('{id}','Admins\AdminDashboardController@edit_sister_account_view')->name('edit.index');
             Route::post('edit/submit','Admins\AdminDashboardController@edit_sister_account_submit')->name('edit.submit');
             Route::post('account/info','Admins\AdminDashboardController@get_account_info')->name('info');
-            Route::prefix('merged_account')->name('merged_account.')->group(function(){
-                Route::get('index','Admins\AdminDashboardController@merged_accounts_index')->name('index');
-                Route::get('list','Admins\AdminDashboardController@merged_accounts_list')->name('list');
-                Route::post('info','Admins\AdminDashboardController@merged_accounts_info')->name('info');
-                Route::prefix('mapping')->name('mapping.')->group(function() {
-                    Route::post('mapping/info', 'Admins\AdminDashboardController@merged_accounts_mapping_info')->name('info');
-                    Route::post('submit', 'Admins\AdminDashboardController@merged_accounts_mapping_submit')->name('submit');
-                });
+        });
+
+        Route::prefix('merged_account')->name('merged_account.')->group(function(){
+            Route::get('','Admins\AdminDashboardController@merged_accounts_index')->name('index');
+            Route::get('list','Admins\AdminDashboardController@merged_accounts_list')->name('list');
+            Route::post('info','Admins\AdminDashboardController@merged_accounts_info')->name('info');
+            Route::prefix('mapping')->name('mapping.')->group(function() {
+                Route::post('mapping/info', 'Admins\AdminDashboardController@merged_accounts_mapping_info')->name('info');
+                Route::post('submit', 'Admins\AdminDashboardController@merged_accounts_mapping_submit')->name('submit');
             });
         });
     });
