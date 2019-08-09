@@ -5843,7 +5843,7 @@ class AdminDashboardController extends Controller
 
                 $merged = MergedSisterAccount::where('user_id', $result->id);
                 if(!$merged->exists()){
-                    if(session('role_id') == 1 || session('role_id') == 4 || (($sale_check != null && $sale_check->user_id == Auth::id())|| in_array(241, session('permissions'))))
+                    if(session('role_id') == 1 || session('role_id') == 4 || (($sale_check->user_id == Auth::id())|| in_array(241, session('permissions'))))
                     {
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                     }
@@ -5998,9 +5998,11 @@ class AdminDashboardController extends Controller
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
                 $merged = MergedSisterAccount::where('user_id', $result->id);
-                if(!$merged->exists()) {
-                    if (session('role_id') == 1 || session('role_id') == 4 || (($sale_check != null && $sale_check->user_id == Auth::id()) || in_array(241, session('permissions')))) {
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
+                if($sale_check != null) {
+                    if (!$merged->exists()) {
+                        if (session('role_id') == 1 || session('role_id') == 4 || (($sale_check->user_id == Auth::id()) || in_array(241, session('permissions')))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
+                        }
                     }
                 }
 
