@@ -21,6 +21,7 @@ class ShipperReportsController extends Controller
     }
     public function qsr_list(Request $request){
 
+        $sister_users = DB::connection('reports')->table('merged_sister_account_mappings')->where('head_user_id', session('user_id'))->pluck('sister_user_id')->toArray();
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -35,7 +36,8 @@ class ShipperReportsController extends Controller
             })
             ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','shipments.amount'])
             ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47])
-        ->where('shipments.user_id', session('user_id'));
+            ->where('shipments.user_id', session('user_id'))
+            ->orwhereIn('shipments.user_id', $sister_users);
         $datatable = Datatables::of($shipments)
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
@@ -75,6 +77,7 @@ class ShipperReportsController extends Controller
         return view('client.reports.sales_report')->with(['cities'=>$cities,'statuses'=>$statuses]);
     }
     public function sales_list(Request $request){
+        $sister_users = DB::connection('reports')->table('merged_sister_account_mappings')->where('head_user_id', session('user_id'))->pluck('sister_user_id')->toArray();
             $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
                 ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
                 ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
@@ -104,7 +107,8 @@ class ShipperReportsController extends Controller
                 ->leftjoin('products as p','p.id','=','si.product_type_id')
                 ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount')
                 ->whereNotIn('shipments.shipper_status_id',[1,17])
-                ->where('u.id', session('user_id'));
+                ->where('u.id', session('user_id'))
+                ->orwhereIn('shipments.user_id', $sister_users);
 
             $datatable = Datatables::of($sales)
                 ->editColumn('s_collection_amount', function($shipment){
@@ -156,6 +160,7 @@ class ShipperReportsController extends Controller
         $from = $request->from_date;
         $to = $request->to_date;
         $origin = $request->origin;
+        $user = $request->user;
         $destination = $request->destination;
         if($from == null || $to == null){
             $today = Carbon::now()->endOfDay();
@@ -166,13 +171,13 @@ class ShipperReportsController extends Controller
         }
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
-        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
-        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', session('user_id'));
+        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
+        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
+        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
+        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
+        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
+        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
+        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$thirtyDays,$today])->where('user_id', $user);
 
         if ($origin) {
             $stats['total'] = $stats['total']->whereExists(function($query) use ($origin) {
@@ -278,7 +283,9 @@ class ShipperReportsController extends Controller
         $stats['return'] = number_format($stats['return']->count());
         $stats['in_process'] = number_format($stats['in_process']->count());
         $cities = DB::connection('reports')->table('cities')->select(['id','name'])->get();
-        return view('client.reports.summary')->with(['stats' => $stats, 'cities' => $cities, 'today' => $today, 'thirtyday' => $thirtyDays]);
+        $sister_users = DB::connection('reports')->table('merged_sister_account_mappings')->leftjoin('users as u', 'u.id', '=', 'merged_sister_account_mappings.sister_user_id')->where('head_user_id', session('user_id'))->select('u.id', 'u.name')->get();
+        $user = DB::connection('reports')->table('users')->select('id', 'name')->where('id', session('user_id'))->first();
+        return view('client.reports.summary')->with(['stats' => $stats, 'cities' => $cities, 'today' => $today, 'thirtyday' => $thirtyDays, 'user' => $user, 'sister_users' => $sister_users]);
     }
 
     public function summary_list(Request $request){
@@ -299,8 +306,7 @@ class ShipperReportsController extends Controller
                     ->where('si.type','=',0);
             })
             ->leftjoin('products as p','p.id','=','si.product_type_id')
-            ->select(['shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','p.product_name','si.description','sj.created_at as arrival_date','oc.name as origin','dc.name as destination'])
-            ->where('shipments.user_id', session('user_id'));
+            ->select(['shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','p.product_name','si.description','sj.created_at as arrival_date','oc.name as origin','dc.name as destination']);
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
@@ -315,6 +321,12 @@ class ShipperReportsController extends Controller
             ->editColumn('collection_amount', function ($shipments){
                 return number_format($shipments->collection_amount);
             });
+            if($user = $request->get('search_user')){
+                $datatable->where('shipments.user_id', $user);
+            }
+            else{
+                $datatable->where('shipments.user_id', session('user_id'));
+            }
             if($origin = $request->get('search_origin')){
                 $datatable->where('oc.id', '=', $origin);
             }

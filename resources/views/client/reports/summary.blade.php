@@ -15,6 +15,16 @@
                 <div class="row mb-2 justify-content-center">
                     <div class="col-3">
                         <fieldset class="form-group">
+                            <select name="search_user" id="search_user" class="form-control select2">
+                                <option value="{{$user->id}}">{{$user->name}}</option>
+                                @foreach($sister_users as $sister_user)
+                                    <option value="{{$sister_user->id}}">{{$sister_user->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
                                 @foreach($cities as $city)
                                     <option value="{{$city->id}}">{{$city->name}}</option>
@@ -307,6 +317,10 @@
             //     'allowMinus': false,
             //     'allowPlus': false
             // });
+            $('#search_user').select2({
+                placeholder:'Select User',
+                width:'100%',
+            });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
                 width:'100%',
@@ -415,6 +429,7 @@
                         url: '{{ route('cod.reports.summary.list') }}',
                         data: {
                             'page': 'all',
+                            'search_user': $('#search_user').val(),
                             'search_origin': $('#search_origin').val(),
                             'search_destination': $('#search_destination').val(),
                             'cards_filter': $('#cards_filter_input').val(),
@@ -490,6 +505,7 @@
                 ajax:{
                     url: '{{ route('cod.reports.summary.list') }}',
                     data: function (d) {
+                        d.search_user = $('#search_user').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.cards_filter = $('#cards_filter_input').val();
@@ -567,10 +583,10 @@
             });
 
             function get_summary_cards_data() {
-                console.log('here');
                 var from_date = $('input[name="search_date_from_formatted"]').val();
                 var to_date = $('input[name="search_date_to_formatted"]').val();
                 var origin = $('#search_origin').val();
+                var user = $('#search_user').val();
                 var destination = $('#search_destination').val();
                 $.ajax({
                     url: '{!! route('cod.reports.summary.data') !!}',
@@ -579,13 +595,13 @@
                         '_token': '{{ csrf_token() }}',
                         'from_date': from_date,
                         'to_date': to_date,
+                        'user': user,
                         'origin': origin,
                         'destination': destination,
 
                     }
                 }).done(function (data) {
                     if(data.status){
-                        console.log(data);
                         $('#total').text(data.stats.total);
                         $('#booked').text(data.stats.booked);
                         $('#received').text(data.stats.received);
