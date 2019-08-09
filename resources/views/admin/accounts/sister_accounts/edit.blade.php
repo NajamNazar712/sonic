@@ -282,6 +282,14 @@
                 submitHandler: function(form) {
                     var group_name = $('#group_name').val();
                     $('#merge_account_form input#account_ids').val(account_ids);
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Accounts is being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
                     form.submit();
                 }
             });
