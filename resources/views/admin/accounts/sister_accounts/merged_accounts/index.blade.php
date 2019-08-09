@@ -50,6 +50,28 @@
     </div>
     <!--Accounts popup -->
 
+
+    <!--Mapping popup -->
+    <div class="modal fade" id="mapping_modal" data-backdrop="static" role="dialog" aria-labelledby="mapping_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title">Mapping</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                {{--<div class="modal-footer">--}}
+                    {{--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>--}}
+                {{--</div>--}}
+            </div>
+        </div>
+    </div>
+    <!--Mapping popup -->
+
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -215,6 +237,59 @@
                     this.api().table().columns.adjust();
                 }
             });
+            $('body').on('click','.mapping',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#mapping_modal .modal-body').html('');
+                $('#mapping_modal').modal('show');
+                $.ajax({
+                    url: '{!! route('admin.accounts.sister_account.merged_account.mapping.info') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id
+                    }
+                })
+                    .done(function(data) {
+                        // console.log(data);
+                        if (data) {
+                            if (data.merged_accounts) {
+                                var html = '';
+                                var route = '{!! route('admin.accounts.sister_account.merged_account.mapping.submit') !!}';
+                                var csrf = '{!!csrf_field()!!}';
+                                html += '<form  action="' + route + '" method="post" id="mapping_form">' + csrf +'<table class="table table-sm datatable">';
+                                // html += '<thead></thead>';
+                                // html += '<thead><tr><th><strong>Head</strong></th><th><strong>Sister</strong><th></tr></thead>';
+                                html += '<tbody>';
+                                $.each(data.merged_accounts, function(index, account) {
+                                    var html_view = '';
+                                    $.each(data.merged_accounts, function(index, sub_account) {
+                                        if(account.id != sub_account.id){
+                                            html_view += '<div class="col text-right">' +
+                                                '<fieldset class="checkbox-inline mr-1">' +
+                                                '<input type="hidden" name="id" value="'+ id +'">' +
+                                                '<input type="checkbox" id="sister_account_' + sub_account.id +'" class="icheck_square" name="sister_account[' + account.id +'][' + sub_account.id +']">' +
+                                                '<label for="sister_account_' + sub_account.id +'">' + sub_account.company_name +'</label>' +
+                                                '</fieldset>' +
+                                                '</div> ';
+                                        }
+                                    });
+                                    html += '<tr class=""><td><b>' + account.company_name + '</b></td>';
+                                    html += '<td>' + html_view
+                                    + '</td>';
+                                });
+                                html += '</tbody></table><button type="submit" class="btn btn-primary mt-1">Update</button>' +
+                                    '<button type="button" class="btn btn-secondary mt-1 ml-1" data-dismiss="modal">Close</button></form>';
+                            }
+                            $('#mapping_modal .modal-body').html(html);
+                            form();
+                        }
+                    });
+            });
+            function form(){
+                $('#mapping_form').on('submit',function (e) {
+                    e.preventDefault();
+                });
+            }
 
             $('#datatable tbody').on('click','tr td.accounts_button button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));

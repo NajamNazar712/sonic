@@ -320,6 +320,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('index','Admins\AdminDashboardController@merged_accounts_index')->name('index');
                 Route::get('list','Admins\AdminDashboardController@merged_accounts_list')->name('list');
                 Route::post('info','Admins\AdminDashboardController@merged_accounts_info')->name('info');
+                Route::prefix('mapping')->name('mapping.')->group(function() {
+                    Route::post('mapping/info', 'Admins\AdminDashboardController@merged_accounts_mapping_info')->name('info');
+                    Route::post('submit', 'Admins\AdminDashboardController@merged_accounts_mapping_submit')->name('submit');
+                });
             });
         });
     });

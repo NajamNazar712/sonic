@@ -6998,6 +6998,63 @@ class AdminDashboardController extends Controller
         }
     }
 
+    public function merged_accounts_index(){
+        return view('admin.accounts.sister_accounts.merged_accounts.index');
+    }
+    public function merged_accounts_list(Request $request){
+        $merged_accounts = MergedAccountHead::leftjoin('admins as ac', 'ac.id', '=', 'merged_account_heads.created_by')
+            ->leftjoin('admins as au', 'au.id', '=', 'merged_account_heads.updated_by')
+            ->select('merged_account_heads.id as id', 'merged_account_heads.name as name', 'merged_account_heads.created_at as created_at', 'merged_account_heads.updated_at as updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('(select count(id) from merged_sister_accounts where merged_sister_accounts.merged_head_id = merged_account_heads.id) as accounts'));
+        return Datatables::of($merged_accounts)
+
+            ->editColumn('accounts_button', function ($users){
+                    return '<div class="text-center"><button type="button" class="btn btn-sm btn-outline-info accounts_button">' . $users->accounts . '</button></div>';
+            })
+            ->editColumn('updated_by', function($users){
+                if($users->updated_by != null){
+                    return $users->updated_by;
+                }
+                else{
+                    return "-";
+                }
+            })
+            ->editColumn('updated_at', function($users){
+                if($users->updated_by != null){
+                    return $users->updated_at;
+                }
+                else{
+                    return "-";
+                }
+            })
+            ->addColumn("action", function ($users) {
+                $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.edit.index', ['id' => $users->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Sister Account</div></button>';
+                    $dropdown .= '<button type="button" class="dropdown-item mapping"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mapping</div></button>';
+
+
+                $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+                return $dropdown;
+            })
+            ->make(true);
+
+    }
+
+    public function merged_accounts_info(Request $request){
+        $merged_head_id = $request->id;
+        $accounts = MergedSisterAccount::leftjoin('users as u', 'u.id', '=', 'merged_sister_accounts.user_id')
+            ->leftjoin('cities as c', 'c.id', '=', 'u.city_id')
+            ->select('u.id as id', 'u.name as name', 'u.poc as poc', 'u.phone as phone', 'u.address as address', 'c.name as city')
+            ->where('merged_head_id', $merged_head_id)
+            ->get();
+        return response(['accounts' => $accounts]);
+    }
 
     public function edit_sister_account_view(Request $request){
         $group_name = MergedAccountHead::where('id', $request->id)->first();
@@ -7038,62 +7095,20 @@ class AdminDashboardController extends Controller
         }
     }
 
-    public function merged_accounts_index(){
-        return view('admin.accounts.sister_accounts.merged_accounts.index');
+    public function merged_accounts_mapping_info(Request $request){
+        $merged_accounts = MergedSisterAccount::leftjoin('users as u', 'u.id', '=', 'merged_sister_accounts.user_id')->select('u.id as id', 'u.name as company_name')->where('merged_sister_accounts.merged_head_id', $request->id)->get();
+        return response(['merged_accounts' => $merged_accounts]);
     }
-    public function merged_accounts_list(Request $request){
-        $merged_accounts = MergedAccountHead::leftjoin('admins as ac', 'ac.id', '=', 'merged_account_heads.created_by')
-            ->leftjoin('admins as au', 'au.id', '=', 'merged_account_heads.updated_by')
-            ->select('merged_account_heads.id as id', 'merged_account_heads.name as name', 'merged_account_heads.created_at as created_at', 'merged_account_heads.updated_at as updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('(select count(id) from merged_sister_accounts where merged_sister_accounts.merged_head_id = merged_account_heads.id) as accounts'));
-        return Datatables::of($merged_accounts)
+    public function merged_accounts_mapping_submit(Request $request){
 
-            ->editColumn('accounts_button', function ($users){
-                    return '<div class="text-center"><button type="button" class="btn btn-sm btn-outline-info accounts_button">' . $users->accounts . '</button></div>';
-            })
-            ->editColumn('updated_by', function($users){
-                if($users->updated_by != null){
-                    return $users->updated_by;
+        dd($request->id);
+        foreach ($request->sister_account as $index => $account){
+            foreach ($request->sister_account[$index] as $sub_index => $switch) {
+                if($switch == "on"){
+                    dd($request->id);
                 }
-                else{
-                    return "-";
-                }
-            })
-            ->editColumn('updated_at', function($users){
-                if($users->updated_by != null){
-                    return $users->updated_at;
-                }
-                else{
-                    return "-";
-                }
-            })
-            ->addColumn("action", function ($users) {
-                $dropdown = '
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                        <div class="dropdown-menu dropdown-menu-sm">
-                    ';
-                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.edit.index', ['id' => $users->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Sister Account</div></button>';
-//                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id' => $users->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mapping</div></button>';
-
-
-                $dropdown .= '
-                        </div>
-                      </div>
-                    ';
-                return $dropdown;
-            })
-            ->make(true);
-
-    }
-
-    public function merged_accounts_info(Request $request){
-        $merged_head_id = $request->id;
-        $accounts = MergedSisterAccount::leftjoin('users as u', 'u.id', '=', 'merged_sister_accounts.user_id')
-            ->leftjoin('cities as c', 'c.id', '=', 'u.city_id')
-            ->select('u.id as id', 'u.name as name', 'u.poc as poc', 'u.phone as phone', 'u.address as address', 'c.name as city')
-            ->where('merged_head_id', $merged_head_id)
-            ->get();
-        return response(['accounts' => $accounts]);
+            }
+        }
     }
 }
 
