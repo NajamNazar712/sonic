@@ -286,10 +286,9 @@
                 submitHandler: function(form) {
                     var group_name = $('#group_name').val();
                     $('#merge_account_form input#account_ids').val(account_ids);
-                    var html='</br>';
                     swal({
                         title: 'Please Wait!',
-                        text: html,
+                        text: 'Accounts is being updated!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
