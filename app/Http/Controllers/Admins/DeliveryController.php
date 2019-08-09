@@ -1669,7 +1669,7 @@ class DeliveryController extends Controller
             $total = $delivered_count/$total_count;
             $total_percentage = $total * 100;
             $percentage = number_format((float)$total_percentage, 2, '.', '');
-            $setting_call_verification = DeliveryCallVerificationRatio::where('min', '<',$total_percentage)->where('max', '>=',$total_percentage)->first();
+            $setting_call_verification = DeliveryCallVerificationRatio::where('min', '<=',$total_percentage)->where('max', '>',$total_percentage)->first();
 //            dd($setting_call_verification);
             if($setting_call_verification == null){
                 $verification_percentage = 0;
