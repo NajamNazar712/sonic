@@ -183,6 +183,7 @@
                     {
                         extend: 'excel',
                         title: 'Merged Accounts',
+                        className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'

@@ -6954,19 +6954,25 @@ class AdminDashboardController extends Controller
         $user_id = $request->id;
         $check_user = User::where('id', $user_id);
         if($check_user->exists()){
-            $check_merged_accounts = MergedSisterAccount::where('user_id', $user_id);
+            $check_user = $check_user->first();
+            if($check_user->blacklist == 0){
+                $check_merged_accounts = MergedSisterAccount::where('user_id', $user_id);
 
-            if(!$check_merged_accounts->exists()){
-                $user = User::leftjoin('cities as c', 'c.id', '=', 'users.city_id')->leftjoin('products as p', 'p.id', '=', 'users.product_id')->leftjoin('sale_person_tags as spt', 'spt.user_id', '=', 'users.id')->leftjoin('admins as a', 'a.id', '=', 'spt.admin_id')->select('users.id as id', 'users.name as company_name', 'c.name as city', 'users.poc as contact_name', 'users.phone as phone', 'users.address as address', 'users.email as email', 'users.status as status', 'p.product_name as product_type', 'a.name as tagged_to')->where('users.id', $request->id)->first();
+                if(!$check_merged_accounts->exists()){
+                    $user = User::leftjoin('cities as c', 'c.id', '=', 'users.city_id')->leftjoin('products as p', 'p.id', '=', 'users.product_id')->leftjoin('sale_person_tags as spt', 'spt.user_id', '=', 'users.id')->leftjoin('admins as a', 'a.id', '=', 'spt.admin_id')->select('users.id as id', 'users.name as company_name', 'c.name as city', 'users.poc as contact_name', 'users.phone as phone', 'users.address as address', 'users.email as email', 'users.status as status', 'p.product_name as product_type', 'a.name as tagged_to')->where('users.id', $request->id)->first();
 
-                return ['status' => 0, 'info' => $user];
+                    return ['status' => 0, 'info' => $user];
+                }
+                else{
+                    return ['status' => 1, 'error' => "Already registered as a sister account"];
+                }
             }
             else{
-                return ['status' => 1, 'error' => "Already registered as a sister account"];
+                return ['status' => 1, 'error' => "Account ID is blocked!"];
             }
         }
         else{
-            return ['status' => 1, 'error' => "Account id does'nt exists!"];
+            return ['status' => 1, 'error' => "Account ID does'nt exists!"];
         }
     }
 

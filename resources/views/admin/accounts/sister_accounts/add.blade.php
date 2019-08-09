@@ -203,52 +203,66 @@
             $('#add_account_form').on('submit',function (e) {
                 e.preventDefault();
                 var account_id = $('#enter_account_number').val();
-                if(account_id != null && account_id != '') {
-                    $('#add_account').attr('disabled', true);
-                    blockPagePermanently();
-                    $.ajax({
-                        url:'{{route('admin.accounts.sister_account.info')}}',
-                        type:'POST',
-                        data: {
-                            'id':account_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        $('#enter_account_number').val('');
-                        if(data.status === 1){
-                            UnblockPagePermanently();
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }else{
-                            var rowNo = table.rows().count() + 1;
-                            var new_account_id = ''+data.info.id+'';
-                            var new_account_id_pad = new_account_id.padStart(6, '0');
-                            var status_no = data.info.status;
-                            var status = '';
-                            if(status_no == 0){
-                                status = 'Request Received';
+                    if (account_id != null && account_id != '') {
+                        $('#add_account').attr('disabled', true);
+                        blockPagePermanently();
+                        $.ajax({
+                            url: '{{route('admin.accounts.sister_account.info')}}',
+                            type: 'POST',
+                            data: {
+                                'id': account_id,
+                                '_token': '{{ csrf_token() }}'
                             }
-                            else if(status_no == 1){
-                                status = 'Rates Added';
-                            }
-                            else if(status_no == 2){
-                                status = 'Pending for Activation';
-                            }
-                            else{
-                                status = 'Active';
-                            }
-                            var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove_account"><i class="la la-close"></i></a>';
-                            var row = table.row.add([rowNo, new_account_id_pad, data.info.company_name, data.info.city, data.info.contact_name, data.info.phone, data.info.address, data.info.email, data.info.product_type, status, data.info.tagged_to, remove]).node().id = data.info.id;
-                            table.draw();
-                            UnblockPagePermanently();
-                            account_ids.push(data.info.id);
-                        }
-                        $('#add_account').attr('disabled', false);
-                    });
-                }
-                else{
-                    var error = "Please enter Account No.";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
+                        }).done(function (data) {
+                            $('#enter_account_number').val('');
+                                if (data.status === 1) {
+                                    UnblockPagePermanently();
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                } else {
+                                    var is_indexed = $.inArray(data.info.id, account_ids);
+                                    if(is_indexed === -1) {
+                                        var rowNo = table.rows().count() + 1;
+                                        var new_account_id = '' + data.info.id + '';
+                                        var new_account_id_pad = new_account_id.padStart(6, '0');
+                                        var status_no = data.info.status;
+                                        var status = '';
+                                        if (status_no == 0) {
+                                            status = 'Request Received';
+                                        }
+                                        else if (status_no == 1) {
+                                            status = 'Rates Added';
+                                        }
+                                        else if (status_no == 2) {
+                                            status = 'Pending for Activation';
+                                        }
+                                        else {
+                                            status = 'Active';
+                                        }
+                                        var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove_account"><i class="la la-close"></i></a>';
+                                        var row = table.row.add([rowNo, new_account_id_pad, data.info.company_name, data.info.city, data.info.contact_name, data.info.phone, data.info.address, data.info.email, data.info.product_type, status, data.info.tagged_to, remove]).node().id = data.info.id;
+                                        table.draw();
+                                        UnblockPagePermanently();
+                                        account_ids.push(data.info.id);
+                                    }
+                                    else{
+                                        var error = 'Account ID already entered!';
+                                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                }
+                            $('#add_account').attr('disabled', false);
+                        });
+                        UnblockPagePermanently();
+                    }
+                    else {
+                        var error = "Please enter Account No.";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
             });
 
             $('body').on('click','a.remove_account',function () {
