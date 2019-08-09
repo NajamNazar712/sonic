@@ -225,7 +225,7 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
 					'reset'],
-				scrollX: true, scrollY: '350px',
+				scrollX: true, scrollY: '500px',
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
 				pageLength: 50,
 				pagingType: 'full_numbers',
@@ -381,7 +381,7 @@
                         $('#reconcile_delivery_notes #reconcile_delivery_notes_form .delivery_note_ids').val(selected_rows);
                     }
                 }],
-				scrollX: true, scrollY: '350px',
+				scrollX: true, scrollY: '500px',
 				paging: false,
 				select: {
 					info: false,

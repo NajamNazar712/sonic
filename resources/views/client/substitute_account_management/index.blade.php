@@ -101,7 +101,7 @@
             } );
 			var table = $('#datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				scrollX: true, scrollY: '350px',
+				scrollX: true, scrollY: '500px',
 				buttons: [{
 					text: '<i class="la la-user-plus"></i> Add',
 					className: 'btn btn-primary add',

@@ -50,7 +50,7 @@
     <script>
         $(document).ready(function() {
             var table = $('#datatable').DataTable({
-                scrollX: true, scrollY: '350px',
+                scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[
                     'reset'
