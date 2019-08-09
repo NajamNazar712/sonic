@@ -5841,11 +5841,13 @@ class AdminDashboardController extends Controller
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
 
-                if(session('role_id') == 1 || session('role_id') == 4 || ($sale_check != null && $sale_check->user_id == Auth::id()))
-                {
-                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
+                $merged = MergedSisterAccount::where('user_id', $result->id);
+                if(!$merged->exists()){
+                    if(session('role_id') == 1 || session('role_id') == 4 || (($sale_check != null && $sale_check->user_id == Auth::id())|| in_array(241, session('permissions'))))
+                    {
+                        $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
+                    }
                 }
-
                 $dropdown .= '
                     </div>
                   </div>
@@ -5995,9 +5997,11 @@ class AdminDashboardController extends Controller
                 {
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
-                if(session('role_id') == 1 || session('role_id') == 4 || ($sale_check != null && $sale_check->user_id == Auth::id()))
-                {
-                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
+                $merged = MergedSisterAccount::where('user_id', $result->id);
+                if(!$merged->exists()) {
+                    if (session('role_id') == 1 || session('role_id') == 4 || (($sale_check != null && $sale_check->user_id == Auth::id()) || in_array(241, session('permissions')))) {
+                        $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
+                    }
                 }
 
                 $dropdown .= '
@@ -6985,14 +6989,7 @@ class AdminDashboardController extends Controller
                     }
                 }
             }
-            $user = User::where('id', $account_ids[0])->first();
-            if($user->status == 3){
-
-                return redirect()->route('admin.accounts.active')->with(['success'=>"Accounts merged successfully."]);
-            }
-            else{
-                return redirect()->route('admin.accounts.pending')->with(['success'=>"Accounts merged successfully."]);
-            }
+                return redirect()->route('admin.accounts.sister_account.merged_account.index')->with(['success'=>"Accounts merged successfully."]);
         }
         else{
             return redirect()->back()->with('error', "Sister accounts are not selected!");
@@ -7028,11 +7025,14 @@ class AdminDashboardController extends Controller
                 }
             })
             ->addColumn("action", function ($users) {
-                $dropdown = '
+                $dropdown = '';
+                if (session('role_id') == 1 || session('role_id') == 4 || in_array(242, session('permissions'))) {
+                $dropdown .= '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
+
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.edit.index', ['id' => $users->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Sister Account</div></button>';
                     $dropdown .= '<button type="button" class="dropdown-item mapping"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mapping</div></button>';
 
@@ -7041,6 +7041,7 @@ class AdminDashboardController extends Controller
                         </div>
                       </div>
                     ';
+                }
                 return $dropdown;
             })
             ->make(true);

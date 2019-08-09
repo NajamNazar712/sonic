@@ -30,6 +30,15 @@ class Permission
             'accounts.get.pickups' =>110,
             'accounts.update.profile' =>111,
             'accounts.update.bank' =>112,
+            'accounts.sister_account.add.account' => 241,
+            'accounts.sister_account.add.submit' => 241,
+            'accounts.sister_account.merged_account.index' => 241,
+            'accounts.sister_account.merged_account.list' => 241,
+            'accounts.sister_account.merged_account.info' => 241,
+            'accounts.sister_account.edit.account' => 242,
+            'accounts.sister_account.edit.submit' => 242,
+            'accounts.sister_account.merged_account.mapping.info' => 242,
+            'accounts.sister_account.merged_account.mapping.submit' => 242,
 
 
             'pickups.pending.index' => 17,

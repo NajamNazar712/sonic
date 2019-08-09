@@ -218,7 +218,6 @@
                         if(data.status === 1){
                             UnblockPagePermanently();
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            scan_sound(2);
                         }else{
                             var rowNo = table.rows().count() + 1;
                             var new_account_id = ''+data.info.id+'';
