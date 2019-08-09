@@ -10,6 +10,7 @@
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
+                @include('admin.inc.messages')
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -74,6 +75,8 @@
 
 @endsection
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
@@ -129,8 +132,8 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/forms/checkbox-radio.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
@@ -257,23 +260,36 @@
                                 var route = '{!! route('admin.accounts.sister_account.merged_account.mapping.submit') !!}';
                                 var csrf = '{!!csrf_field()!!}';
                                 html += '<form  action="' + route + '" method="post" id="mapping_form">' + csrf +'<table class="table table-sm datatable">';
-                                // html += '<thead></thead>';
+                                html += '<thead class="d-none"></thead>';
                                 // html += '<thead><tr><th><strong>Head</strong></th><th><strong>Sister</strong><th></tr></thead>';
                                 html += '<tbody>';
                                 $.each(data.merged_accounts, function(index, account) {
                                     var html_view = '';
                                     $.each(data.merged_accounts, function(index, sub_account) {
                                         if(account.id != sub_account.id){
+                                            var check = false;
                                             html_view += '<div class="col text-right">' +
                                                 '<fieldset class="checkbox-inline mr-1">' +
-                                                '<input type="hidden" name="id" value="'+ id +'">' +
-                                                '<input type="checkbox" id="sister_account_' + sub_account.id +'" class="icheck_square" name="sister_account[' + account.id +'][' + sub_account.id +']">' +
-                                                '<label for="sister_account_' + sub_account.id +'">' + sub_account.company_name +'</label>' +
-                                                '</fieldset>' +
+                                                '<input type="hidden" name="id" value="'+ id +'">';
+                                            // if(){}
+
+                                            $.each(data.merged_mapping, function(map_index, mapped_account) {
+                                                if(account.id == mapped_account.head_user_id && mapped_account.sister_user_id == sub_account.id){
+                                                    if(mapped_account.head_user_id == account.id && mapped_account.sister_user_id == sub_account.id){
+                                                        check = true;
+                                                        html_view += '<input type="checkbox" id="sister_account_' + sub_account.id +'" class="icheckbox" name="sister_account[' + account.id +'][' + sub_account.id +']" checked>';
+                                                    }
+                                                }
+                                            });
+                                            if(check == false){
+                                                html_view += '<input type="checkbox" id="sister_account_' + sub_account.id +'" class="icheckbox" name="sister_account[' + account.id +'][' + sub_account.id +']">';
+                                            }
+                                            html_view += '<label for="sister_account_' + sub_account.id +'">' + sub_account.company_name +'</label>';
+                                            html_view += '</fieldset>' +
                                                 '</div> ';
                                         }
                                     });
-                                    html += '<tr class=""><td><b>' + account.company_name + '</b></td>';
+                                    html += '<tr class=""><td><h5><b>' + account.company_name + '</b></h5></td>';
                                     html += '<td>' + html_view
                                     + '</td>';
                                 });
@@ -286,8 +302,13 @@
                     });
             });
             function form(){
+                $('input.icheckbox').iCheck({
+                    checkboxClass: 'icheckbox_flat-blue'
+                });
                 $('#mapping_form').on('submit',function (e) {
                     e.preventDefault();
+                    var form = this;
+                    form.submit();
                 });
             }
 

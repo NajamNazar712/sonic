@@ -43,6 +43,7 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedAccountHead;
 use App\Http\Models\Sister_account\MergedSisterAccount;
+use App\http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
 use Illuminate\Support\Facades\DB;
@@ -7097,17 +7098,30 @@ class AdminDashboardController extends Controller
 
     public function merged_accounts_mapping_info(Request $request){
         $merged_accounts = MergedSisterAccount::leftjoin('users as u', 'u.id', '=', 'merged_sister_accounts.user_id')->select('u.id as id', 'u.name as company_name')->where('merged_sister_accounts.merged_head_id', $request->id)->get();
-        return response(['merged_accounts' => $merged_accounts]);
+        $merged_mapping = MergedSisterAccountMapping::where('merged_head_id', $request->id)->select('head_user_id', 'sister_user_id')->get();
+        return response(['merged_accounts' => $merged_accounts, 'merged_mapping' => $merged_mapping]);
     }
     public function merged_accounts_mapping_submit(Request $request){
-
-        dd($request->id);
-        foreach ($request->sister_account as $index => $account){
-            foreach ($request->sister_account[$index] as $sub_index => $switch) {
-                if($switch == "on"){
-                    dd($request->id);
+        $merged_account = MergedAccountHead::where('id', $request->id)->first();
+        $merged_account->updated_by = Auth::id();
+        $merged_account->save();
+        MergedSisterAccountMapping::where('merged_head_id', $merged_account->id)->delete();
+        if($request->has('sister_account')){
+            foreach ($request->sister_account as $index => $account){
+                foreach ($request->sister_account[$index] as $sub_index => $switch) {
+                    if($switch == "on"){
+                        $new_mapping = new MergedSisterAccountMapping();
+                        $new_mapping->merged_head_id = $merged_account->id;
+                        $new_mapping->head_user_id = $index;
+                        $new_mapping->sister_user_id = $sub_index;
+                        $new_mapping->save();
+                    }
                 }
             }
+            return redirect()->back()->with('success', "Mapping updated successfully!");
+        }
+        else{
+            return redirect()->back()->with('success', "Mapping updated successfully!");
         }
     }
 }
