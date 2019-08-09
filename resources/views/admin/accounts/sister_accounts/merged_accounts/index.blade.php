@@ -225,7 +225,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.accounts') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.accounts_button') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -254,7 +254,6 @@
                     }
                 })
                     .done(function(data) {
-                        // console.log(data);
                         if (data) {
                             if (data.merged_accounts) {
                                 var html = '';
