@@ -35,7 +35,7 @@ class Permission
             'accounts.merged_account.index' => 241,
             'accounts.merged_account.list' => 241,
             'accounts.merged_account.info' => 241,
-            'accounts.sister_account.edit.account' => 242,
+            'accounts.sister_account.edit.index' => 242,
             'accounts.sister_account.edit.submit' => 242,
             'accounts.sister_account.merged_account.mapping.info' => 242,
             'accounts.sister_account.merged_account.mapping.submit' => 242,
