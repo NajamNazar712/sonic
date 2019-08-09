@@ -1140,7 +1140,7 @@ class AdminOperationForecastController extends Controller
                         $operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup'] = OperationsOutgoingPickupRequests::where('pickup_request_id', $pickup_request_id[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup'])->where('hub_id', $user_shipping_info->city_id)->where('booking_type_id', 5)->whereBetween('updated_at', [$from, $to]);
                         if ($operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup']->exists()) {
                             $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup'] = $operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup']->first();
-                            $new_operation_outgoing_forecast[$pickup_request->user_id][$pickup_request->city_id]['reverse_pickup']->shipments_count = $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup'];
+                            $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup']->shipments_count = $outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup'];
                             $new_operation_outgoing_forecast[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup']->save();
                         } else {
                             if ($outgoing_shipment_count[$pickup_request->user_id][$user_shipping_info->city_id]['reverse_pickup'] > 0) {
