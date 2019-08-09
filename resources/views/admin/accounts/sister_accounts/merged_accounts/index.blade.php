@@ -54,7 +54,7 @@
 
     <!--Mapping popup -->
     <div class="modal fade" id="mapping_modal" data-backdrop="static" role="dialog" aria-labelledby="mapping_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="shipments_modal_title">Mapping</h4>
@@ -269,7 +269,7 @@
                                     $.each(data.merged_accounts, function(index, sub_account) {
                                         if(account.id != sub_account.id){
                                             var check = false;
-                                            html_view += '<div class="col text-right">' +
+                                            html_view += '<div class="col text-left">' +
                                                 '<fieldset class="checkbox-inline mr-1">' +
                                                 '<input type="hidden" name="id" value="'+ id +'">';
                                             // if(){}
@@ -278,19 +278,19 @@
                                                 if(account.id == mapped_account.head_user_id && mapped_account.sister_user_id == sub_account.id){
                                                     if(mapped_account.head_user_id == account.id && mapped_account.sister_user_id == sub_account.id){
                                                         check = true;
-                                                        html_view += '<input type="checkbox" id="sister_account_' + sub_account.id +'" class="icheckbox" name="sister_account[' + account.id +'][' + sub_account.id +']" checked>';
+                                                        html_view += '<input type="checkbox" id="sister_account_' + sub_account.id +'" class="select-checkbox" name="sister_account[' + account.id +'][' + sub_account.id +']" checked>';
                                                     }
                                                 }
                                             });
                                             if(check == false){
-                                                html_view += '<input type="checkbox" id="sister_account_' + sub_account.id +'" class="icheckbox" name="sister_account[' + account.id +'][' + sub_account.id +']">';
+                                                html_view += '<input type="checkbox" id="sister_account_' + sub_account.id +'" class="select-checkbox" name="sister_account[' + account.id +'][' + sub_account.id +']">';
                                             }
                                             html_view += '<label for="sister_account_' + sub_account.id +'">' + sub_account.company_name +'</label>';
                                             html_view += '</fieldset>' +
                                                 '</div> ';
                                         }
                                     });
-                                    html += '<tr class=""><td><h5><b>' + account.company_name + '</b></h5></td>';
+                                    html += '<tr><td><h5><b>' + account.company_name + '</b></h5></td>';
                                     html += '<td>' + html_view
                                     + '</td>';
                                 });

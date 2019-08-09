@@ -253,8 +253,9 @@
                                     }
                                 }
                             $('#add_account').attr('disabled', false);
+                            UnblockPagePermanently();
+                            console.log(account_ids);
                         });
-                        UnblockPagePermanently();
                     }
                     else {
                         var error = "Please enter Account No.";

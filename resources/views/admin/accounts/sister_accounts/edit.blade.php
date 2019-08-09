@@ -170,27 +170,30 @@
                     var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove_account"><i class="la la-close"></i></a>';
                 }
 
-                var account_id = ''+account.id+'';
-                var account_id_pad = account_id.padStart(6, '0');
+                var is_indexed = $.inArray(account.id, account_ids);
+                if(is_indexed === -1) {
+                    var account_id = ''+account.id+'';
+                    var account_id_pad = account_id.padStart(6, '0');
 
-                var status_no = account.status;
-                var status = '';
-                if(status_no == 0){
-                    status = 'Request Received';
-                }
-                else if(status_no == 1){
-                    status = 'Rates Added';
-                }
-                else if(status_no == 2){
-                    status = 'Pending for Activation';
-                }
-                else{
-                    status = 'Active';
-                }
+                    var status_no = account.status;
+                    var status = '';
+                    if(status_no == 0){
+                        status = 'Request Received';
+                    }
+                    else if(status_no == 1){
+                        status = 'Rates Added';
+                    }
+                    else if(status_no == 2){
+                        status = 'Pending for Activation';
+                    }
+                    else{
+                        status = 'Active';
+                    }
 
-                var row = table.row.add([count, account_id_pad, account.company_name, account.city, account.contact_name, account.phone, account.address, account.email, account.product_type, status, account.tagged_to, action]).node().id = account.id;
-                account_ids.push(account.id);
-                table.draw();
+                    var row = table.row.add([count, account_id_pad, account.company_name, account.city, account.contact_name, account.phone, account.address, account.email, account.product_type, status, account.tagged_to, action]).node().id = account.id;
+                    account_ids.push(account.id);
+                    table.draw();
+                }
             });
 
 
@@ -249,12 +252,14 @@
                             }
                         UnblockPagePermanently();
                         $('#add_account').attr('disabled', false);
+                        console.log(account_ids);
                     });
                 }
                 else{
                     var error = "Please enter Account No.";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
+                console.log(account_ids);
             });
 
             $('body').on('click','a.remove_account',function () {
