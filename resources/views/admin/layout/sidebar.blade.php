@@ -221,88 +221,82 @@
 
             <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-money"></i>Financials</span></a>
                 <ul class="menu-content">
-                    @if (session('role_id') == 1 || count(array_intersect([52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147, 238, 243], session('permissions'))) !== 0)
-                        <li class=" nav-item"><a href="#"><span class="menu-title">Finance</span></a>
+
+                    @if (session('role_id') == 1 || in_array(136, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.finance.add_shipment_adjustment.index') }}">Add
+                                Adjustment</a></li>
+                    @endif
+                    @if (session('role_id') == 1 || count(array_intersect([59, 61, 232], session('permissions'))) !== 0)
+                        <li class=" menu-item"><a href="#"><span class="menu-title">Payments</span></a>
                             <ul class="menu-content">
-
-                                @if (session('role_id') == 1 || in_array(136, session('permissions')))
-                                    <li><a class="menu-item" href="{{ route('admin.finance.add_shipment_adjustment.index') }}">Add
-                                            Adjustment</a></li>
+                                @if (session('role_id') == 1 || in_array(59, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.finance.make_payments.index') }}">Make</a></li>
                                 @endif
-                                @if (session('role_id') == 1 || count(array_intersect([59, 61, 232], session('permissions'))) !== 0)
-                                    <li class=" menu-item"><a href="#"><span class="menu-title">Payments</span></a>
-                                        <ul class="menu-content">
-                                            @if (session('role_id') == 1 || in_array(59, session('permissions')))
-                                                <li><a class="menu-item"
-                                                       href="{{ route('admin.finance.make_payments.index') }}">Make</a></li>
-                                            @endif
 
-                                            @if (session('role_id') == 1 || in_array(61, session('permissions')))
-                                                <li><a class="menu-item"
-                                                       href="{{ route('admin.finance.done_payments.index') }}">Done</a></li>
-                                            @endif
-                                            @if (session('role_id') == 1 || in_array(232, session('permissions')))
-                                                <li><a class="menu-item" href="{{ route('admin.finance.invoice_for_reimbursement.index') }}">Invoice for Reimbursement</a></li>
-                                            @endif
-                                        </ul>
+                                @if (session('role_id') == 1 || in_array(61, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.finance.done_payments.index') }}">Done</a></li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(232, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.finance.invoice_for_reimbursement.index') }}">Invoice for Reimbursement</a></li>
+                                @endif
+                            </ul>
+                        </li>
+                    @endif
+
+                    @if (session('role_id') == 1 || in_array(120, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Invoices</a>
+                        </li>
+                    @endif
+
+                    @if (session('role_id') == 1 || count(array_intersect([52, 54, 167], session('permissions'))) !== 0)
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Recovery</span></a>
+                            <ul class="menu-content">
+                                @if (session('role_id') == 1 || in_array(52, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.finance.outstanding_sdn.index') }}">SDN</a></li>
+                                @endif
+
+                                @if (session('role_id') == 1 || in_array(54, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.finance.outstanding_shipments.index') }}">Shipments</a>
+                                    </li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(167, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.finance.outstanding_shipments.walk_in_index') }}">Walk-In
+                                            Shipments</a></li>
+                                @endif
+                            </ul>
+                        </li>
+                    @endif
+
+                    @if (session('role_id') == 1 || count(array_intersect([145, 146, 147, 238, 243], session('permissions'))) !== 0)
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Petty Cash</span></a>
+                            <ul class="menu-content">
+                                @if (session('role_id') == 1 || in_array(145, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.petty_cash.make.index') }}">Make</a></li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(238, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.petty_cash.draft.index') }}">Draft</a></li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(146, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.petty_cash.statements.index') }}">Statements</a>
+                                    </li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(147, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.petty_cash.approved.index') }}">Approved</a>
+                                    </li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(243, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.petty_cash.rejected.index') }}">Rejected</a>
                                     </li>
                                 @endif
 
-                                @if (session('role_id') == 1 || in_array(120, session('permissions')))
-                                    <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Invoices</a>
-                                    </li>
-                                @endif
-
-                                @if (session('role_id') == 1 || count(array_intersect([52, 54, 167], session('permissions'))) !== 0)
-                                    <li class=" nav-item"><a href="#"><span class="menu-title">Recovery</span></a>
-                                        <ul class="menu-content">
-                                            @if (session('role_id') == 1 || in_array(52, session('permissions')))
-                                                <li><a class="menu-item"
-                                                       href="{{ route('admin.finance.outstanding_sdn.index') }}">SDN</a></li>
-                                            @endif
-
-                                            @if (session('role_id') == 1 || in_array(54, session('permissions')))
-                                                <li><a class="menu-item"
-                                                       href="{{ route('admin.finance.outstanding_shipments.index') }}">Shipments</a>
-                                                </li>
-                                            @endif
-                                            @if (session('role_id') == 1 || in_array(167, session('permissions')))
-                                                <li><a class="menu-item"
-                                                       href="{{ route('admin.finance.outstanding_shipments.walk_in_index') }}">Walk-In
-                                                        Shipments</a></li>
-                                            @endif
-                                        </ul>
-                                    </li>
-                                @endif
-
-                                @if (session('role_id') == 1 || count(array_intersect([145, 146, 147, 238, 243], session('permissions'))) !== 0)
-                                    <li class=" nav-item"><a href="#"><span class="menu-title">Petty Cash</span></a>
-                                        <ul class="menu-content">
-                                            @if (session('role_id') == 1 || in_array(145, session('permissions')))
-                                                <li><a class="menu-item"
-                                                       href="{{ route('admin.petty_cash.make.index') }}">Make</a></li>
-                                            @endif
-                                            @if (session('role_id') == 1 || in_array(238, session('permissions')))
-                                                <li><a class="menu-item"
-                                                       href="{{ route('admin.petty_cash.draft.index') }}">Draft</a></li>
-                                            @endif
-                                            @if (session('role_id') == 1 || in_array(146, session('permissions')))
-                                                <li><a class="menu-item"
-                                                       href="{{ route('admin.petty_cash.statements.index') }}">Statements</a>
-                                                </li>
-                                            @endif
-                                            @if (session('role_id') == 1 || in_array(147, session('permissions')))
-                                                <li><a class="menu-item" href="{{ route('admin.petty_cash.approved.index') }}">Approved</a>
-                                                </li>
-                                            @endif
-                                            @if (session('role_id') == 1 || in_array(243, session('permissions')))
-                                                <li><a class="menu-item" href="{{ route('admin.petty_cash.rejected.index') }}">Rejected</a>
-                                                </li>
-                                            @endif
-
-                                        </ul>
-                                    </li>
-                                @endif
                             </ul>
                         </li>
                     @endif
