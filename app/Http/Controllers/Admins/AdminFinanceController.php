@@ -4290,7 +4290,6 @@ class AdminFinanceController extends Controller
                     $payment_shipments = $payment->done_payment_shipments;
 
                     $total_ibft_charges += $payment->ibft_charges;
-                    $total_invoice_amount += $payment->ibft_charges;
                 }
 
                 foreach ($payment_shipments as $invoice_shipment) {
@@ -4484,7 +4483,6 @@ class AdminFinanceController extends Controller
                                   <td class="color secondary text-right">' . number_format(ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                 </tr>
                     ';
-                }
                 }
                 else {
                     $html .= '
