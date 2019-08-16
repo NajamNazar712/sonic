@@ -78,21 +78,23 @@
                         </tr>
                         </thead>
                     </table>
-                    <div class="row justify-content-center">
-                        <div class="">
-                            <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" disabled>Update Details</button>
-                        </div>
-                            @if((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions')))
-                                @if((session('role_id') == 1) || ($petty_statement->status == 0 && session('department_id') == 6) || ($petty_statement->status == 1 && (session('department_id') == 6)) || ($petty_statement->status == 2 && session('department_id') == 4))
-                                <div class="ml-1">
-                                    <button id="statement_approve" type="button"  class="btn btn-primary btn-block">Approve</button>
-                                </div>
-                                <div class="ml-1">
-                                    <button id="statement_reject" type="button"  class="btn btn-danger btn-block">Reject</button>
-                                </div>
+                    @if($petty_statement->status != 6)
+                        <div class="row justify-content-center">
+                            <div class="">
+                                <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" disabled>Update Details</button>
+                            </div>
+                                @if((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions')))
+                                    @if((session('role_id') == 1) || ($petty_statement->status == 0 && session('department_id') == 6) || ($petty_statement->status == 1 && (session('department_id') == 6)) || ($petty_statement->status == 2 && session('department_id') == 4))
+                                    <div class="ml-1">
+                                        <button id="statement_approve" type="button"  class="btn btn-primary btn-block">Approve</button>
+                                    </div>
+                                    <div class="ml-1">
+                                        <button id="statement_reject" type="button"  class="btn btn-danger btn-block">Reject</button>
+                                    </div>
+                                @endif
                             @endif
-                        @endif
-                    </div>
+                        </div>
+                    @endif
                 </form>
             </div>
         </div>
@@ -214,27 +216,35 @@
             var table = $('#datatable').DataTable({
                 @if(($petty_statement->status == 0 && session('department_id') == 6) || ($petty_statement->status == 1 && session('department_id') == 6))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons:[{
-                    title: 'Edit Details',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-plus"></i> Edit Details',
-                    action:function (e) {
-                        edit_ops();
-                        $('#statement_submit').attr('disabled', false);
-                    }
-                }],
+                buttons:[
+                        @if($petty_statement->status != 6)
+                            {
+                                title: 'Edit Details',
+                                className: 'btn btn-primary',
+                                text: '<i class="la la-plus"></i> Edit Details',
+                                action:function (e) {
+                                    edit_finance();
+                                    $('#statement_submit').attr('disabled', false);
+
+                                }
+                            }
+                    @endif],
                 @elseif(session('role_id') == 1 || ($petty_statement->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons:[{
-                    title: 'Edit Details',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-plus"></i> Edit Details',
-                    action:function (e) {
-                        edit_finance();
-                        $('#statement_submit').attr('disabled', false);
+                buttons:[
+                        @if($petty_statement->status != 6)
+                            {
+                                title: 'Edit Details',
+                                className: 'btn btn-primary',
+                                text: '<i class="la la-plus"></i> Edit Details',
+                                action:function (e) {
+                                    edit_finance();
+                                    $('#statement_submit').attr('disabled', false);
 
-                    }
-                },'reset'],
+                                }
+                            }
+                        @endif
+                    ,'reset'],
                 @else
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: ['reset'],

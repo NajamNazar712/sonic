@@ -45,7 +45,7 @@
                         <th class="border-primary border-darken-1">Deposited Amount</th>
 
                         <th class="border-primary border-darken-1">Deposited By</th>
-                        <th class="border-primary border-darken-1">Company Bank</th>
+                        {{--<th class="border-primary border-darken-1">Company Bank</th>--}}
                         <th class="border-primary border-darken-1">Deposited Date</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Deposit Slip</th>
@@ -82,7 +82,7 @@
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Date</th>
                                 <th class="border-primary border-darken-1">Bank Name</th>
-                                <th class="border-primary border-darken-1">Amount </th>
+                                <th class="border-primary border-darken-1">Amount</th>
                                 <th class="border-primary border-darken-1">Deposit Slip</th>
                                 <th class="border-primary border-darken-1"></th>
 
@@ -270,7 +270,7 @@
                             head.push('DNCC Amount');
                             head.push('Deposited Amount');
                             head.push('Deposited By');
-                            head.push('Company Bank');
+                            // head.push('Company Bank');
                             head.push('Deposited Date');
                             head.push('Status');
 
@@ -286,7 +286,7 @@
                                 row.push(values.sdn_amount);
                                 row.push(values.sdn_deposit_amount);
                                 row.push(values.deposited_by);
-                                row.push(values.bank);
+                                // row.push(values.bank);
                                 row.push(values.created_at);
                                 row.push(values.status);
 
@@ -338,7 +338,7 @@
                     // { data:'sdn_expense' ,name: 'sdn_expense', class: 'align-middle sdn_expense'},
                     // { data:'sdn_net_amount' ,name: 'station_deposit_notes.sdn_net_amount', class: 'align-middle sdn_net_amount'},
                     { data:'deposited_by' ,name: 'admins.name', class: 'align-middle deposited_by'},
-                    { data:'bank' ,name: 'banks_lists.id', class: 'align-middle bank'},
+                    // { data:'bank' ,name: 'banks_lists.id', class: 'align-middle bank'},
                     { data:'created_at' ,name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},
                     { data:'status' ,name: 'status', class: 'align-middle status'},
                     { data:'deposit_slip' ,name: 'deposit_slip', class: 'align-middle deposit_slip',orderable: false, searchable: false},
@@ -686,7 +686,7 @@
                     paging:false,
                     columns: [
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                        {name: 'date', class: 'align-middle date date-col-width form-group'},
+                        {name: 'date', class: 'align-middle date date-col-width form-group', width: '20%'},
                         {name: 'bank_name', class: 'align-middle bank_name form-group'},
                         {name: 'amount', class: 'align-middle expense_amount form-group'},
                         {name: 'deposit_slip', class: 'align-middle deposit_slip form-group'},

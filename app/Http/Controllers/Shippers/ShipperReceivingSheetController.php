@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\BookingType;
+use App\http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
@@ -96,8 +97,14 @@ class ShipperReceivingSheetController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftjoin('receiving_sheet_shipments as rss', 'shipments.id', '=', 'rss.shipment_id')
             ->leftjoin('receiving_sheets AS rs', 'rss.receiving_sheet_id', '=', 'rs.id')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'usi.pickup_address', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet', 'rs.id AS receiving_sheet_no','shipments.amount')
-            ->where('shipments.user_id', session('user_id'))
+            ->leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'usi.pickup_address', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet', 'rs.id AS receiving_sheet_no','shipments.amount', 'u.name as user', 'u.id as user_id')
+
+            ->where(function ($query) {
+                $sister_users = MergedSisterAccountMapping::where('head_user_id', session('user_id'))->pluck('sister_user_id')->toArray();
+                $query->where('shipments.user_id', session('user_id'))
+                    ->orwhereIn('shipments.user_id', $sister_users);
+            })
             ->where('shipments.shipper_status_id', 1)
             ->where(function ($query) {
                 $query->whereNull('rs.status')->orWhere('rs.status', 0);
@@ -116,23 +123,30 @@ class ShipperReceivingSheetController extends Controller
                 return number_format($shipment->amount);
             })
             ->addColumn('action', function($shipment) {
-                $dropdown = '
-            <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-        ';
 
-                if ($shipment->receiving_sheet) {
-                    $dropdown .= '<button type="button" class="dropdown-item void"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-circle"></i></div><div class="col-9 offset-1">Void</div></button>';
-                }
-                else {
-                    $dropdown .= '<button type="button" class="dropdown-item add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-circle"></i></div><div class="col-9 offset-1">Add</div></button>';
-                }
+                if($shipment->user_id == session('user_id')){
+                    $dropdown = '
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+            ';
 
-                $dropdown .= '
+                    if ($shipment->receiving_sheet) {
+                        $dropdown .= '<button type="button" class="dropdown-item void"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-circle"></i></div><div class="col-9 offset-1">Void</div></button>';
+                    }
+                    else {
+                        $dropdown .= '<button type="button" class="dropdown-item add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-circle"></i></div><div class="col-9 offset-1">Add</div></button>';
+                    }
+
+                    $dropdown .= '
+                    </div>
                 </div>
-            </div>
-        ';
+            ';
+                }
+                else{
+                    $dropdown = '';
+                }
+
 
                 return $dropdown;
             })
