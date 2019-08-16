@@ -241,9 +241,9 @@
                                                 <li><a class="menu-item"
                                                        href="{{ route('admin.finance.done_payments.index') }}">Done</a></li>
                                             @endif
-                                            {{--@if (session('role_id') == 1 || in_array(232, session('permissions')))--}}
-                                                {{--<li><a class="menu-item" href="{{ route('admin.finance.invoice_for_reimbursement.index') }}">Invoice for Reimbursement</a></li>--}}
-                                            {{--@endif--}}
+                                            @if (session('role_id') == 1 || in_array(232, session('permissions')))
+                                                <li><a class="menu-item" href="{{ route('admin.finance.invoice_for_reimbursement.index') }}">Invoice for Reimbursement</a></li>
+                                            @endif
                                         </ul>
                                     </li>
                                 @endif
@@ -295,10 +295,10 @@
                                                 <li><a class="menu-item" href="{{ route('admin.petty_cash.approved.index') }}">Approved</a>
                                                 </li>
                                             @endif
-                                            {{--@if (session('role_id') == 1 || in_array(243, session('permissions')))--}}
-                                                {{--<li><a class="menu-item" href="{{ route('admin.petty_cash.rejected.index') }}">Rejected</a>--}}
-                                                {{--</li>--}}
-                                            {{--@endif--}}
+                                            @if (session('role_id') == 1 || in_array(243, session('permissions')))
+                                                <li><a class="menu-item" href="{{ route('admin.petty_cash.rejected.index') }}">Rejected</a>
+                                                </li>
+                                            @endif
 
                                         </ul>
                                     </li>

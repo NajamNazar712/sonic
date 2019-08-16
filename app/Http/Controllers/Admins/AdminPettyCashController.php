@@ -280,22 +280,25 @@ class AdminPettyCashController extends Controller
             })
             ->addColumn('action',function ($petty){
                 $dropdown = '';
-                if((session('role_id') == 1 || ($petty->petty_status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)) || (($petty->petty_status == 0 || $petty->petty_status == 1) && (session('role_id') == 8 || session('role_id') == 10))) && ($petty->status != 1)){
-                $dropdown = '
+                if($petty->petty_status != 6) {
+                    if ((session('role_id') == 1 || ($petty->petty_status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)) || (($petty->petty_status == 0 || $petty->petty_status == 1) && (session('role_id') == 8 || session('role_id') == 10))) && ($petty->status != 1)) {
+                        $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
 //                    $dropdown .= '<button type="button" class="dropdown-item reference_document" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Reference Document</div></button>';
-                    $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Approve</div></button>';
-                    $dropdown .= '<button type="button" class="dropdown-item reject" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Reject</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item reject" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Reject</div></button>';
 
+                    }
                 }
                 return $dropdown;
             })
             ->make(true);
     }
+
     public function petty_cash_statements_index(){
         if(session('role_id') == 1){
             $hubs = City::where('hub',1)->where('status',1)->get();
@@ -310,6 +313,7 @@ class AdminPettyCashController extends Controller
 
         return view('admin.petty_cash.reference_document')->with(['url' => $url]);
     }
+
     public function draft_reference_document($reference_document){
         $url = Storage::url('petty_cash_statement_details_draft/' . $reference_document);
 
@@ -702,6 +706,7 @@ class AdminPettyCashController extends Controller
             ->make(true);
         return $petty;
     }
+
     public function rejected_petty_cash_statements_index(){
         return view('admin.petty_cash.rejected');
     }
@@ -795,6 +800,7 @@ class AdminPettyCashController extends Controller
             return response()->json(['status' => 0, 'error' => 'Petty Cash Statement ID not found!']);
         }
     }
+
     public function approved_petty_cash_statements_adjusted(Request $request){
         $id = $request->statement_id;
         if($id){
@@ -1007,6 +1013,7 @@ class AdminPettyCashController extends Controller
 
         return $html;
     }
+
     public function edit_petty_cash_statements_amount(Request $request){
         $id = $request->id;
         if($id){
@@ -1054,6 +1061,7 @@ class AdminPettyCashController extends Controller
     public function draft_petty_cash_statements_index(){
         return view('admin.petty_cash.draft.index');
     }
+
     public function draft_petty_cash_statements_list(Request $request){
 
         $petty = PettyCashStatementDraft::join('cities as h','h.id','=', 'petty_cash_statement_drafts.hub_id')
