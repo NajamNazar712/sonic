@@ -23,6 +23,7 @@
 										<th class="border-primary border-darken-1"></th>
 										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Tracking Number</th>
+										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Order ID</th>
 										<th class="border-primary border-darken-1">Service Type</th>
 										<th class="border-primary border-darken-1">Pickup Address</th>
@@ -158,6 +159,7 @@
 
                             head.push('S.No');
                             head.push('Tracking Number');
+                            head.push('Shipper');
                             head.push('Order ID');
                             head.push('Service Type');
                             head.push('Pickup Address');
@@ -173,6 +175,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
+                                row.push(values.user);
                                 row.push(values.order_id);
                                 row.push(values.service_type);
                                 row.push(values.pickup_address);
@@ -358,11 +361,12 @@
 				serverSide: true,
 				ajax: '{{ route('cod.shipment.receiving_sheet.list') }}',
 				rowId: 'id',
-				order: [[8, 'desc']],
+				order: [[9, 'desc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'tracking_number', name: 'tracking_number', class: 'align-middle tracking_number'},
+					{data: 'user', name: 'u.name', class: 'align-middle user'},
 					{data: 'order_id', name: 'order_id', class: 'align-middle order_id'},
 					{data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
 					{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
