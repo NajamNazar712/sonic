@@ -4290,7 +4290,6 @@ class AdminFinanceController extends Controller
                     $payment_shipments = $payment->done_payment_shipments;
 
                     $total_ibft_charges += $payment->ibft_charges;
-                    $total_invoice_amount += $payment->ibft_charges;
                 }
 
                 foreach ($payment_shipments as $invoice_shipment) {
