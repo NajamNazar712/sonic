@@ -869,6 +869,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('email_reminder', 'Admins\AdminFinanceController@invoices_email_reminder')->name('email_reminder');
             Route::post('mark_as_received', 'Admins\AdminFinanceController@invoices_mark_as_received')->name('mark_as_received');
         });
+
+        Route::prefix('invoice_for_reimbursement')->name('invoice_for_reimbursement.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@invoice_for_reimbursement_index')->name('index');
+            Route::get('generate', 'Admins\AdminFinanceController@invoice_for_reimbursement_generate')->name('generate');
+        });
     });
 
     Route::prefix('petty_cash')->name('petty_cash.')->group(function() {
@@ -898,6 +903,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminPettyCashController@approved_petty_cash_statements_list')->name('list');
             Route::post('paid', 'Admins\AdminPettyCashController@approved_petty_cash_statements_paid')->name('paid');
             Route::post('adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_adjusted')->name('adjusted');
+        });
+        Route::prefix('rejected')->name('rejected.')->group(function (){
+            Route::get('', 'Admins\AdminPettyCashController@rejected_petty_cash_statements_index')->name('index');
+            Route::get('list', 'Admins\AdminPettyCashController@rejected_petty_cash_statements_list')->name('list');
         });
         Route::prefix('draft')->name('draft.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@draft_petty_cash_statements_index')->name('index');

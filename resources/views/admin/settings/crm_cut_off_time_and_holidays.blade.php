@@ -186,6 +186,7 @@
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
+                disable: [7],
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted'
             });

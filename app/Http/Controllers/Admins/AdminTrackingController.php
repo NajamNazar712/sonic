@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
@@ -116,10 +117,18 @@ class AdminTrackingController extends Controller
 
     				if ($journey->reference_1_id) {
                         if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {
-                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_consignment_details" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
                         }
                         else {
-                            $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+                            if(in_array($journey->shipper_status_id, [23, 24, 25, 28, 29, 31, 44, 45, 47, 48])){
+                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle return_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                            }
+                            else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
+                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                            }
+                            else{
+                                $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+                            }
 
                             if ($journey->reference_2_id) {
                                 if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
@@ -239,6 +248,44 @@ class AdminTrackingController extends Controller
                     $details['complain']['id'] = $complain->id;
                     $details['complain']['padded_id'] = str_pad($complain->id, 6, '0', STR_PAD_LEFT);
                     $details['complain']['tat'] = Carbon::parse($complain->created_at)->diffInWeekdays(Carbon::now());
+                }
+
+                $crm_requests = CrmRequest::leftjoin('crm_request_status_histories as crsh', 'crsh.crm_request_id', '=', 'crm_requests.id')
+                    ->leftjoin('admins as a', 'a.id', '=', 'crsh.agent_id')
+                    ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
+                    ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
+                    ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crsh.status_id')
+                    ->select('crm_requests.id as id', 'crs.name as status', 'a.name as created_by_admin', 'u.name as created_by_user', 'su.name as created_by_sub_user', 'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by')
+                    ->where('crm_requests.shipment_id', $shipment->id);
+
+                if($crm_requests->exists()){
+                    $crm_requests = $crm_requests->get();
+
+                    foreach ($crm_requests as $crm_request){
+                        $crm_request_journey = array();
+
+                        $crm_request_journey['id'] = str_pad($crm_request->id, 6, '0', STR_PAD_LEFT);
+                        $crm_request_journey['status_id'] = $crm_request->status_id;
+                        $crm_request_journey['status'] = $crm_request->status;
+                        if($crm_request->status_id == 1){
+                            if($crm_request->launched_added_by == 0){
+                                $crm_request_journey['created_by'] = $crm_request->created_by_admin . ' (Admin)';
+                            }
+                            else if($crm_request->launched_added_by == 1){
+                                $crm_request_journey['created_by'] = $crm_request->created_by_user . ' (Shipper)';
+                            }
+                            else{
+                                $crm_request_journey['created_by'] = $crm_request->created_by_sub_user . ' (Substitute Shipper)';
+                            }
+                        }
+                        else{
+                            $crm_request_journey['created_by'] = $crm_request->created_by_admin . ' (Admin)';
+                        }
+                        $crm_request_journey['created_at'] = Carbon::parse($crm_request->created_at)->toDateTimeString();
+
+                        $details['crm_requests'][] = $crm_request_journey;
+                    }
+
                 }
 
                 // $details['complain']['id'] = 10;

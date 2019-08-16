@@ -185,15 +185,22 @@
                                                                value="{{$crm_details->id}}">
                                                         <input type="hidden" id="prev_status" name="prev_status"
                                                                value="{{$crm_details->status_id}}">
+                                                        @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
+                                                            <input type="hidden" id="close" name="close"
+                                                               value="0">
+                                                        @else
+                                                            <input type="hidden" id="close" name="close"
+                                                                   value="1">
+                                                        @endif
                                                         @if($crm_details['status_id'] != 4 && $crm_details['status_id'] != 2)
                                                             <button id="invalid" type="submit" class="btn btn-danger">
-                                        <span class="d-none d-lg-block">
-                                            @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
-                                                Invalid
-                                            @else
-                                                Close
-                                            @endif
-                                            </span>
+                                                                <span class="d-none d-lg-block">
+                                                                    @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
+                                                                        Invalid
+                                                                    @else
+                                                                        Close
+                                                                    @endif
+                                                                </span>
                                                             </button>
                                                         @endif
                                                     </form>

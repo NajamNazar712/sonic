@@ -476,7 +476,7 @@ class AdminCRMController extends Controller
                         $after_cut_off = $current_tat - 1;
                         $current_tat = $after_cut_off;
                     }
-                    $holidays = CrmTatHolidays::get();
+                    $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
                     foreach($holidays as $holiday){
                         $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
                         $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
@@ -715,7 +715,7 @@ class AdminCRMController extends Controller
                         $after_cut_off = $current_tat - 1;
                         $current_tat = $after_cut_off;
                     }
-                    $holidays = CrmTatHolidays::get();
+                    $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
                     foreach($holidays as $holiday){
                         $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
                         $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
@@ -996,7 +996,7 @@ class AdminCRMController extends Controller
                     $process = Carbon::parse($requests->inprocess);
                     $resolved = Carbon::parse($requests->resolved);
                     $resolved_tat = $resolved->diffInWeekdays($process);
-                    $holidays = CrmTatHolidays::get();
+                    $holidays = CrmTatHolidays::whereBetween('holiday', [$process, $resolved])->get();
                     foreach($holidays as $holiday){
                         $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
                         if($process < $holiday_formatted || $resolved > $holiday_formatted){
@@ -1242,7 +1242,7 @@ class AdminCRMController extends Controller
                         $after_cut_off = $current_tat - 1;
                         $current_tat = $after_cut_off;
                     }
-                    $holidays = CrmTatHolidays::get();
+                    $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $closed])->get();
                     foreach($holidays as $holiday){
                         $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
                         $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
@@ -1460,11 +1460,13 @@ class AdminCRMController extends Controller
                 CrmRequest::where('id', $request->req_id)->update([
                     'status_id' => 4,
                 ]);
-                CrmRequestStatusHistory::create([
-                    'crm_request_id' => $request->req_id,
-                    'status_id' => 7,
-                    'agent_id' => Auth::id()
-                ]);
+                if($request->close == 0){
+                    CrmRequestStatusHistory::create([
+                        'crm_request_id' => $request->req_id,
+                        'status_id' => 7,
+                        'agent_id' => Auth::id()
+                    ]);
+                }
                 CrmRequestStatusHistory::create([
                     'crm_request_id' => $request->req_id,
                     'status_id' => 4,

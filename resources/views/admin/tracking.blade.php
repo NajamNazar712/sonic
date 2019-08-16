@@ -49,24 +49,24 @@
 								</div>
 							</div>
 
-							<div class="modal fade" id="cargo_consignment_details" role="dialog" aria-labelledby="cargo_consignment_details_title" aria-hidden="true">
-								<div class="modal-dialog modal-lg" role="document">
-									<div class="modal-content">
-										<div class="modal-header">
-											<h4 class="modal-title" id="cargo_consignment_details_title">Cargo Consignment Details</h4>
+							{{--<div class="modal fade" id="cargo_consignment_details" role="dialog" aria-labelledby="cargo_consignment_details_title" aria-hidden="true">--}}
+								{{--<div class="modal-dialog modal-lg" role="document">--}}
+									{{--<div class="modal-content">--}}
+										{{--<div class="modal-header">--}}
+											{{--<h4 class="modal-title" id="cargo_consignment_details_title">Cargo Consignment Details</h4>--}}
 
-											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-												<span aria-hidden="true">×</span>
-											</button>
-										</div>
-										<div class="modal-body">
-										</div>
-										<div class="modal-footer">
-											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-										</div>
-									</div>
-								</div>
-							</div>
+											{{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+												{{--<span aria-hidden="true">×</span>--}}
+											{{--</button>--}}
+										{{--</div>--}}
+										{{--<div class="modal-body">--}}
+										{{--</div>--}}
+										{{--<div class="modal-footer">--}}
+											{{--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>--}}
+										{{--</div>--}}
+									{{--</div>--}}
+								{{--</div>--}}
+							{{--</div>--}}
 						</div>
 					</div>
 				</div>
@@ -94,47 +94,47 @@
 
 	<script>
 		$(document).ready(function() {
-			function print(id, booking_type_id) {
-				if (booking_type_id != 4) {
-					var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
-				}
-				else {
-					var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
-				}
+            function print(id, booking_type_id) {
+                if (booking_type_id != 4) {
+                    var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';
+                }
+                else {
+                    var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
+                }
 
-				$.ajax({
-					url: url,
-					method: 'POST',
-					data: {
-						'ids[]': id,
-						'admin': true,
-						'_token': '{{ csrf_token() }}'
-					}
-				})
-				.done(function(data) {
-					var tab = window.open('', '_blank');
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: {
+                        'ids[]': id,
+                        'admin': true,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function (data) {
+                        var tab = window.open('', '_blank');
 
-					if(!tab) {
-						swal({
-							title: 'Popup Blocker Enabled!',
-							text: 'Please add this site to your exception list.',
-							icon: 'error',
-							closeOnClickOutside: false,
-							closeOnEsc: false
-						});
-					}
-					else {
-						tab.document.write(data);
-						tab.document.close();
-						tab.focus();
-					}
-				});
-			}
+                        if (!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
 
-			var complain_route = '{{ route('admin.crm.request.details', 0) }}';
-			complain_route = complain_route.slice(0, -1);
+            var complain_route = '{{ route('admin.crm.request.details', 0) }}';
+            complain_route = complain_route.slice(0, -1);
 
-			function track(tracking_numbers) {
+            function track(tracking_numbers) {
                 $.ajax({
                     url: '{!! route('admin.tracking.track') !!}',
                     method: 'POST',
@@ -143,338 +143,249 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-				.done(function(data) {
-					select[0].selectize.clear();
+                    .done(function (data) {
+                        select[0].selectize.clear();
 
-					$('#tracking').html('');
+                        $('#tracking').html('');
 
-					if (data.invalid !== undefined) {
-						var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
-						scan_sound(2);
-						toastr.error(message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-					}
+                        if (data.invalid !== undefined) {
+                            var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
+                            scan_sound(2);
+                            toastr.error(message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
 
-					if (data.shipments != undefined) {
-						$.each(data.shipments, function(id, details) {
-							var shipment = '';
+                        if (data.shipments != undefined) {
+                            $.each(data.shipments, function (id, details) {
+                                // console.log(details.crm_requests);
+                                var shipment = '';
 
-							shipment += '<div class="mt-4 border-primary">';
-							shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
-							shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '</div>';
+                                shipment += '<div class="mt-4 border-primary">';
+                                shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
+                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '</div>';
 
-							if ('complain' in details) {
-								shipment += '<a class="ml-auto mr-0 mr-sm-1" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
+                                if ('complain' in details) {
+                                    shipment += '<a class="ml-auto mr-0 mr-sm-1" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
 
-								if (details.complain.tat >= 3) {
-									shipment += 'white bg-red';
-								}
-								else {
-									shipment += 'red bg-white';
-								}
+                                    if (details.complain.tat >= 3) {
+                                        shipment += 'white bg-red';
+                                    }
+                                    else {
+                                        shipment += 'red bg-white';
+                                    }
 
-								shipment += '">' + details.complain.padded_id + ' (' + details.complain.tat + 'd)</button></a>';
+                                    shipment += '">' + details.complain.padded_id + ' (' + details.complain.tat + 'd)</button></a>';
 
-								shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
-							}
-							else {
-								shipment += '<button class="btn btn-secondary ml-auto print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
-							}
+                                    shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
+                                }
+                                else {
+                                    shipment += '<button class="btn btn-secondary ml-auto print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + '>Print</button>';
+                                }
 
-							shipment += '</div>';
+                                shipment += '</div>';
 
-							shipment += '<div class="p-1">';
-							shipment += '<div class="row justify-content-between">';
+                                shipment += '<div class="p-1">';
+                                shipment += '<div class="row justify-content-between">';
 
-							shipment += '<div class="col-12">';
-							shipment += '<h4><u>Shipper Information</u></h4>';
-							shipment += '<div class="border table-responsive">';
-							shipment += '<table class="table table-sm table-borderless mb-0">';
-							shipment += '<tbody>';
+                                shipment += '<div class="col-12">';
+                                shipment += '<h4><u>Shipper Information</u></h4>';
+                                shipment += '<div class="border table-responsive">';
+                                shipment += '<table class="table table-sm table-borderless mb-0">';
+                                shipment += '<tbody>';
 
-							shipment += '<tr>';
-							shipment += '<td><strong>Name</strong></td>';
-							shipment += '<td>' + details.shipper.name + '</td>';
-							shipment += '<td><strong>Account No.</strong></td>';
-							shipment += '<td>' + details.shipper.account_number + '</td>';
-							shipment += '<td><strong>City</strong></td>';
-							shipment += '<td>' + details.shipper.city + '</td>';
-							shipment += '</tr>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Name</strong></td>';
+                                shipment += '<td>' + details.shipper.name + '</td>';
+                                shipment += '<td><strong>Account No.</strong></td>';
+                                shipment += '<td>' + details.shipper.account_number + '</td>';
+                                shipment += '<td><strong>City</strong></td>';
+                                shipment += '<td>' + details.shipper.city + '</td>';
+                                shipment += '</tr>';
 
-							shipment += '<tr>';
-							shipment += '<td><strong>Phone No(s).</strong></td>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Phone No(s).</strong></td>';
 
-							if (!details.shipper.phone_number_2) {
-								shipment += '<td>' + details.shipper.phone_number_1 + '</td>';
-							}
-							else {
-								shipment += '<td>' + details.shipper.phone_number_1 + '<br/>' + details.shipper.phone_number_2 + '</td>';
-							}
+                                if (!details.shipper.phone_number_2) {
+                                    shipment += '<td>' + details.shipper.phone_number_1 + '</td>';
+                                }
+                                else {
+                                    shipment += '<td>' + details.shipper.phone_number_1 + '<br/>' + details.shipper.phone_number_2 + '</td>';
+                                }
 
-							shipment += '<td><strong>Email</strong></td>';
-							if (details.shipper.email) {
-								shipment += '<td colspan="3">' + details.shipper.email + '</td>';
-							}
-							else{
-								shipment += '<td colspan="3"></td>'
-							}
+                                shipment += '<td><strong>Email</strong></td>';
+                                if (details.shipper.email) {
+                                    shipment += '<td colspan="3">' + details.shipper.email + '</td>';
+                                }
+                                else {
+                                    shipment += '<td colspan="3"></td>'
+                                }
 
-							shipment += '</tr>';
+                                shipment += '</tr>';
 
-							shipment += '</tbody>';
-							shipment += '</table>';
-							shipment += '</div>';
-							shipment += '</div>';
+                                shipment += '</tbody>';
+                                shipment += '</table>';
+                                shipment += '</div>';
+                                shipment += '</div>';
 
-							shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-2">';
-							shipment += '<h4><u>Pickup Information</u></h4>';
-							shipment += '<div class="border table-responsive">';
-							shipment += '<table class="table table-sm table-borderless mb-0">';
-							shipment += '<tbody>';
-							shipment += '<tr>';
-							shipment += '<td><strong>Person of Contact</strong></td>';
-							shipment += '<td>' + details.pickup.person_of_contact + '</td>';
-							shipment += '<td><strong>Vendor</strong></td>';
-							if (details.pickup.vendor) {
-								shipment += '<td>' + details.pickup.vendor + '</td>';
-							}
-							else{
-								shipment += '<td></td>'
-							}
-							shipment += '</tr>';
-							shipment += '<tr>';
-							shipment += '<td><strong>Phone No.</strong></td>';
-							shipment += '<td>' + details.pickup.phone_number + '</td>';
-							shipment += '<td><strong>Origin</strong></td>';
-							shipment += '<td>' + details.pickup.origin + '</td>';
-							shipment += '</tr>';
-							shipment += '<tr>';
-							shipment += '<td><strong>Email</strong></td>';
-							if (details.pickup.email) {
-								shipment += '<td colspan="3">' + details.pickup.email + '</td>';
-							}
-							else{
-								shipment += '<td colspan="3"></td>'
-							}
-							shipment += '</tr>';
-							shipment += '<tr>';
-							shipment += '<td><strong>Address</strong></td>';
-							shipment += '<td colspan="3">' + details.pickup.address + '</td>';
-							shipment += '</tr>';
-							shipment += '</tbody>';
-							shipment += '</table>';
-							shipment += '</div>';
-							shipment += '</div>';
+                                shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-2">';
+                                shipment += '<h4><u>Pickup Information</u></h4>';
+                                shipment += '<div class="border table-responsive">';
+                                shipment += '<table class="table table-sm table-borderless mb-0">';
+                                shipment += '<tbody>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Person of Contact</strong></td>';
+                                shipment += '<td>' + details.pickup.person_of_contact + '</td>';
+                                shipment += '<td><strong>Vendor</strong></td>';
+                                if (details.pickup.vendor) {
+                                    shipment += '<td>' + details.pickup.vendor + '</td>';
+                                }
+                                else {
+                                    shipment += '<td></td>'
+                                }
+                                shipment += '</tr>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Phone No.</strong></td>';
+                                shipment += '<td>' + details.pickup.phone_number + '</td>';
+                                shipment += '<td><strong>Origin</strong></td>';
+                                shipment += '<td>' + details.pickup.origin + '</td>';
+                                shipment += '</tr>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Email</strong></td>';
+                                if (details.pickup.email) {
+                                    shipment += '<td colspan="3">' + details.pickup.email + '</td>';
+                                }
+                                else {
+                                    shipment += '<td colspan="3"></td>'
+                                }
+                                shipment += '</tr>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Address</strong></td>';
+                                shipment += '<td colspan="3">' + details.pickup.address + '</td>';
+                                shipment += '</tr>';
+                                shipment += '</tbody>';
+                                shipment += '</table>';
+                                shipment += '</div>';
+                                shipment += '</div>';
 
-							shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-2">';
-							shipment += '<h4><u>Consignee Information</u></h4>';
-							shipment += '<div class="border table-responsive">';
-							shipment += '<table class="table table-sm table-borderless mb-0">';
-							shipment += '<tbody>';
-							shipment += '<tr>';
-							shipment += '<td><strong>Consignee</strong></td>';
-							shipment += '<td>' + details.consignee.name + '</td>';
-							shipment += '<td><strong>Destination</strong></td>';
-							shipment += '<td>' + details.consignee.destination + '</td>';
-							shipment += '</tr>';
-							shipment += '<tr>';
-							shipment += '<tr>';
-							shipment += '<td><strong>Phone No(s).</strong></td>';
+                                shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-2">';
+                                shipment += '<h4><u>Consignee Information</u></h4>';
+                                shipment += '<div class="border table-responsive">';
+                                shipment += '<table class="table table-sm table-borderless mb-0">';
+                                shipment += '<tbody>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Consignee</strong></td>';
+                                shipment += '<td>' + details.consignee.name + '</td>';
+                                shipment += '<td><strong>Destination</strong></td>';
+                                shipment += '<td>' + details.consignee.destination + '</td>';
+                                shipment += '</tr>';
+                                shipment += '<tr>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Phone No(s).</strong></td>';
 
-							if (!details.consignee.phone_number_2) {
-								shipment += '<td>' + details.consignee.phone_number_1 + '</td>';
-							}
-							else {
-								shipment += '<td>' + details.consignee.phone_number_1 + '<br/>' + details.consignee.phone_number_2 + '</td>';
-							}
+                                if (!details.consignee.phone_number_2) {
+                                    shipment += '<td>' + details.consignee.phone_number_1 + '</td>';
+                                }
+                                else {
+                                    shipment += '<td>' + details.consignee.phone_number_1 + '<br/>' + details.consignee.phone_number_2 + '</td>';
+                                }
 
-							shipment += '<td colspan="2"></td>';
-							shipment += '</tr>';
-                            shipment += '<td><strong>Email</strong></td>';
-                            if (details.consignee.email) {
-                                shipment += '<td colspan="3">' + details.consignee.email + '</td>';
-                            }
-                            else{
-                                shipment += '<td colspan="3"></td>'
-                            }
-                            shipment += '</tr>';
-							shipment += '<tr>';
-							shipment += '<td><strong>Address</strong></td>';
-							shipment += '<td colspan="3">' + details.consignee.address + '</td>';
-							shipment += '</tr>';
-							shipment += '</tbody>';
-							shipment += '</table>';
-							shipment += '</div>';
-							shipment += '</div>';
+                                shipment += '<td colspan="2"></td>';
+                                shipment += '</tr>';
+                                shipment += '<td><strong>Email</strong></td>';
+                                if (details.consignee.email) {
+                                    shipment += '<td colspan="3">' + details.consignee.email + '</td>';
+                                }
+                                else {
+                                    shipment += '<td colspan="3"></td>'
+                                }
+                                shipment += '</tr>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Address</strong></td>';
+                                shipment += '<td colspan="3">' + details.consignee.address + '</td>';
+                                shipment += '</tr>';
+                                shipment += '</tbody>';
+                                shipment += '</table>';
+                                shipment += '</div>';
+                                shipment += '</div>';
 
-							shipment += '<div class="col-12 mt-2">';
-							shipment += '<h4><u>Order Information</u></h4>';
-							shipment += '<div class="border table-responsive">';
-							shipment += '<table class="table table-sm table-borderless mb-0">';
-							shipment += '<tbody>';
-
-							$.each(details.order_information.items, function(index, item) {
-								shipment += '<tr>';
-								shipment += '<td><strong>Product Type</strong></td>';
-								shipment += '<td>' + item.product_type + '</td>';
-								shipment += '<td><strong>Description</strong></td>';
-								shipment += '<td>' + ((item.description) ? item.description : '-') + '</td>';
-								shipment += '<td><strong>Quantity</strong></td>';
-								shipment += '<td>' + item.quantity + '</td>';
-								shipment += '</tr>';
-							});
-
-							shipment += '<tr>';
-							shipment += '<td><strong>Weight</strong></td>';
-							shipment += '<td>' + details.order_information.weight + ' kg</td>';
-							shipment += '<td><strong>Shipping Mode</strong></td>';
-							shipment += '<td>' + details.order_information.shipping_mode + '</td>';
-							shipment += '<td><strong>Collection Amount</strong></td>';
-							shipment += '<td>Rs. ' + details.order_information.amount + '</td>';
-							shipment += '</tr>';
-
-							shipment += '<tr>';
-                            shipment += '<td><strong>Order ID</strong></td>';
-                            shipment += '<td>' + ((details.order_information.order_id) ? details.order_information.order_id : '-') + '</td>';
-                            shipment += '<td><strong>Instructions</strong></td>';
-
-                        	if (details.order_information.charges_mode_id) {
-                        		shipment += '<td>' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
-                        		shipment += '<td><strong>Charges Mode</strong></td>';
-                        		shipment += '<td>' + details.order_information.charges_mode + '</td>';
-                        	}
-                        	else {
-                        		shipment += '<td colspan="3">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
-                        	}
-
-                            shipment += '</tr>';
-
-							shipment += '</tbody>';
-							shipment += '</table>';
-							shipment += '</div>';
-							shipment += '</div>';
-
-							shipment += '<div class="col-12 mt-2">';
-							shipment += '<h4><u>Tracking History</u></h4>';
-							shipment += '<div class="border table-responsive">';
-
-							shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
-							shipment += '<thead>';
-							shipment += '<tr role="row">';
-							shipment += '<th><strong>Date / Time</strong></th>';
-							shipment += '<th><strong>Status</strong></th>';
-							shipment += '<th><strong>Reason</strong></th>';
-							shipment += '<th><strong>Remarks</strong></th>';
-							shipment += '<th><strong>User</strong></th>';
-							shipment += '<th><strong>City</strong></th>';
-							shipment += '<th><strong>Received/Refused By</strong></th>';
-							shipment += '<th><strong>IP Address</strong></th>';
-							shipment += '</tr>';
-							shipment += '</thead>';
-							shipment += '<tbody>';
-
-							$.each(details.tracking_history, function(index, history) {
-								shipment += '<tr>';
-								shipment += '<td>' + history.date_time + '</td>';
-								shipment += '<td>' + history.status + '</td>';
-								shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
-								shipment += '<td>' + history.remarks + '</td>';
-								shipment += '<td>' + history.user + '</td>';
-								shipment += '<td>' + history.city + '</td>';
-								shipment += '<td>' + history.received_or_refused_by + '</td>';
-								shipment += '<td>' + history.ip + '</td>';
-								shipment += '</tr>';
-							});
-
-							shipment += '</tbody>';
-							shipment += '</table>';
-
-							shipment += '</div>';
-							shipment += '</div>';
-
-							if ('payment_history' in details) {
-								shipment += '<div class="col-12 mt-2">';
-								shipment += '<h4><u>Payment History</u></h4>';
-								shipment += '<div class="border table-responsive">';
-
-								shipment += '<table class="table table-sm table-borderless datatable payment_history">';
-								shipment += '<thead>';
-								shipment += '<tr role="row">';
-								shipment += '<th><strong>Date / Time</strong></th>';
-								shipment += '<th><strong>Status</strong></th>';
-								shipment += '<th><strong>User</strong></th>';
-								shipment += '<th><strong>Remarks</strong></th>';
-								shipment += '</tr>';
-								shipment += '</thead>';
-								shipment += '<tbody>';
-
-								$.each(details.payment_history, function(index, history) {
-									shipment += '<tr>';
-									shipment += '<td>' + history.date_time + '</td>';
-									shipment += '<td>' + history.status + '</td>';
-									shipment += '<td>' + history.user + '</td>';
-									shipment += '<td>' + history.payable_remarks + '</td>';
-									shipment += '</tr>';
-								});
-
-								shipment += '</tbody>';
-								shipment += '</table>';
-
-								shipment += '</div>';
-								shipment += '</div>';
-							}
-
-							if ('pickup_history' in details) {
-								shipment += '<div class="col-12 mt-2">';
-								shipment += '<h4><u>Pickup History</u></h4>';
-								shipment += '<div class="border table-responsive">';
-
-								shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
-								shipment += '<thead>';
-								shipment += '<tr role="row">';
-								shipment += '<th><strong>Date / Time</strong></th>';
-								shipment += '<th><strong>Status</strong></th>';
-								shipment += '<th><strong>User</strong></th>';
-								shipment += '</tr>';
-								shipment += '</thead>';
-								shipment += '<tbody>';
-
-								$.each(details.pickup_history, function(index, history) {
-									shipment += '<tr>';
-									shipment += '<td>' + history.date_time + '</td>';
-									shipment += '<td>' + history.status + '</td>';
-									shipment += '<td>' + history.user + '</td>';
-									shipment += '</tr>';
-								});
-
-								shipment += '</tbody>';
-								shipment += '</table>';
-
-								shipment += '</div>';
-								shipment += '</div>';
-							}
-
-                            if ('amount_history' in details) {
                                 shipment += '<div class="col-12 mt-2">';
-                                shipment += '<h4><u>Amount History</u></h4>';
+                                shipment += '<h4><u>Order Information</u></h4>';
+                                shipment += '<div class="border table-responsive">';
+                                shipment += '<table class="table table-sm table-borderless mb-0">';
+                                shipment += '<tbody>';
+
+                                $.each(details.order_information.items, function (index, item) {
+                                    shipment += '<tr>';
+                                    shipment += '<td><strong>Product Type</strong></td>';
+                                    shipment += '<td>' + item.product_type + '</td>';
+                                    shipment += '<td><strong>Description</strong></td>';
+                                    shipment += '<td>' + ((item.description) ? item.description : '-') + '</td>';
+                                    shipment += '<td><strong>Quantity</strong></td>';
+                                    shipment += '<td>' + item.quantity + '</td>';
+                                    shipment += '</tr>';
+                                });
+
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Weight</strong></td>';
+                                shipment += '<td>' + details.order_information.weight + ' kg</td>';
+                                shipment += '<td><strong>Shipping Mode</strong></td>';
+                                shipment += '<td>' + details.order_information.shipping_mode + '</td>';
+                                shipment += '<td><strong>Collection Amount</strong></td>';
+                                shipment += '<td>Rs. ' + details.order_information.amount + '</td>';
+                                shipment += '</tr>';
+
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Order ID</strong></td>';
+                                shipment += '<td>' + ((details.order_information.order_id) ? details.order_information.order_id : '-') + '</td>';
+                                shipment += '<td><strong>Instructions</strong></td>';
+
+                                if (details.order_information.charges_mode_id) {
+                                    shipment += '<td>' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
+                                    shipment += '<td><strong>Charges Mode</strong></td>';
+                                    shipment += '<td>' + details.order_information.charges_mode + '</td>';
+                                }
+                                else {
+                                    shipment += '<td colspan="3">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
+                                }
+
+                                shipment += '</tr>';
+
+                                shipment += '</tbody>';
+                                shipment += '</table>';
+                                shipment += '</div>';
+                                shipment += '</div>';
+
+                                shipment += '<div class="col-12 mt-2">';
+                                shipment += '<h4><u>Tracking History</u></h4>';
                                 shipment += '<div class="border table-responsive">';
 
-                                shipment += '<table class="table table-sm table-borderless datatable amount_history">';
+                                shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
                                 shipment += '<tr role="row">';
                                 shipment += '<th><strong>Date / Time</strong></th>';
-                                shipment += '<th><strong>Old Amount</strong></th>';
-                                shipment += '<th><strong>New Amount</strong></th>';
+                                shipment += '<th><strong>Status</strong></th>';
+                                shipment += '<th><strong>Reason</strong></th>';
+                                shipment += '<th><strong>Remarks</strong></th>';
                                 shipment += '<th><strong>User</strong></th>';
+                                shipment += '<th><strong>City</strong></th>';
+                                shipment += '<th><strong>Received/Refused By</strong></th>';
+                                shipment += '<th><strong>IP Address</strong></th>';
                                 shipment += '</tr>';
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
 
-                                $.each(details.amount_history, function(index, history) {
+                                $.each(details.tracking_history, function (index, history) {
                                     shipment += '<tr>';
                                     shipment += '<td>' + history.date_time + '</td>';
-                                    shipment += '<td>' + history.old_amount + '</td>';
-                                    shipment += '<td>' + history.new_amount + '</td>';
+                                    shipment += '<td>' + history.status + '</td>';
+                                    shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
+                                    shipment += '<td>' + history.remarks + '</td>';
                                     shipment += '<td>' + history.user + '</td>';
+                                    shipment += '<td>' + history.city + '</td>';
+                                    shipment += '<td>' + history.received_or_refused_by + '</td>';
+                                    shipment += '<td>' + history.ip + '</td>';
                                     shipment += '</tr>';
                                 });
 
@@ -483,202 +394,417 @@
 
                                 shipment += '</div>';
                                 shipment += '</div>';
-                            }
 
-                            if ('weight_history' in details) {
-                                shipment += '<div class="col-12 mt-2">';
-                                shipment += '<h4><u>Weight History</u></h4>';
-                                shipment += '<div class="border table-responsive">';
+                                if ('payment_history' in details) {
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Payment History</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
 
-                                shipment += '<table class="table table-sm table-borderless datatable weight_history">';
-                                shipment += '<thead>';
-                                shipment += '<tr role="row">';
-                                shipment += '<th><strong>Date / Time</strong></th>';
-                                shipment += '<th><strong>Old Weight</strong></th>';
-                                shipment += '<th><strong>New Weight</strong></th>';
-                                shipment += '<th><strong>User</strong></th>';
-                                shipment += '</tr>';
-                                shipment += '</thead>';
-                                shipment += '<tbody>';
-
-                                $.each(details.weight_history, function(index, history) {
-                                    shipment += '<tr>';
-                                    shipment += '<td>' + history.date_time + '</td>';
-                                    shipment += '<td>' + history.old_weight + '</td>';
-                                    shipment += '<td>' + history.new_weight + '</td>';
-                                    shipment += '<td>' + history.user + '</td>';
+                                    shipment += '<table class="table table-sm table-borderless datatable payment_history">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Status</strong></th>';
+                                    shipment += '<th><strong>User</strong></th>';
+                                    shipment += '<th><strong>Remarks</strong></th>';
                                     shipment += '</tr>';
-                                });
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
 
-                                shipment += '</tbody>';
-                                shipment += '</table>';
+                                    $.each(details.payment_history, function (index, history) {
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + history.date_time + '</td>';
+                                        shipment += '<td>' + history.status + '</td>';
+                                        shipment += '<td>' + history.user + '</td>';
+                                        shipment += '<td>' + history.payable_remarks + '</td>';
+                                        shipment += '</tr>';
+                                    });
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                }
+
+                                if ('pickup_history' in details) {
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Pickup History</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
+
+                                    shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Status</strong></th>';
+                                    shipment += '<th><strong>User</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+
+                                    $.each(details.pickup_history, function (index, history) {
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + history.date_time + '</td>';
+                                        shipment += '<td>' + history.status + '</td>';
+                                        shipment += '<td>' + history.user + '</td>';
+                                        shipment += '</tr>';
+                                    });
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                }
+
+                                if ('amount_history' in details) {
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Amount History</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
+
+                                    shipment += '<table class="table table-sm table-borderless datatable amount_history">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Old Amount</strong></th>';
+                                    shipment += '<th><strong>New Amount</strong></th>';
+                                    shipment += '<th><strong>User</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+
+                                    $.each(details.amount_history, function (index, history) {
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + history.date_time + '</td>';
+                                        shipment += '<td>' + history.old_amount + '</td>';
+                                        shipment += '<td>' + history.new_amount + '</td>';
+                                        shipment += '<td>' + history.user + '</td>';
+                                        shipment += '</tr>';
+                                    });
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                }
+
+                                if ('weight_history' in details) {
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Weight History</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
+
+                                    shipment += '<table class="table table-sm table-borderless datatable weight_history">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Old Weight</strong></th>';
+                                    shipment += '<th><strong>New Weight</strong></th>';
+                                    shipment += '<th><strong>User</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+
+                                    $.each(details.weight_history, function (index, history) {
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + history.date_time + '</td>';
+                                        shipment += '<td>' + history.old_weight + '</td>';
+                                        shipment += '<td>' + history.new_weight + '</td>';
+                                        shipment += '<td>' + history.user + '</td>';
+                                        shipment += '</tr>';
+                                    });
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                }
+
+                                if ('crm_requests' in details) {
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>CRM History</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
+
+                                    shipment += '<table class="table table-sm table-borderless datatable crm_requests_history">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>S.No</strong></th>';
+                                    shipment += '<th><strong>Status</strong></th>';
+                                    shipment += '<th><strong>Created At</strong></th>';
+                                    shipment += '<th><strong>Created By</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+                                    $count = 0;
+                                    $.each(details.crm_requests, function (index, crm_request) {
+                                        $count = $count + 1;
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + $count + '</td>';
+                                        if (crm_request.status_id === 1 || crm_request.status_id === 5) {
+                                            shipment += '<td>' + crm_request.status + ' (' + crm_request.id + ')</td>';
+                                        }
+                                        else {
+                                            shipment += '<td>' + crm_request.status + '</td>';
+                                        }
+                                        shipment += '<td>' + crm_request.created_at + '</td>';
+                                        shipment += '<td>' + crm_request.created_by + '</td>';
+                                        shipment += '</tr>';
+                                    });
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                }
 
                                 shipment += '</div>';
                                 shipment += '</div>';
+
+
+                                shipment += '</div>';
+
+                                $('#tracking').append(shipment);
+                            });
+                            scan_sound(1);
+
+                            $('#tracking table.datatable.tracking_history').DataTable({
+                                dom: 't',
+                                paging: false,
+                                order: [[0, 'desc']],
+                                columns: [
+                                    {name: 'date_time', class: 'align-middle date_time'},
+                                    {name: 'status', class: 'align-middle status'},
+                                    {name: 'reason', class: 'align-middle reason'},
+                                    {name: 'remarks', class: 'align-middle remarks'},
+                                    {name: 'user', class: 'align-middle user'},
+                                    {name: 'city', class: 'align-middle city'},
+                                    {name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
+                                    {name: 'ip', class: 'align-middle ip'}
+                                ]
+                            });
+
+                            $('#tracking table.datatable.payment_history').DataTable({
+                                dom: 't',
+                                paging: false,
+                                order: [[0, 'desc']],
+                                columns: [
+                                    {name: 'date_time', class: 'align-middle date_time'},
+                                    {name: 'status', class: 'align-middle status'},
+                                    {name: 'user', class: 'align-middle user'},
+                                    {name: 'remarks', class: 'align-middle remarks'}
+                                ]
+                            });
+                        }
+                    });
+            }
+
+			@if (app('request')->has('tracking_number'))
+            track({{ app('request')->input('tracking_number') }});
+					@endif
+
+            var select = $('#track_form .tracking_numbers').selectize({
+                    placeholder: 'Tracking Number(s)*',
+                    delimiter: ',',
+                    createOnBlur: true,
+                    persist: false,
+                    plugins: ['remove_button'],
+                    onDropdownOpen: function (dropdown) {
+                        dropdown.remove();
+                    },
+                    onType: function (str) {
+                        var regex = /^[0-9,]+$/;
+
+                        if (!regex.test(str)) {
+                            select[0].selectize.setTextboxValue('');
+                        }
+                    },
+                    create: function (input) {
+                        if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                            return {
+                                value: input,
+                                text: input
                             }
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                });
 
-							shipment += '</div>';
-							shipment += '</div>';
-
-
-							shipment += '</div>';
-
-							$('#tracking').append(shipment);
-						});
-						scan_sound(1);
-
-						$('#tracking table.datatable.tracking_history').DataTable({
-							dom: 't',
-							paging: false,
-							order: [[0, 'desc']],
-							columns: [
-								{name: 'date_time', class: 'align-middle date_time'},
-								{name: 'status', class: 'align-middle status'},
-								{name: 'reason', class: 'align-middle reason'},
-								{name: 'remarks', class: 'align-middle remarks'},
-								{name: 'user', class: 'align-middle user'},
-								{name: 'city', class: 'align-middle city'},
-								{name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
-								{name: 'ip', class: 'align-middle ip'}
-							]
-						});
-
-						$('#tracking table.datatable.payment_history').DataTable({
-							dom: 't',
-							paging: false,
-							order: [[0, 'desc']],
-							columns: [
-								{name: 'date_time', class: 'align-middle date_time'},
-								{name: 'status', class: 'align-middle status'},
-								{name: 'user', class: 'align-middle user'},
-								{name: 'remarks', class: 'align-middle remarks'}
-							]
-						});
-					}
-				});
-			}
-
-            @if (app('request')->has('tracking_number'))
-                track({{ app('request')->input('tracking_number') }});
-            @endif
-
-			var select = $('#track_form .tracking_numbers').selectize({
-				placeholder: 'Tracking Number(s)*',
-				delimiter: ',',
-				createOnBlur: true,
-				persist: false,
-				plugins: ['remove_button'],
-				onDropdownOpen: function(dropdown) {
-					dropdown.remove();
-				},
-				onType: function(str) {
-					var regex = /^[0-9,]+$/;
-
-					if (!regex.test(str)) {
-						select[0].selectize.setTextboxValue('');
-					}
-				},
-				create: function(input) {
-					if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
-						return {
-							value: input,
-							text: input
-						}
-					}
-					else {
-						return false;
-					}
-				}
-			});
-
-			$('#track_form').validate({
-				ignore: [],
-				errorClass: 'danger',
-				successClass: 'success',
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parents('form'));
-				},
-				submitHandler: function(form) {
+            $('#track_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parents('form'));
+                },
+                submitHandler: function (form) {
                     track($(form).find('.tracking_numbers').val());
 
-					return false;
-				}
-			});
+                    return false;
+                }
+            });
 
-			$('#tracking').on('click', '.print', function() {
-				id = $(this).attr('id');
+            $('#tracking').on('click', '.print', function () {
+                id = $(this).attr('id');
 
-				booking_type_id = $(this).attr('data-booking-type-id');
+                booking_type_id = $(this).attr('data-booking-type-id');
 
-				print(id, booking_type_id);
-			});
+                print(id, booking_type_id);
+            });
 
-			$('#tracking').on('click', '.rider_information', function() {
-				id = $(this).attr('data-id');
+            $('#tracking').on('click', '.rider_information', function () {
+                id = $(this).attr('data-id');
 
-				$.ajax({
-				url: '{!! route('admin.tracking.rider_information') !!}',
-				method: 'POST',
-				data: {
-					'_token': '{{ csrf_token() }}',
-					'id': id
-				}
-				})
-				.done(function(data) {
-					var details = '<table class="table table-sm table-bordered"><tbody>';
+                $.ajax({
+                    url: '{!! route('admin.tracking.rider_information') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id
+                    }
+                })
+                    .done(function (data) {
+                        var details = '<table class="table table-sm table-bordered"><tbody>';
 
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Name</strong></td><td class="align-middle text-center">' + data.name + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Phone Number</strong></td><td class="align-middle text-center">' + data.phone_number + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="align-middle text-center">' + data.city + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Category</strong></td><td class="align-middle text-center">' + data.category + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Route</strong></td><td class="align-middle text-center">' + data.route + '</td></tr>';
+                        details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Name</strong></td><td class="align-middle text-center">' + data.name + '</td></tr>';
+                        details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Phone Number</strong></td><td class="align-middle text-center">' + data.phone_number + '</td></tr>';
+                        details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="align-middle text-center">' + data.city + '</td></tr>';
+                        details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Category</strong></td><td class="align-middle text-center">' + data.category + '</td></tr>';
+                        details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Route</strong></td><td class="align-middle text-center">' + data.route + '</td></tr>';
 
-					details += '</tbody></table>';
+                        details += '</tbody></table>';
 
-					$('#rider_information .modal-body').html(details);
+                        $('#rider_information .modal-body').html(details);
 
-					$('#rider_information').modal('show');
-				});
-			});
+                        $('#rider_information').modal('show');
+                    });
+            });
 
-			$('#tracking').on('click', '.cargo_consignment_details', function() {
-				id = $(this).attr('data-id');
+            $('#tracking').on('click', '.cargo_note_print', function () {
+                id = $(this).attr('data-id');
+                $.ajax({
+                    url: '{!! route('admin.cargo.in_transit.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function (data) {
+                        var tab = window.open('', '_blank');
 
-				$.ajax({
-				url: '{!! route('admin.tracking.cargo_consignment_details') !!}',
-				method: 'POST',
-				data: {
-					'_token': '{{ csrf_token() }}',
-					'id': id
-				}
-				})
-				.done(function(data) {
-					var details = '<table class="table table-sm table-bordered"><tbody>';
+                        if (!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            });
+            $('#tracking').on('click', '.return_note_print', function () {
+                id = $(this).attr('data-id');
+                $.ajax({
+                    url: '{!! route('admin.return.receive.rn.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
 
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 1</strong></td><td class="align-middle text-center">' + data.junction_hub_1 + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 2</strong></td><td class="align-middle text-center">' + ((data.junction_hub_2) ? data.junction_hub_2 : '') + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Expected Arrival Date</strong></td><td class="align-middle text-center">' + data.expected_arrival_date + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipping Mode</strong></td><td class="align-middle text-center">' + data.shipping_mode + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode</strong></td><td class="align-middle text-center">' + data.transport_mode + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode Vendor</strong></td><td class="align-middle text-center">' + data.transport_mode_vendor + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Seal Number</strong></td><td class="align-middle text-center">' + data.seal_number + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Builty Number</strong></td><td class="align-middle text-center">' + ((data.builty_number) ? data.builty_number : '') + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipments Weight</strong></td><td class="align-middle text-center">' + data.shipments_weight + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td><td class="align-middle text-center">' + data.actual_weight + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Vendor Weight</strong></td><td class="align-middle text-center">' + ((data.vendor_weight) ? data.vendor_weight : '') + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Weight Charges / kg</strong></td><td class="align-middle text-center">' + ((data.weight_charges_per_kg) ? data.weight_charges_per_kg : '') + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Extra Charges</strong></td><td class="align-middle text-center">' + ((data.extra_charges) ? data.extra_charges : '') + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Total Weight Charges</strong></td><td class="align-middle text-center">' + ((data.total_weight_charges) ? data.total_weight_charges : '') + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Sender Name</strong></td><td class="align-middle text-center">' + data.sender_name + '</td></tr>';
-					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Receiver Name</strong></td><td class="align-middle text-center">' + data.receiver_name + '</td></tr>';
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            });
+            $('#tracking').on('click', '.delivery_note_print', function () {
+                id = $(this).attr('data-id');
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function (data) {
+                        var tab = window.open('', '_blank');
 
-					details += '</tbody></table>';
+                        if (!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            });
+        });
 
-					$('#cargo_consignment_details .modal-body').html(details);
+				{{--$.ajax({--}}
+				{{--url: '{!! route('admin.tracking.cargo_consignment_details') !!}',--}}
+				{{--method: 'POST',--}}
+				{{--data: {--}}
+					{{--'_token': '{{ csrf_token() }}',--}}
+					{{--'id': id--}}
+				{{--}--}}
+				{{--})--}}
+				{{--.done(function(data) {--}}
+					{{--var details = '<table class="table table-sm table-bordered"><tbody>';--}}
 
-					$('#cargo_consignment_details').modal('show');
-				});
-			});
-		});
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 1</strong></td><td class="align-middle text-center">' + data.junction_hub_1 + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 2</strong></td><td class="align-middle text-center">' + ((data.junction_hub_2) ? data.junction_hub_2 : '') + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Expected Arrival Date</strong></td><td class="align-middle text-center">' + data.expected_arrival_date + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipping Mode</strong></td><td class="align-middle text-center">' + data.shipping_mode + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode</strong></td><td class="align-middle text-center">' + data.transport_mode + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode Vendor</strong></td><td class="align-middle text-center">' + data.transport_mode_vendor + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Seal Number</strong></td><td class="align-middle text-center">' + data.seal_number + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Builty Number</strong></td><td class="align-middle text-center">' + ((data.builty_number) ? data.builty_number : '') + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipments Weight</strong></td><td class="align-middle text-center">' + data.shipments_weight + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td><td class="align-middle text-center">' + data.actual_weight + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Vendor Weight</strong></td><td class="align-middle text-center">' + ((data.vendor_weight) ? data.vendor_weight : '') + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Weight Charges / kg</strong></td><td class="align-middle text-center">' + ((data.weight_charges_per_kg) ? data.weight_charges_per_kg : '') + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Extra Charges</strong></td><td class="align-middle text-center">' + ((data.extra_charges) ? data.extra_charges : '') + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Total Weight Charges</strong></td><td class="align-middle text-center">' + ((data.total_weight_charges) ? data.total_weight_charges : '') + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Sender Name</strong></td><td class="align-middle text-center">' + data.sender_name + '</td></tr>';--}}
+					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Receiver Name</strong></td><td class="align-middle text-center">' + data.receiver_name + '</td></tr>';--}}
+
+					{{--details += '</tbody></table>';--}}
+
+					{{--$('#cargo_consignment_details .modal-body').html(details);--}}
+
+					{{--$('#cargo_consignment_details').modal('show');--}}
+				{{--});--}}
 	</script>
 @endsection

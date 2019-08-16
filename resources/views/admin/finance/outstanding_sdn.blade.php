@@ -28,7 +28,7 @@
 										<th class="border-primary border-darken-1">DNCC Amount</th>
 										<th class="border-primary border-darken-1">Deposited Amount</th>
 										<th class="border-primary border-darken-1">Deposited by</th>
-										<th class="border-primary border-darken-1">Company Bank</th>
+										{{--<th class="border-primary border-darken-1">Company Bank</th>--}}
 										<th class="border-primary border-darken-1">Deposited Datetime</th>
 										<th class="border-primary border-darken-1">Deposit Slip</th>
 										<th class="border-primary border-darken-1"></th>
@@ -66,14 +66,11 @@
 												</thead>
 											</table>
 
-											<form id="reconcile_delivery_notes_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.finance.outstanding_sdn.reconcile_delivery_notes') }}">
+											<form id="reconcile_delivery_notes_form" class="form-inline mt-2 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.finance.outstanding_sdn.reconcile_delivery_notes') }}">
 												{{ csrf_field() }}
 
 												<input type="hidden" name="station_deposit_note_id" class="station_deposit_note_id">
 												<input type="hidden" name="delivery_note_ids" class="delivery_note_ids">
-												<div class="col-2">
-													<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
-												</div>
 												<div class="col-8">
 													<table class="table table-bordered mb-0">
 														<thead>
@@ -93,6 +90,7 @@
 													</table>
 												</div>
 												<div class="col-2 text-right">
+													<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
 													<button type="submit" name="reconcile" class="btn btn-primary reconcile">Reconcile</button>
 												</div>
 
@@ -295,7 +293,7 @@
                             head.push('DNCC Amount');
                             head.push('Deposited Amount');
                             head.push('Deposited By');
-                            head.push('Company Bank');
+                            // head.push('Company Bank');
                             head.push('Deposited Datetime');
 
 
@@ -312,7 +310,7 @@
                                 row.push(values.sdn_amount);
                                 row.push(values.sdn_deposit_amount);
                                 row.push(values.deposited_by);
-                                row.push(values.bank);
+                                // row.push(values.bank);
                                 row.push(values.deposited_at);
                                 body.push(row);
                             });
@@ -354,7 +352,7 @@
 					{data:'sdn_amount', name: 'station_deposit_notes.sdn_amount', class: 'align-middle amount total_amount'},
 					{data:'sdn_deposit_amount', name: 'station_deposit_notes.sdn_deposit_amount', class: 'align-middle amount deposited_amount'},
 					{data:'deposited_by', name: 'a.name', class: 'align-middle deposited_by'},
-					{data:'bank', name: 'bank', class: 'align-middle bank'},
+					// {data:'bank', name: 'bank', class: 'align-middle bank'},
 					{data:'deposited_at', name: 'station_deposit_notes.created_at', class: 'align-middle deposited_at'},
 					{data:'deposit_slip', name: 'deposit_slip', class: 'align-middle deposit_slip', orderable: false, searchable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -490,7 +488,7 @@
                         $('#reconcile_delivery_notes #reconcile_delivery_notes_form .delivery_note_ids').val(selected_rows);
                     }
                 }],
-				scrollX: true, scrollY: '500px',
+				scrollX: true, scrollY: false,
 				paging: false,
 				select: {
 					info: false,
@@ -510,7 +508,7 @@
 					}
 				},
 				rowId: 'id',
-				order: [[2, 'asc']],
+				order: [[10, 'desc']],
 				columns: [
 					{data: 'dn.id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
