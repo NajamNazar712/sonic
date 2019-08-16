@@ -275,8 +275,8 @@ class Permission
             'admin.petty_cash.statements.index' => 146,
             'admin.petty_cash.approved.index' => 147,
             'admin.petty_cash.statements.approve' => 173,
-            'admin.petty_cash.rejected.index' => 242,
-            'admin.petty_cash.rejected.list' => 242,
+            'admin.petty_cash.rejected.index' => 243,
+            'admin.petty_cash.rejected.list' => 243,
 
             'admin.month_closing.index' => 141,
             'admin.month_closing.list' => 141,
