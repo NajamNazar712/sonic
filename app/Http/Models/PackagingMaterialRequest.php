@@ -12,5 +12,8 @@ class PackagingMaterialRequest extends Model
     public function city() {
         return $this->belongsTo('App\Http\Models\City');
     }
+    public function items() {
+        return $this->hasMany('App\Http\Models\PackagingMaterialRequestDetail');
+    }
 
 }

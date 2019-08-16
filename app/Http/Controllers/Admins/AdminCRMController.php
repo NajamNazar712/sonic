@@ -363,8 +363,8 @@ class AdminCRMController extends Controller
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
             ->leftjoin('crm_request_agent_histories as res', function ($join) {
                 $join->on('res.crm_request_id', '=', 'crm_requests.id')
-                    ->where('res.created_at','=',
-                        DB::raw('(select max(created_at) from crm_request_agent_histories where crm_request_agent_histories.crm_request_id = crm_requests.id and crm_request_agent_histories.agent_id = crm_requests.agent_id)'));
+                    ->where('res.id','=',
+                        DB::raw('(select max(id) from crm_request_agent_histories where crm_request_agent_histories.crm_request_id = crm_requests.id and crm_request_agent_histories.agent_id = crm_requests.agent_id)'));
             })
             ->leftjoin('crm_comments as ccs', function($join){
                 $join->on('ccs.crm_request_id', '=', 'crm_requests.id')
@@ -629,8 +629,8 @@ class AdminCRMController extends Controller
             })
             ->leftjoin('crm_request_status_histories as res', function ($join) {
                 $join->on('res.crm_request_id', '=', 'crm_requests.id')
-                    ->where('res.created_at','=',
-                        DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 2)'));
+                    ->where('res.id','=',
+                        DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 2)'));
             })
             ->leftjoin('crm_comments as ccs', function($join){
                 $join->on('ccs.crm_request_id', '=', 'crm_requests.id')

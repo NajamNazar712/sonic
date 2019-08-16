@@ -1844,7 +1844,7 @@ class AdminReportsController extends Controller
                         $shipper_actual_weight = 0;
                         $shipper_chargeable_weight = 0;
                         if($search_city == null){
-                            $origin_name =  DB::connection('reports')->table('cities')->where('id', $search_city_hub)->select('name')->first();
+                            $origin_name =  DB::connection('reports')->table('cities')->where('id', $origin)->select('name')->first();
                             $origin_name = $origin_name->name;
                         }
 

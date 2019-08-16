@@ -1325,12 +1325,12 @@
             var submit_all_status_flag = true;
             $('#submit_selected_status').on('click', function () {
                 var select_all_status = $('#select_all_status').val();
+
                 var delivery_note = $('#delivery_note').val();
                 var select_all_reason = $('#select_all_reason').val();
-                console.log(select_all_reason)
-                console.log(select_all_status)
-                if(selected_rows.length > 0){
-                    if(select_all_status != null) {
+
+                if(selected_rows.length > 0 && (select_all_status != '')){
+
                         if ((select_all_reason != null) || (select_all_reason == null && select_all_status == 14)) {
 
                         swal({
@@ -1469,16 +1469,19 @@
                     }else{
                             var error = "Please Select A Reason!";
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                    }
-                    else{
-                        var error = "Please Select A Status!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
                     }
                 }
                 else{
-                    var error = "Select at-least one shipment!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    if(select_all_status == ''){
+                        var error = "Please Select A Status!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    if(selected_rows.length == 0){
+                        var error = "Select at-least one shipment!";
+
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
                 }
 
             });

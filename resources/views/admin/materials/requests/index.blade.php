@@ -258,7 +258,7 @@
                     {data: 'amount', name: 'packaging_material_requests.amount', class: 'align-middle amount'},
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'mode', name: 'ppm.id', class: 'align-middle mode'},
-                    {data: 'status', name: 'pmrs.id', class: 'align-middle status'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 
