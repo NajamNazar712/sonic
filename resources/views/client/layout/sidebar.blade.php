@@ -23,8 +23,8 @@
                         <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Receiving Sheet</span></a>
                             <ul class="menu-content">
                         @if (session('user_type') == 1 || in_array(3, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create</a></li>
-                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create by scan</a></li>
+                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
+                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
                             <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
                         @endif
                             </ul>
