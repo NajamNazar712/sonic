@@ -312,7 +312,7 @@
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
 	            @endif
-	            scrollX: true, scrollY: '350px',
+	            scrollX: true, scrollY: '500px',
 				select: {
 					info: false,
 					style: 'multi',

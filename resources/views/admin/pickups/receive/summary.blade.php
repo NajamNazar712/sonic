@@ -181,7 +181,7 @@
 			var table = $('#datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				buttons:['reset'],
-				scrollX: true, scrollY: '350px',
+				scrollX: true, scrollY: '500px',
                 paging:false,
                 processing: true,
                 language: {

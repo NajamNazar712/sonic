@@ -213,7 +213,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(106, session('permissions')))
-                scrollX: true, scrollY: '350px',
+                scrollX: true, scrollY: '500px',
                 buttons: [
                     {
                     text: '<i class="la la-creative-commons"></i> Cash Collect',

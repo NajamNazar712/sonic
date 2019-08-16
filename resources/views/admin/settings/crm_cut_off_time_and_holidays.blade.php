@@ -20,26 +20,26 @@
                             <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.crm_cut_off_time_and_holidays.update') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
                                 <div class="row justify-content-center">
-                                <div class="col-4">
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
-                                          <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                              <span class="">From*</span>
-                                          </span>
+                                    <div class="col-4">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                              <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                  <span class="">From*</span>
+                                              </span>
+                                            </div>
+                                            <input type="text" name="cut_off_time_from" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_from" value="{{$cut_off_time_from}}" id="cut_off_time_from" placeholder="Cut-Off Time From*" data-rule-required="true" data-msg-required="Cut-Off Time From is required">
                                         </div>
-                                        <input type="text" name="cut_off_time_from" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_from" value="{{$cut_off_time_from}}" id="cut_off_time_from" placeholder="Cut-Off Time From*" data-rule-required="true" data-msg-required="Cut-Off Time From is required">
                                     </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
-                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="">To*</span>
-                                </span>
+                                    <div class="col-4">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="">To*</span>
+                                    </span>
+                                            </div>
+                                            <input type="text" name="cut_off_time_to" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_to" id="cut_off_time_to" value="{{$cut_off_time_to}}" placeholder="Cut-Off Time To*" data-rule-required="true" data-msg-required="Cut-Off Time To is required">
                                         </div>
-                                        <input type="text" name="cut_off_time_to" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_to" id="cut_off_time_to" value="{{$cut_off_time_to}}" placeholder="Cut-Off Time To*" data-rule-required="true" data-msg-required="Cut-Off Time To is required">
                                     </div>
-                                </div>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary">Update</button>
@@ -226,7 +226,7 @@
                 }
             } );            var index_column = 0;
             var table = $('#datatable').DataTable({
-                scrollX: true, scrollY: '350px',
+                scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {

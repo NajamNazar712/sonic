@@ -286,7 +286,7 @@
             var selected_rows = [];
 
             var table = $('#datatable').DataTable({
-                scrollX: true, scrollY: '350px',
+                scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(179, session('permissions')))

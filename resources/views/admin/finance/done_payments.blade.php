@@ -334,7 +334,7 @@
                 }
             } );
 			var table = $('#datatable').DataTable({
-				scrollX: true, scrollY: '350px',
+				scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				@if (session('role_id') == 1 || count(array_intersect([62, 63], session('permissions'))) !== 0)
 
@@ -477,7 +477,7 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },'reset'],
 				@endif
-				scrollX: true, scrollY: '350px',
+				scrollX: true, scrollY: '500px',
 				select: {
 					info: false,
 					style: 'multi',

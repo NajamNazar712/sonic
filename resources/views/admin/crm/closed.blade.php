@@ -159,7 +159,7 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 'reset'],
-                scrollX: true, scrollY: '350px',
+                scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
