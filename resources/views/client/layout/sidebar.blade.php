@@ -17,18 +17,21 @@
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Order Form</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
                             @endif
-                        @endif
+
+                            @endif
                         </ul>
                         </li>
                         <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Receiving Sheet</span></a>
                             <ul class="menu-content">
                         @if (session('user_type') == 1 || in_array(3, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
                             <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
+                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
                             <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
                         @endif
                             </ul>
                         </li>
+                        <li><a class="menu-item" href="{{ route('cod.cancelled_shipments.index') }}">Cancelled</a></li>
+
                     </ul>
                 </li>
             @endif
@@ -43,9 +46,7 @@
                     </ul>
                 </li>
             @endif
-            @if (session('user_type') == 1)
-                <li class=" nav-item"><a href="{{ route('cod.cancelled_shipments.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-times"></i>Cancelled Shipments</span></a></li>
-            @endif
+
             @if(session('packaging_charges_check') && (session('user_type') == 1 || in_array(4, session('permissions'))))
                 <li class=" nav-item"><a href="{{ route('cod.packaging.requests.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-sticky-note-o"></i>Packaging Requests</span></a></li>
             @endif
@@ -72,7 +73,6 @@
             @endif
 
 
-            <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title"><i class="la la-crosshairs"></i>Tracking</span></a></li>
 
             @if (session('user_type') == 1 || in_array(9, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
@@ -81,6 +81,8 @@
                     </ul>
                 </li>
             @endif
+            <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title"><i class="la la-crosshairs"></i>Tracking</span></a></li>
+
         </ul>
     </div>
 </div>
