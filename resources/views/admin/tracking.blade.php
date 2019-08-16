@@ -523,7 +523,7 @@
 
                                 if ('crm_requests' in details) {
                                     shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>CRM Requests Log</u></h4>';
+                                    shipment += '<h4><u>CRM History</u></h4>';
                                     shipment += '<div class="border table-responsive">';
 
                                     shipment += '<table class="table table-sm table-borderless datatable crm_requests_history">';
