@@ -4226,6 +4226,8 @@ class AdminFinanceController extends Controller
             $payments = DonePayment::where('user_id', $shipper);
         }
 
+        $payments = $payments->whereBetween('created_at', [$from_date, $to_date]);
+
         if ($payments->exists()) {
             $payments = $payments->get();
 
@@ -4586,7 +4588,16 @@ class AdminFinanceController extends Controller
             return $html;
         }
         else {
-            return '<html><body>No Payment(s) for the given Criteria</body></html>';
+            return '
+            <html>
+                <body>No Payment(s) for the given Criteria</body>
+                <script>
+                  window.onload = function() {
+                    history.replaceState(history.state, "", "/");
+                  }
+                </script>
+            </html>
+            ';
         }
     }
 }
