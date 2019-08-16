@@ -4485,7 +4485,6 @@ class AdminFinanceController extends Controller
                                 </tr>
                     ';
                 }
-                }
                 else {
                     $html .= '
                                 <tr>
