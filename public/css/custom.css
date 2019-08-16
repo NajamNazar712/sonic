@@ -278,6 +278,14 @@ p.comment {
     box-sizing: border-box;
 }
 
+.custom-nav-buttons-padding{
+	padding: 5px 10px;
+}
+.custom-nav-buttons-font{
+	color: #fff !important;
+	background-color: #034370 !important;
+}
+
 @media (max-width: 991.98px) {
 	.dataTables_wrapper table {
 		overflow-x: initial;
