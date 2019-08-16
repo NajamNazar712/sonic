@@ -58,7 +58,6 @@ class ShipperDashboardController extends Controller
       return view('client.dashboard')->with(['cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests]);
     }
     public function orders_list(Request $request) {
-        $sister_users = MergedSisterAccountMapping::where('head_user_id', session('user_id'))->pluck('sister_user_id')->toArray();
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -81,7 +80,7 @@ class ShipperDashboardController extends Controller
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->select(['u.id as user_id', 'u.name as user_name', 'shipments_journey.remarks as cancellation_remarks', 'si.description as product_description','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments_journey.shipper_status_id as status_id'])
             ->where('shipments.user_id', session('user_id'))
-            ->orwhereIn('shipments.user_id', $sister_users)
+            ->orwhereIn('shipments.user_id', session('sister_users'))
             ->groupBy('shipments.id');
 
         $datatable = Datatables::of($shipments)

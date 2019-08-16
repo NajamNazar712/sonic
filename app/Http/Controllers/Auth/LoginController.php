@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -96,6 +97,8 @@ class LoginController extends Controller
                 return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
             }
             else {
+                $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->id)->pluck('sister_user_id')->toArray();
+                session(['sister_users' => $sister_users]);
                 session(['user_id' => $user->id]);
                 session(['account_type' => $user->account_type_id]);
                 if (PackagingCharge::where('user_id', $user->id)->exists()) {
@@ -120,7 +123,8 @@ class LoginController extends Controller
             }
             else {
                 $permissions = SubstituteUserPermission::where('substitute_user_id', $user->id)->pluck('permission_id')->toArray();
-
+                $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->id)->pluck('sister_user_id')->toArray();
+                session(['sister_users' => $sister_users]);
                 session(['permissions' => $permissions]);
                 session(['user_id' => $user->user_id]);
                 session(['account_type' => $shipper->account_type_id]);

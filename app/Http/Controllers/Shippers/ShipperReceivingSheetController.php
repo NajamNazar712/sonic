@@ -101,9 +101,8 @@ class ShipperReceivingSheetController extends Controller
             ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'usi.pickup_address', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet', 'rs.id AS receiving_sheet_no','shipments.amount', 'u.name as user', 'u.id as user_id')
 
             ->where(function ($query) {
-                $sister_users = MergedSisterAccountMapping::where('head_user_id', session('user_id'))->pluck('sister_user_id')->toArray();
                 $query->where('shipments.user_id', session('user_id'))
-                    ->orwhereIn('shipments.user_id', $sister_users);
+                    ->orwhereIn('shipments.user_id', session('sister_users'));
             })
             ->where('shipments.shipper_status_id', 1)
             ->where(function ($query) {
