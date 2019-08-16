@@ -198,7 +198,7 @@
                                                                     @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
                                                                         Invalid
                                                                     @else
-                                                                        close
+                                                                        Close
                                                                     @endif
                                                                 </span>
                                                             </button>
