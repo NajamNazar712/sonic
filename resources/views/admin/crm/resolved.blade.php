@@ -18,6 +18,18 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
+                            <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                <div class="form-group">
+                                    <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
+                                           placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                                </div>
+                                <div class="form-group justify-content-center">
+                                    <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
+                                                class="la la-search"></i> Search
+                                    </button>
+                                </div>
+                            </form>
+
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
@@ -79,12 +91,25 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <style type="text/css">
+        .selectize-control {
+            width: 300px !important;
+        }
+
+        .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #64a0d2 !important;
+            border-color: #5587b4 !important;
+            color: #FFFFFF;
+        }
+    </style>
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
@@ -94,6 +119,10 @@
 
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.crm.resolved.list') }}',
+                        data: {
+                            'page': 'all',
+                            'tracking_numbers': $('#track_form .tracking_numbers').val(),
+                        },
                         success: function (result) {
                             head = [];
 
@@ -157,7 +186,7 @@
             var selected_rows = [];
 
             var table = $('#datatable').DataTable({
-                scrollX: true, scrollY: '350px',
+                scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(179, session('permissions')))
@@ -240,7 +269,7 @@
                         }
                     },
                         @endif
-                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(182, session('permissions')))
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(202, session('permissions')))
                     {
                         text: 'Close Requests',
                         className: 'btn btn-danger close_requests',
@@ -375,7 +404,12 @@
                 language: {
                     processing: data_table_loader
                 },
-                ajax: '{{ route('admin.crm.resolved.list') }}',
+                ajax: {
+                    url: '{{ route('admin.crm.resolved.list') }}',
+                    data: function (d) {
+                        d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                    }
+                },
                 rowId: 'id',
                 order: [[17, 'desc']],
                 columns: [
@@ -597,6 +631,43 @@
                     table.button('.assign').disable();
                     table.button('.close_requests').disable();
                 }
+            });
+
+
+            //Selectize
+            var select = $('#track_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                onType: function(str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function(input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                },
+            });
+
+
+            $('#track_form').bind('submit',function (e) {
+                e.preventDefault();
+                table.draw();
             });
 
             {{--$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.assign', function() {--}}

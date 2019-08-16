@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -36,7 +37,19 @@ class ShipperTrackingController extends Controller
     		if ($shipment->exists()) {
                 $shipment = $shipment->first();
 
-                if (session('user_id') == $shipment->user_id) {
+                $sister_users = MergedSisterAccountMapping::where('head_user_id', session('user_id'))->pluck('sister_user_id')->toArray();
+                $track_check = false;
+                foreach ($sister_users as $user_id){
+                    if($user_id == $shipment->user_id){
+                        $track_check = true;
+                    }
+
+                    if (session('user_id') == $shipment->user_id) {
+                        $track_check = true;
+                    }
+                }
+
+                if ($track_check == true) {
         			$details = array();
 
                     $details['tracking_number'] = $tracking_number;

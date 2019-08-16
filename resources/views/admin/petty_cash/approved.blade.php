@@ -129,7 +129,7 @@
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
-                scrollX: true, scrollY: '350px',
+                scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -140,7 +140,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.petty_cash.approved.list') }}',
                 rowId: 'statement_id',
-                order: [1, 'asc'],
+                order: [1, 'desc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'statement_link', name: 'petty_cash_statements.id', class: 'align-middle statement_link'},

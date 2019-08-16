@@ -148,7 +148,7 @@
             });
             $('#search_form').on('submit',function (e) {
                 e.preventDefault();
-                blockPagePermanently();
+                // blockPagePermanently();
                 var search_date = $('#search_form input[name="search_date_formatted"]').val();
                 var city = $('#city').val();
                 var sales = '';
@@ -183,7 +183,7 @@
 
                         {{--});--}}
                     }
-                    UnblockPagePermanently();
+                    // UnblockPagePermanently();
             });
         });
     });

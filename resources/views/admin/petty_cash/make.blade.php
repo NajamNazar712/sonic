@@ -76,8 +76,11 @@
                     </thead>
                 </table>
                 <div class="row justify-content-center">
-                    <div class="">
-                        <button id="statement_submit" type="submit"  class="btn btn-primary btn-block">Make Statement</button>
+                    <div class="col-2">
+                        <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" name="submit_button" value="create"><i class="la la-list"></i> Make Statement</button>
+                    </div>
+                    <div class="col-2">
+                        <button id="statement_draft" type="submit"  class="btn btn-success btn-block" name="submit_button" value="draft"><i class="la la-save"></i> Save Draft</button>
                     </div>
                 </div>
                 </form>
@@ -129,7 +132,7 @@
             /*min-width: 80px;*/
         /*}*/
         .date-col-width{
-            min-width: 90px;
+            min-width: 190px;
         }
         div.picker .picker__holder{
             width: 250px;
@@ -263,9 +266,10 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
+                    var pressed_button = $(this.submitButton);
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to change make petty cash statement!',
+                        text: 'Select Yes to '+ pressed_button.attr('value') +' petty cash statement!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -286,6 +290,9 @@
                         dangerMode: true
                     }).then(function (confirm) {
                         if (confirm) {
+
+
+                            $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
                             $('#selected_rows').val(selected_rows);
                             // console.log($('#upload_image').val());
                             form.submit();
@@ -331,7 +338,7 @@
                 var heads_select = '<select class="form-control form-control-sm select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
                 var titles_select = '<select class="form-control form-control-sm select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
                 var hub_select = '<select class="form-control form-control-sm hub_select select2" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="City is required"></select>';
-                var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date (From) is required"></div>';
+                var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required"></div>';
 
                 var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
                 var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount"  data-rule-required="true" data-msg-required="Amount is required">';

@@ -83,7 +83,7 @@
                                             </div>
                                             <div class="media-body text-right">
                                                 <h3 id="total">0</h3>
-                                                <span>Total Booked Shipment(s)</span>
+                                                <span>Total Shipment(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -100,7 +100,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="booked">0</h3>
-                                                <span>Pending Shipment(s)</span>
+                                                <span>Booked Shipment(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -117,7 +117,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="received">0</h3>
-                                                <span>Received Shipment(s)</span>
+                                                <span class="font-13">Received / In-Transit Shipment(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -142,6 +142,24 @@
                         </div>
                     </div>
                     <div class="row justify-content-center">
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-inprocess pull-up">
+                            <div class="card-content" id="total_inprocess">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-shuffle text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white" id="in_process">0</h3>
+                                            <span>In Process Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                         <div class="col-3">
                             <div class="card bg-gradient-directional-warning pull-up">
                                 <div class="card-content" id="total_return">
@@ -153,23 +171,6 @@
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="return">0</h3>
                                                 <span>Returned Shipment(s)</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="card bg-gradient-directional-inprocess pull-up">
-                                <div class="card-content" id="total_inprocess">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-shuffle text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="in_process">0</h3>
-                                                <span>In Process Shipment(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -201,18 +202,18 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking No.</th>
                             <th class="border-primary border-darken-1">Order ID</th>
+                            <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Payment Status</th>
                             <th class="border-primary border-darken-1">Service Type</th>
-                            <th class="border-primary border-darken-1">Product Category</th>
-                            <th class="border-primary border-darken-1">Description</th>
                             <th class="border-primary border-darken-1">Arrival Date</th>
                             <th class="border-primary border-darken-1">Origin</th>
                             <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Consignee Name</th>
+                            <th class="border-primary border-darken-1">Consignee Contact</th>
+                            <th class="border-primary border-darken-1">Consignee Address</th>
                             <th class="border-primary border-darken-1">Collection Amount</th>
-                            <th class="border-primary border-darken-1">Actual Weight</th>
-                            <th class="border-primary border-darken-1">Weight Charges</th>
-                            <th class="border-primary border-darken-1">Cash Handling Charges</th>
+                            <th class="border-primary border-darken-1">Booking Date</th>
 
                         </tr>
                         </thead>
@@ -234,6 +235,17 @@
         .bg-gradient-directional-inprocess {
             background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
             background-repeat: repeat-x;
+        }
+        .show_active{
+            -webkit-box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
+            -moz-box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
+            box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+        }
+        span.font-13{
+            font-size: 13px;
         }
     </style>
 
@@ -378,18 +390,19 @@
                             head.push('S. No.');
                             head.push('Tracking No.');
                             head.push('Order ID');
+                            head.push('Shipper');
                             head.push('Status');
                             head.push('Payment Status');
                             head.push('Service Type');
-                            head.push('Product Category');
-                            head.push('Description');
                             head.push('Arrival Date');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Consignee Name');
+                            head.push('Consignee Contact');
+                            head.push('Consignee Address');
                             head.push('Collection Amount');
-                            head.push('Actual Weight');
-                            head.push('Weight Charges');
-                            head.push('Cash Handling Charges');
+                            head.push('Booking Date');
+
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -397,19 +410,18 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.order_id);
+                                row.push(values.shipper);
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
                                 row.push(values.service_type);
-                                row.push(values.product_name);
-                                row.push(values.description);
                                 row.push(values.arrival_date);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.consignee_name);
+                                row.push(values.consignee_phone);
+                                row.push(values.consignee_address);
                                 row.push(values.collection_amount);
-                                row.push(values.actual_weight);
-                                row.push(values.weight_charges);
-                                row.push(values.cash_handling_charges);
-
+                                row.push(values.booking_date);
                                 body.push(row);
                             });
                         },
@@ -421,10 +433,11 @@
             } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '350px',
+                scrollX: true, scrollY: '500px',
                 buttons: [
                     {
                         extend: 'excelHtml5',
+                        className: 'btn btn-primary',
                         title: 'Summary Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -448,23 +461,23 @@
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[8, 'desc']],
+                order: [[7, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
+                    { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
-                    { data:'product_name', name: 'p.product_name', class: 'align-middle product_name'},
-                    { data:'description', name: 'si.description', class: 'align-middle description'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
-                    { data:'collection_amount' ,name: 'shipments.amount', class: 'align-middle collection_amount'},
-                    { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
-                    { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
-                    { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'}
+                    { data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    { data: 'phone', name: 'phone', class: 'align-middle phone'},
+                    { data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+                    { data: 'collection_amount' ,name: 'shipments.amount', class: 'align-middle collection_amount'},
+                    { data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -474,34 +487,45 @@
                     this.api().table().columns.adjust();
                 }
             });
+            function add_animation(box) {
+                $("#report_data div").removeClass("show_active");
+                box.addClass('show_active');
+            }
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
             $('#total_shipments').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('total');
                 table.draw();
             });
             $('#total_pending').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('booked');
                 table.draw();
             });
             $('#total_received').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('received');
                 table.draw();
             });
             $('#total_delivered').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('delivered');
                 table.draw();
             });
             $('#total_return').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('returned');
                 table.draw();
             });
             $('#total_inprocess').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('in_process');
                 table.draw();
             });
             $('#total_cancelled').on('click', function () {
+                add_animation($(this));
                 $('#cards_filter_input').val('cancelled');
                 table.draw();
             });

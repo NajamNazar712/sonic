@@ -185,15 +185,22 @@
                                                                value="{{$crm_details->id}}">
                                                         <input type="hidden" id="prev_status" name="prev_status"
                                                                value="{{$crm_details->status_id}}">
+                                                        @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
+                                                            <input type="hidden" id="close" name="close"
+                                                               value="0">
+                                                        @else
+                                                            <input type="hidden" id="close" name="close"
+                                                                   value="1">
+                                                        @endif
                                                         @if($crm_details['status_id'] != 4 && $crm_details['status_id'] != 2)
                                                             <button id="invalid" type="submit" class="btn btn-danger">
-                                        <span class="d-none d-lg-block">
-                                            @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
-                                                Invalid
-                                            @else
-                                                Close
-                                            @endif
-                                            </span>
+                                                                <span class="d-none d-lg-block">
+                                                                    @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
+                                                                        Invalid
+                                                                    @else
+                                                                        close
+                                                                    @endif
+                                                                </span>
                                                             </button>
                                                         @endif
                                                     </form>
@@ -292,9 +299,9 @@
                                                                    {{--placeholder="Type your message">--}}
                                                             <textarea id="chat_input" class="form-control height-100" placeholder="Type your message" row="4"></textarea>
                                                         </fieldset>
-                                                        <div class="display-inline-block col">
+                                                        <div class="display-inline-block col-2">
                                                             <fieldset
-                                                                    class="form-group position-relative has-icon-left m-0 mb-1">
+                                                                    class="form-group has-icon-left m-0 mb-1">
                                                                 <button id="chat_send" type="button"
                                                                         class="btn btn-block btn-purple chat_send" to="1"><i
                                                                             class="la la-paper-plane-o d-lg-none"></i>
@@ -326,7 +333,7 @@
                                                                    {{--placeholder="Type your message">--}}
                                                             <textarea id="chat_input" class="form-control height-100" placeholder="Type your message"></textarea>
                                                         </fieldset>
-                                                        <div class="display-inline-block col">
+                                                        <div class="display-inline-block col-2">
                                                             <fieldset
                                                                     class="form-group position-relative has-icon-left m-0 mb-1">
                                                                 <button id="chat_send" type="button"
@@ -336,7 +343,7 @@
                                                                 </button>
                                                             </fieldset>
                                                             <fieldset
-                                                                    class="form-group position-relative has-icon-left col-2 m-0">
+                                                                    class="form-group position-relative has-icon-left m-0">
                                                                 <button id="chat_send" type="button"
                                                                         class="btn btn-block btn-default chat_send" to="0">
                                                                     <i class="la la-paper-plane-o d-lg-none"></i>

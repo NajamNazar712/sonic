@@ -26,6 +26,7 @@
 										<th class="border-primary border-darken-1">Email</th>
 										<th class="border-primary border-darken-1">CNIC</th>
 										<th class="border-primary border-darken-1">Role</th>
+										<th class="border-primary border-darken-1">Default Hub</th>
 										<th class="border-primary border-darken-1">Created Datetime</th>
 										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Updated by</th>
@@ -72,6 +73,7 @@
                             head.push('Email');
                             head.push('CNIC');
                             head.push('Role');
+                            head.push('Default Hub');
                             head.push('Updated Datetime');
                             head.push('Updated by');
                             head.push('Status');
@@ -83,6 +85,7 @@
                                 row.push(values.email);
                                 row.push(values.cnic);
                                 row.push(values.role);
+                                row.push(values.default_hub);
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
                                 row.push(values.status);
@@ -119,7 +122,7 @@
 						text: '<i class="la la-file-excel-o"></i> Excel',
 					},'reset'],
 	            @endif
-	            scrollX: true, scrollY: '350px',
+	            scrollX: true, scrollY: '500px',
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
 				pageLength: 50,
 				pagingType: 'full_numbers',
@@ -130,7 +133,7 @@
 				serverSide: true,
 				ajax: '{{ route('admin.user_management.users.list') }}',
 				rowId: 'id',
-				order: [[6, 'desc']],
+				order: [[8, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'admins.name', class: 'align-middle name'},
@@ -138,6 +141,7 @@
 					{data: 'email', name: 'admins.email', class: 'align-middle email'},
 					{data: 'cnic', name: 'admins.cnic', class: 'align-middle cnic'},
 					{data: 'role', name: 'role', class: 'align-middle role'},
+					{data: 'default_hub', name: 'h.name', class: 'align-middle default_hub'},
 					{data: 'created_at', name: 'admins.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'admins.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},

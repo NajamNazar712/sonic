@@ -562,7 +562,7 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    public static function air_waybill($user_type, $user_id, $ids, $twice = FALSE, $body_only = FALSE) {
+    public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE) {
 
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
@@ -1011,7 +1011,10 @@ class ShipperShipmentBookController extends Controller
 
         $html .= $shipment_details;
 
-        if ($twice) {
+
+        $settings = GlobalSettings::where('type', 'air_waybill_printing_count')->first();
+
+        for ($i=1 ; $i<$settings->setting_value ; $i++) {
             $html .= $shipment_details;
         }
 
@@ -1061,7 +1064,7 @@ class ShipperShipmentBookController extends Controller
         }
 
         if ($user_type) {
-            return $this->air_waybill($user_type, $user_id, $request->ids, $request->has('twice'));
+            return $this->air_waybill($user_type, $user_id, $request->ids);
         }
     }
 

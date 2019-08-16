@@ -205,7 +205,7 @@
                             $('#booked_table_div').html('');
                             $('#booked_table_div').html(shipment);
                             var table = $('#datatable').DataTable({
-                                scrollX: true, scrollY: '350px',
+                                scrollX: true, scrollY: '500px',
                                 dom: '<"d-inline-block"><"pull-right"B>t',
                                 buttons: [
                                     {

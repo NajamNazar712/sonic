@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
@@ -11,6 +12,9 @@ use App\Http\Models\Shipment;
 use App\Http\Models\Rider;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\CRM\CrmRequestChannel;
 
 use Auth;
 use Yajra\Datatables\Datatables;
@@ -238,6 +242,44 @@ class AdminTrackingController extends Controller
                     $details['complain']['tat'] = Carbon::parse($complain->created_at)->diffInWeekdays(Carbon::now());
                 }
 
+                $crm_requests = CrmRequest::leftjoin('crm_request_status_histories as crsh', 'crsh.crm_request_id', '=', 'crm_requests.id')
+                    ->leftjoin('admins as a', 'a.id', '=', 'crsh.agent_id')
+                    ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
+                    ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
+                    ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crsh.status_id')
+                    ->select('crm_requests.id as id', 'crs.name as status', 'a.name as created_by_admin', 'u.name as created_by_user', 'su.name as created_by_sub_user', 'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by')
+                    ->where('crm_requests.shipment_id', $shipment->id);
+
+                if($crm_requests->exists()){
+                    $crm_requests = $crm_requests->get();
+
+                    foreach ($crm_requests as $crm_request){
+                        $crm_request_journey = array();
+
+                        $crm_request_journey['id'] = str_pad($crm_request->id, 6, '0', STR_PAD_LEFT);
+                        $crm_request_journey['status_id'] = $crm_request->status_id;
+                        $crm_request_journey['status'] = $crm_request->status;
+                        if($crm_request->status_id == 1){
+                            if($crm_request->launched_added_by == 0){
+                                $crm_request_journey['created_by'] = $crm_request->created_by_admin . ' (Admin)';
+                            }
+                            else if($crm_request->launched_added_by == 1){
+                                $crm_request_journey['created_by'] = $crm_request->created_by_user . ' (Shipper)';
+                            }
+                            else{
+                                $crm_request_journey['created_by'] = $crm_request->created_by_sub_user . ' (Substitute Shipper)';
+                            }
+                        }
+                        else{
+                            $crm_request_journey['created_by'] = $crm_request->created_by_admin . ' (Admin)';
+                        }
+                        $crm_request_journey['created_at'] = Carbon::parse($crm_request->created_at)->toDateTimeString();
+
+                        $details['crm_requests'][] = $crm_request_journey;
+                    }
+
+                }
+
                 // $details['complain']['id'] = 10;
                 // $details['complain']['tat'] = 3;
 
@@ -326,8 +368,13 @@ class AdminTrackingController extends Controller
     }
 
     public function cx_quick_tracking_index(){
+        $case_nature = CrmRequestCaseNature::get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
         $shippers = User::select('id', 'name')->get();
-        return view('admin.tracking.cx_quick_tracking')->with('shippers', $shippers);
+//        dd($shippers);
+        return view('admin.tracking.cx_quick_tracking')->with(['shippers' => $shippers, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels]);
     }
     public function cx_quick_tracking_list(Request $request){
         $quick_tracking = Shipment::leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
@@ -335,11 +382,23 @@ class AdminTrackingController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->select('shipments.tracking_number as tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no');
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no');
         $datatable = Datatables::of($quick_tracking)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('action',function ($shipments) {
+                $dropdown = '
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                            <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Request</div></button>
+                        </div>
+                    </div>
+                ';
+
+                return $dropdown;
             });
         if($tracking = $request->get('search_tracking')){
             $datatable->where('shipments.tracking_number', 'LIKE', '%'. $tracking . '%');

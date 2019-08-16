@@ -142,11 +142,12 @@
         } );
         var table = $('.datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
-            scrollX: true, scrollY: '350px',
+            scrollX: true, scrollY: '500px',
             buttons: [
                 {
                     extend: 'excel',
                     title: 'Blocked Accounts',
+                    className:'btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },
                 'reset'

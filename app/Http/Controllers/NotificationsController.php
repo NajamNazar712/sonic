@@ -2668,99 +2668,167 @@ class NotificationsController extends Controller
 	                    }
 	            }
 	          }
-        else if ($id == 32) {
-              $nsa_shipment = Shipment::find($reference_1_id);
+            else if ($id == 32) {
+                  $nsa_shipment = Shipment::find($reference_1_id);
 
-              if (strpos($subject, '[nsa]') !== FALSE) {
-                  $subject = str_replace('[nsa]', $reference_2_id, $subject);
-              }
+                  if (strpos($subject, '[nsa]') !== FALSE) {
+                      $subject = str_replace('[nsa]', $reference_2_id, $subject);
+                  }
 
-              if (strpos($body, '[nsa]') !== FALSE) {
-                  $body = str_replace('[nsa]', $reference_2_id, $body);
-              }
+                  if (strpos($body, '[nsa]') !== FALSE) {
+                      $body = str_replace('[nsa]', $reference_2_id, $body);
+                  }
 
-              if (strpos($subject, '[tracking_number]') !== FALSE) {
-                  $subject = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $subject);
-              }
+                  if (strpos($subject, '[tracking_number]') !== FALSE) {
+                      $subject = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $subject);
+                  }
 
-              if (strpos($body, '[tracking_number]') !== FALSE) {
-                  $body = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $body);
-              }
+                  if (strpos($body, '[tracking_number]') !== FALSE) {
+                      $body = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $body);
+                  }
 
-              if(ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->exists()){
-                  $to = ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->pluck('email')->toArray();
-              }else{
-                  $to = $nsa_shipment->user->email;
-              }
+                  if(ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->exists()){
+                      $to = ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->pluck('email')->toArray();
+                  }else{
+                      $to = $nsa_shipment->user->email;
+                  }
 
-              self::email($subject, $body, $to);
-        }else if($id == 33){
-              $nsa_shipment = Shipment::find($reference_1_id);
-             if (strpos($subject, '[tracking_number]') !== FALSE) {
-                $subject = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $subject);
-             }
-             if (strpos($body, '[tracking_number]') !== FALSE) {
-                $body = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $body);
-             }
-            if (strpos($subject, '[destination]') !== FALSE) {
-                $subject = str_replace('[destination]', $nsa_shipment->consignee_city->name, $subject);
+                  self::email($subject, $body, $to);
+            }else if($id == 33){
+                  $nsa_shipment = Shipment::find($reference_1_id);
+                 if (strpos($subject, '[tracking_number]') !== FALSE) {
+                    $subject = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $subject);
+                 }
+                 if (strpos($body, '[tracking_number]') !== FALSE) {
+                    $body = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $body);
+                 }
+                if (strpos($subject, '[destination]') !== FALSE) {
+                    $subject = str_replace('[destination]', $nsa_shipment->consignee_city->name, $subject);
+                }
+                if (strpos($body, '[destination]') !== FALSE) {
+                    $body = str_replace('[destination]', $nsa_shipment->consignee_city->name, $body);
+                }
+
+                if (strpos($subject, '[nsa_osa_estimated_charges]') !== FALSE) {
+                    $subject = str_replace('[nsa_osa_estimated_charges]', $nsa_shipment->nsa_osa_estimated_charges, $subject);
+                }
+                if (strpos($body, '[nsa_osa_estimated_charges]') !== FALSE) {
+                    $body = str_replace('[nsa_osa_estimated_charges]', $nsa_shipment->nsa_osa_estimated_charges, $body);
+                }
+
+                $journey = ShipmentsJourney::where('shipment_id', $reference_1_id)->where('shipper_status_id', 12)->whereIn('status_reason_id',[12, 34])->latest('id')->first();
+                if (strpos($subject, '[remarks]') !== FALSE) {
+                    $subject = str_replace('[remarks]', $journey->remarks, $subject);
+                }
+                if (strpos($body, '[remarks]') !== FALSE) {
+                    $body = str_replace('[remarks]', $journey->remarks, $body);
+                }
+
+                $hub_id = $nsa_shipment->consignee_city->hub_id;
+
+                if(ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->exists()){
+                    $to = ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->pluck('email')->toArray();
+                }else{
+                    $to = $nsa_shipment->user->email;
+                }
+
+                $cc = array();
+
+                $general_admins = Admin::whereIn('role_id', [15, 3, 7, 14])->where('status', 1);
+
+                if ($general_admins->exists()) {
+                  $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
+                }
+
+                $related_admins = Admin::whereIn('role_id', [8, 9])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                  $query->where('hub_id', $hub_id);
+                });
+
+                if ($related_admins->exists()) {
+                  $cc = array_merge($cc, $related_admins->pluck('email')->toArray());
+                }
+
+                self::email($subject, $body, $to);
             }
-            if (strpos($body, '[destination]') !== FALSE) {
-                $body = str_replace('[destination]', $nsa_shipment->consignee_city->name, $body);
-            }
+            else if($id == 34){
+                $user_id = str_pad($reference_1_id, 6, '0', STR_PAD_LEFT);
+                $updated_at = Carbon::now();
+                $sale_person = Admin::where('id', $reference_2_id)->first();
 
-            if (strpos($subject, '[nsa_osa_estimated_charges]') !== FALSE) {
-                $subject = str_replace('[nsa_osa_estimated_charges]', $nsa_shipment->nsa_osa_estimated_charges, $subject);
-            }
-            if (strpos($body, '[nsa_osa_estimated_charges]') !== FALSE) {
-                $body = str_replace('[nsa_osa_estimated_charges]', $nsa_shipment->nsa_osa_estimated_charges, $body);
-            }
+                 if (strpos($subject, '[user_id]') !== FALSE) {
+                    $subject = str_replace('[user_id]', $user_id, $subject);
+                 }
+                 if (strpos($body, '[user_id]') !== FALSE) {
+                    $body = str_replace('[user_id]', $user_id, $body);
+                 }
+                if (strpos($subject, '[updated_at]') !== FALSE) {
+                    $subject = str_replace('[updated_at]', $updated_at, $subject);
+                }
+                if (strpos($body, '[updated_at]') !== FALSE) {
+                    $body = str_replace('[updated_at]', $updated_at, $body);
+                }
 
-            $journey = ShipmentsJourney::where('shipment_id', $reference_1_id)->where('shipper_status_id', 12)->whereIn('status_reason_id',[12, 34])->latest('id')->first();
-            if (strpos($subject, '[remarks]') !== FALSE) {
-                $subject = str_replace('[remarks]', $journey->remarks, $subject);
-            }
-            if (strpos($body, '[remarks]') !== FALSE) {
-                $body = str_replace('[remarks]', $journey->remarks, $body);
-            }
-            if(ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->exists()){
-                $to = ShipperNotificationEmail::where('user_id',$nsa_shipment->user_id)->pluck('email')->toArray();
-            }else{
-                $to = $nsa_shipment->user->email;
-            }
-            self::email($subject, $body, $to);
-        }
-        else if($id == 34){
-            $user_id = str_pad($reference_1_id, 6, '0', STR_PAD_LEFT);
-            $updated_at = Carbon::now();
-            $sale_person = Admin::where('id', $reference_2_id)->first();
+                if (strpos($body, '[tagged_sales_person]') !== FALSE) {
+                    $body = str_replace('[tagged_sales_person]', $sale_person->name, $body);
+                }
+                $to = array();
 
-             if (strpos($subject, '[user_id]') !== FALSE) {
-                $subject = str_replace('[user_id]', $user_id, $subject);
-             }
-             if (strpos($body, '[user_id]') !== FALSE) {
-                $body = str_replace('[user_id]', $user_id, $body);
-             }
-            if (strpos($subject, '[updated_at]') !== FALSE) {
-                $subject = str_replace('[updated_at]', $updated_at, $subject);
-            }
-            if (strpos($body, '[updated_at]') !== FALSE) {
-                $body = str_replace('[updated_at]', $updated_at, $body);
-            }
+                $admins = Admin::whereIn('role_id', [2, 4])->where('status', 1);
 
-            if (strpos($body, '[tagged_sales_person]') !== FALSE) {
-                $body = str_replace('[tagged_sales_person]', $sale_person->name, $body);
+                if ($admins->exists()) {
+                    $to = array_merge($to, $admins->pluck('email')->toArray());
+                }
+
+                self::email($subject, $body, $to);
             }
-            $to = array();
+            else if($id == 35){
+                $shipment = Shipment::find($reference_1_id);
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $reference_1_id)->where('verification', 1)->latest('id')->first();
+                if (strpos($body, '[tracking_number]') !== FALSE) {
+                    $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
+                }
+                if (strpos($body, '[consignee_name]') !== FALSE) {
+                    $body = str_replace('[consignee_name]', $shipment->consignee_name, $body);
+                }
+                if (strpos($body, '[shipper_name]') !== FALSE) {
+                    $body = str_replace('[shipper_name]', $shipment->user->name, $body);
+                }
+                if (strpos($body, '[receiver_name]') !== FALSE) {
+                    $body = str_replace('[receiver_name]', $shipment_journey->received_or_refused_by , $body);
+                }
 
-            $admins = Admin::whereIn('role_id', [2, 4])->where('status', 1);
-
-            if ($admins->exists()) {
-                $to = array_merge($to, $admins->pluck('email')->toArray());
+                $to = $shipment->consignee_phone_number_1;
+                self::sms($body, $to);
             }
+            else if($id == 36 || $id == 37){
+                $account_a = User::where('id', $reference_1_id)->first();
+                $account_b = User::where('id', $reference_2_id)->first();
+//                $account_id_a = str_pad($account_a->id, 6, '0', STR_PAD_LEFT);
+                $account_id_b = str_pad($account_b->id, 6, '0', STR_PAD_LEFT);
+                $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+                if (strpos($subject, '[account_id]') !== FALSE) {
+                    $subject = str_replace('[account_id]', $account_id_b, $subject);
+                }
+                if (strpos($body, '[account_id]') !== FALSE) {
+                    $body = str_replace('[account_id]', $account_id_b, $body);
+                }
+                if (strpos($subject, '[company_name_b]') !== FALSE) {
+                    $subject = str_replace('[company_name_b]', $account_b->name, $subject);
+                }
+                if (strpos($body, '[company_name_b]') !== FALSE) {
+                    $body = str_replace('[company_name_b]', $account_b->name, $body);
+                }
 
-            self::email($subject, $body, $to);
-        }
+                if (strpos($body, '[company_name_a]') !== FALSE) {
+                    $body = str_replace('[company_name_a]', $account_a->name, $body);
+                }
+                if (strpos($body, '[trax_logo]') !== FALSE) {
+                    $body = str_replace('[trax_logo]', $logo, $body);
+                }
+                $to = $account_a->email;
+
+                self::email($subject, $body, $to);
+            }
         }
       }
     }

@@ -64,6 +64,19 @@
 											</select>
 										</div>
 									</div>
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<select name="default_hub" class="select2" id="default_hub" data-rule-required="true" data-msg-required="Default hub is required">
+												@foreach($hubs as $hub)
+													@if ($hub->id == $user->default_hub_id)
+														<option value="{{ $hub->id }}" selected="selected">{{ $hub->name }}</option>
+													@else
+														<option value="{{ $hub->id }}">{{ $hub->name }}</option>
+													@endif
+												@endforeach
+											</select>
+										</div>
+									</div>
 
 									<div class="col-12">
 										<h4 class="form-section mb-2">Hubs</h4>
@@ -85,7 +98,7 @@
 											<button type="submit" class="btn btn-primary">Update</button>
 										</div>
 									</div>
-								</form>
+								</div>
 							</form>
 						</div>
 					</div>
@@ -112,6 +125,18 @@
 				width: '100%',
 				placeholder: 'Role*'
 			});
+
+			@if ($user->default_hub_id === null)
+				$('#user_form #default_hub').prepend('<option value="" selected="selected"></option>').select2({
+					width: '100%',
+					placeholder: 'Default Hub*'
+				});
+			@else
+				$('#user_form #default_hub').select2({
+					width: '100%',
+					placeholder: 'Default Hub*'
+				});
+			@endif
 
 			$('#user_form #phone_number').inputmask({
 				'mask': '9999-9999999',

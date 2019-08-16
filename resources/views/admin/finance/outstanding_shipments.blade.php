@@ -236,7 +236,7 @@
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },'reset'],
-				scrollX: true, scrollY: '350px',
+				scrollX: true, scrollY: '500px',
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
 				pageLength: 50,
 				pagingType: 'full_numbers',
@@ -358,6 +358,7 @@
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
 				var tracking_number = $(this).parents('tr').children('td.tracking_number').text();
+				var dncc = parseInt($(this).parents('tr').attr('data-dncc'));
 
 				if ($(this).hasClass('resolve')) {
 					swal({
@@ -433,6 +434,7 @@
 								method: 'PUT',
 								data: {
 									'id': id,
+									'dncc': dncc,
 									'_token': '{{ csrf_token() }}'
 								}
 							})

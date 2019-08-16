@@ -152,7 +152,6 @@
                         $.each(result.data, function(index, values) {
                             row = [];
 
-
                             row.push(index + 1);
                             row.push(values.tracking_number);
                             row.push(values.shipper);
@@ -163,7 +162,7 @@
                             row.push(values.phone);
                             row.push(values.consignee_address);
                             row.push(values.amount);
-                            row.push(values.mode);
+                            row.push(values.shipping_mode);
                             row.push(values.service_type);
                             row.push(values.status);
                             row.push(values.reason);
@@ -191,7 +190,7 @@
                 },
                 'reset'
             ],
-            scrollX: true, scrollY: '350px',
+            scrollX: true, scrollY: '500px',
             lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
             pageLength: 50,
             pagingType: 'full_numbers',

@@ -95,7 +95,6 @@
                 </div>
                 <div class="modal-body text-center">
                     <form id="add_request_form" method="post">
-                        @method('POST')
                         @csrf
                         <div class="container">
                             <div class="row">
@@ -463,7 +462,7 @@
 
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                scrollX: true, scrollY: '350px',
+                scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                         @if (session('role_id') == 1 || in_array(139, session('permissions')))
@@ -846,45 +845,16 @@
 
             $('#track_form').bind('submit',function (e) {
                 e.preventDefault();
-                table.draw();
-                // var tracking_numbers = $('#track_form .tracking_numbers').val();
-                // var booking_from_date = $('#track_form #booking_from_date').val();
-                // var booking_to_date = $('#track_form #booking_to_date').val();
-                // var shipment_status = $('#track_form #shipment_status').val();
-                // if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '') || shipment_status != '') {
-                //     table.draw();
-                // }
-                // if(tracking_numbers == '' && shipment_status == ''){
-                //     toastr.error('Tracking Number is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                //     toastr.error('Shipment Status is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                //
-                // }
 
+                var tracking_numbers = $('#track_form .tracking_numbers').val();
+                var booking_from_date = $('#track_form #booking_from_date').val();
+                var booking_to_date = $('#track_form #booking_to_date').val();
+                var shipment_status = $('#track_form #shipment_status').val();
+                if (tracking_numbers != '' || (booking_from_date != '' && booking_to_date != '') || shipment_status != '') {
+                    table.draw();
+                }
 
             });
-
-            // $('#track_form').validate({
-            //
-            //     rules: {
-            //         tracking_numbers: {
-            //             require_from_group: [1, ".dt_search"]
-            //         },
-            //         shipment_status: {
-            //             require_from_group: [1, ".dt_search"]
-            //         }
-            //     },
-            //     ignore: [],
-            //     errorClass: 'danger',
-            //     successClass: 'success',
-            //     errorPlacement: function(error, element) {
-            //         error.addClass('w-100').appendTo(element.parents('form-group'));
-            //     },
-            //     submitHandler: function(form) {
-            //         table.draw();
-            //
-            //         return false;
-            //     }
-            // });
 
 
             var max_char = 245;
@@ -1266,6 +1236,7 @@
                 $('#feedback_description').val('');
             });
 
-        });
+
+    });
     </script>
 @endsection

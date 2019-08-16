@@ -27,4 +27,8 @@ class DeliveryNote extends Model
     public function delivery_note_station_deposit_note() {
         return $this->hasOne('App\Http\Models\Admin\DeliveryNoteStationDepositNote', 'delivery_note_id', 'id');
     }
+
+    public function admin(){
+        return $this->belongsTo('App\Http\Models\Admin\Admin','admin_id');
+    }
 }

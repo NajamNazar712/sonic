@@ -161,7 +161,8 @@ return [
         App\Providers\RouteServiceProvider::class,
         Buzz\LaravelGoogleCaptcha\CaptchaServiceProvider::class,
         Yajra\Datatables\DatatablesServiceProvider::class,
-        Barryvdh\Snappy\ServiceProvider::class
+        Barryvdh\Snappy\ServiceProvider::class,
+        Fx3costa\LaravelChartJs\Providers\ChartjsServiceProvider::class
     ],
 
     /*
