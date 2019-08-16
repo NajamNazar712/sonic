@@ -42,8 +42,8 @@
                         <th class="border-primary border-darken-1">No of DNCCs</th>
                         <th class="border-primary border-darken-1">Delivered Shipments</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
-                        {{--<th class="border-primary border-darken-1">Expense</th>--}}
-                        {{--<th class="border-primary border-darken-1">Net Amount</th>--}}
+                        <th class="border-primary border-darken-1">Deposited Amount</th>
+
                         <th class="border-primary border-darken-1">Deposited By</th>
                         <th class="border-primary border-darken-1">Company Bank</th>
                         <th class="border-primary border-darken-1">Deposited Date</th>
@@ -62,7 +62,7 @@
     <!--Deposit Slip Modal -->
     <div class="modal fade text-left" id="uploadDepositSlip" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadDepositSlip"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Deposit Slip Upload</h4>
@@ -70,14 +70,25 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body  text-center">
+                <div class="modal-body text-center">
                     <form id="sdn_upload_form" class="form" action="{{route('admin.delivery.sdn.slip')}}" method="post" enctype="multipart/form-data">
                             @csrf
                             <input type="hidden" name="sdn_id" id="sdn_id"/>
-                    <fieldset class="form-group">
-                        <input type="file" class="form-control-file" id="deposit_slip" name="deposit_slip" accept="image/*" data-rule-required="true" data-msg-required="File is required" data-rule-extension="image/jpeg|image/jpg|image/png" data-msg-extension="Only file with extension jpeg or png allowed" data-rule-accept="application/image" data-msg-accept="Only Image file allowed">
-                    </fieldset>
+                            <input type="hidden" name="deposit_rows" id="deposit_rows"/>
+                        <table class="table table-bordered datatable" id="sdn_upload_table" style="z-index: 3;">
+                            <thead>
+                            <tr role="row" class="bg-primary white">
 
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Date</th>
+                                <th class="border-primary border-darken-1">Bank Name</th>
+                                <th class="border-primary border-darken-1">Amount </th>
+                                <th class="border-primary border-darken-1">Deposit Slip</th>
+                                <th class="border-primary border-darken-1"></th>
+
+                            </tr>
+                            </thead>
+                        </table>
                     <hr>
                     <div class="row justify-content-center">
                         <div class="col-3">
@@ -131,12 +142,49 @@
     </div>
     <!--Shipments popup -->
 
+    <div class="modal fade text-left" id="ViewDepositSlip" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewDepositSlip"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Deposit Slips View</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                        <table class="table table-bordered datatable" id="deposit_slip_table" style="z-index: 3;">
+                            <thead>
+                            <tr role="row" class="bg-primary white">
+
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Date</th>
+                                <th class="border-primary border-darken-1">Bank Name</th>
+                                <th class="border-primary border-darken-1">Amount </th>
+                                <th class="border-primary border-darken-1">Deposit Slip</th>
+
+                            </tr>
+                            </thead>
+                        </table>
+
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button type="button" class="btn btn-primary btn-block" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style>
         table.dataTable {
             font-size: 12px;
@@ -187,6 +235,9 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
@@ -217,6 +268,7 @@
                             head.push('No. of DNCCs');
                             head.push('Delivered Shipments');
                             head.push('DNCC Amount');
+                            head.push('Deposited Amount');
                             head.push('Deposited By');
                             head.push('Company Bank');
                             head.push('Deposited Date');
@@ -232,6 +284,7 @@
                                 row.push(values.dncc_count);
                                 row.push(values.sdn_delivered_shipments);
                                 row.push(values.sdn_amount);
+                                row.push(values.sdn_deposit_amount);
                                 row.push(values.deposited_by);
                                 row.push(values.bank);
                                 row.push(values.created_at);
@@ -281,6 +334,7 @@
                     { data:'dncc_link' ,name: 'station_deposit_notes.dncc_count', class: 'align-middle dncc_link text-center'},
                     { data:'delivered_shipments_link' ,name: 'station_deposit_notes.sdn_delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
                     { data:'sdn_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle sdn_amount'},
+                    { data:'sdn_deposit_amount' ,name: 'station_deposit_notes.sdn_deposit_amount', class: 'align-middle sdn_deposit_amount'},
                     // { data:'sdn_expense' ,name: 'sdn_expense', class: 'align-middle sdn_expense'},
                     // { data:'sdn_net_amount' ,name: 'station_deposit_notes.sdn_net_amount', class: 'align-middle sdn_net_amount'},
                     { data:'deposited_by' ,name: 'admins.name', class: 'align-middle deposited_by'},
@@ -391,50 +445,88 @@
                 table.draw();
             });
 
-            $('#sdn_upload_form').bind('submit',function (e) {
-                e.preventDefault();
 
-                var url = '{!! route('admin.delivery.sdn.slip') !!}';
 
-                var imagefile = $('#deposit_slip').val();
+            {{--$('#sdn_upload_form').bind('submit',function (e) {--}}
+                {{--e.preventDefault();--}}
 
-                if(!imagefile){
-                    error = "Please select a deposit slip first!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }else{
-                    $.ajax({
-                        type:'post',
-                        url:url,
-                        enctype: 'multipart/form-data',
-                        processData: false,
-                        contentType: false,
-                        cache: false,
-                        data: new FormData($(this)[0])
-                    }).done(function (data) {
-                        if(data.status == 1){
+                {{--var url = '{!! route('admin.delivery.sdn.slip') !!}';--}}
 
-                            table.draw('false');
-                            $('#deposit_slip').val('');
-                            $('#uploadDepositSlip').modal('hide');
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                {{--var imagefile = $('#deposit_slip').val();--}}
 
-                        }else{
-                            $('#deposit_slip').val('');
-                            $('#uploadDepositSlip').modal('hide');
-                            toastr.error(data.error.deposit_slip[0], 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                {{--if(!imagefile){--}}
+                    {{--error = "Please select a deposit slip first!";--}}
+                    {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                {{--}else{--}}
+                    {{--$.ajax({--}}
+                        {{--type:'post',--}}
+                        {{--url:url,--}}
+                        {{--enctype: 'multipart/form-data',--}}
+                        {{--processData: false,--}}
+                        {{--contentType: false,--}}
+                        {{--cache: false,--}}
+                        {{--data: new FormData($(this)[0])--}}
+                    {{--}).done(function (data) {--}}
+                        {{--if(data.status == 1){--}}
 
+                            {{--table.draw('false');--}}
+                            {{--$('#deposit_slip').val('');--}}
+                            {{--$('#uploadDepositSlip').modal('hide');--}}
+                            {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+
+                        {{--}else{--}}
+                            {{--$('#deposit_slip').val('');--}}
+                            {{--$('#uploadDepositSlip').modal('hide');--}}
+                            {{--toastr.error(data.error.deposit_slip[0], 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+
+                        {{--}--}}
+                    {{--});--}}
+
+                {{--}--}}
+            {{--});--}}
+
+            $('#sdn_upload_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    var pressed_button = $(this.submitButton);
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to upload Deposit Slip!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+
+
+                            // $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
+                            $('#deposit_rows').val(selected_rows);
+                            // console.log($('#upload_image').val());
+                            form.submit();
                         }
                     });
 
                 }
             });
-            $('#uploadDepositSlip').on('shown.bs.modal',function (event) {
-                var id = event.relatedTarget;
-                var sdn = $(id).data('target-id');
-                $('#sdn_id').val($(id).data('target-id'));
-
-            });
-
             function printSDN(id) {
                 $.ajax({
                     url: '{!! route('admin.delivery.sdn.print') !!}',
@@ -563,7 +655,174 @@
                         }
                     });
             }
+            var banks_list = @json($banks);
+            var banks_list = $.map({!! $banks !!}, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.name;
+                return obj;
+            });
+            var deposit_table;
+            var selected_rows = [];
 
+            var rows_count = 0;
+            $('#uploadDepositSlip').on('shown.bs.modal', function (event) {
+                var id = event.relatedTarget;
+                var sdn = $(id).data('target-id');
+                $('#sdn_id').val($(id).data('target-id'));
+
+
+
+                deposit_table = $('#sdn_upload_table').DataTable({
+                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                    buttons:[{
+                        title: 'Add Row',
+                        className: 'btn btn-primary mb-1',
+                        text: '<i class="la la-plus"></i> Add Row',
+                        action:function (e) {
+                            add_row();
+                        }
+                    }],
+                    ordering:false,
+                    paging:false,
+                    columns: [
+                        {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                        {name: 'date', class: 'align-middle date date-col-width form-group'},
+                        {name: 'bank_name', class: 'align-middle bank_name form-group'},
+                        {name: 'amount', class: 'align-middle expense_amount form-group'},
+                        {name: 'deposit_slip', class: 'align-middle deposit_slip form-group'},
+                        {name: 'action', class: 'align-middle action'},
+                    ],
+
+                    rowCallback: function(row, data, index) {
+                        var info = deposit_table.page.info();
+
+                        $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                    },
+                    initComplete: function() {
+
+                        // this.api().table().columns.adjust();
+                    }
+                });
+
+
+                function add_row() {
+                    rows_count++;
+                    var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="deposit_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div>';
+                    var bank_select = '<select class="form-control hub_select select2" name="bank['+rows_count+']" data-rule-required="true" data-msg-required="Bank is required"></select>';
+                    var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">';
+                    var deposit_slip = '<input class="form-control form-control-sm" type="file" name="deposit_slip_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Deposit Slip is required">';
+                    if(rows_count == 1){
+                        var remove = '';
+                    }else{
+                        var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+
+                    }
+                    // deposit_table.row.add(0,1,2,3,4,5);
+                    deposit_table.row.add([0, date_input,bank_select,amount_input,deposit_slip,remove]).node().id = rows_count;
+                    deposit_table.draw(true);
+                    // $('#sdn_upload_table tbody').append(html);
+                    selected_rows.push(rows_count);
+                    $('select[name="bank['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        data:banks_list,
+                        placeholder:'Select Bank',
+                        allowClear:true,
+                        width:'100%',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $('#deposit_date_' + rows_count).pickadate({
+                        firstDay: 1,
+                        today: '',
+                        clear: '',
+                        close: '',
+                        weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
+                        showMonthsShort: true,
+                        formatSubmit: 'yyyy-mm-dd 00:00:00',
+                        hiddenSuffix: '_formatted',
+                        onOpen: function() {
+                            // $('#deposit_date_' + rows_count+'_root').css('top', '-262px');
+                        },
+                    });
+                    $('input.amount').inputmask({
+                        'alias': 'decimal',
+                        'allowMinus': false,
+                        'allowPlus': false,
+                        'rightAlign': false,
+                        'digits': 2,
+                        'min': 0.00,
+                        'max': 1000000.00
+                    });
+                }
+            });
+
+
+            $('body').on('click', 'a.remove_row',function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, selected_rows);
+
+                if (index !== -1) {
+                    selected_rows.splice(index, 1);
+                }
+                deposit_table.row( $(this).parents('tr') ).remove().draw();
+            });
+            var deposit_slip_table;
+            $('body').on('click','.deposit_slip_view', function () {
+               var id = $(this).parents('tr').attr('id');
+               if(id){
+                   $.ajax({
+                       url:'{!! route('admin.delivery.sdn.slip_view') !!}',
+                       type:'POST',
+                       data: {
+                           'sdn_id':id,
+                           '_token': '{{ csrf_token() }}'
+                       }
+                   }).done(function (data) {
+                        if(data.status){
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }else{
+                            $('#ViewDepositSlip').modal('show');
+                            deposit_slip_table = $('#deposit_slip_table').DataTable({
+                                dom: 'ltipr',
+                                ordering:false,
+                                paging:false,
+                                columns: [
+                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                    {name: 'date', class: 'align-middle date date-col-width form-group'},
+                                    {name: 'bank_name', class: 'align-middle bank_name form-group'},
+                                    {name: 'amount', class: 'align-middle expense_amount form-group'},
+                                    {name: 'deposit_slip', class: 'align-middle deposit_slip form-group'}
+                                ],
+
+                                rowCallback: function(row, data, index) {
+                                    var info = deposit_slip_table.page.info();
+
+                                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                                },
+                                initComplete: function() {
+
+                                    // this.api().table().columns.adjust();
+                                }
+                            });
+
+                            $.each(data.slips, function (index, value) {
+                                deposit_slip_table.row.add([0, value.date, value.bank, value.amount, value.image]);
+                                deposit_slip_table.draw(true);
+                            });
+                        }
+                   });
+               }
+            });
+
+            $('#ViewDepositSlip').on('hidden.bs.modal', function () {
+                deposit_slip_table.clear();
+                deposit_slip_table.destroy();
+            });
+            $('#uploadDepositSlip').on('hidden.bs.modal', function () {
+                deposit_table.clear();
+                deposit_table.destroy();
+                selected_rows = [];
+            });
         });
     </script>
 @endsection

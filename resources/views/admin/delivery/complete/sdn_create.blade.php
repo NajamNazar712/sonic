@@ -87,13 +87,13 @@
                             {{--</div>--}}
                         {{--</fieldset>--}}
                     {{--</div>--}}
-                    <div class="col-3">
-                        <select name="bank_select" class="form-control select2" id="banks_list">
-                            @foreach($banks_list as $banks)
-                            <option value="{{$banks->id}}">{{$banks->name}}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    {{--<div class="col-3">--}}
+                        {{--<select name="bank_select" class="form-control select2" id="banks_list">--}}
+                            {{--@foreach($banks_list as $banks)--}}
+                            {{--<option value="{{$banks->id}}">{{$banks->name}}</option>--}}
+                            {{--@endforeach--}}
+                        {{--</select>--}}
+                    {{--</div>--}}
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-2">
@@ -175,9 +175,9 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#banks_list').select2({
-                placeholder: 'Select a company bank'
-            });
+            // $('#banks_list').select2({
+            //     placeholder: 'Select a company bank'
+            // });
             var dncc_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
@@ -319,7 +319,7 @@
                     var net_val = parseInt($(this).val()) || 0;
                     sum_net_amount += net_val;
                 });
-                $('#total_amount').val(sum_net_amount);
+                // $('#total_amount').val(sum_net_amount);
             });
             function number_format(n){
                 var value = n.toLocaleString(

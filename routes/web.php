@@ -538,6 +538,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print','Admins\DeliveryController@sdn_deposit_slip_print')->name('print');
             Route::post('dncc/print','Admins\DeliveryController@sdn_dncc_print')->name('dncc.print');
             Route::post('shipments','Admins\DeliveryController@sdn_delivered_shipments')->name('shipments');
+            Route::post('slip_view','Admins\DeliveryController@sdn_slip_view')->name('slip_view');
 
         });
         Route::prefix('misroute')->name('misroute.')->group(function (){
@@ -798,6 +799,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('delivery_notes_list', 'Admins\AdminFinanceController@outstanding_sdn_delivery_notes_list')->name('delivery_notes_list');
             Route::post('reconcile_delivery_notes', 'Admins\AdminFinanceController@outstanding_sdn_reconcile_delivery_notes')->name('reconcile_delivery_notes');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@outstanding_sdn_export_to_excel')->name('export_to_excel');
+            Route::post('deposit_slip_list', 'Admins\AdminFinanceController@outstanding_sdn_edit_deposit_slip')->name('deposit_slip_list');
+            Route::post('edit', 'Admins\AdminFinanceController@outstanding_sdn_edit_deposit_slip_submit')->name('edit');
         });
 
         Route::prefix('outstanding_shipments')->name('outstanding_shipments.')->group(function () {

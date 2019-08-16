@@ -15,6 +15,7 @@ use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\StationDepositNote;
+use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\Http\Models\BanksList;
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
@@ -2990,7 +2991,8 @@ class DeliveryController extends Controller
             $check_status = DeliveryNote::whereIn('id', $dncc_ids)->where('dncc_status', 1)->exists();
             if (!$check_status) {
                 $expense = $request->has('total_expenses') ? $request->total_expenses : 0;
-                $total_amount = $request->has('total_amount') ? $request->total_amount : $request->total_dncc_amount;
+                $total_amount = $request->total_dncc_amount;
+//                $total_amount = $request->has('total_amount') ? $request->total_amount : $request->total_dncc_amount;
                 $sdn_id = StationDepositNote::create([
                     'hub_id' => $request->sdn_hub_id,
                     'dncc_count' => $request->sdn_count,
@@ -2998,8 +3000,7 @@ class DeliveryController extends Controller
                     'sdn_amount' => $request->total_dncc_amount,
                     'sdn_expense' => $expense,
                     'sdn_net_amount' => $total_amount,
-                    'deposited_by' => Auth::id(),
-                    'banks_list_id' => $request->bank_select
+                    'deposited_by' => Auth::id()
                 ]);
                 foreach ($dncc_ids as $dncc) {
                     DeliveryNoteStationDepositNote::create([
@@ -3027,8 +3028,8 @@ class DeliveryController extends Controller
         $sdn = StationDepositNote::
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
-            ->join('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_expense', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank']);
+            ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
+            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_expense', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount']);
 
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
@@ -3044,6 +3045,13 @@ class DeliveryController extends Controller
             ->editColumn('sdn_net_amount', function($shipment){
                 return number_format($shipment->sdn_net_amount);
             })
+            ->editColumn('sdn_deposit_amount', function($shipment){
+                if($shipment->sdn_deposit_amount){
+                    return number_format($shipment->sdn_deposit_amount);
+                }else{
+                    return '-';
+                }
+            })
             ->addColumn('sdn_id_padded', function ($sdn) {
                 return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
             })
@@ -3051,12 +3059,13 @@ class DeliveryController extends Controller
                 return $query->where('station_deposit_notes.id', '=', $keyword);
             })
             ->addColumn('deposit_slip', function ($sdn) {
-                if ($sdn->deposit_slip != null) {
-                    $img = asset('uploads/sdn/' . $sdn->deposit_slip);
-                    return "<a href='{$img}' target='_blank'>Deposit Slip</a>";
+                if ($sdn->deposit_slip == null && $sdn->deposit_slip_status == 1) {
+                    return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="#"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
 
-                } else {
-                    return "-";
+                } else if($sdn->deposit_slip != null) {
+                    return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $sdn->deposit_slip) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                }else{
+                    return '-';
                 }
             })
             ->editColumn('dncc_link', function($pickup_notes) {
@@ -3175,26 +3184,25 @@ class DeliveryController extends Controller
 
     public function sdn_deposit_slip(Request $request)
     {
-//        return $request;
-        $messages = [
-            'deposit_slip.required' => 'No Image file selected!.',
-            'deposit_slip.mimes' => 'Image file not supported!.',
-            'deposit_slip.size' => 'Image file size exceded!.',
-        ];
-        $validation = [
-            'deposit_slip' => 'required | mimes:jpeg,png,jpg | max:2048',
-        ];
-        $validate = Validator::make($request->all(), $validation, $messages);
+        $deposit_rows = explode(',' , $request->deposit_rows);
+        $sdn_id = $request->sdn_id;
+        if($sdn_id){
+           $sdn = StationDepositNote::find($sdn_id);
 
-        if ($validate->fails()) {
-            return response()->json(['status' => 0, 'error' => $validate->errors()]);
+        }else{
+            return redirect()->back()->with(['status' => 0, 'error' => 'Station Deposit Note ID not found!']);
         }
-        if ($request->has('deposit_slip')) {
-            $image = $request->file('deposit_slip');
+        $total_amount = 0;
+        foreach($deposit_rows as $row){
+            $total_amount += $request->amount[$row];
+            $file_name = 'deposit_slip_'.$row;
+            $deposit_details = new StationDepositNoteSlip();
+            $deposit_details->station_deposit_note_id = $sdn_id;
+            $deposit_details->deposit_date = $request->date[$row];
+            $deposit_details->bank_id = $request->bank[$row];
+            $deposit_details->amount = $request->amount[$row];
+            $image = $request->file($file_name);
             $imageName = $image->getClientOriginalName();
-//        $image_size = $image->getClientSize();
-
-            //$imageName = explode('.', $imageName);
             $extension = $image->getClientOriginalExtension();
             $random = rand(1000, 100000);
             $now = Carbon::now();
@@ -3202,14 +3210,16 @@ class DeliveryController extends Controller
             $slip = $time . $random . Auth::id() . '.' . $extension;
             $image->move(public_path('uploads/sdn'), $slip);
 
-            $imageUpload = StationDepositNote::find($request->sdn_id);
-            $imageUpload->deposit_slip = $slip;
-            $imageUpload->status = 1;
-            $imageUpload->save();
-            return response()->json(['status' => 1, 'success' => 'Deposit Slip uploaded successfully']);
-        } else {
-            return response()->json(['status' => 0, 'error' => 'No image selected!']);
+            $deposit_details->image = $slip;
+            $deposit_details->save();
         }
+
+        $sdn->sdn_deposit_amount = $total_amount;
+        $sdn->deposit_slip_status = 1;
+        $sdn->status = 1;
+        $sdn->save();
+        return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip uploaded successfully!']);
+
     }
 
     public function sdn_deposit_slip_print(Request $request)
@@ -4693,5 +4703,28 @@ class DeliveryController extends Controller
             });
 
         return $datatables->make(true);
+    }
+
+    public function sdn_slip_view(Request $request){
+        $sdn_id = $request->sdn_id;
+        if($sdn_id){
+            $slips = StationDepositNoteSlip::where('station_deposit_note_id', $sdn_id)->get();
+            if(count($slips) > 0){
+                $sorted_array = array();
+                foreach ($slips as $slip) {
+                    $sorted_array[$slip->id]['date'] = Carbon::parse($slip->deposit_date)->toDateString();
+                    $sorted_array[$slip->id]['bank'] = BanksList::find($slip->bank_id)->name;
+                    $sorted_array[$slip->id]['amount'] = $slip->amount;
+                    $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                }
+
+                return ['status' => 0, 'slips' => $sorted_array];
+            }else{
+                return ['status' => 1, 'error' => 'No deposit note slips found!'];
+            }
+        }else{
+            return ['status' => 1, 'error' => 'No deposit note ID selected!'];
+
+        }
     }
 }
