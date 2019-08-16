@@ -21,7 +21,6 @@ class ShipperReportsController extends Controller
     }
     public function qsr_list(Request $request){
 
-        $sister_users = DB::connection('reports')->table('merged_sister_account_mappings')->where('head_user_id', session('user_id'))->pluck('sister_user_id')->toArray();
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -37,7 +36,7 @@ class ShipperReportsController extends Controller
             ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','shipments.amount'])
             ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47])
             ->where('shipments.user_id', session('user_id'))
-            ->orwhereIn('shipments.user_id', $sister_users);
+            ->orwhereIn('shipments.user_id', session('sister_users'));
         $datatable = Datatables::of($shipments)
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
@@ -77,7 +76,6 @@ class ShipperReportsController extends Controller
         return view('client.reports.sales_report')->with(['cities'=>$cities,'statuses'=>$statuses]);
     }
     public function sales_list(Request $request){
-        $sister_users = DB::connection('reports')->table('merged_sister_account_mappings')->where('head_user_id', session('user_id'))->pluck('sister_user_id')->toArray();
             $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
                 ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
                 ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
@@ -108,7 +106,7 @@ class ShipperReportsController extends Controller
                 ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount')
                 ->whereNotIn('shipments.shipper_status_id',[1,17])
                 ->where('u.id', session('user_id'))
-                ->orwhereIn('shipments.user_id', $sister_users);
+                ->orwhereIn('shipments.user_id', session('sister_users'));
 
             $datatable = Datatables::of($sales)
                 ->editColumn('s_collection_amount', function($shipment){

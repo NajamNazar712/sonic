@@ -39,7 +39,7 @@ class ShipperTrackingController extends Controller
 
                 $sister_users = MergedSisterAccountMapping::where('head_user_id', session('user_id'))->pluck('sister_user_id')->toArray();
                 $track_check = false;
-                foreach ($sister_users as $user_id){
+                foreach (session('sister_users') as $user_id){
                     if($user_id == $shipment->user_id){
                         $track_check = true;
                     }
