@@ -29,22 +29,22 @@
                         </select>
 					</div>
 
-                    <div class="form-group input-group col-2">
+                    <div class="form-group input-group col-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                             </span>
                         </div>
-                        <input type="text" name="from" class="form-control from" placeholder="From*" data-rule-required="true" data-msg-required="From is required">
+                        <input type="text" name="from" class="form-control bg-primary border-primary white rounded-right from" placeholder="From*" data-rule-required="true" data-msg-required="Date (From) is required">
                     </div>
 
-                    <div class="form-group input-group col-2">
+                    <div class="form-group input-group col-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                             </span>
                         </div>
-                        <input type="text" name="to" class="form-control to" placeholder="To*" data-rule-required="true" data-msg-required="To is required">
+                        <input type="text" name="to" class="form-control bg-primary border-primary white rounded-right to" placeholder="To*" data-rule-required="true" data-msg-required="Date (To) is required">
                     </div>
 
 					<div class="form-group col-2">

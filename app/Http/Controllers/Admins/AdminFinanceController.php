@@ -4349,12 +4349,13 @@ class AdminFinanceController extends Controller
                         $total_adjustment_charges += $invoice_shipment->payable;
                     }
 
-                    $total_ibft_charges += $payment->ibft_charges;
-
                     $total_charges += $invoice_shipment->charges;
                     $total_gst += $invoice_shipment->gst;
-                    $total_invoice_amount += $invoice_shipment->payable + $payment->ibft_charges;
+                    $total_invoice_amount += $invoice_shipment->payable;
                 }
+
+                $total_ibft_charges += $payment->ibft_charges;
+                $total_invoice_amount += $payment->ibft_charges;
             }
 
             $html .= '
