@@ -35,7 +35,6 @@ class ShipperFinanceController extends Controller
     }
 
     public function payments_list(Request $request) {
-    $sister_users = MergedSisterAccountMapping::where('head_user_id', session('user_id'))->pluck('sister_user_id')->toArray();
       $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
         ->join('cities as c', 'u.city_id', '=', 'c.id')
         ->join('user_bank_infos as ubi', 'done_payments.user_id', '=', 'ubi.user_id')
@@ -44,7 +43,7 @@ class ShipperFinanceController extends Controller
         ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
         ->select('done_payments.id as id', 'u.id as user_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
         ->where('done_payments.user_id', session('user_id'))
-        ->orwhereIn('done_payments.user_id', $sister_users)
+        ->orwhereIn('done_payments.user_id', session('sister_users'))
         ->groupBy('done_payments.id');
 
         $datatables = Datatables::of($done_payments)

@@ -4280,6 +4280,7 @@ class AdminFinanceController extends Controller
             $total_charges = 0;
             $total_gst = 0;
             $total_invoice_amount = 0;
+            $total_ibft_charges = 0;
 
             foreach($payments as $payment) {
                 if ($payment_type == 0) {
@@ -4287,6 +4288,9 @@ class AdminFinanceController extends Controller
                 }
                 else {
                     $payment_shipments = $payment->done_payment_shipments;
+
+                    $total_ibft_charges += $payment->ibft_charges;
+                    $total_invoice_amount += $payment->ibft_charges;
                 }
 
                 foreach ($payment_shipments as $invoice_shipment) {
@@ -4471,10 +4475,31 @@ class AdminFinanceController extends Controller
                                   <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
                                   <td class="text-right">' . number_format($total_gst, 2) . '</td>
                                 </tr>
+                ';
+
+                if ($payment_type == 0) {
+                    $html .= '
                                 <tr>
                                   <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
                                   <td class="color secondary text-right">' . number_format(ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                 </tr>
+                    ';
+                }
+                }
+                else {
+                    $html .= '
+                                <tr>
+                                  <td class="color secondary text-left"><strong>IBFT Charges (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($total_ibft_charges, 2) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
+                                  <td class="color secondary text-right">' . number_format(ROUND(($total_invoice_amount - $total_ibft_charges), 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                </tr>
+                    ';
+                }
+
+                $html .= '
                               </tbody>
                             </table>
                         </div>
