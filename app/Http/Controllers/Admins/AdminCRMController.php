@@ -476,7 +476,7 @@ class AdminCRMController extends Controller
                         $after_cut_off = $current_tat - 1;
                         $current_tat = $after_cut_off;
                     }
-                    $holidays = CrmTatHolidays::get();
+                    $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
                     foreach($holidays as $holiday){
                         $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
                         $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
