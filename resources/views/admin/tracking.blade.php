@@ -156,6 +156,7 @@
 
 					if (data.shipments != undefined) {
 						$.each(data.shipments, function(id, details) {
+                            // console.log(details.crm_requests);
 							var shipment = '';
 
 							shipment += '<div class="mt-4 border-primary">';
@@ -507,6 +508,44 @@
                                     shipment += '<td>' + history.old_weight + '</td>';
                                     shipment += '<td>' + history.new_weight + '</td>';
                                     shipment += '<td>' + history.user + '</td>';
+                                    shipment += '</tr>';
+                                });
+
+                                shipment += '</tbody>';
+                                shipment += '</table>';
+
+                                shipment += '</div>';
+                                shipment += '</div>';
+                            }
+
+                            if ('crm_requests' in details) {
+                                shipment += '<div class="col-12 mt-2">';
+                                shipment += '<h4><u>CRM Requests Log</u></h4>';
+                                shipment += '<div class="border table-responsive">';
+
+                                shipment += '<table class="table table-sm table-borderless datatable crm_requests_history">';
+                                shipment += '<thead>';
+                                shipment += '<tr role="row">';
+                                shipment += '<th><strong>S.No</strong></th>';
+                                shipment += '<th><strong>Status</strong></th>';
+                                shipment += '<th><strong>Created At</strong></th>';
+                                shipment += '<th><strong>Created By</strong></th>';
+                                shipment += '</tr>';
+                                shipment += '</thead>';
+                                shipment += '<tbody>';
+								$count = 0;
+                                $.each(details.crm_requests, function(index, crm_request) {
+                                    $count = $count + 1;
+                                    shipment += '<tr>';
+                                    shipment += '<td>' + $count + '</td>';
+                                    if(crm_request.status_id === 1 || crm_request.status_id === 5){
+                                        shipment += '<td>' + crm_request.status + ' (' + crm_request.id + ')</td>';
+                                    }
+                                    else{
+                                        shipment += '<td>' + crm_request.status + '</td>';
+									}
+                                    shipment += '<td>' + crm_request.created_at + '</td>';
+                                    shipment += '<td>' + crm_request.created_by + '</td>';
                                     shipment += '</tr>';
                                 });
 
