@@ -4204,4 +4204,366 @@ class AdminFinanceController extends Controller
 
         return redirect()->route('admin.finance.invoices.index')->with('success', 'Invoice has been marked as Received');
     }
+
+    public function invoice_for_reimbursement_index(Request $request) {
+        $payment_types = [['id' => 0, 'name' => 'Make'], ['id' => 1, 'name' => 'Done']];
+
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+
+        return view('admin.finance.invoice_for_reimbursement')->with(['payment_types' => $payment_types, 'shippers' => $shippers]);
+    }
+
+    public function invoice_for_reimbursement_generate(Request $request) {
+        $payment_type = $request->input('payment_type');
+        $shipper = $request->input('shipper');
+        $from_date = $request->input('from');
+        $to_date = $request->input('to');
+
+        if ($payment_type == 0) {
+            $payments = PendingPayment::where('user_id', $shipper);
+        }
+        else {
+            $payments = DonePayment::where('user_id', $shipper);
+        }
+
+        if ($payments->exists()) {
+            $payments = $payments->get();
+
+            $shipper = User::find($shipper);
+
+            $shipper_bank = $shipper->bank;
+
+            $account_type_id = $shipper_bank->account_type_id;
+
+            $html = '';
+
+            $html .= '
+            <!doctype html>
+            <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                <title>Invoice</title>
+            ';
+
+            $html .= '
+                <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
+            ';
+
+            $html .= '
+                <style>@page{size:A4 portrait; margin-top: 10rem; margin-bottom: 8rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.9rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
+            ';
+
+            $html .= '
+              </head>
+              <body>
+            ';
+
+            $invoice_number = '';
+
+            $shipment_details = '';
+
+            $serial_number = 1;
+
+            $total_weight_charges = 0;
+            $total_cash_handling_charges = 0;
+            $total_insurance_charges = 0;
+            $total_return_charges = 0;
+            $total_fuel_surcharge = 0;
+            $total_replacement_charges = 0;
+            // $total_try_and_buy_charges = 0;
+            $total_packaging_material_charges = 0;
+            $total_intercept_charges = 0;
+            $total_nsa_osa_charges = 0;
+            $total_adjustment_charges = 0;
+            $total_charges = 0;
+            $total_gst = 0;
+            $total_invoice_amount = 0;
+
+            foreach($payments as $payment) {
+                if ($payment_type == 0) {
+                    $payment_shipments = $payment->pending_payment_shipments;
+                }
+                else {
+                    $payment_shipments = $payment->done_payment_shipments;
+                }
+
+                foreach ($payment_shipments as $invoice_shipment) {
+                    $shipment = $invoice_shipment->shipment;
+
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
+
+                    if ($shipment_journey->exists()) {
+                        $date = $shipment_journey->first()->created_at;
+                    }
+                    else {
+                        $date = $shipment->created_at;
+                    }
+
+                    $date = Carbon::parse($date)->format('Y-m-d');
+
+                    $shipment_details .= '
+                                <tr>
+                                  <td>' . $serial_number . '</td>
+                                  <td>' . $shipment->tracking_number . '</td>
+                                  <td>' . $shipment->pickup_address->city->name . '</td>
+                                  <td>' . $shipment->consignee_city->name . '</td>
+                                  <td>' . $date . '</td>
+                                  <td>' . $shipment->actual_weight . '</td>
+                                  <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
+                                  <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
+                                  <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
+                                  <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->payable, 2) : '0') . '</td>
+                                  <td>' . number_format($invoice_shipment->charges, 2) . '</td>
+                                  <td>' . number_format($invoice_shipment->gst, 2) . '</td>
+                                  <td>' . number_format($invoice_shipment->payable, 2) . '</td>
+                                </tr>
+                    ';
+
+                    $serial_number++;
+
+                    if ($invoice_shipment->type != 2) {
+                        if ($invoice_shipment->type == 0) {
+                            $total_cash_handling_charges += $shipment->cash_handling_charges;
+                            $total_replacement_charges += $shipment->replacement_charges;
+                            // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                        }
+                        else {
+                            $total_return_charges += $shipment->return_charges;
+                        }
+
+                        $total_weight_charges += $shipment->weight_charges;
+
+                        if ($shipment->packaging_material_request) {
+                            $total_packaging_material_charges += $shipment->packaging_material_charges;
+                        }
+
+                        $total_insurance_charges += $shipment->insurance_charges;
+                        $total_fuel_surcharge += $shipment->fuel_surcharge;
+                        $total_intercept_charges += $shipment->intercept_charges;
+                        $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                    }
+                    else {
+                        $total_adjustment_charges += $invoice_shipment->payable;
+                    }
+
+                    $total_charges += $invoice_shipment->charges;
+                    $total_gst += $invoice_shipment->gst;
+                    $total_invoice_amount += $invoice_shipment->payable;
+                }
+            }
+
+            $html .= '
+                <div>
+                  <div class="p-1">
+                    <div class="row align-items-start justify-content-between summary">
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="2"><strong>Customer Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Account No.</strong></td>
+                                    <td>' . str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Name</strong></td>
+                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_name : $shipper->name) . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Address</strong></td>
+                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_address : $shipper->address) . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Contact No.</strong></td>
+                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_phone : $shipper->phone)  . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color secondary"><strong>NTN</strong></td>
+                                  <td>' . $shipper_bank->ntn_no . '</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-4">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary"><strong>NTN</strong></td>
+                                    <td>7930679-5</td>
+                                </tr>
+                                <tr>
+                                    <td class="color primary"><strong>Billing Period</strong></td>
+                                    <td>' . Carbon::parse($from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($to_date)->format('Y-m-d') . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color primary"><strong>Invoice No.</strong></td>
+                                    <td>' . $invoice_number . '</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+            ';
+
+            $html .= '
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                            <td class="color primary text-left"><strong>Invoice Summary</strong></td>
+                            <td class="color primary text-right" style="width: 20%;"><strong>Amount (PKR)</strong></td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Weight Charges</td>
+                          <td class="text-right">' . number_format($total_weight_charges, 2) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Cash Handling Charges</td>
+                          <td class="text-right">' . number_format($total_cash_handling_charges, 2) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Insurance Charges</td>
+                          <td class="text-right">' . number_format($total_insurance_charges, 2) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Replacement Charges</td>
+                          <td class="text-right">' . number_format($total_replacement_charges, 2) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Return Charges</td>
+                          <td class="text-right">' . number_format($total_return_charges, 2) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Fuel Surcharge</td>
+                          <td class="text-right">' . number_format($total_fuel_surcharge, 2) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Intercept Charges</td>
+                          <td class="text-right">' . number_format($total_intercept_charges, 2) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">OSA Charges</td>
+                          <td class="text-right">' . number_format($total_nsa_osa_charges, 2) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Packaging Charges</td>
+                          <td class="text-right">' . number_format($total_packaging_material_charges, 2) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Adjustment Charges</td>
+                          <td class="text-right">' . number_format($total_adjustment_charges, 2) . '</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div class="row justify-content-end">
+                        <div class="col-4">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                  <td class="color secondary text-left"><strong>Subtotal (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($total_charges, 2) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($total_gst, 2) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
+                                  <td class="color secondary text-right">' . number_format(ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
+                          <td class="color secondary">' . self::amount_to_words($total_invoice_amount) . ' Only</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
+                          <td>Trax Online Private Limited</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td>Meezan Bank</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0102951143</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
+                          <td>9912</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
+
+                    <table class="table table-sm table-bordered border shipments_summary">
+                      <thead>
+                        <tr>
+                            <th class="color primary text-center" colspan="13">Shipment(s) Summary</th>
+                        </tr>
+                        <tr>
+                          <th class="color secondary">S. No.</th>
+                          <th class="color secondary">Tracking No.</th>
+                          <th class="color secondary">Origin</th>
+                          <th class="color secondary">Destination</th>
+                          <th class="color secondary">Arrival Date</th>
+                          <th class="color secondary">Weight (kg)</th>
+                          <th class="color secondary">Weight Charges (PKR)</th>
+                          <th class="color secondary">Fuel Surcharge (PKR)</th>
+                          <th class="color secondary">OSA Charges (PKR)</th>
+                          <th class="color secondary">Adjustment Charges (PKR)</th>
+                          <th class="color secondary">Total Charges (PKR)</th>
+                          <th class="color secondary">GST (PKR)</th>
+                          <th class="color secondary">Invoice Amount (PKR)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            ';
+
+            $html .= $shipment_details;
+
+            $html .= '
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+            ';
+
+            $html .= '
+                <script>
+                  window.onload = function() {
+                    history.replaceState(history.state, "", "/");
+
+                    window.print();
+                  }
+                </script>
+              </body>
+            </html>
+            ';
+
+            return $html;
+        }
+        else {
+            return '<html><body>No Payment(s) for the given Criteria</body></html>';
+        }
+    }
 }

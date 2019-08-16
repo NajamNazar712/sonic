@@ -869,6 +869,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('email_reminder', 'Admins\AdminFinanceController@invoices_email_reminder')->name('email_reminder');
             Route::post('mark_as_received', 'Admins\AdminFinanceController@invoices_mark_as_received')->name('mark_as_received');
         });
+
+        Route::prefix('invoice_for_reimbursement')->name('invoice_for_reimbursement.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@invoice_for_reimbursement_index')->name('index');
+            Route::get('generate', 'Admins\AdminFinanceController@invoice_for_reimbursement_generate')->name('generate');
+        });
     });
 
     Route::prefix('petty_cash')->name('petty_cash.')->group(function() {
