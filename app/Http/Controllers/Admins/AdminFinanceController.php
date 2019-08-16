@@ -4280,6 +4280,7 @@ class AdminFinanceController extends Controller
             $total_charges = 0;
             $total_gst = 0;
             $total_invoice_amount = 0;
+            $total_ibft_charges = 0;
 
             foreach($payments as $payment) {
                 if ($payment_type == 0) {
@@ -4348,9 +4349,11 @@ class AdminFinanceController extends Controller
                         $total_adjustment_charges += $invoice_shipment->payable;
                     }
 
+                    $total_ibft_charges += $payment->ibft_charges;
+
                     $total_charges += $invoice_shipment->charges;
                     $total_gst += $invoice_shipment->gst;
-                    $total_invoice_amount += $invoice_shipment->payable;
+                    $total_invoice_amount += $invoice_shipment->payable + $payment->ibft_charges;
                 }
             }
 
@@ -4465,15 +4468,19 @@ class AdminFinanceController extends Controller
                               <tbody>
                                 <tr>
                                   <td class="color secondary text-left"><strong>Subtotal (PKR)</strong></td>
-                                  <td class="text-right">' . number_format($total_charges, 2) . '</td>
+                                  <td class="text-right">' . number_format($total_charges + $total_ibft_charges, 2) . '</td>
                                 </tr>
                                 <tr>
                                   <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
                                   <td class="text-right">' . number_format($total_gst, 2) . '</td>
                                 </tr>
                                 <tr>
+                                  <td class="color secondary text-left"><strong>IBFT Charges (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($total_ibft_charges, 2) . '</td>
+                                </tr>
+                                <tr>
                                   <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
-                                  <td class="color secondary text-right">' . number_format(ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                  <td class="color secondary text-right">' . number_format(ROUND(($total_invoice_amount + $total_ibft_charges), 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -4484,7 +4491,7 @@ class AdminFinanceController extends Controller
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . self::amount_to_words($total_invoice_amount) . ' Only</td>
+                          <td class="color secondary">' . self::amount_to_words($total_invoice_amount + $total_ibft_charges) . ' Only</td>
                         </tr>
                       </tbody>
                     </table>
