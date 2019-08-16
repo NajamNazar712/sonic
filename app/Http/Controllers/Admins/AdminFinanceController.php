@@ -4477,20 +4477,29 @@ class AdminFinanceController extends Controller
                                 </tr>
                 ';
 
-                if ($payment_type == 1) {
+                if ($payment_type == 0) {
+                    $html .= '
+                                <tr>
+                                  <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
+                                  <td class="color secondary text-right">' . number_format(ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                </tr>
+                    ';
+                }
+                }
+                else {
                     $html .= '
                                 <tr>
                                   <td class="color secondary text-left"><strong>IBFT Charges (PKR)</strong></td>
                                   <td class="text-right">' . number_format($total_ibft_charges, 2) . '</td>
                                 </tr>
+                                <tr>
+                                  <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
+                                  <td class="color secondary text-right">' . number_format(ROUND(($total_invoice_amount - $total_ibft_charges), 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                </tr>
                     ';
                 }
 
                 $html .= '
-                                <tr>
-                                  <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
-                                  <td class="color secondary text-right">' . number_format(ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
-                                </tr>
                               </tbody>
                             </table>
                         </div>
