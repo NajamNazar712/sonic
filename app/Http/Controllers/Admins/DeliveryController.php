@@ -828,7 +828,7 @@ class DeliveryController extends Controller
                     ';
                 }
 
-                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id','!=',5)->select('remarks');
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id','!=',5)->where('remarks', '!=', null)->select('remarks');
 
                 if ($shipment_journey->exists()) {
                     $shipment_journey = $shipment_journey->latest()->first();
@@ -1066,7 +1066,10 @@ class DeliveryController extends Controller
                 return $reason;
             })
             ->addColumn('remarks', function ($deliveries) {
-                $reason = '<input class="form-control form-control-sm" name="remarks[' . $deliveries->shId . ']" placeholder="Enter Remarks">';
+
+                $journey_remarks = ShipmentsJourney::where('shipment_id', $deliveries->shId)->where('verification', 1)->where('shipper_status_id', '!=', 5)->latest()->first();
+                $rem = ($journey_remarks->remarks != null) ? $journey_remarks->remarks:'';
+                $reason = '<input class="form-control form-control-sm" name="remarks[' . $deliveries->shId . ']" placeholder="Enter Remarks" value="'. $rem .'">';
                 return $reason;
             })
             ->addColumn('action', function ($deliveries) {
@@ -2074,21 +2077,22 @@ class DeliveryController extends Controller
                                     } else {
                                         AdminFinanceController::done_payment($shipment, 0);
                                     }
-                                }
 
-                                if ($verification == 1) {
                                     $shipment_journey = ShipmentsJourney::where('shipment_id', $parcel->id)->whereNotIn('shipper_status_id', [21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 44, 45, 46, 47, 48])->where('reference_1_id', $delivery_note_id)->latest()->first();
 
                                     if ($shipment_journey) {
                                         $received_or_refused_by = $shipment_journey->received_or_refused_by;
                                         ShipmentsJourneyController::add($shipment, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification, $received_or_refused_by);
                                     } else {
-                                        ShipmentsJourneyController::add($shipment, $shipper_status_details->shipper_status_id, $shipper_status_details->consignee_status_id, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+                                        ShipmentsJourneyController::add($shipment, $shipper_status_details->shipper_status_id, $shipper_status_details->consignee_status_id, NULL, $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                     }
                                     if($parcel->amount == 0){
                                         NotificationsController::send(35, $parcel->id);
                                     }
+
                                 }
+
+
                             }
                         }
                     } else {
