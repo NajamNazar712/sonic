@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
@@ -48,12 +49,22 @@ class AdminTrackingController extends Controller
 
     			$shipper = $shipment->user;
 
+    			$sales_person = SalePersonTag::where('user_id', $shipper->id)->leftjoin('admins as a', 'a.id', '=', 'sale_person_tags.admin_id')->where('sale_person_tags.status', 0);
+    			if ($sales_person->exists()){
+                    $sales_person = $sales_person->first();
+                    $sales_person_name = $sales_person->name;
+                }
+                else{
+                    $sales_person_name = null;
+                }
+
     			$details['shipper']['name'] = $shipper->name;
     			$details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                 $details['shipper']['city'] = $shipper->city->name;
     			$details['shipper']['phone_number_1'] = $shipper->phone;
     			$details['shipper']['phone_number_2'] = $shipper->phone2;
     			$details['shipper']['email'] = $shipper->email;
+    			$details['shipper']['sales_person'] = $sales_person_name;
 
                 $pickup = $shipment->pickup_address;
 
