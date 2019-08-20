@@ -97,7 +97,7 @@
 											<label class="d-block">Show Information on Air Waybill</label>
 											<input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
 										</div>
-									</div>
+									</div>sid
 
 									<div id="consignee_header_div" class="col col_custom">
 										<h4 id="consignee_header_info" class="form-section mb-2 text-center">Consignee Information</h4>

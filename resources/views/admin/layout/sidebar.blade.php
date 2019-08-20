@@ -23,7 +23,7 @@
                                 @if (session('role_id') == 1 || in_array(15, session('permissions')))
                                     <li><a class="menu-item" href="{{route('admin.accounts.block')}}">Blocked</a></li>
                                 @endif
-                                @if (session('role_id') == 1 || session('role_id') == 4 || in_array(242, session('permissions')))
+                                @if (session('role_id') == 1 || session('role_id') == 4 || in_array(241, session('permissions')))
                                     <li><a class="menu-item" href="{{route('admin.accounts.merged_account.index')}}">Merged</a></li>
                                 @endif
                             </ul>
