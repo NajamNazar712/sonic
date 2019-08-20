@@ -37,17 +37,22 @@ class ShipperTrackingController extends Controller
     		if ($shipment->exists()) {
                 $shipment = $shipment->first();
 
-                $sister_users = MergedSisterAccountMapping::where('head_user_id', session('user_id'))->pluck('sister_user_id')->toArray();
-                $track_check = false;
-                foreach (session('sister_users') as $user_id){
-                    if($user_id == $shipment->user_id){
-                        $track_check = true;
-                    }
 
-                    if (session('user_id') == $shipment->user_id) {
-                        $track_check = true;
+                $track_check = false;
+                if(count(session('sister_users')) > 0){
+                    foreach (session('sister_users') as $user_id){
+                        if($user_id == $shipment->user_id){
+                            $track_check = true;
+                        }
+
+                        if (session('user_id') == $shipment->user_id) {
+                            $track_check = true;
+                        }
                     }
+                }else{
+                    $track_check = true;
                 }
+
 
                 if ($track_check == true) {
         			$details = array();
