@@ -20,7 +20,7 @@
                                 <div class="input-group">
                                     @if($air_waybill != null)
                                         <div id="info_display" class="form-group text-center p-1 border border-light rounded">
-                                            <label class="d-block">Show Information on Air Waybill</label>
+                                            <label class="d-block">Show Information on Air Waybill for all Shipments</label>
                                             @if($air_waybill->information == 1)
                                                 <input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
                                             @else
