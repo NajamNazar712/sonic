@@ -27,7 +27,7 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
     public function products(){
-        return $this->belongsToMany('App\Http\Models\Product')->withTimestamps();
+        return $this->belongsTo('App\Http\Models\Product', 'product_id', 'id');
     }
     public function city(){
         return $this->belongsTo('App\Http\Models\City');

@@ -488,6 +488,10 @@
             });
 
         });
+
+       // $('#datatable tbody').on('click', '.view_crf', function () {
+       //    alert(123);
+       // });
     });
 
 </script>
