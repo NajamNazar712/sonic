@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Air Waybill Information And Print Count
+        Air Waybill Print Count
     </h1>
 
     <div class="card">
