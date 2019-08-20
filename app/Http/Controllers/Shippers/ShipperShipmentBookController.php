@@ -9,6 +9,7 @@ use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

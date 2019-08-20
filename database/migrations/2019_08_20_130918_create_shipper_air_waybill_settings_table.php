@@ -15,6 +15,9 @@ class CreateShipperAirWaybillSettingsTable extends Migration
     {
         Schema::create('shipper_air_waybill_settings', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('user_id');
+            $table->integer('print_count');
+            $table->integer('information');
             $table->timestamps();
         });
     }
