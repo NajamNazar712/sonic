@@ -74,7 +74,7 @@
 
 
 
-            @if (session('user_type') == 1 || in_array(9, session('permissions')))
+            @if (session('user_type') == 1 || in_array(11, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{route('cod.settings.air_waybill_printing.index')}}">Air Waybill Information And Print Count</a></li>

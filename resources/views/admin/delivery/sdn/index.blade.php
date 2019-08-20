@@ -655,7 +655,7 @@
                         }
                     });
             }
-            var banks_list = @json($banks);
+{{--            var banks_list = @json($banks);--}}
             var banks_list = $.map({!! $banks !!}, function (obj) {
                 obj.id = obj.id;
                 obj.text = obj.name;
