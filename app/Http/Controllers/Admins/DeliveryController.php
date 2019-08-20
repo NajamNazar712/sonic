@@ -3203,7 +3203,6 @@ class DeliveryController extends Controller
             $deposit_details->bank_id = $request->bank[$row];
             $deposit_details->amount = $request->amount[$row];
             $image = $request->file($file_name);
-            $imageName = $image->getClientOriginalName();
             $extension = $image->getClientOriginalExtension();
             $random = rand(1000, 100000);
             $now = Carbon::now();
