@@ -104,9 +104,13 @@ class ShipperReportsController extends Controller
                 })
                 ->leftjoin('products as p','p.id','=','si.product_type_id')
                 ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount')
-                ->whereNotIn('shipments.shipper_status_id',[1,17])
-                ->where('u.id', session('user_id'))
-                ->orwhereIn('shipments.user_id', session('sister_users'));
+                ->whereNotIn('shipments.shipper_status_id',[1,17]);
+//                ->where('u.id', session('user_id'))
+//                ->orwhereIn('shipments.user_id', session('sister_users'));
+            $sales = $sales->where(function ($query) {
+                $query->where('shipments.user_id', session('user_id'))
+                    ->orwhereIn('shipments.user_id', session('sister_users'));
+            });
 
             $datatable = Datatables::of($sales)
                 ->editColumn('s_collection_amount', function($shipment){
