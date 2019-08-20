@@ -19,6 +19,14 @@
                             <div class="form-group">
                                 <div class="input-group">
                                     @if($air_waybill != null)
+                                        <div id="info_display" class="form-group text-center p-1 border border-light rounded">
+                                            <label class="d-block">Show Information on Air Waybill</label>
+                                            @if($air_waybill->information == 1)
+                                                <input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
+                                            @else
+                                                <input type="checkbox" name="information_display" class="switch hidden" id="information_display">
+                                            @endif
+                                        </div>
                                         <input type="text" name="air_waybill_printing_count" class="form-control air_waybill_printing_count" placeholder="Air Waybill*" data-rule-required="true" data-msg-required="Air Waybill Print Count is required" value="{{ $air_waybill->print_count }}" data-rule-min="1" data-msg-min="Air Waybill Print Count can not be less than 1" data-rule-max="3" data-msg-min="Air Waybill Print Count can not be more than 3">
                                     @else
                                         <input type="text" name="air_waybill_printing_count" class="form-control air_waybill_printing_count" placeholder="Air Waybill*" data-rule-required="true" data-msg-required="Air Waybill Print Count is required" value="1" data-rule-min="1" data-msg-min="Air Waybill Print Count can not be less than 1" data-rule-max="3" data-msg-min="Air Waybill Print Count can not be more than 3">
