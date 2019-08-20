@@ -794,37 +794,37 @@ class DeliveryController extends Controller
 
                 $shipment_details_row_start = '
                           <tr>
-                            <td>' . $total_shipments . '</td>
+                            <td class="'.$class.'">' . $total_shipments . '</td>
                             <td class="'.$class.'">' . $shipment->tracking_number . '</td>
-                            <td>' . $user_details . '</td>
-                            <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                            <td>' . $shipment->consignee_address . '</td>
+                            <td class="'.$class.'">' . $user_details . '</td>
+                            <td class="'.$class.'">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+                            <td class="'.$class.'">' . $shipment->consignee_address . '</td>
                 ';
 
                 if ($shipment->booking_type_id == 1) {
                     $shipment_details_row_start .= '
-                    <td>' . $shipment->booking_type->booking_type . '</td>
+                    <td class="'.$class.'">' . $shipment->booking_type->booking_type . '</td>
                 ';
                 } else if ($shipment->booking_type_id == 2) {
                     $shipment_details_row_start .= '
-                    <td class="replacement"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
+                    <td class="replacement '.$class.'"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
                 ';
                 } else {
                     $shipment_details_row_start .= '
-                    <td>' . $shipment->booking_type->booking_type . '</td>
+                    <td class="'.$class.'">' . $shipment->booking_type->booking_type . '</td>
                 ';
                 }
 
                 if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
                     $shipment_details_row_start .= '
-                            <td>Rs ' . number_format($shipment->amount) . '</td>
+                            <td class="'.$class.'">Rs ' . number_format($shipment->amount) . '</td>
                     ';
 
                     $total_cod_amount += $shipment->amount;
                 }
                 else {
                     $shipment_details_row_start .= '
-                            <td>Rs 0</td>
+                            <td class="'.$class.'">Rs 0</td>
                     ';
                 }
 
@@ -834,18 +834,18 @@ class DeliveryController extends Controller
                     $shipment_journey = $shipment_journey->latest()->first();
 
                     $shipment_details_row_start .= '
-                            <td>' . $shipment_journey->remarks. '</td>
+                            <td class="'.$class.'">' . $shipment_journey->remarks. '</td>
                     ';
                 }
                 else {
                     $shipment_details_row_start .= '
-                            <td></td>
+                            <td class="'.$class.'"></td>
                     ';
                 }
 
                 $shipment_details_row_start .= '
-                            <td></td>
-                            <td></td>
+                            <td class="'.$class.'"></td>
+                            <td class="'.$class.'"></td>
                           </tr>
                 ';
 
