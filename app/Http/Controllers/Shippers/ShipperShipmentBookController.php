@@ -169,8 +169,15 @@ class ShipperShipmentBookController extends Controller
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
+        $air_waybill = ShipperAirWaybillSettings::where('user_id', session('user_id'));
+        if($air_waybill->exists()){
+            $air_waybill = $air_waybill->first();
+        }
+        else{
+            $air_waybill = null;
+        }
 
-        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date]);
+        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill]);
     }
 
     public function shipping_modes(Request $request) {

@@ -34,6 +34,12 @@ class ShipperGlobalSettingsController extends Controller
         if($settings->exists()){
             $settings = $settings->first();
             $settings->print_count = $request->air_waybill_printing_count;
+            if($request->information_display){
+                $settings->information = 1;
+            }
+            else{
+                $settings->information = 0;
+            }
 
             $settings->save();
         }
@@ -41,6 +47,12 @@ class ShipperGlobalSettingsController extends Controller
             $new_settings = new ShipperAirWaybillSettings();
             $new_settings->user_id = session('user_id');
             $new_settings->print_count = $request->air_waybill_printing_count;
+            if($request->information_display == "on"){
+                $new_settings->information = 1;
+            }
+            else{
+                $new_settings->information = 0;
+            }
             $new_settings->save();
         }
 
