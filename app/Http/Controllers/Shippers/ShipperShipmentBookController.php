@@ -1012,9 +1012,16 @@ class ShipperShipmentBookController extends Controller
         $html .= $shipment_details;
 
 
-        $settings = GlobalSettings::where('type', 'air_waybill_printing_count')->first();
+        $settings = ShipperAirWaybillSettings::where('user_id', session('user_id'));
+        if($settings->exists()){
+            $settings = $settings->first();
+            $prints = $settings->print_count;
+        }
+        else{
+            $prints = 1;
+        }
 
-        for ($i=1 ; $i<$settings->setting_value ; $i++) {
+        for ($i=1 ; $i<$prints ; $i++) {
             $html .= $shipment_details;
         }
 
