@@ -114,7 +114,7 @@ class ShipperAgreementController extends Controller
         }
 
 
-        $page = '<table class="table table-sm table-borderless">
+        $page = '<table class="table table-sm table-borderless mb-0">
                         <tbody>
                           <tr class="double-border-bottom">
                             <td colspan="4" class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
@@ -201,34 +201,44 @@ class ShipperAgreementController extends Controller
                           
                         </tbody>
                       </table>';
-        $rates_details = '<table class="table table-sm table-bordered">
-                        <tbody>';
-        if($shipper->account_type_id == 1){
-            $rates_switch = RateStatus::where('user_id', $id)->get();
-        }else{
-            $rates_switch = CorporateRateStatus::where('user_id', $id)->get();
-        }
 
-        if($shipper->account_type_id == 1){
-            $packaging_charges = PackagingCharge::where('user_id', $id)->groupBy('type_id')->get();
-            if($packaging_charges){
-                $ptype = '';
-                foreach ($packaging_charges as $type){
-                    if($ptype != $type->type_id){
-                        $rates_details .= '<tr><td colspan="1">Packaging Material Type</td><td>' . $type->packaging_type->type . '</td></tr>';
-                        $ptype = $type->type_id;
+
+
+            if($shipper->account_type_id == 1){
+                $packaging_details = '<table class="table table-sm table-bordered mb-0">
+                            <tbody>';
+                $packaging_charges = PackagingCharge::where('user_id', $id)->get();
+                if($packaging_charges){
+                    $ptype = '';
+                    $packaging_details .= '<tr class="color secondary"><td colspan="5"><strong>Packaging Materials</strong></td></tr>';
+
+                    foreach ($packaging_charges as $type){
+                        if($ptype != $type->type_id){
+                            $packaging_details .= '<tr class="color primary"><td colspan="5">' . $type->packaging_type->type . '</td></tr>';
+                            $ptype = $type->type_id;
+                            $packaging_details .= '<tr><th class="color secondary">Size</th><th class="color secondary">Charges</th></tr>';
+                        }
+                        $packaging_details .= '<tr><td colspan="1">' . $type->packaging_size->size . '</td>';
+                        $packaging_details .= '<td colspan="1">' . $type->charges . '</td></tr>';
                     }
-
                 }
-            }
-        }
+                $packaging_details .=  '</tbody>
+                          </table>';
+                $rates_switch = RateStatus::where('user_id', $id)->get();
 
-        $rates_details .=  '</tbody>
-                      </table>';
+            }else if($shipper->account_type_id == 2){
+                $rates_switch = CorporateRateStatus::where('user_id', $id)->get();
+            }
+
+            
+
+
+
+
 
 
         $html .= $page;
-        $html .= $rates_details;
+        $html .= $packaging_details;
 
         $html .= '</div>
                     </div>
