@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\BookingType;
+use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\RateStatus;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
 use Illuminate\Http\Request;
 
 class ShipperAgreementController extends Controller
@@ -203,9 +206,9 @@ class ShipperAgreementController extends Controller
                       </table>';
 
 
-
+            $packaging_details = '';
             if($shipper->account_type_id == 1){
-                $packaging_details = '<table class="table table-sm table-bordered mb-0">
+                $packaging_details .= '<table class="table table-sm table-bordered mb-0">
                             <tbody>';
                 $packaging_charges = PackagingCharge::where('user_id', $id)->get();
                 if($packaging_charges){
@@ -214,7 +217,7 @@ class ShipperAgreementController extends Controller
 
                     foreach ($packaging_charges as $type){
                         if($ptype != $type->type_id){
-                            $packaging_details .= '<tr class="color primary"><td colspan="5">' . $type->packaging_type->type . '</td></tr>';
+                            $packaging_details .= '<tr class="color primary"><td colspan="5"><strong>' . $type->packaging_type->type . '</strong></td></tr>';
                             $ptype = $type->type_id;
                             $packaging_details .= '<tr><th class="color secondary">Size</th><th class="color secondary">Charges</th></tr>';
                         }
@@ -230,16 +233,24 @@ class ShipperAgreementController extends Controller
                 $rates_switch = CorporateRateStatus::where('user_id', $id)->get();
             }
 
-            
+            $rate_details = '<table class="table table-sm table-bordered mb-0">
+                            <tbody>';
+            foreach ($rates_switch as $rate){
+                $service_type = ShippingMode::find($rate->shipping_mode_id);
+                $rate_details .= '<tr><td class="color primary" style="width:30%;"><strong>Shipping Mode</strong></td><td class="color secondary" style="width:80%;"><strong>' . $service_type->mode . '</strong></td></tr>';
+                if($shipper->account_type_id == 2){
+                    $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 1)->first();
+                    $rate_details .= '<tr><td class="color primary" style="width:30%;"><strong>Delivery Type</strong></td><td class="color secondary" style="width:80%;"><strong>' . $chargeable_weight->delivery_type->delivery_type . '</strong></td></tr><tr><td style="width:50%;">' . $chargeable_weight->min_chargeable_weight . '</td></tr>';
+                }
+            }
 
 
 
-
-
-
+        $rate_details .=  '</tbody>
+                          </table>';
         $html .= $page;
         $html .= $packaging_details;
-
+        $html .= $rate_details;
         $html .= '</div>
                     </div>
 
