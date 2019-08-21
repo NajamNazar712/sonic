@@ -50,7 +50,9 @@ class ShipperTrackingController extends Controller
                         }
                     }
                 }else{
-                    $track_check = true;
+                    if (session('user_id') == $shipment->user_id) {
+                        $track_check = true;
+                    }
                 }
 
 
