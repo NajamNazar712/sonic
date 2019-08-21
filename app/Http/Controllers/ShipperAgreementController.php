@@ -109,6 +109,7 @@ class ShipperAgreementController extends Controller
                             background: #09262e !important;
                             color: #ffffff;
                        }
+                       .new-page{page-break-before:always}
                        .terms_conditions{page-break-before:always}
                     </style>
                   </head>
@@ -395,6 +396,7 @@ class ShipperAgreementController extends Controller
             $rate_details .= $service_type_details;
             $rate_details .= $weight_charges_details;
             $rate_details .= $cash_handling_details;
+            $rate_details .= '<div class="new-page"></div>';
             $rate_details .= $fuel_surcharge_charges_details;
             $rate_details .= $return_charges_details;
             }
@@ -407,10 +409,41 @@ class ShipperAgreementController extends Controller
 
         $html .= $rate_details;
         $html .= '</div>';
+        $fuel_charge = '';
+        if($shipper->account_type_id == 1){
+            $fuel_surcharge = FuelSurcharge::where('user_id', $id)->where('shipping_mode_id', $shipper->default_shipping_mode)->first();
+        }else{
+            $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $id)->where('shipping_mode_id', $shipper->default_shipping_mode)->first();
+        }
+        if($fuel_surcharge){
+            $fuel_charge = $fuel_surcharge->fuel_surcharge;
+        }
+        $check = '';
+        if($shipper->term_and_conditions){
+            $check = 'checked';
+        }
         $terms_conditions = '<div class="terms_conditions p-2"><h2><u>General Terms & Conditions </u></h2>';
-        $terms_conditions .= '<ul>
-                               <li></li>
+        $terms_conditions .= '<ul class="">
+                               <li>The client must agree to the following terms and conditions: </li>
+                               <li><strong>TRAX Online (Pvt) Ltd.</strong> will act as an agent on behalf of the customer. We shall have complete legal authority to collect the cash and transfer the ownership of goods to the consignee. </li>
+                               <li>Copy of NTN Certificate will be required for account activation. </li>
+                               <li>Taxes will be applicable on total shipment charges depending on the origin of shipments. </li>
+                               <li>13% GST will be applied to the shipments originating from Sindh. </li>
+                               <li>16% GST will be applied to the shipments originating from Punjab. </li>
+                               <li>'.$fuel_charge.' % Fuel Surcharge will be applied.</li>
+                               <li>All the rates are subjected to change at any time. However, customer will be informed 2 weeks prior to the incorporation of the change. </li>
+                               <li>During the transit, if any government agency like CAA, FIA inspect the shipment for security or regulatory reasons, customer will be responsible to provide the relevant documents. </li>
+                               <li>Customer should not move or ship any of the below mentioned items through <strong>TRAX Online (Pvt) Ltd.</strong></li>
+                               <li>Currency, jewelry, Bullion, Antiques, Liquor, Stamps, Precious Metals, Precious Stones, Works of Art, Fire Arms, Plants, Drugs, Explosives, Animals, Perishable goods and items, Negotiable Instruments in bearer form, Lewd Objects, Obscene and Pornographic Material, Industrial Carbons and Diamonds, hazardous or combustible materials, and all other items/articles restricted by IATA (International Air Transport Association), ICAO (International Civil Aviation Organization) and any item whose distribution is regulated by law or by any statute of the Provincial or Federal Government. TRAX will have full legal authority to act against the customer in case any such item is found in any shipments.</li>
+                               <li>In case any such prohibited/fake product is distributed/transferred/shipped/ couriered via TRAX Online, and TRAX Online or any of its employees face any legal charges in lieu of such shipment, shipper shall be solely and fully responsible for it and shall fully indemnify TRAX Online in this regard. Moreover, such indemnification shall not relinquish the legal and constitutional right of TRAX Online to take legal actions/raise claim against shipper for grievance caused due to said shipment. </li>
+                               <li>Any illegal and immodest product (if any) exchange shall be the responsibility of shipper and its consignee and shall not be the responsibility of Trax Online. </li>
+                               <li>Shipper and its consignee shall indemnify Trax Online from any legal claims arising against each other in light of such exchange.</li>
+                               <li><strong>TRAX Online (Pvt) Ltd.</strong> may add new terms & conditions at any point in time.</li>
                              </ul>';
+        $terms_conditions .= '<h2><u>Acknowledgment & Signature</u></h2>';
+        $terms_conditions .= '<div class="ml-2"><input class="form-check-input" type="checkbox" value="1" '.$check.'> <span class="ml-2">I hereby accept all the terms and conditions mention above along with the agreed upon rates mentioned within.</span> </div><div class="row mt-3"><div class="col-6"><span class="border-bottom"><strong>Rates Added By</strong></span><p class="pt-1">'.$sales_person_name.'</p></div><div class="col-6"><p><span class="border-bottom"><strong>Shipper Signature</strong></span></p><p class="pt-2"><span class="border-bottom"><strong>Company Stamp</strong></span></p></div></div>';
+
+
         $terms_conditions .= '</div>';
         $html .= $terms_conditions;
         $html .= '
