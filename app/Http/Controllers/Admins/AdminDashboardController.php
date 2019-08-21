@@ -5835,8 +5835,10 @@ class AdminDashboardController extends Controller
 
                     }
                 }
-                if($result->status > 0){
-                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view_crf_agreement', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item view_crf" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View CRF</div></button>';
+                if (session('role_id') == 1 || in_array(244, session('permissions'))) {
+                    if($result->status > 0){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view_crf_agreement', ['id' => $result->id]) . '\')" type="button" class="dropdown-item view_crf" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View CRF</div></button>';
+                    }
                 }
 
                 if(session('role_id') == 1 || in_array(110, session('permissions')))
@@ -6008,6 +6010,11 @@ class AdminDashboardController extends Controller
                         }
                     }
                 }
+                if (session('role_id') == 1 || in_array(244, session('permissions'))) {
+                    if($result->status > 0){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view_crf_agreement', ['id' => $result->id]) . '\')" type="button" class="dropdown-item view_crf" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View CRF</div></button>';
+                    }
+                }
 
                 $dropdown .= '
                     </div>
@@ -6058,7 +6065,11 @@ class AdminDashboardController extends Controller
                 {
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
-
+                if (session('role_id') == 1 || in_array(244, session('permissions'))) {
+                    if($result->status > 0){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view_crf_agreement', ['id' => $result->id]) . '\')" type="button" class="dropdown-item view_crf" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View CRF</div></button>';
+                    }
+                }
                 $dropdown .= '
                 </div>
               </div>
