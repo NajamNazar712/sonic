@@ -781,7 +781,7 @@
 						if(data.status){
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 						}else{
-						    console.log(data);
+
 						    $('#EditDepositSlip').modal('show');
                             edit_deposit_table = $('#edit_deposit_slip_table').DataTable({
                                 dom: 'ltipr',
@@ -855,6 +855,11 @@
 					});
 				}
 			});
+            $('#EditDepositSlip').on('hidden.bs.modal', function () {
+                edit_deposit_table.clear();
+                edit_deposit_table.destroy();
+                selected_deposit_ids = [];
+            });
             $('#edit_deposit_slip_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
