@@ -720,6 +720,7 @@
 
 								$.each(data, function(index, tracking_number) {
 									tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+									console.log(tracking_number);
 								});
 
                                 $('#shipments .modal-header').html(head);

@@ -1297,7 +1297,7 @@ class AdminCargoController extends Controller
     public function in_transit_short_received_shipments(Request $request) {
         $tracking_numbers = array();
 
-        $cargo_consignments_short_received_shipments = CargoConsignment::leftjoin('cargo_consignment_shipments as css', 'css.cargo_consignment_id', '=', 'cargo_consignments.id')->leftjoin('shipments as s', 's.id', '=', 'css.shipment_id')->where('cargo_consignments.id', $request->id)->where('cargo_consignments.status_id', 4)->where('s.shipper_status_id', 3)->get();
+        $cargo_consignments_short_received_shipments = CargoConsignment::leftjoin('cargo_consignment_shipments as css', 'css.cargo_consignment_id', '=', 'cargo_consignments.id')->leftjoin('shipments as s', 's.id', '=', 'css.shipment_id')->select('s.tracking_number as tracking_number')->where('cargo_consignments.id', $request->id)->where('cargo_consignments.status_id', 4)->where('s.shipper_status_id', 3)->get();
 
         foreach ($cargo_consignments_short_received_shipments as $cargo_consignments_short_received_shipment) {
             $shipment = $cargo_consignments_short_received_shipment->tracking_number;
