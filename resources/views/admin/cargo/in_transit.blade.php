@@ -65,6 +65,7 @@
 									<th class="border-primary border-darken-1">Origin</th>
 									<th class="border-primary border-darken-1">Destination</th>
 									<th class="border-primary border-darken-1">Shipment(s)</th>
+									<th class="border-primary border-darken-1">Short Received Shipment(s)</th>
 									<th class="border-primary border-darken-1">Shipping Mode</th>
 									<th class="border-primary border-darken-1">Junction 1</th>
 									<th class="border-primary border-darken-1">Junction 2</th>
@@ -297,11 +298,6 @@
 								<div class="modal-dialog modal-sm" role="document">
 									<div class="modal-content">
 										<div class="modal-header">
-											<h4 class="modal-title" id="shipments_title">Shipment(s)</h4>
-
-											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-												<span aria-hidden="true">×</span>
-											</button>
 										</div>
 										<div class="modal-body text-center">
 										</div>
@@ -400,6 +396,7 @@
 							head.push('Origin');
 							head.push('Destination');
 							head.push('Shipment(s)');
+							head.push('Short Received Shipment(s)');
 							head.push('Shipping Mode');
 							head.push('Junction 1');
 							head.push('Junction 2');
@@ -426,6 +423,7 @@
 								row.push(values.origin);
 								row.push(values.destination);
 								row.push(values.shipments_count);
+								row.push(values.short_received_shipments_count);
 								row.push(values.shipping_mode);
 								row.push(values.junction_1);
 								row.push(values.junction_2);
@@ -518,6 +516,7 @@
 					{data: 'origin', name: 'oh.name', class: 'align-middle origin'},
 					{data: 'destination', name: 'dh.name', class: 'align-middle destination'},
 					{data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle text-center shipments'},
+					{data: 'short_received_shipments', name: 'short_received_shipments', class: 'align-middle text-center short_received_shipments', orderable: false, searchable: false},
 					{data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
 					{data: 'junction_1', name: 'jh1.name', class: 'align-middle junction_1'},
 					{data: 'junction_2', name: 'jh2.name', class: 'align-middle junction_2'},
@@ -559,7 +558,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action')) {
+						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.short_received_shipments') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.shipping_mode')){
 							$(mode_drop_select).appendTo($(search))
@@ -677,12 +676,53 @@
 				})
 						.done(function(data) {
 							if (data) {
+							    var head = '';
 								var tracking_numbers = '';
+
+								head = '<h4 class="modal-title" id="shipments_title">Shipment(s)</h4>' +
+                                    '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                    '<span aria-hidden="true">×</span>\n' +
+                                    '</button>';
 
 								$.each(data, function(index, tracking_number) {
 									tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
 								});
 
+								$('#shipments .modal-header').html(head);
+								$('#shipments .modal-body').html(tracking_numbers);
+
+								$('#shipments').modal('show');
+							}
+						});
+			});
+			$('#datatable tbody').on('click', 'tr td.short_received_shipments button', function() {
+				var id = parseInt($(this).parents('tr').attr('id'));
+
+				$('#shipments .modal-body').html('');
+
+				$.ajax({
+					url: '{!! route('admin.cargo.in_transit.short_received_shipments') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'id': id
+					}
+				})
+						.done(function(data) {
+							if (data) {
+                                var head = '';
+								var tracking_numbers = '';
+
+                                head = '<h4 class="modal-title" id="shipments_title">Short Received Shipment(s)</h4>' +
+                                    '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                    '<span aria-hidden="true">×</span>\n' +
+                                    '</button>';
+
+								$.each(data, function(index, tracking_number) {
+									tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+								});
+
+                                $('#shipments .modal-header').html(head);
 								$('#shipments .modal-body').html(tracking_numbers);
 
 								$('#shipments').modal('show');
