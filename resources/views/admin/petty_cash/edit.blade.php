@@ -602,7 +602,6 @@
                 var status = parseInt({{$petty_statement->status}});
                 if(status == 0 || status == 1 || status == 2) {
                     $('#statement_approve').attr('disabled', true);
-
                     $.ajax({
                         url: '{!! route('admin.petty_cash.statements.edit.approve') !!}',
                         method: 'POST',
