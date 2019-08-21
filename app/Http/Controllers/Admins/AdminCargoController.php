@@ -1545,7 +1545,7 @@ class AdminCargoController extends Controller
                 return $cargo_consignment->short_received_shipments ;
             })
             ->addColumn('short_received_shipments', function ($cargo_consignment) {
-                if($cargo_consignment->status_id = 4){
+                if($cargo_consignment->status_id == 4){
                     if($cargo_consignment->short_received_shipments > 0){
                         return '<button class="btn btn-sm btn-outline-info align-middle">' . $cargo_consignment->short_received_shipments . '</button>';
                     }
