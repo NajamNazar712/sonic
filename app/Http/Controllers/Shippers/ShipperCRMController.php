@@ -130,31 +130,35 @@ class ShipperCRMController extends Controller
 
     public function request_details(Request $request, $id){
         $crm_request = CrmRequest::find($id);
-        $shipment_status = null;
-        if($crm_request->shipment_id != null) {
-            $shipment_status = Shipment::find($crm_request->shipment_id);
-            $shipment_status = $shipment_status->status_shipper->name;
-        }
-        $crm_comments = array();
-        $last_comment = null;
-        $crm_comments = CrmComments::where('crm_request_id', $id)->where('comment_type',0);
-        if($crm_comments->exists()){
-            $crm_comments = $crm_comments->orderBy('created_at','asc')->get();
-            $last_comment = CrmComments::where('crm_request_id', $id)->latest()->first();
-            $last_comment = $last_comment->id;
-        }
-        $launched_by  = '';
-        if($crm_request->launched_by == 0){
-            $launched_by = 'Agent';
-        }else if($crm_request->launched_by == 1){
-            $launched_by = User::find($crm_request->launched_by_id)->name;
-        }else if($crm_request->launched_by == 2){
-            $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
-        }
-        if($crm_request){
-            return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'shipment_status' => $shipment_status]);
+        if($crm_request->shipper_id == session('user_id')){
+            $shipment_status = null;
+            if($crm_request->shipment_id != null) {
+                $shipment_status = Shipment::find($crm_request->shipment_id);
+                $shipment_status = $shipment_status->status_shipper->name;
+            }
+            $crm_comments = array();
+            $last_comment = null;
+            $crm_comments = CrmComments::where('crm_request_id', $id)->where('comment_type',0);
+            if($crm_comments->exists()){
+                $crm_comments = $crm_comments->orderBy('created_at','asc')->get();
+                $last_comment = CrmComments::where('crm_request_id', $id)->latest()->first();
+                $last_comment = $last_comment->id;
+            }
+            $launched_by  = '';
+            if($crm_request->launched_by == 0){
+                $launched_by = 'Agent';
+            }else if($crm_request->launched_by == 1){
+                $launched_by = User::find($crm_request->launched_by_id)->name;
+            }else if($crm_request->launched_by == 2){
+                $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
+            }
+            if($crm_request){
+                return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'shipment_status' => $shipment_status]);
+            }else{
+                return redirect()->back()->with('danger', 'CRM Request Not found!');
+            }
         }else{
-            return redirect()->back()->with('danger', 'CRM Request Not found!');
+            return redirect()->back()->with('danger', '404 Not Found!');
         }
     }
 
