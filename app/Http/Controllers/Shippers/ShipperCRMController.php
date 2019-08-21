@@ -158,7 +158,7 @@ class ShipperCRMController extends Controller
                 return redirect()->back()->with('danger', 'CRM Request Not found!');
             }
         }else{
-            return redirect()->back()->with('danger', '404 Not Found!');
+            return redirect()->route('cod.crm.request.index')->with('error', '404 Not Found!');
         }
     }
 
