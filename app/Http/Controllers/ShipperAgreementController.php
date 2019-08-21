@@ -29,7 +29,7 @@ class ShipperAgreementController extends Controller
         $this->middleware('Permission');
     }
 
-    public function view_crf_agreement(Request $request, $id){
+    public static function view_crf_agreement($id, $type = null){
         $shipper_id = $id;
 
         $html = '
