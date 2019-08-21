@@ -17,7 +17,7 @@ class CreateShipperAirWaybillSettingsTable extends Migration
             $table->increments('id');
             $table->integer('user_id');
             $table->integer('print_count');
-            $table->integer('information');
+            $table->integer('information')->default(1);
             $table->timestamps();
         });
     }

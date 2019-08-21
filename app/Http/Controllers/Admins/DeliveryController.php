@@ -3207,7 +3207,6 @@ class DeliveryController extends Controller
             $deposit_details->bank_id = $request->bank[$row];
             $deposit_details->amount = $request->amount[$row];
             $image = $request->file($file_name);
-            $imageName = $image->getClientOriginalName();
             $extension = $image->getClientOriginalExtension();
             $random = rand(1000, 100000);
             $now = Carbon::now();
@@ -3362,10 +3361,7 @@ class DeliveryController extends Controller
                             <td>' . number_format($station_note_details->sdn_net_amount) . '</td>
                           </tr>-->
                           
-                          <tr>
-                            <td class="color secondary"><strong>Bank Name</strong></td>
-                            <td>' . $station_note_details->bank->name . '</td>
-                          </tr>
+
                         </tbody>
                       </table>
         ';

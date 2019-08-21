@@ -759,7 +759,7 @@
                 deposit_slip_table.destroy();
             });
 
-            var banks_list = $.map({!! $all_banks !!}, function (obj) {
+            var banks_list = $.map({!! $banks !!}, function (obj) {
                 obj.id = obj.id;
                 obj.text = obj.name;
                 return obj;
