@@ -109,6 +109,7 @@ class ShipperAgreementController extends Controller
                             background: #09262e !important;
                             color: #ffffff;
                        }
+                       .terms_conditions{page-break-before:always}
                     </style>
                   </head>
                   <body>
@@ -405,7 +406,14 @@ class ShipperAgreementController extends Controller
         $html .= $packaging_details;
 
         $html .= $rate_details;
-        $html .= '</div>
+        $html .= '</div>';
+        $terms_conditions = '<div class="terms_conditions p-2"><h2><u>General Terms & Conditions </u></h2>';
+        $terms_conditions .= '<ul>
+                               <li></li>
+                             </ul>';
+        $terms_conditions .= '</div>';
+        $html .= $terms_conditions;
+        $html .= '
                     </div>
 
                     
