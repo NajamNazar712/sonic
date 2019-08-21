@@ -225,7 +225,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147, 238, 243], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147,232, 238, 243], session('permissions'))) !== 0)
 
                 <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-money"></i>Financials</span></a>
                     <ul class="menu-content">
