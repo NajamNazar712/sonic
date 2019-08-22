@@ -193,7 +193,6 @@
                     </div>
                 </div>
                 {{--row end--}}
-pe
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
