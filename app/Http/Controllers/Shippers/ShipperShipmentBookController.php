@@ -9,6 +9,7 @@ use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -168,8 +169,15 @@ class ShipperShipmentBookController extends Controller
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
+        $air_waybill = ShipperAirWaybillSettings::where('user_id', session('user_id'));
+        if($air_waybill->exists()){
+            $air_waybill = $air_waybill->first();
+        }
+        else{
+            $air_waybill = null;
+        }
 
-        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date]);
+        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill]);
     }
 
     public function shipping_modes(Request $request) {
@@ -1012,9 +1020,16 @@ class ShipperShipmentBookController extends Controller
         $html .= $shipment_details;
 
 
-        $settings = GlobalSettings::where('type', 'air_waybill_printing_count')->first();
+        $settings = ShipperAirWaybillSettings::where('user_id', session('user_id'));
+        if($settings->exists()){
+            $settings = $settings->first();
+            $prints = $settings->print_count;
+        }
+        else{
+            $prints = 1;
+        }
 
-        for ($i=1 ; $i<$settings->setting_value ; $i++) {
+        for ($i=1 ; $i<$prints ; $i++) {
             $html .= $shipment_details;
         }
 

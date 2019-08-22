@@ -93,10 +93,23 @@
 
 										</div>
 
-										<div id="info_display" class="form-group text-center p-1 border border-light rounded">
-											<label class="d-block">Show Information on Air Waybill</label>
-											<input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
-										</div>
+										
+										@if($air_waybill != null)
+											<div id="info_display" class="form-group text-center p-1 border border-light rounded">
+												<label class="d-block">Show Information on Air Waybill</label>
+												@if($air_waybill->information == 1)
+													<input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
+												@else
+													<input type="checkbox" name="information_display" class="switch hidden" id="information_display">
+												@endif
+											</div>
+										@else
+											<div id="info_display" class="form-group text-center p-1 border border-light rounded">
+												<label class="d-block">Show Information on Air Waybill</label>
+												<input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
+											</div>
+										@endif
+									
 									</div>
 
 									<div id="consignee_header_div" class="col col_custom">

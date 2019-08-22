@@ -424,7 +424,7 @@ class DeliveryController extends Controller
 
                         if(DeliveryNote::where('id', $old_delivery_note_id->delivery_note_id)->where('status',0)->exists()){
                             $journey = ShipmentsJourney::where('shipment_id',$shipment)->where('verification',0)->latest()->first();
-                            if($journey->count() > 0){
+                            if($journey){
                                 ShipmentsJourneyController::add($journey->shipment_id,$journey->shipper_status_id,$journey->consignee_status_id,$journey->status_reason_id,$journey->remarks,$journey->user_id,Auth::id(),$journey->reference_1_id,NULL,1,$journey->received_or_refused_by);
                             }
                         }
@@ -794,37 +794,37 @@ class DeliveryController extends Controller
 
                 $shipment_details_row_start = '
                           <tr>
-                            <td>' . $total_shipments . '</td>
+                            <td class="'.$class.'">' . $total_shipments . '</td>
                             <td class="'.$class.'">' . $shipment->tracking_number . '</td>
-                            <td>' . $user_details . '</td>
-                            <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                            <td>' . $shipment->consignee_address . '</td>
+                            <td class="'.$class.'">' . $user_details . '</td>
+                            <td class="'.$class.'">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+                            <td class="'.$class.'">' . $shipment->consignee_address . '</td>
                 ';
 
                 if ($shipment->booking_type_id == 1) {
                     $shipment_details_row_start .= '
-                    <td>' . $shipment->booking_type->booking_type . '</td>
+                    <td class="'.$class.'">' . $shipment->booking_type->booking_type . '</td>
                 ';
                 } else if ($shipment->booking_type_id == 2) {
                     $shipment_details_row_start .= '
-                    <td class="replacement"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
+                    <td class="replacement '.$class.'"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
                 ';
                 } else {
                     $shipment_details_row_start .= '
-                    <td>' . $shipment->booking_type->booking_type . '</td>
+                    <td class="'.$class.'">' . $shipment->booking_type->booking_type . '</td>
                 ';
                 }
 
                 if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
                     $shipment_details_row_start .= '
-                            <td>Rs ' . number_format($shipment->amount) . '</td>
+                            <td class="'.$class.'">Rs ' . number_format($shipment->amount) . '</td>
                     ';
 
                     $total_cod_amount += $shipment->amount;
                 }
                 else {
                     $shipment_details_row_start .= '
-                            <td>Rs 0</td>
+                            <td class="'.$class.'">Rs 0</td>
                     ';
                 }
 
@@ -834,18 +834,18 @@ class DeliveryController extends Controller
                     $shipment_journey = $shipment_journey->latest()->first();
 
                     $shipment_details_row_start .= '
-                            <td>' . $shipment_journey->remarks. '</td>
+                            <td class="'.$class.'">' . $shipment_journey->remarks. '</td>
                     ';
                 }
                 else {
                     $shipment_details_row_start .= '
-                            <td></td>
+                            <td class="'.$class.'"></td>
                     ';
                 }
 
                 $shipment_details_row_start .= '
-                            <td></td>
-                            <td></td>
+                            <td class="'.$class.'"></td>
+                            <td class="'.$class.'"></td>
                           </tr>
                 ';
 
@@ -3024,7 +3024,7 @@ class DeliveryController extends Controller
 
     public function sdn_view(Request $request)
     {
-        $banks = BanksList::all();
+        $banks = BanksList::where('affiliate', 1)->get();
         return view('admin.delivery.sdn.index')->with(['banks' => $banks]);
     }
 
@@ -3207,7 +3207,6 @@ class DeliveryController extends Controller
             $deposit_details->bank_id = $request->bank[$row];
             $deposit_details->amount = $request->amount[$row];
             $image = $request->file($file_name);
-            $imageName = $image->getClientOriginalName();
             $extension = $image->getClientOriginalExtension();
             $random = rand(1000, 100000);
             $now = Carbon::now();
@@ -3362,10 +3361,7 @@ class DeliveryController extends Controller
                             <td>' . number_format($station_note_details->sdn_net_amount) . '</td>
                           </tr>-->
                           
-                          <tr>
-                            <td class="color secondary"><strong>Bank Name</strong></td>
-                            <td>' . $station_note_details->bank->name . '</td>
-                          </tr>
+
                         </tbody>
                       </table>
         ';

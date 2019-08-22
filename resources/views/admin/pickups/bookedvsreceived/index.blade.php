@@ -187,6 +187,8 @@
 
                         if(data.status === 1){
                             var shipment = '';
+                            var total_booked = 0;
+                            var total_received = 0;
                             shipment += '<table class="table table-bordered datatable " id="datatable" style="z-index: 3;">' +
                                 '                    <thead>' +
                                 '                    <tr class="bg-primary white">' +
@@ -200,7 +202,12 @@
                                 shipment += '<tr id="'+ details.shipper_id+'"><td class="align-middle shipper">'+details.shipper+'</td>';
                                 shipment += '<td class="align-middle text-center booked"><button class="btn btn-sm btn-outline-info">'+details.booked+'</button></td>';
                                 shipment += '<td class="align-middle text-center received"><button class="btn btn-sm btn-outline-info">'+details.received+'</button></td></tr>';
+                                total_booked = total_booked + details.booked;
+                                total_received = total_received + details.received;
                             });
+                            shipment += '<tr id="total"><td class="align-middle shipper">Total</td>';
+                            shipment += '<td class="align-middle text-center booked">'+total_booked+'</td>';
+                            shipment += '<td class="align-middle text-center received">'+total_received+'</td></tr>';
                             shipment += '</tbody></table>';
                             $('#booked_table_div').html('');
                             $('#booked_table_div').html(shipment);

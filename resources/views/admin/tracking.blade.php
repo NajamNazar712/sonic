@@ -221,6 +221,14 @@
                                 else {
                                     shipment += '<td colspan="3"></td>'
                                 }
+                                shipment += '<td><strong>Sales Person</strong></td>';
+                                console.log(details.shipper.id);
+                                if (details.shipper.sales_person != null) {
+                                    shipment += '<td colspan="3">' + details.shipper.sales_person + '</td>';
+                                }
+                                else {
+                                    shipment += '<td colspan="3"></td>'
+                                }
 
                                 shipment += '</tr>';
 

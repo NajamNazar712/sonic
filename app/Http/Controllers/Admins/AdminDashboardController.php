@@ -223,7 +223,7 @@ class AdminDashboardController extends Controller
         }
         else{
             $day_wise_growth = ($day_wise_growth_thirty - $day_wise_growth_sixty) / $day_wise_growth_sixty;
-            $day_wise_growth_percentage = $day_wise_growth * 100;
+            $day_wise_growth_percentage = number_format($day_wise_growth * 100,1);
         }
         $operation_incoming['per_rider_loads'] = $per_rider_loads;
         $operation_incoming['day_wise_growth'] = $day_wise_growth_percentage . '%';
@@ -309,7 +309,7 @@ class AdminDashboardController extends Controller
         }
         else{
             $outgoing_day_wise_growth = ($outgoing_day_wise_growth_thirty - $outgoing_day_wise_growth_sixty) / $outgoing_day_wise_growth_sixty;
-            $outgoing_day_wise_growth_percentage = $outgoing_day_wise_growth * 100;
+            $outgoing_day_wise_growth_percentage = number_format($outgoing_day_wise_growth * 100, 1);
         }
         $operation_outgoing['per_rider_loads'] = $outgoing_per_rider_loads;
         $operation_outgoing['day_wise_growth'] = $outgoing_day_wise_growth_percentage . '%';
@@ -674,7 +674,7 @@ class AdminDashboardController extends Controller
         }
         else{
             $day_wise_growth = ($day_wise_growth_thirty - $day_wise_growth_sixty) / $day_wise_growth_sixty;
-            $day_wise_growth_percentage = $day_wise_growth * 100;
+            $day_wise_growth_percentage = number_format($day_wise_growth * 100, 1);
         }
         $operation_incoming['per_rider_loads'] = $per_rider_loads;
         $operation_incoming['day_wise_growth'] = $day_wise_growth_percentage . '%';
@@ -753,7 +753,7 @@ class AdminDashboardController extends Controller
         }
         else{
             $outgoing_day_wise_growth = ($outgoing_day_wise_growth_thirty - $outgoing_day_wise_growth_sixty) / $outgoing_day_wise_growth_sixty;
-            $outgoing_day_wise_growth_percentage = $outgoing_day_wise_growth * 100;
+            $outgoing_day_wise_growth_percentage = number_format($outgoing_day_wise_growth * 100, 1);
         }
         $operation_outgoing['per_rider_loads'] = $outgoing_per_rider_loads;
         $operation_outgoing['day_wise_growth'] = $outgoing_day_wise_growth_percentage . '%';
