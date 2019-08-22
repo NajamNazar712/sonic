@@ -1226,8 +1226,8 @@ class AdminCRMController extends Controller
                     $current_tat = $closed->diffInWeekdays($launched);
 
                     $launched_check = $launched->toDateString();
-                    $current_check = $closed->toDateString();
-                    if($launched_check == $current_check){
+                    $closed_check = $closed->toDateString();
+                    if($launched_check == $closed_check){
                         if($to_formatted < $cut_off_check){
                             $after_cut_off = $current_tat - 1;
                             $current_tat = $after_cut_off;
@@ -1238,7 +1238,7 @@ class AdminCRMController extends Controller
                         $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
                         $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
                         $launched_formatted_check = date('Y-m-d', strtotime($launched));
-                        if($launched < $holiday_formatted || $current > $holiday_formatted){
+                        if($launched < $holiday_formatted || $closed > $holiday_formatted){
                             if($holiday_formatted_check == $launched_formatted_check){
                                 if($from_formatted > $cut_off_check || $to_formatted < $cut_off_check){
                                     $after_cut_off = $current_tat + 1;
