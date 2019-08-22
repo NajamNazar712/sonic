@@ -295,36 +295,13 @@ class AdminCRMController extends Controller
 
 
     public function launched_re_open_index(){
-//        $requests = CrmRequest::where('id', 20)->first();
-//        $launched = Carbon::parse($requests->created_at);
-//        $current = Carbon::now();
-//        $time_format = 'H:i';
-//        $time_from = CrmSettings::where('name','TAT Cut-Off Time From')->first();
-//        $time_to = CrmSettings::where('name','TAT Cut-Off Time To')->first();
-//        $from_formatted = date($time_format, strtotime($time_from->setting_value));
-//        $to_formatted = date($time_format, strtotime($time_to->setting_value));
-//        $cut_off_check = $requests->created_at->format($time_format);
-//        $current_tat = $current->diffInWeekdays($launched);
-//        if($from_formatted > $cut_off_check || $to_formatted < $cut_off_check){
-//            $after_cut_off = $current_tat - 1;
-//            $current_tat = $after_cut_off;
+//        $requests = CrmRequest::where('id', 28)->first();
+//        $launched = Carbon::parse($requests->created_at)->toDateString();
+//        $current = Carbon::now()->toDateString();
+//        if($launched == $current){
+//            dd($launched);
 //        }
-//        $holidays = CrmTatHolidays::get();
-//        foreach($holidays as $holiday){
-//            $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
-//            if($launched < $holiday_formatted || $current > $holiday_formatted){
-//                $after_holidays = $current_tat - 1;
-//                $current_tat = $after_holidays;
-//            }
-//        }
-//        dd($current_tat);
-//
-//        $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
-//        if(date('Y-m-d H:i:s', strtotime($launched)) < $holiday_formatted || date('Y-m-d H:i:s', strtotime($current)) > $holiday_formatted){
-//            $after_holidays = $current_tat - 1;
-//            $current_tat = $after_holidays;
-//            dd($current_tat);
-//        }
+
         $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
@@ -472,9 +449,13 @@ class AdminCRMController extends Controller
                     $to_formatted = date($time_format, strtotime($time_to->setting_value));
                     $cut_off_check = $requests->created_at->format($time_format);
                     $current_tat = $current->diffInWeekdays($launched);
-                    if($from_formatted > $cut_off_check || $to_formatted < $cut_off_check){
-                        $after_cut_off = $current_tat - 1;
-                        $current_tat = $after_cut_off;
+                    $launched_check = $launched->toDateString();
+                    $current_check = $current->toDateString();
+                    if($launched_check == $current_check){
+                        if($to_formatted < $cut_off_check){
+                            $after_cut_off = $current_tat - 1;
+                            $current_tat = $after_cut_off;
+                        }
                     }
                     $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
                     foreach($holidays as $holiday){
@@ -711,9 +692,14 @@ class AdminCRMController extends Controller
                     $to_formatted = date($time_format, strtotime($time_to->setting_value));
                     $cut_off_check = $requests->created_at->format($time_format);
                     $current_tat = $current->diffInWeekdays($launched);
-                    if($from_formatted > $cut_off_check || $to_formatted < $cut_off_check){
-                        $after_cut_off = $current_tat - 1;
-                        $current_tat = $after_cut_off;
+
+                    $launched_check = $launched->toDateString();
+                    $current_check = $current->toDateString();
+                    if($launched_check == $current_check){
+                        if($to_formatted < $cut_off_check){
+                            $after_cut_off = $current_tat - 1;
+                            $current_tat = $after_cut_off;
+                        }
                     }
                     $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
                     foreach($holidays as $holiday){
@@ -1238,9 +1224,14 @@ class AdminCRMController extends Controller
                     $to_formatted = date($time_format, strtotime($time_to->setting_value));
                     $cut_off_check = $requests->created_at->format($time_format);
                     $current_tat = $closed->diffInWeekdays($launched);
-                    if($from_formatted > $cut_off_check || $to_formatted < $cut_off_check){
-                        $after_cut_off = $current_tat - 1;
-                        $current_tat = $after_cut_off;
+
+                    $launched_check = $launched->toDateString();
+                    $current_check = $closed->toDateString();
+                    if($launched_check == $current_check){
+                        if($to_formatted < $cut_off_check){
+                            $after_cut_off = $current_tat - 1;
+                            $current_tat = $after_cut_off;
+                        }
                     }
                     $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $closed])->get();
                     foreach($holidays as $holiday){
