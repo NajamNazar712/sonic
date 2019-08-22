@@ -965,8 +965,8 @@ class AdminFinanceController extends Controller
             $file_name = 'deposit_slip_'.$deposit_id;
             if($request->has($file_name)){
                 $image = $request->file($file_name);
-                $imageName = $image->getClientOriginalName();
-                $extension = $image->getClientOriginalExtension();
+//                $extension = $image->getClientOriginalExtension();
+                $extension = 'png';
                 $random = rand(1000, 100000);
                 $now = Carbon::now();
                 $time = $now->year . '_' . $now->month;

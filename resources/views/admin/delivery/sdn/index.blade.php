@@ -92,7 +92,7 @@
                     <hr>
                     <div class="row justify-content-center">
                         <div class="col-3">
-                            <button id="DepositSlipButton" type="submit" class="btn btn-primary btn-block">Upload</button>
+                            <button id="DepositSlipButton" type="submit" class="btn btn-primary btn-block" disabled>Upload</button>
                         </div>
                     </div>
                     </form>
@@ -170,7 +170,7 @@
                         <hr>
                         <div class="row justify-content-center">
                             <div class="col-3">
-                                <button type="button" class="btn btn-primary btn-block" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                 </div>
@@ -722,6 +722,7 @@
                     deposit_table.row.add([0, date_input,bank_select,amount_input,deposit_slip,remove]).node().id = rows_count;
                     deposit_table.draw(true);
                     // $('#sdn_upload_table tbody').append(html);
+                    $('#DepositSlipButton').attr('disabled', false);
                     selected_rows.push(rows_count);
                     $('select[name="bank['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                         data:banks_list,
