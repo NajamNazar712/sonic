@@ -451,7 +451,7 @@ class AdminCRMController extends Controller
                     $current_tat = $current->diffInWeekdays($launched);
                     $launched_check = $launched->toDateString();
                     $current_check = $current->toDateString();
-                    if($launched_check == $current_check){
+                    if($launched_check <= $current_check){
                         if($to_formatted < $cut_off_check){
                             $after_cut_off = $current_tat - 1;
                             $current_tat = $after_cut_off;
@@ -695,7 +695,7 @@ class AdminCRMController extends Controller
 
                     $launched_check = $launched->toDateString();
                     $current_check = $current->toDateString();
-                    if($launched_check == $current_check){
+                    if($launched_check <= $current_check){
                         if($to_formatted < $cut_off_check){
                             $after_cut_off = $current_tat - 1;
                             $current_tat = $after_cut_off;
@@ -1227,7 +1227,7 @@ class AdminCRMController extends Controller
 
                     $launched_check = $launched->toDateString();
                     $closed_check = $closed->toDateString();
-                    if($launched_check == $closed_check){
+                    if($launched_check <= $closed_check){
                         if($to_formatted < $cut_off_check){
                             $after_cut_off = $current_tat - 1;
                             $current_tat = $after_cut_off;
