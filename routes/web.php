@@ -27,6 +27,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('cod.login');
     });
+    Route::get('404', 'Auth\LoginController@not_found')->name('404');
 
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');
@@ -199,7 +200,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/name/match/{name}','Auth\RegisterController@checkCompanyName');
     Route::get('/email/match/{email}/{id}','Auth\RegisterController@checkCompanyEmail')->name('check.email');
     Route::get('/name/match/{name}/{id}','Auth\RegisterController@checkCompanyNameProfile')->name('check.name');
-
+    Route::get('terms_and_conditions/{token}/{id}/accept','ShipperAgreementController@accept')->name('terms.accept');
+    Route::get('terms_and_conditions/{token}/{id}/download','ShipperAgreementController@crf_download')->name('terms.download');
+    Route::get('/terms/success','Auth\RegisterController@register_success')->name('terms.success');
 
     //user profile
     Route::get('/profile','Shippers\ShipperDashboardController@userProfile')->name('edit.profile');

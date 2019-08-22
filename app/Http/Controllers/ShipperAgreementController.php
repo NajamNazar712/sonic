@@ -11,6 +11,7 @@ use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateReturnCharge;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\RateStatus;
@@ -18,18 +19,19 @@ use App\Http\Models\ReturnCharge;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WeightCharge;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use Illuminate\Http\Request;
 
 class ShipperAgreementController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:admin');
+        $this->middleware('auth:admin')->only(['view_crf_agreement']);
 
         $this->middleware('Permission');
     }
 
-    public static function view_crf_agreement($id, $type = null){
+    public static function view_crf_agreement($id, $file_type = null){
         $shipper_id = $id;
 
         $html = '
@@ -118,11 +120,10 @@ class ShipperAgreementController extends Controller
                     <div class="double-border">
       ';
         $shipper = User::find($id);
-        $poc = $shipper->shipping()->where('default_address', 1)->select('poc')->first();
+
         $poc_name = '';
-        if($poc){
-            $poc_name = $poc->poc;
-        }
+        $poc_name = $shipper->poc;
+
         $sales_person_name = '';
         $sales_person = $shipper->sales_person()->where('status', 0)->first();
         if($sales_person){
@@ -276,7 +277,7 @@ class ShipperAgreementController extends Controller
 
                             foreach ($weight_charges as $weight_charge){
                                 if($weight_charge->delivery_type_id == 1){
-                                    $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td><td>' . $weight_charge->national_charges_class_4 . '</td></tr>';
+                                    $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
                                 }
                             }
                             $weight_charges_details .= '</tbody></table>';
@@ -290,7 +291,7 @@ class ShipperAgreementController extends Controller
                             $weight_charges_details .= '<table class="table table-sm table-bordered"><thead><tr><th>Range Up</th><th>Range Down</th><th>Flat Charges/KG (Local)</th><th>Flat Charges/KG (National-Zone A)</th><th>Flat Charges/KG (National-Zone B)</th><th>Flat Charges/KG (National-Zone C)</th><th>Flat Charges/KG (National-Zone D)</th></tr></thead><tbody>';
                             foreach ($weight_charges as $weight_charge){
                                 if($weight_charge->delivery_type_id == 2){
-                                    $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td><td>' . $weight_charge->national_charges_class_4 . '</td></tr>';
+                                    $weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $weight_charge->local_or_6hr . '</td><td>' . $weight_charge->national_charges_class_0 . '</td><td>' . $weight_charge->national_charges_class_1 . '</td><td>' . $weight_charge->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
                                 }
                             }
                             $weight_charges_details .= '</tbody></table>';
@@ -326,7 +327,7 @@ class ShipperAgreementController extends Controller
                     }
                     if($shipper->account_type_id == 1) {
                         if($rate->shipping_mode_id != 4){
-                            $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Weight Slab</th><th>Local Charges</th><th>National Charges Class A</th><th>National Charges Class B</th><th>National Charges Class C</th><th>National Charges Class D</th></tr></thead><tbody>';
+                            $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Weight Addition</th><th>Local Charges</th><th>National Charges Class A</th><th>National Charges Class B</th><th>National Charges Class C</th><th>National Charges Class D</th></tr></thead><tbody>';
 
                             foreach ($weight_charges as $weight_charge) {
                                 if ($shipper->account_type_id == 1) {
@@ -335,7 +336,7 @@ class ShipperAgreementController extends Controller
                             }
                             $weight_charges_details .= '</tbody></table>';
                         }else{
-                            $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Weight Slab</th><th>6hr Charges</th><th>Sameday  Charges</th></tr></thead><tbody>';
+                            $weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Weight Addition</th><th>6hr Charges</th><th>Sameday  Charges</th></tr></thead><tbody>';
 
                             foreach ($weight_charges as $weight_charge) {
                                 if ($shipper->account_type_id == 1) {
@@ -356,11 +357,11 @@ class ShipperAgreementController extends Controller
                 }
                 if($cash_handling){
                     $cash_handling_details = '<div class="row p-1"><div class="col-3 p-1 color secondary rounded border"><h4><strong>Cash Handling Charges </strong></h4></div></div>';
-                    $cash_handling_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Charges</th></tr></thead><tbody>';
+                    $cash_handling_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Charges</th></tr></thead><tbody>';
                     foreach ($cash_handling as $cash){
                         $cash_handling_details .= '<tr><td>' . $cash->range_up . '</td><td>' . $cash->range_down . '</td><td>' . $cash->charges . '</td></tr>';
                     }
-                    $cash_handling_details .= '</tbody></table>';
+                    $cash_handling_details .= '</tbody></table></div></div>';
                 }
 
                 $fuel_surcharge_charges_details = '';
@@ -384,14 +385,26 @@ class ShipperAgreementController extends Controller
                 }
                 if($return_charges){
                     $return_charges_details .= '<div class="row p-1"><div class="col-3 p-1 color secondary rounded border"><h4><strong>Return Charges </strong></h4></div></div>';
-                    $return_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th><th>Zone A</th><th>Zone B</th><th>Zone C</th><th>Zone D</th></tr></thead><tbody>';
-                    foreach ($return_charges as $return_charge){
-                        $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->national_charges_class_0 . '</td><td>' . $return_charges->national_charges_class_1 . '</td><td>' . $return_charges->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
+                    if($rate->shipping_mode_id != 4){
+
+
+                            $return_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th><th>Zone A</th><th>Zone B</th><th>Zone C</th><th>Zone D</th></tr></thead><tbody>';
+                            foreach ($return_charges as $return_charge){
+                                $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->national_charges_class_0 . '</td><td>' . $return_charges->national_charges_class_1 . '</td><td>' . $return_charges->national_charges_class_2 . '</td><td>' . $weight_charge->national_charges_class_3 . '</td></tr>';
+                            }
+                            $return_charges_details .= '</tbody></table></div></div>';
+
+
+                    }else{
+                            $return_charges_details .= '<div class="row"><div class="col-6"><table class="table table-sm table-bordered mb-0"><thead><tr><th>Local</th><th>National</th></tr></thead><tbody>';
+                            foreach ($return_charges as $return_charge){
+                                $return_charges_details .= '<tr><td>' . $return_charges->local . '</td><td>' . $return_charges->national_charges_class_0 . '</td></tr>';
+                            }
+                            $return_charges_details .= '</tbody></table></div></div>';
+
                     }
-                    $return_charges_details .= '</tbody></table>';
-
-
                 }
+
 
             $rate_details .= $service_type_details;
             $rate_details .= $weight_charges_details;
@@ -446,15 +459,61 @@ class ShipperAgreementController extends Controller
 
         $terms_conditions .= '</div>';
         $html .= $terms_conditions;
-        $html .= '
-                    </div>
+        $html .= '</div>';
+        $notification = false;
 
-                    
-                  </body>
+        if($file_type == 1){
+            $notification = true;
+        }
+        if(!$notification){
+            $html .= '<script>
+                  window.onload = function() {
+                    window.print();
+                  }
+                </script>';
+        }
+        $html .='</body>
                 </html>
       ';
 
         return $html;
     }
 
+    public function accept($token, $id){
+        if(($id != null) && ($token !== null)){
+            $user = User::find($id)->term_and_conditions;
+            if($user == 0){
+                $term = CRFTermsConditions::where('user_id', $id)->where('token', $token);
+                if($term->exists()){
+                    $term = $term->delete();
+                    User::where('id', $id)->update(['term_and_conditions' => 1]);
+                    return redirect(route('cod.terms.success'));
+                }
+            }else{
+                return redirect(route('cod.404'));
+            }
+        }
+    }
+    public function accept_success(){
+        return view('client.terms_success');
+    }
+
+    public function crf_download($token, $id){
+        if(($id != null) && ($token !== null)){
+            $user = User::find($id)->term_and_conditions;
+            if($user == 0){
+                $term = CRFTermsConditions::where('user_id', $id)->where('token', $token);
+                if($term->exists()){
+                    $html = self::view_crf_agreement($id);
+                    $pdf = SnappyPDF::loadHTML($html);
+
+                    $filename = 'terms' . '.pdf';
+                    return $pdf->download($filename);
+                }
+            }else{
+                return redirect(route('cod.404'));
+
+            }
+        }
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Models\AccountType;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
+use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -245,6 +246,12 @@ class RegisterController extends Controller
                 'billing_address' => $data['billing_address'],
             ]);
         }
+
+        $token = uniqid(base64_encode(str_random(60)));
+        $crf_terms_and_conditions = new CRFTermsConditions();
+        $crf_terms_and_conditions->user_id = $newUser->id;
+        $crf_terms_and_conditions->token = $token;
+        $crf_terms_and_conditions->save();
 
         return $newUser;
     }

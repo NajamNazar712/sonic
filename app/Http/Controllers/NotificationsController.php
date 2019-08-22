@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\ShipperNotificationEmail;
@@ -2828,6 +2829,37 @@ class NotificationsController extends Controller
                 $to = $account_a->email;
 
                 self::email($subject, $body, $to);
+            }
+            else if($id == 38){
+                $shipper = User::find($reference_1_id);
+                if($shipper){
+                    $terms = CRFTermsConditions::where('user_id', $shipper->id)->first();
+                    if($terms){
+                        $logo = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo.png') . '" width="100" height="50">';
+                        $button = '<div class="row"><button onclick="window.open(' . route('cod.terms.accept', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="width: 100px; height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 25px; font-weight: bold;">Yes</button>';
+                        $link = '<div class="row"><button onclick="window.open(' . route('cod.terms.download', ['token' => $terms->token, 'id' => $shipper->id]) . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">CRF Download</button>';
+                        if (strpos($subject, '[shipper_name]') !== FALSE) {
+                            $subject = str_replace('[shipper_name]', $shipper->name, $subject);
+                        }
+                        if (strpos($body, '[shipper_name]') !== FALSE) {
+                            $body = str_replace('[shipper_name]', $shipper->name, $body);
+                        }
+                        if (strpos($body, '[trax_logo]') !== FALSE) {
+                            $body = str_replace('[trax_logo]', $logo, $body);
+                        }
+
+                        if (strpos($body, '[button]') !== FALSE) {
+                            $body = str_replace('[button]', $button, $body);
+                        }
+
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
+
+                        $to = $shipper->email;
+                        self::email($subject, $body, $to);
+                    }
+                }
             }
         }
       }

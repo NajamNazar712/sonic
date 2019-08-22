@@ -155,4 +155,7 @@ class LoginController extends Controller
 
         return redirect()->route('cod.login');
     }
+    public function not_found(){
+        return view('errors.404');
+    }
 }
