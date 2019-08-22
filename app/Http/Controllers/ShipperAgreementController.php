@@ -507,7 +507,7 @@ class ShipperAgreementController extends Controller
                     $html = self::view_crf_agreement($id);
                     $pdf = SnappyPDF::loadHTML($html);
 
-                    $filename = 'terms' . '.pdf';
+                    $filename = 'Customer Registration Form' . '.pdf';
                     return $pdf->download($filename);
                 }
             }else{
