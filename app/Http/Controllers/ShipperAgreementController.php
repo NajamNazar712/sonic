@@ -454,7 +454,7 @@ class ShipperAgreementController extends Controller
                                <li><strong>TRAX Online (Pvt) Ltd.</strong> may add new terms & conditions at any point in time.</li>
                              </ul>';
         $terms_conditions .= '<h2><u>Acknowledgment & Signature</u></h2>';
-        $terms_conditions .= '<div class="ml-2"><input class="form-check-input" type="checkbox" value="1" '.$check.'> <span class="ml-2">I hereby accept all the terms and conditions mention above along with the agreed upon rates mentioned within.</span> </div><div class="row mt-3"><div class="col-6"><span class="border-bottom"><strong>Rates Added By</strong></span><p class="pt-1">'.$sales_person_name.'</p></div><div class="col-6"><p><span class="border-bottom"><strong>Shipper Signature</strong></span></p><p class="pt-2"><span class="border-bottom"><strong>Company Stamp</strong></span></p></div></div>';
+        $terms_conditions .= '<div class="ml-2"><input class="form-check-input" type="checkbox" value="1" disabled '.$check.'> <span class="ml-2">I hereby accept all the terms and conditions mention above along with the agreed upon rates mentioned within.</span> </div><div class="row mt-3"><div class="col-6"><span class="border-bottom"><strong>Rates Added By</strong></span><p class="pt-1">'.$sales_person_name.'</p></div><div class="col-6"><p><span class="border-bottom"><strong>Shipper Signature</strong></span></p><p class="pt-2"><span class="border-bottom"><strong>Company Stamp</strong></span></p></div></div>';
 
 
         $terms_conditions .= '</div>';
