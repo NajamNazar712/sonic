@@ -224,7 +224,7 @@
                                   <div class="text-center mt-1">
                                       <h3>Operations Incoming Loads Forecast</h3>
                                   </div>
-                                  <div class="row ml-1 mt-4" style="width: 95%">
+                                  <div class="row ml-1 mt-2" style="width: 95%">
                                       <div id="incoming_table">
                                           <table class="table table-sm table-bordered datatable" id="datatable_incoming" style="z-index: 3;">
                                               <thead>
@@ -251,7 +251,7 @@
                                       </div>
                                   </div>
 
-                                  <div class="row ml-1 mr-1">
+                                  <div class="row ml-1 mr-1" style="margin-top: 81px;">
                                       <div class="col-6">
                                           <div class="card bg-gradient-directional-info pull-up">
                                               <div class="card-content">
