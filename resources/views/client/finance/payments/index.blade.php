@@ -107,6 +107,49 @@
 									</div>
 								</div>
 							</div>
+							<div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
+								 aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content">
+										<div class="modal-header bg-primary white">
+											<h4 class="modal-title white">Add Request</h4>
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">&times;</span>
+											</button>
+										</div>
+										<div class="modal-body text-center">
+											<form id="add_request_form" method="post">
+												@csrf
+												<div class="container">
+													<div class="row ml-1">
+														<h2 class="heading">Payment ID(s)</h2>
+													</div>
+
+													<input type="hidden" id="payment_id">
+													<div class="row old_scroll" id="requested_payment_id">
+
+													</div>
+													<hr>
+													<div class="complaints" id="request_complaints">
+														<div class="row justify-content-center">
+															<div class="col">
+																<fieldset class="form-group">
+																	<textarea class="form-control" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..."></textarea>
+																</fieldset>
+															</div>
+														</div>
+													</div>
+													<div class="row justify-content-center">
+														<div class="col-3">
+															<button id="AddNewRequest" type="submit" class="btn btn-primary btn-block">Submit</button>
+														</div>
+													</div>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -118,12 +161,14 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 @endsection
 
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 
@@ -481,7 +526,85 @@
 				else if ($(this).hasClass('export_to_excel')) {
 					window.open('{!! route('cod.finance.payments.export_to_excel') !!}?id=' + id, '_blank');
 				}
+                else if ($(this).hasClass('request_add')) {
+                    var selected_id = id.toString().padStart(6, 0);
+                    var description = 'Payment not received-' + selected_id + '.';
+                    $('#complaint_description').val(description);
+                    $('#AddRequestModal').modal('show');
+                    $('#payment_id').val(id);
+                    var html_rows = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ selected_id +'</b></span></div>';
+                    $('#requested_payment_id').html(html_rows);
+                }
 			});
+            var max_char = 245;
+            $('#complaint_description').on('keypress copy paste',function (e) {
+                if ($(this).val().length == max_char) {
+                    e.preventDefault();
+                } else if ($(this).val().length > max_char) {
+                    // Maximum exceeded
+                    this.value = this.value.substring(0, max_char);
+                }
+            });
+            $('body').on('change','#add_request_form textarea',function() {
+                $(this).val($(this).val().trim());
+            });
+            $( "#add_request_form" ).bind('submit', function (e) {
+                e.preventDefault();
+
+                var nature_flag = true;
+                var case_nature_id = 1;
+                var case_nature_complaint_id = 1;
+                var complaint_description = $('#complaint_description').val();
+                var requested_payment_id = $('#payment_id').val();
+                if(!complaint_description){
+                    nature_flag = false;
+                    var error = "Please select Description!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(nature_flag){
+                    $('#AddNewRequest').attr('disabled',true);
+                    $.ajax({
+                        url: '{!! route('cod.crm.request.add') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'payment_id': requested_payment_id,
+                            'case_nature_id' : case_nature_id,
+                            'complaint_id' : case_nature_complaint_id,
+                            'description' : complaint_description,
+                            'payment_request' : 1
+                        }
+                    })
+                        .done(function(data) {
+                            if (data.status) {
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+
+                            table.button('.paid').disable();
+                            table.button('.reverted').disable();
+
+                            selected_rows = [];
+
+                            table.rows().deselect();
+
+                            table.draw('false');
+
+                            $('#AddRequestModal').modal('hide');
+                            $('#AddNewRequest').attr('disabled',false);
+                        });
+
+                }
+            });
+            $('#AddRequestModal').on('hide.bs.modal', function (e) {
+                $('#add_request_form')[0].reset();
+                $('#complaint_description').val('');
+            });
 		});
 	</script>
 @endsection

@@ -6,6 +6,7 @@ use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\Http\Models\ChargesModes;
+use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\ShipmentStatus;
@@ -2675,8 +2676,9 @@ class AdminFinanceController extends Controller
 
         $banks = BanksList::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
+        $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
 
-        return view('admin.finance.done_payments')->with(['banks'=>$banks,'company_banks'=>$company_banks, 'shippers'=>$shippers]);
+        return view('admin.finance.done_payments')->with(['banks'=>$banks,'company_banks'=>$company_banks, 'shippers'=>$shippers, 'case_nature_channels'=>$case_nature_channels]);
     }
 
     public function done_payments_list(Request $request) {
@@ -2838,6 +2840,7 @@ class AdminFinanceController extends Controller
                     <button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>
                     <button type="button" class="dropdown-item update_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Details</div></button>
                     <button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>
+                    <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Request</div></button>
                   </div>
                 </div>
             ';
