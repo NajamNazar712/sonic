@@ -1,0 +1,18 @@
+<?php
+
+use Illuminate\Database\Seeder;
+
+class UpdateModulePermissionForAccountActivationReportTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::table('module_permissions')->insert(array(
+            array('id' => 246, 'name' => 'Account Activation Report - View', 'module_id' => 9),
+        ));
+    }
+}

@@ -5045,6 +5045,21 @@ public function revenue_index(){
 
     }
 
+    public function account_activation_index(){
+        return view('admin.reports.account_activation');
+    }
+
+    public function account_activation_list(){
+        $shipments = DB::connection('reports')->table('users')->join('sale_person_tags as spt','spt.user_id', '=', 'users.id')
+            ->join('admins AS sp', 'sp.id', '=', 'spt.admin_id')
+            ->select(['shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','u.name as shipper','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.created_at as booking_date']);
+        if( $request->get('search_shipper')){
+            $shipments->where('shipments.user_id', '=',$request->get('search_shipper'));
+        }else{
+            $shipments->where('shipments.user_id', '=', null);
+        }
+
+    }
 
 }
 
