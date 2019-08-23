@@ -190,7 +190,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.sameday.list') }}',
                 rowId: 'shId',
-                order: [[12, 'asc']],
+                order: [[12, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},

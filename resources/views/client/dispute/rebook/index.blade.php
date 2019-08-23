@@ -166,7 +166,7 @@
                 serverSide: true,
                 ajax: '{{ route('cod.dispute.rebook.list') }}',
                 rowId: 'shipment_id',
-                order: [[1, 'asc']],
+                order: [[1, 'desc']],
                 columns: [
                     {data: 'shipment_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {

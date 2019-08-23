@@ -406,7 +406,7 @@
                 serverSide: false,
                 ajax: '{{ route('admin.return.receive.status.list',['id'=>$return_note_id]) }}',
                 rowId: 'shId',
-                order: [[2, 'asc']],
+                order: [[2, 'desc']],
                 ordering: false,
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
