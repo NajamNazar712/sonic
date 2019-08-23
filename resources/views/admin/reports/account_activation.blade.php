@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Summary Report')
+@section('title', 'Account Activation Report')
 
 @section('content')
     <h1 class="mb-1">
@@ -224,7 +224,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                "deferLoading": [50, 100, 500, 1000, -1],
+                "deferLoading": [50, 0],
                 ajax:{
                     url: '{{ route('admin.reports.account_activation.list') }}',
                     data: function (d) {
