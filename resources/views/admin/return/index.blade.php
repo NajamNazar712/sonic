@@ -771,6 +771,16 @@
                 }
             });
 
+            $('body').on('click','.intercept',function () {
+                var row_id = $(this).parents('tr').attr('id');
+
+                if(row_id != ''){
+                    var redirect = '{!! route('admin.intercept.index', ':id') !!}';
+                    var url = redirect.replace(':id', row_id);
+                    window.location = url;
+                }
+            });
+
             $.validator.addMethod('maxsize', function(value, element, params) {
                 if ($(element).attr('type') === 'file') {
                     if (element.files && element.files.length) {

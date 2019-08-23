@@ -1313,5 +1313,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\AdminCRMController@crm_update_store')->name('store');
         });
     });
+
+    Route::prefix('intercept')->name('intercept.')->group(function (){
+        Route::get('/{row_id}','Admins\AdminInterceptRebookRequestHistoryController@intercept_re_book_index')->name('index');
+        Route::post('update','Admins\AdminInterceptRebookRequestHistoryController@intercept_re_book_update')->name('update');
+    });
 });
 
