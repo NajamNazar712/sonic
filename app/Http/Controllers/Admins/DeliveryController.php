@@ -3788,7 +3788,7 @@ class DeliveryController extends Controller
         if($dn_list->count() != 0){
             $shipments = array();
             foreach ($dn_list as $note){
-                $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$note->delivery_note_id)->where('status','>',1)->select('shipment_id')->get();
+                $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$note->delivery_note_id)->where('status','>',1)->where('status', '!=', 10)->select('shipment_id')->get();
                 foreach ($shipment_ids as $id){
                     $shipments[$note->delivery_note_id][] = Shipment::find($id)->pluck('tracking_number');
                 }
