@@ -5049,16 +5049,18 @@ public function revenue_index(){
         return view('admin.reports.account_activation');
     }
 
-    public function account_activation_list(){
-        $shipments = DB::connection('reports')->table('users')->join('sale_person_tags as spt','spt.user_id', '=', 'users.id')
+    public function account_activation_list(Request $request){
+        $users = DB::connection('reports')->table('users')->join('sale_person_tags as spt','spt.user_id', '=', 'users.id')
             ->join('admins AS sp', 'sp.id', '=', 'spt.admin_id')
-            ->select(['shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','u.name as shipper','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.created_at as booking_date']);
-        if( $request->get('search_shipper')){
-            $shipments->where('shipments.user_id', '=',$request->get('search_shipper'));
-        }else{
-            $shipments->where('shipments.user_id', '=', null);
+            ->select(['users.id','users.name as shipper','sp.name as sale_person','users.activated_at'])
+            ->where('spt.status', '=', 0);
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $users = $users->whereBetween('users.activated_at', [$from,$to]);
         }
-
+        $datatable = Datatables::of($users)->make(true);
+        return $datatable;
     }
 
 }

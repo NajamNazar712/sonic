@@ -54,7 +54,7 @@
                             <th class="border-primary border-darken-1">Account No.</th>
                             <th class="border-primary border-darken-1">Account Name</th>
                             <th class="border-primary border-darken-1">Sales Person Name</th>
-                            <th class="border-primary border-darken-1">Authorization Date</th>
+                            <th class="border-primary border-darken-1">Activation Date</th>
 
 
                         </tr>
@@ -162,44 +162,8 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
-                    blockPagePermanently();
 
-
-                    var from_date = $('#search_form input[name="from_date_formatted"]').val();
-                    var to_date = $('#search_form input[name="to_date_formatted"]').val();
-
-                    $.ajax({
-                        url: '{!! route('admin.reports.summary.data') !!}',
-                        method: 'post',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'from_date': from_date,
-                            'to_date': to_date
-                        }
-                    }).done(function (data) {
-                       if(data.status){
-                            $('#total').text(data.stats.total);
-                            $('#booked').text(data.stats.booked);
-                            $('#received').text(data.stats.received);
-                            $('#delivered').text(data.stats.delivered);
-                            $('#in_process').text(data.stats.in_process);
-                            $('#return').text(data.stats.return);
-                            $('#canceled').text(data.stats.canceled);
-                            table.draw();
-
-                       }else{
-                           $('#total').text(0);
-                           $('#booked').text(0);
-                           $('#received').text(0);
-                           $('#delivered').text(0);
-                           $('#in_process').text(0);
-                           $('#return').text(0);
-                           $('#canceled').text(0);
-                           table.draw();
-                       }
-                        UnblockPagePermanently();
-                    });
-                    return false;
+                    table.draw(true);
                 }
             });
 
@@ -208,13 +172,9 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.summary.list') }}',
+                        url: '{{ route('admin.reports.account_activation.list') }}',
                         data: {
                             'page': 'all',
-                            'search_origin': $('#origin').val(),
-                            'search_destination': $('#destination').val(),
-                            'search_shipper': $('#shipper').val(),
-                            'cards_filter': $('#cards_filter_input').val(),
                             'search_date_from': $('input[name="from_date_formatted"]').val(),
                             'search_date_to': $('input[name="to_date_formatted"]').val(),
 
@@ -223,41 +183,20 @@
                             head = [];
 
                             head.push('S. No.');
-                            head.push('Tracking No.');
-                            head.push('Order ID');
-                            head.push('Shipper');
-                            head.push('Status');
-                            head.push('Payment Status');
-                            head.push('Service Type');
-                            head.push('Arrival Date');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Consignee Name');
-                            head.push('Consignee Contact');
-                            head.push('Consignee Address');
-                            head.push('Collection Amount');
-                            head.push('Booking Date');
+                            head.push('Account No.');
+                            head.push('Account Name');
+                            head.push('Sales Person Name');
+                            head.push('Activation Date');
 
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
-                                row.push(values.order_id);
+                                row.push(values.id);
                                 row.push(values.shipper);
-                                row.push(values.current_status);
-                                row.push(values.payment_status);
-                                row.push(values.service_type);
-                                row.push(values.arrival_date);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.consignee_name);
-                                row.push(values.consignee_phone);
-                                row.push(values.consignee_address);
-                                row.push(values.collection_amount);
-                                row.push(values.booking_date);
-                                body.push(row);
+                                row.push(values.sale_person);
+                                row.push(values.activated_at);
                             });
                         },
                         async: false
@@ -273,7 +212,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Summary Report',
+                        title: 'Account Activation Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -285,34 +224,21 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                "deferLoading": [50, 100, 500, 1000, -1],
                 ajax:{
-                    url: '{{ route('admin.reports.summary.list') }}',
+                    url: '{{ route('admin.reports.account_activation.list') }}',
                     data: function (d) {
-                        d.search_origin = $('#origin').val();
-                        d.search_destination = $('#destination').val();
-                        d.search_shipper = $('#shipper').val();
-                        d.cards_filter = $('#cards_filter_input').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[7, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
-                    { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
-                    { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
-                    { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
-                    { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
-                    { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
-                    { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
-                    { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
-                    { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
-                    { data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    { data: 'phone', name: 'phone', class: 'align-middle phone'},
-                    { data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    { data: 'collection_amount' ,name: 'shipments.amount', class: 'align-middle collection_amount'},
-                    { data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
+                    { data:'id' ,name: 'users.id', class: 'align-middle text-center user_id'},
+                    { data:'shipper' ,name: 'users.name', class: 'align-middle text-center shipper'},
+                    { data:'sale_person' ,name: 'sp.name', class: 'align-middle text-center sale_person'},
+                    { data:'activated_at' ,name: 'users.activated_at', class: 'align-middle text-center activated_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -321,48 +247,6 @@
                 initComplete: function() {
                     this.api().table().columns.adjust();
                 }
-            });
-            function add_animation(box) {
-                $("#report_data div").removeClass("show_active");
-                box.addClass('show_active');
-            }
-            $('#search_filter_btn').on('click',function () {
-                table.draw();
-            });
-            $('#total_shipments').on('click', function () {
-                add_animation($(this));
-                $('#cards_filter_input').val('total');
-                table.draw();
-            });
-            $('#total_pending').on('click', function () {
-                add_animation($(this));
-                $('#cards_filter_input').val('booked');
-                table.draw();
-            });
-            $('#total_received').on('click', function () {
-                add_animation($(this));
-                $('#cards_filter_input').val('received');
-                table.draw();
-            });
-            $('#total_delivered').on('click', function () {
-                add_animation($(this));
-                $('#cards_filter_input').val('delivered');
-                table.draw();
-            });
-            $('#total_return').on('click', function () {
-                add_animation($(this));
-                $('#cards_filter_input').val('returned');
-                table.draw();
-            });
-            $('#total_inprocess').on('click', function () {
-                add_animation($(this));
-                $('#cards_filter_input').val('in_process');
-                table.draw();
-            });
-            $('#total_cancelled').on('click', function () {
-                add_animation($(this));
-                $('#cards_filter_input').val('cancelled');
-                table.draw();
             });
 
         });
