@@ -404,6 +404,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
             Route::post('view_cities', 'Admins\AdminZonalManagementController@view_cities')->name('view_cities');
+            Route::post('status_update', 'Admins\AdminZonalManagementController@zonal_status_update')->name('status_update');
         });
     });
     Route::prefix('pickups')->name('pickups.')->group(function () {

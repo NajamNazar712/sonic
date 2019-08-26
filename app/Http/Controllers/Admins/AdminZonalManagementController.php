@@ -29,11 +29,21 @@ class AdminZonalManagementController extends Controller
     }
 
     public function list(Request $request) {
-        $zones = Zone::select('zones.id', 'zones.created_at', 'zones.updated_at', 'zones.name', 'zones.gst');
+        $zones = Zone::select('zones.id', 'zones.created_at', 'zones.updated_at', 'zones.name', 'zones.gst', 'zones.status');
 
         $datatables = Datatables::of($zones)
+            ->editColumn('status', function ($zone) {
+                if($zone->status == 1){
+                    return 'Active';
+                }
+                else{
+                    return 'Inctive';
+                }
+            })
             ->addColumn('action', function($zone) {
                 $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                $active = '<button type="button" class="dropdown-item activate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Activate Zone</div></button>';
+                $inactive = '<button type="button" class="dropdown-item deactivate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Deactivate Zone</div></button>';
                 $view_cities_button = '<button type="button" class="dropdown-item view_cities"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Cities</div></button>';
 
                 $dropdown = '
@@ -44,6 +54,12 @@ class AdminZonalManagementController extends Controller
 
                 if (session('role_id') == 1 || in_array(133, session('permissions'))) {
                     $dropdown .= $edit_button;
+                    if($zone->status == 1){
+                        $dropdown .= $inactive;
+                    }
+                    else{
+                        $dropdown .= $active;
+                    }
                 }
 
                 $dropdown .= $view_cities_button;
@@ -164,6 +180,30 @@ class AdminZonalManagementController extends Controller
         }
         else {
             return 0;
+        }
+    }
+    public function zonal_status_update(Request $request) {
+        $zone_id = $request->id;
+        $zone = Zone::where('id', $zone_id);
+        $new_status = $request->status;
+        if($zone->exists()){
+            $zone = $zone->first();
+            if($new_status == 1){
+                $zone->status = 1;
+                $status_name = 'Activated';
+            }
+            else{
+                City::where('zone_id', $zone_id)->update([
+                    'status' => 0
+                ]);
+                $zone->status = 0;
+                $status_name = 'Deactivated';
+            }
+            $zone->save();
+            return response()->json(['status' => 1, 'success' => 'Zone '. $status_name .' successfully!']);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Invalid Zone selected!']);
         }
     }
 }

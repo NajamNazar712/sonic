@@ -24,6 +24,7 @@
 										<th class="border-primary border-darken-1">ID</th>
 										<th class="border-primary border-darken-1">Name</th>
 										<th class="border-primary border-darken-1">GST</th>
+										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1">Added Datetime</th>
 										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1"></th>
@@ -58,10 +59,25 @@
 @endsection
 
 @section('css')
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+	<style>
+		#toast-bottom-center.toast-container {
+			text-align: center;
+		}
+
+		#toast-bottom-center.toast-container .toast {
+			display: table;
+			width: auto !important;
+			text-align: left;
+		}
+	</style>
 @endsection
 
 @section('js')
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 	<script>
 		$(document).ready(function() {
 			jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -79,6 +95,7 @@
                             head.push('S. No.');
                             head.push('Name');
                             head.push('GST');
+                            head.push('Status');
                             head.push('Created Datetime');
                             head.push('Updated Datetime');
 
@@ -88,6 +105,7 @@
                                 row.push(index + 1);
                                 row.push(values.name);
                                 row.push(values.GST);
+                                row.push(values.status);
                                 row.push(values.created_at);
                                 row.push(values.updated_at);
 
@@ -138,6 +156,7 @@
 					{data: 'id', name: 'zones.id', class: 'align-middle id'},
 					{data: 'name', name: 'zones.name', class: 'align-middle name'},
 					{data: 'gst', name: 'zones.gst', class: 'align-middle gst'},
+					{data: 'status', name: 'zones.status', class: 'align-middle status'},
 					{data: 'created_at', name: 'zones.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'zones.updated_at', class: 'align-middle updated_at'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -153,6 +172,10 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Inactive</option>' +
+                        '<option value="1">Active</option>' +
+                        '</select>';
 
                     this.api().columns().every(function(column_id) {
 						var column = this;
@@ -160,6 +183,12 @@
 
 						if ($(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
+                        }
+                        else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
@@ -172,6 +201,12 @@
 						}
 					});
 
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 					this.api().table().columns.adjust();
 				}
 			});
@@ -184,6 +219,108 @@
 						var link = '{{ route('admin.management.zonal.update.index', ["id" => 0]) }}';
 
 						window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
+					}
+					if ($(this).hasClass('activate')) {
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to activate this Zone!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                $.ajax({
+                                    url: '{!! route('admin.management.zonal.status_update') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'id': id,
+                                        'status': 1
+                                    }
+                                })
+                                    .done(function (data) {
+                                        if (data != 0) {
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                        else {
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+                                        table.draw();
+                                    });
+                            }
+                        });
+					}
+					if ($(this).hasClass('deactivate')) {
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to Deactivate this Zone!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                $.ajax({
+                                    url: '{!! route('admin.management.zonal.status_update') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'id': id,
+                                        'status': 0
+                                    }
+                                })
+                                    .done(function (data) {
+                                        if (data != 0) {
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                        else {
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+                                        table.draw();
+                                    });
+                            }
+                        });
 					}
 				@endif
 
