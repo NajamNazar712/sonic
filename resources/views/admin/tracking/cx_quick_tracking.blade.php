@@ -185,6 +185,67 @@
                 </div>
             </div>
         </div>
+    </div><div class="modal fade text-left" id="UpdateConsigneeInfoModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UpdateConsigneeInfoModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Update Consignee Info</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="update_consignee_info_form" method="post" action="{{route('admin.cx_quick_tracking.update')}}">
+                        @csrf
+                        <div class="container">
+                            <div class="row">
+                                <h2 class="heading">Tracking Number</h2>
+                            </div>
+
+                            <input type="hidden" name="update_consignee_info_shipment_id" id="update_consignee_info_shipment_id">
+                            <div class="row old_scroll" id="update_consignee_info_shipment">
+
+                            </div>
+                            <hr>
+                            <div class="row justify-content-center">
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <input type="text" name="update_consignee_name" class="form-control" placeholder="Consignee Name" id="update_consignee_name" id="update_consignee_address" data-rule-required="true" data-msg-required="Consignee Name is required">
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <input type="text" name="update_consignee_address" class="form-control" placeholder="Consignee Address*" id="update_consignee_address" data-rule-required="true" data-msg-required="Consignee Address is required">
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <input type="text" name="update_consignee_phone" class="form-control phone_number" id="update_consignee_phone" placeholder="Consignee Phone Number*" data-rule-required="true" data-msg-required="Consignee Phone Number is required">
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <textarea class="form-control" name="update_special_instructions" id="update_special_instructions" rows="5" placeholder="Enter Special Instructions Here..."></textarea>
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="Update_consignee_info_button" type="submit" class="btn btn-primary btn-block">Update</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
 @endsection
@@ -247,7 +308,7 @@
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
@@ -351,6 +412,10 @@
                     allowClear:true,
                     dropdownParent:$('#add_request_form')
                 });
+                $('.phone_number').inputmask({
+                    'mask': '9999-9999999',
+                    'clearIncomplete': true
+                });
 
                 jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                     if (this.context.length) {
@@ -450,6 +515,7 @@
                     }
                 });
                 var shipment_id = null;
+                var update_shipment_id = null;
                 $('body').on('click','.request_add',function () {
                     shipment_id = $(this).parents('tr').attr('id');
                     var tracking_number = table.row().data().tracking_number;
@@ -457,10 +523,25 @@
                     $('#requested_shipments').html(html_row);
                     $('#AddRequestModal').modal('show');
                 });
+                $('body').on('click','.update_consignee_info',function () {
+                    var consignee_name = table.row().data().consignee_name;
+                    var consignee_address = table.row().data().address;
+                    var consignee_phone = table.row().data().consignee_phone_no;
+                    var special_instructions = table.row().data().special_instructions;
+                    update_shipment_id = $(this).parents('tr').attr('id');
+                    var tracking_number = table.row().data().tracking_number;
+                    html_row = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking_number +'</b></span></div>';
+                    $('#update_consignee_info_shipment_id').val(update_shipment_id);
+                    $('#update_consignee_name').val(consignee_name);
+                    $('#update_consignee_address').val(consignee_address);
+                    $('#update_consignee_phone').val(consignee_phone);
+                    $('#update_special_instructions').val(special_instructions);
+                    $('#update_consignee_info_shipment').html(html_row);
+                    $('#UpdateConsigneeInfoModal').modal('show');
+                });
 
                 $( "#add_request_form" ).bind('submit', function (e) {
                     e.preventDefault();
-                    console.log(shipment_id);
                     var case_nature_id = parseInt($('#case_nature_select').val());
                     if(case_nature_id === 1){
                         var nature_flag = true;
@@ -718,7 +799,39 @@
                     $('#request_complaints').addClass('d-none');
                     $('#request_service').addClass('d-none');
                     $('#request_feedback').addClass('d-none');
+                });
+                $( "#update_consignee_info_form" ).validate({
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    normalizer: function(value) {
+                        return $.trim(value);
+                    },
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function(form) {
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Your shipment is being booked!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                    }
+                });
+
+                $('#UpdateConsigneeInfoModal').on('hide.bs.modal', function (e) {
+                    $('#update_consignee_info_form')[0].reset();
+                    $('#update_consignee_info_shipment_id').val('');
+                    $('#update_consignee_name').val('');
+                    $('#update_consignee_address').val('');
+                    $('#update_consignee_phone').val('');
+                    $('#update_special_instructions').val('');
                 });
             }
             $('#search_filter_btn').on('click', function () {

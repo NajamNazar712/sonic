@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
@@ -401,7 +402,7 @@ class AdminTrackingController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no');
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no', 'shipments.shipper_status_id as status_id', 'shipments.special_instructions as special_instructions');
         $datatable = Datatables::of($quick_tracking)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -412,8 +413,13 @@ class AdminTrackingController extends Controller
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
-                            <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Request</div></button>
-                        </div>
+                            <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Request</div></button>';
+                if (session('role_id') == 1 || in_array(18, session('permissions'))) {
+                    if($shipments->status_id >= 4){
+                        $dropdown .= '<button type = "button" class="dropdown-item update_consignee_info" ><div class="row no-gutters align-items-center" ><div class="col-2" ><i class="ft-plus-circle" ></i ></div ><div class="col-9 offset-1" > Update Shipment Info</div ></button >';
+                    }
+                    }
+                $dropdown .= '</div>
                     </div>
                 ';
 
@@ -432,5 +438,44 @@ class AdminTrackingController extends Controller
             $datatable->where('shipments.order_id', 'LIKE', '%'. $order_id . '%');
         }
             return $datatable->make(true);
+    }
+
+    public function cx_quick_tracking_update_consginrr_info_and_special_instructions(Request $request){
+        $shipment_id = $request->update_consignee_info_shipment_id;
+        $consignee_name = $request->update_consignee_name;
+        $consignee_address = $request->update_consignee_address;
+        $consignee_phone = $request->update_consignee_phone;
+        $special_instructions = $request->update_special_instructions;
+        if($shipment_id != null){
+            if($consignee_name != null && $consignee_address != null && $consignee_phone != null){
+                $shipment = Shipment::find($shipment_id);
+
+                $shipment_history = new ShipmentInformationLog();
+                $shipment_history->shipment_id = $shipment->id;
+                $shipment_history->old_consignee_name = $shipment->consignee_name;
+                $shipment_history->new_consignee_name = $consignee_name;
+                $shipment_history->old_consignee_address = $shipment->consignee_address;
+                $shipment_history->new_consignee_address = $consignee_address;
+                $shipment_history->old_consignee_phone = $shipment->consignee_phone_number_1;
+                $shipment_history->new_consignee_phone = $consignee_phone;
+                $shipment_history->old_special_instruction = $shipment->special_instructions;
+                $shipment_history->new_special_instruction = $special_instructions;
+                $shipment_history->updated_by = Auth::id();
+                $shipment_history->save();
+
+                $shipment->consignee_name = $consignee_name;
+                $shipment->consignee_address = $consignee_address;
+                $shipment->consignee_phone_number_1 = $consignee_phone;
+                $shipment->special_instructions = $special_instructions;
+                $shipment->save();
+                return redirect()->back()->with('success', 'Shipment updated successfully!');
+            }
+            else{
+                return redirect()->back()->with('error', 'Please fill required fields');
+            }
+        }
+        else{
+            return redirect()->back()->with('error', 'Shipment not selected!');
+        }
     }
 }
