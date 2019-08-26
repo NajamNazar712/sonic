@@ -2829,6 +2829,26 @@ class NotificationsController extends Controller
 
                 self::email($subject, $body, $to);
             }
+            else if($id == 39){
+                $journey = ShipmentsJourney::where('shipment_id', $reference_1_id)->where('shipper_status_id', 25)->first();
+                $shipment = Shipment::find($reference_1_id);
+                if (strpos($subject, '[tracking_number]') !== FALSE) {
+                    $subject = str_replace('[tracking_number]', $shipment->tracking_number, $subject);
+                }
+                if (strpos($body, '[tracking_number]') !== FALSE) {
+                    $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
+                }
+                if (strpos($body, '[status_updated_at]') !== FALSE) {
+                    $body = str_replace('[status_updated_at]', $journey->created_at, $body);
+                }
+
+                if (strpos($body, '[receiver_name]') !== FALSE) {
+                    $body = str_replace('[receiver_name]', $journey->received_or_refused_by, $body);
+                }
+                $to = $shipment->user->email;
+
+                self::email($subject, $body, $to);
+            }
         }
       }
     }
