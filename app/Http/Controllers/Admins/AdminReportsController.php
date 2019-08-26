@@ -5053,7 +5053,8 @@ public function revenue_index(){
         $users = DB::connection('reports')->table('users')->join('sale_person_tags as spt','spt.user_id', '=', 'users.id')
             ->join('admins AS sp', 'sp.id', '=', 'spt.admin_id')
             ->select(['users.id','users.name as shipper','sp.name as sale_person','users.activated_at'])
-            ->where('spt.status', '=', 0);
+            ->where('spt.status', '=', 0)
+            ->where('users.status', '=', 3);
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');

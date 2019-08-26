@@ -180,6 +180,7 @@
 
                         },
                         success: function (result) {
+
                             head = [];
 
                             head.push('S. No.');
@@ -197,6 +198,7 @@
                                 row.push(values.shipper);
                                 row.push(values.sale_person);
                                 row.push(values.activated_at);
+                                body.push(row);
                             });
                         },
                         async: false
@@ -224,7 +226,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                "deferLoading": [50, 0],
+                deferLoading: [50, 0],
                 ajax:{
                     url: '{{ route('admin.reports.account_activation.list') }}',
                     data: function (d) {
