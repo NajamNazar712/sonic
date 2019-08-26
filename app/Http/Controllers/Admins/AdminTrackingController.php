@@ -414,7 +414,7 @@ class AdminTrackingController extends Controller
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                             <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Request</div></button>';
-                if (session('role_id') == 1 || in_array(18, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(247, session('permissions'))) {
                     if($shipments->status_id >= 4){
                         $dropdown .= '<button type = "button" class="dropdown-item update_consignee_info" ><div class="row no-gutters align-items-center" ><div class="col-2" ><i class="ft-plus-circle" ></i ></div ><div class="col-9 offset-1" > Update Shipment Info</div ></button >';
                     }
