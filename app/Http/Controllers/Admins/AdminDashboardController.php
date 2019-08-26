@@ -6525,6 +6525,12 @@ class AdminDashboardController extends Controller
                 $citylist = City::where('hub_id',$id)->where('id','!=',$id)->where('status', 1)->count();
                 if($citylist == 0){
                     City::where('id',$city->id)->update(['status'=>0]);
+                    $zone_cities = City::where('zone_id', $city->zone_id)->where('status', 1)->count();
+                    if($zone_cities == 0){
+                        $zone = Zone::find($city->zone_id);
+                        $zone->status = 0;
+                        $zone->save();
+                    }
                     return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
                 }else{
                     return redirect()->route('admin.management.city')->with('error', 'There are some active cities in hub, please deactivate those cities first!');
@@ -6536,6 +6542,10 @@ class AdminDashboardController extends Controller
             }
         }elseif($status == 'cityactive'){
             $city = City::find($id);
+            $zone = Zone::find($city->zone_id);
+            if($zone->status == 0){
+                return redirect()->route('admin.management.city')->with('error', 'Please, activate or change Zone for city first!');
+            }
             if($city->hub == 1){
                 if($city->status == 0){
                     $city->status = 1;

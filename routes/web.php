@@ -405,6 +405,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
             Route::post('view_cities', 'Admins\AdminZonalManagementController@view_cities')->name('view_cities');
+            Route::post('status_update', 'Admins\AdminZonalManagementController@zonal_status_update')->name('status_update');
         });
     });
     Route::prefix('pickups')->name('pickups.')->group(function () {
@@ -761,6 +762,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('cx_quick_tracking')->name('cx_quick_tracking.')->group(function() {
         Route::get('', 'Admins\AdminTrackingController@cx_quick_tracking_index')->name('cx_index');
         Route::get('list', 'Admins\AdminTrackingController@cx_quick_tracking_list')->name('cx_list');
+        Route::post('update', 'Admins\AdminTrackingController@cx_quick_tracking_update_consginrr_info_and_special_instructions')->name('update');
     });
         Route::prefix('user_management')->name('user_management.')->group(function() {
         Route::prefix('users')->name('users.')->group(function() {

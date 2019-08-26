@@ -254,15 +254,15 @@
             var id = $(this).data('target-id');
             var rel = $(this).attr('rel');
             var isHub = $(this).attr('hub');
+            if(rel == 'cityInactive'){
+                var atext = "Select Yes to Deactive this city!";
+            }else{
+                var atext = "Select Yes to active this city!";
+            }
 
             if(isHub == 0){
                 $('#city_active_form #cid').val(id);
                 $('#city_active_form #cstatus').val(rel);
-                if(rel == 'cityInactive'){
-                    var atext = "Select Yes to Deactive this city!";
-                }else{
-                    var atext = "Select Yes to active this city!";
-                }
                 swal({
                     title: 'Are You Sure?',
                     text: atext,

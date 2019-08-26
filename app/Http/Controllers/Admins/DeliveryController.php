@@ -772,6 +772,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
+                            <td class="color primary"><strong>Special Instructions</strong></td>
                             <td class="color primary"><strong>Remarks</strong></td>
                             <td class="color primary" style="width:200px;"><strong>Receiver\'s Name</strong></td>
                             <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
@@ -829,6 +830,12 @@ class DeliveryController extends Controller
                             <td class="'.$class.'">Rs 0</td>
                     ';
                 }
+                if($shipment->special_instructions != null){
+                    $shipment_details_row_start .= '<td class="'.$class.'">' . $shipment->special_instructions . '</td>';
+                }
+                else{
+                    $shipment_details_row_start .= '<td class="'.$class.'">-</td>';
+                }
 
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id','!=',5)->where('remarks', '!=', null)->select('remarks');
 
@@ -844,6 +851,7 @@ class DeliveryController extends Controller
                             <td class="'.$class.'"></td>
                     ';
                 }
+
 
                 $shipment_details_row_start .= '
                             <td class="'.$class.'"></td>
