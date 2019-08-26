@@ -7,6 +7,7 @@ use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Models\Rider;
 use App\Http\Models\ShipperNotificationEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -2859,6 +2860,27 @@ class NotificationsController extends Controller
                         $to = $shipper->email;
                         self::email($subject, $body, $to);
                     }
+                }
+            }
+            else if($id == 40){
+                $delivery_note = DeliveryNote::find($reference_1_id);
+                if($delivery_note){
+                    $rider = Rider::find($delivery_note->rider_id);
+                    $delivery_note_id = str_pad($delivery_note->id, 6, '0', STR_PAD_LEFT);
+
+                    if (strpos($body, '[rider_name]') !== FALSE) {
+                        $body = str_replace('[rider_name]', $rider->name, $body);
+                    }
+
+                    if (strpos($body, '[delivery_note_id]') !== FALSE) {
+                        $body = str_replace('[delivery_note_id]', $delivery_note_id, $body);
+                    }
+
+                    if (strpos($body, '[password]') !== FALSE) {
+                        $body = str_replace('[password]', $delivery_note->password, $body);
+                    }
+                    $to = $rider->phone;
+                    self::sms($body, $to);
                 }
             }
         }

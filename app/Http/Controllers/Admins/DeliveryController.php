@@ -369,7 +369,7 @@ class DeliveryController extends Controller
         $shipments = explode(',',$request->shipment_ids);
         $notifications = explode(',',$request->notification_ids);
         $rider_informations = explode(',',$request->rider_info_ids);
-
+        $password = rand(10001,99999);
         $admin = Auth::id();
 
         $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15, 49, 55);
@@ -401,6 +401,7 @@ class DeliveryController extends Controller
                 'shipments_count' => $shipments_count,
                 'admin_id' => $admin,
                 'total_cod_amount' => $total_cod_amount,
+                'password' => $password,
                 'last_updated_at' => Carbon::now()
             ]);
 
@@ -441,6 +442,7 @@ class DeliveryController extends Controller
                         NotificationsController::send(12, $note->id, $shipment);
                     }
                 }
+                NotificationsController::send(40, $note->id);
             }
 
             return redirect()->back()->with(['success'=>'Delivery note has been created successfully','print'=>$note->id]);
@@ -1115,10 +1117,24 @@ class DeliveryController extends Controller
 
     }
 
+    public function receive_delivery_password_check(Request $request){
+        $delivery_note_id = $request->delivery_note_id;
+        $password = $request->password;
+        if(DeliveryNote::where('id', $delivery_note_id)->where('password', $password)->exists()){
+            return response()->json(['status' => 0]);
+        }else{
+            return response()->json(['status' => 1, 'error' => 'Wrong Password']);
+        }
+
+    }
     public function receive_delivery_status_submit_all(Request $request){
         $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
         $selected_status = $request->selected_status;
+        $password = $request->password;
+        if(!DeliveryNote::where('id', $delivery_note_id)->where('password', $password)->exists()){
+            return response()->json(['status' => 0, 'error' => 'Wrong Password']);
+        }
         if($selected_status == 0 || $selected_status == null || $selected_status == ''){
             return response()->json(['status'=>0, 'error' => 'Status not selected!']);
         }
@@ -1320,6 +1336,10 @@ class DeliveryController extends Controller
     {
         $shipments = explode(',', $request->shipment_ids);
         $delivery_note_id = $request->delivery_note_id;
+        $password = $request->password;
+        if(!DeliveryNote::where('id', $delivery_note_id)->where('password', $password)->exists()){
+            return redirect()->back()->with('error', 'Wrong Password!');
+        }
         if ($delivery_note_id != '') {
             foreach ($shipments as $shipment) {
                 $statusId = "reason_drop.$shipment";

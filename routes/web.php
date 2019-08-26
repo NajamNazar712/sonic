@@ -235,7 +235,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
 	        });
 	    });
 
-    Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){        Route::get('','Shippers\ShipperShipmentCancelController@index')->name('index');
+    Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
+        Route::get('','Shippers\ShipperShipmentCancelController@index')->name('index');
         Route::get('list', 'Shippers\ShipperShipmentCancelController@list')->name('list');
         Route::put('revert', 'Shippers\ShipperShipmentCancelController@revert')->name('revert');
     });
@@ -499,6 +500,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update/remove','Admins\DeliveryController@receive_delivery_remove')->name('update.remove');
             Route::post('print','Admins\DeliveryController@received_print')->name('print');
             Route::get('{id}/status','Admins\DeliveryController@receive_delivery_status_view')->name('status');
+            Route::post('password/check','Admins\DeliveryController@receive_delivery_password_check')->name('password.check');
             Route::post('add/status','Admins\DeliveryController@receive_delivery_status_submit')->name('add.status');
             Route::post('add/status/all','Admins\DeliveryController@receive_delivery_status_submit_all')->name('add.status.all');
             Route::get('{id}/add/list','Admins\DeliveryController@receive_delivery_status_list')->name('add.list');

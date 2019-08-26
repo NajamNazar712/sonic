@@ -16,7 +16,7 @@
                     <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note" name="delivery_note_id">
                     <input type="hidden" value="{{$shipments_count}}" id="shipments_count" name="shipments_count">
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
-
+                    <input type="hidden" name="password" id="password">
                     <div class="row justify-content-center">
                         <div class="col-12 mb-2">
                             <h3>Delivery Ratio {{$percentage}}%</h3>
@@ -358,6 +358,28 @@
         </div>
     </div>
     <!--Incomplete Address Modal -->
+    {{--Password Modal--}}
+    <div class="modal fade" id="PasswordModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="PasswordModal"
+         aria-hidden="true" style="top:30%;">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white text-center">
+                    <h4 class="modal-title white">Password</h4>
+
+                </div>
+                <div class="modal-body  text-center">
+
+                    <div class="row justify-content-center">
+                        <div class="form-group form-inline">
+                            <input type="text" class="form-control password" id="password_input" placeholder="Enter Password"><button class="btn btn-primary" id="password_submit" disabled>Enter</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{--Password Modal--}}
 @endsection
 
 @section('css')
@@ -444,6 +466,44 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#PasswordModal').modal('show');
+            $('.password').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'mask': '99999'
+            });
+            $('body').on('keypress','#password_input',function() {
+                if($(this).val().length == 5){
+                    $('#password_submit').attr('disabled', false);
+                }
+            });
+            $('#password_submit').on('click', function () {
+               var pass = $('#password_input').val();
+                var delivery_note = $('#delivery_note').val();
+
+                if(pass){
+                   $.ajax({
+                       url: '{!! route('admin.delivery.receive.password.check') !!}',
+                       type: 'POST',
+                       data: {
+                           'delivery_note_id': delivery_note,
+                           'password': pass,
+                           '_token': '{{ csrf_token() }}'
+                       }
+                   }).done(function (data) {
+                        if(data.status){
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            $('#password_input').val('');
+                            $('#password_submit').attr('disabled', true);
+                        }else{
+                            $('#PasswordModal').modal('hide');
+                            $('#password').val(pass);
+                        }
+                   });
+               }
+            });
             $('#select_all_status').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Selected Status Update',
                 width:'100%',
