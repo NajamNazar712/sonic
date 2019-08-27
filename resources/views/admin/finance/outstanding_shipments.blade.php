@@ -66,6 +66,7 @@
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
+										<th class="border-primary border-darken-1"></th>
 										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Tracking Number</th>
 										<th class="border-primary border-darken-1">Consignee</th>
@@ -91,6 +92,46 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="modal fade text-left" id="RevertModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RevertModal"
+		 aria-hidden="true">
+		<div class="modal-dialog modal-xl" role="document">
+			<div class="modal-content">
+				<div class="modal-header bg-primary white">
+					<h4 class="modal-title white">Revert Status Request</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body text-center">
+					{{--<form id="edit_deposit_slip_form" class="form" action="{{route('admin.finance.outstanding_sdn.edit')}}" method="post" enctype="multipart/form-data">--}}
+						{{--@csrf--}}
+						{{--<input type="hidden" name="sdn_id" id="sdn_id"/>--}}
+						{{--<input type="hidden" name="deposit_rows" id="deposit_rows"/>--}}
+						{{--<table class="table table-bordered datatable" id="edit_deposit_slip_table" style="z-index: 3;">--}}
+							{{--<thead>--}}
+							{{--<tr role="row" class="bg-primary white">--}}
+
+								{{--<th class="border-primary border-darken-1">S. No.</th>--}}
+								{{--<th class="border-primary border-darken-1">Tracking</th>--}}
+								{{--<th class="border-primary border-darken-1">Bank Name</th>--}}
+								{{--<th class="border-primary border-darken-1">Amount </th>--}}
+								{{--<th class="border-primary border-darken-1">Deposit Slip</th>--}}
+
+							{{--</tr>--}}
+							{{--</thead>--}}
+						{{--</table>--}}
+						{{--<hr>--}}
+						{{--<div class="row justify-content-center">--}}
+							{{--<div class="col-3">--}}
+								{{--<button type="submit" class="btn btn-primary btn-block">Update</button>--}}
+							{{--</div>--}}
+						{{--</div>--}}
+					{{--</form>--}}
+				</div>
+			</div>
+		</div>
+	</div>
 @endsection
 
 @section('css')
@@ -98,6 +139,17 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<style>
+		table.dataTable tbody tr td.select-checkbox:before {
+			top: 50%;
+			border-color: #64a0d2;
+		}
+
+		table.dataTable tbody tr.selected td.select-checkbox:after {
+			top: 50%;
+			text-shadow: none;
+		}
+	</style>
 @endsection
 
 @section('js')
@@ -226,10 +278,88 @@
                     return {body: body, header: head};
                 }
             } );
+            var selected_rows = [];
 
 			var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+
+                    {
+                        text: 'Request Revert',
+                        className: 'btn btn-primary revert_request',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            $.ajax({
+                                url: '{!! route('admin.finance.outstanding_shipments.revert_request_shipments_check') !!}',
+                                method: 'PUT',
+                                data: {
+                                    'selected_rows': selected_rows,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                                .done(function(data) {
+                                    if (data.status == 0) {
+                                        $('#RevertModal').modal('show');
+                                    }
+                                    else {
+                                    }
+
+                                    table.draw(false);
+                                });
+                        }
+                    },{
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.revert_request').enable();
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                }
+                            });
+                            if (selected_rows.length == 0) {
+                                table.button('.revert_request').disable();
+                            }
+                        }
+                    },
                     {
                         extend: 'excel',
                         title: 'Outstanding Shipments',
@@ -241,6 +371,12 @@
 				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 language: {
                     processing: data_table_loader
                 },
@@ -257,6 +393,7 @@
 				rowId: 'id',
 				order: [[10, 'desc']],
 				columns: [
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'tracking_number', name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
 					{data:'consignee', name: 's.consignee_name', class: 'align-middle text-center consignee'},
@@ -277,7 +414,7 @@
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
 
-					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -354,6 +491,26 @@
 					this.api().table().columns.adjust();
 				}
 			});
+
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.revert_request').enable();
+                }
+                else {
+                    table.button('.revert_request').disable();
+                }
+            });
 
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
