@@ -18,6 +18,7 @@ class CreateAdjustmentLogsTable extends Migration
             $table->integer('shipment_id');
             $table->integer('adjustment_type_id');
             $table->integer('admin_id');
+            $table->string('remarks')->nullable();
             $table->decimal('amount');
             $table->timestamps();
         });
