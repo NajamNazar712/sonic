@@ -1520,7 +1520,7 @@ class AdminFinanceController extends Controller
 
 
         }
-        self::adjustment_logs_add($shipment_id, $adjustment_type, $payable);
+        self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks);
         ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), $payable_remarks);
     }
 
@@ -4616,13 +4616,22 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static public function adjustment_logs_add($shipment_id, $type, $amount){
+    static public function adjustment_logs_add($shipment_id, $type, $amount, $remarks = NULL){
 
             $adjustment_log = new AdjustmentLog();
             $adjustment_log->shipment_id = $shipment_id;
             $adjustment_log->adjustment_type_id = $type;
             $adjustment_log->admin_id = Auth::id();
             $adjustment_log->amount = $amount;
+            $adjustment_log->remarks = $remarks;
             $adjustment_log->save();
+    }
+
+    public function revert_request_shipments_check(Request $request){
+        if(!empty($request->shipment_ids)){
+            foreach ($request->shipment_ids as $shipment_id){
+                
+            }
+        }
     }
 }
