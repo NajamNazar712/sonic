@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
 use App\Http\Models\Admin\StationDepositNoteSlip;
@@ -1039,7 +1040,7 @@ class AdminFinanceController extends Controller
                 if ($pending_payment_shipment->exists()) {
                     $pending_payment_shipment = $pending_payment_shipment->latest()->first();
 
-                    self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0);
+                    self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0,3);
                 }
                 else {
                     $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
@@ -1047,7 +1048,7 @@ class AdminFinanceController extends Controller
                     if ($done_payment_shipment->exists()) {
                         $done_payment_shipment = $done_payment_shipment->latest()->first();
 
-                        self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1);
+                        self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1,3);
                     }
                 }
             }
@@ -1096,7 +1097,7 @@ class AdminFinanceController extends Controller
                 }
 
                 if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
-                    self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type);
+                    self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type,3);
                 }
             }
 
@@ -1164,7 +1165,7 @@ class AdminFinanceController extends Controller
                 if ($pending_payment_shipment->exists()) {
                     $pending_payment_shipment = $pending_payment_shipment->latest()->first();
 
-                    $this->adjust_payment($pending_payment_shipment->pending_payment_id, $request->id, 0);
+                    $this->adjust_payment($pending_payment_shipment->pending_payment_id, $request->id, 0, 2);
                 }
                 else {
                     $done_payment_shipment = DonePaymentShipment::where('shipment_id', $request->id);
@@ -1172,7 +1173,7 @@ class AdminFinanceController extends Controller
                     if ($done_payment_shipment->exists()) {
                         $done_payment_shipment = $done_payment_shipment->latest()->first();
 
-                        $this->adjust_payment($done_payment_shipment->done_payment_id, $request->id, 1);
+                        $this->adjust_payment($done_payment_shipment->done_payment_id, $request->id, 1,2);
                     }
                 }
             }
@@ -1221,7 +1222,7 @@ class AdminFinanceController extends Controller
                 }
 
                 if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
-                    self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type);
+                    self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type,2);
                 }
             }
 
@@ -1450,7 +1451,7 @@ class AdminFinanceController extends Controller
         return redirect()->route('admin.finance.change_shipment_weight.index')->with('success', 'Shipment\'s weight has been changed');
     }
 
-    static public function add_adjustment($shipment_id, $payable, $payable_remarks = '') {
+    static public function add_adjustment($shipment_id, $payable, $payable_remarks = '', $adjustment_type = NULL) {
         $shipment = Shipment::find($shipment_id);
 
         $amount = 0;
@@ -1516,8 +1517,10 @@ class AdminFinanceController extends Controller
             $pending_invoice_shipment->invoice_amount = 0 - $payable;
 
             $pending_invoice_shipment->save();
-        }
 
+
+        }
+        self::adjustment_logs_add($shipment_id, $adjustment_type, $payable);
         ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), $payable_remarks);
     }
 
@@ -1572,7 +1575,7 @@ class AdminFinanceController extends Controller
         $payable = str_replace(',', '', $request->input('payable'));
         $payable_remarks = $request->input('payable_remarks');
 
-        $this->add_adjustment($shipment_id, $payable, $payable_remarks);
+        $this->add_adjustment($shipment_id, $payable, $payable_remarks, 5);
 
         return redirect()->route('admin.finance.add_shipment_adjustment.index')->with('success', 'Shipment\'s adjustment has been added');
     }
@@ -1586,11 +1589,15 @@ class AdminFinanceController extends Controller
                 $shipment->amount = 0;
 
                 $shipment->received_amount = $receivable;
+
+                self::adjustment_logs_add($shipment_id,1,0);
             }
             else {
                 $shipment->amount = $receivable;
 
                 $shipment->received_amount = NULL;
+
+                self::adjustment_logs_add($shipment_id,1,$receivable);
             }
 
             $shipment->return_charges = NULL;
@@ -1612,14 +1619,14 @@ class AdminFinanceController extends Controller
                 if ($pending_payment_shipment->exists()) {
                     $pending_payment_shipment = $pending_payment_shipment->latest()->first();
 
-                    self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0);
+                    self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0, 1);
                 } else {
                     $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
 
                     if ($done_payment_shipment->exists()) {
                         $done_payment_shipment = $done_payment_shipment->latest()->first();
 
-                        self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1);
+                        self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1, 1);
                     }
                 }
             } else {
@@ -1665,12 +1672,13 @@ class AdminFinanceController extends Controller
                 }
 
                 if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
-                    self::adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type);
+                    self::adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, 1);
                 }
             }
 
             ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id());
         }
+
     }
 
     static public function add_payment($shipment_id, $type) {
@@ -1817,7 +1825,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static private function adjust_payment($payment_id, $shipment_id, $payment_type) {
+    static private function adjust_payment($payment_id, $shipment_id, $payment_type, $adjustment_type = NULL) {
         if ($payment_type == 0) {
             $payment_shipment = PendingPaymentShipment::where('pending_payment_id', $payment_id)->where('shipment_id', $shipment_id)->latest()->first();
         }
@@ -1865,9 +1873,11 @@ class AdminFinanceController extends Controller
         $pending_payment_shipment->payable = $payable;
 
         $pending_payment_shipment->save();
+
+        self::adjustment_logs_add($shipment_id,$adjustment_type, $payable);
     }
 
-    static private function adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type) {
+    static private function adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, $adjustment_type = NULL) {
         if ($payment_shipment_id) {
             if ($payment_type == 0) {
                 $payment_shipment = PendingPaymentShipment::find($payment_shipment_id);
@@ -1938,6 +1948,8 @@ class AdminFinanceController extends Controller
                 $pending_payment_shipment->payable = $payable;
 
                 $pending_payment_shipment->save();
+
+                self::adjustment_logs_add($shipment_id,$adjustment_type, $payable);
             }
         }
     }
@@ -4602,5 +4614,15 @@ class AdminFinanceController extends Controller
             </html>
             ';
         }
+    }
+
+    static public function adjustment_logs_add($shipment_id, $type, $amount){
+
+            $adjustment_log = new AdjustmentLog();
+            $adjustment_log->shipment_id = $shipment_id;
+            $adjustment_log->adjustment_type_id = $type;
+            $adjustment_log->admin_id = Auth::id();
+            $adjustment_log->amount = $amount;
+            $adjustment_log->save();
     }
 }
