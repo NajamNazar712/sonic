@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StandardBookingTypeCharge;
 use App\Http\Models\Admin\StandardCashHandlingCharge;
@@ -1133,6 +1134,7 @@ class AdminCorporateAccountsController extends Controller
         }
         User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
 
+        NotificationsController::send(38, $id);
 
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
