@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
+use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\CRM\CrmRequestChannel;
@@ -45,6 +46,7 @@ use App\Http\Models\InvoiceStatus;
 use Auth;
 use DB;
 
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -4659,6 +4661,34 @@ class AdminFinanceController extends Controller
     }
 
     public function revert_request_submit(Request $request){
-        return $request;
+        if($request->revert_shipment_ids != null){
+            $shipment_ids = explode(',', $request->revert_shipment_ids);
+            $delivery_note_ids = explode(',', $request->revert_delivery_note_ids);
+
+            foreach ($shipment_ids as $index => $shipment_id) {
+//                return $delivery_note_ids[$index];
+                DeliveryNoteShipment::where('delivery_note_id', $delivery_note_ids[$index])->where('shipment_id', $shipment_id)->update(['status' => 11]);
+                $revert_status_request = new RevertStatusRequest();
+                $revert_status_request->shipment_id = $shipment_id;
+                $revert_status_request->delivery_note_id = $delivery_note_ids[$index];
+                $revert_status_request->remarks = $request->remarks[$shipment_id];
+                $file_name = 'upload_image'.$shipment_id;
+
+                $filename = 'revert_request_' . $delivery_note_ids[$index] . '_detail_' . $shipment_id . '.png';
+
+                $file = $request->file($file_name);
+
+                Storage::disk('public')->putFileAs('revert_status_requests', $file, $filename);
+
+                $revert_status_request->image = $filename;
+                $revert_status_request->admin_id = Auth::id();
+                $revert_status_request->save();
+                return redirect()->back()->with(['success' => 'Shipments updated to Revert Request Status!']);
+
+            }
+        }
+        else{
+            return redirect()->back()->with(['errors' => 'Shipments not selected!']);
+        }
     }
 }

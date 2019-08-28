@@ -108,6 +108,7 @@
 					<form id="revert_status_add_form" class="form" action="{{route('admin.finance.outstanding_shipments.revert_request_submit')}}" method="post" enctype="multipart/form-data">
 						@csrf
 						<input type="hidden" name="revert_shipment_ids" id="revert_shipment_ids"/>
+						<input type="hidden" name="revert_delivery_note_ids" id="revert_delivery_note_ids"/>
 						<table class="table table-bordered datatable" id="revert_status_table" style="z-index: 3;">
 							<thead>
 							<tr role="row" class="bg-primary white">
@@ -331,41 +332,30 @@
 
                                                 }
                                             });
+                                            console.log(data);
                                             selected_rows = [];
                                             selected_delivery_note_ids = [];
                                             $.each(data.shipments, function (index, value) {
                                                 selected_rows.push(index);
-                                                // selected_delivery_note_ids.push(data)
+                                                selected_delivery_note_ids.push(data.delivery_note_ids[index]);
                                                 var remarks_input = '<textarea class="form-control form-control-sm remarks" rows="5" name="remarks['+index+']" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks are required"></textarea>';
                                                 var upload_image = '<input class="form-control form-control-sm" type="file" name="upload_image'+index+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
                                                 revert_status_table.row.add([0, value, remarks_input, upload_image]).node().id = index;
                                                 revert_status_table.draw(true);
                                             });
-
                                             $('body').on('change','#revert_status_table tr td.remarks textarea',function() {
                                                 $(this).val($(this).val().trim());
                                             });
 
-                                            $('#revert_status_add_form').validate({
-                                                errorClass: 'danger',
-                                                successClass: 'success',
-                                                errorPlacement: function(error, element) {
-                                                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                                                },
-                                                submitHandler: function(form) {
-													$('#revert_shipment_ids').val(selected_rows);
 
-													form.submit();
-
-                                                }
-                                            });
                                         }
                                         else {
                                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            selected_delivery_note_ids = [];
+                                            selected_rows = [];
+                                            table.draw(false);
                                         }
-										selected_delivery_note_ids = [];
-                                        selected_rows = [];
-                                        table.draw(false);
+
                                     });
 							}
 
@@ -675,7 +665,20 @@
 					});
 				}
 			});
+            $('#revert_status_add_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $('#revert_shipment_ids').val(selected_rows);
+                    $('#revert_delivery_note_ids').val(selected_delivery_note_ids);
 
+                    form.submit();
+
+                }
+            });
             function printDNCC(id) {
                 $.ajax({
                     url: '{!! route('admin.delivery.sdn.dncc.print') !!}',
