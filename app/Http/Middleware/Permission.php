@@ -353,6 +353,8 @@ class Permission
             'reports.summary.index' => 206,
             'reports.summary.data' => 206,
             'reports.summary.list' => 206,
+            'reports.adjustments.index' => 248,
+            'reports.adjustments.list' => 248,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
