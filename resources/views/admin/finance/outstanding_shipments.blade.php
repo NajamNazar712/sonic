@@ -19,6 +19,14 @@
 
 							<form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 								<div class="form-group">
+									<select name="recovery_status" class="select2" id="recovery_status_select" data-rule-required="true" data-msg-required="Status is required">
+										<option value="0">All</option>
+										<option value="1">Outstanding</option>
+										<option value="7">Resolved</option>
+										<option value="11">Revert Requested</option>
+									</select>
+								</div>
+								 <div class="form-group ml-1">
 									<select name="hub" class="select2" id="hub" data-rule-required="true" data-msg-required="Hub is required">
 										<option value="0">All</option>
 
@@ -170,6 +178,13 @@
 				$(this).valid();
 			});
 
+			$('#search_form #recovery_status_select').prepend('<option value="" selected="selected"></option>').select2({
+				width: '150px',
+				placeholder: 'Recovery Status*'
+			}).bind('change', function() {
+				$(this).valid();
+			});
+
 			$('#search_form #service').prepend('<option value="" selected="selected"></option>').select2({
 				width: '150px',
 				placeholder: 'Service'
@@ -225,6 +240,7 @@
                         data: {
                             'page': 'all',
                             'hub': $('#search_form #hub').val(),
+                            'recovery_status': $('#search_form #recovery_status_select').val(),
                     		'service': $('#search_form #service').val(),
                     		'delivery_date_from': $('#search_form input[name="delivery_date_from_formatted"]').val(),
                     		'delivery_date_to': $('#search_form input[name="delivery_date_to_formatted"]').val(),
@@ -264,7 +280,7 @@
                                 row.push(values.shipper);
                                 row.push(values.service_type);
                                 row.push(values.amount);
-                                row.push(values.recovery_status);
+                                row.push(values.shipment_recovery_status);
                                 row.push(values.status);
                                 row.push(values.status_updated_at);
                                 row.push(values.remarks);
@@ -332,7 +348,6 @@
 
                                                 }
                                             });
-                                            console.log(data);
                                             selected_rows = [];
                                             selected_delivery_note_ids = [];
                                             $.each(data.shipments, function (index, value) {
@@ -438,13 +453,14 @@
 					url: '{{ route('admin.finance.outstanding_shipments.list') }}',
 					data: function (d) {
 						d.hub = $('#search_form #hub').val();
+						d.recovery_status = $('#search_form #recovery_status_select').val();
 						d.service = $('#search_form #service').val();
 						d.delivery_date_from = $('#search_form input[name="delivery_date_from_formatted"]').val();
 						d.delivery_date_to = $('#search_form input[name="delivery_date_to_formatted"]').val();
 					}
 				},
 				rowId: 'id',
-				order: [[10, 'desc']],
+				order: [[12, 'desc']],
 				columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -456,7 +472,7 @@
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
 					{data:'service_type', name: 'bt.id', class: 'align-middle text-center service_type'},
 					{data:'amount', name: 's.amount', class: 'align-middle text-center amount'},
-					{data:'recovery_status', name: 'delivery_note_shipments.status', class: 'align-middle text-center recovery_status'},
+					{data:'shipment_recovery_status', name: 'delivery_note_shipments.status', class: 'align-middle text-center shipment_recovery_status'},
 					{data:'status', name: 'ss.id', class: 'align-middle text-center status'},
 					{data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
 					{data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
@@ -485,7 +501,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action') || $(header).is('.select')) {
+						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action') || $(header).is('.select') || $(header).is('.shipment_recovery_status')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))
@@ -577,6 +593,51 @@
 					swal({
 						title: 'Are you sure?',
 						text: 'You want to mark ' + tracking_number + ' Resolved?',
+						icon: 'success',
+						buttons: {
+							cancel: {
+								text: 'No',
+								value: null,
+								visible: true,
+								closeModal: true,
+							},
+							confirm: {
+								text: 'Yes',
+								value: true,
+								visible: true,
+								closeModal: true
+							}
+						},
+						closeOnClickOutside: false,
+						closeOnEsc: false,
+						dangerMode: true
+					}).then(function(confirm) {
+						if (confirm) {
+							$.ajax({
+								url: '{!! route('admin.finance.outstanding_shipments.resolved') !!}',
+								method: 'PUT',
+								data: {
+									'id': id,
+									'_token': '{{ csrf_token() }}'
+								}
+							})
+							.done(function(data) {
+								if (data.status == 0) {
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
+
+								table.draw(false);
+							});
+						}
+					});
+				}
+				else if ($(this).hasClass('reject')) {
+					swal({
+						title: 'Are you sure?',
+						text: 'You want to reject status reversion of ' + tracking_number + ' ?',
 						icon: 'success',
 						buttons: {
 							cancel: {

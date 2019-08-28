@@ -732,7 +732,7 @@ class AdminFinanceController extends Controller
 
                 return $updated_at->diffInDays($now) . 'd';
             })
-            ->addColumn('recovery_status',function ($shipment){
+            ->addColumn('shipment_recovery_status',function ($shipment){
                 if(in_array($shipment->recovery_status, [4,5,6])){
                     return "Outstanding";
                 }else if($shipment->recovery_status == 7){
@@ -743,7 +743,7 @@ class AdminFinanceController extends Controller
             })
             ->addColumn('action', function($shipment) {
                 $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
-                $reject_button = '<button type="button" class="dropdown-item reject"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
+                $reject_button = '<button type="button" class="dropdown-item reject"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
                 $adjust_in_payment_button = '<button type="button" class="dropdown-item adjust_in_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Adjust in Payment</div></button>';
 
                 if (session('role_id') == 1 || count(array_intersect([55, 56], session('permissions'))) !== 0) {
@@ -757,7 +757,7 @@ class AdminFinanceController extends Controller
                         if($shipment->recovery_status == 11){
                             $dropdown .= $reject_button;
                         }
-                        else{
+                        else if($shipment->recovery_status != 7){
                             $dropdown .= $resolve_button;
                         }
                     }
@@ -777,6 +777,18 @@ class AdminFinanceController extends Controller
                     return '';
                 }
             });
+
+        if ($recovery_status = $request->get('recovery_status')) {
+            if($recovery_status == 0){
+                $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
+            }else if($recovery_status == 1){
+                $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6]);
+            }else if($recovery_status == 7){
+                $datatables->where('delivery_note_shipments.status', '=', 7);
+            }else if($recovery_status == 11){
+                $datatables->where('delivery_note_shipments.status', '=', 11);
+            }
+        }
 
         if ($hub = $request->get('hub')) {
             $datatables->where('hc.id', '=', $hub);
@@ -798,7 +810,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_shipments_resolved(Request $request) {
-        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->whereIn('status', [4, 5, 6]);
+        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->whereIn('status', [4, 5, 6, 11]);
 
         if ($delivery_note_shipment->exists()) {
             $delivery_note_shipment = $delivery_note_shipment->first();
