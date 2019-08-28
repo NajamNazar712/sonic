@@ -331,11 +331,11 @@ class UserManagementController extends Controller
         if ($request->has('permission_ids')) {
             $current_permission_ids = AdminRoleModulePermission::where('role_id', $id)->pluck('permission_id')->toArray();
 
-            $crm_module_permission = ModulePermission::where('module_id', '=', 18)->pluck('id');
+//            $crm_module_permission = ModulePermission::where('module_id', '=', 18)->pluck('id');
             $delete_permission_ids = array_diff($current_permission_ids, $request->input('permission_ids'));
             $new_permission_ids = array_diff($request->input('permission_ids'), $current_permission_ids);
 
-            AdminRoleModulePermission::where('role_id', $id)->whereNotIn('permission_id', $crm_module_permission)->whereIn('permission_id', $delete_permission_ids)->delete();
+            AdminRoleModulePermission::where('role_id', $id)->whereIn('permission_id', $delete_permission_ids)->delete();
 
             foreach($new_permission_ids as $permission_id) {
                 $admin_role_module_permission = new AdminRoleModulePermission();
