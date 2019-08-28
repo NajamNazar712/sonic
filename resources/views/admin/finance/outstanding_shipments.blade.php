@@ -76,6 +76,7 @@
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Service Type</th>
 										<th class="border-primary border-darken-1">Amount</th>
+										<th class="border-primary border-darken-1">Recovery Status</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1">Status Updated Datetime</th>
 										<th class="border-primary border-darken-1">Remarks</th>
@@ -104,7 +105,7 @@
 					</button>
 				</div>
 				<div class="modal-body text-center">
-					<form id="revert_status_add_form" class="form" action="{{route('admin.finance.outstanding_sdn.edit')}}" method="post" enctype="multipart/form-data">
+					<form id="revert_status_add_form" class="form" action="{{route('admin.finance.outstanding_shipments.revert_request_submit')}}" method="post" enctype="multipart/form-data">
 						@csrf
 						<input type="hidden" name="revert_shipment_ids" id="revert_shipment_ids"/>
 						<table class="table table-bordered datatable" id="revert_status_table" style="z-index: 3;">
@@ -239,6 +240,7 @@
                             head.push('Shipper');
                             head.push('Service Type');
                             head.push('Amount');
+                            head.push('Recovery Status');
                             head.push('Status');
                             head.push('Status Updated Datetime');
                             head.push('Remarks');
@@ -261,6 +263,7 @@
                                 row.push(values.shipper);
                                 row.push(values.service_type);
                                 row.push(values.amount);
+                                row.push(values.recovery_status);
                                 row.push(values.status);
                                 row.push(values.status_updated_at);
                                 row.push(values.remarks);
@@ -463,6 +466,7 @@
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
 					{data:'service_type', name: 'bt.id', class: 'align-middle text-center service_type'},
 					{data:'amount', name: 's.amount', class: 'align-middle text-center amount'},
+					{data:'recovery_status', name: 'delivery_note_shipments.status', class: 'align-middle text-center recovery_status'},
 					{data:'status', name: 'ss.id', class: 'align-middle text-center status'},
 					{data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
 					{data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
@@ -473,8 +477,10 @@
 				],
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
-
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
+					if(data.recovery_status == 11){
+                        $('td:eq(0)', row).removeClass('select-checkbox');
+					}
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -489,7 +495,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action')) {
+						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action') || $(header).is('.select')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))

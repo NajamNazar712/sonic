@@ -632,7 +632,7 @@ class AdminFinanceController extends Controller
             })
             ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc')
+            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status')
             ->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
 
         if (session('role_id') != 1) {
@@ -647,6 +647,9 @@ class AdminFinanceController extends Controller
                 'data-sdn' => function ($shipments) {
                     return $shipments->sdn;
                 },
+                'recovery_status' => function ($shipments){
+                    return $shipments->recovery_status;
+                }
             ])
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -726,6 +729,15 @@ class AdminFinanceController extends Controller
                 $now = Carbon::now()->startOfDay();
 
                 return $updated_at->diffInDays($now) . 'd';
+            })
+            ->addColumn('recovery_status',function ($shipment){
+                if(in_array($shipment->recovery_status, [4,5,6])){
+                    return "Outstanding";
+                }else if($shipment->recovery_status == 7){
+                    return "Resolved";
+                }else if($shipment->recovery_status == 11){
+                    return "Revert Requested";
+                }
             })
             ->addColumn('action', function($shipment) {
                 $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
