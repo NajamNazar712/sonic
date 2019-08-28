@@ -1508,9 +1508,15 @@ class ShipperShipmentBookController extends Controller
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
         $charges_modes = ChargesModes::whereIn('id', [2, 3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
+        $air_waybill = ShipperAirWaybillSettings::where('user_id', session('user_id'));
+        if($air_waybill->exists()){
+            $air_waybill = $air_waybill->first();
+        }
+        else{
+            $air_waybill = null;
+        }
 
-
-        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date]);
+        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill]);
     }
 
     public function corporate_store(Request $request) {
