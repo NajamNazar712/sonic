@@ -9,6 +9,7 @@ use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\RevertStatusRequestLog;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\ShipmentStatus;
@@ -634,7 +635,11 @@ class AdminFinanceController extends Controller
             })
             ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status')
+            ->leftjoin('revert_status_request_logs as rsrl', function($join){
+                $join->on('rsrl.delivery_note_id', '=', 'delivery_note_shipments.delivery_note_id')
+                    ->where('delivery_note_shipments.shipment_id', '=', DB::raw('(SELECT shipment_id FROM revert_status_request_logs WHERE delivery_note_id = delivery_note_shipments.delivery_note_id AND shipment_id = s.id)'));
+            })
+            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsrl.previous_status as previous_status')
             ->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
 
         if (session('role_id') != 1) {
@@ -651,7 +656,22 @@ class AdminFinanceController extends Controller
                 },
                 'recovery_status' => function ($shipments){
                     return $shipments->recovery_status;
-                }
+                },
+                'class' => function ($shipments) {
+                    if ($shipments->recovery_status == 11) {
+                        if(in_array($shipments->previous_status, [4,5,6])){
+                            return 'outstanding_revert';
+                        }
+                        else if($shipments->previous_status == 7){
+                            return 'resolved_revert';
+                        }
+                        else{
+                            return '';
+                        }
+                    } else {
+                        return '';
+                    }
+                },
             ])
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -4685,6 +4705,8 @@ class AdminFinanceController extends Controller
 
             foreach ($shipment_ids as $index => $shipment_id) {
 //                return $delivery_note_ids[$index];
+                $previous = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_ids[$index])->where('shipment_id', $shipment_id)->first();
+                $previous_status = $previous->status;
                 DeliveryNoteShipment::where('delivery_note_id', $delivery_note_ids[$index])->where('shipment_id', $shipment_id)->update(['status' => 11]);
                 $revert_status_request = new RevertStatusRequest();
                 $revert_status_request->shipment_id = $shipment_id;
@@ -4701,6 +4723,13 @@ class AdminFinanceController extends Controller
                 $revert_status_request->image = $filename;
                 $revert_status_request->admin_id = Auth::id();
                 $revert_status_request->save();
+
+                $revert_status_request_log = new RevertStatusRequestLog();
+                $revert_status_request_log->delivery_note_id = $delivery_note_ids[$index];
+                $revert_status_request_log->shipment_id = $shipment_id;
+                $revert_status_request_log->previous_status = $previous_status;
+                $revert_status_request_log->updated_by = Auth::id();
+                $revert_status_request_log->save();
                 return redirect()->back()->with(['success' => 'Shipments updated to Revert Request Status!']);
 
             }

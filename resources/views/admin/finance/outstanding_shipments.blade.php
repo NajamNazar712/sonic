@@ -157,6 +157,15 @@
 			top: 50%;
 			text-shadow: none;
 		}
+
+		.outstanding_revert{
+			color: #FDFEFE;
+			background-color: #F39C12;
+		}
+		.resolved_revert{
+			/*color: #FDFEFE;*/
+			background-color: #F7DC6F;
+		}
 	</style>
 @endsection
 
