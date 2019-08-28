@@ -12,12 +12,12 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div id="search_form" class="row mb-2 justify-content-center">
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_shipper" class="form-control select2">
                                 @foreach($shippers as $shipper)
@@ -26,7 +26,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
 
                         <div class="form-group input-group ml-1">
                             <div class="input-group-prepend">
@@ -38,7 +38,7 @@
                             <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
                         </div>
                     </div>
-                    <div class="col-4 ">
+                    <div class="col-3 ">
                         <div class="form-group input-group ml-1">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
