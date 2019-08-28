@@ -1139,6 +1139,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('data', 'Admins\AdminReportsController@account_activation_data')->name('data');
             Route::get('list', 'Admins\AdminReportsController@account_activation_list')->name('list');
         });
+        Route::prefix('adjustments')->name('adjustments.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@adjustments_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@adjustments_list')->name('list');
+
+        });
     });
 
     //Reports end
