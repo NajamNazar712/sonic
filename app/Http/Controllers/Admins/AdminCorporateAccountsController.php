@@ -1133,6 +1133,7 @@ class AdminCorporateAccountsController extends Controller
         }
         User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
 
+        NotificationsController::send(38, $id);
 
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
