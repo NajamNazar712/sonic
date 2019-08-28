@@ -104,30 +104,28 @@
 					</button>
 				</div>
 				<div class="modal-body text-center">
-					{{--<form id="edit_deposit_slip_form" class="form" action="{{route('admin.finance.outstanding_sdn.edit')}}" method="post" enctype="multipart/form-data">--}}
-						{{--@csrf--}}
-						{{--<input type="hidden" name="sdn_id" id="sdn_id"/>--}}
-						{{--<input type="hidden" name="deposit_rows" id="deposit_rows"/>--}}
-						{{--<table class="table table-bordered datatable" id="edit_deposit_slip_table" style="z-index: 3;">--}}
-							{{--<thead>--}}
-							{{--<tr role="row" class="bg-primary white">--}}
+					<form id="revert_status_add_form" class="form" action="{{route('admin.finance.outstanding_sdn.edit')}}" method="post" enctype="multipart/form-data">
+						@csrf
+						<input type="hidden" name="revert_shipment_ids" id="revert_shipment_ids"/>
+						<table class="table table-bordered datatable" id="revert_status_table" style="z-index: 3;">
+							<thead>
+							<tr role="row" class="bg-primary white">
 
-								{{--<th class="border-primary border-darken-1">S. No.</th>--}}
-								{{--<th class="border-primary border-darken-1">Tracking</th>--}}
-								{{--<th class="border-primary border-darken-1">Bank Name</th>--}}
-								{{--<th class="border-primary border-darken-1">Amount </th>--}}
-								{{--<th class="border-primary border-darken-1">Deposit Slip</th>--}}
+								<th class="border-primary border-darken-1">S. No.</th>
+								<th class="border-primary border-darken-1">Tracking</th>
+								<th class="border-primary border-darken-1">Remarks</th>
+								<th class="border-primary border-darken-1">Image</th>
 
-							{{--</tr>--}}
-							{{--</thead>--}}
-						{{--</table>--}}
-						{{--<hr>--}}
-						{{--<div class="row justify-content-center">--}}
-							{{--<div class="col-3">--}}
-								{{--<button type="submit" class="btn btn-primary btn-block">Update</button>--}}
-							{{--</div>--}}
-						{{--</div>--}}
-					{{--</form>--}}
+							</tr>
+							</thead>
+						</table>
+						<hr>
+						<div class="row justify-content-center">
+							<div class="col-3">
+								<button type="submit" class="btn btn-primary btn-block">Update</button>
+							</div>
+						</div>
+					</form>
 				</div>
 			</div>
 		</div>
@@ -279,7 +277,8 @@
                 }
             } );
             var selected_rows = [];
-
+			var selected_delivery_note_ids = [];
+            var revert_status_table;
 			var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -289,23 +288,84 @@
                         className: 'btn btn-primary revert_request',
                         enabled: true,
                         action: function (e, dt, node, config) {
-                            $.ajax({
-                                url: '{!! route('admin.finance.outstanding_shipments.revert_request_shipments_check') !!}',
-                                method: 'PUT',
-                                data: {
-                                    'selected_rows': selected_rows,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            })
-                                .done(function(data) {
-                                    if (data.status == 0) {
-                                        $('#RevertModal').modal('show');
-                                    }
-                                    else {
-                                    }
+                            if(selected_rows.length > 0){
+                                table.rows().nodes().each(function(index) {
+                                    var row = table.row(index);
 
-                                    table.draw(false);
+                                    if ($(row.node()).hasClass('selected')) {
+                                        var id = parseInt(row.id());
+                                        var delivery_note_id = $(row.node()).attr('data-dncc');
+                                        selected_delivery_note_ids[id] = delivery_note_id;
+                                    }
                                 });
+
+                                $.ajax({
+                                    url: '{!! route('admin.finance.outstanding_shipments.revert_request_shipments_check') !!}',
+                                    method: 'PUT',
+                                    data: {
+                                        'shipment_ids': selected_rows,
+										'delivery_note_ids': selected_delivery_note_ids,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                })
+                                    .done(function(data) {
+                                        if (data.status == 0) {
+                                            $('#RevertModal').modal('show');
+                                            revert_status_table = $('#revert_status_table').DataTable({
+                                                dom: 'ltipr',
+                                                ordering:false,
+                                                paging:false,
+                                                columns: [
+                                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                                    {name: 'tracking_number', class: 'align-middle tracking_number form-group'},
+                                                    {name: 'remarks', class: 'align-middle remarks form-group'},
+                                                    {name: 'image', class: 'align-middle image form-group'},
+                                                ],
+                                                rowCallback: function(row, data, index) {
+                                                    var info = revert_status_table.page.info();
+
+                                                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                                                }
+                                            });
+                                            selected_rows = [];
+                                            selected_delivery_note_ids = [];
+                                            $.each(data.shipments, function (index, value) {
+                                                selected_rows.push(index);
+                                                // selected_delivery_note_ids.push(data)
+                                                var remarks_input = '<textarea class="form-control form-control-sm remarks" rows="5" name="remarks['+index+']" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks are required"></textarea>';
+                                                var upload_image = '<input class="form-control form-control-sm" type="file" name="upload_image'+index+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
+                                                revert_status_table.row.add([0, value, remarks_input, upload_image]).node().id = index;
+                                                revert_status_table.draw(true);
+                                            });
+
+                                            $('body').on('change','#revert_status_table tr td.remarks textarea',function() {
+                                                $(this).val($(this).val().trim());
+                                            });
+
+                                            $('#revert_status_add_form').validate({
+                                                errorClass: 'danger',
+                                                successClass: 'success',
+                                                errorPlacement: function(error, element) {
+                                                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                                                },
+                                                submitHandler: function(form) {
+													$('#revert_shipment_ids').val(selected_rows);
+
+													form.submit();
+
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }
+										selected_delivery_note_ids = [];
+                                        selected_rows = [];
+                                        table.draw(false);
+                                    });
+							}
+
                         }
                     },{
                         extend: 'selectAll',

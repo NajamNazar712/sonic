@@ -635,8 +635,6 @@
                                 });
                             }
                             $('#dncc_modal .modal-body').html(notes);
-
-
                         }
                     });
 
@@ -738,10 +736,6 @@
 
                                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
-                                },
-                                initComplete: function() {
-
-                                    // this.api().table().columns.adjust();
                                 }
                             });
 
@@ -781,7 +775,7 @@
 						if(data.status){
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 						}else{
-						    console.log(data);
+
 						    $('#EditDepositSlip').modal('show');
                             edit_deposit_table = $('#edit_deposit_slip_table').DataTable({
                                 dom: 'ltipr',

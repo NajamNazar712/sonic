@@ -633,7 +633,7 @@ class AdminFinanceController extends Controller
             ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
             ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc')
-            ->whereIn('delivery_note_shipments.status', [4, 5, 6]);
+            ->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
@@ -4628,10 +4628,25 @@ class AdminFinanceController extends Controller
     }
 
     public function revert_request_shipments_check(Request $request){
+        $filtered_shipments = array();
+        $filtered_dncc = array();
         if(!empty($request->shipment_ids)){
             foreach ($request->shipment_ids as $shipment_id){
-                
+                if(DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_ids[$shipment_id])->where('shipment_id', $shipment_id)->whereIn('status', [4,5,6,7])->exists()){
+                    $tracking_number = Shipment::find($shipment_id)->tracking_number;
+                    $filtered_shipments[$shipment_id] = $tracking_number;
+                    $filtered_dncc[$shipment_id] = $request->delivery_note_ids[$shipment_id];
+                }
+            }
+            if(count($filtered_shipments) > 0){
+                return response()->json(['status'=> 0, 'shipments' => $filtered_shipments, 'delivery_note_ids' => $filtered_dncc]);
+            }else{
+                return response()->json(['status'=> 1, 'error' => 'Revert request can not be requested for these shipments']);
             }
         }
+    }
+
+    public function revert_request_submit(Request $request){
+        return $request;
     }
 }

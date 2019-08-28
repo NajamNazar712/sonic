@@ -502,6 +502,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print','Admins\DeliveryController@received_print')->name('print');
             Route::get('{id}/status','Admins\DeliveryController@receive_delivery_status_view')->name('status');
             Route::post('password/check','Admins\DeliveryController@receive_delivery_password_check')->name('password.check');
+            Route::post('password/check','Admins\DeliveryController@receive_delivery_password_check')->name('password.check');
             Route::post('add/status','Admins\DeliveryController@receive_delivery_status_submit')->name('add.status');
             Route::post('add/status/all','Admins\DeliveryController@receive_delivery_status_submit_all')->name('add.status.all');
             Route::get('{id}/add/list','Admins\DeliveryController@receive_delivery_status_list')->name('add.list');
@@ -823,6 +824,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('walk_in_list', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_list')->name('walk_in_list');
             Route::put('walk_in_resolved', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_resolved')->name('walk_in_resolved');
             Route::put('revert_request_shipments_check', 'Admins\AdminFinanceController@revert_request_shipments_check')->name('revert_request_shipments_check');
+            Route::post('revert_request_submit', 'Admins\AdminFinanceController@revert_request_submit')->name('revert_request_submit');
         });
 
         Route::prefix('change_shipment_amount')->name('change_shipment_amount.')->group(function () {
