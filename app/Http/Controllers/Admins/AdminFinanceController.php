@@ -1558,6 +1558,8 @@ class AdminFinanceController extends Controller
             $pending_payment_shipment->payable = $payable;
 
             $pending_payment_shipment->save();
+
+            self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks);
         }
         else {
             $pending_invoice_shipment = new PendingInvoiceShipment();
@@ -1572,7 +1574,7 @@ class AdminFinanceController extends Controller
 
 
         }
-        self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks);
+
         ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), $payable_remarks);
     }
 

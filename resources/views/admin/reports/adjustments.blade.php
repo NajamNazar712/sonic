@@ -268,7 +268,7 @@
                     { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'shipper_name' ,name: 'u.name', class: 'align-middle shipper_name'},
                     { data:'adjustment_type' ,name: 'at.name', class: 'align-middle adjustment_type'},
-                    { data:'adjustment_amount' ,name: 'adjustment_logs.amount', class: 'align-middle adjustment_amount'},
+                    { data:'adjustment_amount' ,name: 'adjustment_logs.adjustment_amount', class: 'align-middle adjustment_amount'},
                     // { data:'payment_id' ,name: 'delivery_notes.updated_at', class: 'align-middle payment_id'},
                     { data:'remarks' ,name: 'adjustment_logs.remarks', class: 'align-middle remarks'},
                     { data:'created_at' ,name: 'adjustment_logs.created_at', class: 'align-middle created_at'},
