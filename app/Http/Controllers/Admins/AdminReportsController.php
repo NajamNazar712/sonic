@@ -3787,9 +3787,7 @@ class AdminReportsController extends Controller
                         }
                     }
                     else {
-                        $rows = $rows->join('delivery_note_shipments as dns', function($join) {
-                            $join->on('s.id', '=', 'dns.shipment_id');
-                        })
+                        $rows = $rows->join('delivery_note_shipments as dns', 's.id', '=', 'dns.shipment_id')
                         ->join('delivery_notes as dn', function($join) use ($from, $to) {
                             $join->where('dn.status', '=', 1)
                             ->whereBetween('dn.status_verified_at', [$from, $to])
