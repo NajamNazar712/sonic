@@ -440,6 +440,9 @@ class AdminCRMController extends Controller
             ->orderColumn('launched_by_name', DB::raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, u.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1')
             ->addColumn('current_tat', function ($requests){
                 if($requests->created_at){
+                    Carbon::setWeekendDays([
+                        Carbon::SUNDAY,
+                    ]);
                     $launched = Carbon::parse($requests->created_at);
                     $current = Carbon::now();
                     $time_format = 'H:i';
@@ -683,7 +686,10 @@ class AdminCRMController extends Controller
             })
             ->addColumn('current_tat', function ($requests){
                 if($requests->created_at){
-                    $launched = Carbon::parse($requests->created_at);
+                    Carbon::setWeekendDays([
+                        Carbon::SUNDAY,
+                    ]);
+                    $launched = Carbon::parse($requests->created_at)->startOfDay();
                     $current = Carbon::now();
                     $time_format = 'H:i';
                     $time_from = CrmSettings::where('name','TAT Cut-Off Time From')->first();
@@ -979,6 +985,9 @@ class AdminCRMController extends Controller
                 }
             })
             ->editColumn('in_process_resolved_tat', function ($requests){
+                    Carbon::setWeekendDays([
+                        Carbon::SUNDAY,
+                    ]);
                     $process = Carbon::parse($requests->inprocess);
                     $resolved = Carbon::parse($requests->resolved);
                     $resolved_tat = $resolved->diffInWeekdays($process);
@@ -1215,6 +1224,9 @@ class AdminCRMController extends Controller
                 }
             })
             ->editColumn('total_tat', function ($requests){
+                    Carbon::setWeekendDays([
+                        Carbon::SUNDAY,
+                    ]);
                     $launched = Carbon::parse($requests->created_at);
                     $closed = Carbon::parse($requests->closed_date);
                     $time_format = 'H:i';
