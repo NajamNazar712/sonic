@@ -3749,7 +3749,7 @@ class AdminReportsController extends Controller
                 $to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
             }
             else {
-                $from_month = Carbon::parse($date)->subDays(30)->addHour($day_cut_off_time)->toDateTimeString();
+                $from_month = Carbon::today()->subDays(30)->addHour($day_cut_off_time)->toDateTimeString();
                 $from = Carbon::today()->addHour($day_cut_off_time)->toDateTimeString();
                 $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
             }
