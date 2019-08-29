@@ -392,7 +392,7 @@ class ShipperReportsController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->addColumn('done_payment_link', function ($shipments) {
-                if($shipments->done_payment_id){
+                if($shipments->done_payment_id != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->done_payment_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
                 }else{
                     return "-";
