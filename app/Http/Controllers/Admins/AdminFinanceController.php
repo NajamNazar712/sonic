@@ -1559,7 +1559,7 @@ class AdminFinanceController extends Controller
 
             $pending_payment_shipment->save();
 
-            self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks);
+            self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks, $pending_payment_shipment->id, 1);
         }
         else {
             $pending_invoice_shipment = new PendingInvoiceShipment();
@@ -1572,6 +1572,7 @@ class AdminFinanceController extends Controller
 
             $pending_invoice_shipment->save();
 
+            self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks, $pending_invoice_shipment->id, 2);
 
         }
 
@@ -4678,7 +4679,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    public function adjustment_logs_add($shipment_id, $adjustment_type, $adjustment_amount, $remarks = NULL, $pending_id, $type){
+    static public function adjustment_logs_add($shipment_id, $adjustment_type, $adjustment_amount, $remarks = NULL, $pending_id, $type){
 
             $adjustment_log = new AdjustmentLog();
             $adjustment_log->shipment_id = $shipment_id;
@@ -4691,7 +4692,7 @@ class AdminFinanceController extends Controller
             $adjustment_log->save();
     }
 
-    public function adjustment_logs_done($type, $pending_id, $done_id){
+    static public function adjustment_logs_done($type, $pending_id, $done_id){
         $adjustment_log = AdjustmentLog::where('pending_id', $pending_id)->where('type', $type);
 
         if ($adjustment_log->exists()) {
@@ -4700,6 +4701,7 @@ class AdminFinanceController extends Controller
             $adjustment_log->save();
         }
     }
+
     public function revert_request_shipments_check(Request $request){
         $filtered_shipments = array();
         $filtered_dncc = array();
@@ -4759,4 +4761,5 @@ class AdminFinanceController extends Controller
             return redirect()->back()->with(['errors' => 'Shipments not selected!']);
         }
     }
+
 }

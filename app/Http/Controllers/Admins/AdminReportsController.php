@@ -4356,7 +4356,7 @@ class AdminReportsController extends Controller
         }
         return $datatable->make(true);
     }
-public function revenue_index(){
+    public function revenue_index(){
         $shippers = DB::connection('reports')->table('users')->whereIn('status',[3,4])->select('id','name')->get();
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
@@ -5072,22 +5072,25 @@ public function revenue_index(){
 
     public function adjustments_list(Request $request){
         $adjustments = DB::connection('reports')->table('adjustment_logs')
-            ->leftjoin('pending_payment_shipments as pps','pps.id', '=', 'adjustment_logs.pending_id')
             ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
+            ->leftjoin('done_payments as dp', 'dp.id', '=', 'dps.done_payment_id')
             ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
             ->leftjoin('adjustment_types as at', 'at.id', '=', 'adjustment_logs.adjustment_type_id')
             ->leftjoin('admins as a', 'a.id', '=', 'adjustment_logs.admin_id')
-            ->select('adjustment_logs.id as adjustment_id', 'adjustment_logs.adjustment_amount as adjustment_amount', 'adjustment_logs.remarks as remarks', 's.tracking_number as tracking_number', 'at.name as adjustment_type', 'adjustment_logs.created_at as created_at', 'a.name as created_by', 'u.name as shipper_name')
+            ->select('adjustment_logs.id as adjustment_id', 'adjustment_logs.adjustment_amount as adjustment_amount', 'adjustment_logs.remarks as remarks', 's.tracking_number as tracking_number', 'at.name as adjustment_type', 'adjustment_logs.created_at as created_at', 'a.name as created_by', 'u.name as shipper_name', 'dp.id as done_payment_id')
             ->whereIn('adjustment_logs.type', [1,2]);
         $datatable = Datatables::of($adjustments)
-            ->editColumn('adjustment_id_padded', function ($adjustment) {
+            ->addColumn('adjustment_id_padded', function ($adjustment) {
                 $padded_id = str_pad($adjustment->adjustment_id, 6, '0', STR_PAD_LEFT);
                 return $padded_id;
             })
-            ->editColumn('tracking_number_link', function ($shipments) {
+            ->addColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('done_payment_link', function ($shipments) {
+                return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->done_payment_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
             });
 
         if($tracking_number = $request->get('search_tracking')){
@@ -5095,6 +5098,9 @@ public function revenue_index(){
         }
         if($shipper = $request->get('search_shipper')){
             $datatable->where('u.id', '=', $shipper);
+        }
+        if($type = $request->get('search_type')){
+            $datatable->where('adjustment_logs.type', '=', $type);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');

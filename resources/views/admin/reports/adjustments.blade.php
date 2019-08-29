@@ -12,17 +12,25 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div id="search_form" class="row mb-2 justify-content-center">
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_shipper" class="form-control select2">
                                 @foreach($shippers as $shipper)
                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                 @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_type" id="search_type" class="form-control select2">
+                                <option value="1">Reimbursment</option>
+                                <option value="2">Invoice</option>
                             </select>
                         </fieldset>
                     </div>
@@ -63,7 +71,7 @@
                         <th class="border-primary border-darken-1">Shipper Name</th>
                         <th class="border-primary border-darken-1">Adjustment Type</th>
                         <th class="border-primary border-darken-1">Adjusted Amount</th>
-                        {{--<th class="border-primary border-darken-1">Payment ID</th>--}}
+                        <th class="border-primary border-darken-1">Payment ID</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
@@ -83,6 +91,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
 
     <style>
         table.dataTable {
@@ -145,6 +155,8 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+
     {{--<script src="{{asset('js/main-1.0.js')}}" type="text/javascript"></script>--}}
 
     <script type="text/javascript">
@@ -156,6 +168,11 @@
             });
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Shipper',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_type').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Adjustment Type',
                 width:'100%',
                 allowClear:true
             });
@@ -196,6 +213,7 @@
                             'page': 'all',
                             'search_tracking': $('#search_tracking_no').val(),
                             'search_shipper': $('#search_shipper').val(),
+                            'search_type': $('#search_type').val(),
                             'search_date_from': $('input[name="search_date_from_formatted"]').val(),
                             'search_date_to': $('input[name="search_date_to_formatted"]').val()
                         },
@@ -207,7 +225,7 @@
                             head.push('Shipper Name');
                             head.push('Adjustment Type');
                             head.push('Adjusted Amount');
-                            // head.push('Payment ID');
+                            head.push('Payment ID');
                             head.push('Remarks');
                             head.push('Created At');
                             head.push('Created By');
@@ -219,7 +237,7 @@
                                 row.push(values.shipper_name);
                                 row.push(values.adjustment_type);
                                 row.push(values.adjustment_amount);
-                                // row.push(values.payment_id);
+                                row.push(values.done_payment_id);
                                 row.push(values.remarks);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
@@ -243,7 +261,7 @@
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
-                "autoWidth": false,
+                autoWidth : false,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -257,6 +275,7 @@
                     data: function (d) {
                         d.search_tracking = $('#search_tracking_no').val();
                         d.search_shipper = $('#search_shipper').val();
+                        d.search_type = $('#search_type').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
@@ -269,7 +288,7 @@
                     { data:'shipper_name' ,name: 'u.name', class: 'align-middle shipper_name'},
                     { data:'adjustment_type' ,name: 'at.name', class: 'align-middle adjustment_type'},
                     { data:'adjustment_amount' ,name: 'adjustment_logs.adjustment_amount', class: 'align-middle adjustment_amount'},
-                    // { data:'payment_id' ,name: 'delivery_notes.updated_at', class: 'align-middle payment_id'},
+                    { data:'done_payment_link' ,name: 'dp.id', class: 'align-middle done_payment_id'},
                     { data:'remarks' ,name: 'adjustment_logs.remarks', class: 'align-middle remarks'},
                     { data:'created_at' ,name: 'adjustment_logs.created_at', class: 'align-middle created_at'},
                     { data:'created_by' ,name: 'a.name', class: 'align-middle created_by'}
@@ -285,6 +304,45 @@
             });
             $('#search_filter_btn').on('click',function () {
                 table.draw();
+            });
+
+            function print(id){
+                $.ajax({
+                    url: '{!! route('admin.finance.done_payments.details_print') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+            $('#datatable tbody').on('click', 'tr td.done_payment_id button', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if (id) {
+                    print(id);
+                } else {
+                    var error = "Payment Details not found!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                }
             });
 
         });
