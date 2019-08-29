@@ -3744,10 +3744,12 @@ class AdminReportsController extends Controller
             $hubs = $hubs->get();
 
             if ($date) {
+                $from_month = Carbon::parse($date)->subDays(30)->addHour($day_cut_off_time)->toDateTimeString();
                 $from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
                 $to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
             }
             else {
+                $from_month = Carbon::parse($date)->subDays(30)->addHour($day_cut_off_time)->toDateTimeString();
                 $from = Carbon::today()->addHour($day_cut_off_time)->toDateTimeString();
                 $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
             }
@@ -3772,9 +3774,9 @@ class AdminReportsController extends Controller
                     }
                     else if ($type != 'correct_status' && $type != 'fake_status') {
                         if ($type == 'status_not_updated') {
-                        $rows = $rows->join('shipments_journey as sj', function($join) use ($from, $to) {
+                            $rows = $rows->join('shipments_journey as sj', function($join) use ($from_month, $to) {
                                 $join->on('s.id', '=', 'sj.shipment_id')
-                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at <= "' . $to . '")'));
+                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and sj.shipper_status_id IN (2, 4, 7, 13) and shipments_journey.created_at between "' . $from_month . '" and "' . $to . '")'));
                             });
                         }
                         else {
@@ -3791,7 +3793,7 @@ class AdminReportsController extends Controller
                         })
                         ->join('delivery_notes as dn', function($join) use ($from, $to) {
                             $join->where('dn.status', '=', 1)
-                            ->whereBetween('dn.created_at', [$from, $to])
+                            ->whereBetween('dn.verified_at', [$from, $to])
                             ->where('dn.id', '=', DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
                         });
                     }
@@ -3807,7 +3809,7 @@ class AdminReportsController extends Controller
 
                     if ($type == 'status_not_updated') {
                         $rows = $rows->where(function ($query) use ($arrival_cut_off_time) {
-                            $query->where('sj.shipper_status_id', '=', 7)
+                            $query->where('sj.shipper_status_id', [7, 13])
                             ->orWhere(function ($sub_query) use ($arrival_cut_off_time) {
                                 $sub_query->where(function ($sub_sub_query) {
                                     $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
