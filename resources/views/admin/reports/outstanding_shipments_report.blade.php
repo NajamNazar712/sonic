@@ -24,9 +24,11 @@
                         </div>
                         <div class="form-group ml-1">
                             <select name="shipment_status" class="select2" id="shipment_status">
+                                <option value="0">All</option>
                                 <option value="1">Outstanding Shipments</option>
                                 <option value="2">Resolved</option>
                                 <option value="3">Adjust In Payment</option>
+                                <option value="4">Requested for Reversion</option>
 
                             </select>
                         </div>
