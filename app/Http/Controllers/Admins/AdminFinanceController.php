@@ -1630,12 +1630,12 @@ class AdminFinanceController extends Controller
         $payable = str_replace(',', '', $request->input('payable'));
         $payable_remarks = $request->input('payable_remarks');
 
-        $this->add_adjustment($shipment_id, $payable, $payable_remarks, 5);
+        $this->add_adjustment($shipment_id, $payable, $payable_remarks, 4);
 
         return redirect()->route('admin.finance.add_shipment_adjustment.index')->with('success', 'Shipment\'s adjustment has been added');
     }
 
-    static public function return_confirmed_revert($shipment_id) {
+    static public function $adjustment_type($shipment_id, $adjustment_type = NULL) {
         $shipment = Shipment::find($shipment_id);
         if($shipment->booking_type_id == 4){
             $receivable = ROUND(($shipment->fuel_surcharge + $shipment->weight_charges + $shipment->gst), 0, PHP_ROUND_HALF_DOWN);
@@ -1672,14 +1672,14 @@ class AdminFinanceController extends Controller
                 if ($pending_payment_shipment->exists()) {
                     $pending_payment_shipment = $pending_payment_shipment->latest()->first();
 
-                    self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0, 1);
+                    self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0, $adjustment_type);
                 } else {
                     $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
 
                     if ($done_payment_shipment->exists()) {
                         $done_payment_shipment = $done_payment_shipment->latest()->first();
 
-                        self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1, 1);
+                        self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1, $adjustment_type);
                     }
                 }
             } else {
@@ -1725,7 +1725,7 @@ class AdminFinanceController extends Controller
                 }
 
                 if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
-                    self::adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, 1);
+                    self::adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, $adjustment_type);
                 }
             }
 

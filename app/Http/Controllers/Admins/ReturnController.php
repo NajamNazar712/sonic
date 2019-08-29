@@ -1870,7 +1870,7 @@ class ReturnController extends Controller
 
             ShipmentsJourneyController::add($request->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
 
-            AdminFinanceController::return_confirmed_revert($request->id);
+            AdminFinanceController::return_confirmed_revert($request->id, 1);
 
             return ['status' => 0, 'success' => 'Shipment has been Reverted'];
         }

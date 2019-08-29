@@ -153,7 +153,7 @@ class AdminMonthClosingController extends Controller
                             }
                         }
                         if(in_array($shipment_details->shipper_status_id, $return_revert_statuses)){
-                            AdminFinanceController::return_confirmed_revert($shipment_details->id);
+                            AdminFinanceController::return_confirmed_revert($shipment_details->id, 3);
                         }
 
                         if(in_array($shipment_details->shipper_status_id, $replacement_try_and_buy_statuses)){

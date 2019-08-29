@@ -20,8 +20,7 @@ class AdjustmentTypeTableSeeder extends Seeder
             array('id' => 1, 'name' => 'Adjusted from Return Confirm', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id' => 2, 'name' => 'Adjusted from Delivered', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('id' => 3, 'name' => 'Adjusted from Month Closing', 'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('id' => 4, 'name' => 'Adjusted from Lost', 'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('id' => 5, 'name' => 'Manual Adjustment', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('id' => 4, 'name' => 'Manual Adjustment', 'created_at' => $timestamp, 'updated_at' => $timestamp),
 
         ));
     }
