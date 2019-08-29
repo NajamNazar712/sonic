@@ -3767,7 +3767,7 @@ class AdminReportsController extends Controller
                     $rows = DB::connection('reports')->table('cities')->join('shipments as s', 'cities.id', '=', 's.consignee_city_id');
 
                     if ($type == 'delivery_note_pending') {
-                        $rows = $rows->join('shipments_journey as sj', function($join) use ($from, $to) {
+                        $rows = $rows->join('shipments_journey as sj', function($join) use ($to) {
                             $join->on('s.id', '=', 'sj.shipment_id')
                             ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at < "' . $to . '")'));
                         });
@@ -3788,8 +3788,7 @@ class AdminReportsController extends Controller
                     }
                     else {
                         $rows = $rows->join('delivery_note_shipments as dns', function($join) {
-                            $join->on('s.id', '=', 'dns.shipment_id')
-                            ->where('dns.delivery_note_id', '=', DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
+                            $join->on('s.id', '=', 'dns.shipment_id');
                         })
                         ->join('delivery_notes as dn', function($join) use ($from, $to) {
                             $join->where('dn.status', '=', 1)
@@ -3809,14 +3808,14 @@ class AdminReportsController extends Controller
 
                     if ($type == 'status_not_updated') {
                         $rows = $rows->where(function ($query) use ($arrival_cut_off_time) {
-                            $query->where('sj.shipper_status_id', [7, 13])
+                            $query->where('sj.shipper_status_id', '=', 7)
                             ->orWhere(function ($sub_query) use ($arrival_cut_off_time) {
                                 $sub_query->where(function ($sub_sub_query) {
                                     $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                     ->orWhereNull('zcc.class')
                                     ->orWhereIn('zcc.class', [0, 1]);
                                 })
-                                ->whereIn('sj.shipper_status_id', [2, 4])
+                                ->whereIn('sj.shipper_status_id', [2, 4, 13])
                                 ->whereRaw('hour(`sj`.`created_at`) < ?', [$arrival_cut_off_time]);
                             });
                         });
@@ -3859,6 +3858,9 @@ class AdminReportsController extends Controller
                                 ->orWhere(function ($sub_sub_query) {
                                    $sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('s.consignee_city_id'))
                                    ->where('sj.shipper_status_id', 4);
+                                })
+                                ->orWhere(function ($sub_sub_query) {
+                                   $sub_sub_query->where('sj.shipper_status_id', 13);
                                 });
                             })
                             ->where(function ($sub_query) use ($arrival_cut_off_time) {
