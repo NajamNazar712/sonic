@@ -5073,7 +5073,7 @@ class AdminReportsController extends Controller
 
     public function adjustments_list(Request $request){
         $adjustments = DB::connection('reports')->table('adjustment_logs')
-            ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
+            ->leftjoin('done_payment_shipments as dps','dps.done_payment_id', '=', 'adjustment_logs.done_id')
             ->leftjoin('done_payments as dp', 'dp.id', '=', 'dps.done_payment_id')
             ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
