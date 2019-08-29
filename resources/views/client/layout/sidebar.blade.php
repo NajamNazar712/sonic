@@ -61,6 +61,7 @@
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{ route('cod.reports.sales.index') }}">Overall Sales</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.summary.index') }}">Summary</a></li>
+                        <li><a class="menu-item" href="{{ route('cod.reports.adjustments.index') }}">Adjustments</a></li>
                     </ul>
                 </li>
             @endif

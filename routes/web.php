@@ -192,6 +192,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('list','Shippers\ShipperReportsController@summary_list')->name('list');
             Route::post('data','Shippers\ShipperReportsController@summary_data')->name('data');
         });
+
+        Route::prefix('adjustments')->name('adjustments.')->group(function (){
+            Route::get('', 'Shippers\ShipperReportsController@adjustments_index')->name('index');
+            Route::get('list', 'Shippers\ShipperReportsController@adjustments_list')->name('list');
+
+        });
     });
 
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
