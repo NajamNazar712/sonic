@@ -1926,8 +1926,9 @@ class AdminFinanceController extends Controller
         $pending_payment_shipment->payable = $payable;
 
         $pending_payment_shipment->save();
-
-        self::adjustment_logs_add($shipment_id,$adjustment_type, $payable, NULL, $pending_payment_shipment->id, 1);
+        if($adjustment_type){
+            self::adjustment_logs_add($shipment_id,$adjustment_type, $payable, NULL, $pending_payment_shipment->id, 1);
+        }
     }
 
     static private function adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, $adjustment_type = NULL) {
@@ -1949,8 +1950,9 @@ class AdminFinanceController extends Controller
                 $pending_invoice_shipment->invoice_amount = $payment_shipment->payable;
 
                 $pending_invoice_shipment->save();
-
-                self::adjustment_logs_add($shipment_id,$adjustment_type, $payment_shipment->payable, NULL, $pending_invoice_shipment->id, 2);
+                if($adjustment_type){
+                    self::adjustment_logs_add($shipment_id,$adjustment_type, $payment_shipment->payable, NULL, $pending_invoice_shipment->id, 2);
+                }
 
             }
         }
@@ -2004,9 +2006,9 @@ class AdminFinanceController extends Controller
                 $pending_payment_shipment->payable = $payable;
 
                 $pending_payment_shipment->save();
-
-                self::adjustment_logs_add($shipment_id,$adjustment_type, $payment_shipment->payable, NULL, $pending_payment_shipment->id, 1);
-
+                if($adjustment_type) {
+                    self::adjustment_logs_add($shipment_id, $adjustment_type, $payment_shipment->payable, NULL, $pending_payment_shipment->id, 1);
+                }
             }
         }
     }

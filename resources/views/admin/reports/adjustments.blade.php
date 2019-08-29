@@ -66,8 +66,8 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Adjustment ID.</th>
-                        <th class="border-primary border-darken-1">Tracking Number</th>
+                        <th class="border-primary border-darken-1">Adjustment ID</th>
+                        <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Shipper Name</th>
                         <th class="border-primary border-darken-1">Adjustment Type</th>
                         <th class="border-primary border-darken-1">Adjusted Amount</th>
@@ -220,8 +220,8 @@
                         success: function (result) {
                             head = [];
                             head.push('S. No.');
-                            head.push('Adjustment ID.');
-                            head.push('Tracking Number');
+                            head.push('Adjustment ID');
+                            head.push('Tracking No.');
                             head.push('Shipper Name');
                             head.push('Adjustment Type');
                             head.push('Adjusted Amount');
@@ -280,7 +280,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                order: [[5, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'adjustment_id_padded' ,name: 'adjustment_logs.id', class: 'align-middle text-center adjustment_id'},
