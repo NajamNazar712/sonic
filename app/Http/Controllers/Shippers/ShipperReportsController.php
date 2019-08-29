@@ -367,5 +367,50 @@ class ShipperReportsController extends Controller
             return $datatable->make(true);
 
     }
+
+    public function adjustments_index(){
+        return view('client.reports.adjustments');
+    }
+
+    public function adjustments_list(Request $request){
+        $adjustments = DB::connection('reports')->table('adjustment_logs')
+            ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
+            ->leftjoin('done_payments as dp', 'dp.id', '=', 'dps.done_payment_id')
+            ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
+            ->leftjoin('users as u', 'u.id', '=', 's.user_id')
+            ->leftjoin('adjustment_types as at', 'at.id', '=', 'adjustment_logs.adjustment_type_id')
+            ->select('adjustment_logs.id as adjustment_id', 'adjustment_logs.adjustment_amount as adjustment_amount', 'adjustment_logs.remarks as remarks', 's.tracking_number as tracking_number', 'at.name as adjustment_type', 'adjustment_logs.created_at as created_at', 'u.name as shipper_name', 'dp.id as done_payment_id')
+            ->whereIn('adjustment_logs.type', [1,2])
+            ->where('s.user_id', session('user_id'));
+        $datatable = Datatables::of($adjustments)
+            ->addColumn('adjustment_id_padded', function ($adjustment) {
+                $padded_id = str_pad($adjustment->adjustment_id, 6, '0', STR_PAD_LEFT);
+                return $padded_id;
+            })
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('done_payment_link', function ($shipments) {
+                if($shipments->done_payment_id){
+                    return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->done_payment_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+                }else{
+                    return "-";
+                }
+            });
+
+        if($tracking_number = $request->get('search_tracking')){
+            $datatable->where('s.tracking_number', '=', $tracking_number);
+        }
+        if($type = $request->get('search_type')){
+            $datatable->where('adjustment_logs.type', '=', $type);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable = $datatable->whereBetween('adjustment_logs.created_at', [$from,$to]);
+        }
+        return $datatable->make(true);
+    }
 }
 
