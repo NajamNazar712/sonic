@@ -1635,7 +1635,7 @@ class AdminFinanceController extends Controller
         return redirect()->route('admin.finance.add_shipment_adjustment.index')->with('success', 'Shipment\'s adjustment has been added');
     }
 
-    static public function $adjustment_type($shipment_id, $adjustment_type = NULL) {
+    static public function return_confirmed_revert($shipment_id, $adjustment_type = NULL) {
         $shipment = Shipment::find($shipment_id);
         if($shipment->booking_type_id == 4){
             $receivable = ROUND(($shipment->fuel_surcharge + $shipment->weight_charges + $shipment->gst), 0, PHP_ROUND_HALF_DOWN);
