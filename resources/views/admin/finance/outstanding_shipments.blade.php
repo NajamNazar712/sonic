@@ -17,58 +17,76 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-								<div class="form-group">
-									<select name="recovery_status" class="select2" id="recovery_status_select" data-rule-required="true" data-msg-required="Status is required">
-										<option value="0">All</option>
-										<option value="1">Outstanding</option>
-										<option value="7">Resolved</option>
-										<option value="11">Revert Requested</option>
-									</select>
-								</div>
-								 <div class="form-group ml-1">
-									<select name="hub" class="select2" id="hub" data-rule-required="true" data-msg-required="Hub is required">
-										<option value="0">All</option>
+							<form id="search_form" class=" mb-1 justify-content-center" novalidate="novalidate">
+                                <div class="row justify-content-center">
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <select name="recovery_status" class="select2" id="recovery_status_select" data-rule-required="true" data-msg-required="Status is required">
+                                                <option value="0">All</option>
+                                                <option value="1">Outstanding</option>
+                                                <option value="7">Resolved</option>
+                                                <option value="11">Revert Requested</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <select name="hub" class="select2" id="hub" data-rule-required="true" data-msg-required="Hub is required">
+                                                <option value="0">All</option>
 
-										@foreach($hubs as $hub)
-											<option value="{{ $hub->id }}">{{ $hub->name }}</option>
-										@endforeach
-									</select>
-								</div>
+                                                @foreach($hubs as $hub)
+                                                    <option value="{{ $hub->id }}">{{ $hub->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <select name="service" class="select2" id="service">
+                                                <option value="0">All</option>
 
-								<div class="form-group ml-1">
-									<select name="service" class="select2" id="service">
-										<option value="0">All</option>
-
-										@foreach($booking_types as $booking_type)
-											<option value="{{ $booking_type->id }}">{{ $booking_type->booking_type }}</option>
-										@endforeach
-									</select>
-								</div>
-
-								<div class="form-group input-group ml-1">
-									<div class="input-group-prepend">
+                                                @foreach($booking_types as $booking_type)
+                                                    <option value="{{ $booking_type->id }}">{{ $booking_type->booking_type }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
 										<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
 											<span class="la la-calendar-o"></span>
 										</span>
-									</div>
+                                            </div>
 
-									<input type="text" name="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_from" placeholder="Delivery Date (From)">
-								</div>
-
-								<div class="form-group input-group ml-1">
-									<div class="input-group-prepend">
+                                            <input type="text" name="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_from" placeholder="Delivery Date (From)">
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
 										<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
 											<span class="la la-calendar-o"></span>
 										</span>
-									</div>
+                                            </div>
 
-									<input type="text" name="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_to" placeholder="Delivery Date (To)">
-								</div>
+                                            <input type="text" name="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_to" placeholder="Delivery Date (To)">
+                                        </div>
 
-								<div class="form-group ml-1">
-									<button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
-								</div>
+                                    </div>
+
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
+                                        </div>
+                                    </div>
+
+
+
+
+
+                                </div>
+
 							</form>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -181,22 +199,22 @@
 	<script>
 		$(document).ready(function() {
 			$('#search_form #hub').prepend('<option value="" selected="selected"></option>').select2({
-				width: '150px',
+				width: '100%',
 				placeholder: 'Hub*'
 			}).bind('change', function() {
 				$(this).valid();
 			});
 
 			$('#search_form #recovery_status_select').prepend('<option value="" selected="selected"></option>').select2({
-				width: '150px',
-				placeholder: 'Recovery Status*'
+                width: '100%',
+                placeholder: 'Recovery Status*'
 			}).bind('change', function() {
 				$(this).valid();
 			});
 
 			$('#search_form #service').prepend('<option value="" selected="selected"></option>').select2({
-				width: '150px',
-				placeholder: 'Service'
+                width: '100%',
+                placeholder: 'Service'
 			});
 
 			$('#search_form #delivery_date_from').pickadate({

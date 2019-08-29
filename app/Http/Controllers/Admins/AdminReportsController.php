@@ -1060,9 +1060,10 @@ class AdminReportsController extends Controller
             }else if($status == 2){
                 $datatables->where('delivery_note_shipments.status','=',7);
 
-            }else {
+            }else if($status == 3){
                 $datatables->where('delivery_note_shipments.status','=',8);
-
+            }else if($status == 4){
+                $datatables->where('delivery_note_shipments.status','=',11);
             }
         }
         if ($delivery_date_from = $request->get('delivery_date_from')) {
