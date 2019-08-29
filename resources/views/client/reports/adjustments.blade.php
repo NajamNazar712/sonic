@@ -278,44 +278,44 @@
                 table.draw();
             });
 
-            {{--function print(id){--}}
-                {{--$.ajax({--}}
-                    {{--url: '{!! route('admin.finance.done_payments.details_print') !!}',--}}
-                    {{--method: 'POST',--}}
-                    {{--data: {--}}
-                        {{--'_token': '{{ csrf_token() }}',--}}
-                        {{--'id': id--}}
-                    {{--}--}}
-                {{--})--}}
-                    {{--.done(function(data) {--}}
-                        {{--var tab = window.open('', '_blank');--}}
+            function print(id){
+                $.ajax({
+                    url: '{!! route('cod.finance.payments.details_print') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
 
-                        {{--if(!tab) {--}}
-                            {{--swal({--}}
-                                {{--title: 'Popup Blocker Enabled!',--}}
-                                {{--text: 'Please add this site to your exception list.',--}}
-                                {{--icon: 'error',--}}
-                                {{--closeOnClickOutside: false,--}}
-                                {{--closeOnEsc: false--}}
-                            {{--});--}}
-                        {{--}--}}
-                        {{--else {--}}
-                            {{--tab.document.write(data);--}}
-                            {{--tab.document.close();--}}
-                            {{--tab.focus();--}}
-                        {{--}--}}
-                    {{--});--}}
-            {{--}--}}
-            {{--$('#datatable tbody').on('click', 'tr td.done_payment_id button', function() {--}}
-                {{--var id = parseInt($(this).parents('tr').attr('id'));--}}
-                {{--if (id) {--}}
-                    {{--print(id);--}}
-                {{--} else {--}}
-                    {{--var error = "Payment Details not found!";--}}
-                    {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+            $('#datatable tbody').on('click', 'tr td.done_payment_id button', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if (id) {
+                    print(id);
+                } else {
+                    var error = "Payment Details not found!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
-                {{--}--}}
-            {{--});--}}
+                }
+            });
 
         });
     </script>
