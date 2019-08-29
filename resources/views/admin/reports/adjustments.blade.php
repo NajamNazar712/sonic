@@ -269,6 +269,7 @@
                 language: {
                     processing: data_table_loader
                 },
+                rowId:done_payment_id,
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.adjustments.list') }}',
