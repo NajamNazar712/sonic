@@ -3771,10 +3771,18 @@ class AdminReportsController extends Controller
                         });
                     }
                     else if ($type != 'correct_status' && $type != 'fake_status') {
+                        if ($type == 'status_not_updated') {
                         $rows = $rows->join('shipments_journey as sj', function($join) use ($from, $to) {
-                            $join->on('s.id', '=', 'sj.shipment_id')
-                            ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
-                        });
+                                $join->on('s.id', '=', 'sj.shipment_id')
+                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at <= "' . $to . '")'));
+                            });
+                        }
+                        else {
+                            $rows = $rows->join('shipments_journey as sj', function($join) use ($from, $to) {
+                                $join->on('s.id', '=', 'sj.shipment_id')
+                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
+                            });
+                        }
                     }
                     else {
                         $rows = $rows->join('delivery_note_shipments as dns', function($join) {
