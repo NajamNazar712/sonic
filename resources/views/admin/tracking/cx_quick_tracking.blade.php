@@ -211,7 +211,7 @@
                             <div class="row justify-content-center">
                                 <div class="col-8">
                                     <fieldset class="form-group">
-                                        <input type="text" name="update_consignee_name" class="form-control" placeholder="Consignee Name" id="update_consignee_name" id="update_consignee_address" data-rule-required="true" data-msg-required="Consignee Name is required">
+                                        <input type="text" name="update_consignee_name" class="form-control" placeholder="Consignee Name*" id="update_consignee_name" id="update_consignee_address" data-rule-required="true" data-msg-required="Consignee Name is required">
                                     </fieldset>
                                 </div>
                             </div>
@@ -518,18 +518,18 @@
                 var update_shipment_id = null;
                 $('body').on('click','.request_add',function () {
                     shipment_id = $(this).parents('tr').attr('id');
-                    var tracking_number = table.row().data().tracking_number;
+                    var tracking_number = table.row( $(this).parents('tr') ).data().tracking_number;
                     html_row = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking_number +'</b></span></div>';
                     $('#requested_shipments').html(html_row);
                     $('#AddRequestModal').modal('show');
                 });
-                $('body').on('click','.update_consignee_info',function () {
-                    var consignee_name = table.row().data().consignee_name;
-                    var consignee_address = table.row().data().address;
-                    var consignee_phone = table.row().data().consignee_phone_no;
-                    var special_instructions = table.row().data().special_instructions;
-                    update_shipment_id = $(this).parents('tr').attr('id');
-                    var tracking_number = table.row().data().tracking_number;
+                $('body').on('click','tr .action button.update_consignee_info',function () {
+                    var consignee_name = table.row( $(this).parents('tr') ).data().consignee_name;
+                    var consignee_address = table.row( $(this).parents('tr') ).data().address;
+                    var consignee_phone = table.row( $(this).parents('tr') ).data().consignee_phone_no;
+                    var special_instructions = table.row( $(this).parents('tr') ).data().special_instructions;
+                    update_shipment_id = parseInt($(this).parents('tr').attr('id'));
+                    var tracking_number = table.row( $(this).parents('tr') ).data().tracking_number;
                     html_row = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking_number +'</b></span></div>';
                     $('#update_consignee_info_shipment_id').val(update_shipment_id);
                     $('#update_consignee_name').val(consignee_name);
@@ -800,7 +800,7 @@
                     $('#request_service').addClass('d-none');
                     $('#request_feedback').addClass('d-none');
                 });
-                $( "#update_consignee_info_form" ).validate({
+                var validator_consignee_info_form = $( "#update_consignee_info_form" ).validate({
                     errorClass: 'danger',
                     successClass: 'success',
                     normalizer: function(value) {
@@ -826,6 +826,8 @@
                 });
 
                 $('#UpdateConsigneeInfoModal').on('hide.bs.modal', function (e) {
+                    // console.log($('#update_consignee_info_form')[0]);
+                    validator_consignee_info_form.resetForm();
                     $('#update_consignee_info_form')[0].reset();
                     $('#update_consignee_info_shipment_id').val('');
                     $('#update_consignee_name').val('');
