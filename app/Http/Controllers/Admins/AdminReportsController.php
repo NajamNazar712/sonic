@@ -3791,8 +3791,7 @@ class AdminReportsController extends Controller
                         ->join('delivery_notes as dn', function($join) use ($from, $to) {
                             $join->on('dn.id', '=', 'dns.delivery_note_id')
                             ->where('dn.status', '=', 1)
-                            ->whereBetween('dn.status_verified_at', [$from, $to])
-                            ->where('dn.id', '=', DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
+                            ->whereBetween('dn.status_verified_at', [$from, $to]);
                         });
                     }
 
