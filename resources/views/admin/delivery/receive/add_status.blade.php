@@ -1388,7 +1388,7 @@
 
                 var delivery_note = $('#delivery_note').val();
                 var select_all_reason = $('#select_all_reason').val();
-
+                var password = $('#password').val();
                 if(selected_rows.length > 0 && (select_all_status != '')){
 
                         if ((select_all_reason != null) || (select_all_reason == null && select_all_status == 14)) {
@@ -1503,6 +1503,7 @@
                                             'remarks': shipment_remarks_obj,
                                             'received_or_refused_by': shipment_received_refused_obj,
                                             '_token': '{{ csrf_token() }}',
+                                            'password': password,
                                         }
                                     }).done(function (data) {
                                         if (data.status === 1) {
