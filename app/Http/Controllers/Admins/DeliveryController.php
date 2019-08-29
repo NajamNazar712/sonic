@@ -1140,7 +1140,8 @@ class DeliveryController extends Controller
         $shipment_ids = $request->shipment_ids;
         $selected_status = $request->selected_status;
         $password = $request->password;
-        if(!DeliveryNote::where('id', $delivery_note_id)->where('password', $password)->exists()){
+        $delivery_password = DeliveryNote::where('id', $delivery_note_id)->where('password', $password);
+        if(!$delivery_password->exists()){
             return response()->json(['status' => 0, 'error' => 'Wrong Password']);
         }
         if($selected_status == 0 || $selected_status == null || $selected_status == ''){
