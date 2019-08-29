@@ -3776,7 +3776,7 @@ class AdminReportsController extends Controller
                         if ($type == 'status_not_updated') {
                             $rows = $rows->join('shipments_journey as sj', function($join) use ($from_month, $to) {
                                 $join->on('s.id', '=', 'sj.shipment_id')
-                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and sj.shipper_status_id IN (2, 4, 7, 13) and shipments_journey.created_at between "' . $from_month . '" and "' . $to . '")'));
+                                ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from_month . '" and "' . $to . '")'));
                             });
                         }
                         else {
