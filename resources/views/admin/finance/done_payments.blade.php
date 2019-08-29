@@ -877,7 +877,7 @@
 				}
 				else if ($(this).hasClass('request_add')) {
                     var selected_id = id.toString().padStart(6, 0);
-                    var description = 'Payment not received-' + selected_id + '.';
+                    var description = 'Payment not received against ID-' + selected_id + '.';
                     $('#complaint_description').val(description);
                     $('#AddRequestModal').modal('show');
                     $('#payment_id').val(id);

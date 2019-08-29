@@ -371,7 +371,7 @@
 
                     <div class="row justify-content-center">
                         <div class="form-group form-inline">
-                            <input type="text" class="form-control password" id="password_input" placeholder="Enter Password"><button class="btn btn-primary" id="password_submit" disabled>Enter</button>
+                            <input type="text" class="form-control password" id="password_input" placeholder="Enter Password"><button class="btn btn-primary ml-1" id="password_submit" disabled>Enter</button>
                         </div>
 
                     </div>
@@ -505,12 +505,12 @@
                }
             });
             $('#select_all_status').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Selected Status Update',
+                placeholder:'Select Status',
                 width:'100%',
                 allowClear:true
             });
             $('#select_all_reason').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Selected reason Update',
+                placeholder:'Select Reason',
                 width:'100%'
             });
 
