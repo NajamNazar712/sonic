@@ -19,57 +19,7 @@ class ShipperReportsController extends Controller
     public function qsr_index(){
         return view('client.reports.qsr_report');
     }
-    public function qsr_list(Request $request){
 
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-//            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
-            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->leftJoin('shipments_journey as sj', function ($join) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
-            })
-            ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','shipments.amount'])
-            ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47])
-            ->where('shipments.user_id', session('user_id'))
-            ->orwhereIn('shipments.user_id', session('sister_users'));
-        $datatable = Datatables::of($shipments)
-            ->editColumn('amount', function($shipment){
-                return number_format($shipment->amount);
-            })
-            ->addColumn('aging',function ($shipments){
-                $now = Carbon::now();
-                $days = Carbon::now()->diffInDays($shipments->arrival);
-                if($days == 0){
-                    return "-";
-                }else{
-                    return $days;
-                }
-            });
-//        if ($shipper = $request->get('search_shipper')) {
-//            $datatable->where('u.id', '=', $shipper);
-//        }
-//        if ($origin = $request->get('search_origin')) {
-//            $datatable->where('oc.id', '=', $origin);
-//        }
-//        if ($destination = $request->get('search_destination')) {
-//            $datatable->where('dc.id', '=', $destination);
-//        }
-//        if ($hub = $request->get('search_hub')) {
-//            $datatable->where('h.id', '=', $hub);
-//        }
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $datatable->whereBetween('sj.created_at', [$from,$to]);
-        }
-
-        return $datatable->make(true);
-    }
     public function sales_index(){
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
@@ -374,7 +324,7 @@ class ShipperReportsController extends Controller
 
     public function adjustments_list(Request $request){
         $adjustments = DB::connection('reports')->table('adjustment_logs')
-            ->leftjoin('done_payment_shipments as dps','dps.id', '=', 'adjustment_logs.done_id')
+            ->leftjoin('done_payment_shipments as dps','dps.done_payment_id', '=', 'adjustment_logs.done_id')
             ->leftjoin('done_payments as dp', 'dp.id', '=', 'dps.done_payment_id')
             ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
