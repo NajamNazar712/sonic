@@ -23,7 +23,7 @@
                                         <div class="form-group">
                                             <select name="recovery_status" class="select2" id="recovery_status_select" data-rule-required="true" data-msg-required="Status is required">
                                                 <option value="0">All</option>
-                                                <option value="1">Outstanding</option>
+                                                <option value="1" selected="selected">Outstanding</option>
                                                 <option value="7">Resolved</option>
                                                 <option value="11">Revert Requested</option>
                                             </select>
@@ -31,7 +31,7 @@
                                     </div>
                                     <div class="col-4">
                                         <div class="form-group">
-                                            <select name="hub" class="select2" id="hub" data-rule-required="true" data-msg-required="Hub is required">
+                                            <select name="hub" class="select2" id="hub">
                                                 <option value="0">All</option>
 
                                                 @foreach($hubs as $hub)
@@ -202,12 +202,12 @@
 		$(document).ready(function() {
 			$('#search_form #hub').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
-				placeholder: 'Hub*'
+				placeholder: 'Hub'
 			}).bind('change', function() {
 				$(this).valid();
 			});
 
-			$('#search_form #recovery_status_select').prepend('<option value="" selected="selected"></option>').select2({
+			$('#search_form #recovery_status_select').select2({
                 width: '100%',
                 placeholder: 'Recovery Status*'
 			}).bind('change', function() {
