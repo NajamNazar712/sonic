@@ -778,7 +778,7 @@ class AdminFinanceController extends Controller
             })
             ->addColumn('action', function($shipment) {
                 $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
-                $reject_button = '<button type="button" class="dropdown-item reject"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
+                $reject_button = '<button type="button" class="dropdown-item reject"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
                 $adjust_in_payment_button = '<button type="button" class="dropdown-item adjust_in_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Adjust in Payment</div></button>';
 
                 if (session('role_id') == 1 || count(array_intersect([55, 56], session('permissions'))) !== 0) {
@@ -789,16 +789,18 @@ class AdminFinanceController extends Controller
                 ';
 
                     if (session('role_id') == 1 || in_array(55, session('permissions'))) {
-                        if($shipment->recovery_status == 11){
-                            $dropdown .= $reject_button;
-                        }
-                        else if($shipment->recovery_status != 7){
+                        if($shipment->recovery_status != 7){
                             $dropdown .= $resolve_button;
                         }
                     }
-
                     if (session('role_id') == 1 || in_array(56, session('permissions'))) {
                         $dropdown .= $adjust_in_payment_button;
+                    }
+
+                    if (session('role_id') == 1 || in_array(55, session('permissions'))) {
+                        if($shipment->recovery_status == 11){
+                            $dropdown .= $reject_button;
+                        }
                     }
 
                     $dropdown .= '
