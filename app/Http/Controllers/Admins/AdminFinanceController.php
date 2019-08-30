@@ -4708,11 +4708,11 @@ class AdminFinanceController extends Controller
         $filtered_shipments = array();
         $filtered_dncc = array();
         if(!empty($request->shipment_ids)){
-            foreach ($request->shipment_ids as $shipment_id){
-                if(DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_ids[$shipment_id])->where('shipment_id', $shipment_id)->whereIn('status', [4,5,6,7])->exists()){
+            foreach ($request->shipment_ids as $index => $shipment_id){
+                if(DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_ids[$index])->where('shipment_id', $shipment_id)->whereIn('status', [4,5,6,7])->exists()){
                     $tracking_number = Shipment::find($shipment_id)->tracking_number;
                     $filtered_shipments[$shipment_id] = $tracking_number;
-                    $filtered_dncc[$shipment_id] = $request->delivery_note_ids[$shipment_id];
+                    $filtered_dncc[$shipment_id] = $request->delivery_note_ids[$index];
                 }
             }
             if(count($filtered_shipments) > 0){
