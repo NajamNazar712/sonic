@@ -6543,7 +6543,7 @@ class AdminDashboardController extends Controller
         }elseif($status == 'cityactive'){
             $city = City::find($id);
             $zone = Zone::find($city->zone_id);
-            if($zone->status == 0){
+            if($zone->status != 1){
                 return redirect()->route('admin.management.city')->with('error', 'Please, activate or change Zone for city first!');
             }
             if($city->hub == 1){
