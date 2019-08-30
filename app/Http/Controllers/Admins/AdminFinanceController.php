@@ -4758,7 +4758,8 @@ class AdminFinanceController extends Controller
             $delivery_note_ids = explode(',', $request->revert_delivery_note_ids);
 
             foreach ($shipment_ids as $index => $shipment_id) {
-
+                $previous = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_ids[$index])->where('shipment_id', $shipment_id)->first();
+                $previous_status = $previous->status;
                 DeliveryNoteShipment::where('delivery_note_id', $delivery_note_ids[$index])->where('shipment_id', $shipment_id)->update(['status' => 11]);
                 $revert_status_request = new RevertStatusRequest();
                 $revert_status_request->shipment_id = $shipment_id;
@@ -4776,8 +4777,7 @@ class AdminFinanceController extends Controller
                 $revert_status_request->admin_id = Auth::id();
                 $revert_status_request->save();
 
-                $previous = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_ids[$index])->where('shipment_id', $shipment_id)->first();
-                $previous_status = $previous->status;
+
 
                 $revert_status_request_log = new RevertStatusRequestLog();
                 $revert_status_request_log->delivery_note_id = $delivery_note_ids[$index];
