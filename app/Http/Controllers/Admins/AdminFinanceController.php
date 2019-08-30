@@ -639,7 +639,11 @@ class AdminFinanceController extends Controller
                 $join->on('rsrl.delivery_note_id', '=', 'delivery_note_shipments.delivery_note_id')
                     ->where('rsrl.id', '=', DB::raw('(SELECT MAX(id) FROM revert_status_request_logs WHERE revert_status_request_logs.delivery_note_id = delivery_note_shipments.delivery_note_id AND shipment_id = s.id)'));
             })
-            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsrl.created_at as recovery_date', 'rsrl.previous_status as previous_status')
+            ->leftjoin('revert_status_requests as rsr', function($join){
+                $join->on('rsr.delivery_note_id', '=', 'delivery_note_shipments.delivery_note_id')
+                    ->where('rsr.id', '=', DB::raw('(SELECT MAX(id) FROM revert_status_requests WHERE revert_status_requests.delivery_note_id = delivery_note_shipments.delivery_note_id AND shipment_id = s.id)'));
+            })
+            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id')
             ->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
 
         if (session('role_id') != 1) {
@@ -761,6 +765,17 @@ class AdminFinanceController extends Controller
                     return "Revert Requested";
                 }
             })
+
+            ->editColumn('revert_requested_image_button', function ($shipments) {
+                $image = '<div class="text-center">';
+                if ($shipments->recovery_status == 11) {
+                    if ($shipments->revert_requested_image != null) {
+                        $image .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.finance.outstanding_shipments.revert_requested_image', [$shipments->image_id]) . ' target="_blank">View</a></button>';
+                    }
+                }
+                $image .= '</div>';
+                return $image;
+            })
             ->addColumn('action', function($shipment) {
                 $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
                 $reject_button = '<button type="button" class="dropdown-item reject"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
@@ -852,6 +867,15 @@ class AdminFinanceController extends Controller
         else {
             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
         }
+    }
+
+
+    public function revert_requested_image($image_id){
+        $revert_Status_request = RevertStatusRequest::find($image_id);
+        $image_url = $revert_Status_request->image;
+        $url = Storage::url('revert_status_requests/'. $image_url .'');
+
+        return view('admin.finance.revert_requested_image')->with(['url' => $url]);
     }
 
     public function outstanding_walk_in_shipments_index(){
