@@ -4750,13 +4750,13 @@ class AdminFinanceController extends Controller
     }
 
     public function revert_request_submit(Request $request){
+
         if($request->revert_shipment_ids != null){
             $shipment_ids = explode(',', $request->revert_shipment_ids);
             $delivery_note_ids = explode(',', $request->revert_delivery_note_ids);
 
             foreach ($shipment_ids as $index => $shipment_id) {
-                $previous = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_ids[$index])->where('shipment_id', $shipment_id)->first();
-                $previous_status = $previous->status;
+
                 DeliveryNoteShipment::where('delivery_note_id', $delivery_note_ids[$index])->where('shipment_id', $shipment_id)->update(['status' => 11]);
                 $revert_status_request = new RevertStatusRequest();
                 $revert_status_request->shipment_id = $shipment_id;
@@ -4774,15 +4774,18 @@ class AdminFinanceController extends Controller
                 $revert_status_request->admin_id = Auth::id();
                 $revert_status_request->save();
 
+                $previous = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_ids[$index])->where('shipment_id', $shipment_id)->first();
+                $previous_status = $previous->status;
+
                 $revert_status_request_log = new RevertStatusRequestLog();
                 $revert_status_request_log->delivery_note_id = $delivery_note_ids[$index];
                 $revert_status_request_log->shipment_id = $shipment_id;
                 $revert_status_request_log->previous_status = $previous_status;
                 $revert_status_request_log->updated_by = Auth::id();
                 $revert_status_request_log->save();
-                return redirect()->back()->with(['success' => 'Shipments updated to Revert Request Status!']);
 
             }
+            return redirect()->back()->with(['success' => 'Shipments updated to Revert Request Status!']);
         }
         else{
             return redirect()->back()->with(['errors' => 'Shipments not selected!']);
