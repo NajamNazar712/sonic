@@ -203,7 +203,6 @@
                             head.push('Payment ID');
                             head.push('Remarks');
                             head.push('Created At');
-                            head.push('Created By');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
@@ -215,7 +214,6 @@
                                 row.push(values.done_payment_id);
                                 row.push(values.remarks);
                                 row.push(values.created_at);
-                                row.push(values.created_by);
                                 body.push(row);
                             });
                         },

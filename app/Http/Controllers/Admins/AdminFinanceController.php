@@ -209,6 +209,7 @@ class AdminFinanceController extends Controller
             return ['status' => 0, 'success' => 'No Booked Shipments', 'delivery_notes' => FALSE];
         }
     }
+
     public function outstanding_sdn_shipments_delivered(Request $request){
         $sdn_id = $request->input('sdn_id');
         $sdn_details = StationDepositNote::find($sdn_id);
@@ -789,7 +790,7 @@ class AdminFinanceController extends Controller
                 ';
 
                     if (session('role_id') == 1 || in_array(55, session('permissions'))) {
-                        if($shipment->recovery_status != 7){
+                        if($shipment->recovery_status != 7 || $shipment->recovery_status != 11){
                             $dropdown .= $resolve_button;
                         }
                     }
