@@ -466,7 +466,9 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            @if($require_password)
             $('#PasswordModal').modal('show');
+            @endif
             $('.password').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -474,7 +476,7 @@
                 'rightAlign': false,
                 'mask': '99999'
             });
-            $('body').on('keypress','#password_input',function() {
+            $('body').on('keypress change','#password_input',function() {
                 if($(this).val().length == 5){
                     $('#password_submit').attr('disabled', false);
                 }

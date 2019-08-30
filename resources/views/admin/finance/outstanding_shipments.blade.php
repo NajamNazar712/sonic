@@ -328,8 +328,9 @@
                 }
             } );
             var selected_rows = [];
-			var selected_delivery_note_ids = [];
-            var revert_status_table;
+			var selected_delivery_note_ids = {};
+            var filtered_rows = [];
+            var filtered_delivery_notes = [];
 			var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -340,15 +341,15 @@
                         enabled: true,
                         action: function (e, dt, node, config) {
                             if(selected_rows.length > 0){
-                                // table.rows().nodes().each(function(index) {
-                                //     var row = table.row(index);
-                                //
-                                //     // if ($(row.node()).hasClass('selected')) {
-                                //     //     var id = parseInt(row.id());
-                                //     //     var delivery_note_id = $(row.node()).attr('data-dncc');
-                                //     //     selected_delivery_note_ids[id] = delivery_note_id;
-                                //     // }
-                                // });
+                                table.rows().nodes().each(function(index) {
+                                    var row = table.row(index);
+
+                                    if ($(row.node()).hasClass('selected')) {
+                                        var id = parseInt(row.id());
+                                        var delivery_note_id = $(row.node()).attr('data-dncc');
+                                        selected_delivery_note_ids[id] = delivery_note_id;
+                                    }
+                                });
 
                                 $.ajax({
                                     url: '{!! route('admin.finance.outstanding_shipments.revert_request_shipments_check') !!}',
@@ -362,7 +363,8 @@
                                     .done(function(data) {
                                         if (data.status == 0) {
                                             $('#RevertModal').modal('show');
-                                            revert_status_table = $('#revert_status_table').DataTable({
+                                            // var revert_status_table;
+                                            var revert_status_table = $('#revert_status_table').DataTable({
                                                 dom: 'ltipr',
                                                 ordering:false,
                                                 paging:false,
@@ -379,11 +381,10 @@
 
                                                 }
                                             });
-                                            selected_rows = [];
-                                            selected_delivery_note_ids = [];
+
                                             $.each(data.shipments, function (index, value) {
-                                                selected_rows.push(index);
-                                                selected_delivery_note_ids.push(data.delivery_note_ids[index]);
+                                                filtered_rows.push(index);
+                                                filtered_delivery_notes.push(data.delivery_note_ids[index]);
                                                 var remarks_input = '<textarea class="form-control form-control-sm remarks" rows="5" name="remarks['+index+']" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks are required"></textarea>';
                                                 var upload_image = '<input class="form-control form-control-sm" type="file" name="upload_image'+index+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
                                                 revert_status_table.row.add([0, value, remarks_input, upload_image]).node().id = index;
@@ -393,7 +394,12 @@
                                                 $(this).val($(this).val().trim());
                                             });
 
-
+                                            $('#RevertModal').on('hidden.bs.modal', function () {
+                                                revert_status_table.clear().draw();
+                                                revert_status_table.destroy();
+                                                filtered_rows = [];
+                                                filtered_delivery_notes = [];
+                                            });
                                         }
                                         else {
                                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -601,17 +607,16 @@
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
-                var delivery_note_id = $(this).parents('tr').attr('data-dncc');
+
 
                 var index = $.inArray(id, selected_rows);
 
                 if (index === -1) {
                     selected_rows.push(id);
-                    selected_delivery_note_ids.push(delivery_note_id);
+
                 }
                 else {
                     selected_rows.splice(index, 1);
-                    selected_delivery_note_ids.push(index, 1);
 
                 }
 
@@ -772,8 +777,8 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    $('#revert_shipment_ids').val(selected_rows);
-                    $('#revert_delivery_note_ids').val(selected_delivery_note_ids);
+                    $('#revert_shipment_ids').val(filtered_rows);
+                    $('#revert_delivery_note_ids').val(filtered_delivery_notes);
 
                     form.submit();
 
