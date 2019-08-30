@@ -340,15 +340,15 @@
                         enabled: true,
                         action: function (e, dt, node, config) {
                             if(selected_rows.length > 0){
-                                table.rows().nodes().each(function(index) {
-                                    var row = table.row(index);
-
-                                    if ($(row.node()).hasClass('selected')) {
-                                        var id = parseInt(row.id());
-                                        var delivery_note_id = $(row.node()).attr('data-dncc');
-                                        selected_delivery_note_ids[id] = delivery_note_id;
-                                    }
-                                });
+                                // table.rows().nodes().each(function(index) {
+                                //     var row = table.row(index);
+                                //
+                                //     // if ($(row.node()).hasClass('selected')) {
+                                //     //     var id = parseInt(row.id());
+                                //     //     var delivery_note_id = $(row.node()).attr('data-dncc');
+                                //     //     selected_delivery_note_ids[id] = delivery_note_id;
+                                //     // }
+                                // });
 
                                 $.ajax({
                                     url: '{!! route('admin.finance.outstanding_shipments.revert_request_shipments_check') !!}',
@@ -601,14 +601,18 @@
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
+                var delivery_note_id = $(this).parents('tr').attr('data-dncc');
 
                 var index = $.inArray(id, selected_rows);
 
                 if (index === -1) {
                     selected_rows.push(id);
+                    selected_delivery_note_ids.push(delivery_note_id);
                 }
                 else {
                     selected_rows.splice(index, 1);
+                    selected_delivery_note_ids.push(index, 1);
+
                 }
 
                 if (selected_rows.length > 0) {
