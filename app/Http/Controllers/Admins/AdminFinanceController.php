@@ -766,7 +766,7 @@ class AdminFinanceController extends Controller
                 }
             })
 
-            ->editColumn('adjustment_image_button', function ($shipments) {
+            ->editColumn('revert_requested_image_button', function ($shipments) {
                 $image = '<div class="text-center">';
                 if ($shipments->recovery_status == 11) {
                     if ($shipments->revert_requested_image != null) {
