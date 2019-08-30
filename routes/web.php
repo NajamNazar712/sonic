@@ -830,6 +830,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('walk_in_resolved', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_resolved')->name('walk_in_resolved');
             Route::put('revert_request_shipments_check', 'Admins\AdminFinanceController@revert_request_shipments_check')->name('revert_request_shipments_check');
             Route::post('revert_request_submit', 'Admins\AdminFinanceController@revert_request_submit')->name('revert_request_submit');
+            Route::get('revert_requested/{image_id}', 'Admins\AdminFinanceController@revert_requested_image')->name('revert_requested_image');
         });
 
         Route::prefix('change_shipment_amount')->name('change_shipment_amount.')->group(function () {

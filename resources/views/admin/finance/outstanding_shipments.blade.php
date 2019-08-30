@@ -104,6 +104,7 @@
 										<th class="border-primary border-darken-1">Amount</th>
 										<th class="border-primary border-darken-1">Recovery Status</th>
 										<th class="border-primary border-darken-1">Recovery Status Date</th>
+										<th class="border-primary border-darken-1">Revert Requested Image</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1">Status Updated Datetime</th>
 										<th class="border-primary border-darken-1">Remarks</th>
@@ -506,6 +507,7 @@
 					{data:'amount', name: 's.amount', class: 'align-middle text-center amount'},
 					{data:'shipment_recovery_status', name: 'delivery_note_shipments.status', class: 'align-middle text-center shipment_recovery_status'},
                     {data:'recovery_date', name: 'sj.remarks', class: 'align-middle text-center recovery_date'},
+                    {data:'adjustment_image_button', name: 'adjustment_image_button', class: 'align-middle text-center adjustment_image_button', orderable: false, searchable: false},
                     {data:'status', name: 'ss.id', class: 'align-middle text-center status'},
                     {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
                     {data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
@@ -534,7 +536,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action') || $(header).is('.select') || $(header).is('.shipment_recovery_status')) {
+						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action') || $(header).is('.select') || $(header).is('.shipment_recovery_status') || $(header).is('.adjustment_image_button')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))
