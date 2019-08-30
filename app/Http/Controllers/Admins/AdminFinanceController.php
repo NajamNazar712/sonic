@@ -4722,6 +4722,7 @@ class AdminFinanceController extends Controller
         $adjustment_log = AdjustmentLog::where('pending_id', $pending_id)->where('type', $type);
 
         if ($adjustment_log->exists()) {
+            $adjustment_log = $adjustment_log->first();
             $adjustment_log->pending_id = NULL;
             $adjustment_log->done_id = $done_id;
             $adjustment_log->save();
