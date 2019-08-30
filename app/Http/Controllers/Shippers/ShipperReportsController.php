@@ -328,7 +328,7 @@ class ShipperReportsController extends Controller
             ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
             ->leftjoin('adjustment_types as at', 'at.id', '=', 'adjustment_logs.adjustment_type_id')
-            ->select('adjustment_logs.id as adjustment_id', 'adjustment_logs.adjustment_amount as adjustment_amount', 'adjustment_logs.remarks as remarks', 's.tracking_number as tracking_number', 'at.name as adjustment_type', 'adjustment_logs.created_at as created_at', 'u.name as shipper_name', 'dps.done_payment_id as Adminrepo')
+            ->select('adjustment_logs.id as adjustment_id', 'adjustment_logs.adjustment_amount as adjustment_amount', 'adjustment_logs.remarks as remarks', 's.tracking_number as tracking_number', 'at.name as adjustment_type', 'adjustment_logs.created_at as created_at', 'u.name as shipper_name', 'dps.done_payment_id as done_payment_id')
             ->whereIn('adjustment_logs.type', [1,2])
             ->where('s.user_id', session('user_id'));
         $datatable = Datatables::of($adjustments)
