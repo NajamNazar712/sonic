@@ -103,6 +103,7 @@
 										<th class="border-primary border-darken-1">Service Type</th>
 										<th class="border-primary border-darken-1">Amount</th>
 										<th class="border-primary border-darken-1">Recovery Status</th>
+										<th class="border-primary border-darken-1">Recovery Status Date</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1">Status Updated Datetime</th>
 										<th class="border-primary border-darken-1">Remarks</th>
@@ -285,6 +286,7 @@
                             head.push('Service Type');
                             head.push('Amount');
                             head.push('Recovery Status');
+                            head.push('Recovery Status Date');
                             head.push('Status');
                             head.push('Status Updated Datetime');
                             head.push('Remarks');
@@ -308,6 +310,7 @@
                                 row.push(values.service_type);
                                 row.push(values.amount);
                                 row.push(values.shipment_recovery_status);
+                                row.push(values.recovery_date);
                                 row.push(values.status);
                                 row.push(values.status_updated_at);
                                 row.push(values.remarks);
@@ -329,7 +332,7 @@
 			var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-
+                    @if (session('role_id') == 1 || in_array(249, session('permissions')))
                     {
                         text: 'Request Revert',
                         className: 'btn btn-primary revert_request',
@@ -402,7 +405,9 @@
 							}
 
                         }
-                    },{
+                    },
+                    @endif
+                    {
                         extend: 'selectAll',
                         text: 'Select All',
                         className: 'select_all',
@@ -500,9 +505,10 @@
 					{data:'service_type', name: 'bt.id', class: 'align-middle text-center service_type'},
 					{data:'amount', name: 's.amount', class: 'align-middle text-center amount'},
 					{data:'shipment_recovery_status', name: 'delivery_note_shipments.status', class: 'align-middle text-center shipment_recovery_status'},
-					{data:'status', name: 'ss.id', class: 'align-middle text-center status'},
-					{data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
-					{data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
+                    {data:'recovery_date', name: 'sj.remarks', class: 'align-middle text-center recovery_date'},
+                    {data:'status', name: 'ss.id', class: 'align-middle text-center status'},
+                    {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
+                    {data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
 					{data:'dncc_link', name: 'delivery_note_shipments.delivery_note_id', class: 'align-middle text-center dncc_link'},
 					{data:'sdn_link', name: 'dnsdn.station_deposit_note_id', class: 'align-middle text-center sdn_link'},
 					{data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},

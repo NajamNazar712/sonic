@@ -329,7 +329,7 @@
                     {data:'recovery_status', name: 'ss.name as status', class: 'align-middle text-center recovery_status', orderable: false, searchable: false},
                     {data:'current_status', name: 'ss.name', class: 'align-middle text-center current_status'},
                     {data:'payment_status', name: 'sps.name', class: 'align-middle text-center payment_status'},
-                    {data:'operation_status_date', name: 'sod.created_at', class: 'align-middle text-center operation_status_date'},
+                    {data:'operation_status_date', name: 'rsrl.created_at', class: 'align-middle text-center operation_status_date'},
                     {data:'verification_status_date', name: 'svd.created_at', class: 'align-middle text-center verification_status_date'},
                     {data:'rider_name', name: 'rider.name', class: 'align-middle text-center rider_name'},
                     {data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
