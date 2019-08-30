@@ -371,7 +371,7 @@
 
                     <div class="row justify-content-center">
                         <div class="form-group form-inline">
-                            <input type="text" class="form-control password" id="password_input" placeholder="Enter Password"><button class="btn btn-primary ml-1" id="password_submit" disabled>Enter</button>
+                            <input type="text" class="form-control password" autofocus id="password_input" placeholder="Enter Password"><button tabindex="-1" type="button" class="btn btn-primary ml-1" id="password_submit" disabled>Enter</button>
                         </div>
 
                     </div>
@@ -505,6 +505,34 @@
                         }
                    });
                }
+            });
+            $('#password_input').keypress(function (event) {
+                if(event.keyCode == 13){
+                    var pass = $('#password_input').val();
+                    var delivery_note = $('#delivery_note').val();
+
+                    if(pass){
+                        $.ajax({
+                            url: '{!! route('admin.delivery.receive.password.check') !!}',
+                            type: 'POST',
+                            data: {
+                                'delivery_note_id': delivery_note,
+                                'password': pass,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status){
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                $('#password_input').val('');
+                                $('#password_submit').attr('disabled', true);
+                            }else{
+                                $('#PasswordModal').modal('hide');
+                                $('#password').val(pass);
+                            }
+                        });
+                    }
+                }
+
             });
             $('#select_all_status').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Status',
