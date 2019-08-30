@@ -790,7 +790,7 @@ class AdminFinanceController extends Controller
                 ';
 
                     if (session('role_id') == 1 || in_array(55, session('permissions'))) {
-                        if($shipment->recovery_status != 7 || $shipment->recovery_status != 11){
+                        if($shipment->recovery_status != 7 && $shipment->recovery_status != 11){
                             $dropdown .= $resolve_button;
                         }
                     }
@@ -1186,7 +1186,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_shipments_adjust_in_payment(Request $request) {
-        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->whereIn('status', [4, 5, 6])->where('delivery_note_id', $request->dncc);
+        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->whereIn('status', [4, 5, 6, 11])->where('delivery_note_id', $request->dncc);
 
         if ($delivery_note_shipment->exists()) {
             $delivery_note_shipment = $delivery_note_shipment->first();
