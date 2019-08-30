@@ -493,7 +493,7 @@
 					}
 				},
 				rowId: 'id',
-				order: [[12, 'desc']],
+				order: [[14, 'desc']],
 				columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
