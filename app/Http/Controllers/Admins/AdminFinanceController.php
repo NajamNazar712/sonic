@@ -1908,53 +1908,79 @@ class AdminFinanceController extends Controller
     static private function adjust_payment($payment_id, $shipment_id, $payment_type, $adjustment_type = NULL) {
         if ($payment_type == 0) {
             $payment_shipment = PendingPaymentShipment::where('pending_payment_id', $payment_id)->where('shipment_id', $shipment_id)->latest()->first();
+
+            $payment = $payment_shipment->pending_payment;
+
+            $total_shipments = $payment->total_shipments - 1;
+
+            if ($total_shipments == 0) {
+                $payment->delete();
+            }
+            else {
+                $payment->total_shipments = $total_shipments;
+
+                if ($payment_shipment->type == 0) {
+                    $payment->delivered_shipments = $payment->delivered_shipments - 1;
+                }
+                if ($payment_shipment->type == 1) {
+                    $payment->returned_shipments = $payment->returned_shipments - 1;
+                }
+                else {
+                    $payment->adjusted_shipments = $payment->adjusted_shipments - 1;
+                }
+
+                $payment->save();
+            }
+
+            $payment_shipment->delete();
         }
         else {
             $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment_id)->where('shipment_id', $shipment_id)->latest()->first();
-        }
 
-        $shipment = Shipment::find($shipment_id);
+            $shipment = Shipment::find($shipment_id);
 
-        $amount = 0;
-        $charges = 0;
-        $gst = 0;
-        $payable = 0 - $payment_shipment->payable;
+            $amount = 0;
+            $charges = 0;
+            $gst = 0;
+            $payable = 0 - $payment_shipment->payable;
 
-        $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
-        if ($pending_payment->exists()) {
-            $pending_payment = $pending_payment->first();
+            if ($pending_payment->exists()) {
+                $pending_payment = $pending_payment->first();
 
-            $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
-            $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
+                $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+                $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
 
-            $pending_payment->save();
-        }
-        else {
-            $pending_payment = new PendingPayment();
+                $pending_payment->save();
+            }
+            else {
+                $pending_payment = new PendingPayment();
 
-            $pending_payment->user_id = $shipment->user_id;
-            $pending_payment->total_shipments = 1;
-            $pending_payment->delivered_shipments = 0;
-            $pending_payment->returned_shipments = 0;
-            $pending_payment->adjusted_shipments = 1;
+                $pending_payment->user_id = $shipment->user_id;
+                $pending_payment->total_shipments = 1;
+                $pending_payment->delivered_shipments = 0;
+                $pending_payment->returned_shipments = 0;
+                $pending_payment->adjusted_shipments = 1;
 
-            $pending_payment->save();
-        }
+                $pending_payment->save();
+            }
 
-        $pending_payment_shipment = new PendingPaymentShipment();
+            $pending_payment_shipment = new PendingPaymentShipment();
 
-        $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-        $pending_payment_shipment->shipment_id = $shipment_id;
-        $pending_payment_shipment->type = 2;
-        $pending_payment_shipment->amount = $amount;
-        $pending_payment_shipment->charges = $charges;
-        $pending_payment_shipment->gst = $gst;
-        $pending_payment_shipment->payable = $payable;
+            $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+            $pending_payment_shipment->shipment_id = $shipment_id;
+            $pending_payment_shipment->type = 2;
+            $pending_payment_shipment->amount = $amount;
+            $pending_payment_shipment->charges = $charges;
+            $pending_payment_shipment->gst = $gst;
+            $pending_payment_shipment->payable = $payable;
 
-        $pending_payment_shipment->save();
-        if($adjustment_type){
-            self::adjustment_logs_add($shipment_id,$adjustment_type, $payable, NULL, $pending_payment_shipment->id, 1);
+            $pending_payment_shipment->save();
+
+            if ($adjustment_type) {
+                self::adjustment_logs_add($shipment_id,$adjustment_type, $payable, NULL, $pending_payment_shipment->id, 1);
+            }
         }
     }
 
@@ -1962,79 +1988,99 @@ class AdminFinanceController extends Controller
         if ($payment_shipment_id) {
             if ($payment_type == 0) {
                 $payment_shipment = PendingPaymentShipment::find($payment_shipment_id);
+
+                $payment = $payment_shipment->pending_payment;
+
+                if ($payment_shipment->type == 0) {
+                    $payment->delivered_shipments = $payment->delivered_shipments - 1;
+                }
+                if ($payment_shipment->type == 1) {
+                    $payment->returned_shipments = $payment->returned_shipments - 1;
+                }
+                else {
+                    $payment->adjusted_shipments = $payment->adjusted_shipments - 1;
+                }
+
+                $payment->total_shipments = $payment->total_shipments - 1;
+
+                $payment->save();
+
+                $payment_shipment->delete();
             }
             else {
                 $payment_shipment = DonePaymentShipment::find($payment_shipment_id);
-            }
 
-            if ($payment_shipment) {
-                $pending_invoice_shipment = new PendingInvoiceShipment();
+                if ($payment_shipment) {
+                    $pending_invoice_shipment = new PendingInvoiceShipment();
 
-                $pending_invoice_shipment->shipment_id = $shipment_id;
-                $pending_invoice_shipment->type = 2;
-                $pending_invoice_shipment->charges = 0;
-                $pending_invoice_shipment->gst = 0;
-                $pending_invoice_shipment->invoice_amount = $payment_shipment->payable;
+                    $pending_invoice_shipment->shipment_id = $shipment_id;
+                    $pending_invoice_shipment->type = 2;
+                    $pending_invoice_shipment->charges = 0;
+                    $pending_invoice_shipment->gst = 0;
+                    $pending_invoice_shipment->invoice_amount = $payment_shipment->payable;
 
-                $pending_invoice_shipment->save();
-                if($adjustment_type){
-                    self::adjustment_logs_add($shipment_id,$adjustment_type, $payment_shipment->payable, NULL, $pending_invoice_shipment->id, 2);
+                    $pending_invoice_shipment->save();
+                    if($adjustment_type){
+                        self::adjustment_logs_add($shipment_id,$adjustment_type, $payment_shipment->payable, NULL, $pending_invoice_shipment->id, 2);
+                    }
+
                 }
-
             }
         }
 
         if ($invoice_shipment_id) {
             if ($invoice_type == 0) {
                 $invoice_shipment = PendingInvoiceShipment::find($invoice_shipment_id);
+
+                $invoice_shipment->delete();
             }
             else {
                 $invoice_shipment = InvoiceShipment::find($invoice_shipment_id);
-            }
 
-            if ($invoice_shipment) {
-                $shipment = Shipment::find($shipment_id);
+                if ($invoice_shipment) {
+                    $shipment = Shipment::find($shipment_id);
 
-                $amount = 0;
-                $charges = 0;
-                $gst = 0;
-                $payable = $invoice_shipment->invoice_amount;
+                    $amount = 0;
+                    $charges = 0;
+                    $gst = 0;
+                    $payable = $invoice_shipment->invoice_amount;
 
-                $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                    $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
-                if ($pending_payment->exists()) {
-                    $pending_payment = $pending_payment->first();
+                    if ($pending_payment->exists()) {
+                        $pending_payment = $pending_payment->first();
 
-                    $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
-                    $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
+                        $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+                        $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
 
-                    $pending_payment->save();
-                }
-                else {
-                    $pending_payment = new PendingPayment();
+                        $pending_payment->save();
+                    }
+                    else {
+                        $pending_payment = new PendingPayment();
 
-                    $pending_payment->user_id = $shipment->user_id;
-                    $pending_payment->total_shipments = 1;
-                    $pending_payment->delivered_shipments = 0;
-                    $pending_payment->returned_shipments = 0;
-                    $pending_payment->adjusted_shipments = 1;
+                        $pending_payment->user_id = $shipment->user_id;
+                        $pending_payment->total_shipments = 1;
+                        $pending_payment->delivered_shipments = 0;
+                        $pending_payment->returned_shipments = 0;
+                        $pending_payment->adjusted_shipments = 1;
 
-                    $pending_payment->save();
-                }
+                        $pending_payment->save();
+                    }
 
-                $pending_payment_shipment = new PendingPaymentShipment();
+                    $pending_payment_shipment = new PendingPaymentShipment();
 
-                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-                $pending_payment_shipment->shipment_id = $shipment_id;
-                $pending_payment_shipment->type = 2;
-                $pending_payment_shipment->amount = $amount;
-                $pending_payment_shipment->charges = $charges;
-                $pending_payment_shipment->gst = $gst;
-                $pending_payment_shipment->payable = $payable;
+                    $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                    $pending_payment_shipment->shipment_id = $shipment_id;
+                    $pending_payment_shipment->type = 2;
+                    $pending_payment_shipment->amount = $amount;
+                    $pending_payment_shipment->charges = $charges;
+                    $pending_payment_shipment->gst = $gst;
+                    $pending_payment_shipment->payable = $payable;
 
-                $pending_payment_shipment->save();
-                if($adjustment_type) {
-                    self::adjustment_logs_add($shipment_id, $adjustment_type, $payment_shipment->payable, NULL, $pending_payment_shipment->id, 1);
+                    $pending_payment_shipment->save();
+                    if($adjustment_type) {
+                        self::adjustment_logs_add($shipment_id, $adjustment_type, $payment_shipment->payable, NULL, $pending_payment_shipment->id, 1);
+                    }
                 }
             }
         }
