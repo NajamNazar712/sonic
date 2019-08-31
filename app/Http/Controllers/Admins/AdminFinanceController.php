@@ -1911,19 +1911,26 @@ class AdminFinanceController extends Controller
 
             $payment = $payment_shipment->pending_payment;
 
-            if ($payment_shipment->type == 0) {
-                $payment->delivered_shipments = $payment->delivered_shipments - 1;
-            }
-            if ($payment_shipment->type == 1) {
-                $payment->returned_shipments = $payment->returned_shipments - 1;
+            $total_shipments = $payment->total_shipments - 1;
+
+            if ($total_shipments == 0) {
+                $payment->delete();
             }
             else {
-                $payment->adjusted_shipments = $payment->adjusted_shipments - 1;
+                $payment->total_shipments = $total_shipments;
+
+                if ($payment_shipment->type == 0) {
+                    $payment->delivered_shipments = $payment->delivered_shipments - 1;
+                }
+                if ($payment_shipment->type == 1) {
+                    $payment->returned_shipments = $payment->returned_shipments - 1;
+                }
+                else {
+                    $payment->adjusted_shipments = $payment->adjusted_shipments - 1;
+                }
+
+                $payment->save();
             }
-
-            $payment->total_shipments = $payment->total_shipments - 1;
-
-            $payment->save();
 
             $payment_shipment->delete();
         }
