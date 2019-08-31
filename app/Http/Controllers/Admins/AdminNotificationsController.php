@@ -238,13 +238,11 @@ class AdminNotificationsController extends Controller
         else if ($id == 36 || $id == 37) {
              $details['fields'] = ['account_id', 'company_name_b', 'company_name_a', 'trax_logo'];
         }
-        else if($id == 38){
+		else if($id == 38){
             $details['fields'] = ['shipper_name','button','trax_logo'];
+        }		else if ($id == 39) {
+            $details['fields'] = ['tracking_number', 'status_updated_at', 'receiver_name'];
         }
-        else if($id == 40){
-            $details['fields'] = ['rider_name','delivery_note_id','password'];
-        }
-
         return $details;
     }
 

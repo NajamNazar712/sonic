@@ -3746,15 +3746,17 @@ class AdminReportsController extends Controller
             $hubs = $hubs->get();
 
             if ($date) {
+                $from_month = Carbon::parse($date)->subDays(30)->addHour($day_cut_off_time)->toDateTimeString();
                 $from = Carbon::parse($date)->addHour($day_cut_off_time)->toDateTimeString();
                 $to = Carbon::parse($date)->addDay()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
             }
             else {
+                $from_month = Carbon::today()->subDays(30)->addHour($day_cut_off_time)->toDateTimeString();
                 $from = Carbon::today()->addHour($day_cut_off_time)->toDateTimeString();
                 $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
             }
 
-            $types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'on_hold', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'delivery_note_pending', 'delivery_tomorrow'];
+            $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_updated', 'confirmation_pending', 'fake_status', 'delivery_note_pending', 'delivery_tomorrow'];
 
             $counts = array();
 
@@ -3766,27 +3768,30 @@ class AdminReportsController extends Controller
                 foreach ($types as $type) {
                     $rows = DB::connection('reports')->table('cities')->join('shipments as s', 'cities.id', '=', 's.consignee_city_id');
 
-                    if ($type == 'delivery_note_pending') {
-                        $rows = $rows->join('shipments_journey as sj', function($join) use ($from, $to) {
+                    if ($type == 'status_not_updated') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) use ($from_month, $to) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                            ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from_month . '" and "' . $to . '")'));
+                        });
+                    }
+                    else if ($type == 'fake_status') {
+                        $rows = $rows->join('delivery_note_shipments as dns', 's.id', '=', 'dns.shipment_id')
+                        ->join('delivery_notes as dn', function($join) use ($from, $to) {
+                            $join->on('dn.id', '=', 'dns.delivery_note_id')
+                            ->where('dn.status', '=', 1)
+                            ->whereBetween('dn.status_verified_at', [$from, $to]);
+                        });
+                    }
+                    else if ($type == 'delivery_note_pending') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) use ($to) {
                             $join->on('s.id', '=', 'sj.shipment_id')
                             ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at < "' . $to . '")'));
                         });
                     }
-                    else if ($type != 'correct_status' && $type != 'fake_status') {
+                    else {
                         $rows = $rows->join('shipments_journey as sj', function($join) use ($from, $to) {
                             $join->on('s.id', '=', 'sj.shipment_id')
                             ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
-                        });
-                    }
-                    else {
-                        $rows = $rows->join('delivery_note_shipments as dns', function($join) {
-                            $join->on('s.id', '=', 'dns.shipment_id')
-                            ->where('dns.delivery_note_id', '=', DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
-                        })
-                        ->join('delivery_notes as dn', function($join) use ($from, $to) {
-                            $join->where('dn.status', '=', 1)
-                            ->whereBetween('dn.created_at', [$from, $to])
-                            ->where('dn.id', '=', DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
                         });
                     }
 
@@ -3799,21 +3804,7 @@ class AdminReportsController extends Controller
                         });
                     }
 
-                    if ($type == 'status_not_updated') {
-                        $rows = $rows->where(function ($query) use ($arrival_cut_off_time) {
-                            $query->where('sj.shipper_status_id', '=', 7)
-                            ->orWhere(function ($sub_query) use ($arrival_cut_off_time) {
-                                $sub_query->where(function ($sub_sub_query) {
-                                    $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
-                                    ->orWhereNull('zcc.class')
-                                    ->orWhereIn('zcc.class', [0, 1]);
-                                })
-                                ->whereIn('sj.shipper_status_id', [2, 4])
-                                ->whereRaw('hour(`sj`.`created_at`) < ?', [$arrival_cut_off_time]);
-                            });
-                        });
-                    }
-                    else if ($type == 'delivered') {
+                    if ($type == 'delivered') {
                         $rows = $rows->whereIn('sj.shipper_status_id', [14, 30, 36, 37]);
                     }
                     else if ($type == 'delivery_unsucessful') {
@@ -3822,18 +3813,22 @@ class AdminReportsController extends Controller
                     else if ($type == 'on_hold') {
                         $rows = $rows->whereIn('sj.shipper_status_id', [9, 10, 11, 15]);
                     }
+                    else if ($type == 'status_not_updated') {
+                        $rows = $rows->where(function ($query) use ($arrival_cut_off_time) {
+                            $query->where('sj.shipper_status_id', '=', 7)
+                            ->orWhere(function ($sub_query) use ($arrival_cut_off_time) {
+                                $sub_query->where(function ($sub_sub_query) {
+                                    $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                    ->orWhereNull('zcc.class')
+                                    ->orWhereIn('zcc.class', [0, 1]);
+                                })
+                                ->whereIn('sj.shipper_status_id', [2, 4, 13])
+                                ->whereRaw('hour(`sj`.`created_at`) < ?', [$arrival_cut_off_time]);
+                            });
+                        });
+                    }
                     else if ($type == 'confirmation_pending') {
                         $rows = $rows->where('sj.shipper_status_id', '=', 12);
-                    }
-                    else if ($type == 'lost') {
-                        $rows = $rows->where('sj.shipper_status_id', '=', 18);
-                    }
-                    else if ($type == 'confirm') {
-                        $rows = $rows->where('sj.shipper_status_id', '=', 20)
-                        ->whereNotNull('sj.reference_1_id');
-                    }
-                    else if ($type == 'correct_status') {
-                        $rows = $rows->where('dns.fake_status', '=', 0);
                     }
                     else if ($type == 'fake_status') {
                         $rows = $rows->where('dns.fake_status', '=', 1);
@@ -3851,6 +3846,9 @@ class AdminReportsController extends Controller
                                 ->orWhere(function ($sub_sub_query) {
                                    $sub_sub_query->where('usi.city_id', '!=', DB::connection('reports')->raw('s.consignee_city_id'))
                                    ->where('sj.shipper_status_id', 4);
+                                })
+                                ->orWhere(function ($sub_sub_query) {
+                                   $sub_sub_query->where('sj.shipper_status_id', 13);
                                 });
                             })
                             ->where(function ($sub_query) use ($arrival_cut_off_time) {
@@ -3873,7 +3871,7 @@ class AdminReportsController extends Controller
 
                         $counts[$hub->name][$type] = $rows->count();
 
-                        if ($type != 'correct_status' && $type != 'fake_status') {
+                        if ($type != 'fake_status') {
                             if ($type != 'delivery_note_pending' && $type != 'delivery_tomorrow') {
                                 if (!isset($counts[$hub->name]['total_1'])) {
                                     $counts[$hub->name]['total_1'] = 0;
@@ -4017,14 +4015,14 @@ class AdminReportsController extends Controller
 
         $details = array();
 
-        $details[] = ['Hubs', 'Status Not Updated', 'Delivered', 'Delivery Unsuccessful', 'On Hold', 'Confirmation Pending', 'Lost', 'Confirm', 'Correct Status', 'Fake Status', 'Total', 'Ratio', 'Delivery Note Pending', 'Total', 'Ratio', 'Delivery Tomorrow', 'Grand Total', 'Ratio'];
+        $details[] = ['Hubs', 'Delivered', 'Delivery Unsuccessful', 'On Hold', 'Status Not Updated', 'Confirmation Pending', 'Fake Status', 'Total', 'Ratio', 'Delivery Note Pending', 'Total', 'Ratio', 'Delivery Tomorrow', 'Grand Total', 'Ratio'];
 
         $result = $this->debriefing_data($date, $hub, $zone, TRUE);
 
         if ($result['status'] == 0) {
-            $types = ['status_not_updated', 'delivered', 'delivery_unsucessful', 'on_hold', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];
+            $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_updated', 'confirmation_pending', 'fake_status', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];
 
-            $type_names = ['status_not_updated' => 'Status Not Updated', 'delivered' => 'Delivered', 'delivery_unsucessful' => 'Delivery Unsuccessful', 'on_hold' => 'On Hold', 'confirmation_pending' => 'Confirmation Pending', 'lost' => 'Lost', 'confirm' => 'Confirm', 'correct_status' => 'Correct Status', 'fake_status' => 'Fake Status', 'total_1' => 'Total', 'total_1_ratio' => 'Ratio', 'delivery_note_pending' => 'Delivery Note Pending', 'total_2' => 'Total', 'total_2_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
+            $type_names = ['delivered' => 'Delivered', 'delivery_unsucessful' => 'Delivery Unsuccessful', 'on_hold' => 'On Hold', 'status_not_updated' => 'Status Not Updated', 'confirmation_pending' => 'Confirmation Pending', 'fake_status' => 'Fake Status', 'total_1' => 'Total', 'total_1_ratio' => 'Ratio', 'delivery_note_pending' => 'Delivery Note Pending', 'total_2' => 'Total', 'total_2_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
 
             foreach ($result['counts'] as $hub => $count) {
                 $row = array();
@@ -4052,19 +4050,16 @@ class AdminReportsController extends Controller
             $spreadsheet->getActiveSheet()->getStyle('F')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
             $spreadsheet->getActiveSheet()->getStyle('G')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
             $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-            $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE);
             $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
             $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
             $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE);
             $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
             $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
             $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE);
-            $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-            $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-            $spreadsheet->getActiveSheet()->getStyle('R')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE);
 
-            $spreadsheet->getActiveSheet()->getStyle('B')->getFont()->getColor()->setARGB('FFFF0000');
-            $spreadsheet->getActiveSheet()->getStyle('J')->getFont()->getColor()->setARGB('FFFF0000');
+            $spreadsheet->getActiveSheet()->getStyle('E')->getFont()->getColor()->setARGB('FFFF0000');
+            $spreadsheet->getActiveSheet()->getStyle('G')->getFont()->getColor()->setARGB('FFFF0000');
 
             $spreadsheet->getActiveSheet()->setTitle('Overall')->fromArray($details, NULL);
 

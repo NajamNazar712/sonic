@@ -129,7 +129,7 @@
                 pagingType: 'full_numbers',
                 ajax: '{{ route('admin.settings.petty_cash.heads.list') }}',
                 rowId: 'id',
-                order: [1, 'asc'],
+                order: [1, 'desc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'name', class: 'align-middle name'},

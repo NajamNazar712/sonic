@@ -163,7 +163,7 @@
                 serverSide: false,
                 ajax: '{{ route('admin.delivery.receive.verify.status.list',['id'=>$delivery_note_id]) }}',
                 rowId: 'shId',
-                order: [[1, 'asc']],
+                order: [[1, 'desc']],
                 ordering: false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

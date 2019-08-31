@@ -928,7 +928,7 @@
 
                     $(this).find('.quantity').TouchSpin({
                         min: 1,
-                        max: 1000,
+                        max: 10000,
                         buttondown_class: 'btn btn-primary rounded-left',
                         buttonup_class: 'btn btn-primary rounded-right',
                         buttondown_txt: '<i class="ft-minus"></i>',
@@ -1267,7 +1267,7 @@
 
             $('.quantity').TouchSpin({
                 min: 1,
-                max: 1000,
+                max: 10000,
                 buttondown_class: 'btn btn-primary rounded-left',
                 buttonup_class: 'btn btn-primary rounded-right',
                 buttondown_txt: '<i class="ft-minus"></i>',

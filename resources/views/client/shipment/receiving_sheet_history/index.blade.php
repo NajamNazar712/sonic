@@ -172,7 +172,7 @@
 				serverSide: true,
 				ajax: '{{ route('cod.shipment.receiving_sheet_history.short_received_list') }}',
 				rowId: 'pickup_address_id',
-				order: [[3, 'asc']],
+				order: [[3, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_address_id', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'received', name: 'receiving_sheets.received', class: 'text-center align-middle received', orderable: false, searchable: false},

@@ -1524,6 +1524,8 @@ class ReturnController extends Controller
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
 
+                    NotificationsController::send(39, $shipment);
+
 
                         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
                         if($packaging_material_shipment != null){
@@ -1578,6 +1580,7 @@ class ReturnController extends Controller
 
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
+                    NotificationsController::send(39, $shipment);
                 }
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
@@ -1619,6 +1622,7 @@ class ReturnController extends Controller
                         Shipment::where('id',$shipment_id)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
                     }
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment_id])->update(['status'=>1]);
+                    NotificationsController::send(39, $shipment_id);
                 }
                 $shipment_status_count = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
                 if($shipment_status_count == 0){

@@ -44,10 +44,12 @@
 									<div class="col-6 col-xs-6 col-sm-6 col-md-4 col-lg-3">
 										<div class="nav flex-column nav-pills border-info rounded-0" role="tablist" aria-orientation="vertical">
 											@foreach($modules as $module)
-												@if ($loop->first)
-													<a class="nav-link rounded-0 active" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="true">{{ $module->name }}</a>
-												@else
-													<a class="nav-link rounded-0" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="false">{{ $module->name }}</a>
+												@if($module->id != 18)
+													@if ($loop->first)
+														<a class="nav-link rounded-0 active" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="true">{{ $module->name }}</a>
+													@else
+														<a class="nav-link rounded-0" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="false">{{ $module->name }}</a>
+													@endif
 												@endif
 											@endforeach
 										</div>
@@ -55,24 +57,26 @@
 									<div class="col-6 col-xs-6 col-sm-6 col-md-8 col-lg-9">
 										<div class="tab-content">
 											@foreach($modules as $module)
-												@if ($loop->first)
-													<div class="tab-pane fade show active" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
-														@foreach($module->permissions as $permission)
-															<fieldset class="d-inline-block m-1">
-																<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}">
-																<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
-															</fieldset>
-														@endforeach
-													</div>
-												@else
-													<div class="tab-pane fade" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
-														@foreach($module->permissions as $permission)
-															<fieldset class="d-inline-block m-1">
-																<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}">
-																<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
-															</fieldset>
-														@endforeach
-													</div>
+												@if($module->id != 18)
+													@if ($loop->first)
+														<div class="tab-pane fade show active" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
+															@foreach($module->permissions as $permission)
+																<fieldset class="d-inline-block m-1">
+																	<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}">
+																	<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
+																</fieldset>
+															@endforeach
+														</div>
+													@else
+														<div class="tab-pane fade" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
+															@foreach($module->permissions as $permission)
+																<fieldset class="d-inline-block m-1">
+																	<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}">
+																	<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
+																</fieldset>
+															@endforeach
+														</div>
+													@endif
 												@endif
 											@endforeach
 										</div>

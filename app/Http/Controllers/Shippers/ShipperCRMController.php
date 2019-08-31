@@ -173,6 +173,9 @@ class ShipperCRMController extends Controller
         $shipment_ids = $request->shipment_ids;
         $description = $request->description;
         $launched_by = 1;
+        if(!$request->case_nature_id){
+            return ['status' => 0, 'error' => 'Case nature not selected!'];
+        }
         $present_shipments = array();
         $flag = false;
         if(session('user_type') == 2){

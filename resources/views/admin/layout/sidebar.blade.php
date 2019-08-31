@@ -763,8 +763,9 @@
                                 </ul>
                             </li>
                         @endif
-                        @endif
                     </ul>
+                </li>
+            @endif
                 <li class=" nav-item"><a href="{{route('admin.tracking.index')}}"><i class="la la-crosshairs"></i><span class="menu-title"
                                                                                                                         data-i18n="nav.dash.main">Tracking</span></a>
         </ul>

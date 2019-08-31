@@ -1046,8 +1046,8 @@ class AdminFinanceController extends Controller
             $file_name = 'deposit_slip_'.$deposit_id;
             if($request->has($file_name)){
                 $image = $request->file($file_name);
-                $imageName = $image->getClientOriginalName();
-                $extension = $image->getClientOriginalExtension();
+//                $extension = $image->getClientOriginalExtension();
+                $extension = 'png';
                 $random = rand(1000, 100000);
                 $now = Carbon::now();
                 $time = $now->year . '_' . $now->month;
@@ -3830,7 +3830,7 @@ class AdminFinanceController extends Controller
                                 </tr>
                                 <tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
-                                    <td>' . Carbon::parse($invoice->from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->to_date)->format('Y-m-d') . '</td>
+                                    <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
                                 </tr>
                                 <tr>
                                     <td class="color primary"><strong>Invoice No.</strong></td>
