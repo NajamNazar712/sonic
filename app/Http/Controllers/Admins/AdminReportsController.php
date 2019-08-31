@@ -3825,8 +3825,13 @@ class AdminReportsController extends Controller
                             })
                             ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
                                 $sub_query->where('sj.shipper_status_id', '=', 13)
-                                ->whereRaw('date(`sj`.`created_at`) <= DATE(?)', [$from])
-                                ->whereRaw('hour(`sj`.`created_at`) < ?', [$arrival_cut_off_time]);
+                                ->where(function ($sub_sub_query) use ($arrival_cut_off_time, $from) {
+                                    $sub_sub_query->whereRaw('date(`sj`.`created_at`) < DATE(?)', [$from])
+                                    ->orWhere(function ($sub_sub_sub_query) use ($arrival_cut_off_time, $from) {
+                                        $sub_sub_sub_query->whereRaw('date(`sj`.`created_at`) = DATE(?)', [$from])
+                                        ->whereRaw('hour(`sj`.`created_at`) < ?', [$arrival_cut_off_time]);
+                                    });
+                                });
                             });
                         });
                     }
