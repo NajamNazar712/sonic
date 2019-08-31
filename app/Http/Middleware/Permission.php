@@ -353,6 +353,9 @@ class Permission
             'reports.summary.index' => 206,
             'reports.summary.data' => 206,
             'reports.summary.list' => 206,
+            'reports.account_activation.index' => 246,
+            'reports.account_activation.data' => 246,
+            'reports.account_activation.list' => 246,
             'reports.adjustments.index' => 248,
             'reports.adjustments.list' => 248,
 
