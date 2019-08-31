@@ -3813,8 +3813,8 @@ class AdminReportsController extends Controller
                     }
                     else if ($type == 'status_not_updated') {
                         $rows = $rows->where('sj.shipper_status_id', '=', 7)
-                        ->orWhere(function ($query) use ($arrival_cut_off_time) {
-                            $query->where(function ($sub_query) use ($arrival_cut_off_time) {
+                        ->orWhere(function ($query) use ($arrival_cut_off_time, $from) {
+                            $query->where(function ($sub_query) use ($arrival_cut_off_time, $from) {
                                 $sub_query->where('sj.shipper_status_id', '=', 13)
                                 ->orWhere(function ($sub_sub_query) use ($arrival_cut_off_time) {
                                     $sub_sub_query->where(function ($sub_sub_sub_query) {
