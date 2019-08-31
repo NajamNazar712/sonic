@@ -3813,7 +3813,7 @@ class AdminReportsController extends Controller
                     }
                     else if ($type == 'status_not_updated') {
                         $rows = $rows->where(function ($query) use ($arrival_cut_off_time, $from) {
-                            $query->whereIn('sj.shipper_status_id', [7, 14])
+                            $query->whereIn('sj.shipper_status_id', [7, 13])
                             ->orWhere(function ($sub_query) use ($arrival_cut_off_time) {
                                 $sub_query->where(function ($sub_sub_query) {
                                     $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
@@ -3824,9 +3824,9 @@ class AdminReportsController extends Controller
                             });
                         })
                         ->where(function ($sub_query) use ($arrival_cut_off_time, $from) {
-                            $sub_query->whereRaw('date(`sj`.`created_at`) < DATE(?)', [$from])
+                            $sub_query->whereRaw('date(`sj`.`created_at`) < date(?)', [$from])
                             ->orWhere(function ($sub_sub_query) use ($arrival_cut_off_time, $from) {
-                                $sub_sub_query->whereRaw('date(`sj`.`created_at`) = DATE(?)', [$from])
+                                $sub_sub_query->whereRaw('date(`sj`.`created_at`) = date(?)', [$from])
                                 ->whereRaw('hour(`sj`.`created_at`) < ?', [$arrival_cut_off_time]);
                             });
                         });
@@ -3863,7 +3863,7 @@ class AdminReportsController extends Controller
                             ->orWhere('sj.shipper_status_id', '=', 13);
                         })
                         ->where(function ($sub_query) use ($arrival_cut_off_time, $from) {
-                            $sub_query->whereRaw('date(`sj`.`created_at`) = DATE(?)', [$from])
+                            $sub_query->whereRaw('date(`sj`.`created_at`) = date(?)', [$from])
                             ->whereRaw('hour(`sj`.`created_at`) >= ?', [$arrival_cut_off_time]);
                         });
                     }
