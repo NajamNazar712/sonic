@@ -3812,22 +3812,25 @@ class AdminReportsController extends Controller
                         $rows = $rows->whereIn('sj.shipper_status_id', [9, 10, 11, 15]);
                     }
                     else if ($type == 'status_not_updated') {
-                        $rows = $rows->where(function ($query) use ($arrival_cut_off_time) {
-                            $query->whereIn('sj.shipper_status_id', [7, 13])
-                            ->orWhere(function ($sub_query) use ($arrival_cut_off_time) {
-                                $sub_query->where(function ($sub_sub_query) {
-                                    $sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
-                                    ->orWhereNull('zcc.class')
-                                    ->orWhereIn('zcc.class', [0, 1]);
+                        $rows = $rows->where('sj.shipper_status_id', '=', 7)
+                        ->orWhere(function ($query) use ($arrival_cut_off_time) {
+                            $query->where(function ($sub_query) use ($arrival_cut_off_time) {
+                                $sub_query->where('sj.shipper_status_id', '=', 13)
+                                ->orWhere(function ($sub_sub_query) use ($arrival_cut_off_time) {
+                                    $sub_sub_query->where(function ($sub_sub_sub_query) {
+                                        $sub_sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
+                                        ->orWhereNull('zcc.class')
+                                        ->orWhereIn('zcc.class', [0, 1]);
+                                    })
+                                    ->whereIn('sj.shipper_status_id', [2, 4]);
                                 })
-                                ->whereIn('sj.shipper_status_id', [2, 4]);
-                            });
-                        })
-                        ->where(function ($sub_query) use ($arrival_cut_off_time, $from) {
-                            $sub_query->whereRaw('date(`sj`.`created_at`) < date(?)', [$from])
-                            ->orWhere(function ($sub_sub_query) use ($arrival_cut_off_time, $from) {
-                                $sub_sub_query->whereRaw('date(`sj`.`created_at`) = date(?)', [$from])
-                                ->whereRaw('hour(`sj`.`created_at`) < ?', [$arrival_cut_off_time]);
+                                ->where(function ($sub_sub_query) use ($arrival_cut_off_time, $from) {
+                                    $sub_sub_query->whereRaw('date(`sj`.`created_at`) < date(?)', [$from])
+                                    ->orWhere(function ($sub_sub_sub_query) use ($arrival_cut_off_time, $from) {
+                                        $sub_sub_sub_query->whereRaw('date(`sj`.`created_at`) = date(?)', [$from])
+                                        ->whereRaw('hour(`sj`.`created_at`) < ?', [$arrival_cut_off_time]);
+                                    });
+                                });
                             });
                         });
                     }
