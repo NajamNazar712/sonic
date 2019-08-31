@@ -26,6 +26,7 @@ use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\MisroutedHistory;
+use App\Http\Models\Notification;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
@@ -369,7 +370,11 @@ class DeliveryController extends Controller
         $shipments = explode(',',$request->shipment_ids);
         $notifications = explode(',',$request->notification_ids);
         $rider_informations = explode(',',$request->rider_info_ids);
-        $password = rand(10001,99999);
+        if(Notification::where('id', 40)->where('statut', 1)->exists()){
+            $password = rand(10001,99999);
+        }else{
+            $password = NULL;
+        }
         $admin = Auth::id();
 
         $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15, 49, 55);
