@@ -3841,7 +3841,7 @@ class AdminReportsController extends Controller
                     }
                     else if ($type == 'delivery_tomorrow') {
                         $rows = $rows->where(function ($query) use ($arrival_cut_off_time, $from) {
-                            $query->where(function ($sub_query) {
+                            $query->where(function ($sub_query) use ($arrival_cut_off_time) {
                                 $sub_query->where(function ($sub_sub_query) {
                                     $sub_sub_query->where(function ($sub_sub_sub_query) {
                                         $sub_sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
