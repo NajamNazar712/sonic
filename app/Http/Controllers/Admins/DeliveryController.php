@@ -370,7 +370,7 @@ class DeliveryController extends Controller
         $shipments = explode(',',$request->shipment_ids);
         $notifications = explode(',',$request->notification_ids);
         $rider_informations = explode(',',$request->rider_info_ids);
-        if(Notification::where('id', 40)->where('statut', 1)->exists()){
+        if(Notification::where('id', 40)->where('status', 1)->exists()){
             $password = rand(10001,99999);
         }else{
             $password = NULL;
