@@ -35,9 +35,103 @@
 			</div>
 		</div>
 	</div>
+
+    <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Request</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_request_form" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+                            <div class="row">
+                                <h2 class="heading">Tracking Number(s)</h2>
+                            </div>
+
+                            <input type="hidden" id="requested_shipment_ids">
+                            <div class="row old_scroll" id="requested_shipments">
+
+                            </div>
+                            <hr>
+                            <div class="row justify-content-center">
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <select name="case_nature_select" id="case_nature_select" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
+                                            @foreach($case_nature as $nature)
+                                                <option value="{{$nature->id}}">{{$nature->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="complaints d-none" id="request_complaints">
+                                <div class="row justify-content-center">
+                                    <div class="col-8">
+                                        <fieldset class="form-group">
+                                            <select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2" data-rule-required="true" data-msg-required="Complaint Type is required">
+                                                @foreach($case_nature_complaints as $complaints)
+                                                    <option value="{{$complaints->id}}">{{$complaints->type}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-8">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="service d-none" id="request_service">
+                                <div class="row justify-content-center">
+                                    <div class="col-8">
+                                        <fieldset class="form-group">
+                                            <select name="case_nature_request" id="case_nature_requests" class="form-control select2" data-rule-required="true" data-msg-required="Complaint Type is required">
+                                                @foreach($case_nature_service_requests as $service)
+                                                    <option value="{{$service->id}}">{{$service->type}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+
+                                    <div class="col-8">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="feedback d-none" id="request_feedback">
+                                <div class="row justify-content-center">
+                                    <div class="col-8">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="feedback_description_request" id="feedback_description_request" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block d-none">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
@@ -50,11 +144,13 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {

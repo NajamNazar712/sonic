@@ -1,7 +1,7 @@
 @extends('client.layout.master')
 
 @section('title', 'Book Excel Shipment(s)')
-
+{{--{{dd($errors)}}--}}
 @section('content')
     <div class="app-content content">
         <div class="content-wrapper">
@@ -88,8 +88,8 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][information_display]', $ro['information_display'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
-                                            @if(isset($errors[$no]['consignee_city_name']))
-                                                <td>{!! Form::select('form[' . $no . '][consignee_city_name]',$cities ,null,['class' => 'form-control is-invalid consignee_city_name select2','id'=>'consignee_city_name','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['consignee_city_name']}}</font></td>
+                                            @if(isset($errors[$no]['consignee_city']))
+                                                <td>{!! Form::select('form[' . $no . '][consignee_city_name]',$cities ,null,['class' => 'form-control is-invalid consignee_city_name select2','id'=>'consignee_city_name','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['consignee_city']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][consignee_city_name]', $ro['consignee_city_name'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
