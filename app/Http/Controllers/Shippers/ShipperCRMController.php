@@ -171,6 +171,7 @@ class ShipperCRMController extends Controller
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $shipment_ids = $request->shipment_ids;
+        $shipment_id = $request->shipment_id;
         $description = $request->description;
         $launched_by = 1;
         if(!$request->case_nature_id){
@@ -207,7 +208,7 @@ class ShipperCRMController extends Controller
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
                     if($shipment){
-                        $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
+                        $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                         if($is_shipment){
                             if($is_shipment->case_nature_id != $nature_id){
                                 CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
@@ -224,7 +225,26 @@ class ShipperCRMController extends Controller
                 }
                 return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
 //            return ['status' => 1, 'success' => 'Request(s) successfully added'];
-            }else{
+            }
+            elseif (!empty($shipment_id)){
+                $shipment = Shipment::find($shipment_id);
+                if($shipment){
+                    $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
+                    if($is_shipment){
+                        if($is_shipment->case_nature_id != $nature_id){
+                            CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                        }else{
+
+                            $present_shipments[] = $shipment->tracking_number;
+                            $flag = true;
+                        }
+                    }else{
+                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                    }
+                }
+                return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+            }
+            else{
                 return ['status' => 0, 'error' => 'No shipments selected!'];
             }
         }
