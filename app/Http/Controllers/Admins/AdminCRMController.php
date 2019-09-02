@@ -83,7 +83,7 @@ class AdminCRMController extends Controller
                     foreach ($shipment_ids as $shipment_id) {
                         $shipment = Shipment::find($shipment_id);
                         if($shipment){
-                            $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
+                            $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                             if($is_shipment){
                                 if($is_shipment->case_nature_id != $nature_id){
                                     CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
