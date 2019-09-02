@@ -429,9 +429,14 @@ class AdminPackagingMaterialController extends Controller
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
             ->leftjoin('shipments as s', 's.tracking_number', '=', 'packaging_material_requests.tracking_number')
 //            ->leftjoin('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
+            })
             ->leftjoin('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'packaging_material_requests.status_id')
             ->leftjoin('packaging_material_request_details as pmrd', 'pmrd.packaging_material_request_id', '=', 'packaging_material_requests.id')
-            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id'])
+            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks'])
         ->groupBy('packaging_material_requests.id');
 
         if(session('department_id') == 7){
@@ -457,6 +462,19 @@ class AdminPackagingMaterialController extends Controller
                     return "-";
                 }else{
                     return $days;
+                }
+            })
+            ->addColumn('confirmed_aging',function ($shipments){
+                if($shipments->confirmed_date){
+                    $days = Carbon::now()->diffInDays($shipments->confirmed_date);
+                    if($days == 0){
+                        return "-";
+                    }else{
+                        return $days;
+                    }
+                }
+                else{
+                    return "-";
                 }
             })
             ->filterColumn('status',function ($query,$keyword){
@@ -491,6 +509,12 @@ class AdminPackagingMaterialController extends Controller
                     }
                     if ($packaging->status_id == 2 && ($packaging->shipper_status_id == 4 || $packaging->shipper_status_id == 2) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item dispatch"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Dispatch</div></button>';
+                    }
+                    if($packaging->remarks){
+                        $dropdown .= '<button type="button" class="dropdown-item remarks"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Remarks</div></button>';
+                    }
+                    else{
+                        $dropdown .= '<button type="button" class="dropdown-item remarks"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
                     }
 
                     $dropdown .= '
@@ -1665,6 +1689,20 @@ class AdminPackagingMaterialController extends Controller
         }
 
         return redirect()->back()->with('success', 'Stock requested successfully!');
+    }
+    public function packaging_request_remarks(Request $request){
+        $shipment_id = $request->id;
+        $remarks = $request->remarks;
+        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest('id')->first();
+        if($shipment_journey){
+            $shipment_journey->remarks = $remarks;
+            $shipment_journey->save();
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Packaging request remarks can\'t be updated!']);
+        }
+
+        return response()->json(['status' => 1, 'success' => 'Packaging request remarks updated successfully!']);
     }
 
 }
