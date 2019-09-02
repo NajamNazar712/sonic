@@ -79,7 +79,7 @@
                 <div class="modal-body text-center">
                     <form action="#" id="update_remarks_form" class="form">
                         <input type="hidden" name="remarks_shipment_id" id="remarks_shipment_id">
-                        <textarea type="text" name="packaging_remarks" class="form-group form-control" id="packaging_remarks" placeholder="Remarks"></textarea>
+                        <textarea type="text" name="packaging_remarks" class="form-group form-control" id="packaging_remarks" placeholder="Remarks" rows="7"></textarea>
                     </form>
                 </div>
                 <div class="modal-footer">
