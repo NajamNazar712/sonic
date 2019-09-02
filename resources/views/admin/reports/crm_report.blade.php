@@ -70,6 +70,16 @@
                     </div>
 
                     <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_status" id="search_status" class="form-control select2">
+                                @foreach($statuses as $status)
+                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -224,6 +234,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Status',
+                width:'100%',
+                allowClear:true
+            });
             $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -267,6 +282,7 @@
                             'search_agent': $('#search_agent').val(),
                             'search_case_nature': $('#search_case_nature').val(),
                             'search_shipper': $('#search_shipper').val(),
+                            'search_status': $('#search_status').val(),
                             'search_from': $('input[name="from_date_formatted"]').val(),
                             'search_to': $('input[name="to_date_formatted"]').val()
                         },
@@ -360,6 +376,7 @@
                         d.search_agent = $('#search_agent').val();
                         d.search_case_nature = $('#search_case_nature').val();
                         d.search_shipper = $('#search_shipper').val();
+                        d.search_status = $('#search_status').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }

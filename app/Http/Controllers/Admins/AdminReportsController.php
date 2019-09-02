@@ -4649,7 +4649,8 @@ class AdminReportsController extends Controller
         $agents = DB::connection('reports')->table('admin_roles')->leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
         $case_natures = DB::connection('reports')->table('crm_request_case_nature')->select('id', 'name')->get();
-        return view('admin.reports.crm_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'agents'=>$agents,'case_natures'=>$case_natures]);
+        $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6,7])->get();
+        return view('admin.reports.crm_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'agents'=>$agents,'case_natures'=>$case_natures,'statuses'=>$statuses]);
     }
 
     public function crm_list(Request $request){
@@ -4815,6 +4816,9 @@ class AdminReportsController extends Controller
         }
         if($agent = $request->get('search_agent')){
             $datatable->where('a.id', '=', $agent);
+        }
+        if($status = $request->get('search_status')){
+            $datatable->where('crs.id', '=', $status);
         }
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
