@@ -1429,7 +1429,7 @@ class ShipperShipmentBookController extends Controller
 
                     $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode', 'id');
                     $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
-
+                    $city_name = array();
                     foreach ($cities as $city) {
                         $city_name[$city->name] = $city->name;
                     }
@@ -2565,6 +2565,7 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode','id');
+                $city_name = array();
                 foreach ($cities as $city){
                     $city_name[$city->name]=$city->name;
                 }
