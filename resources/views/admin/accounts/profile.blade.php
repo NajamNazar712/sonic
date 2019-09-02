@@ -273,8 +273,8 @@
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
                                         <label>Company Name:</label>
-                                        <span class="danger">*</span>
-                                        <input type="text" minlength="3" id="name" class="form-control border-primary" data-rule-remote="{{ route('cod.check.name', ['id' => $user->id,'name'=>$user->name]) }}" data-msg-remote="Company Name must be unique" data-rule-required="true" data-msg-required="Company Name is required" value="{{$user->name}}" name="name" required>
+                                        {{--<span class="danger">*</span>--}}
+                                        <input type="text" minlength="3" id="name" class="form-control border-primary" data-rule-remote="{{ route('cod.check.name', ['id' => $user->id,'name'=>$user->name]) }}" data-msg-remote="Company Name must be unique" data-rule-required="true" data-msg-required="Company Name is required" value="{{$user->name}}" name="name" required readonly>
                                     </div>
                                 </div>
                             </div>

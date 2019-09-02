@@ -6101,7 +6101,6 @@ class AdminDashboardController extends Controller
 
     public function updateProfile(Request $request)
     {
-
         $user_id = $request->user_id;
 
         //1 for Admin, 0 for User

@@ -33,7 +33,9 @@
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Payment Mode</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Aging</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">Request Date Aging</th>
+                        <th class="border-primary border-darken-1">Confirmed Date Aging</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -58,6 +60,30 @@
 
                 </div>
                 <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="AddRemarks" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRemarks"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add/Update Remarks</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="#" id="update_remarks_form" class="form">
+                        <input type="hidden" name="remarks_shipment_id" id="remarks_shipment_id">
+                        <input type="text" name="packaging_remarks" class="form-group form-control" id="packaging_remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="update_remarks_button">Update</button>
                     <button class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -186,7 +212,9 @@
                             head.push('Address');
                             head.push('Payment Mode');
                             head.push('Status');
-                            head.push('Aging');
+                            head.push('Remarks');
+                            head.push('Requested Date Aging');
+                            head.push('Confirmed Date Aging');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -202,6 +230,7 @@
                                 row.push(values.address);
                                 row.push(values.mode);
                                 row.push(values.status);
+                                row.push(values.remarks);
                                 row.push(values.aging);
 
                                 body.push(row);
@@ -259,7 +288,9 @@
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'mode', name: 'ppm.id', class: 'align-middle mode'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'remarks', name: 'sj.remarks', class: 'align-middle remarks'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
+                    {data: 'confirmed_aging', class: 'align-middle confirmed_aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 
                 ],
@@ -281,7 +312,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.total_quantity_button') || $(header).is('.aging')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.total_quantity_button') || $(header).is('.aging') || $(header).is('.confirmed_aging')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -652,6 +683,55 @@
                     }
                 });
 
+            });
+            //remarks
+            $('body').on('click','.remarks',function(){
+                var request_id = table.row($(this).parents('tr')).data().shipment_id;
+                var remarks = table.row($(this).parents('tr')).data().remarks;
+                $('#remarks_shipment_id').val(request_id);
+                $('#packaging_remarks').val(remarks);
+
+                $('#AddRemarks').modal('show');
+
+            });
+            $('#update_remarks_form').on('submit', function(e){
+                e.preventDefault();
+            });
+
+            $('#update_remarks_button').on('click', function(){
+                var remarks_shipment_id = $('#remarks_shipment_id').val();
+                var packaging_remarks = $('#packaging_remarks').val();
+                if(packaging_remarks == null || packaging_remarks == ''){
+                    var error = 'Please enter remarks';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                else{
+                    $('#update_remarks_button').attr('disabled', true);
+                    $.ajax({
+                        url: '{!! route('admin.packaging.requests.remarks') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': remarks_shipment_id,
+                            'remarks': packaging_remarks,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status === 1){
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            table.draw();
+                            $('#AddRemarks').modal('hide');
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        $('#update_remarks_button').attr('disabled', false);
+                    });
+                }
+            });
+
+            $('#AssignAgentModal').on('hide.bs.modal', function (e) {
+                $('#remarks_shipment_id').val('');
+                $('#packaging_remarks').val('');
             });
 
 
