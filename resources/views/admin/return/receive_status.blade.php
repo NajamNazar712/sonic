@@ -430,7 +430,7 @@
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-                    if ((data.shipper_status_id != 25) && (data.shipper_status_id != 31) && (data.shipper_status_id != 38)) {
+                    if ((data.shipper_status_id != 25) && (data.shipper_status_id != 31) && (data.shipper_status_id != 38) && (data.return_note_flag == true)) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shId, selected_rows) !== -1) {
