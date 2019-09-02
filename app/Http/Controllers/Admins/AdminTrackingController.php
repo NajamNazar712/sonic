@@ -29,8 +29,12 @@ class AdminTrackingController extends Controller
     }
 
     public function index(Request $request) {
+        $case_nature = CrmRequestCaseNature::get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
 
-      return view('admin.tracking');
+        return view('admin.tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels]);
     }
 
     public function track(Request $request) {
@@ -174,7 +178,7 @@ class AdminTrackingController extends Controller
                         $journey_details = array();
 
                         $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                        $journey_details['status'] = $journey->status->name;
+                        $journey_details['status'] = $journey->status->name . ' ('. str_pad($journey->id, 6, '0', STR_PAD_LEFT) . ')';
                         $journey_details['user'] = $journey->admin->name;
                         $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';
 

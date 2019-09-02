@@ -106,7 +106,7 @@ class AdminCRMController extends Controller
                 if(!empty($shipment_id)){
                     $shipment = Shipment::find($shipment_id);
                     if($shipment){
-                        $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
+                        $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                         if($is_shipment){
                             if($is_shipment->case_nature_id != $nature_id){
                                 CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
@@ -120,7 +120,7 @@ class AdminCRMController extends Controller
                     }
                     return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                 }else{
-                    return ['status' => 0, 'error' => 'No shipments selected!'];
+                    return ['status' => 0, 'error' => $request->shipment_id];
                 }
             }
         }
