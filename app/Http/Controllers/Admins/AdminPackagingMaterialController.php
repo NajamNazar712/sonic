@@ -510,12 +510,7 @@ class AdminPackagingMaterialController extends Controller
                     if ($packaging->status_id == 2 && ($packaging->shipper_status_id == 4 || $packaging->shipper_status_id == 2) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item dispatch"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Dispatch</div></button>';
                     }
-                    if($packaging->remarks){
-                        $dropdown .= '<button type="button" class="dropdown-item remarks"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Remarks</div></button>';
-                    }
-                    else{
-                        $dropdown .= '<button type="button" class="dropdown-item remarks"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
-                    }
+                        $dropdown .= '<button type="button" class="dropdown-item remarks"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add/Update Remarks</div></button>';
 
                     $dropdown .= '
                     </div>
