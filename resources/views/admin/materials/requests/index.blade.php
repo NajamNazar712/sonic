@@ -68,7 +68,7 @@
 
     <div class="modal fade text-left" id="AddRemarks" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRemarks"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Add/Update Remarks</h4>
@@ -79,7 +79,7 @@
                 <div class="modal-body text-center">
                     <form action="#" id="update_remarks_form" class="form">
                         <input type="hidden" name="remarks_shipment_id" id="remarks_shipment_id">
-                        <input type="text" name="packaging_remarks" class="form-group form-control" id="packaging_remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
+                        <textarea type="text" name="packaging_remarks" class="form-group form-control" id="packaging_remarks" placeholder="Remarks"></textarea>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -288,7 +288,7 @@
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'mode', name: 'ppm.id', class: 'align-middle mode'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'remarks', name: 'sj.remarks', class: 'align-middle remarks'},
+                    {data: 'remarks', name: 'sj.remarks', class: 'align-middle remarks_view'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'confirmed_aging', class: 'align-middle confirmed_aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
