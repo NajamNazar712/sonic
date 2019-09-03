@@ -1916,10 +1916,12 @@ class NotificationsController extends Controller
 
               $user_wise_shipments = array();
 
+              $yesterday = Carbon::yesterday();
+
               foreach ($shipments as $shipment) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first();
 
-                if ($shipment_journey && $shipment_journey->verification) {
+                if ($shipment_journey && $shipment_journey->verification && Carbon::parse($shipment_journey->created_at)->startOfDay()->greaterThanOrEqualTo($yesterday)) {
                   $details = array();
 
                   $details['service_type'] = $shipment->booking_type->booking_type;
