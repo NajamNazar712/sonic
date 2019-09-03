@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -23,7 +25,10 @@ class ShipperTrackingController extends Controller
     }
 
     public function index() {
-      return view('client.tracking');
+        $case_nature = CrmRequestCaseNature::get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+      return view('client.tracking')->with([ 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests]);
     }
 
     public function track(Request $request) {

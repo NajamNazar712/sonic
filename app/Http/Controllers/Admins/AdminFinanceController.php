@@ -3714,21 +3714,32 @@ class AdminFinanceController extends Controller
             if ($user_banking_information->invoicing_cycle_id == 1) {
                 if ($user_banking_information->generation_date == $current_date->dayOfWeekIso) {
                     $generate = TRUE;
+
+                    $billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
                 }
             }
             else if ($user_banking_information->invoicing_cycle_id == 2) {
                 if ($current_date->day == 14 || $current_date->day == 28) {
                     $generate = TRUE;
+
+                    if ($current_date->day == 14) {
+                        $billing_period_from_date = Carbon::now()->subMonth()->day(28)->startOfDay()->toDateString();
+                    }
+                    else {
+                        $billing_period_from_date = Carbon::now()->day(14)->startOfDay()->toDateString();
+                    }
                 }
             }
             else if ($user_banking_information->invoicing_cycle_id == 3) {
                 if ($user_banking_information->generation_date == $current_date->day) {
                     $generate = TRUE;
+
+                    $billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
                 }
             }
 
             if ($generate) {
-                $pending_invoice_shipments = PendingInvoiceShipment::whereHas('shipment', function ($query) use ($user_id) {
+                $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $today)->whereHas('shipment', function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
                 });
 
@@ -3736,8 +3747,9 @@ class AdminFinanceController extends Controller
                     $invoice = new Invoice();
 
                     $invoice->user_id = $user_id;
-                    $invoice->billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
-                    $invoice->billing_period_to_date = Carbon::now()->startOfDay()->toDateString();
+                    $invoice->invoicing_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+                    $invoice->billing_period_from_date = $billing_period_from_date;
+                    $invoice->billing_period_to_date = Carbon::now()->subDay()->startOfDay()->toDateString();
                     $invoice->due_date = Carbon::now()->addDays($due_date_days)->startOfDay()->toDateString();
                     $invoice->status_id = 1;
 

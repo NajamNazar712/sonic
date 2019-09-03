@@ -32,6 +32,7 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Request No.</th>
                                     <th class="border-primary border-darken-1">Tracking No.</th>
@@ -151,7 +152,111 @@
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [
+                buttons: [{
+                    text: 'Re-Open',
+                    className: 'btn btn-primary re_open',
+                    enabled: false,
+                    action: function (e, dt, node, config) {
+                        swal({
+                            text: 'Are you sure, you want to Re-Open these Request(s)?',
+                            icon: 'info',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function(confirm) {
+                            if (confirm) {
+                                $.ajax({
+                                    url: '{!! route('admin.crm.bulk_re_open') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        'crm_request_ids[]': selected_rows,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                })
+                                .done(function (data) {
+                                    if (data.status == 0) {
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    }
+                                    selected_rows = [];
+
+                                    table.rows().deselect();
+
+                                    table.draw('false');
+                                });
+                            }
+                        });
+                    }
+                },
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.re_open').enable();
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.re_open').disable();
+                                    }
+                                }
+                            });
+                        }
+                    },
                     {
                         extend: 'excel',
                         title: 'CRM Requests (Closed)',
@@ -159,6 +264,12 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 'reset'],
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -177,6 +288,7 @@
                 rowId: 'id',
                 order: [[15, 'desc']],
                 columns: [
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle id_padded_link'},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
@@ -198,9 +310,14 @@
 
                 ],
                 rowCallback: function(row, data, index) {
+                    $('td:eq(0)', row).addClass('select-checkbox');
+
+                    if ($.inArray(data.id, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
 
                     var info = table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -387,6 +504,26 @@
                         return false;
                     }
                 },
+            });
+
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.re_open').enable();
+                }
+                else {
+                    table.button('.re_open').disable();
+                }
             });
 
 
