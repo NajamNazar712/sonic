@@ -1417,11 +1417,13 @@ class AdminCRMController extends Controller
                         'status_id' => 6,
                         'agent_id' => Auth::id()
                     ]);
+                    NotificationsController::send(41, $request->req_id);
                     CrmRequestStatusHistory::create([
                         'crm_request_id' => $request->req_id,
                         'status_id' => 2,
                         'agent_id' => Auth::id()
                     ]);
+
                     return redirect()->back()->with(['success' => 'Request marked as In-Process']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as In-Process']);
