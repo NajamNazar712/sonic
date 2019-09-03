@@ -1322,6 +1322,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('assign', 'Admins\AdminCRMController@assign')->name('assign');
         Route::post('close', 'Admins\AdminCRMController@close')->name('close');
         Route::post('valid', 'Admins\AdminCRMController@valid')->name('valid');
+        Route::post('bulk_re_open', 'Admins\AdminCRMController@bulk_re_open')->name('bulk_re_open');
         Route::post('invalid', 'Admins\AdminCRMController@invalid')->name('invalid');
         Route::post('tag', 'Admins\AdminCRMController@admin_tag')->name('tag');
         Route::prefix('comment')->name('comment.')->group(function(){

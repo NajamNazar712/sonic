@@ -8,6 +8,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
@@ -1480,6 +1481,25 @@ class AdminCRMController extends Controller
         else{
             return redirect()->back()->with(['error' => 'Agent is not assigned yet']);
         }
+    }
+
+    public function bulk_re_open(Request $request){
+        foreach ($request->crm_request_ids as $crm_request_id)
+        {
+            $crm_requests = CrmRequest::find($crm_request_id);
+            if ($crm_requests) {
+                $crm_requests->status_id = 5;
+                $crm_requests->save();
+                CrmRequestStatusHistory::create([
+                    'crm_request_id' => $crm_requests->id,
+                    'status_id' => 5,
+                    'agent_id' => Auth::id()
+                ]);
+                $crm_requests->agent_id = $request->admin_id;
+                $crm_requests->save();
+            }
+        }
+        return ['status' => 0, 'success' => 'Request(s) has been Re-Opened'];
     }
 
     public function invalid(Request $request)
