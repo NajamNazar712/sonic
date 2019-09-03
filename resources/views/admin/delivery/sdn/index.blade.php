@@ -45,9 +45,12 @@
                         <th class="border-primary border-darken-1">Deposited Amount</th>
 
                         <th class="border-primary border-darken-1">Deposited By</th>
-                        {{--<th class="border-primary border-darken-1">Company Bank</th>--}}
+
                         <th class="border-primary border-darken-1">Deposited Date</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Adjustment Date</th>
+                        <th class="border-primary border-darken-1">Adjustment Amount</th>
+                        <th class="border-primary border-darken-1">Adjustment Reference</th>
                         <th class="border-primary border-darken-1">Deposit Slip</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -178,6 +181,63 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="AddAdjustmentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddAdjustmentModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Adjustment For SDN</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="sdn_adjustment_add" class="form" action="{{route('admin.delivery.sdn.adjustment.add')}}" method="post">
+                        @csrf
+                        <input type="hidden" name="sdn_id" id="sdn_id_for_adjustment">
+                        <table class="table table-bordered" style="z-index: 3;">
+                            <thead>
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1">Date</th>
+                                <th class="border-primary border-darken-1">Adjustment Amount</th>
+                                <th class="border-primary border-darken-1">Adjustment Reference</th>
+
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td class="">
+                                        <div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="adjustment_date" id="adjustment_date" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <input class="form-control form-control-sm adjustment_amount" id="adjustment_amount" name="adjustment_amount" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required"></div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <input class="form-control form-control-sm adjustment_ref" id="adjustment_ref" name="adjustment_ref" placeholder="Adjustment Ref*" data-rule-required="true" data-msg-required="Adjustment reference is required"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-3">
+                                <button type="submit" class="btn btn-primary btn-block">Add Adjustment</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -273,6 +333,9 @@
                             // head.push('Company Bank');
                             head.push('Deposited Date');
                             head.push('Status');
+                            head.push('Adjustment Date');
+                            head.push('Adjustment Amount');
+                            head.push('Adjustment Reference');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -289,6 +352,9 @@
                                 // row.push(values.bank);
                                 row.push(values.created_at);
                                 row.push(values.status);
+                                row.push(values.adjustment_date);
+                                row.push(values.adjustment_amount);
+                                row.push(values.adjustment_ref);
 
                                 body.push(row);
                             });
@@ -341,6 +407,9 @@
                     // { data:'bank' ,name: 'banks_lists.id', class: 'align-middle bank'},
                     { data:'created_at' ,name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},
                     { data:'status' ,name: 'status', class: 'align-middle status'},
+                    { data:'adjustment_date' ,name: 'station_deposit_notes.adjustment_date', class: 'align-middle adjustment_date'},
+                    { data:'sdn_adjustment_amount' ,name: 'station_deposit_notes.adjustment_amount', class: 'align-middle adjustment_amount'},
+                    { data:'adjustment_ref' ,name: 'station_deposit_notes.adjustment_ref', class: 'align-middle adjustment_ref'},
                     { data:'deposit_slip' ,name: 'deposit_slip', class: 'align-middle deposit_slip',orderable: false, searchable: false},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
@@ -823,6 +892,55 @@
                 deposit_table.clear();
                 deposit_table.destroy();
                 selected_rows = [];
+            });
+
+            $('#adjustment_date').pickadate({
+                firstDay: 1,
+                today: '',
+                clear: '',
+                close: '',
+                weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
+                showMonthsShort: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+            });
+            $('input.adjustment_amount').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 10000000.00
+            });
+
+            $('body').on('change','#sdn_adjustment_add .adjustment_ref',function() {
+                $(this).val($(this).val().trim());
+            });
+            $('#datatable tbody').on('click', 'button.adjustment_add', function () {
+               var sdn_id = $(this).parents('tr').attr('id');
+               if(sdn_id){
+                   $('#adjustment_date').val('');
+                   $('#adjustment_amount').val('');
+                   $('#adjustment_ref').val('');
+
+                   $('#AddAdjustmentModal').modal('show');
+                   $('#sdn_id_for_adjustment').val(sdn_id);
+               }
+            });
+            var sdn_form;
+            sdn_form = $('#sdn_adjustment_add').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    form.submit();
+                }
+            });
+            $('#AddAdjustmentModal').on('hidden.bs.modal', function () {
+                sdn_form.resetForm()
             });
         });
     </script>

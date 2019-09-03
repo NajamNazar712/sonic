@@ -104,8 +104,7 @@ class AdminFinanceController extends Controller
     public function outstanding_sdn_list(Request $request) {
         $station_deposit_notes = StationDepositNote::join('cities as h', 'station_deposit_notes.hub_id', '=', 'h.id')
             ->join('admins as a', 'station_deposit_notes.deposited_by', '=', 'a.id')
-            ->leftjoin('banks_lists as b', 'station_deposit_notes.banks_list_id', '=', 'b.id')
-            ->select('station_deposit_notes.id', 'station_deposit_notes.id as sdn_number', 'h.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_count_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'a.name as deposited_by', 'b.name as bank', 'station_deposit_notes.created_at as deposited_at', 'station_deposit_notes.deposit_slip','station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount')
+            ->select('station_deposit_notes.id', 'station_deposit_notes.id as sdn_number', 'h.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_count_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'a.name as deposited_by', 'station_deposit_notes.created_at as deposited_at', 'station_deposit_notes.deposit_slip','station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref')
             ->where('station_deposit_notes.status', 1);
 
         if (session('role_id') != 1) {
@@ -132,6 +131,13 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('sdn_deposit_amount', function($shipment){
                 return number_format($shipment->sdn_deposit_amount);
+            })
+            ->addColumn('sdn_adjustment_amount', function($shipment){
+                if($shipment->adjustment_amount){
+                    return number_format($shipment->adjustment_amount);
+                }else{
+                    return '-';
+                }
             })
             ->editColumn('delivered_shipments_link', function($station_deposit_note) {
                 if ($station_deposit_note->sdn_delivered_shipments != 0) {
@@ -168,7 +174,7 @@ class AdminFinanceController extends Controller
                 $reconcile_delivery_notes_button = '<button type="button" class="dropdown-item reconcile_delivery_notes"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Reconcile Delivery Notes</div></button>';
                 $edit_deposit_button = '<button type="button" class="dropdown-item edit_deposit_slip"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Deposit Slip</div></button>';
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
-
+                $sdn_adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -180,6 +186,11 @@ class AdminFinanceController extends Controller
                 }
 
                 $dropdown .= $edit_deposit_button;
+
+                if (session('role_id') == 1 || in_array(251, session('permissions'))) {
+                    $dropdown .= $sdn_adjustment_add_button;
+                }
+
 
                 $dropdown .= $export_to_excel_button;
 
@@ -3719,21 +3730,32 @@ class AdminFinanceController extends Controller
             if ($user_banking_information->invoicing_cycle_id == 1) {
                 if ($user_banking_information->generation_date == $current_date->dayOfWeekIso) {
                     $generate = TRUE;
+
+                    $billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
                 }
             }
             else if ($user_banking_information->invoicing_cycle_id == 2) {
                 if ($current_date->day == 14 || $current_date->day == 28) {
                     $generate = TRUE;
+
+                    if ($current_date->day == 14) {
+                        $billing_period_from_date = Carbon::now()->subMonth()->day(28)->startOfDay()->toDateString();
+                    }
+                    else {
+                        $billing_period_from_date = Carbon::now()->day(14)->startOfDay()->toDateString();
+                    }
                 }
             }
             else if ($user_banking_information->invoicing_cycle_id == 3) {
                 if ($user_banking_information->generation_date == $current_date->day) {
                     $generate = TRUE;
+
+                    $billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
                 }
             }
 
             if ($generate) {
-                $pending_invoice_shipments = PendingInvoiceShipment::whereHas('shipment', function ($query) use ($user_id) {
+                $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $today)->whereHas('shipment', function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
                 });
 
@@ -3741,8 +3763,9 @@ class AdminFinanceController extends Controller
                     $invoice = new Invoice();
 
                     $invoice->user_id = $user_id;
-                    $invoice->billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
-                    $invoice->billing_period_to_date = Carbon::now()->startOfDay()->toDateString();
+                    $invoice->invoicing_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+                    $invoice->billing_period_from_date = $billing_period_from_date;
+                    $invoice->billing_period_to_date = Carbon::now()->subDay()->startOfDay()->toDateString();
                     $invoice->due_date = Carbon::now()->addDays($due_date_days)->startOfDay()->toDateString();
                     $invoice->status_id = 1;
 

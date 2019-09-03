@@ -3072,7 +3072,7 @@ class DeliveryController extends Controller
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_expense', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount']);
+            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref']);
 
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
@@ -3091,6 +3091,13 @@ class DeliveryController extends Controller
             ->editColumn('sdn_deposit_amount', function($shipment){
                 if($shipment->sdn_deposit_amount){
                     return number_format($shipment->sdn_deposit_amount);
+                }else{
+                    return '-';
+                }
+            })
+            ->addColumn('sdn_adjustment_amount', function($shipment){
+                if($shipment->adjustment_amount){
+                    return number_format($shipment->adjustment_amount);
                 }else{
                     return '-';
                 }
@@ -3130,8 +3137,9 @@ class DeliveryController extends Controller
             ->addColumn("action", function ($result) {
                 $route = route('admin.delivery.sdn.details', ['id' => $result->sdn_id]);
 
-                $details_button = '<a href="' . $route . '" class="dropdown-item" data-target-id="' . $result->sdn_id . '" class=""><i class="ft-plus-circle primary"></i> Details</a>';
-                $upload_deposit_slip_button = '<a href="javascript:void(0);" class="dropdown-item" data-target-id="' . $result->sdn_id . '" class="" data-target="#uploadDepositSlip" data-toggle="modal"><i class="ft-plus-circle primary"></i> Upload Deposit Slip</a>';
+                $details_button = '<button href="' . $route . '" class="dropdown-item" data-target-id="' . $result->sdn_id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1"> Details</div></div></button>';
+                $adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
+                $upload_deposit_slip_button = '<a href="javascript:void(0);" class="dropdown-item" data-target-id="' . $result->sdn_id . '" data-target="#uploadDepositSlip" data-toggle="modal"><i class="ft-plus-circle primary"></i> Upload Deposit Slip</a>';
 
                 $dropdown = '
                   <div class="btn-group">
@@ -3140,6 +3148,10 @@ class DeliveryController extends Controller
                 ';
 
                 $dropdown .= $details_button;
+
+                if (session('role_id') == 1 || in_array(251, session('permissions'))) {
+                    $dropdown .= $adjustment_add_button;
+                }
 
                 if (($result->status == 0) && (session('role_id') == 1 || in_array(43, session('permissions')))) {
                     $dropdown .= $upload_deposit_slip_button;
@@ -4765,6 +4777,21 @@ class DeliveryController extends Controller
         }else{
             return ['status' => 1, 'error' => 'No deposit note ID selected!'];
 
+        }
+    }
+
+    public function sdn_adjustment_add(Request $request){
+        $sdn_id = $request->sdn_id;
+        if($sdn_id){
+            $sdn = StationDepositNote::find($sdn_id);
+            $sdn->adjustment_amount = $request->adjustment_amount;
+            $sdn->adjustment_date = $request->adjustment_date_formatted;
+            $sdn->adjustment_ref = $request->adjustment_ref;
+            $sdn->save();
+
+            return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
+        }else{
+            return redirect()->back()->with(['error' => 'Station Deposit Note ID not found!']);
         }
     }
 }
