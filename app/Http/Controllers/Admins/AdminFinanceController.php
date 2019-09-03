@@ -3892,21 +3892,12 @@ class AdminFinanceController extends Controller
                     </div>
         ';
 
-        $shipment_details = '';
+        $shipment_details = array();
 
-        $serial_number = 1;
+        $serial_number = array();
 
-        $total_weight_charges = 0;
-        $total_cash_handling_charges = 0;
-        $total_insurance_charges = 0;
-        $total_return_charges = 0;
-        $total_fuel_surcharge = 0;
-        $total_replacement_charges = 0;
-        // $total_try_and_buy_charges = 0;
-        $total_packaging_material_charges = 0;
-        $total_intercept_charges = 0;
-        $total_nsa_osa_charges = 0;
-        $total_adjustment_charges = 0;
+        $origins = array();
+
         $total_charges = 0;
         $total_gst = 0;
         $total_invoice_amount = 0;
@@ -3925,11 +3916,24 @@ class AdminFinanceController extends Controller
 
             $date = Carbon::parse($date)->format('Y-m-d');
 
-            $shipment_details .= '
+            $origin = $shipment->pickup_address->city->name;
+
+            if (!in_array($origin, $origins)) {
+                $origins[] = $origin;
+            }
+
+            if (!isset($shipment_details[$origin])) {
+                $shipment_details[$origin] = '';
+            }
+
+            if (!isset($serial_number[$origin])) {
+                $serial_number[$origin] = 1;
+            }
+
+            $shipment_details[$origin] .= '
                         <tr>
-                          <td>' . $serial_number . '</td>
+                          <td>' . $serial_number[$origin] . '</td>
                           <td>' . $shipment->tracking_number . '</td>
-                          <td>' . $shipment->pickup_address->city->name . '</td>
                           <td>' . $shipment->consignee_city->name . '</td>
                           <td>' . $date . '</td>
                           <td>' . $shipment->actual_weight . '</td>
@@ -3943,31 +3947,75 @@ class AdminFinanceController extends Controller
                         </tr>
             ';
 
-            $serial_number++;
+            $serial_number[$origin]++;
+
+            if (!isset($total_weight_charges[$origin])) {
+                $total_weight_charges[$origin] = 0;
+            }
+
+            if (!isset($total_cash_handling_charges[$origin])) {
+                $total_cash_handling_charges[$origin] = 0;
+            }
+
+            if (!isset($total_insurance_charges[$origin])) {
+                $total_insurance_charges[$origin] = 0;
+            }
+
+            if (!isset($total_return_charges[$origin])) {
+                $total_return_charges[$origin] = 0;
+            }
+
+            if (!isset($total_fuel_surcharge[$origin])) {
+                $total_fuel_surcharge[$origin] = 0;
+            }
+
+            if (!isset($total_replacement_charges[$origin])) {
+                $total_replacement_charges[$origin] = 0;
+            }
+
+            // if (!isset($total_try_and_buy_charges[$origin])) {
+            //     $total_try_and_buy_charges[$origin] = 0;
+            // }
+
+            if (!isset($total_packaging_material_charges[$origin])) {
+                $total_packaging_material_charges[$origin] = 0;
+            }
+
+            if (!isset($total_intercept_charges[$origin])) {
+                $total_intercept_charges[$origin] = 0;
+            }
+
+            if (!isset($total_nsa_osa_charges[$origin])) {
+                $total_nsa_osa_charges[$origin] = 0;
+            }
+
+            if (!isset($total_adjustment_charges[$origin])) {
+                $total_adjustment_charges[$origin] = 0;
+            }
 
             if ($invoice_shipment->type != 2) {
                 if ($invoice_shipment->type == 0) {
-                    $total_cash_handling_charges += $shipment->cash_handling_charges;
-                    $total_replacement_charges += $shipment->replacement_charges;
-                    // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                    $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
+                    $total_replacement_charges[$origin] += $shipment->replacement_charges;
+                    // $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
                 }
                 else {
-                    $total_return_charges += $shipment->return_charges;
+                    $total_return_charges[$origin] += $shipment->return_charges;
                 }
 
-                $total_weight_charges += $shipment->weight_charges;
+                $total_weight_charges[$origin] += $shipment->weight_charges;
 
                 if ($shipment->packaging_material_request) {
-                    $total_packaging_material_charges += $shipment->packaging_material_charges;
+                    $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
                 }
 
-                $total_insurance_charges += $shipment->insurance_charges;
-                $total_fuel_surcharge += $shipment->fuel_surcharge;
-                $total_intercept_charges += $shipment->intercept_charges;
-                $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                $total_insurance_charges[$origin] += $shipment->insurance_charges;
+                $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                $total_intercept_charges[$origin] += $shipment->intercept_charges;
+                $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
             }
             else {
-                $total_adjustment_charges += $invoice_shipment->invoice_amount;
+                $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
 
             $total_charges += $invoice_shipment->charges;
@@ -3977,51 +4025,46 @@ class AdminFinanceController extends Controller
 
         $html .= '
                     <table class="table table-sm table-bordered border">
+                      <thead>
+                        <tr>
+                            <th colspan="11" class="color primary text-center">Invoice Summary</th>
+                        </tr>
+                        <tr>
+                            <th class="color secondary">Origin</th>
+                            <th class="color secondary">Weight Charges (PKR)</th>
+                            <th class="color secondary">Cash Handling Charges (PKR)</th>
+                            <th class="color secondary">Insurance Charges (PKR)</th>
+                            <th class="color secondary">Replacement Charges (PKR)</th>
+                            <th class="color secondary">Return Charges (PKR)</th>
+                            <th class="color secondary">Fuel Surcharge (PKR)</th>
+                            <th class="color secondary">Intercept Charges (PKR)</th>
+                            <th class="color secondary">OSA Charges (PKR)</th>
+                            <th class="color secondary">Packaging Charges (PKR)</th>
+                            <th class="color secondary">Adjustment Charges (PKR)</th>
+                        </tr>
+                      </thead>
                       <tbody>
+        ';
+
+        foreach ($origins as $origin) {
+            $html .= '
                         <tr>
-                            <td class="color primary text-left"><strong>Invoice Summary</strong></td>
-                            <td class="color primary text-right" style="width: 20%;"><strong>Amount (PKR)</strong></td>
+                            <td>' . $origin . '</td>
+                            <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_cash_handling_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_insurance_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_replacement_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_return_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_fuel_surcharge[$origin], 2) . '</td>
+                            <td>' . number_format($total_intercept_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_nsa_osa_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_packaging_material_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
                         </tr>
-                        <tr>
-                          <td class="text-left">Weight Charges</td>
-                          <td class="text-right">' . number_format($total_weight_charges, 2) . '</td>
-                        </tr>
-                        <tr>
-                          <td class="text-left">Cash Handling Charges</td>
-                          <td class="text-right">' . number_format($total_cash_handling_charges, 2) . '</td>
-                        </tr>
-                        <tr>
-                          <td class="text-left">Insurance Charges</td>
-                          <td class="text-right">' . number_format($total_insurance_charges, 2) . '</td>
-                        </tr>
-                        <tr>
-                          <td class="text-left">Replacement Charges</td>
-                          <td class="text-right">' . number_format($total_replacement_charges, 2) . '</td>
-                        </tr>
-                        <tr>
-                          <td class="text-left">Return Charges</td>
-                          <td class="text-right">' . number_format($total_return_charges, 2) . '</td>
-                        </tr>
-                        <tr>
-                          <td class="text-left">Fuel Surcharge</td>
-                          <td class="text-right">' . number_format($total_fuel_surcharge, 2) . '</td>
-                        </tr>
-                        <tr>
-                          <td class="text-left">Intercept Charges</td>
-                          <td class="text-right">' . number_format($total_intercept_charges, 2) . '</td>
-                        </tr>
-                        <tr>
-                          <td class="text-left">OSA Charges</td>
-                          <td class="text-right">' . number_format($total_nsa_osa_charges, 2) . '</td>
-                        </tr>
-                        <tr>
-                          <td class="text-left">Packaging Charges</td>
-                          <td class="text-right">' . number_format($total_packaging_material_charges, 2) . '</td>
-                        </tr>
-                        <tr>
-                          <td class="text-left">Adjustment Charges</td>
-                          <td class="text-right">' . number_format($total_adjustment_charges, 2) . '</td>
-                        </tr>
+            ';
+        }
+
+        $html .= '
                       </tbody>
                     </table>
 
@@ -4080,16 +4123,18 @@ class AdminFinanceController extends Controller
                     </table>
 
                     <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
+        ';
 
+        foreach ($origins as $origin) {
+            $html .= '
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="13">Shipment(s) Summary</th>
+                            <th class="color primary text-center" colspan="13">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
                           <th class="color secondary">Tracking No.</th>
-                          <th class="color secondary">Origin</th>
                           <th class="color secondary">Destination</th>
                           <th class="color secondary">Arrival Date</th>
                           <th class="color secondary">Weight (kg)</th>
@@ -4103,13 +4148,17 @@ class AdminFinanceController extends Controller
                         </tr>
                     </thead>
                     <tbody>
-        ';
+            ';
 
-        $html .= $shipment_details;
+            $html .= $shipment_details[$origin];
 
-        $html .= '
+            $html .= '
                       </tbody>
                     </table>
+            ';
+        }
+
+        $html .= '
                   </div>
                 </div>
         ';
