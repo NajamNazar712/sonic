@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\City;
 use Carbon\Carbon;
 use function foo\func;
@@ -5113,5 +5114,106 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
 
+    public function sdn_index(Request $request)
+    {
+        return view('admin.reports.station_deposit_notes');
+    }
+
+    public function sdn_list(Request $request)
+    {
+        $sdn = StationDepositNote::
+        join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
+            ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
+            ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
+            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref']);
+
+        if (session('role_id') != 1) {
+            $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
+        }
+
+        $datatable = Datatables::of($sdn)
+            ->editColumn('sdn', function ($sdn) {
+                return "<a href='javascript:void(0);' class='printSDN'><u>" . str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT) . "</u></a>";
+            })
+            ->editColumn('sdn_amount', function($shipment){
+                return number_format($shipment->sdn_amount);
+            })
+            ->editColumn('sdn_net_amount', function($shipment){
+                return number_format($shipment->sdn_net_amount);
+            })
+            ->editColumn('sdn_deposit_amount', function($shipment){
+                if($shipment->sdn_deposit_amount){
+                    return number_format($shipment->sdn_deposit_amount);
+                }else{
+                    return '-';
+                }
+            })
+            ->addColumn('sdn_adjustment_amount', function($shipment){
+                if($shipment->adjustment_amount){
+                    return number_format($shipment->adjustment_amount);
+                }else{
+                    return '-';
+                }
+            })
+            ->addColumn('sdn_id_padded', function ($sdn) {
+                return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('station_deposit_notes.id', function ($query, $keyword) {
+                return $query->where('station_deposit_notes.id', '=', $keyword);
+            })
+            ->addColumn('deposit_slip', function ($sdn) {
+                if ($sdn->deposit_slip == null && $sdn->deposit_slip_status == 1) {
+                    return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="#"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+
+                } else if($sdn->deposit_slip != null) {
+                    return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $sdn->deposit_slip) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                }else{
+                    return '-';
+                }
+            })
+            ->editColumn('dncc_link', function($pickup_notes) {
+                if ($pickup_notes->dncc_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->dncc_count . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('delivered_shipments_link', function($pickup_notes) {
+                if ($pickup_notes->sdn_delivered_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->sdn_delivered_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('status', function ($sdn) {
+                return ($sdn->status == 0) ? 'Created' : 'Deposited';
+            })
+            ->filterColumn('status', function ($query, $keyword) {
+
+                if ($keyword == 0) {
+                    $query->where('station_deposit_notes.status', '=', $keyword);
+                } else if ($keyword == 1) {
+                    $query->where('station_deposit_notes.status', '>=', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            });
+        if ($tracking_number = $request->get('search_tracking')) {
+            $datatable->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
+                ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
+                ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
+                ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number)
+                ->groupBy('station_deposit_notes.id');
+        }
+        if ($dncc = $request->get('scan_dncc')) {
+            $datatable->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
+                ->where('dnsdns.delivery_note_id', '=', $dncc)
+                ->groupBy('station_deposit_notes.id');
+        }
+        return $datatable->make(true);
+    }
 }
 
