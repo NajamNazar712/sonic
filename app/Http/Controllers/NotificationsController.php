@@ -2918,6 +2918,24 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
                 }
             }
+			else if($id == 42){
+                $rider = Rider::find($reference_1_id);
+                $user = User::find($reference_2_id);
+                if($user){
+                    if($rider){
+                        if (strpos($body, '[rider_name]') !== FALSE) {
+                            $body = str_replace('[rider_name]', $rider->name, $body);
+                        }
+
+                        if (strpos($body, '[rider_phone_number]') !== FALSE) {
+                            $body = str_replace('[rider_phone_number]', $rider->phone, $body);
+                        }
+
+                        $to = $user->phone;
+                        self::sms($body, $to);
+                    }
+                }
+            }
         }
       }
     }
