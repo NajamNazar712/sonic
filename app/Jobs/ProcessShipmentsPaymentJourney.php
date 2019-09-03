@@ -42,6 +42,8 @@ class ProcessShipmentsPaymentJourney implements ShouldQueue
         $shipment_payment_journey->status_id = $this->entry['status_id'];
         $shipment_payment_journey->admin_id = $this->entry['admin_id'];
         $shipment_payment_journey->payable_remarks = $this->entry['payable_remarks'];
+        $shipment_payment_journey->payable_remarks = $this->entry['payable_remarks'];
+        $shipment_payment_journey->payment_id = $this->entry['payment_id'];
 
         $shipment_payment_journey->save();
     }
