@@ -59,7 +59,7 @@ class AdminCRMController extends Controller
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
                     if($shipment){
-                        $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
+                        $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                         if($is_shipment){
                             if($is_shipment->case_nature_id != $nature_id){
                                 CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
@@ -82,7 +82,7 @@ class AdminCRMController extends Controller
             if(!empty($shipment_id)){
                 $shipment = Shipment::find($shipment_id);
                 if($shipment){
-                    $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
+                    $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                     if($is_shipment){
                         if($is_shipment->case_nature_id != $nature_id){
                             CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
@@ -1574,7 +1574,7 @@ class AdminCRMController extends Controller
         $roles = AdminRole::join('admin_departments as ad', 'admin_roles.department_id', '=', 'ad.id')
             ->join('admins as a', 'admin_roles.updated_by', '=', 'a.id')
             ->select('admin_roles.id', 'admin_roles.name', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by')
-            ->where('admin_roles.department_id', '=', 3);
+            ->where('admin_roles.department_id', '!=', 1);
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function($roles) {
