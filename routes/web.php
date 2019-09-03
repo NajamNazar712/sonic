@@ -552,6 +552,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('dncc/print','Admins\DeliveryController@sdn_dncc_print')->name('dncc.print');
             Route::post('shipments','Admins\DeliveryController@sdn_delivered_shipments')->name('shipments');
             Route::post('slip_view','Admins\DeliveryController@sdn_slip_view')->name('slip_view');
+            Route::post('adjustment/add','Admins\DeliveryController@sdn_adjustment_add')->name('adjustment.add');
 
         });
         Route::prefix('misroute')->name('misroute.')->group(function (){
