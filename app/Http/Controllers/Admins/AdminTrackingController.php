@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
@@ -176,9 +177,9 @@ class AdminTrackingController extends Controller
                 if ($shipment_payment_journey) {
                     foreach ($shipment_payment_journey as $journey) {
                         $journey_details = array();
-
+                        $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
                         $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                        $journey_details['status'] = $journey->status->name . ' ('. str_pad($journey->id, 6, '0', STR_PAD_LEFT) . ')';
+                        $journey_details['status'] = $journey->status->name . ' (<button class="btn btn-sm btn-outline-info align-middle payment_print" data-id="' . $payment->done_payment_id . '">' . str_pad($payment->done_payment_id, 6, '0', STR_PAD_LEFT) . '</button>)';
                         $journey_details['user'] = $journey->admin->name;
                         $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';
 
