@@ -809,7 +809,7 @@ class AdminPickupsController extends Controller
             $pickup_request = $pickup_note_request->pickup_request;
 
             $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
-
+            NotificationsController::send(42, $pickup_note->rider_id, $pickup_request->shipper_id);
             if ($assigned_shipments) {
               foreach ($assigned_shipments as $assigned_shipment) {
                 $shipment = $assigned_shipment->shipment;
@@ -938,6 +938,7 @@ class AdminPickupsController extends Controller
 
         $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
 
+        NotificationsController::send(42, $pickup_note->rider_id, $pickup_request->shipper_id);
         if ($assigned_shipments) {
           foreach ($assigned_shipments as $assigned_shipment) {
             $shipment = $assigned_shipment->shipment;
