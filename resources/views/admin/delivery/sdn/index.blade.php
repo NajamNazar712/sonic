@@ -917,7 +917,7 @@
             $('body').on('change','#sdn_adjustment_add .adjustment_ref',function() {
                 $(this).val($(this).val().trim());
             });
-            $('#datatable tbody').on('click', 'a.adjustment_add', function () {
+            $('#datatable tbody').on('click', 'button.adjustment_add', function () {
                var sdn_id = $(this).parents('tr').attr('id');
                if(sdn_id){
                    $('#adjustment_date').val('');
