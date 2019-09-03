@@ -1961,8 +1961,6 @@ class NotificationsController extends Controller
               }
 
               if (!empty($user_wise_shipments)) {
-                var_dump($user_wise_shipments);
-                exit;
                 $original_subject = $subject;
                 $original_body = $body;
 
