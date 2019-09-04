@@ -3716,6 +3716,9 @@ class AdminFinanceController extends Controller
             $due_date_days = 7;
         }
 
+        $current_date = Carbon::now()->startOfDay();
+        $current_date_string = $current_date->toDateString();
+
         $users = User::where('account_type_id', 2)->get();
 
         foreach ($users as $user) {
@@ -3724,8 +3727,6 @@ class AdminFinanceController extends Controller
             $user_id = $user->id;
 
             $user_banking_information = $user->bank;
-
-            $current_date = Carbon::now();
 
             if ($user_banking_information->invoicing_cycle_id == 1) {
                 if ($user_banking_information->generation_date == $current_date->dayOfWeekIso) {
@@ -3755,7 +3756,7 @@ class AdminFinanceController extends Controller
             }
 
             if ($generate) {
-                $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $today)->whereHas('shipment', function ($query) use ($user_id) {
+                $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
                 });
 
