@@ -2921,13 +2921,15 @@ class NotificationsController extends Controller
                 $crm_request = CrmRequest::find($reference_1_id);
                 if($crm_request){
                     $user = User::find($crm_request->shipper_id);
-                    $crm_request_id = str_pad($crm_request->id, 6, '0', STR_PAD_LEFT);
+                    if($user) {
+                        $crm_request_id = str_pad($crm_request->id, 6, '0', STR_PAD_LEFT);
 
-                    if (strpos($subject, '[request_id]') !== FALSE) {
-                        $subject = str_replace('[request_id]', $crm_request_id, $subject);
+                        if (strpos($subject, '[request_id]') !== FALSE) {
+                            $subject = str_replace('[request_id]', $crm_request_id, $subject);
+                        }
+                        $to = $user->email;
+                        self::email($subject, $body, $to);
                     }
-                    $to = $user->email;
-                    self::email($subject, $body, $to);
                 }
             }
 			else if($id == 42){
