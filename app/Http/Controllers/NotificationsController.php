@@ -28,6 +28,7 @@ use App\Http\Models\DonePayment;
 use App\Http\Models\City;
 use App\Http\Models\Invoice;
 use App\Http\Models\SMS;
+use App\Http\Models\Admin\GlobalSettings;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
@@ -1914,9 +1915,20 @@ class NotificationsController extends Controller
 
               $shipments = $shipments->get();
 
-              $user_wise_shipments = array();
+              $settings = GlobalSettings::where('type', 'return_confirmation_pending_shipment_selection_time')->first();
+
+              if ($settings) {
+                  $return_confirmation_pending_shipment_selection_time = $settings->setting_value;
+              }
+              else {
+                  $return_confirmation_pending_shipment_selection_time = 5;
+              }
 
               $yesterday = Carbon::yesterday();
+
+              $yesterday->hour = $return_confirmation_pending_shipment_selection_time;
+
+              $user_wise_shipments = array();
 
               foreach ($shipments as $shipment) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first();

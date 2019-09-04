@@ -635,7 +635,7 @@
 
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([88, 92, 96, 131, 192, 205, 231], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([88, 92, 96, 131, 192, 205, 231, 253], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Last Mile</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(192, session('permissions')))
@@ -670,6 +670,10 @@
 
                                             </ul>
                                         </li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(253, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.return_confirmation_pending_shipment_selection_time.index')}}">Return Confirmation Pending Shipment Selection Time</a></li>
                                     @endif
                                 </ul>
                             </li>
