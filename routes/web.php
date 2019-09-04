@@ -1152,6 +1152,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReportsController@adjustments_list')->name('list');
 
         });
+
+        Route::prefix('sdn')->name('sdn.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@sdn_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@sdn_list')->name('list');
+
+        });
     });
 
     //Reports end
@@ -1273,6 +1279,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\AdminCrmSettingsController@crm_cut_off_time_and_holidays_update')->name('update');
             Route::post('list', 'Admins\AdminCrmSettingsController@crm_cut_off_time_and_holidays_list')->name('list');
             Route::post('add', 'Admins\AdminCrmSettingsController@crm_cut_off_time_and_holidays_add')->name('add');
+        });
+
+        Route::prefix('return_confirmation_pending_shipment_selection_time')->name('return_confirmation_pending_shipment_selection_time.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@return_confirmation_pending_shipment_selection_time_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@return_confirmation_pending_shipment_selection_time_store')->name('store');
         });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
