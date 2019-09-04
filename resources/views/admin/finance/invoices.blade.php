@@ -23,6 +23,7 @@
 							<th class="border-primary border-darken-1">Total GST</th>
 							<th class="border-primary border-darken-1">Total Invoice Amount</th>
 							<th class="border-primary border-darken-1">Generation Date</th>
+							<th class="border-primary border-darken-1">Invoicing Date</th>
 							<th class="border-primary border-darken-1">Aging</th>
 							<th class="border-primary border-darken-1">Due Date</th>
 							<th class="border-primary border-darken-1">Overdue By</th>
@@ -167,6 +168,7 @@
                             head.push('Total GST');
                             head.push('Total Invoice Amount');
                             head.push('Generation Date');
+                            head.push('Invoicing Date');
                             head.push('Aging');
                             head.push('Due Date');
                             head.push('Overdue By');
@@ -188,6 +190,7 @@
                                 row.push(values.total_gst);
                                 row.push(values.total_invoice_amount);
                                 row.push(values.created_at);
+                                row.push(values.invoicing_date);
                                 row.push(values.aging);
                                 row.push(values.due_date);
                                 row.push(values.overdue_by);
@@ -238,6 +241,7 @@
 					{data:'total_gst', name: 'invoices.total_gst', class: 'align-middle text-center total_gst'},
 					{data:'total_invoice_amount', name: 'invoices.total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
 					{data:'created_at', name: 'invoices.created_at', class: 'align-middle text-center generation_date'},
+					{data:'invoicing_date', name: 'invoices.invoicing_date', class: 'align-middle text-center invoicing_date'},
 					{data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
 					{data:'due_date', name: 'invoices.due_date', class: 'align-middle text-center due_date'},
 					{data:'overdue_by', name: 'overdue_by', class: 'align-middle text-center overdue_by', orderable: false, searchable: false},

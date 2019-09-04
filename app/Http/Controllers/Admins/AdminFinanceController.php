@@ -3923,6 +3923,10 @@ class AdminFinanceController extends Controller
                                     <td>' . $invoice->invoice_number . '</td>
                                 </tr>
                                 <tr>
+                                    <td class="color primary"><strong>Invoice Date</strong></td>
+                                    <td>' . Carbon::parse($invoice->invoicing_date)->format('Y-m-d') . '</td>
+                                </tr>
+                                <tr>
                                     <td class="color primary"><strong>Due Date</strong></td>
                                     <td>' . Carbon::parse($invoice->due_date)->format('Y-m-d') . '</td>
                                 </tr>
@@ -4183,7 +4187,7 @@ class AdminFinanceController extends Controller
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
-            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id');
+            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date');
 
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function($invoice) {
@@ -4200,6 +4204,9 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('created_at', function($invoice) {
                 return Carbon::parse($invoice->created_at)->format('Y-m-d');
+            })
+            ->editColumn('invoicing_date', function($invoice) {
+                return Carbon::parse($invoice->invoicing_date)->format('Y-m-d');
             })
             ->addColumn('aging', function($invoice) {
                 if ($invoice->status_id == 1) {
