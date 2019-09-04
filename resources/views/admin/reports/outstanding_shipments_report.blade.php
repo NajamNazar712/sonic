@@ -20,6 +20,7 @@
                                     {{--<option value="0">All</option>--}}
                                     <option value="1" selected="selected">Outstanding</option>
                                     <option value="7">Resolved</option>
+                                    <option value="8">Adjustment</option>
                                     <option value="11">Revert Requested</option>
                                 </select>
                             </div>
