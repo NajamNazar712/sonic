@@ -1916,10 +1916,12 @@ class NotificationsController extends Controller
 
               $user_wise_shipments = array();
 
+              $yesterday = Carbon::yesterday();
+
               foreach ($shipments as $shipment) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first();
 
-                if ($shipment_journey && $shipment_journey->verification) {
+                if ($shipment_journey && $shipment_journey->verification && Carbon::parse($shipment_journey->created_at)->startOfDay()->greaterThanOrEqualTo($yesterday)) {
                   $details = array();
 
                   $details['service_type'] = $shipment->booking_type->booking_type;
@@ -2914,6 +2916,24 @@ class NotificationsController extends Controller
                     }
                     $to = $user->email;
                     self::email($subject, $body, $to);
+                }
+            }
+			else if($id == 42){
+                $rider = Rider::find($reference_1_id);
+                $user = User::find($reference_2_id);
+                if($user){
+                    if($rider){
+                        if (strpos($body, '[rider_name]') !== FALSE) {
+                            $body = str_replace('[rider_name]', $rider->name, $body);
+                        }
+
+                        if (strpos($body, '[rider_phone_number]') !== FALSE) {
+                            $body = str_replace('[rider_phone_number]', $rider->phone, $body);
+                        }
+
+                        $to = $user->phone;
+                        self::sms($body, $to);
+                    }
                 }
             }
         }
