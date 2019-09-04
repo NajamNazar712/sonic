@@ -1041,4 +1041,36 @@ class GlobalSettingsController extends Controller
         $new_ratios = new DeliveryCallVerificationRatio();
         return redirect()->back()->with('success', 'Call verification ratio is Updated Successfully!');
     }
+
+    public function return_confirmation_pending_shipment_selection_time_index() {
+        $settings = GlobalSettings::where('type', 'return_confirmation_pending_shipment_selection_time')->first();
+
+        if ($settings) {
+            $return_confirmation_pending_shipment_selection_time = $settings->setting_value;
+        }
+        else {
+            $return_confirmation_pending_shipment_selection_time = 5;
+        }
+
+        return view('admin.settings.return_confirmation_pending_shipment_selection_time')->with(['return_confirmation_pending_shipment_selection_time' => $return_confirmation_pending_shipment_selection_time]);
+    }
+
+    public function return_confirmation_pending_shipment_selection_time_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'return_confirmation_pending_shipment_selection_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        }
+        else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'return_confirmation_pending_shipment_selection_time';
+        }
+
+        $settings->setting_value = $request->return_confirmation_pending_shipment_selection_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }
