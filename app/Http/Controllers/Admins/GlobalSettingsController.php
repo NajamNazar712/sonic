@@ -649,93 +649,184 @@ class GlobalSettingsController extends Controller
     }
 
 	public function fuel_factor_index(){
-        return view('admin.settings.fuel_factor');
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
+        return view('admin.settings.fuel_factor')->with(['shippers'=>$shippers]);
     }
 
     public function fuel_factor_store(Request $request)
     {
         $fuel_factor = $request->fuel_factor;
+
         if ($fuel_factor != null) {
-            $shipping_modes = ShippingMode::all();
-            $users = User::where('status', 3)->select('id', 'account_type_id')->get();
-            if (!$users->isEmpty()) {
-                foreach ($users as $user) {
-                    foreach ($shipping_modes as $shipping_mode) {
-                        if ($user->account_type_id == 1) {
-                            $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
-                        } else {
-                            $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
-                        }
-
-                        if ($rate_status->exists()) {
-                            $rate_status = $rate_status->first();
-
+            if($request->has('all_shippers_checkbox')){
+                $shipping_modes = ShippingMode::all();
+                $users = User::where('status', 3)->select('id', 'account_type_id')->get();
+                if (!$users->isEmpty()) {
+                    foreach ($users as $user) {
+                        foreach ($shipping_modes as $shipping_mode) {
                             if ($user->account_type_id == 1) {
-                                $fuel_surcharge = FuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                             } else {
-                                $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                             }
-                            if ($fuel_surcharge->exists()) {
-                                $fuel_surcharge = $fuel_surcharge->first();
 
-                                if ($rate_status->fuel_charges == 1) {
-                                    $update_fuel_surcharge = $fuel_surcharge->fuel_surcharge + $fuel_factor;
+                            if ($rate_status->exists()) {
+                                $rate_status = $rate_status->first();
+
+                                if ($user->account_type_id == 1) {
+                                    $fuel_surcharge = FuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                 } else {
-                                    $update_fuel_surcharge = $fuel_factor;
+                                    $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                }
+                                if ($fuel_surcharge->exists()) {
+                                    $fuel_surcharge = $fuel_surcharge->first();
 
+                                    if ($rate_status->fuel_charges == 1) {
+                                        $update_fuel_surcharge = $fuel_surcharge->fuel_surcharge + $fuel_factor;
+                                    } else {
+                                        $update_fuel_surcharge = $fuel_factor;
+
+                                        $rate_status->fuel_charges = 1;
+                                        $rate_status->save();
+                                    }
+
+                                    if ($update_fuel_surcharge >= 0) {
+                                        $fuel_surcharge->fuel_surcharge = $update_fuel_surcharge;
+                                    } else {
+                                        $fuel_surcharge->fuel_surcharge = 0;
+                                    }
+                                    $fuel_surcharge->save();
+
+                                    if ($user->account_type_id == 1) {
+                                        $fuel_surcharge_history = new HistoryFuelSurcharge();
+                                    } else {
+                                        $fuel_surcharge_history = new HistoryCorporateFuelSurcharge();
+                                    }
+
+                                    $fuel_surcharge_history->user_id = $user->id;
+                                    $fuel_surcharge_history->shipping_mode_id = $shipping_mode->id;
+                                    $fuel_surcharge_history->fuel_surcharge = $update_fuel_surcharge;
+                                    $fuel_surcharge_history->save();
+
+                                } else {
                                     $rate_status->fuel_charges = 1;
                                     $rate_status->save();
-                                }
+                                    if ($user->account_type_id == 1) {
+                                        $fuel_surcharge = new FuelSurcharge();
+                                        $fuel_surcharge->user_id = $user->id;
+                                        $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                        $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                        $fuel_surcharge->save();
+                                    } else {
+                                        $fuel_surcharge = new CorporateFuelSurcharge();
+                                        $fuel_surcharge->user_id = $user->id;
+                                        $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                        $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                        $fuel_surcharge->save();
+                                    }
 
-                                if ($update_fuel_surcharge >= 0) {
-                                    $fuel_surcharge->fuel_surcharge = $update_fuel_surcharge;
-                                } else {
-                                    $fuel_surcharge->fuel_surcharge = 0;
                                 }
-                                $fuel_surcharge->save();
+                            }
 
+                        }
+                    }
+
+                    $fuel_factor_history = new FuelFactorHistory();
+                    $fuel_factor_history->fuel_factor = $fuel_factor;
+                    $fuel_factor_history->admin_id = Auth::id();
+                    $fuel_factor_history->save();
+
+                    return redirect()->back()->with('success', 'Fuel Factor Updated!');
+                } else {
+                    return redirect()->back()->with('error', 'Fuel Factor failed to update!');
+                }
+            }else {
+                if (count($request->shippers) > 0) {
+
+                    $shipping_modes = ShippingMode::all();
+                    $users = User::whereIn('id', $request->shippers)->select('id', 'account_type_id')->get();
+                    if (!$users->isEmpty()) {
+                        foreach ($users as $user) {
+                            foreach ($shipping_modes as $shipping_mode) {
                                 if ($user->account_type_id == 1) {
-                                    $fuel_surcharge_history = new HistoryFuelSurcharge();
+                                    $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                 } else {
-                                    $fuel_surcharge_history = new HistoryCorporateFuelSurcharge();
+                                    $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                 }
 
-                                $fuel_surcharge_history->user_id = $user->id;
-                                $fuel_surcharge_history->shipping_mode_id = $shipping_mode->id;
-                                $fuel_surcharge_history->fuel_surcharge = $update_fuel_surcharge;
-                                $fuel_surcharge_history->save();
+                                if ($rate_status->exists()) {
+                                    $rate_status = $rate_status->first();
 
-                            } else {
-                                $rate_status->fuel_charges = 1;
-                                $rate_status->save();
-                                if ($user->account_type_id == 1) {
-                                    $fuel_surcharge = new FuelSurcharge();
-                                    $fuel_surcharge->user_id = $user->id;
-                                    $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
-                                    $fuel_surcharge->fuel_surcharge = $fuel_factor;
-                                    $fuel_surcharge->save();
-                                } else {
-                                    $fuel_surcharge = new CorporateFuelSurcharge();
-                                    $fuel_surcharge->user_id = $user->id;
-                                    $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
-                                    $fuel_surcharge->fuel_surcharge = $fuel_factor;
-                                    $fuel_surcharge->save();
+                                    if ($user->account_type_id == 1) {
+                                        $fuel_surcharge = FuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                    } else {
+                                        $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                    }
+                                    if ($fuel_surcharge->exists()) {
+                                        $fuel_surcharge = $fuel_surcharge->first();
+
+                                        if ($rate_status->fuel_charges == 1) {
+                                            $update_fuel_surcharge = $fuel_surcharge->fuel_surcharge + $fuel_factor;
+                                        } else {
+                                            $update_fuel_surcharge = $fuel_factor;
+
+                                            $rate_status->fuel_charges = 1;
+                                            $rate_status->save();
+                                        }
+
+                                        if ($update_fuel_surcharge >= 0) {
+                                            $fuel_surcharge->fuel_surcharge = $update_fuel_surcharge;
+                                        } else {
+                                            $fuel_surcharge->fuel_surcharge = 0;
+                                        }
+                                        $fuel_surcharge->save();
+
+                                        if ($user->account_type_id == 1) {
+                                            $fuel_surcharge_history = new HistoryFuelSurcharge();
+                                        } else {
+                                            $fuel_surcharge_history = new HistoryCorporateFuelSurcharge();
+                                        }
+
+                                        $fuel_surcharge_history->user_id = $user->id;
+                                        $fuel_surcharge_history->shipping_mode_id = $shipping_mode->id;
+                                        $fuel_surcharge_history->fuel_surcharge = $update_fuel_surcharge;
+                                        $fuel_surcharge_history->save();
+
+                                    } else {
+                                        $rate_status->fuel_charges = 1;
+                                        $rate_status->save();
+                                        if ($user->account_type_id == 1) {
+                                            $fuel_surcharge = new FuelSurcharge();
+                                            $fuel_surcharge->user_id = $user->id;
+                                            $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                            $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                            $fuel_surcharge->save();
+                                        } else {
+                                            $fuel_surcharge = new CorporateFuelSurcharge();
+                                            $fuel_surcharge->user_id = $user->id;
+                                            $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                            $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                            $fuel_surcharge->save();
+                                        }
+
+                                    }
                                 }
 
                             }
                         }
 
+                        $fuel_factor_history = new FuelFactorHistory();
+                        $fuel_factor_history->fuel_factor = $fuel_factor;
+                        $fuel_factor_history->admin_id = Auth::id();
+                        $fuel_factor_history->save();
+
+                        return redirect()->back()->with('success', 'Fuel Factor Updated!');
+                    } else {
+                        return redirect()->back()->with('error', 'Fuel Factor failed to update!');
                     }
+                }else{
+                    return redirect()->back()->with('error', 'Shippers not selected!');
                 }
-
-                $fuel_factor_history = new FuelFactorHistory();
-                $fuel_factor_history->fuel_factor = $fuel_factor;
-                $fuel_factor_history->admin_id = Auth::id();
-                $fuel_factor_history->save();
-
-                return redirect()->back()->with('success', 'Fuel Factor Updated!');
-            } else {
-                return redirect()->back()->with('error', 'Fuel Factor failed to update!');
             }
         }
     }
@@ -850,129 +941,248 @@ class GlobalSettingsController extends Controller
         if($settings){
             $weight_factor = $settings->setting_value;
         }
-        return view('admin.settings.weight_factor')->with(['weight_factor' => $weight_factor]);
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
+        return view('admin.settings.weight_factor')->with(['weight_factor' => $weight_factor, 'shippers' => $shippers]);
     }
 
     public function weight_factor_update(Request $request){
 
         $weight_factor = $request->weight_factor;
         if ($weight_factor != null) {
-            $settings = GlobalSettings::where('type', 'weight_charges_factor');
-            if($settings->exists()){
-                $settings = $settings->first();
-                $settings->setting_value = $weight_factor;
-                $settings->save();
-            }else{
-                $global_settings = new GlobalSettings();
-                $global_settings->setting_value = $weight_factor;
-                $global_settings->type = 'weight_charges_factor';
-                $global_settings->save();
-            }
-            $this->weight_factor_account_charges_update($weight_factor);
+            if($request->has('all_shippers_checkbox')){
 
-            return redirect()->back()->with('success', 'Weight Charges Factor is Updated!');
+                $settings = GlobalSettings::where('type', 'weight_charges_factor');
+                if($settings->exists()){
+                    $settings = $settings->first();
+                    $settings->setting_value = $weight_factor;
+                    $settings->save();
+                }else{
+                    $global_settings = new GlobalSettings();
+                    $global_settings->setting_value = $weight_factor;
+                    $global_settings->type = 'weight_charges_factor';
+                    $global_settings->save();
+                }
+                $this->weight_factor_account_charges_update($weight_factor, NULL);
+
+                return redirect()->back()->with('success', 'Weight Charges Factor is Updated!');
+            }else{
+
+                $settings = GlobalSettings::where('type', 'weight_charges_factor');
+                if($settings->exists()){
+                    $settings = $settings->first();
+                    $settings->setting_value = $weight_factor;
+                    $settings->save();
+                }else{
+                    $global_settings = new GlobalSettings();
+                    $global_settings->setting_value = $weight_factor;
+                    $global_settings->type = 'weight_charges_factor';
+                    $global_settings->save();
+                }
+                $this->weight_factor_account_charges_update($weight_factor,$request->shippers);
+
+                return redirect()->back()->with('success', 'Weight Charges Factor is Updated!');
+            }
 
         }
         return redirect()->back()->with('error', 'Settings can\'t be updated');
 
     }
 
-    public function weight_factor_account_charges_update($weight_factor){
+    public function weight_factor_account_charges_update($weight_factor, $shippers = NULL){
         $shipping_modes = ShippingMode::all();
-        $users = User::where('status', 3)->select('id', 'account_type_id')->get();
-        if (!$users->isEmpty()) {
-            foreach ($users as $user) {
-                foreach ($shipping_modes as $shipping_mode) {
-                    if ($user->account_type_id == 1) {
-                        $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
-                    } else {
-                        $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
-                    }
-
-                    if ($rate_status->exists()) {
-                        $rate_status = $rate_status->first();
-
+        if($shippers == NULL){
+            $users = User::where('status', 3)->select('id', 'account_type_id')->get();
+            if (!$users->isEmpty()) {
+                foreach ($users as $user) {
+                    foreach ($shipping_modes as $shipping_mode) {
                         if ($user->account_type_id == 1) {
-                            $weight_charge = WeightCharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                            $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                         } else {
-                            $weight_charge = CorporateWeightCharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                            $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                         }
-                        if ($weight_charge->exists()) {
-                            $weight_charges = $weight_charge->get();
 
-                            foreach($weight_charges as $charge){
-                                $local_or_6hr = self::calculate_weight_charges_factor($charge->local_or_6hr);
-                                $national_charges_class_0 = self::calculate_weight_charges_factor($charge->national_charges_class_0);
+                        if ($rate_status->exists()) {
+                            $rate_status = $rate_status->first();
 
-                                if (strpos($charge->national_charges_class_1, '%') == FALSE) {
-                                    $national_charges_class_1 = self::calculate_weight_charges_factor($charge->national_charges_class_1);
-                                }
-                                else {
-                                    $national_charges_class_1 = $charge->national_charges_class_1;
-                                }
+                            if ($user->account_type_id == 1) {
+                                $weight_charge = WeightCharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                            } else {
+                                $weight_charge = CorporateWeightCharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                            }
+                            if ($weight_charge->exists()) {
+                                $weight_charges = $weight_charge->get();
 
-                                if (strpos($charge->national_charges_class_2, '%') == FALSE) {
-                                    $national_charges_class_2 = self::calculate_weight_charges_factor($charge->national_charges_class_2);
-                                }
-                                else {
-                                    $national_charges_class_2 = $charge->national_charges_class_2;
-                                }
+                                foreach($weight_charges as $charge){
+                                    $local_or_6hr = self::calculate_weight_charges_factor($charge->local_or_6hr);
+                                    $national_charges_class_0 = self::calculate_weight_charges_factor($charge->national_charges_class_0);
 
-                                if (strpos($charge->national_charges_class_3, '%') == FALSE) {
-                                    $national_charges_class_3 = self::calculate_weight_charges_factor($charge->national_charges_class_3);
-                                }
-                                else {
-                                    $national_charges_class_3 = $charge->national_charges_class_3;
-                                }
+                                    if (strpos($charge->national_charges_class_1, '%') == FALSE) {
+                                        $national_charges_class_1 = self::calculate_weight_charges_factor($charge->national_charges_class_1);
+                                    }
+                                    else {
+                                        $national_charges_class_1 = $charge->national_charges_class_1;
+                                    }
 
-                                if ($user->account_type_id == 1) {
-                                    $weight_charge_history = new HistoryWeightCharge();
-                                    $weight_charge_history->user_id = $charge->user_id;
-                                    $weight_charge_history->shipping_mode_id = $charge->shipping_mode_id;
-                                    $weight_charge_history->range_up = $charge->range_up;
-                                    $weight_charge_history->range_down = $charge->range_down;
-                                    $weight_charge_history->weight_addition = $charge->weight_addition;
-                                    $weight_charge_history->spkg = $charge->spkg;
-                                    $weight_charge_history->local_or_6hr = $charge->local_or_6hr;
-                                    $weight_charge_history->national_charges_class_0 = $charge->national_charges_class_0;
-                                    $weight_charge_history->national_charges_class_1 = $charge->national_charges_class_1;
-                                    $weight_charge_history->national_charges_class_2 = $charge->national_charges_class_2;
-                                    $weight_charge_history->national_charges_class_3 = $charge->national_charges_class_3;
-                                    $weight_charge_history->save();
+                                    if (strpos($charge->national_charges_class_2, '%') == FALSE) {
+                                        $national_charges_class_2 = self::calculate_weight_charges_factor($charge->national_charges_class_2);
+                                    }
+                                    else {
+                                        $national_charges_class_2 = $charge->national_charges_class_2;
+                                    }
 
-                                    WeightCharge::where('id', $charge->id)->update(['local_or_6hr' => $local_or_6hr, 'national_charges_class_0' => $national_charges_class_0, 'national_charges_class_1' => $national_charges_class_1, 'national_charges_class_2' => $national_charges_class_2, 'national_charges_class_3' => $national_charges_class_3]);
+                                    if (strpos($charge->national_charges_class_3, '%') == FALSE) {
+                                        $national_charges_class_3 = self::calculate_weight_charges_factor($charge->national_charges_class_3);
+                                    }
+                                    else {
+                                        $national_charges_class_3 = $charge->national_charges_class_3;
+                                    }
 
-                                } else {
-                                    $weight_charge_history = new HistoryCorporateWeightCharge();
-                                    $weight_charge_history->user_id = $charge->user_id;
-                                    $weight_charge_history->shipping_mode_id = $charge->shipping_mode_id;
-                                    $weight_charge_history->delivery_type_id = $charge->delivery_type_id;
-                                    $weight_charge_history->range_up = $charge->range_up;
-                                    $weight_charge_history->range_down = $charge->range_down;
-                                    $weight_charge_history->local_or_6hr = $charge->local_or_6hr;
-                                    $weight_charge_history->national_charges_class_0 = $charge->national_charges_class_0;
-                                    $weight_charge_history->national_charges_class_1 = $charge->national_charges_class_1;
-                                    $weight_charge_history->national_charges_class_2 = $charge->national_charges_class_2;
-                                    $weight_charge_history->national_charges_class_3 = $charge->national_charges_class_3;
-                                    $weight_charge_history->save();
-                                    CorporateWeightCharge::where('id', $charge->id)->update(['local_or_6hr' => $local_or_6hr, 'national_charges_class_0' => $national_charges_class_0, 'national_charges_class_1' => $national_charges_class_1, 'national_charges_class_2' => $national_charges_class_2, 'national_charges_class_3' => $national_charges_class_3]);
+                                    if ($user->account_type_id == 1) {
+                                        $weight_charge_history = new HistoryWeightCharge();
+                                        $weight_charge_history->user_id = $charge->user_id;
+                                        $weight_charge_history->shipping_mode_id = $charge->shipping_mode_id;
+                                        $weight_charge_history->range_up = $charge->range_up;
+                                        $weight_charge_history->range_down = $charge->range_down;
+                                        $weight_charge_history->weight_addition = $charge->weight_addition;
+                                        $weight_charge_history->spkg = $charge->spkg;
+                                        $weight_charge_history->local_or_6hr = $charge->local_or_6hr;
+                                        $weight_charge_history->national_charges_class_0 = $charge->national_charges_class_0;
+                                        $weight_charge_history->national_charges_class_1 = $charge->national_charges_class_1;
+                                        $weight_charge_history->national_charges_class_2 = $charge->national_charges_class_2;
+                                        $weight_charge_history->national_charges_class_3 = $charge->national_charges_class_3;
+                                        $weight_charge_history->save();
+
+                                        WeightCharge::where('id', $charge->id)->update(['local_or_6hr' => $local_or_6hr, 'national_charges_class_0' => $national_charges_class_0, 'national_charges_class_1' => $national_charges_class_1, 'national_charges_class_2' => $national_charges_class_2, 'national_charges_class_3' => $national_charges_class_3]);
+
+                                    } else {
+                                        $weight_charge_history = new HistoryCorporateWeightCharge();
+                                        $weight_charge_history->user_id = $charge->user_id;
+                                        $weight_charge_history->shipping_mode_id = $charge->shipping_mode_id;
+                                        $weight_charge_history->delivery_type_id = $charge->delivery_type_id;
+                                        $weight_charge_history->range_up = $charge->range_up;
+                                        $weight_charge_history->range_down = $charge->range_down;
+                                        $weight_charge_history->local_or_6hr = $charge->local_or_6hr;
+                                        $weight_charge_history->national_charges_class_0 = $charge->national_charges_class_0;
+                                        $weight_charge_history->national_charges_class_1 = $charge->national_charges_class_1;
+                                        $weight_charge_history->national_charges_class_2 = $charge->national_charges_class_2;
+                                        $weight_charge_history->national_charges_class_3 = $charge->national_charges_class_3;
+                                        $weight_charge_history->save();
+                                        CorporateWeightCharge::where('id', $charge->id)->update(['local_or_6hr' => $local_or_6hr, 'national_charges_class_0' => $national_charges_class_0, 'national_charges_class_1' => $national_charges_class_1, 'national_charges_class_2' => $national_charges_class_2, 'national_charges_class_3' => $national_charges_class_3]);
+
+                                    }
 
                                 }
 
                             }
-
                         }
+
                     }
-
                 }
+
+                $weight_factor_history = new WeightChargeFactorHistory();
+                $weight_factor_history->weight_factor = $weight_factor;
+                $weight_factor_history->admin_id = Auth::id();
+                $weight_factor_history->save();
+
             }
-
-            $weight_factor_history = new WeightChargeFactorHistory();
-            $weight_factor_history->weight_factor = $weight_factor;
-            $weight_factor_history->admin_id = Auth::id();
-            $weight_factor_history->save();
-
         }
+        else{
+            $users = User::whereIn('id', $shippers)->select('id', 'account_type_id')->get();
+            if (!$users->isEmpty()) {
+                foreach ($users as $user) {
+                    foreach ($shipping_modes as $shipping_mode) {
+                        if ($user->account_type_id == 1) {
+                            $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                        } else {
+                            $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                        }
+
+                        if ($rate_status->exists()) {
+                            $rate_status = $rate_status->first();
+
+                            if ($user->account_type_id == 1) {
+                                $weight_charge = WeightCharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                            } else {
+                                $weight_charge = CorporateWeightCharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                            }
+                            if ($weight_charge->exists()) {
+                                $weight_charges = $weight_charge->get();
+
+                                foreach($weight_charges as $charge){
+                                    $local_or_6hr = self::calculate_weight_charges_factor($charge->local_or_6hr);
+                                    $national_charges_class_0 = self::calculate_weight_charges_factor($charge->national_charges_class_0);
+
+                                    if (strpos($charge->national_charges_class_1, '%') == FALSE) {
+                                        $national_charges_class_1 = self::calculate_weight_charges_factor($charge->national_charges_class_1);
+                                    }
+                                    else {
+                                        $national_charges_class_1 = $charge->national_charges_class_1;
+                                    }
+
+                                    if (strpos($charge->national_charges_class_2, '%') == FALSE) {
+                                        $national_charges_class_2 = self::calculate_weight_charges_factor($charge->national_charges_class_2);
+                                    }
+                                    else {
+                                        $national_charges_class_2 = $charge->national_charges_class_2;
+                                    }
+
+                                    if (strpos($charge->national_charges_class_3, '%') == FALSE) {
+                                        $national_charges_class_3 = self::calculate_weight_charges_factor($charge->national_charges_class_3);
+                                    }
+                                    else {
+                                        $national_charges_class_3 = $charge->national_charges_class_3;
+                                    }
+
+                                    if ($user->account_type_id == 1) {
+                                        $weight_charge_history = new HistoryWeightCharge();
+                                        $weight_charge_history->user_id = $charge->user_id;
+                                        $weight_charge_history->shipping_mode_id = $charge->shipping_mode_id;
+                                        $weight_charge_history->range_up = $charge->range_up;
+                                        $weight_charge_history->range_down = $charge->range_down;
+                                        $weight_charge_history->weight_addition = $charge->weight_addition;
+                                        $weight_charge_history->spkg = $charge->spkg;
+                                        $weight_charge_history->local_or_6hr = $charge->local_or_6hr;
+                                        $weight_charge_history->national_charges_class_0 = $charge->national_charges_class_0;
+                                        $weight_charge_history->national_charges_class_1 = $charge->national_charges_class_1;
+                                        $weight_charge_history->national_charges_class_2 = $charge->national_charges_class_2;
+                                        $weight_charge_history->national_charges_class_3 = $charge->national_charges_class_3;
+                                        $weight_charge_history->save();
+
+                                        WeightCharge::where('id', $charge->id)->update(['local_or_6hr' => $local_or_6hr, 'national_charges_class_0' => $national_charges_class_0, 'national_charges_class_1' => $national_charges_class_1, 'national_charges_class_2' => $national_charges_class_2, 'national_charges_class_3' => $national_charges_class_3]);
+
+                                    } else {
+                                        $weight_charge_history = new HistoryCorporateWeightCharge();
+                                        $weight_charge_history->user_id = $charge->user_id;
+                                        $weight_charge_history->shipping_mode_id = $charge->shipping_mode_id;
+                                        $weight_charge_history->delivery_type_id = $charge->delivery_type_id;
+                                        $weight_charge_history->range_up = $charge->range_up;
+                                        $weight_charge_history->range_down = $charge->range_down;
+                                        $weight_charge_history->local_or_6hr = $charge->local_or_6hr;
+                                        $weight_charge_history->national_charges_class_0 = $charge->national_charges_class_0;
+                                        $weight_charge_history->national_charges_class_1 = $charge->national_charges_class_1;
+                                        $weight_charge_history->national_charges_class_2 = $charge->national_charges_class_2;
+                                        $weight_charge_history->national_charges_class_3 = $charge->national_charges_class_3;
+                                        $weight_charge_history->save();
+                                        CorporateWeightCharge::where('id', $charge->id)->update(['local_or_6hr' => $local_or_6hr, 'national_charges_class_0' => $national_charges_class_0, 'national_charges_class_1' => $national_charges_class_1, 'national_charges_class_2' => $national_charges_class_2, 'national_charges_class_3' => $national_charges_class_3]);
+
+                                    }
+
+                                }
+
+                            }
+                        }
+
+                    }
+                }
+
+                $weight_factor_history = new WeightChargeFactorHistory();
+                $weight_factor_history->weight_factor = $weight_factor;
+                $weight_factor_history->admin_id = Auth::id();
+                $weight_factor_history->save();
+
+            }
+        }
+
     }
 
     private function calculate_weight_charges_factor($charges){
