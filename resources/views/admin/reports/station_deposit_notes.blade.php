@@ -12,24 +12,49 @@
                 @include('admin.inc.messages')
 
                 <div class="row mb-2 justify-content-center">
-
                     <div class="col-3">
-                        <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Scan DNCC" name="scan_dncc" id="scan_dncc">
-                            <div class="form-control-position">
-                                <i class="ft-search"></i>
-                            </div>
+                        <fieldset class="form-group">
+                            <select name="search_hub" id="search_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-3">
-                        <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Search By Tracking Number" name="search_tracking" id="search_tracking">
-                            <div class="form-control-position">
-                                <i class="ft-search"></i>
-                            </div>
+                        <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_sdn_no" id="search_sdn_no" placeholder="Search SDN Number">
                         </fieldset>
                     </div>
 
+                    <div class="col-3">
+
+                        <div class="form-group input-group ml">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Creation Date (From)">
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-group input-group ml">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Creation Date (To)">
+                        </div>
+
+                    </div>
+
+                    <div class="col-2">
+                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                    </div>
 
                 </div>
 
@@ -43,6 +68,7 @@
                         <th class="border-primary border-darken-1">Delivered Shipments</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
                         <th class="border-primary border-darken-1">Deposited Amount</th>
+                        <th class="border-primary border-darken-1">Differece Amount</th>
 
                         <th class="border-primary border-darken-1">Deposited By</th>
 
@@ -171,6 +197,43 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Hub',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_sdn_no').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+
+            $('#search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('##search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -179,8 +242,10 @@
                         url: '{{ route('admin.reports.sdn.list') }}',
                         data: {
                             'page':'all',
-                            'scan_dncc':$('#scan_dncc').val(),
-                            'search_tracking': $('#search_tracking').val()
+                            'search_sdn_no': $('#search_sdn_no').val(),
+                            'search_hub': $('#search_hub').val(),
+                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
+                            'search_date_to': $('input[name="search_date_to_formatted"]').val(),
                         },
                         success: function (result) {
                             head = [];
@@ -191,6 +256,7 @@
                             head.push('Delivered Shipments');
                             head.push('DNCC Amount');
                             head.push('Deposited Amount');
+                            head.push('Difference Amount');
                             head.push('Deposited By');
                             head.push('Deposited Date');
                             head.push('Status');
@@ -209,6 +275,7 @@
                                 row.push(values.sdn_delivered_shipments);
                                 row.push(values.sdn_amount);
                                 row.push(values.sdn_deposit_amount);
+                                row.push(values.difference_amount);
                                 row.push(values.deposited_by);
                                 // row.push(values.bank);
                                 row.push(values.created_at);
@@ -248,8 +315,10 @@
                 ajax: {
                     url: '{{ route('admin.reports.sdn.list') }}',
                     data: function (d) {
-                        d.scan_dncc = $('#scan_dncc').val();
-                        d.search_tracking = $('#search_tracking').val();
+                        d.search_hub = $('#search_hub').val();
+                        d.search_sdn_no = $('#search_sdn_no').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 rowId: 'sdn_id',
@@ -262,6 +331,7 @@
                     { data:'delivered_shipments_link' ,name: 'station_deposit_notes.sdn_delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
                     { data:'sdn_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle sdn_amount'},
                     { data:'sdn_deposit_amount' ,name: 'station_deposit_notes.sdn_deposit_amount', class: 'align-middle sdn_deposit_amount'},
+                    { data:'difference_amount' ,name: 'difference_amount', class: 'align-middle difference_amount'},
                     // { data:'sdn_expense' ,name: 'sdn_expense', class: 'align-middle sdn_expense'},
                     // { data:'sdn_net_amount' ,name: 'station_deposit_notes.sdn_net_amount', class: 'align-middle sdn_net_amount'},
                     { data:'deposited_by' ,name: 'admins.name', class: 'align-middle deposited_by'},
@@ -441,7 +511,9 @@
                         }
                     });
             }
-
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
         });
     </script>
 @endsection

@@ -5116,7 +5116,8 @@ class AdminReportsController extends Controller
 
     public function sdn_index(Request $request)
     {
-        return view('admin.reports.station_deposit_notes');
+        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
+        return view('admin.reports.station_deposit_notes')->with(['hubs' => $hubs]);
     }
 
     public function sdn_list(Request $request)
@@ -5124,8 +5125,7 @@ class AdminReportsController extends Controller
         $sdn = StationDepositNote::
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
-            ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref']);
+            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref']);
 
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
@@ -5171,21 +5171,26 @@ class AdminReportsController extends Controller
                     return '-';
                 }
             })
-            ->editColumn('dncc_link', function($pickup_notes) {
-                if ($pickup_notes->dncc_count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->dncc_count . '</button>';
+            ->editColumn('dncc_link', function($sdn) {
+                if ($sdn->dncc_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $sdn->dncc_count . '</button>';
                 }
                 else {
                     return 0;
                 }
             })
-            ->editColumn('delivered_shipments_link', function($pickup_notes) {
-                if ($pickup_notes->sdn_delivered_shipments != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->sdn_delivered_shipments . '</button>';
+            ->editColumn('delivered_shipments_link', function($sdn) {
+                if ($sdn->sdn_delivered_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $sdn->sdn_delivered_shipments . '</button>';
                 }
                 else {
                     return 0;
                 }
+            })
+            ->addColumn('difference_amount', function ($sdn){
+                $diff_amount = '';
+                $diff_amount = $sdn->sdn_amount - $sdn->sdn_deposit_amount;
+                return number_format($diff_amount);
             })
             ->editColumn('status', function ($sdn) {
                 return ($sdn->status == 0) ? 'Created' : 'Deposited';
@@ -5200,18 +5205,16 @@ class AdminReportsController extends Controller
                     $query->whereRaw('false');
                 }
             });
-        if ($tracking_number = $request->get('search_tracking')) {
-            $datatable->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
-                ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
-                ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
-                ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number)
-                ->groupBy('station_deposit_notes.id');
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('station_deposit_notes.created_at', [$from,$to]);
         }
-        if ($dncc = $request->get('scan_dncc')) {
-            $datatable->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
-                ->where('dnsdns.delivery_note_id', '=', $dncc)
-                ->groupBy('station_deposit_notes.id');
+        if ($sdn_no = $request->get('search_sdn_no')) {
+            $datatable->where('station_deposit_notes.id', '=', $sdn_no);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $datatable->where('oc.id', '=', $hub);
         }
         return $datatable->make(true);
     }
