@@ -278,7 +278,7 @@ class DeliveryController extends Controller
                             $misroute_history = MisroutedHistory::where('shipment_id', $shipment->id);
                             if($misroute_history->exists()){
                                 $misroute_history = $misroute_history->latest()->first();
-                                if ($misroute_history->old_consignee_city_id != $misroute_history->new_consignee_city_id){
+                                if ($misroute_history->old_consignee_city->hub_id != $misroute_history->new_consignee_city->hub_id){
                                     return ['status' => 1, 'error' => 'Shipment needs to be moved through cargo!'];
                                 }
                             }else{
@@ -290,7 +290,7 @@ class DeliveryController extends Controller
                             $request_history = InterceptReBookRequestHistory::where('shipment_id', $shipment->id);
                             if($request_history->exists()){
                                 $request_history = $request_history->first();
-                                if ($request_history->old_consignee_city_id != $request_history->new_consignee_city_id){
+                                if ($request_history->old_consignee_city->hub_id != $request_history->new_consignee_city->hub_id){
                                     return ['status' => 1, 'error' => 'Shipment needs to be moved through cargo!'];
                                 }
                             }else{
@@ -4686,7 +4686,7 @@ class DeliveryController extends Controller
                         'type' => $type,
                     ]);
                     if($replacement_charges != null){
-                        AdminFinanceController::add_adjustment($shipment->id, $replacement_charges, 5);
+                        AdminFinanceController::add_adjustment($shipment->id, $replacement_charges, 5, 5);
                     }
 
                     $shipment->replacement_charges = NULL;

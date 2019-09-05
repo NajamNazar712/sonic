@@ -1620,9 +1620,9 @@ class ReturnController extends Controller
                         ShipmentsJourneyController::add($shipment_id, 25, 25, NULL, ($request->has('remarks')? $request->remarks[$shipment_id]:null), NULL, Auth::id(),$request->return_note_id,NULL,1,($request->has('received_or_refused_by')? $request->received_or_refused_by[$shipment_id]:null));
 
                         Shipment::where('id',$shipment_id)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
+                        NotificationsController::send(39, $shipment_id);
                     }
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment_id])->update(['status'=>1]);
-                    NotificationsController::send(39, $shipment_id);
                 }
                 $shipment_status_count = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
                 if($shipment_status_count == 0){
