@@ -4686,7 +4686,7 @@ class DeliveryController extends Controller
                         'type' => $type,
                     ]);
                     if($replacement_charges != null){
-                        AdminFinanceController::add_adjustment($shipment->id, $replacement_charges, 5);
+                        AdminFinanceController::add_adjustment($shipment->id, $replacement_charges, 5, 5);
                     }
 
                     $shipment->replacement_charges = NULL;
