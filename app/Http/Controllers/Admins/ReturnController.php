@@ -1129,9 +1129,9 @@ class ReturnController extends Controller
 
                         if(ReturnNote::where('id', $old_return_note_id->return_note_id)->where('status',0)->exists()){
                             $journey = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
-                            if($journey){
-                                ShipmentsJourneyController::add($journey->shipment_id,57,57,$journey->status_reason_id,$journey->remarks,NULL,Auth::id(),$journey->reference_1_id,NULL,1,NULL);
-                            }
+
+                            ShipmentsJourneyController::add($journey->shipment_id,57,57,$journey->status_reason_id,$journey->remarks,NULL,Auth::id(),$journey->reference_1_id,NULL,1,NULL);
+
                         }
                     }
 
