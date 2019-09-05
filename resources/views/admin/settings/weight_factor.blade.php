@@ -45,8 +45,8 @@
                                             <div class="col-12 form-group">
                                                 <label class="font-medium-2 font-weight-bold block">All Shippers</label>
                                                 <div class="form-group">
-                                                    <label for="all_shippers_checkbox" class="font-medium-2 text-bold-600 mr-1">NO</label>
-                                                    <input type="checkbox" name="all_shippers_checkbox" id="all_shippers_checkbox" class="switchery all_shippers_checkbox" data-size="md" data-switchery="true" checked>
+                                                    <label for="all_shippers_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                                    <input type="checkbox" name="all_shippers_checkbox" id="all_shippers_checkbox" class="switchery all_shippers_checkbox" data-size="sm" data-switchery="true" checked>
                                                     <label for="all_shippers_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
                                                 </div>
                                             </div>
