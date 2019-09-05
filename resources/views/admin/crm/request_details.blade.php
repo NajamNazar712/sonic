@@ -129,6 +129,17 @@
                                                     </td>
                                                 </tr>
                                             @endif
+                                                <tr>
+                                                    <th scope="row">Arrival Date</th>
+                                                    <td class="name">
+                                                        @if($arrival_date != '')
+                                                            <h5 class="mb-0">{{$arrival_date}}</h5>
+                                                        @else
+                                                            <h5 class="mb-0">-</h5>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+
                                             <tr>
                                                 <th scope="row">Description</th>
                                                 <td class="name">

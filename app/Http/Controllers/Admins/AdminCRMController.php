@@ -23,6 +23,7 @@ use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
@@ -193,9 +194,15 @@ class AdminCRMController extends Controller
         $crm_request = CrmRequest::find($id);
         $shipment_status = null;
         $shipper = null;
+        $arrival_date = '';
         if($crm_request->shipment_id != null) {
             $shipment_status = Shipment::find($crm_request->shipment_id);
             $shipment_status = $shipment_status->status_shipper->name;
+            $journey = ShipmentsJourney::where('shipment_id', $crm_request->shipment_id)->where('shipper_status_id', '=', 2);
+            if($journey->exists()){
+                $journey = $journey->latest()->first();
+                $arrival_date = $journey->created_at;
+            }
         }
         
         if($crm_request->shipper_id != null){
@@ -256,8 +263,10 @@ class AdminCRMController extends Controller
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+
+
         if($crm_request){
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests]);
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
