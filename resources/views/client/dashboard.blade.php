@@ -13,6 +13,7 @@
                         <div class="card-content">
                             <div class="card-body">
                                 <h1>Order Details</h1>
+                                @include('client.inc.messages')
                                 <div class="col mt-2">
                                     <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                                         <div class="form-group">
@@ -281,6 +282,40 @@
             </div>
         </div>
     </div>
+    {{--Request modal end   --}}
+    <div class="modal fade text-left" id="ConsolidateModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConsolidateModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Consolidate Shipments</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="consolidate_shipments_form" class="form-horizontal" method="POST" action="{{ route('cod.orders.consolidate.submit') }}" novalidate="novalidate" enctype="multipart/form-data">
+                        @method('POST')
+                        @csrf
+                        <input type="hidden" id="consolidate_shipment_ids" name="shipment_ids">
+                        <div class="container">
+
+                            <div id="consolidate_shipment_table" class="row justify-content-center consolidate_shipment_table">
+
+                            </div>
+
+
+                            <div class="row justify-content-center">
+                                <div class="col-3 mt-1">
+                                    <button id="AddConsolidateShipments" type="submit" class="btn btn-primary btn-block">Consolidate</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -294,6 +329,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
 
     <style type="text/css">
         .small-calender-icon{
@@ -330,6 +366,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
 
 
 
@@ -456,7 +493,102 @@
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
+                buttons: [
+
+                    {
+                        text: '<i class="la la-plus"></i> Consolidate',
+                        className: 'btn btn-primary consolidate',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if (selected_rows.length > 1) {
+                                $.ajax({
+                                    url: '{!! route('cod.orders.consolidate.shipment_info') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        'shipment_ids': selected_rows,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                }).done(function (data) {
+                                    if (data.status === 1) {
+                                        $('#consolidate_shipment_ids').val(selected_rows);
+                                        var route = '{!! route('cod.tracking.index') !!}';
+                                        var html = '';
+                                        html += '<table class="table table datatable text-center">';
+                                        html += '<thead><tr><th>S No.</th><th><strong>Tracking No</strong></th><th><strong>Order ID</strong></th><th><strong>Origin</strong><th><strong>Destination</strong><th><strong>Consignee Name</strong><th><strong>Consignee Contact No(s)</strong><th><strong>Consignee Address</strong><th><strong>COD Amount</strong><th><strong>Product Type</strong><th><strong>Booking Date</strong><th><strong>Action</strong></tr></thead>';
+                                        html += '<tbody>';
+                                        $.each(data.shipment_info, function(index, value) {
+                                            var ind = index+1;
+                                            html += '<tr class=""><td>' + ind + '</td>';
+                                            html += '<td><u><a href='+route+'?tracking_number='+value.tracking_number+' target="_blank">'+value.tracking_number+'</a></u></td>';
+                                            if(value.order_id != null){
+                                                html += '<td>' + value.order_id + '</td>';
+                                            } else{
+                                                html += '<td>-</td>';
+                                            }
+                                            html += '<td>' + value.origin + '</td>';
+                                            html += '<td>' + value.destination + '</td>';
+                                            html += '<td>' + value.consignee_name + '</td>';
+                                            html += '<td>' + value.consignee_phone_number_1 + '</td>';
+                                            html += '<td>' + value.consignee_address + '</td>';
+                                            html += '<td>' + value.amount + '</td>';
+                                            html += '<td>' + value.product_type + '</td>';
+                                            html += '<td>' + value.created_at + '</td>';
+                                            if(index == 0){
+                                                html += '<td><input type="radio" name="default-radio" class="icheck dradio" id="default-radio" value="' + value.id + '" checked="checked"><label for="default-radio">Make Default</label></td></tr>';
+                                            }
+                                            else{
+                                                html += '<td><input type="radio" name="default-radio" class="icheck dradio" id="default-radio" value="' + value.id + '"><label for="default-radio">Make Default</label></td></tr>';
+                                            }
+                                        });
+                                        html += '</tbody></table>';
+
+                                        $('#ConsolidateModal .modal-body .container .consolidate_shipment_table').html(html);
+                                        $('#ConsolidateModal').modal('show');
+                                    } else if(data.status === 2){
+                                            var consolidated_html = '';
+
+                                            $.each(data.consolidated_Shipments, function(index, tracking_number) {
+                                                consolidated_html += tracking_number + '<br/>';
+                                            });
+
+                                            consolidated_html += '<br/>Above Shipment(s) are already Consolidated!';
+
+                                            content = document.createElement('div');
+                                            content.innerHTML = consolidated_html;
+
+                                            swal({
+                                                title: 'Already Consolidated',
+                                                content: content,
+                                                icon: 'warning',
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'Close',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                dangerMode: true
+                                            });
+                                    } else{
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+                                });
+                            }
+                            else{
+                                var error = 'Select at least two shipments to Consolidate';
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        }
+                    },{
                     text: '<i class="la la-print"></i> Print',
                     className: 'btn btn-primary print',
                     enabled: false,
@@ -526,6 +658,7 @@
 
                                     table.button('.print').enable();
                                     table.button('.cancel').enable();
+                                    table.button('.consolidate').enable();
 
                                 }
                             });
@@ -554,6 +687,7 @@
                                     if (selected_rows.length == 0) {
                                         table.button('.print').disable();
                                         table.button('.cancel').disable();
+                                        table.button('.consolidate').disable();
 
                                     }
                                 }
@@ -1038,6 +1172,44 @@
                 }
 
             });
+            $('#consolidate_shipments_form').bind('submit', function (e) {
+                e.preventDefault();
+                var form = this;
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to consolidate shipments!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Shipments are being consolidated!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        form.submit();
+                    }
+                });
+            });
 
             $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
@@ -1198,6 +1370,7 @@
 
                                     table.button('.print').disable();
                                     table.button('.cancel').disable();
+                                    table.button('.consolidate').disable();
 
                                     selected_rows = [];
 
@@ -1272,6 +1445,7 @@
 
                                 table.button('.print').disable();
                                 table.button('.cancel').disable();
+                                table.button('.consolidate').disable();
 
                                 selected_rows = [];
 

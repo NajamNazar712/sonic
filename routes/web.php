@@ -47,6 +47,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('cancel','Shippers\ShipperDashboardController@order_cancel')->name('cancel');
         Route::post('cancel_all', 'Shippers\ShipperDashboardController@order_cancel_all')->name('cancel_all');
         Route::post('shipment_charges','Shippers\ShipperDashboardController@get_shipment_charges')->name('charges');
+
+
+        Route::prefix('consolidate')->name('consolidate.')->group(function(){
+            Route::post('shipment_info','Shippers\ShipperDashboardController@consolidate_shipment_info')->name('shipment_info');
+            Route::post('submit','Shippers\ShipperDashboardController@consolidate_shipment_submit')->name('submit');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
