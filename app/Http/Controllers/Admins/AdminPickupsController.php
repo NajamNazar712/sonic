@@ -995,7 +995,7 @@ class AdminPickupsController extends Controller
       ->join('cities as c', 'r.city_id', '=', 'c.id')
       ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
       ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
-      ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.bookings as bookings_link', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no','pickup_notes.id as pickup_note_id', 'pickup_notes.status_id', 'pns.name as status')
+      ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.bookings as bookings_link', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no','pickup_notes.id as pickup_note_id', 'pickup_notes.status_id', 'pns.name as status','pickup_notes.vendor')
       ->whereIn('pickup_notes.status_id', [2, 3]);
 
       if (session('role_id') != 1) {
@@ -1003,6 +1003,13 @@ class AdminPickupsController extends Controller
       }
 
       $datatables = Datatables::of($pickup_notes)
+          ->setRowAttr([
+              'class' => function ($pickup_notes) {
+                  if ($pickup_notes->vendor == 1) {
+                      return 'vendor_pickup_row';
+                  }
+              }
+          ])
       ->addColumn('rider', function($pickup_note) {
         return $pickup_note->rider_name . '<br/>' . $pickup_note->rider_phone;
       })
