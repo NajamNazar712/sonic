@@ -26,6 +26,8 @@ use App\Http\Models\CityDelivery;
 use App\Http\Models\ZoneClassCity;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\Consolidation;
+use App\Http\Models\ConsolidationShipments;
 
 use Carbon\Carbon;
 
@@ -1180,13 +1182,13 @@ class APIController extends Controller
 
         $shipment_ids = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
 
-        $recieving_sheet = ShipperReceivingSheetController::create($shipment_ids, $user_id);
+        $receiving_sheet = ShipperReceivingSheetController::create($shipment_ids, $user_id);
 
-        if ($recieving_sheet['status'] == 0) {
-          return response()->json(['status' => 0, 'message' => $recieving_sheet['success'], 'receiving_sheet_id' => $recieving_sheet['receiving_sheet_id']]);
+        if ($receiving_sheet['status'] == 0) {
+          return response()->json(['status' => 0, 'message' => $receiving_sheet['success'], 'receiving_sheet_id' => $receiving_sheet['receiving_sheet_id']]);
         }
         else {
-          return response()->json(['status' => 1, 'message' => $recieving_sheet['error']]);
+          return response()->json(['status' => 1, 'message' => $receiving_sheet['error']]);
         }
       }
     }
@@ -1405,6 +1407,85 @@ class APIController extends Controller
         }
 
         return response()->json(['status' => 0, 'message' => 'Charges Calculated', 'information' => $information]);
+      }
+    }
+
+    public function shipment_consolidate(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'tracking_numbers' => ['required', 'array', 'min:2'],
+        'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })],
+        'default_tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })]
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $tracking_numbers = $request->tracking_numbers;
+        $default_tracking_number = $request->default_tracking_number;
+
+        if (!in_array($default_tracking_number, $tracking_numbers)) {
+          $tracking_numbers[] = $default_tracking_number;
+        }
+
+        $shipments = Shipment::whereIn('tracking_number', $tracking_numbers);
+
+        $received_tracking_numbers = array();
+
+        foreach ($shipments as $shipment) {
+          if ($shipment->shipper_status_id != 1) {
+            $received_tracking_numbers[] = $shipment->tracking_number;
+          }
+        }
+
+        if (empty($received_tracking_numbers)) {
+          $shipment_ids = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
+
+          $default_shipment_id = Shipment::where('tracking_number', '=', $default_tracking_number)->first()->id;
+
+          $consolidated_shipments = ConsolidationShipments::whereIn('shipment_id', $shipment_ids);
+
+          if (!$consolidated_shipments->exists()) {
+            $consolidation = new Consolidation();
+
+            $consolidation->count = count($shipment_ids);
+            $consolidation->default_shipment_id = $default_shipment_id;
+
+            $consolidation->save();
+
+            foreach ($shipment_ids as $index => $shipment_id) {
+              $consolidation_shipment = new ConsolidationShipments();
+
+              $consolidation_shipment->consolidation_id = $consolidation->id;
+              $consolidation_shipment->shipment_id = $shipment_id;
+              $consolidation_shipment->order = $index + 1;
+
+              $consolidation_shipment->save();
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Shipments Consolidated Successfully!']);
+          }
+          else {
+            $consolidated_shipment_ids = $consolidated_shipments->pluck('id')->toArray();
+
+            $tracking_numbers = Shipment::whereIn('id', $consolidated_shipment_ids)->pluck('tracking_number')->toArray();
+
+            return response()->json(['status' => 1, 'message' => 'These Shipment(s) are already in another Consolidation!', 'tracking_numbers' => $tracking_numbers]);
+          }
+        }
+        else {
+          return response()->json(['status' => 1, 'message' => 'These Shipment(s) have already been Received!', 'tracking_numbers' => $received_tracking_numbers]);
+        }
       }
     }
 }
