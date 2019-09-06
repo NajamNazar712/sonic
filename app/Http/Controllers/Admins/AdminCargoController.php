@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignmentStatus;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\DraftCargo;
 use App\Http\Models\DraftCargoShipment;
 use App\Http\Models\JunctionMapping;
@@ -1451,7 +1452,41 @@ class AdminCargoController extends Controller
             $shipment->save();
 
             ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
-            
+
+            $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
+            if($consolidated_shipment){
+                $check_all_consolidation_shipments = true;
+
+                $shipment->shipper_status_id = 58;
+                $shipment->consignee_status_id = 58;
+                $shipment->save();
+
+                ShipmentsJourneyController::add($shipment_id, 58, 58, NULL, NULL, NULL, Auth::id());
+
+                $consolidation_id = $consolidated_shipment->consolidation_id;
+                $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
+
+                foreach ($remaining_consolidated_shipments as $remaining_consolidated_shipment){
+                    $check_remaining_consolidated_shipment = Shipment::find($remaining_consolidated_shipment->shipment_id);
+                    if($check_remaining_consolidated_shipment->shipper_status_id != 58){
+                        $check_all_consolidation_shipments = false;
+                    }
+                }
+
+                if($check_all_consolidation_shipments == true){
+                    foreach ($remaining_consolidated_shipments as $index => $remaining_consolidated_shipment){
+                        $update_all_consolidated_shipment = Shipment::find($remaining_consolidated_shipment->shipment_id);
+
+                        $update_all_consolidated_shipment->shipper_status_id = 59;
+                        $update_all_consolidated_shipment->consignee_status_id = 59;
+
+                        $update_all_consolidated_shipment->save();
+
+                        ShipmentsJourneyController::add($shipment_id, 59, 59, NULL, NULL, NULL, Auth::id());
+                    }
+                }
+            }
+
             NotificationsController::send(7, $cargo_consignment_id, $shipment_id);
 
             NotificationsController::send(8, $cargo_consignment_id, $shipment_id);
