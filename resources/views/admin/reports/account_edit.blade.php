@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Account Activation Report')
+@section('title', 'Account Edit Report')
 
 @section('content')
     <h1 class="mb-1">
-        Account Activation Report
+        Account Edit Report
     </h1>
 
     <div class="card">
@@ -14,8 +14,15 @@
                 <div class="row mb-2 justify-content-center">
                     <div class="col-12 ">
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-
-                            <div class="col-4">
+                            <div class="col-3">
+                                <fieldset class="form-group">
+                                    <select name="search_account_type" id="search_account_type" class="form-control select2" data-rule-required="true" data-msg-required="Account Type is required">
+                                            <option value="1">Reimbursement</option>
+                                            <option value="2">Invoicing</option>
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-3">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -25,7 +32,7 @@
                                     <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required">
                                 </div>
                             </div>
-                            <div class="col-4">
+                            <div class="col-3">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -55,6 +62,7 @@
                             <th class="border-primary border-darken-1">Account Name</th>
                             <th class="border-primary border-darken-1">Sales Person Name</th>
                             <th class="border-primary border-darken-1">Activation Date</th>
+                            <th class="border-primary border-darken-1">Edited Date</th>
 
 
                         </tr>
@@ -105,6 +113,10 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            $('#search_form #search_account_type').select2({
+                width: '100%',
+                placeholder: 'Select Account Type*',
+            });
 
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
@@ -157,9 +169,10 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.account_activation.list') }}',
+                        url: '{{ route('admin.reports.account_edit.list') }}',
                         data: {
                             'page': 'all',
+                            'search_account_type' : $('#search_account_type').val(),
                             'search_date_from': $('input[name="from_date_formatted"]').val(),
                             'search_date_to': $('input[name="to_date_formatted"]').val(),
 
@@ -173,6 +186,7 @@
                             head.push('Account Name');
                             head.push('Sales Person Name');
                             head.push('Activation Date');
+                            head.push('Edited Date');
 
 
                             $.each(result.data, function(index, values) {
@@ -183,6 +197,7 @@
                                 row.push(values.shipper);
                                 row.push(values.sale_person);
                                 row.push(values.activated_at);
+                                row.push(values.rates_edit_at);
                                 body.push(row);
                             });
                         },
@@ -199,7 +214,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Account Activation Report',
+                        title: 'Account Edit Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -213,8 +228,9 @@
                 serverSide: true,
                 deferLoading: [50, 0],
                 ajax:{
-                    url: '{{ route('admin.reports.account_activation.list') }}',
+                    url: '{{ route('admin.reports.account_edit.list') }}',
                     data: function (d) {
+                        d.search_account_type = $('#search_account_type').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -226,6 +242,7 @@
                     { data:'shipper' ,name: 'users.name', class: 'align-middle text-center shipper'},
                     { data:'sale_person' ,name: 'sp.name', class: 'align-middle text-center sale_person'},
                     { data:'activated_at' ,name: 'users.activated_at', class: 'align-middle text-center activated_at'},
+                    { data:'rates_edit_at' ,name: 'rates_edit_at', class: 'align-middle text-center rates_edit_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

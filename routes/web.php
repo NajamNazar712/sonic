@@ -1144,7 +1144,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 		Route::prefix('account_activation')->name('account_activation.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@account_activation_index')->name('index');
-            Route::post('data', 'Admins\AdminReportsController@account_activation_data')->name('data');
             Route::get('list', 'Admins\AdminReportsController@account_activation_list')->name('list');
         });
         Route::prefix('adjustments')->name('adjustments.')->group(function (){
@@ -1157,6 +1156,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@sdn_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@sdn_list')->name('list');
 
+        });
+        Route::prefix('account_edit')->name('account_edit.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@account_edit_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@account_edit_list')->name('list');
         });
     });
 

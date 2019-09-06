@@ -5218,5 +5218,36 @@ class AdminReportsController extends Controller
         }
         return $datatable->make(true);
     }
+
+    public function account_edit_index(){
+        return view('admin.reports.account_edit');
+    }
+
+    public function account_edit_list(Request $request){
+        $users = DB::connection('reports')->table('users')->join('sale_person_tags as spt','spt.user_id', '=', 'users.id')
+            ->join('admins AS sp', 'sp.id', '=', 'spt.admin_id')
+            ->where('spt.status', '=', 0);
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            if($request->get('search_account_type') == 1){
+                $users = $users->leftJoin('history_rate_statuses', 'history_rate_statuses.user_id','=','users.id')
+                    ->select(['users.id','users.name as shipper', 'users.account_type_id','sp.name as sale_person','users.activated_at','history_rate_statuses.created_at as rates_edit_at'])
+                    ->where('users.account_type_id', '=', 1)->whereBetween('history_rate_statuses.created_at', [$from,$to]);
+            }else{
+                $users = $users->leftJoin('history_corporate_rate_statuses', 'history_corporate_rate_statuses.user_id','=','users.id')
+                    ->select(['users.id','users.name as shipper', 'users.account_type_id','sp.name as sale_person','users.activated_at','history_corporate_rate_statuses.created_at as rates_edit_at'])
+                    ->where('users.account_type_id', '=', 2)->whereBetween('history_corporate_rate_statuses.created_at', [$from,$to]);
+            }
+
+        }
+
+        $datatable = Datatables::of($users);
+
+
+
+        return $datatable->make(true);
+    }
 }
 
