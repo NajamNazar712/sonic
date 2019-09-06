@@ -1453,6 +1453,7 @@ class AdminCargoController extends Controller
 
             ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
 
+            //Consolidated Shipments
             $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
             if($consolidated_shipment){
                 $check_all_consolidation_shipments = true;
@@ -1486,6 +1487,7 @@ class AdminCargoController extends Controller
                     }
                 }
             }
+            //Consolidated Shipments
 
             NotificationsController::send(7, $cargo_consignment_id, $shipment_id);
 

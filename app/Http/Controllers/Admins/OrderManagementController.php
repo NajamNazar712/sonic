@@ -220,6 +220,7 @@ class OrderManagementController extends Controller
                     }
                     else {
                         if ($shipment->packaging_material_request != 1) {
+                            //Consolidated Shipments
                             $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
                             if($consolidated_shipment){
                                 $consolidation_id = $consolidated_shipment->consolidation_id;
@@ -237,6 +238,8 @@ class OrderManagementController extends Controller
                                 }
                                 $consolidation->save();
                             }
+                            //Consolidated Shipments
+
                             if ($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
                                 $shipment->shipper_status_id = 20;
                                 $shipment->consignee_status_id = 20;
