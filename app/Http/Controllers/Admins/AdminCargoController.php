@@ -1475,15 +1475,15 @@ class AdminCargoController extends Controller
                 }
 
                 if($check_all_consolidation_shipments == true){
-                    foreach ($remaining_consolidated_shipments as $index => $remaining_consolidated_shipment){
-                        $update_all_consolidated_shipment = Shipment::find($remaining_consolidated_shipment->shipment_id);
+                    foreach ($remaining_consolidated_shipments as $update_remaining_consolidated_shipment){
+                        $update_all_consolidated_shipment = Shipment::find($update_remaining_consolidated_shipment->shipment_id);
 
                         $update_all_consolidated_shipment->shipper_status_id = 59;
                         $update_all_consolidated_shipment->consignee_status_id = 59;
 
                         $update_all_consolidated_shipment->save();
 
-                        ShipmentsJourneyController::add($shipment_id, 59, 59, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, NULL, NULL, NULL, Auth::id());
                     }
                 }
             }
