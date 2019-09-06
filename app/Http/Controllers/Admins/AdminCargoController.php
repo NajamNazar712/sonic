@@ -1451,7 +1451,7 @@ class AdminCargoController extends Controller
             $shipment->save();
 
             ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
-
+            
             NotificationsController::send(7, $cargo_consignment_id, $shipment_id);
 
             NotificationsController::send(8, $cargo_consignment_id, $shipment_id);
