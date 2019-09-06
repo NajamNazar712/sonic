@@ -288,6 +288,13 @@ class AdminPickupsController extends Controller
             }
         }
       $datatables = Datatables::of($pickup_requests)
+          ->setRowAttr([
+              'class' => function ($pickup_requests) {
+                  if ($pickup_requests->vendor != null) {
+                      return 'vendor_row';
+                  }
+              },
+          ])
           ->editColumn('pickup_request_id', function ($pickup_requests) {
               return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
           })
