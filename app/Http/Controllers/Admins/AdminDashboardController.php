@@ -8,6 +8,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\AdminLogs;
@@ -6151,7 +6152,7 @@ class AdminDashboardController extends Controller
             'iban'=>'required|string|max:255',
             'payment_cycle'=>'required|string|max:255'
         ]);
-
+        $old_bank_detail = UserBankInfo::where('user_id',$user_id)->select('bank_name')->first();
 
         if($user->account_type_id == 1){
             UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
@@ -6179,6 +6180,13 @@ class AdminDashboardController extends Controller
                     'billing_person_email' => $request->billing_person_email,
                     'billing_address' => $request->billing_address
             ]);
+        }
+        if($old_bank_detail->bank_name != $request->bank_name){
+            $bank_history = new HistoryShipperBankAccount();
+            $bank_history->user_id = $user_id;
+            $bank_history->bank_id = $old_bank_detail->bank_name;
+            $bank_history->save();
+
         }
         AdminLogs::create([
             'admin_id' => Auth::id(),

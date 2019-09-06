@@ -359,6 +359,8 @@ class Permission
             'reports.adjustments.list' => 248,
             'reports.account_edit.index' => 255,
             'reports.account_edit.list' => 255,
+            'reports.bank_history.index' => 257,
+            'reports.bank_history.list' => 257,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

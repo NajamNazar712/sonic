@@ -11,7 +11,7 @@ use Carbon\Carbon;
 use function foo\func;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
+use App\Http\Models\Shipper\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
@@ -22,6 +22,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
+
 
 class AdminReportsController extends Controller
 {
@@ -5248,6 +5249,30 @@ class AdminReportsController extends Controller
 
 
         return $datatable->make(true);
+    }
+
+    public function bank_history_index(){
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
+        return view('admin.reports.shipper_bank_history')->with(['shippers' => $shippers]);
+    }
+
+    public function bank_history_list(Request $request){
+        $users = DB::connection('reports')->table('history_shipper_bank_accounts')
+        ->join('users', 'users.id', '=', 'history_shipper_bank_accounts.user_id')
+        ->join('banks_lists', 'history_shipper_bank_accounts.bank_id', '=', 'banks_lists.id')
+        ->select('users.id as account_id','users.name as shipper', 'banks_lists.name as bank_name', 'history_shipper_bank_accounts.created_at as change_date');
+            
+            
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $users = $users->whereBetween('history_shipper_bank_accounts.created_at', [$from,$to]);
+        }
+        if($shipper_id = $request->get('search_shipper')){
+            $users = $users->where('history_shipper_bank_accounts.user_id', '=',$shipper_id);
+        }
+        $datatable = Datatables::of($users)->make(true);
+        return $datatable;
     }
 }
 

@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Account Edit Report')
+@section('title', 'Shipper Bank History Report')
 
 @section('content')
     <h1 class="mb-1">
-        Account Edit Report
+        Shipper Bank History Report
     </h1>
 
     <div class="card">
@@ -14,11 +14,13 @@
                 <div class="row mb-2 justify-content-center">
                     <div class="col-12 ">
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+
                             <div class="col-3">
                                 <fieldset class="form-group">
-                                    <select name="search_account_type" id="search_account_type" class="form-control select2" data-rule-required="true" data-msg-required="Account Type is required">
-                                            <option value="1" selected="selected">Reimbursement</option>
-                                            <option value="2">Invoicing</option>
+                                    <select name="search_shipper" id="search_shipper" class="form-control select2" data-rule-required="true" data-msg-required="Shipper is required">
+                                        @foreach($shippers as $shipper)
+                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                        @endforeach
                                     </select>
                                 </fieldset>
                             </div>
@@ -51,7 +53,7 @@
                         </form>
                     </div>
                 </div>
-                <div class="" id="report_data">
+        
 
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                         <thead>
@@ -60,15 +62,13 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Account No.</th>
                             <th class="border-primary border-darken-1">Account Name</th>
-                            <th class="border-primary border-darken-1">Sales Person Name</th>
-                            <th class="border-primary border-darken-1">Activation Date</th>
-                            <th class="border-primary border-darken-1">Edited Date</th>
-
+                            <th class="border-primary border-darken-1">Bank Name</th>
+                            <th class="border-primary border-darken-1">Bank Change Date</th>
 
                         </tr>
                         </thead>
                     </table>
-                </div>
+               
             </div>
         </div>
     </div>
@@ -113,9 +113,9 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('#search_form #search_account_type').select2({
+            $('#search_form #search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Account Type*',
+                placeholder: 'Select Shipper*',
             });
 
             var from_date = $('#from_date').pickadate({
@@ -169,10 +169,10 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.account_edit.list') }}',
+                        url: '{{ route('admin.reports.bank_history.list') }}',
                         data: {
                             'page': 'all',
-                            'search_account_type' : $('#search_account_type').val(),
+                            'search_shipper': $('#search_shipper').val(),
                             'search_date_from': $('input[name="from_date_formatted"]').val(),
                             'search_date_to': $('input[name="to_date_formatted"]').val(),
 
@@ -184,20 +184,18 @@
                             head.push('S. No.');
                             head.push('Account No.');
                             head.push('Account Name');
-                            head.push('Sales Person Name');
-                            head.push('Activation Date');
-                            head.push('Edited Date');
+                            head.push('Bank Name');
+                            head.push('Bank Change Date');
 
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.id);
+                                row.push(values.account_id);
                                 row.push(values.shipper);
-                                row.push(values.sale_person);
-                                row.push(values.activated_at);
-                                row.push(values.rates_edit_at);
+                                row.push(values.bank_name);
+                                row.push(values.change_date);
                                 body.push(row);
                             });
                         },
@@ -214,7 +212,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Account Edit Report',
+                        title: 'Shipper Bank History Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -228,21 +226,20 @@
                 serverSide: true,
                 deferLoading: [50, 0],
                 ajax:{
-                    url: '{{ route('admin.reports.account_edit.list') }}',
+                    url: '{{ route('admin.reports.bank_history.list') }}',
                     data: function (d) {
-                        d.search_account_type = $('#search_account_type').val();
+                        d.search_shipper = $('#search_shipper').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[5, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'id' ,name: 'users.id', class: 'align-middle text-center user_id'},
+                    { data:'account_id' ,name: 'users.id', class: 'align-middle text-center account_id'},
                     { data:'shipper' ,name: 'users.name', class: 'align-middle text-center shipper'},
-                    { data:'sale_person' ,name: 'sp.name', class: 'align-middle text-center sale_person'},
-                    { data:'activated_at' ,name: 'users.activated_at', class: 'align-middle text-center activated_at'},
-                    { data:'rates_edit_at' ,name: 'rates_edit_at', class: 'align-middle text-center rates_edit_at'},
+                    { data:'bank_name' ,name: 'users.name', class: 'align-middle text-center bank_name'},
+                    { data:'change_date' ,name: 'history_shipper_bank_accounts.created_at', class: 'align-middle text-center change_date'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
