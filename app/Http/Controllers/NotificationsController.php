@@ -53,7 +53,7 @@ class NotificationsController extends Controller
       dispatch(new ProcessSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL) {
+    static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL) {
       $mail = Mail::to($to);
 
       if ($cc) {
@@ -64,7 +64,7 @@ class NotificationsController extends Controller
         $mail->bcc($bcc);
       }
 
-      $mail->send(new Notifications($subject, $body));
+      $mail->send(new Notifications($subject, $body, $from));
     }
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL) {
@@ -2042,7 +2042,7 @@ class NotificationsController extends Controller
                     $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
                   }
 
-                  self::email($subject, $body, $to, $cc);
+                  self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
 
                   $subject = $original_subject;
                   $body = $original_body;
