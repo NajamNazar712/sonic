@@ -509,6 +509,9 @@ class Permission
             'shipment.history.walk_in_history' => 209,
             'shipment.history.walk_in_history_list' => 209,
 
+            'shipment.consolidation.history.index' => 254,
+            'shipment.consolidation.history.list' => 254,
+
 
             'intercept.index' => 245,
             'intercept.update' => 245,

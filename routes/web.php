@@ -50,8 +50,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
 
         Route::prefix('consolidate')->name('consolidate.')->group(function(){
-            Route::post('shipment_info','Shippers\ShipperDashboardController@consolidate_shipment_info')->name('shipment_info');
-            Route::post('submit','Shippers\ShipperDashboardController@consolidate_shipment_submit')->name('submit');
+            Route::post('shipment_info','Shippers\ShipperConsolidatedController@consolidate_shipment_info')->name('shipment_info');
+            Route::post('submit','Shippers\ShipperConsolidatedController@consolidate_shipment_submit')->name('submit');
         });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
@@ -261,6 +261,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('air_waybill_printing')->name('air_waybill_printing.')->group(function () {
             Route::get('', 'Shippers\ShipperGlobalSettingsController@air_waybill_printing_count_index')->name('index');
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@air_waybill_printing_count_store')->name('store');
+        });
+    });
+    Route::prefix('consolidation')->name('consolidation.')->group(function () {
+        Route::prefix('history')->name('history.')->group(function () {
+            Route::get('', 'Shippers\ShipperConsolidatedController@consolidation_history_index')->name('index');
+            Route::get('list', 'Shippers\ShipperConsolidatedController@consolidation_history_list')->name('list');
         });
     });
 
@@ -1305,6 +1311,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@history_index')->name('walk_in_history');
             Route::get('list', 'Admins\AdminWalkInBookShipmentController@history_list')->name('walk_in_history_list');
+        });
+
+        Route::prefix('consolidation')->name('consolidation.')->group(function () {
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\AdminConsolidatedController@consolidation_history_index')->name('index');
+                Route::get('list', 'Admins\AdminConsolidatedController@consolidation_history_list')->name('list');
+            });
         });
     });
 

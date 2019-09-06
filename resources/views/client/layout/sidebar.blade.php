@@ -17,7 +17,6 @@
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Order Form</a></li>
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
                             @endif
-
                             @endif
                         </ul>
                         </li>
@@ -32,6 +31,7 @@
                         </li>
                         <li><a class="menu-item" href="{{ route('cod.cancelled_shipments.index') }}">Cancelled</a></li>
 
+                        <li><a class="menu-item" href="{{ route('cod.consolidation.history.index') }}">Consolidation History</a></li>
                     </ul>
                 </li>
             @endif

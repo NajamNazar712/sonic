@@ -17,6 +17,7 @@ class CreateConsolidationShipmentsTable extends Migration
             $table->increments('id');
             $table->integer('consolidation_id');
             $table->integer('shipment_id');
+            $table->integer('order');
             $table->timestamps();
         });
     }
