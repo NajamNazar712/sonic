@@ -503,6 +503,7 @@
                                     })
                                         .done(function(data) {
                                             if (data.status == 0) {
+                                                console.log(data.success);
                                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                             }
                                             else {
