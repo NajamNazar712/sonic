@@ -8,6 +8,8 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\BookingType;
+use App\Http\Models\Consolidation;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
@@ -218,6 +220,23 @@ class OrderManagementController extends Controller
                     }
                     else {
                         if ($shipment->packaging_material_request != 1) {
+                            $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
+                            if($consolidated_shipment){
+                                $consolidation_id = $consolidated_shipment->consolidation_id;
+                                ConsolidationShipments::where('id', $consolidated_shipment->id)->delete();
+                                $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
+                                foreach ($remaining_consolidated_shipments as $index => $remaining_consolidated_shipment){
+                                    $new_order_consolidated_shipment = ConsolidationShipments::find($remaining_consolidated_shipment->id);
+                                    $new_order_consolidated_shipment->order = $index + 1;
+                                    $new_order_consolidated_shipment->save();
+                                }
+                                $consolidation = Consolidation::find($consolidation_id);
+                                $consolidation->count = count($remaining_consolidated_shipments);
+                                if($consolidation->default_shipment_id == $shipment_id){
+                                    $consolidation->default_shipment_id = $remaining_consolidated_shipments[0]->shipment_id;
+                                }
+                                $consolidation->save();
+                            }
                             if ($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
                                 $shipment->shipper_status_id = 20;
                                 $shipment->consignee_status_id = 20;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\BookingType;
 use App\Http\Models\Consolidation;
 use App\Http\Models\ConsolidationShipments;
@@ -29,6 +30,7 @@ class ShipperConsolidatedController extends Controller
             $shipments_info = array();
             $consolidated_shipment = array();
             $check = false;
+            $settings = GlobalSettings::where('type', 'maximum_consolidation_shipments')->first();
             foreach ($shipment_ids as $index => $shipment_id){
                 $already_consolidated = ConsolidationShipments::where('shipment_id', $shipment_id);
                 $shipment = Shipment::leftjoin('user_shipping_infos as usi', 'usi.id', '=', 'shipments.pickup_address_id')
@@ -36,27 +38,36 @@ class ShipperConsolidatedController extends Controller
                     ->leftjoin('cities as dc', 'dc.id', '=','shipments.consignee_city_id')
                     ->leftjoin('shipment_items as si', 'si.shipment_id', '=', 'shipments.id')
                     ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
-                    ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_address', 'shipments.amount', 'p.product_name as product_type', 'shipments.created_at', 'shipments.booking_type_id', 'shipments.consignee_city_id')
+                    ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_address', 'shipments.amount', 'p.product_name as product_type', 'shipments.created_at', 'shipments.booking_type_id', 'shipments.consignee_city_id', 'shipments.shipper_status_id')
                     ->where('shipments.id', $shipment_id)->first();
                 if($already_consolidated->exists()){
                     $check = true;
                     $consolidated_shipment[$index] = $shipment->tracking_number;
                 }
                 else{
-                    if(($first_shipment->consignee_phone_number_1 == $shipment->consignee_phone_number_1) && ($first_shipment->consignee_city_id == $shipment->consignee_city_id) && ($first_shipment->booking_type_id == $shipment->booking_type_id)){
-
+                    if(($shipment->shipper_status_id == 1) && ($first_shipment->consignee_phone_number_1 == $shipment->consignee_phone_number_1) && ($first_shipment->consignee_city_id == $shipment->consignee_city_id) && ($first_shipment->booking_type_id == $shipment->booking_type_id)){
                         $shipments_info[$index] = $shipment;
                     }
                     else{
-                        return response()->json(['status'=>0, 'error'=>'Different Consignee Shipments selected']);
+                        if($shipment->shipper_status_id == 1){
+                            return response()->json(['status'=>0, 'error'=>'Different Consignee Shipments selected']);
+                        }
+                        else{
+                            return response()->json(['status'=>0, 'error'=>'Shipment Status must be Shipment - Booked']);
+                        }
                     }
                 }
             }
-            if($check == true){
-                return response()->json(['status' => 2, 'consolidated_Shipments' => $consolidated_shipment]);
+            if(count($shipment_ids) > $settings->setting_value){
+                return response()->json(['status'=>0, 'error'=>'More than ' . $settings->setting_value . ' Shipments are not allowed!']);
             }
             else{
-                return response()->json(['status' => 1, 'shipment_info' => $shipments_info]);
+                if($check == true){
+                    return response()->json(['status' => 2, 'consolidated_Shipments' => $consolidated_shipment]);
+                }
+                else{
+                    return response()->json(['status' => 1, 'shipment_info' => $shipments_info]);
+                }
             }
         }
     }
