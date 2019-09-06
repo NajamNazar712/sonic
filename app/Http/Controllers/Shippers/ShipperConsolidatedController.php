@@ -45,7 +45,7 @@ class ShipperConsolidatedController extends Controller
                     $consolidated_shipment[$index] = $shipment->tracking_number;
                 }
                 else{
-                    if(($shipment->shipper_status_id == 1) && ($first_shipment->consignee_phone_number_1 == $shipment->consignee_phone_number_1) && ($first_shipment->consignee_city_id == $shipment->consignee_city_id) && ($first_shipment->booking_type_id == $shipment->booking_type_id)){
+                   if ($shipment->shipper_status_id == 1 && $first_shipment->booking_type_id == $shipment->booking_type_id && $first_shipment->consignee_name == $shipment->consignee_name && $first_shipment->consignee_address == $shipment->consignee_address && $first_shipment->consignee_phone_number_1 == $shipment->consignee_phone_number_1 && $first_shipment->consignee_city_id == $shipment->consignee_city_id) {
                         $shipments_info[$index] = $shipment;
                     }
                     else{

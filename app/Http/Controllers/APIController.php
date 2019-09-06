@@ -1438,17 +1438,22 @@ class APIController extends Controller
           $tracking_numbers[] = $default_tracking_number;
         }
 
-        $shipments = Shipment::whereIn('tracking_number', $tracking_numbers);
+        $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->get();
 
-        $received_tracking_numbers = array();
+        $first_shipment = $shipments[0];
+
+        $valid = TRUE;
 
         foreach ($shipments as $shipment) {
-          if ($shipment->shipper_status_id != 1) {
-            $received_tracking_numbers[] = $shipment->tracking_number;
+          if ($shipment->shipper_status_id == 1 && $first_shipment->booking_type_id == $shipment->booking_type_id && $first_shipment->consignee_name == $shipment->consignee_name && $first_shipment->consignee_address == $shipment->consignee_address && $first_shipment->consignee_phone_number_1 == $shipment->consignee_phone_number_1 && $first_shipment->consignee_city_id == $shipment->consignee_city_id) {
+
+            $valid = FALSE;
+
+            break;
           }
         }
 
-        if (empty($received_tracking_numbers)) {
+        if ($valid) {
           $shipment_ids = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
 
           $default_shipment_id = Shipment::where('tracking_number', '=', $default_tracking_number)->first()->id;
@@ -1484,7 +1489,7 @@ class APIController extends Controller
           }
         }
         else {
-          return response()->json(['status' => 1, 'message' => 'These Shipment(s) have already been Received!', 'tracking_numbers' => $received_tracking_numbers]);
+          return response()->json(['status' => 1, 'message' => 'These Shipment(s) cannot be Consolidated Together!']);
         }
       }
     }
