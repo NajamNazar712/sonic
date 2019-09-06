@@ -1073,4 +1073,18 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+    public function consolidation_max_shipments_index(){
+        $settings = GlobalSettings::where('type', 'maximum_consolidation_shipments')->first();
+        return view('admin.settings.max_consolidation_shipments')->with(['settings' => $settings]);
+    }
+    public function consolidation_max_shipments_update(Request $request){
+        $settings = GlobalSettings::where('type', 'maximum_consolidation_shipments')->first();
+
+        $settings->setting_value = $request->max_shipments;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }

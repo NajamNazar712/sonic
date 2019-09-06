@@ -496,6 +496,8 @@ class Permission
             'settings.delivery_call_verification_ratio.list' => 237,
             'settings.crm_cut_off_time_and_holidays.update' => 237,
             'settings.delivery_call_verification_ratio.add' => 237,
+            'settings.consolidation.max.index' => 256,
+            'settings.consolidation.max.update' => 256,
 
 
 

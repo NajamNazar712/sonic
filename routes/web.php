@@ -1297,6 +1297,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_confirmation_pending_shipment_selection_time_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@return_confirmation_pending_shipment_selection_time_store')->name('store');
         });
+
+        Route::prefix('consolidation')->name('consolidation.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@consolidation_max_shipments_index')->name('max.index');
+            Route::post('update', 'Admins\GlobalSettingsController@consolidation_max_shipments_update')->name('max.update');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {

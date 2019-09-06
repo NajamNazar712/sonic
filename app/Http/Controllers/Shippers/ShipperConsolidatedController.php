@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\BookingType;
 use App\Http\Models\Consolidation;
 use App\Http\Models\ConsolidationShipments;
@@ -29,6 +30,7 @@ class ShipperConsolidatedController extends Controller
             $shipments_info = array();
             $consolidated_shipment = array();
             $check = false;
+            $settings = GlobalSettings::where('type', 'maximum_consolidation_shipments')->first();
             foreach ($shipment_ids as $index => $shipment_id){
                 $already_consolidated = ConsolidationShipments::where('shipment_id', $shipment_id);
                 $shipment = Shipment::leftjoin('user_shipping_infos as usi', 'usi.id', '=', 'shipments.pickup_address_id')
@@ -52,11 +54,16 @@ class ShipperConsolidatedController extends Controller
                     }
                 }
             }
-            if($check == true){
-                return response()->json(['status' => 2, 'consolidated_Shipments' => $consolidated_shipment]);
+            if(count($shipment_ids) > $settings->setting_value){
+                return response()->json(['status'=>0, 'error'=>'More than ' . $settings->setting_value . ' Shipments are not allowed!']);
             }
             else{
-                return response()->json(['status' => 1, 'shipment_info' => $shipments_info]);
+                if($check == true){
+                    return response()->json(['status' => 2, 'consolidated_Shipments' => $consolidated_shipment]);
+                }
+                else{
+                    return response()->json(['status' => 1, 'shipment_info' => $shipments_info]);
+                }
             }
         }
     }
