@@ -449,7 +449,7 @@ class AdminTrackingController extends Controller
             return $datatable->make(true);
     }
 
-    public function cx_quick_tracking_update_consginrr_info_and_special_instructions(Request $request){
+    public function cx_quick_tracking_update_consignee_info_and_special_instructions(Request $request){
         $shipment_id = $request->update_consignee_info_shipment_id;
         $consignee_name = $request->update_consignee_name;
         $consignee_address = $request->update_consignee_address;
