@@ -810,6 +810,9 @@ class AdminPickupsController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
+                      .vendor_pickup_row{
+                        background-color: var(--light);
+                      }
                     </style>
                   </head>
                   <body>
