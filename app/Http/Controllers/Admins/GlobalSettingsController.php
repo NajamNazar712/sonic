@@ -900,6 +900,7 @@ class GlobalSettingsController extends Controller
                         if ($weight_charge->exists()) {
                             $weight_charges = $weight_charge->get();
 
+
                             foreach($weight_charges as $charge){
                                 $local_or_6hr = self::calculate_weight_charges_factor($charge->local_or_6hr);
                                 $national_charges_class_0 = self::calculate_weight_charges_factor($charge->national_charges_class_0);

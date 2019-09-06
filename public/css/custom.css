@@ -259,6 +259,12 @@ p.comment {
 .complaint_row{
 	background-color: var(--light);
 }
+.vendor_row{
+	background-color: yellow;
+}
+.vendor_pickup_row{
+	background-color: var(--light);
+}
 .nsa_osa_reason{
 	background-color: #fd8282;
 	color: #ffffff;
