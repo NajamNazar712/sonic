@@ -84,7 +84,9 @@ table.table-sm {
 }
 
 table thead tr th,
-table.dataTable thead tr th {
+table.dataTable thead tr th,
+table tfoot tr th,
+table.dataTable tfoot tr th {
 	padding-left: 0.5em;
 	white-space: normal;
 	word-wrap: break-word;

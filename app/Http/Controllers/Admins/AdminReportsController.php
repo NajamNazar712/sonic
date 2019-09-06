@@ -3922,6 +3922,12 @@ class AdminReportsController extends Controller
 
                         $counts[$hub->name][$type] = $rows->count();
 
+                        if (!isset($counts['Grand Total'][$type])) {
+                            $counts['Grand Total'][$type] = 0;
+                        }
+
+                        $counts['Grand Total'][$type] += $rows->count();
+
                         if ($type != 'fake_status') {
                             if ($type != 'delivery_note_pending' && $type != 'delivery_tomorrow') {
                                 if (!isset($counts[$hub->name]['total_1'])) {
@@ -3929,6 +3935,12 @@ class AdminReportsController extends Controller
                                 }
 
                                 $counts[$hub->name]['total_1'] += $counts[$hub->name][$type];
+
+                                if (!isset($counts['Grand Total']['total_1'])) {
+                                    $counts['Grand Total']['total_1'] = 0;
+                                }
+
+                                $counts['Grand Total']['total_1'] += $counts[$hub->name][$type];
                             }
 
                             if ($type != 'delivery_tomorrow') {
@@ -3937,6 +3949,12 @@ class AdminReportsController extends Controller
                                 }
 
                                 $counts[$hub->name]['total_2'] += $counts[$hub->name][$type];
+
+                                if (!isset($counts['Grand Total']['total_2'])) {
+                                    $counts['Grand Total']['total_2'] = 0;
+                                }
+
+                                $counts['Grand Total']['total_2'] += $counts[$hub->name][$type];
                             }
 
                             if (!isset($counts[$hub->name]['grand_total'])) {
@@ -3944,6 +3962,12 @@ class AdminReportsController extends Controller
                             }
 
                             $counts[$hub->name]['grand_total'] += $counts[$hub->name][$type];
+
+                            if (!isset($counts['Grand Total']['grand_total'])) {
+                                $counts['Grand Total']['grand_total'] = 0;
+                            }
+
+                            $counts['Grand Total']['grand_total'] += $counts[$hub->name][$type];
                         }
 
                         if ($export) {
@@ -3956,6 +3980,10 @@ class AdminReportsController extends Controller
                     }
                     else {
                         $counts[$hub->name][$type] = 0;
+
+                        if (!isset($counts['Grand Total'][$type])) {
+                            $counts['Grand Total'][$type] = 0;
+                        }
                     }
                 }
 
@@ -4029,6 +4057,10 @@ class AdminReportsController extends Controller
                 return ['status' => 0, 'success' => 'Shipments Found', 'counts' => $counts];
             }
             else {
+                $grand_total_counts = $counts['Grand Total'];
+                unset($counts['Grand Total']);
+                $counts['Grand Total'] = $grand_total_counts;
+
                 return ['status' => 0, 'success' => 'Shipments Found', 'counts' => $counts, 'shipments' => $shipments];
             }
         }
@@ -4113,6 +4145,12 @@ class AdminReportsController extends Controller
             $spreadsheet->getActiveSheet()->getStyle('G')->getFont()->getColor()->setARGB('FFFF0000');
 
             $spreadsheet->getActiveSheet()->setTitle('Overall')->fromArray($details, NULL);
+
+            $highest_row = $spreadsheet->getActiveSheet()->getHighestRow();
+
+            $highest_row = 'A' . $highest_row . ':O' . $highest_row;
+
+            $spreadsheet->getActiveSheet()->getStyle($highest_row)->getFont()->setBold(TRUE);
 
             $types = array();
 
