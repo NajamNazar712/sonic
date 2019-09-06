@@ -260,19 +260,10 @@ p.comment {
 	background-color: var(--light);
 }
 .vendor_row{
-	background-color: #69a3a9;
-	color: white !important;
+	background-color: yellow;
 }
-.vendor_row td.bookings_link button{
-	background-color: #69a3a9;
-	color: white !important;
-	border: 1px solid #ffffff !important;
-}
-.vendor_row td.select-checkbox:before{
-	border: 1px solid #ffffff !important;
-}
-.vendor_row.selected{
-	color: black !important;
+.vendor_pickup_row{
+	background-color: var(--light);
 }
 .nsa_osa_reason{
 	background-color: #fd8282;
