@@ -43,6 +43,7 @@ use App\Http\Models\PendingInvoiceShipment;
 use App\Http\Models\Invoice;
 use App\Http\Models\InvoiceShipment;
 use App\Http\Models\InvoiceStatus;
+use App\Http\Models\Sister_account\MergedSisterAccount;
 
 use Auth;
 use DB;
@@ -2562,16 +2563,54 @@ class AdminFinanceController extends Controller
             }
         }
 
+        $shipper_ids = array();
+
         $negative_payments = array();
 
         foreach ($pending_payment_payables as $pending_payment_id => $payable) {
+            $pending_payment_shipper = PendingPayment::find($pending_payment_id)->shipper;
+
+            $shipper_ids[] = $pending_payment_shipper->id;
+
             if ($payable < 0) {
-                $negative_payments[] = PendingPayment::find($pending_payment_id)->shipper->name;
+                $negative_payments[] = $pending_payment_shipper->name;
             }
         }
 
         if (empty($negative_payments)) {
             if (empty($duplicate_shipments)) {
+                foreach ($shipper_ids as $shipper_id) {
+                    $merged_account = MergedSisterAccount::where('user_id', $shipper_id);
+
+                    if ($merged_account->exists()) {
+                        $merged_account = $merged_account->first();
+
+                        $merged_accounts = MergedSisterAccount::where('merged_head_id', $merged_account->merged_head_id)->get();
+
+                        $merged_account_negative = array();
+
+                        foreach ($merged_accounts as $merge_account) {
+                            $pending_payment_shipper = PendingPayment::where('user_id', $merge_account->id);
+
+                            if ($pending_payment_shipper->exists()) {
+                                $pending_payment_shipper = $pending_payment_shipper->first();
+
+                                $payable = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipper->id)->sum('payable');
+
+                                if ($payable < 0) {
+                                    $merged_account_negative['shipper'] = User::find($shipper_id)->name;
+                                    $merged_account_negative['merged_account'][] = $pending_payment_shipper->shipper->name;
+                                    $merged_account_negative['payable'][] = $payable;
+                                }
+                            }
+                        }
+
+                        if (!empty($merged_account_negative)) {
+                            return ['status' => 2, 'negative_payments' => false, 'duplicate_shipments' => false, 'merged_account_negative' => $merged_account_negative];
+                        }
+                    }
+                }
+
                 return ['status' => 0, 'negative_payments' => false, 'duplicate_shipments' => false];
             }
             else {
