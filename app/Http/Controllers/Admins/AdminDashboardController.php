@@ -920,7 +920,7 @@ class AdminDashboardController extends Controller
             ->pluck('id')->toArray();
         $operation_forecasting_shipments_list = OperationForecastShipments::leftjoin('shipments as s', 's.id', '=', 'operation_forecast_shipments.shipment_id')
             ->select('s.tracking_number as tracking_number')
-            ->whereIn('operation_forecast_shipments.operation_forecast_id', [$operation_forecasting_ids])
+            ->whereIn('operation_forecast_shipments.operation_forecast_id', $operation_forecasting_ids)
             ->whereBetween('operation_forecast_shipments.updated_at', [$from, $to])
             ->groupBy('s.id')
             ->get();
