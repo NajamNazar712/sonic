@@ -21,6 +21,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\Consolidation;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\DeliveryCallVerificationRatio;
@@ -233,6 +234,28 @@ class DeliveryController extends Controller
         return view('admin.delivery.note.index')->with(['riders' => $riders, 'routes' => $routes]);
     }
 
+    public function note_consolidation_check(Request $request){
+        $missing_shipments = array();
+        foreach ($request->consolidation_ids as $id){
+            $consolidation_shipments = ConsolidationShipments::where('consolidation_id', $id);
+            if($consolidation_shipments->exists()){
+                $consolidation_shipments = $consolidation_shipments->pluck('shipment_id')->toArray();
+                foreach ($consolidation_shipments as $shipment_id){
+                    if(!in_array($shipment_id, $request->shipment_ids)){
+                        $tracking = Shipment::find($shipment_id)->tracking_number;
+                        $missing_shipments[] = $tracking;
+                    }
+
+                }
+            }
+        }
+        if(count($missing_shipments) > 0){
+            return response()->json(['missing_flag' => TRUE, 'missing_shipments' => $missing_shipments]);
+        }else{
+            return response()->json(['missing_flag' => FALSE]);
+        }
+    }
+
     public function check_consolidation($shipment_id){
 
         $consolidation_details = array();
@@ -377,9 +400,15 @@ class DeliveryController extends Controller
                                 $class = 'complaint_row';
                             }
 
+                            $consolidation_details = $this->check_consolidation($shipment->id);
 
+                            $consolidation_flag = FALSE;
 
-                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks, 'class' => $class]);
+                            if($consolidation_details){
+                                $consolidation_flag = TRUE;
+                            }
+
+                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details]);
                         }
                     } else {
                         return ['status' => 1, 'error' => 'This Shipment is already in an unverified delivery note!'];

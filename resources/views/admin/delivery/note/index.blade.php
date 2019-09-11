@@ -200,6 +200,7 @@
 
             var shipment_ids = [];
             var tracking_ids = [];
+            var consolidation_ids = [];
             var notification_ids = [];
             var rider_info_ids = [];
             var table = $('#datatable').DataTable({
@@ -382,9 +383,20 @@
                                 var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                 var rider_information = '<input type="checkbox" class="form-control select select-checkbox rider_information" name="rider_information[]" checked>';
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                var row = table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
+
+                                var consolidation = '';
+                                if(data.consolidation_flag){
+                                    consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
+                                }else{
+                                    consolidation = '-';
+                                }
+                                var row = table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,consolidation,remove]).node().id = data.shId;
                                 table.draw(false);
                                 $('tr#'+row).attr('class',data.class);
+                                if(data.consolidation_flag){
+                                    $('tr#'+row).attr('consolidation_id',data.consolidation_details.consolidation_id);
+                                }
+
                                 // table.rows(row).nodes().attr("class", data.class);
                                 scan_sound(1);
                                 UnblockPagePermanently();
@@ -429,9 +441,18 @@
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                     var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                    var row = table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
+                                    var consolidation = '';
+                                    if(data.consolidation_flag){
+                                        consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
+                                    }else{
+                                        consolidation = '-';
+                                    }
+                                    var row = table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,consolidation,remove]).node().id = data.shId;
                                     table.draw(false);
                                     $('tr#'+row).attr('class',data.class);
+                                    if(data.consolidation_flag){
+                                        $('tr#'+row).attr('consolidation_id',data.consolidation_details.consolidation_id);
+                                    }
                                     scan_sound(1);
                                     UnblockPagePermanently();
                                     shipment_ids.push(data.shId);
@@ -506,6 +527,11 @@
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
 
+                if(consolidation_ids.length != null){
+                    var error = "All Consolidation shipments not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    errors = 1;
+                }
 
                 if (rider !== '' && rider !== null) {
 
@@ -525,6 +551,64 @@
                     errors = 1;
                     $('#route_error').css('display', 'block');
                 }
+
+                table.rows().nodes().each(function(index) {
+                    var row = table.row(index);
+
+                    if ($(row.node()).attr('consolidation_id')) {
+
+                        var id = parseInt($(row.node()).attr('consolidation_id'));
+                        //
+                        var index = $.inArray(id, consolidation_ids);
+
+                        if (index === -1) {
+                            consolidation_ids.push(id);
+                        }
+                        if(consolidation_ids.length > 0){
+                            $.ajax({
+                                url:'{{route('admin.delivery.note.consolidation_check')}}',
+                                type:'POST',
+                                data: {
+                                    'consolidation_ids':consolidation_ids,
+                                    'shipment_ids':shipment_ids,
+                                    '_token':'{!! csrf_token() !!}'
+                                }
+                            }).done(function (data) {
+                                if(data.missing_flag){
+                                    errors = 1;
+                                    var html = '';
+
+                                    html += 'The following Shipment(s) are missing from consolidation:<br/>';
+
+                                    $.each(data.missing_shipments, function (index, tracking) {
+                                        html += tracking + ', ';
+                                    });
+
+                                    html = html.slice(0, -2);
+
+                                    content = document.createElement('div');
+                                    content.innerHTML = html;
+                                    swal({
+                                        content: content,
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Close',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    });
+                                }
+                            });
+                        }
+
+                    }
+                });
 
                 if(count > 0) {
                     if (errors === 0) {
@@ -571,8 +655,6 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                 }
-
-
 
             });
 
