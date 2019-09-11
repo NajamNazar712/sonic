@@ -1090,7 +1090,7 @@
 							});
 						}
 					}
-					else {
+					else if (data.status == 1) {
 						var html = 'Cannot proceed since following Shipper(s) have Overall Negative Payment(s) Selected:<br/>';
 
 						$.each(data.negative_payments, function(index, shipper) {
@@ -1114,6 +1114,44 @@
 							closeOnClickOutside: false,
 							closeOnEsc: false,
 							dangerMode: true
+						});
+					}
+					else {
+						var html = 'Shipper: <b>' + data.merged_account_negative.shipper + '</b> Sister Account(s) have Overall Negative Payable:<br/>';
+
+						$.each(data.merged_account_negative.merged_account, function(index, account) {
+							html += account + ': ' + data.merged_account_negative.payable[index];
+						});
+
+						html += '<br/>Are you sure, you want to make the Payments?';
+
+						content = document.createElement('div');
+						content.innerHTML = html;
+
+						swal({
+							content: content,
+							icon: 'warning',
+							buttons: {
+								cancel: {
+									text: 'No',
+									value: null,
+									visible: true,
+									closeModal: true,
+								},
+								confirm: {
+									text: 'Yes',
+									value: true,
+									visible: true,
+									closeModal: true
+								}
+							},
+							closeOnClickOutside: false,
+							closeOnEsc: false,
+							dangerMode: true
+						}).then(function(confirm) {
+							if (confirm) {
+								form.submit();
+							}
 						});
 					}
 				});
