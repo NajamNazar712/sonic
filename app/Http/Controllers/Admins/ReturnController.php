@@ -13,6 +13,7 @@ use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
@@ -765,22 +766,38 @@ class ReturnController extends Controller
             })
             ->addColumn('action', function($shipment) {
                 if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
-                    $revert_button = '<button type="button" class="dropdown-item revert"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Revert</div></button>';
+                    $flag = true;
+                    $consolidation = ConsolidationShipments::where('shipment_id', $shipment->shipment_id)->first();
+                    if($consolidation){
+                        $consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidation->consolidation_id)->get();
+                        foreach ($consolidation_shipments as $consolidation_shipment){
+                            $is_shipment = Shipment::find($consolidation_shipment->shipment_id);
+                            if($is_shipment->shipper_status_id == 23){
+                                $flag = false;
+                            }
+                        }
+                    }
+                    if($flag == true){
+                        $revert_button = '<button type="button" class="dropdown-item revert"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Revert</div></button>';
 
-                    $dropdown = '
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                        <div class="dropdown-menu dropdown-menu-sm">
-                    ';
+                        $dropdown = '
+                          <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                        ';
 
-                    $dropdown .= $revert_button;
+                            $dropdown .= $revert_button;
 
-                    $dropdown .= '
-                        </div>
-                      </div>
-                    ';
+                        $dropdown .= '
+                            </div>
+                          </div>
+                        ';
+                            return $dropdown;
+                    }
+                    else{
+                        return '';
+                    }
 
-                    return $dropdown;
                 }
                 else {
                     return '';
@@ -1919,30 +1936,44 @@ class ReturnController extends Controller
 
     public function return_confirmed_revert(Request $request) {
         $shipment = Shipment::find($request->id);
-
-        if ($shipment->shipper_status_id == 20) {
-            $shipment->shipper_status_id = 13;
-            $shipment->consignee_status_id = 13;
-
-            $shipment->save();
-
-            $journey = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id', 20)->latest()->first();
-            if($journey){
-                $return_reattempt = new ReturnReattemptRatio();
-                $return_reattempt->shipment_id = $shipment->id;
-                $return_reattempt->return_confirm_date = $journey->created_at;
-                $return_reattempt->save();
+        $flag = true;
+        $consolidation = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
+        if($consolidation){
+            $consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidation->consolidation_id)->get();
+            foreach ($consolidation_shipments as $consolidation_shipment){
+                $is_shipment = Shipment::find($consolidation_shipment->shipment_id);
+                if($is_shipment->shipper_status_id == 23){
+                    $flag = false;
+                }
             }
+        }
+        if($flag == true) {
+            if ($shipment->shipper_status_id == 20) {
+                $shipment->shipper_status_id = 13;
+                $shipment->consignee_status_id = 13;
+
+                $shipment->save();
+
+                $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 20)->latest()->first();
+                if ($journey) {
+                    $return_reattempt = new ReturnReattemptRatio();
+                    $return_reattempt->shipment_id = $shipment->id;
+                    $return_reattempt->return_confirm_date = $journey->created_at;
+                    $return_reattempt->save();
+                }
 
 
-            ShipmentsJourneyController::add($request->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
+                ShipmentsJourneyController::add($request->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
 
-            AdminFinanceController::return_confirmed_revert($request->id, 1);
+                AdminFinanceController::return_confirmed_revert($request->id, 1);
 
-            return ['status' => 0, 'success' => 'Shipment has been Reverted'];
+                return ['status' => 0, 'success' => 'Shipment has been Reverted'];
+            } else {
+                return ['status' => 1, 'error' => 'Shipment has already been Reverted'];
+            }
         }
         else {
-            return ['status' => 1, 'error' => 'Shipment has already been Reverted'];
+            return ['status' => 1, 'error' => 'Consolidated Shipment found in Return Note'];
         }
     }
 
