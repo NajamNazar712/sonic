@@ -2080,7 +2080,7 @@ class AdminFinanceController extends Controller
 
                     $pending_payment_shipment->save();
                     if($adjustment_type) {
-                        self::adjustment_logs_add($shipment_id, $adjustment_type, $payment_shipment->payable, NULL, $pending_payment_shipment->id, 1);
+                        self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, NULL, $pending_payment_shipment->id, 1);
                     }
                 }
             }
