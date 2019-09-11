@@ -3041,7 +3041,6 @@ class DeliveryController extends Controller
                     'dncc_count' => $request->sdn_count,
                     'sdn_delivered_shipments' => $request->sdn_delivered_shipments,
                     'sdn_amount' => $request->total_dncc_amount,
-                    'sdn_expense' => $expense,
                     'sdn_net_amount' => $total_amount,
                     'deposited_by' => Auth::id()
                 ]);
@@ -3403,15 +3402,6 @@ class DeliveryController extends Controller
                             <td class="color secondary"><strong>Total DNCC Amount</strong></td>
                             <td>Rs ' . number_format($station_note_details->sdn_amount) . '</td>
                           </tr>
-                         <!-- <tr>
-                            <td class="color secondary"><strong>Total Expenses</strong></td>
-                            <td>' . number_format($station_note_details->sdn_expense) . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Total Net Amount</strong></td>
-                            <td>' . number_format($station_note_details->sdn_net_amount) . '</td>
-                          </tr>-->
-                          
 
                         </tbody>
                       </table>
