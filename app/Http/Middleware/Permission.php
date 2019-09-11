@@ -358,6 +358,8 @@ class Permission
             'reports.adjustments.index' => 248,
             'reports.adjustments.list' => 248,
             'reports.account_edit.index' => 255,
+            'reports.sdn.index' => 252,
+            'reports.sdn.list' => 252,
             'reports.account_edit.list' => 255,
             'reports.bank_history.index' => 257,
             'reports.bank_history.list' => 257,
