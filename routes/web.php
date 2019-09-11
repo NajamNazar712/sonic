@@ -281,7 +281,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
     Route::prefix('operation_forecasting')->name('operation_forecasting.')->group(function () {
         Route::prefix('incoming')->name('incoming.')->group(function () {
-            Route::get('{from?}/{to?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
+            Route::get('{from?}/{to?}/{service_type_id?}/{hub?}/{status?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
         });
         Route::prefix('outgoing')->name('outgoing.')->group(function () {
             Route::get('{from?}/{to?}/{customer_id?}', 'Admins\AdminDashboardController@outgoing_shipments_list')->name('shipments_list');
