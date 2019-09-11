@@ -526,12 +526,7 @@
                 var errors = 0;
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
-
-                if(consolidation_ids.length != null){
-                    var error = "All Consolidation shipments not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    errors = 1;
-                }
+                
 
                 if (rider !== '' && rider !== null) {
 
