@@ -838,7 +838,7 @@ class AdminDashboardController extends Controller
             $to = Carbon::now()->endOfDay();
         }
 
-        $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('operations_outgoing_top_customers.id as id', 'u.name as name', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))
+        $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('operations_outgoing_top_customers.id as id', 'u.name as name', 'u.id as user_id', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))
             ->whereBetween('operations_outgoing_top_customers.created_at',[$from,$to])
             ->orderBy('count', 'desc')
             ->groupBy('u.id')
@@ -847,7 +847,7 @@ class AdminDashboardController extends Controller
             ->editColumn('count', function ($shipments) use($from, $to) {
                 if($shipments->count > 0){
                     $route = route('admin.operation_forecasting.outgoing.shipments_list');
-                    return "<u><a href='{$route}/$from/$to/$shipments->id' class='white' target='_blank'>$shipments->count</a></u>";
+                    return "<u><a href='{$route}/$from/$to/$shipments->user_id' class='white' target='_blank'>$shipments->count</a></u>";
                 }
                 else{
                     return 0;
@@ -929,8 +929,12 @@ class AdminDashboardController extends Controller
         }
     }
     public function outgoing_shipments_list($from, $to, $user_id){
+        $top_customers = OperationsOutgoingTopCustomers::select('operations_outgoing_top_customers.id as id')
+            ->where('operations_outgoing_top_customers.user_id', $user_id)
+            ->whereBetween('operations_outgoing_top_customers.updated_at', [$from, $to])
+            ->pluck('id')->toArray();
         $operation_outgoing_top_customer = OperationsOutgoingTopCustomersShipments::leftjoin('shipments as s', 's.id', '=', 'operations_outgoing_top_customers_shipments.shipment_id')
-            ->where('customer_id', $user_id)
+            ->whereIn('operations_outgoing_top_customers_shipments.customer_id', $top_customers)
             ->whereBetween('operations_outgoing_top_customers_shipments.updated_at', [$from,$to])
             ->groupBy('s.id')
             ->get();
