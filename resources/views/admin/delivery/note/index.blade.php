@@ -75,6 +75,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Last Rider Name</th>
                         <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">Consolidation</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -314,6 +315,7 @@
                     {name: 'status', class: 'align-middle status', orderable: false},
                     {name: 'rider_name', class: 'align-middle rider_name', orderable: false},
                     {name: 'remarks', class: 'align-middle remarks', orderable: false},
+                    {name: 'consolidation', class: 'align-middle consolidation', orderable: false},
                     {name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
