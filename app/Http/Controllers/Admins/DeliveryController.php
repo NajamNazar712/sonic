@@ -21,6 +21,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\InterceptReBookRequest;
@@ -232,6 +233,20 @@ class DeliveryController extends Controller
         return view('admin.delivery.note.index')->with(['riders' => $riders, 'routes' => $routes]);
     }
 
+    public function check_consolidation($shipment_id){
+
+        $consolidation_details = array();
+
+        $consolidation_shipment = ConsolidationShipments::where('shipment_id', $shipment_id);
+
+        if($consolidation_shipment->exists()){
+            $consolidation_shipment = $consolidation_shipment->first();
+            $consolidation = Consolidation::find($consolidation_shipment->consolidation_id);
+            $consolidation_details['order'] = $consolidation_shipment->order;
+            $consolidation_details['consolidation_id'] = $consolidation_shipment->consolidation_id;
+        }
+    }
+
     public function get_shipment_details(Request $request)
     {
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55);
@@ -349,6 +364,9 @@ class DeliveryController extends Controller
                             if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
                                 $class = 'complaint_row';
                             }
+
+
+
                             return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks, 'class' => $class]);
                         }
                     } else {
