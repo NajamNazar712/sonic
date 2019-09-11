@@ -224,7 +224,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 	        Route::get('','Shippers\ShipperResourcesController@index')->name('index');
 	        Route::get('city_list','Shippers\ShipperResourcesController@get_network_list')->name('city_list');
 	    });
-	
+
 	Route::prefix('crm')->name('crm.')->group(function () {
 	        Route::prefix('request')->name('request.')->group(function(){
 	            Route::get('', 'Shippers\ShipperCRMController@index')->name('index');
@@ -281,10 +281,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
     Route::prefix('operation_forecasting')->name('operation_forecasting.')->group(function () {
         Route::prefix('incoming')->name('incoming.')->group(function () {
-            Route::get('{operation_forecasting?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
+            Route::get('{from?}/{to?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
         });
         Route::prefix('outgoing')->name('outgoing.')->group(function () {
-            Route::get('{customer_id?}', 'Admins\AdminDashboardController@outgoing_shipments_list')->name('shipments_list');
+            Route::get('{from?}/{to?}/{customer_id?}', 'Admins\AdminDashboardController@outgoing_shipments_list')->name('shipments_list');
         });
     });
 
