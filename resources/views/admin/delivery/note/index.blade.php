@@ -526,7 +526,7 @@
                 var errors = 0;
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
-                
+
 
                 if (rider !== '' && rider !== null) {
 

@@ -1060,7 +1060,12 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [2, 3, 5])
                     ->where('crm.case_nature_id', 1);
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request'])
+            ->leftjoin('consolidation_shipments as consolidations', function ($join){
+                $join->on('consolidations.shipment_id', '=', 'shipments.id')
+                    ->where('consolidations.consolidation_id','=',
+                        DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
+            })
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','consolidations.consolidation_id'])
             ->where('delivery_notes.id', $id);
 
         if (session('role_id') != 1) {
@@ -1087,6 +1092,13 @@ class DeliveryController extends Controller
                 },
                 'amount' => function ($deliveries){
                     return $deliveries->amount;
+                },
+                'consolidation_id' => function($deliveries){
+                    if($deliveries->consolidation_id != null){
+                        return $deliveries->consolidation_id;
+                    } else {
+                        return '';
+                    }
                 }
             ])
             ->addColumn('collection_amount', function($shipment){
@@ -1123,6 +1135,24 @@ class DeliveryController extends Controller
             ->addColumn('attempts', function ($deliveries){
                 $attempt_counts = ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 5, 'verification' => 1])->count();
                 return $attempt_counts;
+            })
+            ->addColumn('consolidation', function($deliveries){
+                $consolidations = $this->check_consolidation($deliveries->shId);
+                $consol = '';
+                if($consolidations){
+                    $consol = $consolidations['order'] . '/'. $consolidations['count'];
+                }
+                else{
+                    $consol = '-';
+                }
+                return $consol;
+            })
+            ->addColumn('consolidated_id', function ($deliveries){
+                if($deliveries->consolidation_id){
+                    return $deliveries->consolidation_id;
+                }else{
+                    return '-';
+                }
             })
             ->addColumn('status', function ($deliveries) {
                 if($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == ''){
@@ -1419,6 +1449,10 @@ class DeliveryController extends Controller
         }
         if ($delivery_note_id != '') {
             foreach ($shipments as $shipment) {
+                $consolidation_shipments = ConsolidationShipments::where('shipment_id', $shipment);
+                if($consolidation_shipments->exists()){
+                    
+                }
                 $statusId = "reason_drop.$shipment";
                 $status_drop = "status_drop.$shipment";
                 $shipment_status = Shipment::where('id', $shipment)->first();
