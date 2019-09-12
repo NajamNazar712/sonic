@@ -30,6 +30,8 @@ class AdminConsolidatedController extends Controller
 
     public function consolidation_history_list(){
         $consolidation_shipments = ConsolidationShipments::leftjoin('shipments as s', 's.id', '=', 'consolidation_shipments.shipment_id')
+            ->leftjoin('consolidations as c', 'c.id', '=', 'consolidation_shipments.consolidation_id')
+            ->leftjoin('shipments as cs', 'cs.id', '=', 'c.default_shipment_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
             ->leftjoin('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
             ->leftjoin('cities as oc', 'oc.id', '=','usi.city_id')
@@ -48,11 +50,11 @@ class AdminConsolidatedController extends Controller
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)'));
             })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'sjc.shipper_status_id')
-            ->select('consolidation_shipments.consolidation_id as id', 's.tracking_number as tracking_number', 's.order_id as order_id', 'oc.name as origin', 'dc.name as destination', 's.consignee_name as consignee_name', 's.consignee_phone_number_1 as consignee_phone_number_1', 's.consignee_address as consignee_address', 's.amount as amount', 'p.product_name as product_type', 's.created_at', 'bt.booking_type as booking_type', 's.consignee_city_id as consignee_city_id', 'sj.created_at as arrival_date', 'u.name as shipper', 'ss.name as status', 'sjc.created_at as status_date', 'consolidation_shipments.order as order', DB::raw('(SELECT count(cs.id) FROM consolidation_shipments AS cs WHERE cs.consolidation_id = consolidation_shipments.consolidation_id) AS order_count'))
+            ->select('consolidation_shipments.consolidation_id as id', 's.tracking_number as tracking_number', 's.order_id as order_id', 'oc.name as origin', 'dc.name as destination', 's.consignee_name as consignee_name', 's.consignee_phone_number_1 as consignee_phone_number_1', 's.consignee_address as consignee_address', 's.amount as amount', 'p.product_name as product_type', 's.created_at', 'bt.booking_type as booking_type', 's.consignee_city_id as consignee_city_id', 'sj.created_at as arrival_date', 'u.name as shipper', 'ss.name as status', 'sjc.created_at as status_date', 'consolidation_shipments.order as order', 'c.count AS order_count', 'cs.tracking_number AS default_shipment_tracking_number', 'consolidation_shipments.created_at as consolidation_created_at')
             ->groupBy('s.id');
         $datatables = Datatables::of($consolidation_shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
-                $route = route('cod.tracking.index');
+                $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('id_padded', function ($consolidation_shipment) {
@@ -60,6 +62,10 @@ class AdminConsolidatedController extends Controller
             })
             ->editColumn('consolidation', function ($consolidation_shipment) {
                 return $consolidation_shipment->order . '/' . $consolidation_shipment->order_count;
+            })
+            ->editColumn('default_shipment_tracking_number_link', function ($consolidation_shipment) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$consolidation_shipment->default_shipment_tracking_number' class='tracking' target='_blank'>$consolidation_shipment->default_shipment_tracking_number</a></u>";
             })
             ->editColumn('arrival_date', function ($consolidation_shipment) {
                 if($consolidation_shipment->arrival_date){
