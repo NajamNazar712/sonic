@@ -235,6 +235,8 @@
                             head.push('OSA Estimated Charges');
                             head.push('Arrival Date');
                             head.push('Status Date');
+                            head.push('Consolidation');
+                            head.push('Consolidation IDs');
                             head.push('Re-Attempt Count');
 
                             $.each(result.data, function(index, values) {
@@ -262,6 +264,8 @@
                                 row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
+                                row.push(values.consolidation);
+                                row.push(values.consolidated_id);
                                 row.push(values.reattempts);
 
                                 body.push(row);
@@ -751,7 +755,7 @@
 
                     }
                 }
-                console.log(selected_rows)
+
 
 
             });

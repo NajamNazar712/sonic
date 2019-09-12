@@ -34,6 +34,8 @@
                         <th class="border-primary border-darken-1">OSA Estimated Charges</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Consolidation</th>
+                        <th class="border-primary border-darken-1">Consolidated IDs</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -543,6 +545,8 @@
                     {data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                    {data:'consolidation' ,name: 'consolidation', class: 'align-middle consolidation'},
+                    {data:'consolidated_id' ,name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -721,27 +725,48 @@
 
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var hub_id = $(this).parents('tr').data('hub');
-                if(hub_ids.length == 0){
-                    hub_ids.push(hub_id);
-                    var index = $.inArray(id, selected_rows);
+                var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
+                if(con_id){
+                    if(hub_ids.length == 0){
+                        hub_ids.push(hub_id);
+                    }else if(hub_ids[0] != hub_id){
+                        var error = "Selected hubs should be the same!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        return false;
+                    }
+                    table.rows().nodes().each(function(index) {
+                        var row = table.row(index);
+                        if ($(row.node()).attr('consolidation_id') == con_id) {
+                            var rid = parseInt($(row.node()).attr('id'));
+                            var rindex = $.inArray(rid, selected_rows);
 
-                    if (index === -1) {
-                        selected_rows.push(id);
-                    }
-                    else {
-                        selected_rows.splice(index, 1);
-                    }
+                            if (rindex === -1) {
+                                selected_rows.push(rid);
+                                if(id != rid){
 
-                    if (selected_rows.length > 0) {
-                        table.button('.confirm').enable();
-                        table.button('.reattempt').enable();
-                    }
-                    else {
-                        table.button('.confirm').disable();
-                        table.button('.reattempt').disable();
-                    }
+                                    table.row(row).select();
+                                }
+                            }
+                            else {
+                                if(id != rid){
+
+                                    row.deselect();
+                                }
+                                selected_rows.splice(rindex, 1);
+                            }
+                            if (selected_rows.length > 0) {
+                                table.button('.confirm').enable();
+                                table.button('.reattempt').enable();
+                            }
+                            else {
+                                table.button('.confirm').disable();
+                                table.button('.reattempt').disable();
+                            }
+                        }
+                    });
                 }else{
-                    if(hub_ids[0] == hub_id){
+                    if(hub_ids.length == 0){
+                        hub_ids.push(hub_id);
                         var index = $.inArray(id, selected_rows);
 
                         if (index === -1) {
@@ -760,11 +785,31 @@
                             table.button('.reattempt').disable();
                         }
                     }else{
-                        var error = "Selected hubs should be the same!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        return false;
-                    }
+                        if(hub_ids[0] == hub_id){
+                            var index = $.inArray(id, selected_rows);
 
+                            if (index === -1) {
+                                selected_rows.push(id);
+                            }
+                            else {
+                                selected_rows.splice(index, 1);
+                            }
+
+                            if (selected_rows.length > 0) {
+                                table.button('.confirm').enable();
+                                table.button('.reattempt').enable();
+                            }
+                            else {
+                                table.button('.confirm').disable();
+                                table.button('.reattempt').disable();
+                            }
+                        }else{
+                            var error = "Selected hubs should be the same!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            return false;
+                        }
+
+                    }
                 }
 
             });
