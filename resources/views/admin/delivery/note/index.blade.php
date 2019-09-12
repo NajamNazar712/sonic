@@ -560,6 +560,7 @@
                             consolidation_ids.push(id);
                         }
                         if(consolidation_ids.length > 0){
+                            errors = 1;
                             $.ajax({
                                 url:'{{route('admin.delivery.note.consolidation_check')}}',
                                 type:'POST',
@@ -598,6 +599,8 @@
                                         closeOnEsc: false,
                                         dangerMode: true
                                     });
+                                }else{
+                                    errors = 0;
                                 }
                             });
                         }

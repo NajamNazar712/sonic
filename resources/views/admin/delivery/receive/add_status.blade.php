@@ -729,15 +729,43 @@
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
+                var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
 
-                var index = $.inArray(id, selected_rows);
+                if(con_id){
+                    table.rows().nodes().each(function(index) {
+                        var row = table.row(index);
+                        if ($(row.node()).attr('consolidation_id') == con_id) {
+                            var rid = parseInt($(row.node()).attr('id'));
+                            var rindex = $.inArray(rid, selected_rows);
 
-                if (index === -1) {
-                    selected_rows.push(id);
+                            if (rindex === -1) {
+                                selected_rows.push(rid);
+                                if(id != rid){
+
+                                    table.row(row).select();
+                                }
+                            }
+                            else {
+                                if(id != rid){
+
+                                    row.deselect();
+                                }
+                                selected_rows.splice(rindex, 1);
+                            }
+                        }
+                    });
+                }else{
+                    var index = $.inArray(id, selected_rows);
+
+                    if (index === -1) {
+
+                        selected_rows.push(id);
+                    }
+                    else {
+                        selected_rows.splice(index, 1);
+                    }
                 }
-                else {
-                    selected_rows.splice(index, 1);
-                }
+
 
                 if (selected_rows.length > 0) {
                     table.button('.delivered').enable();
@@ -747,6 +775,7 @@
                     table.button('.delivered').disable();
                     $('#submit_selected_status').attr('disabled', true);
                 }
+                console.log(selected_rows);
             });
 
 
