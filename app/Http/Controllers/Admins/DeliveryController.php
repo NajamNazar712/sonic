@@ -256,7 +256,7 @@ class DeliveryController extends Controller
         }
     }
 
-    public function check_consolidation($shipment_id){
+    static public function check_consolidation($shipment_id){
 
         $consolidation_details = array();
 
@@ -365,7 +365,7 @@ class DeliveryController extends Controller
                                 if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
                                     $class = 'complaint_row';
                                 }
-                                $consolidation_details = $this->check_consolidation($shipment->id);
+                                $consolidation_details = self::check_consolidation($shipment->id);
 
                                 $consolidation_flag = FALSE;
 
@@ -400,7 +400,7 @@ class DeliveryController extends Controller
                                 $class = 'complaint_row';
                             }
 
-                            $consolidation_details = $this->check_consolidation($shipment->id);
+                            $consolidation_details = self::check_consolidation($shipment->id);
 
                             $consolidation_flag = FALSE;
 
@@ -1137,7 +1137,7 @@ class DeliveryController extends Controller
                 return $attempt_counts;
             })
             ->addColumn('consolidation', function($deliveries){
-                $consolidations = $this->check_consolidation($deliveries->shId);
+                $consolidations = self::check_consolidation($deliveries->shId);
                 $consol = '';
                 if($consolidations){
                     $consol = $consolidations['order'] . '/'. $consolidations['count'];
