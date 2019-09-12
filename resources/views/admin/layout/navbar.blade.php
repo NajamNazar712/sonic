@@ -18,23 +18,24 @@
             <div class="collapse navbar-collapse" id="navbar-mobile">
                 <ul class="nav navbar-nav mr-auto float-left">
                     <li class="nav-item d-none d-md-block"><a class="nav-link nav-menu-main menu-toggle hidden-xs" id="sidebar_menu" href="#"><i class="ft-menu"></i></a></li>
+                    <li class="nav-item d-none d-md-flex justify-content-center h4 m-auto"><p class="m-auto white"><span class="d-none d-lg-inline-block">For Assistance Call:</span> <a href="tel:+922138772222" target="_blank" class="text-bold-700 white">0213-877-22-22</a></p></li>
                 </ul>
                 <ul class="nav navbar-nav float-right">
                     <li class="dropdown dropdown-user nav-item">
                         <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('admin.tracking.index') }}" target="_blank">
                             <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
-                                <span class="align-middle font-weight-bold">Tracking</span>
+                                <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Tracking</span>
                                 <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-crosshairs m-0"></i></h2>
                             </div>
                         </a>
                         <a class="nav-link d-inline-flex align-middle p-0" href="http://bit.ly/sonic_manuals" target="_blank">
                             <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
-                                <span class="align-middle font-weight-bold">HELP</span>
+                                <span class ="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">HELP</span>
                                 <h2 class="d-inline-block m-0 align-middle primary"><i class="ft-help-circle m-0"></i></h2>
                             </div>
                         </a>
 
-                        <a class="dropdown-toggle nav-link d-inline-flex align-middle dropdown-user-link" href="#" data-toggle="dropdown">
+                        <a class="dropdown-toggle nav-link d-flex d-md-inline-flex align-middle dropdown-user-link" href="#" data-toggle="dropdown">
                             <span class="d-inline-block align-middle">
                                 <div class="text-bold-700 border-bottom-white text-right">{{ucfirst(Auth::user()->name)}}</div>
                                 <div class="border-top-white text-right">{{Auth::user()->role->department->name}}</div>
