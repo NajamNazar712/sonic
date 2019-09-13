@@ -20,6 +20,8 @@
                         <th class="border-primary border-darken-1">Shipper Name</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Consolidation</th>
+                        <th class="border-primary border-darken-1">Default Tracking No.</th>
+                        <th class="border-primary border-darken-1">Consolidation Date/Time</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Status Date/Time</th>
                         <th class="border-primary border-darken-1">Order ID</th>
@@ -135,6 +137,8 @@
                             head.push('Shipper Name');
                             head.push('Service Type');
                             head.push('Consolidation');
+                            head.push('Default Tracking No.');
+                            head.push('Consolidation Date/Time');
                             head.push('Status');
                             head.push('Status Date/Time');
                             head.push('Order ID');
@@ -156,6 +160,8 @@
                                 row.push(values.shipper);
                                 row.push(values.booking_type);
                                 row.push(values.consolidation);
+                                row.push(values.default_shipment_tracking_number);
+                                row.push(values.consolidation_created_at);
                                 row.push(values.status);
                                 row.push(values.status_date);
                                 row.push(values.order_id);
@@ -209,7 +215,9 @@
                     { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'booking_type' ,name: 'bt.id', class: 'align-middle service_type'},
-                    { data:'consolidation' ,name: 'bt.booking_type', class: 'align-middle consolidation'},
+                    { data:'consolidation' ,name: 'consolidation', class: 'align-middle consolidation', orderable: false, searchable: false},
+                    { data:'default_shipment_tracking_number_link' ,name: 'cs.tracking_number', class: 'align-middle default_shipment_tracking_number_link'},
+                    { data:'consolidation_created_at' ,name: 'consolidation_shipments.created_at', class: 'align-middle consolidation_created_at'},
                     { data:'status' ,name: 'ss.id', class: 'align-middle status'},
                     { data:'status_date' ,name: 'sjc.created_at', class: 'align-middle status_date'},
                     { data:'order_id' ,name: 's.order_id', class: 'align-middle order_id'},
