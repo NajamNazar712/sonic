@@ -772,7 +772,7 @@ class ShipmentChargesController extends Controller
                     else {
                         if ($class == 1) {
                             if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
-                                $charges = (floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0;
+                                $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
                             }
                             else {
                                 $charges = intval($weight_charge->national_charges_class_1);
@@ -780,7 +780,7 @@ class ShipmentChargesController extends Controller
                         }
                         else if ($class == 2) {
                             if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
-                                $charges = (floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0;
+                                $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
                             }
                             else {
                                 $charges = intval($weight_charge->national_charges_class_2);
@@ -788,7 +788,7 @@ class ShipmentChargesController extends Controller
                         }
                         else if ($class == 3) {
                             if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
-                                $charges = (floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0;
+                                $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
                             }
                             else {
                                 $charges = intval($weight_charge->national_charges_class_3);
@@ -823,7 +823,7 @@ class ShipmentChargesController extends Controller
                     else {
                         if ($class == 1) {
                             if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
-                                $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
+                                $charges = (((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
                             }
                             else {
                                 $charges = intval($weight_charge->national_charges_class_1) * $multiplier;
@@ -831,7 +831,7 @@ class ShipmentChargesController extends Controller
                         }
                         else if ($class == 2) {
                             if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
-                                $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
+                                $charges = (((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
                             }
                             else {
                                 $charges = intval($weight_charge->national_charges_class_2) * $multiplier;
@@ -839,7 +839,7 @@ class ShipmentChargesController extends Controller
                         }
                         else if ($class == 3) {
                             if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
-                                $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
+                                $charges = (((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
                             }
                             else {
                                 $charges = intval($weight_charge->national_charges_class_3) * $multiplier;
@@ -865,7 +865,7 @@ class ShipmentChargesController extends Controller
                                 else {
                                     if ($class == 1) {
                                         if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
-                                            $charges += (floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0;
+                                            $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
                                         }
                                         else {
                                             $charges += intval($weight_charge->national_charges_class_1);
@@ -873,7 +873,7 @@ class ShipmentChargesController extends Controller
                                     }
                                     else if ($class == 2) {
                                         if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
-                                            $charges += (floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0;
+                                            $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
                                         }
                                         else {
                                             $charges += intval($weight_charge->national_charges_class_2);
@@ -881,7 +881,7 @@ class ShipmentChargesController extends Controller
                                     }
                                     else if ($class == 3) {
                                         if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
-                                            $charges += (floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0;
+                                            $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
                                         }
                                         else {
                                             $charges += intval($weight_charge->national_charges_class_3);
@@ -903,7 +903,7 @@ class ShipmentChargesController extends Controller
                                 else {
                                     if ($class == 1) {
                                         if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
-                                            $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
+                                            $charges += (((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
                                         }
                                         else {
                                             $charges += intval($weight_charge->national_charges_class_1) * $multiplier;
@@ -911,7 +911,7 @@ class ShipmentChargesController extends Controller
                                     }
                                     else if ($class == 2) {
                                         if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
-                                            $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
+                                            $charges += (((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
                                         }
                                         else {
                                             $charges += intval($weight_charge->national_charges_class_2) * $multiplier;
@@ -919,7 +919,7 @@ class ShipmentChargesController extends Controller
                                     }
                                     else if ($class == 3) {
                                         if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
-                                            $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
+                                            $charges += (((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
                                         }
                                         else {
                                             $charges += intval($weight_charge->national_charges_class_3) * $multiplier;
