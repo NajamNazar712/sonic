@@ -182,6 +182,7 @@ class ShipperCRMController extends Controller
         if(session('user_type') == 2){
             $launched_by = 2;
         }
+        
         if ($request->has('payment_request')) {
             if($request->payment_request == 1){
                 $payment_id = $request->payment_id;

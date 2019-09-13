@@ -719,7 +719,7 @@
                         @endif
 
 
-                        @if (session('role_id') == 1 || count(array_intersect([188, 237], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || session('role_id') == 6 || count(array_intersect([237], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">CRM</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || session('role_id') == 6 || in_array(188, session('permissions')))
