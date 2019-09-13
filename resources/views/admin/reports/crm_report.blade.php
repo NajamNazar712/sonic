@@ -394,7 +394,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'arrival_date', name: 'sj,created_at', class: 'align-middle arrival_date'},
+                    {data: 'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'agent', name: 'a.name', class: 'align-middle agent'},
                     {data: 'request_status', name: 'crs.name', class: 'align-middle request_status'},
