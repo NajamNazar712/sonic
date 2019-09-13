@@ -573,7 +573,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(255, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.reports.account_edit.index') }}">Account Edit</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.reports.account_edit.index') }}">Rates Edit</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(257, session('permissions')))
