@@ -527,11 +527,6 @@
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
 
-                if(consolidation_ids.length != null){
-                    var error = "All Consolidation shipments not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    errors = 1;
-                }
 
                 if (rider !== '' && rider !== null) {
 
@@ -551,110 +546,117 @@
                     errors = 1;
                     $('#route_error').css('display', 'block');
                 }
+                if(errors === 0) {
+                    table.rows().nodes().each(function (index) {
+                        var row = table.row(index);
 
-                table.rows().nodes().each(function(index) {
-                    var row = table.row(index);
+                        if ($(row.node()).attr('consolidation_id')) {
 
-                    if ($(row.node()).attr('consolidation_id')) {
+                            var id = parseInt($(row.node()).attr('consolidation_id'));
+                            //
+                            var index = $.inArray(id, consolidation_ids);
 
-                        var id = parseInt($(row.node()).attr('consolidation_id'));
-                        //
-                        var index = $.inArray(id, consolidation_ids);
-
-                        if (index === -1) {
-                            consolidation_ids.push(id);
-                        }
-                        if(consolidation_ids.length > 0){
-                            $.ajax({
-                                url:'{{route('admin.delivery.note.consolidation_check')}}',
-                                type:'POST',
-                                data: {
-                                    'consolidation_ids':consolidation_ids,
-                                    'shipment_ids':shipment_ids,
-                                    '_token':'{!! csrf_token() !!}'
-                                }
-                            }).done(function (data) {
-                                if(data.missing_flag){
-                                    errors = 1;
-                                    var html = '';
-
-                                    html += 'The following Shipment(s) are missing from consolidation:<br/>';
-
-                                    $.each(data.missing_shipments, function (index, tracking) {
-                                        html += tracking + ', ';
-                                    });
-
-                                    html = html.slice(0, -2);
-
-                                    content = document.createElement('div');
-                                    content.innerHTML = html;
-                                    swal({
-                                        content: content,
-                                        icon: 'warning',
-                                        buttons: {
-                                            cancel: {
-                                                text: 'Close',
-                                                value: null,
-                                                visible: true,
-                                                closeModal: true,
-                                            },
-                                        },
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false,
-                                        dangerMode: true
-                                    });
-                                }
-                            });
-                        }
-
-                    }
-                });
-
-                if(count > 0) {
-                    if (errors === 0) {
-
-                        swal({
-                            title: 'Are You Sure?',
-                            text: 'Select Yes to create the Delivery Note!',
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
-                            },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function (confirm) {
-                            if(confirm){
-                                blockPagePermanently();
-                                $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
-                                $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                                $('#create_delivery_note_form input#notification_ids').val(notification_ids);
-                                $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
-                                $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                                $('#create_delivery_note_form input#selected_route_id').val(route);
-
-                                this_form.submit();
+                            if (index === -1) {
+                                consolidation_ids.push(id);
                             }
-                        });
+                            if (consolidation_ids.length > 0) {
+
+                                $.ajax({
+                                    url: '{{route('admin.delivery.note.consolidation_check')}}',
+                                    type: 'POST',
+                                    data: {
+                                        'consolidation_ids': consolidation_ids,
+                                        'shipment_ids': shipment_ids,
+                                        '_token': '{!! csrf_token() !!}'
+                                    }
+                                }).done(function (data) {
+                                    if (data.missing_flag) {
+                                        errors = 1;
+                                        var html = '';
+
+                                        html += 'The following Shipment(s) are missing from consolidation:<br/>';
+
+                                        $.each(data.missing_shipments, function (index, tracking) {
+                                            html += tracking + ', ';
+                                        });
+
+                                        html = html.slice(0, -2);
+
+                                        content = document.createElement('div');
+                                        content.innerHTML = html;
+                                        swal({
+                                            content: content,
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+                                    } else {
+
+                                        if (count > 0) {
+                                            if (errors === 0) {
+
+                                                swal({
+                                                    title: 'Are You Sure?',
+                                                    text: 'Select Yes to create the Delivery Note!',
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'No',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        },
+                                                        confirm: {
+                                                            text: 'Yes',
+                                                            value: true,
+                                                            visible: true,
+                                                            closeModal: true
+                                                        }
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                }).then(function (confirm) {
+                                                    if (confirm) {
+                                                        blockPagePermanently();
+                                                        $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                                                        $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                                                        $('#create_delivery_note_form input#notification_ids').val(notification_ids);
+                                                        $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
+                                                        $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                                        $('#create_delivery_note_form input#selected_route_id').val(route);
+
+                                                        this_form.submit();
+                                                    }
+                                                });
 
 
-                    }
-                }else{
-                    var error = "Select at-least one shipment!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            }
+                                        } else {
+                                            var error = "Select at-least one shipment!";
+                                            toastr.error(error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
 
+                                        }
+                                    }
+                                });
+                            }
+
+                        }
+                    });
                 }
+
 
             });
 

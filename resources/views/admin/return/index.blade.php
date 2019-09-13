@@ -48,6 +48,8 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Re-Attempt Count</th>
+                        <th class="border-primary border-darken-1">Consolidation</th>
+                        <th class="border-primary border-darken-1">Consolidated IDs</th>
                         <th class="border-primary border-darken-1">Actions</th>
                     </tr>
                     </thead>
@@ -233,6 +235,8 @@
                             head.push('OSA Estimated Charges');
                             head.push('Arrival Date');
                             head.push('Status Date');
+                            head.push('Consolidation');
+                            head.push('Consolidation IDs');
                             head.push('Re-Attempt Count');
 
                             $.each(result.data, function(index, values) {
@@ -260,6 +264,8 @@
                                 row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
+                                row.push(values.consolidation);
+                                row.push(values.consolidated_id);
                                 row.push(values.reattempts);
 
                                 body.push(row);
@@ -560,6 +566,8 @@
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                     {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
+                    {data:'consolidation' ,name: 'consolidation', class: 'align-middle consolidation'},
+                    {data:'consolidated_id' ,name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -585,7 +593,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')|| $(header).is('.reattempts')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks') || $(header).is('.reattempts') || $(header).is('.consolidation')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
@@ -660,27 +668,49 @@
 
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var hub_id = $(this).parents('tr').data('hub');
-                if(hub_ids.length == 0){
-                    hub_ids.push(hub_id);
-                    var index = $.inArray(id, selected_rows);
+                var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
 
-                    if (index === -1) {
-                        selected_rows.push(id);
+                if(con_id){
+                    if(hub_ids.length == 0){
+                        hub_ids.push(hub_id);
+                    }else if(hub_ids[0] != hub_id){
+                        var error = "Selected hubs should be the same!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        return false;
                     }
-                    else {
-                        selected_rows.splice(index, 1);
-                    }
+                    table.rows().nodes().each(function(index) {
+                        var row = table.row(index);
+                        if ($(row.node()).attr('consolidation_id') == con_id) {
+                            var rid = parseInt($(row.node()).attr('id'));
+                            var rindex = $.inArray(rid, selected_rows);
 
-                    if (selected_rows.length > 0) {
-                        table.button('.confirm').enable();
-                        table.button('.re-attempt').enable();
-                    }
-                    else {
-                        table.button('.confirm').disable();
-                        table.button('.re-attempt').disable();
-                    }
+                            if (rindex === -1) {
+                                selected_rows.push(rid);
+                                if(id != rid){
+
+                                    table.row(row).select();
+                                }
+                            }
+                            else {
+                                if(id != rid){
+
+                                    row.deselect();
+                                }
+                                selected_rows.splice(rindex, 1);
+                            }
+                            if (selected_rows.length > 0) {
+                                table.button('.confirm').enable();
+                                table.button('.re-attempt').enable();
+                            }
+                            else {
+                                table.button('.confirm').disable();
+                                table.button('.re-attempt').disable();
+                            }
+                        }
+                    });
                 }else{
-                    if(hub_ids[0] == hub_id){
+                    if(hub_ids.length == 0){
+                        hub_ids.push(hub_id);
                         var index = $.inArray(id, selected_rows);
 
                         if (index === -1) {
@@ -699,12 +729,34 @@
                             table.button('.re-attempt').disable();
                         }
                     }else{
-                        var error = "Selected hubs should be the same!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        return false;
-                    }
+                        if(hub_ids[0] == hub_id){
+                            var index = $.inArray(id, selected_rows);
 
+                            if (index === -1) {
+                                selected_rows.push(id);
+                            }
+                            else {
+                                selected_rows.splice(index, 1);
+                            }
+
+                            if (selected_rows.length > 0) {
+                                table.button('.confirm').enable();
+                                table.button('.re-attempt').enable();
+                            }
+                            else {
+                                table.button('.confirm').disable();
+                                table.button('.re-attempt').disable();
+                            }
+                        }else{
+                            var error = "Selected hubs should be the same!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            return false;
+                        }
+
+                    }
                 }
+
+
 
             });
             $('body').on('click','.returnMarkStatus',function () {

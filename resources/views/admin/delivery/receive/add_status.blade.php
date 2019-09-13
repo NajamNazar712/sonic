@@ -62,6 +62,8 @@
                             <th class="border-primary border-darken-1">Current Status</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Attempts Count</th>
+                            <th class="border-primary border-darken-1">Consolidation</th>
+                            <th class="border-primary border-darken-1">Consolidated IDs</th>
                             <th class="border-primary border-darken-1">Clear</th>
                         </tr>
                         </thead>
@@ -655,6 +657,8 @@
                     {data:'current_status',name: 'current_status', class: 'align-middle current_status'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
                     {data:'attempts' ,name: 'shipments.id', class: 'align-middle attempts'},
+                    {data:'consolidation' ,name: 'consolidation', class: 'align-middle consolidation'},
+                    {data:'consolidated_id' ,name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id'},
                     {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -700,7 +704,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.received_or_refused_by')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.received_or_refused_by') || $(header).is('.consolidation')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -725,15 +729,43 @@
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
+                var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
 
-                var index = $.inArray(id, selected_rows);
+                if(con_id){
+                    table.rows().nodes().each(function(index) {
+                        var row = table.row(index);
+                        if ($(row.node()).attr('consolidation_id') == con_id) {
+                            var rid = parseInt($(row.node()).attr('id'));
+                            var rindex = $.inArray(rid, selected_rows);
 
-                if (index === -1) {
-                    selected_rows.push(id);
+                            if (rindex === -1) {
+                                selected_rows.push(rid);
+                                if(id != rid){
+
+                                    table.row(row).select();
+                                }
+                            }
+                            else {
+                                if(id != rid){
+
+                                    row.deselect();
+                                }
+                                selected_rows.splice(rindex, 1);
+                            }
+                        }
+                    });
+                }else{
+                    var index = $.inArray(id, selected_rows);
+
+                    if (index === -1) {
+
+                        selected_rows.push(id);
+                    }
+                    else {
+                        selected_rows.splice(index, 1);
+                    }
                 }
-                else {
-                    selected_rows.splice(index, 1);
-                }
+
 
                 if (selected_rows.length > 0) {
                     table.button('.delivered').enable();
@@ -743,6 +775,7 @@
                     table.button('.delivered').disable();
                     $('#submit_selected_status').attr('disabled', true);
                 }
+                console.log(selected_rows);
             });
 
 
