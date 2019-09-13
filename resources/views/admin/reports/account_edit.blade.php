@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Account Edit Report')
+@section('title', 'Rates Edit Report')
 
 @section('content')
     <h1 class="mb-1">
-        Account Edit Report
+        Rates Edit Report
     </h1>
 
     <div class="card">
@@ -214,7 +214,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Account Edit Report',
+                        title: 'Rates Edit Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
