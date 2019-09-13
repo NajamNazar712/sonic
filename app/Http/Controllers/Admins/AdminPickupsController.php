@@ -1998,7 +1998,7 @@ class AdminPickupsController extends Controller
             foreach ($pickup_request_all_booked_shipments as $all_shipments) {
                 $shipment = $all_shipments->shipment_id;
                 $shipment_details = Shipment::find($shipment);
-                if ($shipment_details->shipment->shipper_status_id == 1) {
+                if ($shipment_details->shipper_status_id == 1) {
                   $bookings[] = $shipment_details->tracking_number;
                 }
             }
@@ -2021,7 +2021,7 @@ class AdminPickupsController extends Controller
             foreach ($pickup_request_all_booked_shipments as $all_shipments) {
                 $shipment = $all_shipments->shipment_id;
                 $shipment_details = Shipment::find($shipment);
-                if ($shipment_details->shipment->shipper_status_id == 1) {
+                if ($shipment_details->shipper_status_id == 1) {
                   $bookings[] = $shipment_details->tracking_number;
                 }
             }
