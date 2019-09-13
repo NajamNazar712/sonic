@@ -1552,7 +1552,7 @@ class ReturnController extends Controller
             NotificationsController::send(15, $return_note_id);
             NotificationsController::send(16, $return_note_id);
 
-            if(count($new_return_note_shipments) > 0){
+            if($new_return_note_shipments != null){
                 if($shipments_updated_flag){
                     return redirect()->back()->with(['success'=>'Return Note Status Has Been Updated','error' => 'Following shipments are already in new return note '.$new_return_note_shipments]);
 
