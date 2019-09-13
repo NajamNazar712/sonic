@@ -63,6 +63,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">SDN No.</th>
+                        <th class="border-primary border-darken-1">Created Date</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">No of DNCCs</th>
                         <th class="border-primary border-darken-1">Delivered Shipments</th>
@@ -251,6 +252,7 @@
                             head = [];
                             head.push('S.No');
                             head.push('SDN No.');
+                            head.push('Created Date');
                             head.push('Hub');
                             head.push('No. of DNCCs');
                             head.push('Delivered Shipments');
@@ -270,6 +272,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.sdn_id_padded);
+                                row.push(values.created_at);
                                 row.push(values.hub);
                                 row.push(values.dncc_count);
                                 row.push(values.sdn_delivered_shipments);
@@ -326,6 +329,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'sdn' ,name: 'station_deposit_notes.id', class: 'align-middle text-center sdn'},
+                    { data:'created_at' ,name: 'station_deposit_notes.created_at', class: 'align-middle text-center created_at'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'dncc_link' ,name: 'station_deposit_notes.dncc_count', class: 'align-middle dncc_link text-center'},
                     { data:'delivered_shipments_link' ,name: 'station_deposit_notes.sdn_delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
