@@ -2590,7 +2590,7 @@ class AdminFinanceController extends Controller
                         $merged_account_negative = array();
 
                         foreach ($merged_accounts as $merge_account) {
-                            $pending_payment_shipper = PendingPayment::where('user_id', $merge_account->id);
+                            $pending_payment_shipper = PendingPayment::where('user_id', $merge_account->user_id);
 
                             if ($pending_payment_shipper->exists()) {
                                 $pending_payment_shipper = $pending_payment_shipper->first();
