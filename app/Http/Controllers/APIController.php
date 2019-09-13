@@ -27,6 +27,8 @@ use App\Http\Models\ZoneClassCity;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CorporateRateStatus;
 
+use DB;
+
 use Carbon\Carbon;
 
 use SnappyImage;
@@ -248,7 +250,7 @@ class APIController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
+            'amount' => ['required', 'numeric', 'between:0,1000000'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
@@ -299,7 +301,7 @@ class APIController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
+            'amount' => ['required', 'numeric', 'between:0,1000000'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],
@@ -387,7 +389,7 @@ class APIController extends Controller
                   } else {
                       $check_zone = $class_d['setting_value'];
                   }
-                  if ((int)$request->input('amount') > $check_zone) {
+                  if ((float)$request->input('amount') > $check_zone) {
                       return response()->json(['status' => 1, 'message' => 'Amount must be smaller then or equal to ' . $check_zone]);
                   }
               } else {
@@ -480,7 +482,7 @@ class APIController extends Controller
           $same_day_timing_id = NULL;
         }
 
-        $amount = $request->input('amount');
+        $amount = ROUND($request->input('amount'));
         $payment_mode_id = $request->input('payment_mode_id');
           if($user_type['account_type_id'] == 1) {
               $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id);
@@ -618,11 +620,15 @@ class APIController extends Controller
 
       $rules = [
         'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+          $query->whereExists(function ($query) use ($user_id) {
+            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
+          })->orWhere('user_id', $user_id);
         })],
         'tracking_numbers' => ['required_without:tracking_number', 'array', 'min:1'],
         'tracking_numbers.*' => ['required_without:tracking_number', 'integer', 'distinct', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+          $query->whereExists(function ($query) use ($user_id) {
+            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
+          })->orWhere('user_id', $user_id);
         })]
       ];
 
@@ -684,7 +690,9 @@ class APIController extends Controller
 
       $rules = [
         'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+          $query->whereExists(function ($query) use ($user_id) {
+            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
+          })->orWhere('user_id', $user_id);
         })],
         'type' => ['required', 'boolean']
       ];
@@ -732,7 +740,9 @@ class APIController extends Controller
 
       $rules = [
         'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+          $query->whereExists(function ($query) use ($user_id) {
+            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
+          })->orWhere('user_id', $user_id);
         })],
         'type' => ['required', 'boolean']
       ];
@@ -839,7 +849,9 @@ class APIController extends Controller
 
       $rules = [
         'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+          $query->whereExists(function ($query) use ($user_id) {
+            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
+          })->orWhere('user_id', $user_id);
         })]
       ];
 
@@ -951,7 +963,9 @@ class APIController extends Controller
 
       $rules = [
         'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+          $query->whereExists(function ($query) use ($user_id) {
+            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
+          })->orWhere('user_id', $user_id);
         })]
       ];
 
@@ -985,7 +999,9 @@ class APIController extends Controller
 
       $rules = [
         'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+          $query->whereExists(function ($query) use ($user_id) {
+            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
+          })->orWhere('user_id', $user_id);
         })]
       ];
 
@@ -1196,7 +1212,9 @@ class APIController extends Controller
 
       $rules = [
         'receiving_sheet_id' => ['required', 'integer', Rule::exists('receiving_sheets', 'id')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+          $query->whereExists(function ($query) use ($user_id) {
+            $query->select(DB::raw(1))->from('merged_sister_account_mappings')->whereRaw('merged_sister_account_mappings.head_user_id = ? and sister_user_id = shipments.user_id', $user_id);
+          })->orWhere('user_id', $user_id);
         })],
         'type' => ['nullable', 'boolean']
       ];

@@ -1608,8 +1608,9 @@ class AdminFinanceController extends Controller
             $pending_payment_shipment->payable = $payable;
 
             $pending_payment_shipment->save();
-
-            self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks, $pending_payment_shipment->id, 1);
+            if($adjustment_type){
+                self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks, $pending_payment_shipment->id, 1);
+            }
         }
         else {
             $pending_invoice_shipment = new PendingInvoiceShipment();
@@ -1621,9 +1622,9 @@ class AdminFinanceController extends Controller
             $pending_invoice_shipment->invoice_amount = 0 - $payable;
 
             $pending_invoice_shipment->save();
-
-            self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks, $pending_invoice_shipment->id, 2);
-
+            if($adjustment_type) {
+                self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, $payable_remarks, $pending_invoice_shipment->id, 2);
+            }
         }
 
         ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), $payable_remarks);
@@ -2107,7 +2108,7 @@ class AdminFinanceController extends Controller
 
                     $pending_payment_shipment->save();
                     if($adjustment_type) {
-                        self::adjustment_logs_add($shipment_id, $adjustment_type, $payment_shipment->payable, NULL, $pending_payment_shipment->id, 1);
+                        self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, NULL, $pending_payment_shipment->id, 1);
                     }
                 }
             }

@@ -11,53 +11,66 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <form id="search_form" class=" mb-1 justify-content-center" novalidate="novalidate">
+
                 <div class="row mb-2 justify-content-center">
-                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                        <div class="form-group">
-                            <select name="hub" class="select2" id="hub">
-
-
-                                @foreach($hubs as $hub)
-                                    <option value="{{ $hub->id }}">{{ $hub->name }}</option>
-                                @endforeach
-                            </select>
+                        <div class="col-2">
+                            <div class="form-group mb-1">
+                                <select name="search_recovery_status" class="select2" id="recovery_status_select" data-rule-required="true" data-msg-required="Status is required">
+                                    {{--<option value="0">All</option>--}}
+                                    <option value="1" selected="selected">Outstanding</option>
+                                    <option value="7">Resolved</option>
+                                    <option value="8">Adjustment</option>
+                                    <option value="11">Revert Requested</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group ml-1">
-                            <select name="shipment_status" class="select2" id="shipment_status">
-                                <option value="0">All</option>
-                                <option value="1">Outstanding Shipments</option>
-                                <option value="2">Resolved</option>
-                                <option value="3">Adjust In Payment</option>
-                                <option value="4">Requested for Reversion</option>
 
-                            </select>
+                        <div class="col-2">
+                            <div class="form-group mb-1">
+                                <select name="hub" class="select2" id="hub">
+
+
+                                    @foreach($hubs as $hub)
+                                        <option value="{{ $hub->id }}">{{ $hub->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group input-group ml-1">
-                            <div class="input-group-prepend">
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
 										<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
 											<span class="la la-calendar-o"></span>
 										</span>
-                            </div>
+                                </div>
 
-                            <input type="text" name="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_from" placeholder="Delivery Date (From)">
+                                <input type="text" name="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_from" placeholder="Delivery Date (From)">
+                            </div>
                         </div>
 
-                        <div class="form-group input-group ml-1">
-                            <div class="input-group-prepend">
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
 										<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
 											<span class="la la-calendar-o"></span>
 										</span>
+                                </div>
+
+                                <input type="text" name="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_to" placeholder="Delivery Date (To)">
                             </div>
-
-                            <input type="text" name="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_to" placeholder="Delivery Date (To)">
                         </div>
 
-                        <div class="form-group ml-1">
-                            <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
+                        <div class="col-2">
+                            <div class="form-group">
+                                <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
+                            </div>
                         </div>
-                    </form>
+
 
                 </div>
+                </form>
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -156,16 +169,16 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_form #hub').prepend('<option value="" selected="selected"></option>').select2({
-                width: '150px',
-                placeholder: 'Select Hub',
-                allowClear:true,
+            $('#search_form #recovery_status_select').select2({
+                width: '100%',
+                placeholder: 'Recovery Status*'
             }).bind('change', function() {
-                table.draw();
+                $(this).valid();
             });
-            $('#search_form #shipment_status').prepend('<option value="" selected="selected"></option>').select2({
-                width: '150px',
-                placeholder: 'Select Status',
+
+            $('#search_form #hub').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Hub',
                 allowClear:true,
             }).bind('change', function() {
                 table.draw();
@@ -221,8 +234,8 @@
                         url: '{{ route('admin.reports.outstanding_shipments.list') }}',
                         data:{
                             'page': 'all',
+                            'search_recovery_status': $('#search_form #recovery_status_select').val(),
                             'hub': $('#search_form #hub').val(),
-                            'shipment_status': $('#search_form #shipment_status').val(),
                             'delivery_date_from': $('#search_form input[name="delivery_date_from_formatted"]').val(),
                             'delivery_date_to': $('#search_form input[name="delivery_date_to_formatted"]').val()
                         },
@@ -307,8 +320,8 @@
                 ajax: {
                     url: '{{ route('admin.reports.outstanding_shipments.list') }}',
                     data: function (d) {
+                        d.search_recovery_status = $('#search_form #recovery_status_select').val();
                         d.hub = $('#search_form #hub').val();
-                        d.shipment_status = $('#search_form #shipment_status').val();
                         d.delivery_date_from = $('#search_form input[name="delivery_date_from_formatted"]').val();
                         d.delivery_date_to = $('#search_form input[name="delivery_date_to_formatted"]').val();
                     }
@@ -329,7 +342,7 @@
                     {data:'recovery_status', name: 'ss.name as status', class: 'align-middle text-center recovery_status', orderable: false, searchable: false},
                     {data:'current_status', name: 'ss.name', class: 'align-middle text-center current_status'},
                     {data:'payment_status', name: 'sps.name', class: 'align-middle text-center payment_status'},
-                    {data:'operation_status_date', name: 'rsrl.created_at', class: 'align-middle text-center operation_status_date'},
+                    {data:'operation_status_date', name: 'sod.created_at', class: 'align-middle text-center operation_status_date'},
                     {data:'verification_status_date', name: 'svd.created_at', class: 'align-middle text-center verification_status_date'},
                     {data:'rider_name', name: 'rider.name', class: 'align-middle text-center rider_name'},
                     {data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},

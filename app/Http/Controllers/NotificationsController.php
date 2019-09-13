@@ -2877,7 +2877,7 @@ class NotificationsController extends Controller
                 }
             }
 			else if($id == 39){
-                $journey = ShipmentsJourney::where('shipment_id', $reference_1_id)->where('shipper_status_id', 25)->first();
+                $journey = ShipmentsJourney::where('shipment_id', $reference_1_id)->where('shipper_status_id', 25)->latest('id')->first();
                 $shipment = Shipment::find($reference_1_id);
                 if (strpos($subject, '[tracking_number]') !== FALSE) {
                     $subject = str_replace('[tracking_number]', $shipment->tracking_number, $subject);

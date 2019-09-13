@@ -959,7 +959,7 @@ class AdminReportsController extends Controller
             ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
             ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as current_status', 'sod.created_at as operation_status_date','svd.created_at as verification_status_date', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status','sps.name as payment_status','rider.name as rider_name', 's.booking_type_id', 'usi.poc','u.id as account_no')
-            ->whereIn('delivery_note_shipments.status', [4,5,6,7,8]);
+            ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,11]);
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
@@ -1050,24 +1050,26 @@ class AdminReportsController extends Controller
                     return "Resolved";
                 }else if($shipment->recovery_status == 8){
                     return "Payment Adjusted";
+                }else if($shipment->recovery_status == 11){
+                    return "Revert Requested";
                 }
             });
+        if ($recovery_status = $request->get('search_recovery_status')) {
+            if($recovery_status == 0){
+                $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
+            }else if($recovery_status == 1){
+                $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6]);
+            }else if($recovery_status == 7){
+                $datatables->where('delivery_note_shipments.status', '=', 7);
+            }else if($recovery_status == 11){
+                $datatables->where('delivery_note_shipments.status', '=', 11);
+            }
+        }
 
         if ($hub = $request->get('hub')) {
             $datatables->where('hc.id', '=', $hub);
         }
-        if($status = $request->get('shipment_status')){
-            if($status == 1){
-                $datatables->whereIn('delivery_note_shipments.status',[4,5,6]);
-            }else if($status == 2){
-                $datatables->where('delivery_note_shipments.status','=',7);
 
-            }else if($status == 3){
-                $datatables->where('delivery_note_shipments.status','=',8);
-            }else if($status == 4){
-                $datatables->where('delivery_note_shipments.status','=',11);
-            }
-        }
         if ($delivery_date_from = $request->get('delivery_date_from')) {
             $datatables->where('sjd.created_at', '>=', $delivery_date_from);
         }
@@ -3839,10 +3841,6 @@ class AdminReportsController extends Controller
                                 $sub_query->where(function ($sub_sub_query) use ($arrival_cut_off_time, $from) {
                                     $sub_sub_query->where(function ($sub_sub_sub_query) use ($arrival_cut_off_time) {
                                         $sub_sub_sub_query->where(function ($sub_sub_sub_sub_query) use ($arrival_cut_off_time) {
-                                            $sub_sub_sub_sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
-                                            ->where('sj.shipper_status_id', '=', 13);
-                                        })
-                                        ->orWhere(function ($sub_sub_sub_sub_query) use ($arrival_cut_off_time) {
                                             $sub_sub_sub_sub_query->where(function ($sub_sub_sub_sub_sub_query) {
                                                 $sub_sub_sub_sub_sub_query->where('usi.city_id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                                 ->orWhereNull('zcc.class')
@@ -3871,7 +3869,7 @@ class AdminReportsController extends Controller
                             })
                             ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
                                 $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
-                                ->where('sj.shipper_status_id', '=', 8)
+                                ->whereIn('sj.shipper_status_id', [8, 13])
                                 ->whereRaw('date(`sj`.`created_at`) < date(?)', [$from]);
                             });
                         });
@@ -3886,7 +3884,7 @@ class AdminReportsController extends Controller
                         $rows = $rows->where('sj.shipper_status_id', '=', 5);
                     }
                     else if ($type == 'delivery_tomorrow') {
-                        $rows = $rows->where(function ($query) use ($arrival_cut_off_time) {
+                        $rows = $rows->where(function ($query) use ($arrival_cut_off_time, $from) {
                             $query->where(function ($sub_query) use ($arrival_cut_off_time) {
                                 $sub_query->where(function ($sub_sub_query) {
                                     $sub_sub_query->where(function ($sub_sub_sub_query) {
@@ -3908,10 +3906,10 @@ class AdminReportsController extends Controller
                                     });
                                 });
                             })
-                            ->orWhere(function ($sub_query) use ($arrival_cut_off_time) {
+                            ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
                                 $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
                                 ->where('sj.shipper_status_id', '=', 13)
-                                ->whereRaw('hour(`sj`.`created_at`) >= ?', [$arrival_cut_off_time]);
+                                ->whereRaw('date(`sj`.`created_at`) = date(?)', [$from]);
                             });
                         });
                     }
@@ -3926,6 +3924,12 @@ class AdminReportsController extends Controller
 
                         $counts[$hub->name][$type] = $rows->count();
 
+                        if (!isset($counts['Grand Total'][$type])) {
+                            $counts['Grand Total'][$type] = 0;
+                        }
+
+                        $counts['Grand Total'][$type] += $rows->count();
+
                         if ($type != 'fake_status') {
                             if ($type != 'delivery_note_pending' && $type != 'delivery_tomorrow') {
                                 if (!isset($counts[$hub->name]['total_1'])) {
@@ -3933,6 +3937,12 @@ class AdminReportsController extends Controller
                                 }
 
                                 $counts[$hub->name]['total_1'] += $counts[$hub->name][$type];
+
+                                if (!isset($counts['Grand Total']['total_1'])) {
+                                    $counts['Grand Total']['total_1'] = 0;
+                                }
+
+                                $counts['Grand Total']['total_1'] += $counts[$hub->name][$type];
                             }
 
                             if ($type != 'delivery_tomorrow') {
@@ -3941,6 +3951,12 @@ class AdminReportsController extends Controller
                                 }
 
                                 $counts[$hub->name]['total_2'] += $counts[$hub->name][$type];
+
+                                if (!isset($counts['Grand Total']['total_2'])) {
+                                    $counts['Grand Total']['total_2'] = 0;
+                                }
+
+                                $counts['Grand Total']['total_2'] += $counts[$hub->name][$type];
                             }
 
                             if (!isset($counts[$hub->name]['grand_total'])) {
@@ -3948,6 +3964,12 @@ class AdminReportsController extends Controller
                             }
 
                             $counts[$hub->name]['grand_total'] += $counts[$hub->name][$type];
+
+                            if (!isset($counts['Grand Total']['grand_total'])) {
+                                $counts['Grand Total']['grand_total'] = 0;
+                            }
+
+                            $counts['Grand Total']['grand_total'] += $counts[$hub->name][$type];
                         }
 
                         if ($export) {
@@ -3960,6 +3982,10 @@ class AdminReportsController extends Controller
                     }
                     else {
                         $counts[$hub->name][$type] = 0;
+
+                        if (!isset($counts['Grand Total'][$type])) {
+                            $counts['Grand Total'][$type] = 0;
+                        }
                     }
                 }
 
@@ -4033,6 +4059,10 @@ class AdminReportsController extends Controller
                 return ['status' => 0, 'success' => 'Shipments Found', 'counts' => $counts];
             }
             else {
+                $grand_total_counts = $counts['Grand Total'];
+                unset($counts['Grand Total']);
+                $counts['Grand Total'] = $grand_total_counts;
+
                 return ['status' => 0, 'success' => 'Shipments Found', 'counts' => $counts, 'shipments' => $shipments];
             }
         }
@@ -4117,6 +4147,12 @@ class AdminReportsController extends Controller
             $spreadsheet->getActiveSheet()->getStyle('G')->getFont()->getColor()->setARGB('FFFF0000');
 
             $spreadsheet->getActiveSheet()->setTitle('Overall')->fromArray($details, NULL);
+
+            $highest_row = $spreadsheet->getActiveSheet()->getHighestRow();
+
+            $highest_row = 'A' . $highest_row . ':O' . $highest_row;
+
+            $spreadsheet->getActiveSheet()->getStyle($highest_row)->getFont()->setBold(TRUE);
 
             $types = array();
 

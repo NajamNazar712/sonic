@@ -224,7 +224,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 	        Route::get('','Shippers\ShipperResourcesController@index')->name('index');
 	        Route::get('city_list','Shippers\ShipperResourcesController@get_network_list')->name('city_list');
 	    });
-	
+
 	Route::prefix('crm')->name('crm.')->group(function () {
 	        Route::prefix('request')->name('request.')->group(function(){
 	            Route::get('', 'Shippers\ShipperCRMController@index')->name('index');
@@ -281,10 +281,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
     Route::prefix('operation_forecasting')->name('operation_forecasting.')->group(function () {
         Route::prefix('incoming')->name('incoming.')->group(function () {
-            Route::get('{operation_forecasting?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
+            Route::get('{from?}/{to?}/{service_type_id?}/{hub?}/{status?}', 'Admins\AdminDashboardController@shipments_list')->name('shipments_list');
         });
         Route::prefix('outgoing')->name('outgoing.')->group(function () {
-            Route::get('{customer_id?}', 'Admins\AdminDashboardController@outgoing_shipments_list')->name('shipments_list');
+            Route::get('{from?}/{to?}/{customer_id?}', 'Admins\AdminDashboardController@outgoing_shipments_list')->name('shipments_list');
         });
     });
 
@@ -769,7 +769,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('cx_quick_tracking')->name('cx_quick_tracking.')->group(function() {
         Route::get('', 'Admins\AdminTrackingController@cx_quick_tracking_index')->name('cx_index');
         Route::get('list', 'Admins\AdminTrackingController@cx_quick_tracking_list')->name('cx_list');
-        Route::post('update', 'Admins\AdminTrackingController@cx_quick_tracking_update_consginrr_info_and_special_instructions')->name('update');
+        Route::post('update', 'Admins\AdminTrackingController@cx_quick_tracking_update_consignee_info_and_special_instructions')->name('update');
     });
         Route::prefix('user_management')->name('user_management.')->group(function() {
         Route::prefix('users')->name('users.')->group(function() {

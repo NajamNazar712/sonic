@@ -11,9 +11,9 @@
             <div class="card">
                 <div class="card-content" aria-expanded="true">
                     <div class="card-body">
-                        <div class="text-center">
-                            <h4>{{$status}}</h4>
-                        </div>
+                        {{--<div class="text-center">--}}
+                            {{--<h4>{{$status}}</h4>--}}
+                        {{--</div>--}}
                         <div id="shipments_link" class="text-center">
                             @foreach($shipments as $shipment)
                                 <div>

@@ -412,7 +412,7 @@ class AdminTrackingController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no', 'shipments.shipper_status_id as status_id', 'shipments.special_instructions as special_instructions');
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no', 'shipments.shipper_status_id as status_id', 'shipments.special_instructions as special_instructions', 'oc.id as origin_id', 'dc.id as destination_id');
         $datatable = Datatables::of($quick_tracking)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -425,10 +425,19 @@ class AdminTrackingController extends Controller
                         <div class="dropdown-menu dropdown-menu-sm">
                             <button type="button" class="dropdown-item request_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Request</div></button>';
                 if (session('role_id') == 1 || in_array(247, session('permissions'))) {
-                    if($shipments->status_id >= 4){
-                        $dropdown .= '<button type = "button" class="dropdown-item update_consignee_info" ><div class="row no-gutters align-items-center" ><div class="col-2" ><i class="ft-plus-circle" ></i ></div ><div class="col-9 offset-1" > Update Shipment Info</div ></button >';
+                    if($shipments->origin_id == $shipments->destination_id){
+                        $shipment_statuses_same_city = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 49, 52, 54, 55];
+                        if(in_array($shipments->status_id, $shipment_statuses_same_city)){
+                            $dropdown .= '<button type = "button" class="dropdown-item update_consignee_info" ><div class="row no-gutters align-items-center" ><div class="col-2" ><i class="ft-plus-circle" ></i ></div ><div class="col-9 offset-1" > Update Shipment Info</div ></button >';
+                        }
                     }
+                    else{
+                        $shipment_statuses_different_city = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 49, 52, 54, 55];
+                        if(in_array($shipments->status_id, $shipment_statuses_different_city)){
+                            $dropdown .= '<button type = "button" class="dropdown-item update_consignee_info" ><div class="row no-gutters align-items-center" ><div class="col-2" ><i class="ft-plus-circle" ></i ></div ><div class="col-9 offset-1" > Update Shipment Info</div ></button >';
+                        }
                     }
+                }
                 $dropdown .= '</div>
                     </div>
                 ';
@@ -450,7 +459,7 @@ class AdminTrackingController extends Controller
             return $datatable->make(true);
     }
 
-    public function cx_quick_tracking_update_consginrr_info_and_special_instructions(Request $request){
+    public function cx_quick_tracking_update_consignee_info_and_special_instructions(Request $request){
         $shipment_id = $request->update_consignee_info_shipment_id;
         $consignee_name = $request->update_consignee_name;
         $consignee_address = $request->update_consignee_address;

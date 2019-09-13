@@ -818,10 +818,10 @@ class AdminDashboardController extends Controller
                     }
                 }
             ])
-            ->editColumn('count_link', function ($shipments) {
+            ->editColumn('count_link', function ($shipments) use($from, $to, $service_type_id, $hub) {
                 if($shipments->count > 0){
                     $route = route('admin.operation_forecasting.incoming.shipments_list');
-                    return "<u><a href='{$route}?operation_forecasting=$shipments->opfs_id' class='white' target='_blank'>$shipments->count</a></u>";
+                    return "<u><a href='{$route}/$from/$to/$service_type_id/$hub/$shipments->shipper_status_id' class='white' target='_blank'>$shipments->count</a></u>";
                 }
                 else{
                     return 0;
@@ -839,16 +839,16 @@ class AdminDashboardController extends Controller
             $to = Carbon::now()->endOfDay();
         }
 
-        $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('operations_outgoing_top_customers.id as id', 'u.name as name', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))
+        $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('operations_outgoing_top_customers.id as id', 'u.name as name', 'u.id as user_id', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))
             ->whereBetween('operations_outgoing_top_customers.created_at',[$from,$to])
             ->orderBy('count', 'desc')
             ->groupBy('u.id')
             ->take(5);
         $datatable = Datatables::of($outgoing_top_five_customers)
-            ->editColumn('count', function ($shipments) {
+            ->editColumn('count', function ($shipments) use($from, $to) {
                 if($shipments->count > 0){
                     $route = route('admin.operation_forecasting.outgoing.shipments_list');
-                    return "<u><a href='{$route}?customer_id=$shipments->id' class='white' target='_blank'>$shipments->count</a></u>";
+                    return "<u><a href='{$route}/$from/$to/$shipments->user_id' class='white' target='_blank'>$shipments->count</a></u>";
                 }
                 else{
                     return 0;
@@ -912,22 +912,33 @@ class AdminDashboardController extends Controller
         $datatable = Datatables::of($operation_outgoing);
         return $datatable->make(true);
     }
-    public function shipments_list(Request $request){
-        $operation_forecasting_shipments_status = OperationForecast::leftjoin('shipment_status as ss', 'ss.id', '=', 'operation_forecasts.shipper_status_id')
-            ->select('ss.name as status')
-            ->where('operation_forecasts.id', $request->operation_forecasting)
-            ->first();
+    public function shipments_list($from, $to, $service_type_id , $hub, $shipper_status_id){
+        $operation_forecasting_ids = OperationForecast::select('operation_forecasts.id as id')
+            ->where('operation_forecasts.shipper_status_id', $shipper_status_id)
+            ->where('operation_forecasts.hub_id', $hub)
+            ->where('operation_forecasts.booking_type_id', $service_type_id)
+            ->whereBetween('operation_forecasts.updated_at', [$from, $to])
+            ->pluck('id')->toArray();
         $operation_forecasting_shipments_list = OperationForecastShipments::leftjoin('shipments as s', 's.id', '=', 'operation_forecast_shipments.shipment_id')
             ->select('s.tracking_number as tracking_number')
-            ->where('operation_forecast_id', $request->operation_forecasting)
+            ->whereIn('operation_forecast_shipments.operation_forecast_id', $operation_forecasting_ids)
+            ->whereBetween('operation_forecast_shipments.updated_at', [$from, $to])
             ->groupBy('s.id')
             ->get();
-        if(!empty($operation_forecasting_shipments_status) && !empty($operation_forecasting_shipments_list)){
-            return view('admin.operation_forecasting.index')->with(['status'=>$operation_forecasting_shipments_status->status, 'shipments'=>$operation_forecasting_shipments_list]);
+        if(!empty($operation_forecasting_shipments_list)){
+            return view('admin.operation_forecasting.index')->with(['shipments'=>$operation_forecasting_shipments_list]);
         }
     }
-    public function outgoing_shipments_list(Request $request){
-        $operation_outgoing_top_customer = OperationsOutgoingTopCustomersShipments::leftjoin('shipments as s', 's.id', '=', 'operations_outgoing_top_customers_shipments.shipment_id')->where('customer_id', $request->customer_id)->groupBy('s.id')->get();
+    public function outgoing_shipments_list($from, $to, $user_id){
+        $top_customers = OperationsOutgoingTopCustomers::select('operations_outgoing_top_customers.id as id')
+            ->where('operations_outgoing_top_customers.user_id', $user_id)
+            ->whereBetween('operations_outgoing_top_customers.updated_at', [$from, $to])
+            ->pluck('id')->toArray();
+        $operation_outgoing_top_customer = OperationsOutgoingTopCustomersShipments::leftjoin('shipments as s', 's.id', '=', 'operations_outgoing_top_customers_shipments.shipment_id')
+            ->whereIn('operations_outgoing_top_customers_shipments.customer_id', $top_customers)
+            ->whereBetween('operations_outgoing_top_customers_shipments.updated_at', [$from,$to])
+            ->groupBy('s.id')
+            ->get();
         if(!empty($operation_outgoing_top_customer)) {
             return view('admin.operation_forecasting.outgoing_index')->with('shipments', $operation_outgoing_top_customer);
         }
@@ -5850,7 +5861,7 @@ class AdminDashboardController extends Controller
 
                 $merged = MergedSisterAccount::where('user_id', $result->id);
                 if(!$merged->exists()){
-                    if(session('role_id') == 1 || session('role_id') == 4 || (($sale_check->user_id == Auth::id())|| in_array(241, session('permissions'))))
+                    if(session('role_id') == 1 || session('role_id') == 4 || (($sale_check) && ($sale_check->user_id == Auth::id()) || in_array(241, session('permissions'))))
                     {
                         $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                     }

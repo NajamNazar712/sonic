@@ -2033,7 +2033,9 @@ class AdminPickupsController extends Controller
             foreach ($pickup_request_all_booked_shipments as $all_shipments) {
                 $shipment = $all_shipments->shipment_id;
                 $shipment_details = Shipment::find($shipment);
-                $bookings[] = $shipment_details->tracking_number;
+                if ($shipment_details->shipper_status_id == 1) {
+                  $bookings[] = $shipment_details->tracking_number;
+                }
             }
 
             return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $bookings];
@@ -2054,7 +2056,9 @@ class AdminPickupsController extends Controller
             foreach ($pickup_request_all_booked_shipments as $all_shipments) {
                 $shipment = $all_shipments->shipment_id;
                 $shipment_details = Shipment::find($shipment);
-                $bookings[] = $shipment_details->tracking_number;
+                if ($shipment_details->shipper_status_id == 1) {
+                  $bookings[] = $shipment_details->tracking_number;
+                }
             }
 
             return ['status' => 0, 'success' => 'Pending Booked Shipments', 'booked' => $bookings];

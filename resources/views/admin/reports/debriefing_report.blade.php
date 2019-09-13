@@ -71,6 +71,10 @@
                     </thead>
                     <tbody>
                     </tbody>
+                    <tfoot>
+                        <tr>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -153,15 +157,28 @@
                         table.clear();
 
                         $.each(data.counts, function(hub, count) {
-                            var row = [];
+                            if (hub != 'Grand Total') {
+                                var row = [];
 
-                            row.push(hub);
+                                row.push(hub);
 
-                            $.each(types, function(index, type) {
-                                row.push(count[type]);
-                            });
+                                $.each(types, function(index, type) {
+                                    row.push(count[type]);
+                                });
 
-                            table.row.add(row);
+                                table.row.add(row);
+                            }
+                            else {
+                                var row = '';
+
+                                row += '<th>' + hub + '</th>';
+
+                                $.each(types, function(index, type) {
+                                    row += '<th>' + count[type] + '</th>';
+                                });
+
+                                $(table.table().footer()).empty().append('<tr>' + row + '</tr>');
+                            }
                         });
 
                         table.draw();

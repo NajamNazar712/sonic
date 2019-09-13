@@ -33,7 +33,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('sms:clear')->everyTenMinutes()->runInBackground();
+        $schedule->command('sms:clear')->everyTenMinutes()->withoutOverlapping()->runInBackground();
         $schedule->command('email:returnconfirmationpending')->dailyAt('10:00')->runInBackground();
         $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
         $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
@@ -61,6 +61,8 @@ class Kernel extends ConsoleKernel
         }
         $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->runInBackground();
         $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
+
+        $schedule->command('pickuprequest:clear')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
     }
 
     /**
