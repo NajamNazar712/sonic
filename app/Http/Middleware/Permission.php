@@ -365,6 +365,8 @@ class Permission
             'reports.bank_history.list' => 257,
             'reports.consignee_details.index' => 258,
             'reports.consignee_details.list' => 258,
+            'reports.booked_and_cancelled.index' => 259,
+            'reports.booked_and_cancelled.list' => 259,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

@@ -583,6 +583,9 @@
                         @if (session('role_id') == 1 || in_array(258, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.consignee_details.index') }}">Consignee Details History</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(259, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.booked_and_cancelled.index') }}">Booked And Cancelled</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

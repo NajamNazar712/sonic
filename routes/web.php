@@ -1170,6 +1170,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@consignee_details_history_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@consignee_details_history_list')->name('list');
         });
+        Route::prefix('booked_and_cancelled')->name('booked_and_cancelled.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@booked_and_cancelled_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@booked_and_cancelled_list')->name('list');
+        });
     });
 
     //Reports end

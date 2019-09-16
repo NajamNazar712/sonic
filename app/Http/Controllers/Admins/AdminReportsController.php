@@ -5393,7 +5393,60 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable = $datatable->whereBetween('history_shipper_bank_accounts.created_at', [$from,$to]);
+            $datatable = $datatable->whereBetween('shipment_information_logs.created_at', [$from,$to]);
+        }
+        return $datatable->make(true);
+    }
+    public function booked_and_cancelled_index(){
+        $shippers = DB::connection('reports')->table('users')->get(['id','name']);
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
+        $service_types = DB::connection('reports')->table('booking_types')->get();
+        $statuses = DB::connection('reports')->table('shipment_status')->whereIn('id', [1, 17])->get(['id','name']);
+        return view('admin.reports.booked_and_cancelled_shipments_report')->with(['shippers' => $shippers, 'shipping_modes' => $shipping_modes, 'service_types' => $service_types, 'statuses' => $statuses]);
+    }
+
+    public function booked_and_cancelled_list(Request $request){
+        $shipments = DB::connection('reports')->table('shipments')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('shipment_items as si', function ($join) {
+                $join->on('si.shipment_id', '=', 'shipments.id')
+                    ->where('si.type','=',0);
+            })
+            ->select(['si.quantity as item_quantity','shipments.tracking_number as tracking_number','ss.name as status','bt.booking_type as service_type','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','sj.remarks as remarks', 'u.name as shipper'])
+            ->whereIn('shipments.shipper_status_id',[1, 17]);
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            });
+
+        if($shipper = $request->get('search_shipper')){
+            $datatable = $datatable->where('u.id', '=', $shipper);
+        }
+        if($search_shipping_mode = $request->get('search_shipping_mode')){
+            $datatable = $datatable->where('sm.id', '=', $search_shipping_mode);
+        }
+        if($service_type = $request->get('search_service_type')){
+            $datatable = $datatable->where('bt.id', '=', $service_type);
+        }
+        if($status = $request->get('search_status')){
+            $datatable = $datatable->where('ss.id', '=', $status);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable = $datatable->whereBetween('shipments.created_at', [$from,$to]);
         }
         return $datatable->make(true);
     }
