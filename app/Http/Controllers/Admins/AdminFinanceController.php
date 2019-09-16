@@ -2500,38 +2500,40 @@ class AdminFinanceController extends Controller
         foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
 
-            if (!isset($pending_payment_payables[$pending_payment_shipment->pending_payment_id])) {
-                $pending_payment_payables[$pending_payment_shipment->pending_payment_id] = $pending_payment_shipment->payable;
-            }
-            else {
-                $pending_payment_payables[$pending_payment_shipment->pending_payment_id] = $pending_payment_payables[$pending_payment_shipment->pending_payment_id] + $pending_payment_shipment->payable;
-            }
+            if ($pending_payment_shipment) {
+                if (!isset($pending_payment_payables[$pending_payment_shipment->pending_payment_id])) {
+                    $pending_payment_payables[$pending_payment_shipment->pending_payment_id] = $pending_payment_shipment->payable;
+                }
+                else {
+                    $pending_payment_payables[$pending_payment_shipment->pending_payment_id] = $pending_payment_payables[$pending_payment_shipment->pending_payment_id] + $pending_payment_shipment->payable;
+                }
 
-            $shipment_id = $pending_payment_shipment->shipment_id;
-            $type = $pending_payment_shipment->type;
+                $shipment_id = $pending_payment_shipment->shipment_id;
+                $type = $pending_payment_shipment->type;
 
-            if (!isset($shipment_ids[$type]) || !in_array($shipment_id, $shipment_ids[$type])) {
-                $shipment_ids[$type][] = $shipment_id;
-            }
-            else {
-                if (!isset($duplicate_shipment_ids[$type]) || !in_array($shipment_id, $duplicate_shipment_ids[$type])) {
-                    $duplicate_shipment_ids[$type][] = $shipment_id;
+                if (!isset($shipment_ids[$type]) || !in_array($shipment_id, $shipment_ids[$type])) {
+                    $shipment_ids[$type][] = $shipment_id;
+                }
+                else {
+                    if (!isset($duplicate_shipment_ids[$type]) || !in_array($shipment_id, $duplicate_shipment_ids[$type])) {
+                        $duplicate_shipment_ids[$type][] = $shipment_id;
 
-                    $shipment = Shipment::find($shipment_id);
+                        $shipment = Shipment::find($shipment_id);
 
-                    $duplicate_shipment = $shipment->tracking_number . ' - ';
+                        $duplicate_shipment = $shipment->tracking_number . ' - ';
 
-                    if ($type == 0) {
-                        $duplicate_shipment .= 'Delivered';
+                        if ($type == 0) {
+                            $duplicate_shipment .= 'Delivered';
+                        }
+                        else if ($type == 1) {
+                            $duplicate_shipment .= 'Returned';
+                        }
+                        else {
+                            $duplicate_shipment .= 'Adjusted';
+                        }
+
+                        $duplicate_shipments[] = $duplicate_shipment;
                     }
-                    else if ($type == 1) {
-                        $duplicate_shipment .= 'Returned';
-                    }
-                    else {
-                        $duplicate_shipment .= 'Adjusted';
-                    }
-
-                    $duplicate_shipments[] = $duplicate_shipment;
                 }
             }
         }
