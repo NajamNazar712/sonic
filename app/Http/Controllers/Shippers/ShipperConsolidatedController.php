@@ -50,7 +50,7 @@ class ShipperConsolidatedController extends Controller
                     }
                     else{
                         if($shipment->shipper_status_id == 1){
-                            if($shipment->booking_type_id == 1){
+                            if($shipment->booking_type_id != 1){
                                 return response()->json(['status'=>0, 'error'=>'Different Consignee Shipments selected']);
                             }
                             else{
@@ -58,7 +58,7 @@ class ShipperConsolidatedController extends Controller
                             }
                         }
                         else{
-                            if($shipment->booking_type_id == 1){
+                            if($shipment->booking_type_id != 1){
                                 return response()->json(['status'=>0, 'error'=>'Service type must be Regular']);
                             }
                             else{
