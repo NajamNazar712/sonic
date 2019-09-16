@@ -6,6 +6,7 @@ use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -538,12 +539,12 @@ class AdminPickupsController extends Controller
     }
 
     public function assigned_list(Request $request) {
-      $pickup_notes = PickupNote::join('riders as r', 'pickup_notes.rider_id', '=', 'r.id')
-      ->join('rider_categories as rc', 'r.rider_category_id', '=', 'rc.id')
-      ->join('routes as ro', 'r.route_id', '=', 'ro.id')
-      ->join('cities as c', 'r.city_id', '=', 'c.id')
-      ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
-      ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
+      $pickup_notes = PickupNote::leftjoin('riders as r', 'pickup_notes.rider_id', '=', 'r.id')
+      ->leftjoin('rider_categories as rc', 'r.rider_category_id', '=', 'rc.id')
+      ->leftjoin('routes as ro', 'r.route_id', '=', 'ro.id')
+      ->leftjoin('cities as c', 'r.city_id', '=', 'c.id')
+      ->leftjoin('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
+      ->leftjoin('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
       ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.rider_id', 'pickup_notes.pickups', 'pickup_notes.pickups as pickups_link', 'pickup_notes.bookings', 'pickup_notes.bookings as bookings_link', 'pickup_notes.total_estimated_weight', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no')
       ->where('pickup_notes.status_id', '=', 1);
 
@@ -963,12 +964,12 @@ class AdminPickupsController extends Controller
     }
 
     public function receive_list(Request $request) {
-      $pickup_notes = PickupNote::join('riders as r', 'pickup_notes.rider_id', '=', 'r.id')
-      ->join('rider_categories as rc', 'r.rider_category_id', '=', 'rc.id')
-      ->join('routes as ro', 'r.route_id', '=', 'ro.id')
-      ->join('cities as c', 'r.city_id', '=', 'c.id')
-      ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
-      ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
+      $pickup_notes = PickupNote::leftjoin('riders as r', 'pickup_notes.rider_id', '=', 'r.id')
+      ->leftjoin('rider_categories as rc', 'r.rider_category_id', '=', 'rc.id')
+      ->leftjoin('routes as ro', 'r.route_id', '=', 'ro.id')
+      ->leftjoin('cities as c', 'r.city_id', '=', 'c.id')
+      ->leftjoin('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
+      ->leftjoin('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
       ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.bookings as bookings_link', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no','pickup_notes.id as pickup_note_id', 'pickup_notes.status_id', 'pns.name as status')
       ->whereIn('pickup_notes.status_id', [2, 3]);
 
@@ -1283,34 +1284,37 @@ class AdminPickupsController extends Controller
             //Consolidated Shipments
             $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
             if($consolidated_shipment){
-                $check_all_consolidation_shipments = true;
+                $user_shipping_info = UserShippingInfo::find($shipment->pickup_address_id);
+                if($shipment->consignee_city_id == $user_shipping_info->city_id){
+                    $check_all_consolidation_shipments = true;
 
-                $shipment->shipper_status_id = 58;
-                $shipment->consignee_status_id = 58;
-                $shipment->save();
+                    $shipment->shipper_status_id = 58;
+                    $shipment->consignee_status_id = 58;
+                    $shipment->save();
 
-                ShipmentsJourneyController::add($shipment_id, 58, 58, NULL, NULL, NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment_id, 58, 58, NULL, NULL, NULL, Auth::id());
 
-                $consolidation_id = $consolidated_shipment->consolidation_id;
-                $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
+                    $consolidation_id = $consolidated_shipment->consolidation_id;
+                    $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
 
-                foreach ($remaining_consolidated_shipments as $remaining_consolidated_shipment){
-                    $check_remaining_consolidated_shipment = Shipment::find($remaining_consolidated_shipment->shipment_id);
-                    if($check_remaining_consolidated_shipment->shipper_status_id != 58){
-                        $check_all_consolidation_shipments = false;
+                    foreach ($remaining_consolidated_shipments as $remaining_consolidated_shipment){
+                        $check_remaining_consolidated_shipment = Shipment::find($remaining_consolidated_shipment->shipment_id);
+                        if($check_remaining_consolidated_shipment->shipper_status_id != 58){
+                            $check_all_consolidation_shipments = false;
+                        }
                     }
-                }
 
-                if($check_all_consolidation_shipments == true){
-                    foreach ($remaining_consolidated_shipments as $update_remaining_consolidated_shipment){
-                        $update_all_consolidated_shipment = Shipment::find($update_remaining_consolidated_shipment->shipment_id);
+                    if($check_all_consolidation_shipments == true){
+                        foreach ($remaining_consolidated_shipments as $update_remaining_consolidated_shipment){
+                            $update_all_consolidated_shipment = Shipment::find($update_remaining_consolidated_shipment->shipment_id);
 
-                        $update_all_consolidated_shipment->shipper_status_id = 59;
-                        $update_all_consolidated_shipment->consignee_status_id = 59;
+                            $update_all_consolidated_shipment->shipper_status_id = 59;
+                            $update_all_consolidated_shipment->consignee_status_id = 59;
 
-                        $update_all_consolidated_shipment->save();
+                            $update_all_consolidated_shipment->save();
 
-                        ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, NULL, NULL, NULL, Auth::id());
+                            ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, NULL, NULL, NULL, Auth::id());
+                        }
                     }
                 }
             }
