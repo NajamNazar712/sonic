@@ -112,6 +112,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Request No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Shipment Status</th>
                         <th class="border-primary border-darken-1">Case Nature</th>
                         <th class="border-primary border-darken-1">Case Nature Type</th>
                         <th class="border-primary border-darken-1">Description</th>
@@ -292,6 +293,7 @@
                             head.push('S.No');
                             head.push('Request No.');
                             head.push('Tracking No.');
+                            head.push('Shipment Status');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
                             head.push('Description');
@@ -317,6 +319,7 @@
                                 row.push(index + 1);
                                 row.push(values.request_number);
                                 row.push(values.tracking_number);
+                                row.push(values.status);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
@@ -382,11 +385,12 @@
                     }
                 },
                 // rowId: 'shipment_id',
-                order: [[16, 'desc']],
+                order: [[17, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'request_number', name: 'crm_requests.id', class: 'align-middle request_number'},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
+                    {data: 'status', name: 'ss.name', class: 'align-middle status'},
                     {data: 'case_nature', name: 'crcn.name', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'crcnt.type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
