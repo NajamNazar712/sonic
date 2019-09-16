@@ -579,6 +579,10 @@
                         @if (session('role_id') == 1 || in_array(257, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.bank_history.index') }}">Shipper Bank History</a></li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(199, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.consignee_details.index') }}">Consignee Details History</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

@@ -5363,5 +5363,33 @@ class AdminReportsController extends Controller
         $datatable = Datatables::of($users)->make(true);
         return $datatable;
     }
+
+    public function consignee_details_history_index(){
+        return view('admin.reports.consignee_details_history');
+    }
+
+    public function consignee_details_history_list(Request $request){
+        $shipments = DB::connection('reports')->table('shipment_information_logs')
+            ->leftJoin('shipments as s','s.id','=','shipment_information_logs.shipment_id')
+            ->leftJoin('users as u','u.id','=','s.user_id')
+            ->leftJoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities as oc', 'usi.city_id', '=', 'oc.id')
+        ->select('s.tracking_number as tracking_number', 'shipment_information_logs.old_consignee_name as o_name', 'shipment_information_logs.old_consignee_address as o_address', 'shipment_information_logs.old_consignee_phone as o_phone_no', 'shipment_information_logs.old_special_instruction as o_s_instruction', 'shipment_information_logs.new_consignee_name as n_name', 'shipment_information_logs.new_consignee_address as n_address', 'shipment_information_logs.new_consignee_phone as n_phone_no', 'shipment_information_logs.new_special_instruction as n_s_instruction', 'oc.name as origin');
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            });
+
+        if($tracking_number= $request->get('search_tracking_no')){
+            $datatable = $datatable->where('s.tracking_number', '=', $tracking_number);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable = $datatable->whereBetween('history_shipper_bank_accounts.created_at', [$from,$to]);
+        }
+        return $datatable->make(true);
+    }
 }
 

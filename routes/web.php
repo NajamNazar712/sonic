@@ -1165,6 +1165,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@bank_history_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@bank_history_list')->name('list');
         });
+
+        Route::prefix('consignee_details')->name('consignee_details.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@consignee_details_history_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@consignee_details_history_list')->name('list');
+        });
     });
 
     //Reports end
