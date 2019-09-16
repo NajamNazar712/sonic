@@ -33,6 +33,7 @@ use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
@@ -755,6 +756,10 @@ class DeliveryController extends Controller
                             background: #09262e !important;
                             color: #ffffff;
                        }
+                      td.details_changed {
+                            background: #000000 !important;
+                            color: #ffffff;
+                       }
                     </style>
                   </head>
                   <body>
@@ -789,8 +794,12 @@ class DeliveryController extends Controller
                 $total_shipments++;
                 $shipment = Shipment::find($parcel->shipment_id);
                 $class = null;
+                $details_change_class = null;
                 if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
                     $class = 'complaint';
+                }
+                elseif (ShipmentInformationLog::where('shipment_id',$shipment->id)->exists()){
+                    $details_change_class = 'details_changed';
                 }
                 $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
                 if($check_walk_in['setting_value'] == $shipment->user->id){
@@ -804,9 +813,9 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="'.$class.'">' . $total_shipments . '</td>
                             <td class="'.$class.'">' . $shipment->tracking_number . '</td>
-                            <td class="'.$class.'">' . $user_details . '</td>
-                            <td class="'.$class.'">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                            <td class="'.$class.'">' . $shipment->consignee_address . '</td>
+                            <td class="'.$class .'">' . $user_details . '</td>
+                            <td class="'.$class.' ' . $details_change_class .'">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+                            <td class="'.$class.' ' . $details_change_class .'">' . $shipment->consignee_address . '</td>
                 ';
 
                 if ($shipment->booking_type_id == 1) {
@@ -836,10 +845,10 @@ class DeliveryController extends Controller
                     ';
                 }
                 if($shipment->special_instructions != null){
-                    $shipment_details_row_start .= '<td class="'.$class.'">' . $shipment->special_instructions . '</td>';
+                    $shipment_details_row_start .= '<td class="'.$class.' ' . $details_change_class .'">' . $shipment->special_instructions . '</td>';
                 }
                 else{
-                    $shipment_details_row_start .= '<td class="'.$class.'">-</td>';
+                    $shipment_details_row_start .= '<td class="'.$class.' ' . $details_change_class .'">-</td>';
                 }
 
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id','!=',5)->where('remarks', '!=', null)->select('remarks');

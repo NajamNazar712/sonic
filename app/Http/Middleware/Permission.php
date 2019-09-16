@@ -363,6 +363,8 @@ class Permission
             'reports.account_edit.list' => 255,
             'reports.bank_history.index' => 257,
             'reports.bank_history.list' => 257,
+            'reports.consignee_details.index' => 258,
+            'reports.consignee_details.list' => 258,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
