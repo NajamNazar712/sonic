@@ -298,9 +298,12 @@
                         @method('POST')
                         @csrf
                         <input type="hidden" id="consolidate_shipment_ids" name="shipment_ids">
-                        <div class="container">
 
-                            <div id="consolidate_shipment_table" class="row justify-content-center consolidate_shipment_table">
+
+                            <div id="consolidate_shipment_table" class="row justify-content-center">
+                                <div class="col-lg-12 consolidate_shipment_table">
+
+                                </div>
 
                             </div>
 
@@ -310,7 +313,7 @@
                                     <button id="AddConsolidateShipments" type="submit" class="btn btn-primary btn-block">Consolidate</button>
                                 </div>
                             </div>
-                        </div>
+
                     </form>
                 </div>
             </div>
@@ -513,7 +516,7 @@
                                         $('#consolidate_shipment_ids').val(selected_rows);
                                         var route = '{!! route('cod.tracking.index') !!}';
                                         var html = '';
-                                        html += '<table class="table table datatable text-center">';
+                                        html += '<table class="table datatable text-center table-sm">';
                                         html += '<thead><tr><th>S No.</th><th><strong>Tracking No</strong></th><th><strong>Order ID</strong></th><th><strong>Origin</strong><th><strong>Destination</strong><th><strong>Consignee Name</strong><th><strong>Consignee Contact No(s)</strong><th><strong>Consignee Address</strong><th><strong>COD Amount</strong><th><strong>Product Type</strong><th><strong>Booking Date</strong><th><strong>Action</strong></tr></thead>';
                                         html += '<tbody>';
                                         $.each(data.shipment_info, function(index, value) {
@@ -542,7 +545,7 @@
                                         });
                                         html += '</tbody></table>';
 
-                                        $('#ConsolidateModal .modal-body .container .consolidate_shipment_table').html(html);
+                                        $('#ConsolidateModal .modal-body .row .consolidate_shipment_table').html(html);
                                         $('#ConsolidateModal').modal('show');
                                     } else if(data.status === 2){
                                             var consolidated_html = '';
