@@ -516,8 +516,8 @@
                                         $('#consolidate_shipment_ids').val(selected_rows);
                                         var route = '{!! route('cod.tracking.index') !!}';
                                         var html = '';
-                                        html += '<table class="table datatable text-center table-sm">';
-                                        html += '<thead><tr><th>S No.</th><th><strong>Tracking No</strong></th><th><strong>Origin</strong><th><strong>Destination</strong><th><strong>Consignee Name | Phone</strong><strong>Consignee Address</strong><th><strong>COD Amount</strong><th><strong>Product Type</strong><th><strong>Booking Date</strong><th><strong>Action</strong></tr></thead>';
+                                        html += '<table class="table datatable text-center">';
+                                        html += '<thead><tr><th>S No.</th><th><strong>Tracking No</strong></th><th><strong>Origin</strong></th><th><strong>Destination</strong><th><strong>Consignee Name & Phone</strong></th><th><strong>Consignee Address</strong></th><th><strong>COD Amount</strong></th><th><strong>Product Type</strong></th><th><strong>Booking Date</strong></th><th><strong>Action</strong></th></tr></thead>';
                                         html += '<tbody>';
                                         $.each(data.shipment_info, function(index, value) {
                                             var ind = index+1;
@@ -530,7 +530,7 @@
                                             // }
                                             html += '<td>' + value.origin + '</td>';
                                             html += '<td>' + value.destination + '</td>';
-                                            html += '<td>' + value.consignee_name + '|' + value.consignee_phone_number_1 + '</td>';
+                                            html += '<td>' + value.consignee_name + ' | ' + value.consignee_phone_number_1 + '</td>';
                                             // html += '<td>' + value.consignee_phone_number_1 + '</td>';
                                             html += '<td>' + value.consignee_address + '</td>';
                                             html += '<td>' + value.amount + '</td>';
