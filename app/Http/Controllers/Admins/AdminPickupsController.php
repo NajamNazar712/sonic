@@ -539,12 +539,12 @@ class AdminPickupsController extends Controller
     }
 
     public function assigned_list(Request $request) {
-      $pickup_notes = PickupNote::leftjoin('riders as r', 'pickup_notes.rider_id', '=', 'r.id')
-      ->leftjoin('rider_categories as rc', 'r.rider_category_id', '=', 'rc.id')
-      ->leftjoin('routes as ro', 'r.route_id', '=', 'ro.id')
-      ->leftjoin('cities as c', 'r.city_id', '=', 'c.id')
-      ->leftjoin('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
-      ->leftjoin('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
+      $pickup_notes = PickupNote::join('riders as r', 'pickup_notes.rider_id', '=', 'r.id')
+      ->join('rider_categories as rc', 'r.rider_category_id', '=', 'rc.id')
+      ->join('routes as ro', 'r.route_id', '=', 'ro.id')
+      ->join('cities as c', 'r.city_id', '=', 'c.id')
+      ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
+      ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
       ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.rider_id', 'pickup_notes.pickups', 'pickup_notes.pickups as pickups_link', 'pickup_notes.bookings', 'pickup_notes.bookings as bookings_link', 'pickup_notes.total_estimated_weight', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no')
       ->where('pickup_notes.status_id', '=', 1);
 
@@ -964,12 +964,12 @@ class AdminPickupsController extends Controller
     }
 
     public function receive_list(Request $request) {
-      $pickup_notes = PickupNote::leftjoin('riders as r', 'pickup_notes.rider_id', '=', 'r.id')
-      ->leftjoin('rider_categories as rc', 'r.rider_category_id', '=', 'rc.id')
-      ->leftjoin('routes as ro', 'r.route_id', '=', 'ro.id')
-      ->leftjoin('cities as c', 'r.city_id', '=', 'c.id')
-      ->leftjoin('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
-      ->leftjoin('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
+      $pickup_notes = PickupNote::join('riders as r', 'pickup_notes.rider_id', '=', 'r.id')
+      ->join('rider_categories as rc', 'r.rider_category_id', '=', 'rc.id')
+      ->join('routes as ro', 'r.route_id', '=', 'ro.id')
+      ->join('cities as c', 'r.city_id', '=', 'c.id')
+      ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
+      ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
       ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.bookings as bookings_link', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no','pickup_notes.id as pickup_note_id', 'pickup_notes.status_id', 'pns.name as status')
       ->whereIn('pickup_notes.status_id', [2, 3]);
 
