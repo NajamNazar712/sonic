@@ -715,23 +715,52 @@ class DeliveryController extends Controller
             $delivery_note = $request->delivery_note_id;
             $delivery = DeliveryNote::where('id', $delivery_note);
             if ($delivery->exists()) {
-                $parcel = Shipment::where('id', $request->shipment_id)->first();
-                DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
-                $delivery = $delivery->first();
-                $count = $delivery->shipments_count;
-                $cod = $delivery->total_cod_amount;
-                $count-=1;
-                if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
-                    $cod = $cod - $parcel->amount;
-                }
-                if ($count == 0) {
-                    DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
-                } else {
-                    DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
-                }
-                Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 6]);
-                ShipmentsJourneyController::add($request->shipment_id, 6, NULL, NULL, NULL, NULL, Auth::id(), $request->delivery_note_id);
+                $consolidation_shipments = ConsolidationShipments::where('shipment_id', $request->shipment_id);
+                if($consolidation_shipments->exists()){
+                    $consolidation_shipments = $consolidation_shipments->first();
+                    $consolidation_id = $consolidation_shipments->consolidation_id;
+                    $consolidated_shipments = ConsolidationShipments::where('consolidation_id',$consolidation_id)->pluck('shipment_id')->toArray();
+                    $shipment_count = 0;
+                    $shipment_cod = 0;
+                    foreach ($consolidated_shipments as $consolidated_shipment) {
+                        $parcel = Shipment::where('id', $consolidated_shipment)->first();
+                        $shipment_cod += $parcel->amount;
+                        $shipment_count += 1;
+                        DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $consolidated_shipment])->delete();
+                        Shipment::where('id', $consolidated_shipment)->update(['shipper_status_id' => 6]);
+                        ShipmentsJourneyController::add($consolidated_shipment, 6, NULL, NULL, NULL, NULL, Auth::id(), $request->delivery_note_id);
+                    }
+                    $delivery = $delivery->first();
+                    $count = $delivery->shipments_count;
+                    $cod = $delivery->total_cod_amount;
+                    $count = $count - $shipment_count;
+                    if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
+                        $cod = $cod - $shipment_cod;
+                    }
+                    if ($count == 0) {
+                        DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
+                    } else {
+                        DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
+                    }
 
+                }else{
+                    $parcel = Shipment::where('id', $request->shipment_id)->first();
+                    DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
+                    $delivery = $delivery->first();
+                    $count = $delivery->shipments_count;
+                    $cod = $delivery->total_cod_amount;
+                    $count-=1;
+                    if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
+                        $cod = $cod - $parcel->amount;
+                    }
+                    if ($count == 0) {
+                        DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
+                    } else {
+                        DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
+                    }
+                    Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 6]);
+                    ShipmentsJourneyController::add($request->shipment_id, 6, NULL, NULL, NULL, NULL, Auth::id(), $request->delivery_note_id);
+                }
 
                 return ['status' => 0, 'success' => 'Shipment is successfully removed'];
             } else {
