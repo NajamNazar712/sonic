@@ -35,10 +35,12 @@ class AdminReportsController extends Controller
         $shippers = DB::connection('reports')->table('users')->whereIn('status',[3,4])->select('id','name')->get();
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
-        return view('admin.reports.qsr_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs]);
+        $shippimg_modes = DB::connection('reports')->table('shipping_modes')->get();
+        return view('admin.reports.qsr_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'shippimg_modes'=>$shippimg_modes]);
     }
     public function qsr_list(Request $request){
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -60,7 +62,7 @@ class AdminReportsController extends Controller
                     ->where('si.type','=',0);
             })
             ->leftjoin('products as p','p.id','=','si.product_type_id')
-            ->select(['p.product_name as product_type','si.description as description','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name', 'shipments.booking_type_id', 'usi.poc','u.id as account_no'])
+            ->select(['p.product_name as product_type','si.description as description','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name', 'shipments.booking_type_id', 'usi.poc','u.id as account_no','sm.mode as shipping_mode'])
             ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,25,31,36,38,39,40,41,43,47]);
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function($query) {
@@ -135,6 +137,9 @@ class AdminReportsController extends Controller
         }
         if ($hub = $request->get('search_hub')) {
             $datatable->where('h.id', '=', $hub);
+        }
+        if ($shipping_mode = $request->get('search_shipping_mode')) {
+            $datatable->where('sm.id', '=', $shipping_mode);
         }
         if ($search_qsr = $request->get('search_qsr')) {
             if($search_qsr != 3){

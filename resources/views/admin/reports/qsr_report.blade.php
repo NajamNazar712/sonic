@@ -59,6 +59,15 @@
                         </select>
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shippimg_modes" id="search_shippimg_modes" class="form-control select2">
+                                @foreach($shippimg_modes as $shippimg_mode)
+                                    <option value="{{$shippimg_mode->id}}">{{$shippimg_mode->mode}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-4 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -96,6 +105,7 @@
                         <th class="border-primary border-darken-1">Service</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Last Status Date</th>
+                        <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -198,6 +208,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_shippimg_modes').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipping Mode',
+                width:'100%',
+                allowClear:true
+            });
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
@@ -249,6 +264,7 @@
                             'search_destination': $('#search_destination').val(),
                             'search_qsr': $('#search_qsr').val(),
                             'search_hub': $('#search_hub').val(),
+                            'search_shipping_mode': $('#search_shippimg_modes').val(),
                             'search_from': $('input[name="from_date_formatted"]').val(),
                             'search_to': $('input[name="to_date_formatted"]').val()
                         },
@@ -264,6 +280,7 @@
                             head.push('Service Type');
                             head.push('Arrival');
                             head.push('Last Status Date');
+                            head.push('Shipping Mode');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
@@ -285,6 +302,7 @@
                                 row.push(values.service_type);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
+                                row.push(values.shipping_mode);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
@@ -334,6 +352,7 @@
                         d.search_destination = $('#search_destination').val();
                         d.search_qsr = $('#search_qsr').val();
                         d.search_hub = $('#search_hub').val();
+                        d.search_shipping_mode = $('#search_shippimg_modes').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -350,6 +369,7 @@
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'last_status_date', name: 'journey.created_at', class: 'align-middle last_status_date'},
+                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
