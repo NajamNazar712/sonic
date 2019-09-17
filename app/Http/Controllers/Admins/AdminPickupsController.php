@@ -1284,8 +1284,8 @@ class AdminPickupsController extends Controller
             //Consolidated Shipments
             $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
             if($consolidated_shipment){
-                $user_shipping_info = UserShippingInfo::find($shipment->pickup_address_id);
-                if($shipment->consignee_city_id == $user_shipping_info->city_id){
+//                $user_shipping_info = UserShippingInfo::find($shipment->pickup_address_id);
+                if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
                     $check_all_consolidation_shipments = true;
 
                     $shipment->shipper_status_id = 58;

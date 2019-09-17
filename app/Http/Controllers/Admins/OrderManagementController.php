@@ -207,7 +207,7 @@ class OrderManagementController extends Controller
             foreach ($shipment_ids as $shipment_id) {
                 $shipment = Shipment::find($shipment_id);
 
-                if ($shipment && $shipment->shipper_status_id == 2) {
+                if ($shipment && ($shipment->shipper_status_id == 2 || ($shipment->shipper_status_id == 58 && $shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id))) {
                     $valid = TRUE;
 
                     $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
