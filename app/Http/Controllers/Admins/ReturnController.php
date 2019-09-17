@@ -2006,6 +2006,28 @@ class ReturnController extends Controller
         }
         if($flag == true) {
             if ($shipment->shipper_status_id == 20) {
+                if($consolidation){
+                    $consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidation->consolidation_id)->get();
+                    foreach ($consolidation_shipments as $consolidation_shipment){
+                        $is_shipment = Shipment::find($consolidation_shipment->shipment_id);
+
+                        $is_shipment->shipper_status_id = 13;
+                        $is_shipment->consignee_status_id = 13;
+
+                        $is_shipment->save();
+                        $is_journey = ShipmentsJourney::where('shipment_id', $is_shipment->id)->where('shipper_status_id', 20)->latest()->first();
+                        if ($is_journey) {
+                            $return_reattempt = new ReturnReattemptRatio();
+                            $return_reattempt->shipment_id = $is_shipment->id;
+                            $return_reattempt->return_confirm_date = $is_journey->created_at;
+                            $return_reattempt->save();
+                        }
+
+                        ShipmentsJourneyController::add($is_shipment->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
+
+                        AdminFinanceController::return_confirmed_revert($is_shipment->id, 1);
+                    }
+                }
                 $shipment->shipper_status_id = 13;
                 $shipment->consignee_status_id = 13;
 
