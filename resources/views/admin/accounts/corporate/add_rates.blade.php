@@ -3097,7 +3097,7 @@
         }
 
         $('#ratesAdditionForm').on('keypress',function (e) {
-            if(e.which == 13) {
+            if(e.which == 13 || e.keyCode == 13) {
                 e.preventDefault();
             }
         });
