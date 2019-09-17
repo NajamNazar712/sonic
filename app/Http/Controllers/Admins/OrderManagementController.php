@@ -226,17 +226,23 @@ class OrderManagementController extends Controller
                                 $consolidation_id = $consolidated_shipment->consolidation_id;
                                 ConsolidationShipments::where('id', $consolidated_shipment->id)->delete();
                                 $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
-                                foreach ($remaining_consolidated_shipments as $index => $remaining_consolidated_shipment){
-                                    $new_order_consolidated_shipment = ConsolidationShipments::find($remaining_consolidated_shipment->id);
-                                    $new_order_consolidated_shipment->order = $index + 1;
-                                    $new_order_consolidated_shipment->save();
+                                if(count($remaining_consolidated_shipments) == 1){
+                                    ConsolidationShipments::where('consolidation_id', $consolidation_id)->delete();
+                                    Consolidation::where('id', $consolidation_id)->delete();
                                 }
-                                $consolidation = Consolidation::find($consolidation_id);
-                                $consolidation->count = count($remaining_consolidated_shipments);
-                                if($consolidation->default_shipment_id == $shipment_id){
-                                    $consolidation->default_shipment_id = $remaining_consolidated_shipments[0]->shipment_id;
+                                else{
+                                    foreach ($remaining_consolidated_shipments as $index => $remaining_consolidated_shipment){
+                                        $new_order_consolidated_shipment = ConsolidationShipments::find($remaining_consolidated_shipment->id);
+                                        $new_order_consolidated_shipment->order = $index + 1;
+                                        $new_order_consolidated_shipment->save();
+                                    }
+                                    $consolidation = Consolidation::find($consolidation_id);
+                                    $consolidation->count = count($remaining_consolidated_shipments);
+                                    if($consolidation->default_shipment_id == $shipment_id){
+                                        $consolidation->default_shipment_id = $remaining_consolidated_shipments[0]->shipment_id;
+                                    }
+                                    $consolidation->save();
                                 }
-                                $consolidation->save();
                             }
                             //Consolidated Shipments
 
