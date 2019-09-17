@@ -438,7 +438,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 258, 259], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-file-text-o"></i>Reports</span></a>
 
                     <ul class="menu-content">
@@ -726,7 +726,7 @@
                         @endif
 
 
-                        @if (session('role_id') == 1 || session('role_id') == 6 || count(array_intersect([237], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || session('role_id') == 6 || count(array_intersect([237, 260], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">CRM</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || session('role_id') == 6 || in_array(188, session('permissions')))
@@ -734,6 +734,9 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(237, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.crm_cut_off_time_and_holidays.index') }}">TAT Cut-Off Time and Holidays</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(260, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.settings.crm_case_nature_types.index') }}">Case Nature Types</a></li>
                                     @endif
                                 </ul>
 
