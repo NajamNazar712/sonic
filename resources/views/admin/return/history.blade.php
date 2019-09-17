@@ -278,6 +278,7 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '<option value="0">Pending for Update</option>' +
+                        '<option value="3">Updated</option>' +
                         '<option value="1">Verified</option>' +
                         '<option value="2">Cancelled</option>' +
                         '</select>';
