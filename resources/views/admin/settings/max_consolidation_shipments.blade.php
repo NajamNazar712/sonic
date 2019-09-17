@@ -53,6 +53,8 @@
         $(document).ready(function() {
             $('#settings_form .max_shipments').inputmask({
                 'alias': 'integer',
+                'min': 1,
+                'max': 10,
                 'allowMinus': false,
                 'allowPlus': false
             });

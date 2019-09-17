@@ -60,6 +60,9 @@ class AdminConsolidatedController extends Controller
             ->editColumn('id_padded', function ($consolidation_shipment) {
                 return str_pad($consolidation_shipment->id, 6, '0', STR_PAD_LEFT);
             })
+            ->editColumn('amount', function($consolidation_shipment){
+                return number_format($consolidation_shipment->amount);
+            })
             ->editColumn('consolidation', function ($consolidation_shipment) {
                 return $consolidation_shipment->order . '/' . $consolidation_shipment->order_count;
             })

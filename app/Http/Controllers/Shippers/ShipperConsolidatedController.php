@@ -147,6 +147,9 @@ class ShipperConsolidatedController extends Controller
             ->editColumn('consolidation', function ($consolidation_shipment) {
                 return $consolidation_shipment->order . '/' . $consolidation_shipment->order_count;
             })
+            ->editColumn('amount', function($consolidation_shipment){
+                return number_format($consolidation_shipment->amount);
+            })
             ->editColumn('default_shipment_tracking_number_link', function ($consolidation_shipment) {
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$consolidation_shipment->default_shipment_tracking_number' class='tracking' target='_blank'>$consolidation_shipment->default_shipment_tracking_number</a></u>";
