@@ -13,12 +13,19 @@
                 @include('admin.inc.messages')
 
                 <div id="search_form" class="row mb-2 justify-content-center">
-
-                    {{--<div class="col-4">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search delivery Note Number">--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
+                    @if (session('role_id') == 1 || in_array(261, session('permissions')))
+                    <div class="col-4 mb-1">
+                        <div class="form-group">
+                            <select name="search_sales_person" class="select2" id="sales_person_select">
+                                @foreach($sales_persons as $sales)
+                                    <option value="{{ $sales->id }}">{{ $sales->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                        @else
+                        <input type="hidden" name="search_sales_person" value="null">
+                    @endif
                     <div class="col-4">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
@@ -72,7 +79,7 @@
 
                     <div class="col-4">
 
-                        <div class="form-group input-group ml-1">
+                        <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -83,7 +90,7 @@
                         </div>
                     </div>
                     <div class="col-4 ">
-                        <div class="form-group input-group ml-1">
+                        <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -225,6 +232,11 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
+            $('#sales_person_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Sales Person',
+                allowClear:true
+            });
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Shipper',
                 width:'100%',
@@ -308,6 +320,7 @@
                         data: {
                             'page': 'all',
                             'search_tracking': $('#search_tracking_no').val(),
+                            'search_sales_person': $('#sales_person_select').val(),
                             'search_shipper': $('#search_shipper').val(),
                             'search_origin': $('#search_origin').val(),
                             'search_destination': $('#search_destination').val(),
@@ -435,6 +448,7 @@
                     },
                     data: function (d) {
                         d.search_tracking = $('#search_tracking_no').val();
+                        d.search_sales_person =  $('#sales_person_select').val();
                         d.search_shipper = $('#search_shipper').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
