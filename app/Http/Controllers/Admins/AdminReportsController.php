@@ -2971,7 +2971,8 @@ class AdminReportsController extends Controller
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
-        return view('admin.reports.overall_sales')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses]);
+        $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
+        return view('admin.reports.overall_sales')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses, 'sales_persons' => $sales_persons]);
     }
     public function overall_sales_list(Request $request){
 
@@ -3202,6 +3203,9 @@ class AdminReportsController extends Controller
 
         if($tracking = $request->get('search_tracking')){
             $datatable->where('shipments.tracking_number', '=', $tracking);
+        }
+        if($sales_person = $request->get('search_sales_person')){
+            $datatable->where('adsp.id', '=', $sales_person);
         }
         if($shipper = $request->get('search_shipper')){
             $datatable->where('u.id', '=', $shipper);
