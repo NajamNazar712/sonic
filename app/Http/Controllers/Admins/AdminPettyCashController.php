@@ -81,10 +81,10 @@ class AdminPettyCashController extends Controller
                     $petty_detail->account_title_id = $request->title[$selected_id];
                     $petty_detail->hub_id = $request->hub[$selected_id];
                     $petty_detail->date = $request->date[$selected_id];
-                    $petty_detail->expense_details = $request->expense[$selected_id];
+                    $petty_detail->expense_details = str_replace(array("\n", "\r"), '',$request->expense[$selected_id]);
                     $petty_detail->amount = $request->amount[$selected_id];
                     $petty_detail->reference_no = $request->reference[$selected_id];
-                    $petty_detail->remarks = $request->remarks[$selected_id];
+                    $petty_detail->remarks = str_replace(array("\n", "\r"), '',$request->remarks[$selected_id]);
                     $petty_detail->save();
 
                     if ($request->hasFile('upload_image' . $selected_id)) {
@@ -120,10 +120,10 @@ class AdminPettyCashController extends Controller
                     $petty_detail_draft->account_title_id = $request->title[$selected_id];
                     $petty_detail_draft->hub_id = $request->hub[$selected_id];
                     $petty_detail_draft->date = $request->date[$selected_id];
-                    $petty_detail_draft->expense_details = $request->expense[$selected_id];
+                    $petty_detail_draft->expense_details = str_replace(array("\n", "\r"), '',$request->expense[$selected_id]);
                     $petty_detail_draft->amount = $request->amount[$selected_id];
                     $petty_detail_draft->reference_no = $request->reference[$selected_id];
-                    $petty_detail_draft->remarks = $request->remarks[$selected_id];
+                    $petty_detail_draft->remarks = str_replace(array("\n", "\r"), '',$request->remarks[$selected_id]);
                     $petty_detail_draft->save();
 
                     if ($request->hasFile('upload_image' . $selected_id)) {
@@ -1195,7 +1195,8 @@ class AdminPettyCashController extends Controller
                 return Carbon::parse($petty_details->date)->toDateString();
             })
             ->editColumn('expense_details', function ($petty_details){
-                $expense = '<textarea class="form-control form-control-sm" name="expense['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Expense Detail is required">'.$petty_details->expense_details.'</textarea>';
+                $expense_detail = str_replace(array("\n", "\r"), '',$petty_details->expense_details);
+                $expense = '<textarea class="form-control form-control-sm" name="expense['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Expense Detail is required">'.$expense_detail.'</textarea>';
                 return $expense;
             })
             ->editColumn('amount', function ($petty_details){
@@ -1212,7 +1213,8 @@ class AdminPettyCashController extends Controller
                 return $reference;
             })
             ->editColumn('remarks', function ($petty_details){
-                $remarks = '<textarea class="form-control form-control-sm" name="remarks['.$petty_details->petty_cash_statement_draft_id.']">'.$petty_details->remarks.'</textarea>';
+                $rem = str_replace(array("\n", "\r"), '',$petty_details->remarks);
+                $remarks = '<textarea class="form-control form-control-sm" name="remarks['.$petty_details->petty_cash_statement_draft_id.']">'.$rem.'</textarea>';
                 return $remarks;
             })
             ->editColumn('reference_document', function ($petty_details){

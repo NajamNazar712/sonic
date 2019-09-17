@@ -329,6 +329,9 @@
 
             }
 
+            $('body').on('change','#datatable tr td.details_of_expense textarea,#datatable tr td.remarks textarea',function() {
+                $(this).val($(this).val().trim());
+            });
 
             $('body').on('select2:select','.account_head .head_select',function () {
                 var rowid = parseInt($(this).parents('tr').attr('id'));
@@ -646,10 +649,10 @@
                         var title = '{{$data->account_title_id}}';
                         var hub = '{{$data->hub_id}}';
                         var date = '{{$data->date}}';
-                        var expense = '{{$data->expense_details}}';
+                        var expense = '{{str_replace(array("\n", "\r"), '',$data->expense_details)}}';
                         var amount = '{{$data->amount}}';
                         var reference_no = '{{$data->reference_no}}';
-                        var remarks = '{{$data->remarks}}';
+                        var remarks = '{{str_replace(array("\n", "\r"), '',$data->remarks)}}';
                         var reference_document = $.trim('{{$data->reference_document}}');
 
                     load_row(head, title, hub, date, expense, amount, reference_no, remarks, reference_document);
