@@ -189,25 +189,35 @@
                             var shipment = '';
                             var total_booked = 0;
                             var total_received = 0;
+                            var total_actual_weight = 0;
+                            var total_average_weight = 0;
                             shipment += '<table class="table table-bordered datatable " id="datatable" style="z-index: 3;">' +
                                 '                    <thead>' +
                                 '                    <tr class="bg-primary white">' +
                                 '                        <th class="border-primary border-darken-1">Shipper</th>' +
                                 '                        <th class="border-primary border-darken-1">Booked</th>' +
                                 '                        <th class="border-primary border-darken-1">Received</th>' +
+                                '                        <th class="border-primary border-darken-1">Total Actual Weight</th>' +
+                                '                        <th class="border-primary border-darken-1">Total Average Weight</th>' +
                                 '                    </tr>' +
                                 '                    </thead>';
                             shipment += '<tbody>';
                             $.each(data.shipments,function (id,details) {
                                 shipment += '<tr id="'+ details.shipper_id+'"><td class="align-middle shipper">'+details.shipper+'</td>';
                                 shipment += '<td class="align-middle text-center booked"><button class="btn btn-sm btn-outline-info">'+details.booked+'</button></td>';
-                                shipment += '<td class="align-middle text-center received"><button class="btn btn-sm btn-outline-info">'+details.received+'</button></td></tr>';
+                                shipment += '<td class="align-middle text-center received"><button class="btn btn-sm btn-outline-info">'+details.received+'</button></td>';
+                                shipment += '<td class="align-middle">'+ details.total_actual_weight +'</td>';
+                                shipment += '<td class="align-middle">'+ details.total_average_weight +'</td></tr>';
                                 total_booked = total_booked + details.booked;
                                 total_received = total_received + details.received;
+                                total_actual_weight += parseFloat(details.total_actual_weight);
+                                total_average_weight += parseFloat(details.total_average_weight);
                             });
                             shipment += '<tr id="total"><td class="align-middle shipper">Total</td>';
                             shipment += '<td class="align-middle text-center booked">'+total_booked+'</td>';
-                            shipment += '<td class="align-middle text-center received">'+total_received+'</td></tr>';
+                            shipment += '<td class="align-middle text-center received">'+total_received+'</td>';
+                            shipment += '<td class="align-middle">'+total_actual_weight+'</td>';
+                            shipment += '<td class="align-middle">'+total_average_weight+'</td></tr>';
                             shipment += '</tbody></table>';
                             $('#booked_table_div').html('');
                             $('#booked_table_div').html(shipment);
@@ -226,7 +236,9 @@
                                 columns: [
                                     {name: 'shipper', class: 'align-middle shipper'},
                                     {name: 'booked', class: 'align-middle booked'},
-                                    {name: 'received', class: 'align-middle received'}
+                                    {name: 'received', class: 'align-middle received'},
+                                    {name: 'total_weight', class: 'align-middle text-center total_weight'},
+                                    {name: 'total_average_weight', class: 'align-middle text-center total_average_weight'}
 
                                 ],
                                 initComplete: function() {
