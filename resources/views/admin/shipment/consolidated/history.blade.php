@@ -118,6 +118,7 @@
             <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
             <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
             <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+            <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 
             <script type="text/javascript">
@@ -193,6 +194,7 @@
                                 title: 'Consolidated Shipments',
                                 text:'<i class="la la-file-excel-o"></i> Excel',
                             },
+                            'reset'
                         ],
                         autoWidth: false,
                         lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
