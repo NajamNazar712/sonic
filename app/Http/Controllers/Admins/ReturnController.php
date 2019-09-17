@@ -2028,23 +2028,25 @@ class ReturnController extends Controller
                         AdminFinanceController::return_confirmed_revert($is_shipment->id, 1);
                     }
                 }
-                $shipment->shipper_status_id = 13;
-                $shipment->consignee_status_id = 13;
+                else{
+                    $shipment->shipper_status_id = 13;
+                    $shipment->consignee_status_id = 13;
 
-                $shipment->save();
+                    $shipment->save();
 
-                $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 20)->latest()->first();
-                if ($journey) {
-                    $return_reattempt = new ReturnReattemptRatio();
-                    $return_reattempt->shipment_id = $shipment->id;
-                    $return_reattempt->return_confirm_date = $journey->created_at;
-                    $return_reattempt->save();
+                    $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 20)->latest()->first();
+                    if ($journey) {
+                        $return_reattempt = new ReturnReattemptRatio();
+                        $return_reattempt->shipment_id = $shipment->id;
+                        $return_reattempt->return_confirm_date = $journey->created_at;
+                        $return_reattempt->save();
+                    }
+
+
+                    ShipmentsJourneyController::add($request->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
+
+                    AdminFinanceController::return_confirmed_revert($request->id, 1);
                 }
-
-
-                ShipmentsJourneyController::add($request->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
-
-                AdminFinanceController::return_confirmed_revert($request->id, 1);
 
                 return ['status' => 0, 'success' => 'Shipment has been Reverted'];
             } else {
