@@ -1323,7 +1323,7 @@ class AdminFinanceController extends Controller
                 }
             }
 
-            if($payment_type == 1){
+            if(isset($payment_type) && $payment_type == 1) {
                 ShipmentsPaymentJourneyController::add($request->id, 4, Auth::id(), '', $done_payment_id);
             }
             else{
@@ -1780,10 +1780,11 @@ class AdminFinanceController extends Controller
                     self::adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, $adjustment_type);
                 }
             }
-            if($payment_type == 1){
+            
+            if (isset($payment_type) && $payment_type == 1) {
                 ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), '', $done_payment_id);
             }
-            else{
+            else {
                 ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id());
             }
         }
