@@ -1982,9 +1982,13 @@ class AdminPickupsController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id');
 
-            $shipments = $shipments->select('shipments.id','u.name as shipper','u.id as shipper_id');
+        $shipments = $shipments->leftJoin('shipments_journey as ar', function($join){
+            $join->on('ar.shipment_id', '=', 'shipments.id');
+        });
+
+        $shipments = $shipments->select('shipments.id','u.name as shipper','u.id as shipper_id',DB::raw('count(shipments.id) as booked'));
         
-               $shipments = $shipments->where('usi.city_id',$request->city_select)
+        $shipments = $shipments->where('usi.city_id',$request->city_select)
             ->where('shipments.shipper_status_id','!=',17)
             ->whereBetween('shipments.created_at',[$request->search_from,$request->search_to])
             ->groupBy('u.id')->get();
