@@ -1987,13 +1987,28 @@ class AdminPickupsController extends Controller
         $shippers = User::where('status', 3)->select('id','name')->get();
         foreach ($shippers as $shipper) {
           $data[$shipper->id]['shipper'] = $shipper->name;
-          $data[$shipper->id]['booked'] = DB::connection('reports')->table('shipments')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+//          $shipments = DB::connection('reports')->table('shipments');
+          $data[$shipper->id]['booked'] = DB::connection('reports')->table('shipments')->join('user_shipping_infos AS usib', 'shipments.pickup_address_id', '=', 'usib.id')
+//            ->join('cities AS ocb', 'usib.city_id', '=', 'ocb.id')
+            ->where('usib.city_id',$city)
             ->where('shipments.shipper_status_id','!=',17)
             ->whereBetween('shipments.created_at',[$from,$to])
             ->where('shipments.user_id','=', $shipper->id)
             ->count();
+            $data[$shipper->id]['received'] = DB::connection('reports')->table('shipments')->join('user_shipping_infos AS usia', 'shipments.pickup_address_id', '=', 'usia.id')
+//                ->join('cities AS oca', 'usia.city_id', '=', 'oca.id')
+                ->leftJoin('shipments_journey as rc', function ($join) use ($from, $to) {
+                    $join->on('rc.shipment_id', '=', 'shipments.id')
+                        ->where('rc.id','=',
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'))
+                        ->where('rc.shipper_status_id','=',20)
+                        ->whereBetween('rc.created_at',[$from,$to]);
+                })
+                ->where('usia.city_id',$city)
+                ->where('shipments.shipper_status_id','!=',17)
+                ->where('shipments.user_id','=', $shipper->id)
+                ->count();
+
         }
         return $data;
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
