@@ -2015,14 +2015,15 @@ class AdminPickupsController extends Controller
             ->leftJoin('shipments_journey as sjd', function ($join) {
                 $join->on('sjd.shipment_id', '=', 'shipments.id')
                     ->where('sjd.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,16,30,36) )'));
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'))
+                    ->whereIn('sjd.shipper_status_id',[14,30,36]);
             })
             ->leftJoin('shipments_journey as rc', function ($join) {
                 $join->on('rc.shipment_id', '=', 'shipments.id')
                     ->where('rc.id','=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20)'));
             })
-            ->select(['shipments.id','u.name as shipper','u.id as shipper_id',DB::raw('count(shipments.id) as booked'),DB::raw('count(srec.shipment_id) as received'),DB::raw('count(sjd.id) as delivered'),DB::raw('count(rc.id) as returned'),DB::connection('reports')->raw('(SELECT IFNULL(SUM(`s`.`actual_weight`),0) FROM `shipments` AS `s` INNER JOIN `shipments_journey` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`shipment_id` = `shipments`.`id`) AS `total_actual_weight`'),DB::connection('reports')->raw('(SELECT IFNULL(AVG(`s`.`actual_weight`),0) FROM `shipments` AS `s` INNER JOIN `shipments_journey` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`shipment_id` = `shipments`.`id`) AS `total_average_weight`')])
+            ->select(['shipments.id','u.name as shipper','u.id as shipper_id',DB::raw('count(shipments.id) as booked'),DB::raw('count(srec.shipment_id) as received'),DB::raw('count(sjd.id) as delivered'),DB::raw('count(rc.id) as returned'),DB::connection('reports')->raw('IF (srec.id IS NOT NULL, SUM(shipments.actual_weight), 0) AS `total_actual_weight`'),DB::connection('reports')->raw('(SELECT IFNULL(AVG(`s`.`actual_weight`),0) FROM `shipments` AS `s` INNER JOIN `shipments_journey` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`shipment_id` = `shipments`.`id`) AS `total_average_weight`')])
             ->where('usi.city_id',$request->city_select)
             ->where('shipments.shipper_status_id','!=',17)
             ->whereBetween('shipments.created_at',[$request->search_from,$request->search_to])
