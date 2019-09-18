@@ -1190,8 +1190,8 @@ class ReturnController extends Controller
         join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins','admins.id','=','return_notes.admin_id')
-            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link'])
-            ->where('return_notes.status',0);
+            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status'])
+            ->whereIn('return_notes.status',[0,3]);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
@@ -1215,12 +1215,21 @@ class ReturnController extends Controller
             ->filterColumn('return_notes.id', function ($query, $keyword) {
                 return $query->where('return_notes.id', '=', $keyword);
             })
+            ->addColumn('return_note_status', function ($deliveries){
+
+                if($deliveries->status == 0){
+                    return 'Created';
+                }else if($deliveries->status == 3){
+                    return 'Updated';
+                }
+            })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.return.receive.status',['id'=>$result->return_note]);
                 $route = route('admin.return.receive.update',['id'=>$result->return_note]);
 
                 $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item"><i class="ft-plus-circle primary"></i> Receive</a>';
                 $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item returnnoteupdate"><i class="ft-plus-circle primary"></i> Edit Shipment</a>';
+                $return_image_upload = '<a href="javascript:void(0);" class="dropdown-item return_image_upload"><i class="ft-image primary"></i> Image Upload</a>';
 
                 if (session('role_id') == 1 || count(array_intersect([50, 51], session('permissions'))) !== 0) {
                     $dropdown = "
@@ -1234,6 +1243,10 @@ class ReturnController extends Controller
 
                     if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(51, session('permissions')))) {
                         $dropdown .= $shift_shipment_button;
+                    }
+
+                    if($result->status == 2){
+                        $dropdown .= $return_image_upload;
                     }
 
                     $dropdown .= "
@@ -1341,12 +1354,8 @@ class ReturnController extends Controller
         if($return->exists()){
             $return = $return->first();
             $shipment_status = ShipmentStatus::whereIn('id', [24,25, 47, 48])->get();
-            $shipment_count = ReturnNoteShipment::where(['return_note_id'=>$id,'status'=>0])->count();
-            $return_image = true;
-            if($shipment_count == 0){
-                $return_image = false;
-            }
-            return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count, 'return_note_status' => $return->status, 'shipment_statuses' => $shipment_status, 'return_note_image_status' => $return->image, 'return_image' => $return_image]);
+
+            return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count, 'return_note_status' => $return->status, 'shipment_statuses' => $shipment_status]);
         }else{
             return redirect()->route('admin.return.receive.index')->with(['error' => 'Return Note not found']);
         }
@@ -1470,7 +1479,6 @@ class ReturnController extends Controller
                         return $deliveries->received_or_refused_by;
                     }
 
-
             })
             ->addColumn('charges', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -1546,7 +1554,7 @@ class ReturnController extends Controller
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$return_note_id,'status'=>0])->count();
             if($shipment_status == 0){
-                ReturnNote::where('id',$return_note_id)->update(['status' => 1 ,'updated_by' => Auth::id()]);
+                ReturnNote::where('id',$return_note_id)->update(['status' => 3 ,'updated_by' => Auth::id()]);
             }
 
             NotificationsController::send(15, $return_note_id);
@@ -1642,7 +1650,7 @@ class ReturnController extends Controller
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
             if($shipment_status == 0){
-                ReturnNote::where('id',$request->return_note_id)->update(['status' => 1 ,'updated_by'=>Auth::id()]);
+                ReturnNote::where('id',$request->return_note_id)->update(['status' => 3 ,'updated_by'=>Auth::id()]);
             }
 
             NotificationsController::send(15, $request->return_note_id);
@@ -1708,7 +1716,7 @@ class ReturnController extends Controller
                 }
                 $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
                 if($shipment_status == 0){
-                    ReturnNote::where('id',$request->return_note_id)->update(['status' => 1 ,'updated_by'=>Auth::id()]);
+                    ReturnNote::where('id',$request->return_note_id)->update(['status' => 3 ,'updated_by'=>Auth::id()]);
                 }
 
                 NotificationsController::send(15, $request->return_note_id);
@@ -2017,6 +2025,8 @@ class ReturnController extends Controller
                     return 'Verified';
                 }else if($deliveries->status == 2){
                     return 'Canceled';
+                }else if($deliveries->status == 3){
+                    return 'Updated';
                 }
             })
             ->filterColumn('main_status',function ($query,$keyword){
@@ -2026,6 +2036,8 @@ class ReturnController extends Controller
                     $query->where('return_notes.status',1);
                 }else if($keyword == 2){
                     $query->where('return_notes.status',2);
+                }else if($keyword == 3){
+                    $query->where('return_notes.status',3);
                 }
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
@@ -2073,26 +2085,32 @@ class ReturnController extends Controller
         }
 
         if($return_note_id){
+            $return_note = ReturnNote::find($return_note_id);
+            if($return_note->status == 3){
+                $image = $request->file('return_note_image');
+                $imageName = $image->getClientOriginalName();
 
-            $image = $request->file('return_note_image');
-            $imageName = $image->getClientOriginalName();
-
-            //$imageName = explode('.', $imageName);
-            $extension = $image->getClientOriginalExtension();
-            $random = rand(1000, 100000);
-            $now = Carbon::now();
-            $time = $now->year . '_' . $now->month;
-            $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
-            $image->move(public_path('uploads/return_notes'), $generated_image_name);
-
-            $imageUpload = ReturnNote::find($return_note_id);
-            $imageUpload->image = $generated_image_name;
-            $imageUpload->updated_by = Auth::id();
-//            $imageUpload->status = 1;
-            $imageUpload->save();
+                //$imageName = explode('.', $imageName);
+                $extension = $image->getClientOriginalExtension();
+                $random = rand(1000, 100000);
+                $now = Carbon::now();
+                $time = $now->year . '_' . $now->month;
+                $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+                $image->move(public_path('uploads/return_notes'), $generated_image_name);
 
 
-            return redirect()->back()->with(['status' => 1, 'success' => 'Return Note updated successfully']);
+                $return_note->image = $generated_image_name;
+                $return_note->updated_by = Auth::id();
+                $return_note->status = 1;
+                $return_note->save();
+
+
+                return redirect()->back()->with(['status' => 1, 'success' => 'Return Note updated successfully']);
+            }
+            else{
+                return redirect()->back()->with(['status' => 0, 'error' => 'Return Note not updated yet!']);
+            }
+
         }
         else{
             return redirect()->back()->with(['status' => 0, 'error' => 'Return Note Not found!']);

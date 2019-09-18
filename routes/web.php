@@ -1165,6 +1165,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@bank_history_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@bank_history_list')->name('list');
         });
+
+        Route::prefix('consignee_details')->name('consignee_details.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@consignee_details_history_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@consignee_details_history_list')->name('list');
+        });
+        Route::prefix('booked_and_cancelled')->name('booked_and_cancelled.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@booked_and_cancelled_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@booked_and_cancelled_list')->name('list');
+        });
     });
 
     //Reports end
@@ -1291,6 +1300,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('return_confirmation_pending_shipment_selection_time')->name('return_confirmation_pending_shipment_selection_time.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_confirmation_pending_shipment_selection_time_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@return_confirmation_pending_shipment_selection_time_store')->name('store');
+        });
+
+        Route::prefix('crm_case_nature_types')->name('crm_case_nature_types.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@crm_case_nature_types_index')->name('index');
+            Route::post('list', 'Admins\GlobalSettingsController@crm_case_nature_types_list')->name('list');
+            Route::post('store', 'Admins\GlobalSettingsController@crm_case_nature_types_store')->name('store');
         });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {

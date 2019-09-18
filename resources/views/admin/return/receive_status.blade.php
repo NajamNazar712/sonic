@@ -26,7 +26,7 @@
                                 </select>
                             </fieldset>
                         </div>
-                        @if(!$return_note_status == 1)
+                        @if($return_note_status == 0)
                             <div class="col-3">
                                 <button type="button" id="submit_selected_status" disabled class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-list-alt"></i> Bulk Update </button>
                             </div>
@@ -55,45 +55,13 @@
                         </thead>
                     </table>
                     <div class="row justify-content-center">
+                        @if($return_note_status == 0)
                         <div class="col-2">
                             <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Verify Status</button>
                         </div>
-
+                        @endif
                     </div>
                 </form>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="modal fade text-left" id="uploadReturnNote" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadReturnNote"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Return Note Image Upload</h4>
-
-                </div>
-                <div class="modal-body  text-center">
-                    <form id="return_note_upload_form" class="form" action="{{route('admin.return.receive.upload_image')}}" method="post" enctype="multipart/form-data">
-                        @csrf
-                        <input type="hidden" name="image_return_note_id" id="image_return_note_id"/>
-                        <fieldset class="form-group">
-                            <input type="file" class="form-control-file" id="return_note_image" name="return_note_image" accept="image/*" data-rule-required="true" data-msg-required="Image File is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2048000" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
-                        </fieldset>
-
-                        <hr>
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="" type="button" class="btn btn-danger btn-block" data-dismiss="modal">Close</button>
-                            </div>
-                            <div class="col-3">
-                                <button id="ReturnNoteImageSubmitButton" type="submit" class="btn btn-primary btn-block">Upload</button>
-                            </div>
-
-                        </div>
-                    </form>
-                </div>
             </div>
         </div>
     </div>
@@ -790,58 +758,14 @@
 
             });
             {{--var return_note_status = {{$return_note_status}};--}}
-            var return_note_image_status = '{{$return_note_image_status}}';
-            var return_image = '{{$return_image}}';
-            var return_note_id = {{$return_note_id}};
-
-            function upload_return_note_image() {
-                if(return_note_image_status == '' && return_image == false){
-                    $('#image_return_note_id').val(return_note_id);
-                    $('#uploadReturnNote').modal('show');
-                }
-            }
-            upload_return_note_image();
 
 
-            $.validator.addMethod('maxsize', function(value, element, params) {
-                if ($(element).attr('type') === 'file') {
-                    if (element.files && element.files.length) {
-                        console.log(element.files);
-                        for (var c = 0; c < element.files.length; c++) {
-                            if (element.files[c].size > params) {
-                                return false;
-                            }
-                        }
-                    }
-                }
 
-                return true;
-            }, $.validator.format("File Size must not exceed {0} bytes."));
 
-            $('#return_note_upload_form').validate({
+            // upload_return_note_image();
 
-                errorClass: 'danger',
-                successClass: 'success',
-                normalizer: function(value) {
-                    return $.trim(value);
-                },
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Image is being uploaded!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    form.submit();
-                }
-            });
+
         });
     </script>
 @endsection

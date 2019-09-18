@@ -14,6 +14,8 @@ use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\FuelSurcharge;
@@ -1278,5 +1280,44 @@ class GlobalSettingsController extends Controller
         $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+    public function crm_case_nature_types_index() {
+        $case_nature = CrmRequestCaseNature::whereNotIn('id', [3])->select(['id', 'name'])->get();
+
+        return view('admin.settings.add_case_nature_types')->with(['case_nature' => $case_nature]);
+    }
+
+    public function crm_case_nature_types_list(Request $request) {
+        $case_nature_types = CrmRequestCaseNatureType::leftjoin('crm_request_case_nature as crcs', 'crcs.id', '=', 'crm_request_case_nature_types.nature_id')
+        ->select('crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type');
+
+        return Datatables::of($case_nature_types)->make(true);
+    }
+    public function crm_case_nature_types_store(Request $request) {
+        $nature = $request->case_nature;
+        $type = $request->case_nature_type;
+        if($nature == null && $type == null && $nature == '' && $type == ''){
+            if($nature == null && $nature == ''){
+                return response()->json(['status' => 0, 'error' => 'Please select Case Nature!']);
+            }
+            if($type == null && $type == ''){
+                return response()->json(['status' => 0, 'error' => 'Please enter Case Nature Type!']);
+            }
+        }
+        $case_nature_types = CrmRequestCaseNatureType::where('type', $type);
+        if ($case_nature_types->exists()) {
+            return response()->json(['status' => 0, 'error' => 'Same Case Nature Type already exists!']);
+        }
+        else {
+            $new_case_nature_type = new CrmRequestCaseNatureType();
+            $new_case_nature_type->nature_id = $nature;
+            $new_case_nature_type->type = $type;
+            $new_case_nature_type->updated_at = Carbon::now();
+            $new_case_nature_type->updated_by = Auth::id();
+            $new_case_nature_type->type = $type;
+            $new_case_nature_type->save();
+
+            return response()->json(['status' => 1, 'success' => 'New Case Nature Type added successfully!']);
+        }
     }
 }

@@ -2956,7 +2956,11 @@
         //     console.log('double');
         //     event.preventDefault();
         // });
-
+        $('#ratesAdditionForm').on('keypress',function (e) {
+            if(e.which == 13 || e.keyCode == 13) {
+                e.preventDefault();
+            }
+        });
 
         var overnightSwitch = document.querySelector('.switchery.on-main-switch');
         var overlandSwitch = document.querySelector('.switchery.ol-main-switch');

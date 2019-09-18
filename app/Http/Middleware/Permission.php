@@ -363,6 +363,10 @@ class Permission
             'reports.account_edit.list' => 255,
             'reports.bank_history.index' => 257,
             'reports.bank_history.list' => 257,
+            'reports.consignee_details.index' => 258,
+            'reports.consignee_details.list' => 258,
+            'reports.booked_and_cancelled.index' => 259,
+            'reports.booked_and_cancelled.list' => 259,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -501,6 +505,9 @@ class Permission
             'settings.delivery_call_verification_ratio.list' => 237,
             'settings.crm_cut_off_time_and_holidays.update' => 237,
             'settings.delivery_call_verification_ratio.add' => 237,
+            'settings.crm_case_nature_types.index' => 260,
+            'settings.crm_case_nature_types.list' => 260,
+            'settings.crm_case_nature_types.store' => 260,
 
 
 

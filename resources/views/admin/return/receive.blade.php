@@ -48,6 +48,7 @@
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
+                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -76,6 +77,38 @@
         </div>
     </div>
     <!--Shipments popup -->
+
+    <div class="modal fade text-left" id="uploadReturnNote" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadReturnNote"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Return Note Image Upload</h4>
+
+                </div>
+                <div class="modal-body  text-center">
+                    <form id="return_note_upload_form" class="form" action="{{route('admin.return.receive.upload_image')}}" method="post" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="image_return_note_id" id="image_return_note_id"/>
+                        <fieldset class="form-group">
+                            <input type="file" class="form-control-file" id="return_note_image" name="return_note_image" accept="image/*" data-rule-required="true" data-msg-required="Image File is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2048000" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                        </fieldset>
+
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="" type="button" class="btn btn-danger btn-block" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-3">
+                                <button id="ReturnNoteImageSubmitButton" type="submit" class="btn btn-primary btn-block">Upload</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -137,6 +170,8 @@
 
     {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -173,6 +208,7 @@
                                 row.push(values.shipments_count);
                                 row.push(values.assignee);
                                 row.push(values.created_at);
+                                row.push(values.return_note_status);
 
                                 body.push(row);
                             });
@@ -220,6 +256,7 @@
                     { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
+                    { data:'return_note_status' ,name: 'return_notes.status', class: 'align-middle return_note_status'},
                     {data:'action' ,name: 'action', class: 'align-middle action text-center',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -245,7 +282,10 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Created</option>' +
+                        '<option value="3">Updated</option>' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -254,6 +294,12 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.action')){
                             $(td).appendTo($(search));
+                        }
+                        else if($(header).is('.return_note_status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -264,6 +310,12 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
                 }
@@ -349,6 +401,55 @@
                         }
                     });
 
+            });
+
+            $('#datatable tbody').on('click','tr td .return_image_upload',function () {
+                var id = $(this).parents('tr').attr('id');
+                if(id){
+                    $('#image_return_note_id').val(id);
+                    $('#uploadReturnNote').modal('show');
+                }
+            });
+
+
+            $.validator.addMethod('maxsize', function(value, element, params) {
+                if ($(element).attr('type') === 'file') {
+                    if (element.files && element.files.length) {
+                        console.log(element.files);
+                        for (var c = 0; c < element.files.length; c++) {
+                            if (element.files[c].size > params) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }, $.validator.format("File Size must not exceed {0} bytes."));
+
+            $('#return_note_upload_form').validate({
+
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Image is being uploaded!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
             });
 
         });
