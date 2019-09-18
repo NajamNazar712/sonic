@@ -1976,7 +1976,23 @@ class AdminPickupsController extends Controller
     }
 
     public function bookedvsreceived_list(Request $request){
+        $shipments = array();
 
+        $shipments['shippers'] = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->select(['shipments.id','u.name as shipper','u.id as shipper_id'])
+            ->where('usi.city_id',$request->city_select)
+            ->where('shipments.shipper_status_id','!=',17)
+            ->whereBetween('shipments.created_at',[$request->search_from,$request->search_to])
+            ->groupBy('u.id')->get();
+        if($shipments){
+            foreach($shipments['shippers'] as $shipper){
+                
+            }
+        }
+
+        return $shipments;
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -1984,12 +2000,12 @@ class AdminPickupsController extends Controller
                 $join->on('srec.shipment_id', '=', 'shipments.id')
                     ->where('srec.shipper_status_id','=',2);
             })
-
             ->select(['shipments.id','u.name as shipper','u.id as shipper_id',DB::raw('count(shipments.id) as booked'),DB::raw('count(srec.shipment_id) as received'),DB::connection('reports')->raw('(SELECT IFNULL(SUM(`s`.`actual_weight`),0) FROM `shipments` AS `s` INNER JOIN `shipments_journey` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`shipment_id` = `shipments`.`id`) AS `total_actual_weight`'),DB::connection('reports')->raw('(SELECT IFNULL(AVG(`s`.`actual_weight`),0) FROM `shipments` AS `s` INNER JOIN `shipments_journey` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`shipment_id` = `shipments`.`id`) AS `total_average_weight`')])
             ->where('usi.city_id',$request->city_select)
             ->where('shipments.shipper_status_id','!=',17)
             ->whereBetween('shipments.created_at',[$request->search_from,$request->search_to])
             ->groupBy('u.id')->get();
+
         return response()->json(['status'=>1,'shipments'=>$shipments]);
 
     }

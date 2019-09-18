@@ -164,7 +164,7 @@
                 },
                 submitHandler: function(form) {
 
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    // $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
                     var city_select = $('#search_city').val();
                     var search_from = $('input[name="search_date_from_formatted"]').val();
