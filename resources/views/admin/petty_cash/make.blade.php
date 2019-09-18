@@ -328,10 +328,9 @@
                 "Statement Reference Number already exists."
             );
 
-            $('body').on('change','#datatable tr td.details_of_expense input,#datatable tr td.remarks input',function() {
+            $('body').on('change','#datatable tr td.details_of_expense textarea,#datatable tr td.remarks textarea',function() {
                 $(this).val($(this).val().trim());
             });
-
             function add_row() {
                 rows_count++;
                 selected_rows.push(rows_count);
