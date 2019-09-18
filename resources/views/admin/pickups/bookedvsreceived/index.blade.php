@@ -189,6 +189,8 @@
                             var shipment = '';
                             var total_booked = 0;
                             var total_received = 0;
+                            var total_delivered = 0;
+                            var total_returned = 0;
                             var total_actual_weight = 0;
                             var total_average_weight = 0;
                             shipment += '<table class="table table-bordered datatable " id="datatable" style="z-index: 3;">' +
@@ -197,6 +199,8 @@
                                 '                        <th class="border-primary border-darken-1">Shipper</th>' +
                                 '                        <th class="border-primary border-darken-1">Booked</th>' +
                                 '                        <th class="border-primary border-darken-1">Received</th>' +
+                                '                        <th class="border-primary border-darken-1">Delivered</th>' +
+                                '                        <th class="border-primary border-darken-1">Returned</th>' +
                                 '                        <th class="border-primary border-darken-1">Total Actual Weight</th>' +
                                 '                        <th class="border-primary border-darken-1">Total Average Weight</th>' +
                                 '                    </tr>' +
@@ -206,16 +210,22 @@
                                 shipment += '<tr id="'+ details.shipper_id+'"><td class="align-middle shipper">'+details.shipper+'</td>';
                                 shipment += '<td class="align-middle text-center booked"><button class="btn btn-sm btn-outline-info">'+details.booked+'</button></td>';
                                 shipment += '<td class="align-middle text-center received"><button class="btn btn-sm btn-outline-info">'+details.received+'</button></td>';
+                                shipment += '<td class="align-middle text-center received"><button class="btn btn-sm btn-outline-info">'+details.delivered+'</button></td>';
+                                shipment += '<td class="align-middle text-center received"><button class="btn btn-sm btn-outline-info">'+details.returned+'</button></td>';
                                 shipment += '<td class="align-middle">'+ details.total_actual_weight +'</td>';
                                 shipment += '<td class="align-middle">'+ details.total_average_weight +'</td></tr>';
                                 total_booked = total_booked + details.booked;
                                 total_received = total_received + details.received;
+                                total_delivered += details.delivered;
+                                total_returned += details.returned;
                                 total_actual_weight += parseFloat(details.total_actual_weight);
                                 total_average_weight += parseFloat(details.total_average_weight);
                             });
                             shipment += '<tr id="total"><td class="align-middle shipper">Total</td>';
                             shipment += '<td class="align-middle text-center booked">'+total_booked+'</td>';
                             shipment += '<td class="align-middle text-center received">'+total_received+'</td>';
+                            shipment += '<td class="align-middle text-center received">'+total_delivered+'</td>';
+                            shipment += '<td class="align-middle text-center received">'+total_returned+'</td>';
                             shipment += '<td class="align-middle">'+total_actual_weight+'</td>';
                             shipment += '<td class="align-middle">'+total_average_weight+'</td></tr>';
                             shipment += '</tbody></table>';
@@ -237,6 +247,8 @@
                                     {name: 'shipper', class: 'align-middle shipper'},
                                     {name: 'booked', class: 'align-middle booked'},
                                     {name: 'received', class: 'align-middle received'},
+                                    {name: 'delivered', class: 'align-middle delivered'},
+                                    {name: 'returned', class: 'align-middle returned'},
                                     {name: 'total_weight', class: 'align-middle text-center total_weight'},
                                     {name: 'total_average_weight', class: 'align-middle text-center total_average_weight'}
 
