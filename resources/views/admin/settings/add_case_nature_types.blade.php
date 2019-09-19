@@ -140,6 +140,12 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#case_nature_type_form').keydown(function(event){
+            if(event.keyCode == 13) {
+                event.preventDefault();
+                $("#add_type_button").trigger('click');
+            }
+        });
             $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Case Nature",
