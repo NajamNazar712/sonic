@@ -332,35 +332,55 @@
                 allowClear:true
             });
 
-            var thirtydays = '{{ $thirtyday }}';
-            var today = '{{ $today }}';
-            $('#search_date_from').pickadate({
+
+            var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: false,
-                min: new Date(thirtydays),
-                max : new Date(today),
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                        var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                        var currentDate = moment(old_date_formatted);
+
+                        var to_date_formatted = $('input[name="search_date_to_formatted"]').val();
+                        var toDate = moment(to_date_formatted);
+
+                        if (currentDate.format('x') > toDate.format('x')) {
+                            to_date.pickadate('picker').clear();
+                        }
+
+                        var afterDate = currentDate.add(30, 'days');
+                        to_date.pickadate('picker').set({'select': afterDate.toDate()   ,'max': afterDate.toDate()},{muted: true});
+
+
                     }
                 }
             });
-            $('#search_date_to').pickadate({
+            var to_date = $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
-                max : new Date(today),
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    // if (context.select) {
-                    //     $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
-                    // }
+                    if (context.select) {
+                        var current_date_formatted = $('input[name="search_date_to_formatted"]').val();
+                        var currentDate = moment(current_date_formatted);
+
+                        var from_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                        var fromDate = moment(from_date_formatted);
+
+                        if (currentDate.format('x') < fromDate.format('x')) {
+                            from_date.pickadate('picker').clear();
+                        }
+
+                        var beforeDate = currentDate.subtract(30, 'days');
+                        from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
+                    }
                 }
             });
             // $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
