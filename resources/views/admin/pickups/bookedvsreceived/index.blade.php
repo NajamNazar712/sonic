@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Booked VS Received')
+@section('title', 'Booked VS Received VS Delivered VS Returned')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Booked VS Received
+                    Booked VS Received VS Delivered VS Returned
                 </h1>
 
                 <div class="card">
@@ -21,8 +21,17 @@
                             <div class="row mb-2 justify-content-center">
                                 <div class="col">
                                     <div class="form-group">
+                                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                                                @foreach($shippers as $shipper)
+                                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                                @endforeach
+                                            </select>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
 
-                                            <select name="search_city" id="search_city" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                                            <select name="search_city" id="search_city" class="form-control select2">
                                                 @foreach($cities as $city)
                                                     <option value="{{$city->id}}">{{$city->name}}</option>
                                                 @endforeach
@@ -61,6 +70,7 @@
                             <input type="hidden" name="city_id" id="city_id">
                             <input type="hidden" name="date_from" id="date_from">
                             <input type="hidden" name="date_to" id="date_to">
+                            <input type="hidden" name="shipper_id" id="shipper_id">
                                 <div id="booked_table_div" style="min-height: 300px;"></div>
                             </div>
                         </div>
@@ -105,6 +115,42 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="delivered_shipments" role="dialog" aria-labelledby="delivered_shipments_title" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="delivered_shipments_title">Delivered Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="returned_shipments" role="dialog" aria-labelledby="returned_shipments_title" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="returned_shipments_title">Returned Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -122,6 +168,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
@@ -130,7 +177,13 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_form #search_date_from').pickadate({
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipper',
+                width:'100%',
+                allowClear:true
+            });
+
+            var from_date = $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -139,11 +192,24 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                        var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                        var currentDate = moment(old_date_formatted);
+
+                        var to_date_formatted = $('input[name="search_date_to_formatted"]').val();
+                        var toDate = moment(to_date_formatted);
+
+                        if (currentDate.format('x') > toDate.format('x')) {
+                            to_date.pickadate('picker').clear();
+                        }
+
+                        var afterDate = currentDate.add(30, 'days');
+                        to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
+
+
                     }
                 }
             });
-            $('#search_form #search_date_to').pickadate({
+            var to_date = $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -152,7 +218,18 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                        var current_date_formatted = $('input[name="search_date_to_formatted"]').val();
+                        var currentDate = moment(current_date_formatted);
+
+                        var from_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                        var fromDate = moment(from_date_formatted);
+
+                        if (currentDate.format('x') < fromDate.format('x')) {
+                            from_date.pickadate('picker').clear();
+                        }
+
+                        var beforeDate = currentDate.subtract(30, 'days');
+                        from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
                     }
                 }
             });
@@ -164,12 +241,14 @@
                 },
                 submitHandler: function(form) {
 
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    // $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
+                    var shipper_select = $('#search_shipper').val();
                     var city_select = $('#search_city').val();
                     var search_from = $('input[name="search_date_from_formatted"]').val();
                     var search_to = $('input[name="search_date_to_formatted"]').val();
 
+                    $('#shipper_id').val(shipper_select);
                     $('#city_id').val(city_select);
                     $('#date_from').val(search_from);
                     $('#date_to').val(search_to);
@@ -178,6 +257,7 @@
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
+                            'shipper_select': shipper_select,
                             'city_select': city_select,
                             'search_from': search_from,
                             'search_to': search_to,
@@ -189,25 +269,45 @@
                             var shipment = '';
                             var total_booked = 0;
                             var total_received = 0;
+                            var total_delivered = 0;
+                            var total_returned = 0;
+                            var total_actual_weight = 0;
+                            var total_average_weight = 0;
                             shipment += '<table class="table table-bordered datatable " id="datatable" style="z-index: 3;">' +
                                 '                    <thead>' +
                                 '                    <tr class="bg-primary white">' +
                                 '                        <th class="border-primary border-darken-1">Shipper</th>' +
                                 '                        <th class="border-primary border-darken-1">Booked</th>' +
                                 '                        <th class="border-primary border-darken-1">Received</th>' +
+                                '                        <th class="border-primary border-darken-1">Delivered</th>' +
+                                '                        <th class="border-primary border-darken-1">Returned</th>' +
+                                '                        <th class="border-primary border-darken-1">Total Actual Weight</th>' +
+                                '                        <th class="border-primary border-darken-1">Total Average Weight</th>' +
                                 '                    </tr>' +
                                 '                    </thead>';
                             shipment += '<tbody>';
                             $.each(data.shipments,function (id,details) {
-                                shipment += '<tr id="'+ details.shipper_id+'"><td class="align-middle shipper">'+details.shipper+'</td>';
+                                shipment += '<tr id="'+ id+'"><td class="align-middle shipper">'+details.shipper+'</td>';
                                 shipment += '<td class="align-middle text-center booked"><button class="btn btn-sm btn-outline-info">'+details.booked+'</button></td>';
-                                shipment += '<td class="align-middle text-center received"><button class="btn btn-sm btn-outline-info">'+details.received+'</button></td></tr>';
+                                shipment += '<td class="align-middle text-center received"><button class="btn btn-sm btn-outline-info">'+details.received+'</button></td>';
+                                shipment += '<td class="align-middle text-center delivered"><button class="btn btn-sm btn-outline-info">'+details.delivered+'</button></td>';
+                                shipment += '<td class="align-middle text-center returned"><button class="btn btn-sm btn-outline-info">'+details.returned+'</button></td>';
+                                shipment += '<td class="align-middle">'+ details.total_actual_weight +'</td>';
+                                shipment += '<td class="align-middle">'+ details.total_average_weight +'</td></tr>';
                                 total_booked = total_booked + details.booked;
                                 total_received = total_received + details.received;
+                                total_delivered += details.delivered;
+                                total_returned += details.returned;
+                                total_actual_weight += parseFloat(details.total_actual_weight);
+                                total_average_weight += parseFloat(details.total_average_weight);
                             });
                             shipment += '<tr id="total"><td class="align-middle shipper">Total</td>';
                             shipment += '<td class="align-middle text-center booked">'+total_booked+'</td>';
-                            shipment += '<td class="align-middle text-center received">'+total_received+'</td></tr>';
+                            shipment += '<td class="align-middle text-center received">'+total_received+'</td>';
+                            shipment += '<td class="align-middle text-center received">'+total_delivered+'</td>';
+                            shipment += '<td class="align-middle text-center received">'+total_returned+'</td>';
+                            shipment += '<td class="align-middle">'+total_actual_weight+'</td>';
+                            shipment += '<td class="align-middle">'+total_average_weight+'</td></tr>';
                             shipment += '</tbody></table>';
                             $('#booked_table_div').html('');
                             $('#booked_table_div').html(shipment);
@@ -226,7 +326,11 @@
                                 columns: [
                                     {name: 'shipper', class: 'align-middle shipper'},
                                     {name: 'booked', class: 'align-middle booked'},
-                                    {name: 'received', class: 'align-middle received'}
+                                    {name: 'received', class: 'align-middle received'},
+                                    {name: 'delivered', class: 'align-middle delivered'},
+                                    {name: 'returned', class: 'align-middle returned'},
+                                    {name: 'total_weight', class: 'align-middle text-center total_weight'},
+                                    {name: 'total_average_weight', class: 'align-middle text-center total_average_weight'}
 
                                 ],
                                 initComplete: function() {
@@ -242,13 +346,15 @@
 
 
             });
-            $('body').on('click', 'tr td.booked button', function() {
+            var route = '{!! route('admin.tracking.index') !!}';
+            $('body').on('click', 'tr td', function() {
                 var shipper_id = parseInt($(this).parents('tr').attr('id'));
                 var city = $('#city_id').val();
                 var date_from = $('#date_from').val();
                 var date_to = $('#date_to').val();
 
-                $.ajax({
+                if($(this).hasClass('booked')){
+                    $.ajax({
                     url: '{!! route('admin.pickups.bookedvsreceived.booked') !!}',
                     method: 'POST',
                     data: {
@@ -262,24 +368,22 @@
                     if (data.status == 1) {
                         var tracking_numbers = '';
 
-                        $.each(data.shipments, function(index, tracking_number) {
-                            tracking_numbers += tracking_number.tracking_number + '<br/>';
-                        });
+                        if(data.shipments.length != 0){
+                            $.each(data.shipments, function(index, tracking_number) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number.tracking_number+' target="_blank">'+tracking_number.tracking_number+'</a></u><br>';
+                            });
+                        }
+                        else{
+                            tracking_numbers = 'No Data found!';
+                        }
 
                         $('#booked_shipments .modal-body').html(tracking_numbers);
 
                         $('#booked_shipments').modal('show');
                     }
                 });
-
-            });
-            $('body').on('click', 'tr td.received button', function() {
-                var shipper_id = parseInt($(this).parents('tr').attr('id'));
-                var city = $('#city_id').val();
-                var date_from = $('#date_from').val();
-                var date_to = $('#date_to').val();
-
-                $.ajax({
+                }else if($(this).hasClass('received')){
+                    $.ajax({
                     url: '{!! route('admin.pickups.bookedvsreceived.received') !!}',
                     method: 'POST',
                     data: {
@@ -293,9 +397,14 @@
                     if (data.status == 1) {
                         var tracking_numbers = '';
 
-                        $.each(data.shipments, function(index, tracking_number) {
-                            tracking_numbers += tracking_number.tracking_number + '<br/>';
-                        });
+                        if(data.shipments.length != 0){
+                            $.each(data.shipments, function(index, tracking_number) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number.tracking_number+' target="_blank">'+tracking_number.tracking_number+'</a></u><br>';
+                            });
+                        }
+                        else{
+                            tracking_numbers = 'No Data found!';
+                        }
 
                         $('#received_shipments .modal-body').html(tracking_numbers);
 
@@ -303,6 +412,65 @@
                     }
                 });
 
+                }else if($(this).hasClass('delivered')){
+                    $.ajax({
+                    url: '{!! route('admin.pickups.bookedvsreceived.delivered') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'shipper_id':shipper_id,
+                        'city_id': city,
+                        'search_from': date_from,
+                        'search_to': date_to,
+                    }
+                }).done(function (data) {
+                    if (data.status == 1) {
+                        var tracking_numbers = '';
+
+                        if(data.shipments.length != 0){
+                            $.each(data.shipments, function(index, tracking_number) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number.tracking_number+' target="_blank">'+tracking_number.tracking_number+'</a></u><br>';
+                            });
+                        }
+                        else{
+                            tracking_numbers = 'No Data found!';
+                        }
+
+                        $('#delivered_shipments .modal-body').html(tracking_numbers);
+
+                        $('#delivered_shipments').modal('show');
+                    }
+                });
+                }else if($(this).hasClass('returned')){
+                    $.ajax({
+                    url: '{!! route('admin.pickups.bookedvsreceived.returned') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'shipper_id':shipper_id,
+                        'city_id': city,
+                        'search_from': date_from,
+                        'search_to': date_to,
+                    }
+                }).done(function (data) {
+                    if (data.status == 1) {
+                        var tracking_numbers = '';
+                        if(data.shipments.length != 0){
+                            $.each(data.shipments, function(index, tracking_number) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number.tracking_number+' target="_blank">'+tracking_number.tracking_number+'</a></u><br>';
+                            });
+                        }
+                        else{
+                            tracking_numbers = 'No Data found!';
+                        }
+                        
+
+                        $('#returned_shipments .modal-body').html(tracking_numbers);
+
+                        $('#returned_shipments').modal('show');
+                    }
+                });
+                }
             });
 
         });
