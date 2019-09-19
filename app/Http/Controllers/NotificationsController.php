@@ -84,21 +84,25 @@ class NotificationsController extends Controller
 
             $shipper = User::find($reference_1_id);
             $sales_person = SalePersonTag::where('user_id',$reference_1_id)->where('status', 0)->first();
-            $cc = Admin::find($sales_person->admin_id)->email;
+            $cc = array();
             $bcc = array();
+            $cc[] = Admin::find($sales_person->admin_id)->email;
+
+
             $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->where('admin_roles.department_id', 6)->where('admin_hubs.hub_id','=', $shipper->city_id);
 
             if ($admins->exists()) {
                   $bcc = $admins->pluck('admins.email')->toArray();
             }
 
-//            $to = $shipper->email;
               if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
                   $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
               }else{
                   $to = $shipper->email;
               }
-
+              if (empty($bcc)) {
+                  $bcc = NULL;
+              }
             foreach ($fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
                 if ($key == 'account_id') {
