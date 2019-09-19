@@ -145,11 +145,11 @@
             @endif
 
 
-            @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105, 44, 47, 48, 49, 126], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105, 44, 47, 48, 49, 126, 262], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-motorcycle"></i>Last Mile</span></a>
                     <ul class="menu-content">
 
-                        @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105, 262], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Delivery</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(33, session('permissions')))
@@ -189,6 +189,10 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(32, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.sameday.index')}}">Same-Day</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(262, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.delivery.fake_status.log.index')}}">Log Fake Status</a></li>
                                     @endif
 
                                 </ul>
@@ -438,7 +442,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 258, 259], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 258, 259, 263], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-file-text-o"></i>Reports</span></a>
 
                     <ul class="menu-content">
@@ -585,6 +589,11 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(259, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.booked_and_cancelled.index') }}">Booked And Cancelled</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(263, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.fake_status_shipments.index') }}">Fake
+                                    Statuses Shipments</a></li>
                         @endif
                     </ul>
                 </li>

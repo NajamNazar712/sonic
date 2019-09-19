@@ -611,6 +611,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\DeliveryController@fake_status_remove_index')->name('index');
             Route::get('list', 'Admins\DeliveryController@fake_status_remove_list')->name('list');
             Route::post('remove', 'Admins\DeliveryController@fake_status_remove')->name('remove');
+            Route::prefix('log')->name('log.')->group(function () {
+                Route::get('', 'Admins\DeliveryController@log_fake_statuses_index')->name('index');
+                Route::post('store', 'Admins\DeliveryController@log_fake_statuses_store')->name('store');
+            });
         });
         Route::prefix('replacement')->name('replacement.')->group(function () {
             Route::prefix('not_collected')->name('not_collected.')->group(function () {
@@ -1173,6 +1177,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('booked_and_cancelled')->name('booked_and_cancelled.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@booked_and_cancelled_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@booked_and_cancelled_list')->name('list');
+        });
+
+        Route::prefix('fake_status_shipments')->name('fake_status_shipments.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@fake_status_shipments_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@fake_status_shipments_list')->name('list');
         });
     });
 

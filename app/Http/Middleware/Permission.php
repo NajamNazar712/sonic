@@ -191,6 +191,8 @@ class Permission
             'delivery.replacement.collected.change_booking_type' => 207,
             'delivery.replacement.logs.index' => 208,
             'delivery.replacement.logs.list' => 208,
+            'delivery.fake_status.log.index' => 262,
+            'delivery.fake_status.log.list' => 262,
 
             'return.index' => 44,
             'return.list' => 44,
@@ -367,6 +369,8 @@ class Permission
             'reports.consignee_details.list' => 258,
             'reports.booked_and_cancelled.index' => 259,
             'reports.booked_and_cancelled.list' => 259,
+            'reports.fake_status_shipments.index' => 263,
+            'reports.fake_status_shipments.index' => 263,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
