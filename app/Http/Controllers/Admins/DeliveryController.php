@@ -781,6 +781,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
                             <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
+                            <td class="color primary"><strong>Item Qty</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
                             <td class="color primary"><strong>Special Instructions</strong></td>
                             <td class="color primary"><strong>Remarks</strong></td>
@@ -831,6 +832,9 @@ class DeliveryController extends Controller
                     <td class="'.$class.'">' . $shipment->booking_type->booking_type . '</td>
                 ';
                 }
+
+                $shipment_details_row_start .= '
+                    <td class="'.$class.'">' . $shipment->items->sum('quantity') . '</td>';
 
                 if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
                     $shipment_details_row_start .= '
