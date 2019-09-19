@@ -1684,7 +1684,6 @@ class ReturnController extends Controller
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
                     }else{
                         $new_return_note_shipments[] = $parcel->tracking_number;
-                        NotificationsController::send(39, $shipment_id);
                     }
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment_id])->update(['status'=>1]);
                 }
