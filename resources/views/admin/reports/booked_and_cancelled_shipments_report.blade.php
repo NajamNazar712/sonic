@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Booked Amd Cancelled Shipments Report')
+@section('title', 'Booked And Cancelled Shipments Report')
 
 @section('content')
     <h1 class="mb-1">
-        Booked Amd Cancelled Shipments Report
+        Booked And Cancelled Shipments Report
     </h1>
 
     <div class="card">
@@ -273,7 +273,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Booked Amd Cancelled Shipments Report',
+                        title: 'Booked And Cancelled Shipments Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],

@@ -135,7 +135,7 @@ class AdminTrackingController extends Controller
                         if($shipment->booked_by == 1){
                             $journey_details['status'] .= ' (Main User)';
                         }
-                        else{
+                        else if($shipment->booked_by == 2){
                             $journey_details['status'] .= ' (Substitute User)';
                         }
                     }

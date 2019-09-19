@@ -5454,5 +5454,48 @@ class AdminReportsController extends Controller
         }
         return $datatable->make(true);
     }
+
+    public function fake_status_shipments_index(){
+        $riders = DB::connection('reports')->table('riders')->get(['id','name']);
+        $destinations = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
+        $hubs = DB::connection('reports')->table('cities')->where('status',1)->select('id','name')->get();
+        return view('admin.reports.fake_statuses_shipments_report')->with(['riders' => $riders, 'hubs' => $hubs, 'destinations' => $destinations]);
+    }
+
+    public function fake_status_shipments_list(request $request){
+        $delivery_note = DB::connection('reports')->table('delivery_note_shipments')->join('delivery_notes as dn','dn.id', '=', 'delivery_note_shipments.delivery_note_id')
+            ->leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
+            ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
+            ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+            ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
+            ->leftjoin('users as u', 'u.id', '=', 's.user_id')
+            ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at')
+            ->where('delivery_note_shipments.fake_status', 1);
+
+
+        $datatables = Datatables::of($delivery_note)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            });
+        if ($rider = $request->get('rider')) {
+            $datatables->where('r.id', '=', $rider);
+        }
+        if ($hub = $request->get('hub')) {
+            $datatables->where('h.id', $hub);
+        }
+        if ($destination = $request->get('destination')) {
+            $datatables->where('dc.id', $destination);
+        }
+        if ($tracking_number = $request->get('search_tracking_no')) {
+            $datatables->where('s.tracking_number', $tracking_number);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('delivery_note_shipments.fake_status_updated_at', [$from, $to]);
+        }
+        return $datatables->make(true);
+    }
 }
 
