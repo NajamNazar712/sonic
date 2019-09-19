@@ -12,9 +12,12 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
-                    <div class="form-group">
-                        <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Tracking Number">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Tracking Number">
+                        </div>
                     </div>
+
                     <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
