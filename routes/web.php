@@ -474,6 +474,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminPickupsController@bookedvsreceived_list')->name('list');
             Route::post('booked', 'Admins\AdminPickupsController@bookedvsreceived_booked_list')->name('booked');
             Route::post('received', 'Admins\AdminPickupsController@bookedvsreceived_received_list')->name('received');
+            Route::post('delivered', 'Admins\AdminPickupsController@bookedvsreceived_delivered_list')->name('delivered');
+            Route::post('returned', 'Admins\AdminPickupsController@bookedvsreceived_returned_list')->name('returned');
         });
     });
     Route::prefix('delivery')->name('delivery.')->group(function(){

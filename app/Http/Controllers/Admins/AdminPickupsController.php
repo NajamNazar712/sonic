@@ -1989,154 +1989,142 @@ class AdminPickupsController extends Controller
           $data[$shipper->id]['shipper'] = $shipper->name;
 //          $shipments = DB::connection('reports')->table('shipments');
           $data[$shipper->id]['booked'] = DB::connection('reports')->table('shipments')->join('user_shipping_infos AS usib', 'shipments.pickup_address_id', '=', 'usib.id')
-//            ->join('cities AS ocb', 'usib.city_id', '=', 'ocb.id')
-            ->where('usib.city_id',$city)
+            ->where('usib.city_id','=',$city)
             ->where('shipments.shipper_status_id','!=',17)
             ->whereBetween('shipments.created_at',[$from,$to])
             ->where('shipments.user_id','=', $shipper->id)
             ->count();
-            $data[$shipper->id]['received'] = DB::connection('reports')->table('shipments')->join('user_shipping_infos AS usia', 'shipments.pickup_address_id', '=', 'usia.id')
-//                ->join('cities AS oca', 'usia.city_id', '=', 'oca.id')
-                ->leftJoin('shipments_journey as rc', function ($join) use ($from, $to) {
-                    $join->on('rc.shipment_id', '=', 'shipments.id')
-                        ->where('rc.id','=',
-                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'))
-                        ->where('rc.shipper_status_id','=',20)
-                        ->whereBetween('rc.created_at',[$from,$to]);
-                })
-                ->where('usia.city_id',$city)
-                ->where('shipments.shipper_status_id','!=',17)
-                ->where('shipments.user_id','=', $shipper->id)
-                ->count();
+            $data[$shipper->id]['received'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($city) {
+                            $query->from('user_shipping_infos')
+                            ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                            ->whereExists(function($sub_query) use ($city) {
+                                $sub_query->from('cities')
+                                ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                                ->where('cities.id', $city);
+                            });
+                        })->whereExists(function ($query) use ($from, $to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$from, $to])
+                            ->where('shipper_status_id', 2);
+                        })->where('shipments.user_id', $shipper->id)->count();
+           $data[$shipper->id]['delivered'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($from, $to) {
+                           $query->from('shipments_journey')
+                           ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                           ->whereBetween('shipments_journey.created_at', [$from, $to])
+                           ->where('shipments_journey.verification','=', 1)
+                           ->whereIn('shipments_journey.shipper_status_id', [14,30,36,37]);
+                       })->where('shipments.user_id', $shipper->id)->where('shipments.consignee_city_id', $city)->count();
 
+           $data[$shipper->id]['returned'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($from, $to) {
+                           $query->from('shipments_journey')
+                           ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                           ->whereBetween('shipments_journey.created_at', [$from, $to])
+                           ->where('shipments_journey.shipper_status_id', 20);
+                       })->where('shipments.user_id', $shipper->id)->where('shipments.consignee_city_id', $city)->count();
+
+            $data[$shipper->id]['total_actual_weight']= DB::connection('reports')->table('shipments')->whereExists(function($query) use ($city) {
+                            $query->from('user_shipping_infos')
+                            ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                            ->whereExists(function($sub_query) use ($city) {
+                                $sub_query->from('cities')
+                                ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                                ->where('cities.id', $city);
+                            });
+                        })->whereExists(function ($query) use ($from, $to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$from, $to])
+                            ->where('shipper_status_id', 2);
+                        })->where('shipments.user_id', $shipper->id)->sum('shipments.actual_weight');
+          $average_weight = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($city) {
+                            $query->from('user_shipping_infos')
+                            ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                            ->whereExists(function($sub_query) use ($city) {
+                                $sub_query->from('cities')
+                                ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                                ->where('cities.id', $city);
+                            });
+                        })->whereExists(function ($query) use ($from, $to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$from, $to])
+                            ->where('shipper_status_id', 2);
+                        })->where('shipments.user_id', $shipper->id)->avg('shipments.actual_weight');
+                        if($average_weight != NULL){
+                          $data[$shipper->id]['total_average_weight'] = $average_weight;
+                        }else{
+                          $data[$shipper->id]['total_average_weight'] = 0;
+                        }
         }
-        return $data;
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id');
-            // ->join('cities AS oc', 'usi.city_id', '=', 'oc.id');
-        $shippers = $shipments->select('u.name as shipper','u.id as shipper_id')
-        ->where('shipments.shipper_status_id','!=',17)
-            ->whereBetween('shipments.created_at',[$from,$to])
-            ->groupBy('u.id')->get();
-        return $shippers;
-            foreach ($shippers as $key => $value) {
-              $data['shipper'][] = $value->shipper;
-              $data['id'][] = $value->shipper_id;
-              $data['booked'][] = $shipments->where('usi.city_id',$city)
-                ->where('shipments.shipper_status_id','!=',17)
-                ->whereBetween('shipments.created_at',[$from,$to])
-                ->groupBy('u.id')->count();
-            }
-        return $data;
-        $data['booked'] = $shipments->where('usi.city_id',$city)
-            ->where('shipments.shipper_status_id','!=',17)
-            ->whereBetween('shipments.created_at',[$from,$to])
-            ->groupBy('u.id')->get();
-            return $data;
-        $received = $shipments->leftJoin('shipments_journey as ar', function($join) use ($from, $to){
-            $join->on('ar.shipment_id', '=', 'shipments.id')
-            ->where('ar.shipper_status_id', '=', 2)
-            ->whereBetween('ar.created_at',[$from,$to]);
-        });
-        
-        $shipments = $shipments->leftJoin('shipments_journey as dd', function($join) use ($from, $to){
-            $join->on('dd.shipment_id', '=', 'shipments.id')
-            ->where('dd.id','=',
-                DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'))
-                ->whereIn('dd.shipper_status_id',[14,30,36])
-                ->whereBetween('dd.created_at',[$from,$to]);
-        });
-        $shipments = $shipments->leftJoin('shipments_journey as rc', function ($join) use ($from, $to) {
-                $join->on('rc.shipment_id', '=', 'shipments.id')
-                    ->where('rc.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'))
-                    ->where('rc.shipper_status_id','=',20)
-                    ->whereBetween('rc.created_at',[$from,$to]);
-            });
-        
-        $shipments = $shipments->select('shipments.id','u.name as shipper','u.id as shipper_id',DB::raw('count(shipments.id) as booked'),DB::raw('count(ar.id) as received'),DB::raw('count(dd.id) as delivered'),DB::raw('count(rc.id) as returned'));
-        
-        $shipments = $shipments->where('usi.city_id',$request->city_select)
-            ->where('shipments.shipper_status_id','!=',17)
-            ->whereBetween('shipments.created_at',[$from,$to])
-            ->groupBy('u.id')->get();
-            
-        
-            
-        // return $shipments;
-        // if($shipments){
-        //     foreach($shipments['shippers'] as $shipper){
 
-        //     }
-        // }
-//
-//        return $shipments;
-//        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
-//            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-//            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-//            ->leftJoin('shipments_journey as srec', function ($join) {
-//                $join->on('srec.shipment_id', '=', 'shipments.id')
-//                    ->where('srec.shipper_status_id','=',2);
-//            })
-//            ->select(['shipments.id','u.name as shipper','u.id as shipper_id',DB::raw('count(shipments.id) as booked'),DB::raw('count(srec.shipment_id) as received'),DB::connection('reports')->raw('(SELECT IFNULL(SUM(`s`.`actual_weight`),0) FROM `shipments` AS `s` INNER JOIN `shipments_journey` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`shipment_id` = `shipments`.`id`) AS `total_actual_weight`'),DB::connection('reports')->raw('(SELECT IFNULL(AVG(`s`.`actual_weight`),0) FROM `shipments` AS `s` INNER JOIN `shipments_journey` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`shipment_id` = `shipments`.`id`) AS `total_average_weight`')])
-//            ->where('usi.city_id',$request->city_select)
-//            ->where('shipments.shipper_status_id','!=',17)
-//            ->whereBetween('shipments.created_at',[$request->search_from,$request->search_to])
-//            ->groupBy('u.id')->get();
-//        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
-//            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-//            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-//            ->leftJoin('shipments_journey as srec', function ($join) {
-//                $join->on('srec.shipment_id', '=', 'shipments.id')
-//                    ->where('srec.shipper_status_id','=',2);
-//            })
-//            ->leftJoin('shipments_journey as sjd', function ($join) {
-//                $join->on('sjd.shipment_id', '=', 'shipments.id')
-//                    ->where('sjd.id','=',
-//                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'))
-//                    ->whereIn('sjd.shipper_status_id',[14,30,36]);
-//            })
-//            ->leftJoin('shipments_journey as rc', function ($join) {
-//                $join->on('rc.shipment_id', '=', 'shipments.id')
-//                    ->where('rc.id','=',
-//                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20)'));
-//            })
-//            ->select(['shipments.id','u.name as shipper','u.id as shipper_id',DB::raw('count(shipments.id) as booked'),DB::raw('count(srec.shipment_id) as received'),DB::raw('count(sjd.id) as delivered'),DB::raw('count(rc.id) as returned'),DB::connection('reports')->raw('IF (srec.id IS NOT NULL, SUM(shipments.actual_weight), 0) AS `total_actual_weight`'),DB::connection('reports')->raw('(SELECT IFNULL(AVG(`s`.`actual_weight`),0) FROM `shipments` AS `s` INNER JOIN `shipments_journey` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`shipment_id` = `shipments`.`id`) AS `total_average_weight`')])
-//            ->where('usi.city_id',$request->city_select)
-//            ->where('shipments.shipper_status_id','!=',17)
-//            ->whereBetween('shipments.created_at',[$request->search_from,$request->search_to])
-//            ->groupBy('u.id')->get();
-
-        return response()->json(['status'=>1,'shipments'=>$shipments]);
+        return response()->json(['status'=>1,'shipments'=>$data]);
 
     }
     public function bookedvsreceived_booked_list(Request $request){
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->select('shipments.tracking_number')
-            ->where('usi.city_id',$request->city_id)
-            ->where('u.id',$request->shipper_id)
+        $from = $request->search_from;
+        $to = $request->search_to;
+        $city = $request->city_id;
+        $shipper = $request->shipper_id;
+        $shipments = DB::connection('reports')->table('shipments')->join('user_shipping_infos AS usib', 'shipments.pickup_address_id', '=', 'usib.id')
+            ->where('usib.city_id','=',$city)
             ->where('shipments.shipper_status_id','!=',17)
-            ->whereBetween('shipments.created_at',[$request->search_from,$request->search_to])
+            ->whereBetween('shipments.created_at',[$from,$to])
+            ->where('shipments.user_id','=', $shipper)
+            ->select('shipments.tracking_number')
             ->get();
         return response()->json(['status'=>1,'shipments'=>$shipments]);
     }
     public function bookedvsreceived_received_list(Request $request){
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->leftJoin('shipments_journey as srec', function ($join) {
-                $join->on('srec.shipment_id', '=', 'shipments.id')
-                    ->where('srec.shipper_status_id','=',2);
-            })
-            ->select('shipments.tracking_number')
-            ->where('usi.city_id',$request->city_id)
-            ->where('u.id',$request->shipper_id)
-            ->where('srec.shipper_status_id',2)
-            ->where('shipments.shipper_status_id','!=',17)
-            ->whereBetween('shipments.created_at',[$request->search_from,$request->search_to])
-            ->get();
+      $from = $request->search_from;
+        $to = $request->search_to;
+        $city = $request->city_id;
+        $shipper = $request->shipper_id;
+      $shipments = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($city) {
+                            $query->from('user_shipping_infos')
+                            ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                            ->whereExists(function($sub_query) use ($city) {
+                                $sub_query->from('cities')
+                                ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                                ->where('cities.id', $city);
+                            });
+                        })->whereExists(function ($query) use ($from, $to) {
+                            $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$from, $to])
+                            ->where('shipper_status_id', 2);
+                        })->where('shipments.user_id', $shipper)
+                        ->select('shipments.tracking_number')->get();
+        
+        return response()->json(['status'=>1,'shipments'=>$shipments]);
+    }
+    public function bookedvsreceived_delivered_list(Request $request){
+        $from = $request->search_from;
+        $to = $request->search_to;
+        $city = $request->city_id;
+        $shipper = $request->shipper_id;
+      $shipments = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($from, $to) {
+                           $query->from('shipments_journey')
+                           ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                           ->whereBetween('shipments_journey.created_at', [$from, $to])
+                           ->where('shipments_journey.verification','=', 1)
+                           ->whereIn('shipments_journey.shipper_status_id', [14,30,36,37]);
+                       })->where('shipments.user_id', $shipper)->where('shipments.consignee_city_id', $city)->select('shipments.tracking_number')->get();
+        
+        return response()->json(['status'=>1,'shipments'=>$shipments]);
+    }
+    public function bookedvsreceived_returned_list(Request $request){
+        $from = $request->search_from;
+        $to = $request->search_to;
+        $city = $request->city_id;
+        $shipper = $request->shipper_id;
+      $shipments = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($from, $to) {
+                           $query->from('shipments_journey')
+                           ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                           ->whereBetween('shipments_journey.created_at', [$from, $to])
+                           ->where('shipments_journey.shipper_status_id', 20);
+                       })->where('shipments.user_id', $shipper)->where('shipments.consignee_city_id', $city)->select('shipments.tracking_number')->get();
+        
         return response()->json(['status'=>1,'shipments'=>$shipments]);
     }
     public function pending_all_bookings(Request $request){

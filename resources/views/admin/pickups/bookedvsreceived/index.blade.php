@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Booked VS Received')
+@section('title', 'Booked VS Received VS Delivered VS Returned')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Booked VS Received
+                    Booked VS Received VS Delivered VS Returned
                 </h1>
 
                 <div class="card">
@@ -92,6 +92,42 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="received_shipments_title">Received Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="delivered_shipments" role="dialog" aria-labelledby="delivered_shipments_title" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="delivered_shipments_title">Delivered Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="returned_shipments" role="dialog" aria-labelledby="returned_shipments_title" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="returned_shipments_title">Returned Shipment(s)</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -207,11 +243,11 @@
                                 '                    </thead>';
                             shipment += '<tbody>';
                             $.each(data.shipments,function (id,details) {
-                                shipment += '<tr id="'+ details.shipper_id+'"><td class="align-middle shipper">'+details.shipper+'</td>';
+                                shipment += '<tr id="'+ id+'"><td class="align-middle shipper">'+details.shipper+'</td>';
                                 shipment += '<td class="align-middle text-center booked"><button class="btn btn-sm btn-outline-info">'+details.booked+'</button></td>';
                                 shipment += '<td class="align-middle text-center received"><button class="btn btn-sm btn-outline-info">'+details.received+'</button></td>';
-                                shipment += '<td class="align-middle text-center received"><button class="btn btn-sm btn-outline-info">'+details.delivered+'</button></td>';
-                                shipment += '<td class="align-middle text-center received"><button class="btn btn-sm btn-outline-info">'+details.returned+'</button></td>';
+                                shipment += '<td class="align-middle text-center delivered"><button class="btn btn-sm btn-outline-info">'+details.delivered+'</button></td>';
+                                shipment += '<td class="align-middle text-center returned"><button class="btn btn-sm btn-outline-info">'+details.returned+'</button></td>';
                                 shipment += '<td class="align-middle">'+ details.total_actual_weight +'</td>';
                                 shipment += '<td class="align-middle">'+ details.total_average_weight +'</td></tr>';
                                 total_booked = total_booked + details.booked;
@@ -266,13 +302,15 @@
 
 
             });
-            $('body').on('click', 'tr td.booked button', function() {
+            var route = '{!! route('admin.tracking.index') !!}';
+            $('body').on('click', 'tr td', function() {
                 var shipper_id = parseInt($(this).parents('tr').attr('id'));
                 var city = $('#city_id').val();
                 var date_from = $('#date_from').val();
                 var date_to = $('#date_to').val();
 
-                $.ajax({
+                if($(this).hasClass('booked')){
+                    $.ajax({
                     url: '{!! route('admin.pickups.bookedvsreceived.booked') !!}',
                     method: 'POST',
                     data: {
@@ -286,24 +324,22 @@
                     if (data.status == 1) {
                         var tracking_numbers = '';
 
-                        $.each(data.shipments, function(index, tracking_number) {
-                            tracking_numbers += tracking_number.tracking_number + '<br/>';
-                        });
+                        if(data.shipments.length != 0){
+                            $.each(data.shipments, function(index, tracking_number) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number.tracking_number+' target="_blank">'+tracking_number.tracking_number+'</a></u><br>';
+                            });
+                        }
+                        else{
+                            tracking_numbers = 'No Data found!';
+                        }
 
                         $('#booked_shipments .modal-body').html(tracking_numbers);
 
                         $('#booked_shipments').modal('show');
                     }
                 });
-
-            });
-            $('body').on('click', 'tr td.received button', function() {
-                var shipper_id = parseInt($(this).parents('tr').attr('id'));
-                var city = $('#city_id').val();
-                var date_from = $('#date_from').val();
-                var date_to = $('#date_to').val();
-
-                $.ajax({
+                }else if($(this).hasClass('received')){
+                    $.ajax({
                     url: '{!! route('admin.pickups.bookedvsreceived.received') !!}',
                     method: 'POST',
                     data: {
@@ -317,9 +353,14 @@
                     if (data.status == 1) {
                         var tracking_numbers = '';
 
-                        $.each(data.shipments, function(index, tracking_number) {
-                            tracking_numbers += tracking_number.tracking_number + '<br/>';
-                        });
+                        if(data.shipments.length != 0){
+                            $.each(data.shipments, function(index, tracking_number) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number.tracking_number+' target="_blank">'+tracking_number.tracking_number+'</a></u><br>';
+                            });
+                        }
+                        else{
+                            tracking_numbers = 'No Data found!';
+                        }
 
                         $('#received_shipments .modal-body').html(tracking_numbers);
 
@@ -327,6 +368,65 @@
                     }
                 });
 
+                }else if($(this).hasClass('delivered')){
+                    $.ajax({
+                    url: '{!! route('admin.pickups.bookedvsreceived.delivered') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'shipper_id':shipper_id,
+                        'city_id': city,
+                        'search_from': date_from,
+                        'search_to': date_to,
+                    }
+                }).done(function (data) {
+                    if (data.status == 1) {
+                        var tracking_numbers = '';
+
+                        if(data.shipments.length != 0){
+                            $.each(data.shipments, function(index, tracking_number) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number.tracking_number+' target="_blank">'+tracking_number.tracking_number+'</a></u><br>';
+                            });
+                        }
+                        else{
+                            tracking_numbers = 'No Data found!';
+                        }
+
+                        $('#delivered_shipments .modal-body').html(tracking_numbers);
+
+                        $('#delivered_shipments').modal('show');
+                    }
+                });
+                }else if($(this).hasClass('returned')){
+                    $.ajax({
+                    url: '{!! route('admin.pickups.bookedvsreceived.returned') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'shipper_id':shipper_id,
+                        'city_id': city,
+                        'search_from': date_from,
+                        'search_to': date_to,
+                    }
+                }).done(function (data) {
+                    if (data.status == 1) {
+                        var tracking_numbers = '';
+                        if(data.shipments.length != 0){
+                            $.each(data.shipments, function(index, tracking_number) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number.tracking_number+' target="_blank">'+tracking_number.tracking_number+'</a></u><br>';
+                            });
+                        }
+                        else{
+                            tracking_numbers = 'No Data found!';
+                        }
+                        
+
+                        $('#returned_shipments .modal-body').html(tracking_numbers);
+
+                        $('#returned_shipments').modal('show');
+                    }
+                });
+                }
             });
 
         });
