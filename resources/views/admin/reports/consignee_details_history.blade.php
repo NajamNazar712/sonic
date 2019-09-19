@@ -183,14 +183,14 @@
                             head.push('S. No.');
                             head.push('Tracking Number');
                             head.push('Origin');
-                            head.push('Old Consignee City');
                             head.push('Old Consignee Name');
                             head.push('Old Consignee Phone No.');
                             head.push('Old Consignee Address');
-                            head.push('New Consignee City');
+                            head.push('Old Special Instruction');
                             head.push('New Consignee Name');
                             head.push('New Consignee Phone No.');
                             head.push('New Consignee Address');
+                            head.push('New Special Instruction');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
