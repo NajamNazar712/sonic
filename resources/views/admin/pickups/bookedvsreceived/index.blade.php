@@ -21,8 +21,17 @@
                             <div class="row mb-2 justify-content-center">
                                 <div class="col">
                                     <div class="form-group">
+                                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                                                @foreach($shippers as $shipper)
+                                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                                @endforeach
+                                            </select>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
 
-                                            <select name="search_city" id="search_city" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                                            <select name="search_city" id="search_city" class="form-control select2">
                                                 @foreach($cities as $city)
                                                     <option value="{{$city->id}}">{{$city->name}}</option>
                                                 @endforeach
@@ -61,6 +70,7 @@
                             <input type="hidden" name="city_id" id="city_id">
                             <input type="hidden" name="date_from" id="date_from">
                             <input type="hidden" name="date_to" id="date_to">
+                            <input type="hidden" name="shipper_id" id="shipper_id">
                                 <div id="booked_table_div" style="min-height: 300px;"></div>
                             </div>
                         </div>
@@ -158,6 +168,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
@@ -166,7 +177,13 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_form #search_date_from').pickadate({
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipper',
+                width:'100%',
+                allowClear:true
+            });
+
+            var from_date = $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -175,11 +192,24 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                        var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                        var currentDate = moment(old_date_formatted);
+
+                        var to_date_formatted = $('input[name="search_date_to_formatted"]').val();
+                        var toDate = moment(to_date_formatted);
+
+                        if (currentDate.format('x') > toDate.format('x')) {
+                            to_date.pickadate('picker').clear();
+                        }
+
+                        var afterDate = currentDate.add(30, 'days');
+                        to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
+
+
                     }
                 }
             });
-            $('#search_form #search_date_to').pickadate({
+            var to_date = $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -188,7 +218,18 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                        var current_date_formatted = $('input[name="search_date_to_formatted"]').val();
+                        var currentDate = moment(current_date_formatted);
+
+                        var from_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                        var fromDate = moment(from_date_formatted);
+
+                        if (currentDate.format('x') < fromDate.format('x')) {
+                            from_date.pickadate('picker').clear();
+                        }
+
+                        var beforeDate = currentDate.subtract(30, 'days');
+                        from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
                     }
                 }
             });
@@ -202,10 +243,12 @@
 
                     // $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
+                    var shipper_select = $('#search_shipper').val();
                     var city_select = $('#search_city').val();
                     var search_from = $('input[name="search_date_from_formatted"]').val();
                     var search_to = $('input[name="search_date_to_formatted"]').val();
 
+                    $('#shipper_id').val(shipper_select);
                     $('#city_id').val(city_select);
                     $('#date_from').val(search_from);
                     $('#date_to').val(search_to);
@@ -214,6 +257,7 @@
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
+                            'shipper_select': shipper_select,
                             'city_select': city_select,
                             'search_from': search_from,
                             'search_to': search_to,
