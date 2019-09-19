@@ -296,7 +296,7 @@
                                                 </div>
                                             </section>
 
-                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))
+                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || in_array(201, session('permissions')))
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
@@ -319,14 +319,16 @@
                                                                     <span class="">Internal</span>
                                                                 </button>
                                                             </fieldset>
-                                                            <fieldset
-                                                                    class="form-group position-relative has-icon-left m-0">
-                                                                <button id="chat_send" type="button"
-                                                                        class="btn btn-block btn-default chat_send" to="0">
-                                                                    <i class="la la-paper-plane-o d-lg-none"></i>
-                                                                    <span class="">Shipper</span>
-                                                                </button>
-                                                            </fieldset>
+                                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))
+                                                                <fieldset
+                                                                        class="form-group position-relative has-icon-left m-0">
+                                                                    <button id="chat_send" type="button"
+                                                                            class="btn btn-block btn-default chat_send" to="0">
+                                                                        <i class="la la-paper-plane-o d-lg-none"></i>
+                                                                        <span class="">Shipper</span>
+                                                                    </button>
+                                                                </fieldset>
+                                                            @endif
                                                         </div>
                                                     </form>
                                                 </section>
