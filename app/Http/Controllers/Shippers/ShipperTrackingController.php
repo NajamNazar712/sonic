@@ -134,6 +134,14 @@ class ShipperTrackingController extends Controller
 
                             $journey_details['date_time'] = $journey->created_at->toDateTimeString();
                             $journey_details['status'] = $journey->shipment_status_shipper->name;
+                            if(in_array($journey->shipper_status_id, [1])){
+                                if($shipment->booked_by == 1){
+                                    $journey_details['status'] .= ' (Main User)';
+                                }
+                                else{
+                                    $journey_details['status'] .= ' (Substitute User)';
+                                }
+                            }
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
 //                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';

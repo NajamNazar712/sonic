@@ -109,6 +109,9 @@ class ShipperShipmentBookController extends Controller
         $shipment->charges_mode_id = $charges_mode_id;
         $shipment->shipper_status_id = 1;
         $shipment->consignee_status_id = 1;
+
+
+        $shipment->booked_by = session('user_type');
         $shipment->save();
 
         $shipment_id = $shipment->id;
@@ -1480,6 +1483,8 @@ class ShipperShipmentBookController extends Controller
         $shipment->consignee_status_id = 1;
         $shipment->walk_in_delivery_type_id = $delivery_type_id;
         $shipment->charges_mode_id = $charges_mode_id;
+
+        $shipment->booked_by = session('user_type');
         $shipment->save();
 
         $shipment_id = $shipment->id;

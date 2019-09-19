@@ -53,6 +53,7 @@
                                         <th class="border-primary border-darken-1">Tracking No.</th>
                                         <th class="border-primary border-darken-1">Order ID</th>
                                         <th class="border-primary border-darken-1">Shipper</th>
+                                        <th class="border-primary border-darken-1">Booked By</th>
                                         <th class="border-primary border-darken-1">Service Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Reason</th>
@@ -585,7 +586,7 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[17, 'desc']],
+                order: [[18, 'desc']],
                 columns: [
                     {
                         data: 'id',
@@ -610,6 +611,7 @@
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'user_name', name: 'u.name', class: 'align-middle user_name'},
+                    {data: 'booked_by', name: 'shipments.booked_by', class: 'align-middle booked_by'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
@@ -665,6 +667,10 @@
                     var payment_select = '<select name="payment_select" id="payment_select" class="select2 form-control"></select>';
                     var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
+                    var user_select = '<select name="user_select" id="user_select" class="select2 form-control">' +
+                        '<option value="1">Main User</option>' +
+                        '<option value="2">Substitute User</option>' +
+                        '</select>';
 
                     this.api().columns().every(function (column_id) {
                         var column = this;
@@ -694,6 +700,11 @@
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
+                        } else if ($(header).is('.booked_by')) {
+                            $(user_select).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function () {
@@ -704,6 +715,13 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+                    $("#user_select").prepend('<option value="" selected></option>').select2({
+                        data: data,
+                        placeholder: "Select User",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data = $.map({!! $shipment_status !!}, function (obj) {
                         obj.id = obj.id;

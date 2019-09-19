@@ -1245,7 +1245,7 @@ class ReturnController extends Controller
                         $dropdown .= $shift_shipment_button;
                     }
 
-                    if($result->status == 2){
+                    if($result->status == 3){
                         $dropdown .= $return_image_upload;
                     }
 
