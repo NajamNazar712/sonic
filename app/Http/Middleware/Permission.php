@@ -516,6 +516,8 @@ class Permission
             'settings.crm_case_nature_types.index' => 260,
             'settings.crm_case_nature_types.list' => 260,
             'settings.crm_case_nature_types.store' => 260,
+            'settings.return_confirmation_pending_shipment_selection_time.index.list' => 253,
+            'settings.return_confirmation_pending_shipment_selection_time.store' => 253,
 
 
 
