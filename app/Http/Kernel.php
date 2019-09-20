@@ -62,5 +62,6 @@ class Kernel extends HttpKernel
 
         'APIToken' => \App\Http\Middleware\APIToken::class,
         'Permission' => \App\Http\Middleware\Permission::class,
+        'APIThrottle' => \App\Http\Middleware\APIThrottle::class,
     ];
 }
