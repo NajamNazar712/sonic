@@ -257,6 +257,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@air_waybill_printing_count_store')->name('store');
         });
     });
+    Route::prefix('daily_visit')->name('daily_visit.')->group(function () {
+        Route::get('', 'Shippers\ShipperDailyVisitController@daily_visit_index')->name('index');
+        Route::post('store', 'Shippers\ShipperDailyVisitController@daily_visit_store')->name('store');
+    });
 
 });
 //Admin Routes Start
