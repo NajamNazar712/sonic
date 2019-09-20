@@ -1937,7 +1937,7 @@ class NotificationsController extends Controller
               foreach ($shipments as $shipment) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first();
 
-                if ($shipment_journey && $shipment_journey->verification && Carbon::parse($shipment_journey->created_at)->greaterThanOrEqualTo($yesterday)->lessThan($today)) {
+                if ($shipment_journey && $shipment_journey->verification && Carbon::parse($shipment_journey->created_at)->greaterThanOrEqualTo($yesterday) && Carbon::parse($shipment_journey->created_at)->lessThan($today)) {
                   $details = array();
 
                   $details['service_type'] = $shipment->booking_type->booking_type;
@@ -1990,13 +1990,13 @@ class NotificationsController extends Controller
                   if (strpos($body, '[company_name]') !== FALSE) {
                     $body = str_replace('[company_name]', $shipper->name, $body);
                   }
+                  if (ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                      $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+                  }
+                  else {
+                      $to = $shipper->email;
+                  }
 
-//                  $to = $shipper->email;
-                    if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
-                        $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
-                    }else{
-                        $to = $shipper->email;
-                    }
                   $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
 
                   $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
