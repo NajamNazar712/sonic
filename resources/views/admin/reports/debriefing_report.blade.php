@@ -23,6 +23,15 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                @foreach($shipping_modes as $mode)
+                                    <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="search_zone" id="search_zone" class="form-control select2">
                                 @foreach($zones as $zone)
                                     <option value="{{$zone->id}}">{{$zone->name}}</option>
@@ -103,6 +112,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipping Mode',
+                width:'100%',
+                allowClear:true
+            });
 
             $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Zone',
@@ -147,6 +161,7 @@
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
+                        'search_shipping_mode' : search_shipping_mode,
                         'search_date' : search_date,
                         'search_hub' : search_hub,
                         'search_zone' : search_zone
@@ -196,11 +211,13 @@
             var search_date = $('input[name="search_date_formatted"]').val();
             var search_hub = $('#search_hub').val();
             var search_zone = $('#search_zone').val();
+            var search_shipping_mode = $('#search_shipping_mode').val();
 
             $('#search_filter_btn').on('click', function() {
                 search_date = $('input[name="search_date_formatted"]').val();
                 search_hub = $('#search_hub').val();
                 search_zone = $('#search_zone').val();
+                search_shipping_mode = $('#search_shipping_mode').val();
 
                 list();
             });
@@ -209,8 +226,8 @@
                 search_date = $('input[name="search_date_formatted"]').val();
                 search_hub = $('#search_hub').val();
                 search_zone = $('#search_zone').val();
-
-                window.open('{!! route('admin.reports.debriefing.export') !!}?search_date=' + search_date + '&search_hub=' + search_hub + '&search_zone=' + search_zone, '_blank');
+                search_shipping_mode = $('#search_shipping_mode').val();
+                window.open('{!! route('admin.reports.debriefing.export') !!}?search_date=' + search_date + '&search_hub=' + search_hub + '&search_zone=' + search_zone + '&search_shipping_mode=' + search_shipping_mode, '_blank');
             });
         });
 

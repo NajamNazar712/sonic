@@ -3722,11 +3722,12 @@ class AdminReportsController extends Controller
     public function debriefing_index() {
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id','name')->get();
         $zones = DB::connection('reports')->table('zones')->get();
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
 
-        return view('admin.reports.debriefing_report')->with(['hubs' => $hubs, 'zones' => $zones]);
+        return view('admin.reports.debriefing_report')->with(['hubs' => $hubs, 'zones' => $zones, 'shipping_modes' => $shipping_modes]);
     }
 
-    private function debriefing_data($date, $hub, $zone, $export = FALSE) {
+    private function debriefing_data($date, $hub, $zone, $export = FALSE, $mode) {
         $settings = DB::connection('reports')->table('global_settings')->where('type', 'debriefing_report_arrival_cut_off_time')->first();
 
         if ($settings) {
@@ -3926,6 +3927,10 @@ class AdminReportsController extends Controller
                     $rows = $rows->select('s.tracking_number')
                     ->where('cities.hub_id', $hub->id);
 
+                    if($mode){
+                        $rows = $rows->where('shipments.shipping_mode_id', '=', $mode);
+                    }
+
                     if ($rows->exists()) {
                         $rows = $rows->groupBy('s.id');
 
@@ -4084,8 +4089,9 @@ class AdminReportsController extends Controller
         $date = $request->get('search_date');
         $hub = $request->get('search_hub');
         $zone = $request->get('search_zone');
+        $mode = $request->get('search_shipping_mode');
 
-        return $this->debriefing_data($date, $hub, $zone);
+        return $this->debriefing_data($date, $hub, $zone, $mode);
     }
 
     public function debriefing_export(Request $request) {
