@@ -64,7 +64,15 @@
                             </select>
                         </fieldset>
                     </div>
-
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                @foreach($shipping_modes as $mode)
+                                    <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -104,6 +112,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Current Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Arrival Date(A)</th>
@@ -215,6 +224,11 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
+            $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipping Mode',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Origin',
                 width:'100%',
@@ -299,6 +313,7 @@
                             'search_hub': $('#search_hub').val(),
                             'search_status': $('#search_status').val(),
                             'search_shipper': $('#search_shipper').val(),
+                            'search_shipping_mode': $('#search_shipping_mode').val(),
                             'search_from': $('input[name="from_date_formatted"]').val(),
                             'search_to': $('input[name="to_date_formatted"]').val()
                         },
@@ -315,6 +330,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Shipping Mode');
                             head.push('Current Status');
                             head.push('Payment Status');
                             head.push('Arrival Date(A)');
@@ -361,6 +377,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.shipping_mode);
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
                                 row.push(values.arrival_date);
@@ -437,6 +454,7 @@
                         d.search_hub = $('#search_hub').val();
                         d.search_status = $('#search_status').val();
                         d.search_shipper = $('#search_shipper').val();
+                        d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -454,6 +472,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'shipping_mode', name: 'shipping_modes.id', class: 'align-middle shipping_mode'},
                     {data: 'current_status', name: 'ss.name', class: 'align-middle current_status'},
                     {data: 'payment_status', name: 'sps.name', class: 'align-middle payment_status'},
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date'},

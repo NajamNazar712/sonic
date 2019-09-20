@@ -10,7 +10,15 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                            @foreach($shipping_mode as $mode)
+                                <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -106,6 +114,13 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Shipping Mode',
+                allowClear:true
+            }).bind('change', function() {
+                table.draw();
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -114,7 +129,8 @@
                         url: '{{ route('admin.return.confirmed.list') }}',
                         data: {
                             'page': 'all',
-                            'select_type': $('#select_type').val()
+                            'select_type': $('#select_type').val(),
+                            'search_shipping_mode': $('#search_shipping_mode').val()
                         },
                         success: function (result) {
                             head = [];
@@ -194,6 +210,7 @@
                     url:'{{ route('admin.return.confirmed.list') }}',
                     data: function (d) {
                         d.select_type = $('#select_type').val();
+                        d.search_shipping_mode = $('#search_shipping_mode').val()
                     }
                 },
                 rowId: 'shId',

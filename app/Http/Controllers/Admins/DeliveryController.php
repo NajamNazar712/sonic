@@ -110,7 +110,7 @@ class DeliveryController extends Controller
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
-        return Datatables::of($shipments)
+        $datatables = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
                     if ($shipments->complaint != null) {
@@ -204,8 +204,13 @@ class DeliveryController extends Controller
                 } else {
                     return '';
                 }
-            })
-            ->make(true);
+            });
+            if($mode = $request->get('search_shipping_mode')){
+                $datatables->where('sm.id', '=', $mode);
+            }
+           return $datatables->make(true);
+
+
     }
 
     public function delivery_note_index()

@@ -255,6 +255,9 @@ class AdminCargoController extends Controller
         else {
             $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37, 49, 55]);
         }
+        if($mode = $request->get('search_shipping_mode')){
+            $datatables->where('sm.id', '=', $mode);
+        }
 
         return $datatables->make(true);
     }

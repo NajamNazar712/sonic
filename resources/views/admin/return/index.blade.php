@@ -10,16 +10,28 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div class="col">
-                    <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                        <div class="form-group">
-                            <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-                        </div>
+                <div class="row justify-content-center">
 
-                        <div class="form-group ml-1">
-                            <button type="submit" class="btn btn-primary">Search</button>
-                        </div>
-                    </form>
+                    <div class="col-3">
+                        <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                            @foreach($shipping_mode as $mode)
+                                <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    <div class="col-5">
+                        <form id="track_form" class="form-inline mb-1 " novalidate="novalidate">
+                            <div class="form-group">
+                                <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                            </div>
+
+                            <div class="form-group ml-1">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -201,6 +213,13 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Shipping Mode',
+                allowClear:true
+            }).bind('change', function() {
+                table.draw();
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -209,6 +228,7 @@
                         url: '{{ route('admin.return.list') }}',
                         data: {
                             'page': 'all',
+                            'search_shipping_mode': $('#search_shipping_mode').val()
                         },
                         success: function (result) {
                             head = [];
@@ -532,6 +552,7 @@
                     url: '{{ route('admin.return.list') }}',
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                        d.search_shipping_mode = $('#search_shipping_mode').val();
                     }
                 },
                 rowId: 'shId',
