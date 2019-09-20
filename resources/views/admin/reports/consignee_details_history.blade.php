@@ -40,7 +40,7 @@
                     </div>
 
                     <div class="col-2">
-                        <button type="button" id="search_filter_btn" class="btn btn-primary"><i class="la la-search"></i> Search</button>
+                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
                 </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">

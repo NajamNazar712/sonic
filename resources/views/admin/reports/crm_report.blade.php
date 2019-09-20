@@ -236,7 +236,7 @@
                 allowClear:true
             });
             $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Status',
+                placeholder:'Search CRM Status',
                 width:'100%',
                 allowClear:true
             });

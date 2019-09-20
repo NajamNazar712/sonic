@@ -12,61 +12,62 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
-                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Tracking Number">
-                        </div>
-                        <div class="form-group ml-1">
+                    <div class="col-4">
+                        <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Tracking Number">
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="riders" class="select2" id="riders">
                                 @foreach($riders as $rider)
                                     <option value="{{ $rider->id }}">{{ $rider->name }}</option>
                                 @endforeach
                             </select>
-                        </div>
-
-                        <div class="form-group ml-1">
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="hubs" class="select2" id="hubs">
                                 @foreach($hubs as $hub)
                                     <option value="{{ $hub->id }}">{{ $hub->name }}</option>
                                 @endforeach
                             </select>
-                        </div>
-                        <div class="form-group ml-1">
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="destinations" class="select2" id="destinations">
                                 @foreach($destinations as $destination)
                                     <option value="{{ $destination->id }}">{{ $destination->name }}</option>
                                 @endforeach
                             </select>
-                        </div>
-
-                        <div class="form-group input-group ml-1">
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)">
+                            <input type="text" name="search_date_from" class="form-control bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)" data-value="">
                         </div>
-
-
-                        <div class="form-group input-group ml-1">
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Search Date (To)" disabled>
+                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Search Date (To)" data-value="">
                         </div>
-
-
-                        <div class="col-2 mt-2">
-                            <button type="button" id="search_filter_btn" class="btn btn-primary"><i class="la la-search"></i> Search</button>
-                        </div>
-                    </form>
-
+                    </div>
+                    <div class="col-2">
+                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                    </div>
                 </div>
+
+                {{--</div>--}}
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -154,27 +155,27 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_form #search_tracking_no').inputmask({
+            $('#search_tracking_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
             });
-            $('#search_form #riders').prepend('<option value="" selected="selected"></option>').select2({
-                width: '200px',
+            $('#riders').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
                 placeholder: 'Select Rider',
                 allowClear:true
             });
-            $('#search_form #hubs').prepend('<option value="" selected="selected"></option>').select2({
-                width: '200px',
+            $('#hubs').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
                 placeholder: 'Select Hub',
                 allowClear:true
             });
-            $('#search_form #destinations').prepend('<option value="" selected="selected"></option>').select2({
-                width: '200px',
+            $('#destinations').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
                 placeholder: 'Select Destination',
                 allowClear:true
             });
-            $('#search_form #search_date_from').pickadate({
+            $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -187,7 +188,7 @@
                     }
                 }
             });
-            $('#search_form #search_date_to').pickadate({
+            $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
