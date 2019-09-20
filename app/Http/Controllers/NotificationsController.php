@@ -2042,6 +2042,8 @@ class NotificationsController extends Controller
                     $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
                   }
 
+                  $cc[] = 'info@trax.pk';
+
                   self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
 
                   $subject = $original_subject;
