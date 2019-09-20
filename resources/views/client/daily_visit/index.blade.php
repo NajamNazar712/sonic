@@ -28,7 +28,7 @@
                             <input type="text" name="phone_no" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                         </div>
                         <div class="col form-group">
-                            <input type="email" name="email_address" placeholder="Email Address" class="form-control" data-rule-required="true" data-msg-required="Email Address is required">
+                            <input type="email" name="email_address" placeholder="Email Address*" class="form-control" data-rule-required="true" data-msg-required="Email Address is required">
                         </div>
                         <div class="col form-group">
                             <select name="lead_status" class="select2" id="lead_status" data-rule-required="true" data-msg-required="Lead Status is required">
