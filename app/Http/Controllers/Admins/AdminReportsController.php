@@ -4090,7 +4090,6 @@ class AdminReportsController extends Controller
         $hub = $request->get('search_hub');
         $zone = $request->get('search_zone');
         $mode = $request->get('search_shipping_mode');
-
         return $this->debriefing_data($date, $hub, $zone, $mode);
     }
 
@@ -4098,6 +4097,7 @@ class AdminReportsController extends Controller
         $date = $request->get('search_date');
         $hub = $request->get('search_hub');
         $zone = $request->get('search_zone');
+        $mode = $request->get('search_shipping_mode');
 
         $file_name = 'debriefing_report_';
 
@@ -4117,7 +4117,7 @@ class AdminReportsController extends Controller
 
         $details[] = ['Hubs', 'Delivered', 'Delivery Unsuccessful', 'On Hold', 'Status Not Updated', 'Confirmation Pending', 'Fake Status', 'Total', 'Ratio', 'Delivery Note Pending', 'Total', 'Ratio', 'Delivery Tomorrow', 'Grand Total', 'Ratio'];
 
-        $result = $this->debriefing_data($date, $hub, $zone, TRUE);
+        $result = $this->debriefing_data($date, $hub, $zone, TRUE, $mode);
 
         if ($result['status'] == 0) {
             $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_updated', 'confirmation_pending', 'fake_status', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];
