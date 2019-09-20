@@ -257,6 +257,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@air_waybill_printing_count_store')->name('store');
         });
     });
+    Route::prefix('daily_visit')->name('daily_visit.')->group(function () {
+        Route::get('', 'Shippers\ShipperDailyVisitController@daily_visit_index')->name('index');
+        Route::post('store', 'Shippers\ShipperDailyVisitController@daily_visit_store')->name('store');
+    });
 
 });
 //Admin Routes Start
@@ -1184,6 +1188,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('fake_status_shipments')->name('fake_status_shipments.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@fake_status_shipments_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@fake_status_shipments_list')->name('list');
+        });
+        Route::prefix('daily_visit')->name('daily_visit.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@daily_visit_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@daily_visit_list')->name('list');
+            Route::get('business_card/{business_card}', 'Admins\AdminReportsController@business_card')->name('business_card');
+            Route::get('location_photo/{location_photo}', 'Admins\AdminReportsController@location_photo')->name('location_photo');
         });
     });
 

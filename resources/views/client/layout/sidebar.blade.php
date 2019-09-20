@@ -82,6 +82,8 @@
                     </ul>
                 </li>
             @endif
+            <li class=" nav-item"><a href="{{ route('cod.daily_visit.index') }}"><span class="menu-title"><i class="la la-clipboard"></i>Daily Visit Form</span></a></li>
+
             <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title"><i class="la la-crosshairs"></i>Tracking</span></a></li>
 
         </ul>
