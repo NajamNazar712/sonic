@@ -4090,7 +4090,7 @@ class AdminReportsController extends Controller
         $hub = $request->get('search_hub');
         $zone = $request->get('search_zone');
         $mode = $request->get('search_shipping_mode');
-        return $this->debriefing_data($date, $hub, $zone, $mode);
+        return $this->debriefing_data($date, $hub, $zone, NULL, $mode);
     }
 
     public function debriefing_export(Request $request) {
