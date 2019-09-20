@@ -595,6 +595,11 @@
                             <li><a class="menu-item" href="{{ route('admin.reports.fake_status_shipments.index') }}">Fake
                                     Statuses Shipments</a></li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(263, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.daily_visit.index') }}">Daily
+                                    Visit</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

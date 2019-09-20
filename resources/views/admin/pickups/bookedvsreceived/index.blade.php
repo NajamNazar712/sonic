@@ -19,7 +19,7 @@
                             <form id="search_form" class="form" nonvalidate="nonvalidate" >
 
                             <div class="row mb-2 justify-content-center">
-                                <div class="col">
+                                <div class="col-4">
                                     <div class="form-group">
                                             <select name="search_shipper" id="search_shipper" class="form-control select2">
                                                 @foreach($shippers as $shipper)
@@ -28,7 +28,7 @@
                                             </select>
                                     </div>
                                 </div>
-                                <div class="col">
+                                <div class="col-4">
                                     <div class="form-group">
 
                                             <select name="search_city" id="search_city" class="form-control select2">
@@ -38,7 +38,9 @@
                                             </select>
                                     </div>
                                 </div>
-                                <div class="col">
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-4">
                                     <div class="form-group input-group ">
                                         <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -49,7 +51,7 @@
                                         <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-rule-required="true" data-msg-required="Date is required">
                                     </div>
                                 </div>
-                                <div class="col">
+                                <div class="col-4">
                                     <div class="form-group input-group ">
                                         <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -60,7 +62,7 @@
                                         <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date is required">
                                     </div>
                                 </div>
-                                    <div class="col">
+                                    <div class="col-2">
                                         <button type="submit" id="search_filter_btn" class=" btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                     </div>
 
@@ -317,6 +319,7 @@
                                 buttons: [
                                     {
                                         extend: 'excel',
+                                        className:'btn btn-primary',
                                         title: 'Booked VS Received',
                                         text:'<i class="la la-file-excel-o"></i> Excel',
                                     },
