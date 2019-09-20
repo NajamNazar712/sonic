@@ -1425,4 +1425,69 @@ class APIController extends Controller
         return response()->json(['status' => 0, 'message' => 'Charges Calculated', 'information' => $information]);
       }
     }
+
+    public function shipment_track_public(Request $request) {
+      $rules = [
+        'tracking_number' => ['required', 'integer', 'digits_between:12,20', 'exists:shipments,tracking_number']
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $tracking_number = $request->tracking_number;
+
+        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+
+        $details = array();
+
+        $details['tracking_number'] = $tracking_number;
+
+        $shipper = $shipment->user;
+
+        $details['shipper']['name'] = $shipper->name;
+
+        $pickup = $shipment->pickup_address;
+
+        $details['pickup']['origin'] = $pickup->city->name;
+
+        $details['consignee']['name'] = $shipment->consignee_name;
+        $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+        $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+        $details['consignee']['destination'] = $shipment->consignee_city->name;
+        $details['consignee']['address'] = $shipment->consignee_address;
+
+        foreach ($shipment->items as $item) {
+          $item_details = array();
+
+          $item_details['order_id'] = $shipment->order_id;
+          $item_details['product_type'] = $item->product->product_name;
+          $item_details['description'] = $item->description;
+          $item_details['quantity'] = $item->quantity;
+
+          $details['order_information']['items'][] = $item_details;
+        }
+
+        foreach ($shipment->shipment_journey as $journey) {
+          if ($journey->consignee_status_id != NULL) {
+            if ($journey->verification) {
+              $journey_details = array();
+
+              $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+              $journey_details['status'] = $journey->shipment_status_consignee->name;
+
+              $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+
+              $details['tracking_history'][] = $journey_details;
+            }
+          }
+        }
+
+        return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
+      }
+    }
 }
