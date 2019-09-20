@@ -263,6 +263,9 @@ class ReturnController extends Controller
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
+        if($mode = $request->get('search_shipping_mode')){
+            $datatable->where('sm.id', '=', $mode);
+        }
         return $datatable->make(true);
     }
 
@@ -748,7 +751,8 @@ class ReturnController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })            ->filterColumn('return_pending_for', function ($query, $keyword) {
+            })
+            ->filterColumn('return_pending_for', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
                 if (strpos('shipper', $keyword) !== FALSE) {
@@ -786,7 +790,9 @@ class ReturnController extends Controller
                     return '';
                 }
             });
-
+        if($mode = $request->get('search_shipping_mode')){
+            $datatables->where('sm.id', '=', $mode);
+        }
         return $datatables->make(true);
     }
 

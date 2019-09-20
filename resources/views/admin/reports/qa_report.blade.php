@@ -11,40 +11,56 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div class="row mb-2 justify-content-center">
+
 
                     {{--<div class="col-3">--}}
                         {{--<fieldset class="form-group">--}}
                             {{--<input type="text" name="search_date" class="form-control bg-primary border-primary white rounded-right" id="search_date" placeholder="Search Date" data-value="">--}}
                         {{--</fieldset>--}}
                     {{--</div>--}}
-                    <form id="search_form" class="form-inline mb-1 " nonvalidate="nonvalidate">
 
-                    <div class="form-group input-group ml-1">
-                        <div class="input-group-prepend">
+                    <div class="row justify-content-center">
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                    @foreach($shipping_modes as $mode)
+                                        <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                             </span>
+                                </div>
+
+                                <input type="text" name="qa_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="qa_date_from" placeholder="Date (From)">
+                            </div>
                         </div>
 
-                        <input type="text" name="qa_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="qa_date_from" placeholder="Date (From)">
-                    </div>
-
-                    <div class="form-group input-group ml-1">
-                        <div class="input-group-prepend">
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                             </span>
+                                </div>
+
+                                <input type="text" name="qa_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="qa_date_to" placeholder="Date (To)">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                         </div>
 
-                        <input type="text" name="qa_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="qa_date_to" placeholder="Date (To)">
                     </div>
 
-                    </form>
-                    <div class="col-2">
-                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                    </div>
-                </div>
+
+
+
                 <div id="qa_table"></div>
                
             </div>
@@ -126,8 +142,12 @@
 
             var from_max = '{{ Carbon\Carbon::yesterday()}}';
 
-
-            $('#search_form #qa_date_from').pickadate({
+            $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Shipping Mode',
+                width:'100%',
+                allowClear:true
+            });
+            $('#qa_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -136,11 +156,11 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #qa_date_to').pickadate('picker').set('min', $('#search_form #qa_date_from').pickadate('picker').get('select'));
+                        $('#qa_date_to').pickadate('picker').set('min', $('#qa_date_from').pickadate('picker').get('select'));
                     }
                 }
             });
-            $('#search_form #qa_date_to').pickadate({
+            $('#qa_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -149,22 +169,35 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #qa_date_from').pickadate('picker').set('max', $('#search_form #qa_date_to').pickadate('picker').get('select'));
+                        $('#qa_date_from').pickadate('picker').set('max', $('#qa_date_to').pickadate('picker').get('select'));
                     }
                 }
             });
-
+            var flag = true;
             $('#search_filter_btn').on('click',function () {
-                    blockPagePermanently();
+                flag = true;
+                blockPagePermanently();
                 // var table = '';
 
                 var search_date_from = $('input[name="qa_date_from_formatted"]').val();
                 var search_date_to = $('input[name="qa_date_to_formatted"]').val();
-                if((search_date_from !== '') && (search_date_to !== '' )){
+                var search_shipping_mode = $('#search_shipping_mode').val();
+                if(search_date_from == null){
+                    flag = false;
+                    var error = "Select Date From!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(search_date_from == null || search_date_to == null){
+                    flag = false;
+                    var error = "Select Date To!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+                if(flag){
                     $.ajax({
                         url: '{!! route('admin.reports.qa.list') !!}',
                         method: 'POST',
                         data: {
+                            'search_shipping_mode': search_shipping_mode,
                             'search_date_from': search_date_from,
                             'search_date_to': search_date_to,
                             '_token': '{{ csrf_token() }}'

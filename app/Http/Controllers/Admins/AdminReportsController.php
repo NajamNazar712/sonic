@@ -460,7 +460,8 @@ class AdminReportsController extends Controller
         $shipper = DB::connection('reports')->table('users')->get(['id','name']);
         $hubs = DB::connection('reports')->table('cities')->select(['id','name'])->where('hub',1)->get();
         $statuses = DB::connection('reports')->table('shipment_status')->get(['id','name']);
-        return view('admin.reports.lead_time_report')->with(['cities'=>$cities,'statuses'=>$statuses,'hubs'=>$hubs,'shipper'=>$shipper]);
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
+        return view('admin.reports.lead_time_report')->with(['cities'=>$cities,'statuses'=>$statuses,'hubs'=>$hubs,'shipper'=>$shipper, 'shipping_modes' => $shipping_modes]);
     }
     public function lead_time_list(Request $request){
         $shipments = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
@@ -470,6 +471,7 @@ class AdminReportsController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->join('shipping_modes','shipping_modes.id', '=', 'shipments.shipping_mode_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -586,7 +588,7 @@ class AdminReportsController extends Controller
             })            ->leftjoin('cargo_consignments as ccss','ccss.id', '=', 'cccc.cargo_consignment_id')
             ->leftjoin('cargo_consignments as ccssr','ccssr.id', '=', 'ccrc.cargo_consignment_id')
             ->leftjoin('shipment_status as lssv','lssv.id','=','lsjv.shipper_status_id')
-            ->select('fatstatus.created_at as first_attempt','ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as first_delivery_note_id','dnss.delivery_note_id as last_delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','lstatus.created_at as last_status_date','fs.name as first_status','ls.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc', 'ccss.id as cargo_number', 'ccss.created_at as cargo_date_time', 'ccssr.type as return_type', 'ccssr.id as return_cargo_number', 'ccssr.created_at as return_cargo_date_time')
+            ->select('fatstatus.created_at as first_attempt','ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as first_delivery_note_id','dnss.delivery_note_id as last_delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link', 'shipments.shipping_mode_id','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','lstatus.created_at as last_status_date','fs.name as first_status','ls.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc', 'ccss.id as cargo_number', 'ccss.created_at as cargo_date_time', 'ccssr.type as return_type', 'ccssr.id as return_cargo_number', 'ccssr.created_at as return_cargo_date_time','shipping_modes.mode as shipping_mode')
             ->groupBy('shipments.id');
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -732,6 +734,9 @@ class AdminReportsController extends Controller
         if($status = $request->get('search_status')){
             $lead_time->where('ss.id','=',$status);
         }
+        if($mode = $request->get('search_shipping_mode')){
+            $lead_time->where('shipments.shipping_mode_id','=',$mode);
+        }
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
@@ -740,11 +745,13 @@ class AdminReportsController extends Controller
         return $lead_time->make(true);
     }
     public function qa_index(Request $request){
-        return view('admin.reports.qa_report');
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
+        return view('admin.reports.qa_report')->with('shipping_modes', $shipping_modes);
     }
     public function qa_list(Request $request){
         $from = $request->search_date_from;
         $to = $request->search_date_to;
+        $mode = $request->search_shipping_mode;
         $qa_data = array();
         if (session('role_id') != 1) {
             $stations = DB::connection('reports')->table('cities')->whereIn('hub_id', session('hubs'))->get();
@@ -771,7 +778,7 @@ class AdminReportsController extends Controller
                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                     ->whereBetween('created_at', [$from, $to])
                     ->where('shipper_status_id', 2);
-                })->count();
+                })->where('shipments.shipping_mode_id', '=', $mode)->count();
             $qa_data[$hub->name]['cargo_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -790,9 +797,9 @@ class AdminReportsController extends Controller
                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                     ->whereBetween('created_at', [$from, $to])
                     ->where('shipper_status_id', 3);
-                })->count();
-            $qa_data[$hub->name]['cargo_transit_pending'] = DB::connection('reports')->table('cargo_consignments')->whereBetween('created_at',[$from,$to])->where('status_id','!=',3)->where('origin_hub_id',$hub->id)->count();
-            $qa_data[$hub->name]['cargo_transit_resolved'] = DB::connection('reports')->table('cargo_consignments')->whereBetween('updated_at',[$from,$to])->where('status_id','=',3)->where('origin_hub_id',$hub->id)->count();
+                })->where('shipments.shipping_mode_id', '=', $mode)->count();
+            $qa_data[$hub->name]['cargo_transit_pending'] = DB::connection('reports')->table('cargo_consignments')->whereBetween('created_at',[$from,$to])->where('status_id','!=',3)->where('origin_hub_id',$hub->id)->where('cargo_consignments.shipping_mode_id', '=', $mode)->count();
+            $qa_data[$hub->name]['cargo_transit_resolved'] = DB::connection('reports')->table('cargo_consignments')->whereBetween('updated_at',[$from,$to])->where('status_id','=',3)->where('origin_hub_id',$hub->id)->where('cargo_consignments.shipping_mode_id', '=', $mode)->count();
             $pending_status = array(2, 4, 6, 7, 8, 9, 13, 15); //for pending deliveries
             $not_pending_status = array(1, 3, 5, 10, 11,12,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47); //for pending deliveries
             $qa_data[$hub->name]['deliveries_pending'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
@@ -806,6 +813,7 @@ class AdminReportsController extends Controller
                     ->whereBetween('created_at', [$from, $to])
                     ->whereIn('shipper_status_id', $not_pending_status);
                 })
+                ->where('shipments.shipping_mode_id', '=', $mode)
                 ->count();
 
             $qa_data[$hub->name]['deliveries_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
@@ -819,7 +827,7 @@ class AdminReportsController extends Controller
                     ->whereBetween('created_at', [$from, $to])
                     ->where('shipper_status_id', 5);
                 })
-                ->count();
+                ->where('shipments.shipping_mode_id', '=', $mode)->count();
             $qa_data[$hub->name]['receive_deliveries_pending'] = DB::connection('reports')->table('delivery_notes')->whereBetween('created_at',[$from,$to])->where('status',0)->count();
             $qa_data[$hub->name]['receive_deliveries_resolved'] = DB::connection('reports')->table('delivery_notes')->whereBetween('created_at',[$from,$to])->where('status',1)->count();
             $qa_data[$hub->name]['return_marked_pending'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
@@ -832,7 +840,7 @@ class AdminReportsController extends Controller
                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                     ->whereBetween('created_at', [$from, $to])
                     ->where('shipper_status_id', 12);
-                })->count();
+                })->where('shipments.shipping_mode_id', '=', $mode)->count();
             $qa_data[$hub->name]['return_marked_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
                     ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
@@ -843,7 +851,7 @@ class AdminReportsController extends Controller
                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                     ->whereBetween('created_at', [$from, $to])
                     ->whereIn('shipper_status_id', [13, 20]);
-                })->count();
+                })->where('shipments.shipping_mode_id', '=', $mode)->count();
             $qa_data[$hub->name]['return_confirmed_pending'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
                     ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
@@ -854,7 +862,7 @@ class AdminReportsController extends Controller
                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                     ->whereBetween('created_at', [$from, $to])
                     ->where('shipper_status_id', 20);
-                })->count();
+                })->where('shipments.shipping_mode_id', '=', $mode)->count();
             $qa_data[$hub->name]['return_confirmed_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($hub) {
                     $query->from('cities')
                     ->where('shipments.consignee_city_id', '=', DB::raw('`cities`.`id`'))
@@ -865,7 +873,7 @@ class AdminReportsController extends Controller
                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                     ->whereBetween('created_at', [$from, $to])
                     ->whereIn('shipper_status_id', [21, 23]);
-                })->count();
+                })->where('shipments.shipping_mode_id', '=', $mode)->count();
             $qa_data[$hub->name]['return_cargo_pending'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -880,7 +888,7 @@ class AdminReportsController extends Controller
                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                     ->whereBetween('created_at', [$from, $to])
                     ->whereIn('shipper_status_id', [21, 26, 32]);
-                })->count();
+                })->where('shipments.shipping_mode_id', '=', $mode)->count();
             $qa_data[$hub->name]['return_cargo_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -895,7 +903,7 @@ class AdminReportsController extends Controller
                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                     ->whereBetween('created_at', [$from, $to])
                     ->whereIn('shipper_status_id', [22, 27, 33]);
-                })->count();
+                })->where('shipments.shipping_mode_id', '=', $mode)->count();
             $qa_data[$hub->name]['return_delivery_pending'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -910,7 +918,7 @@ class AdminReportsController extends Controller
                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                     ->whereBetween('created_at', [$from, $to])
                     ->whereIn('shipper_status_id', [22, 24, 27, 29, 33, 35]);
-                })->count();
+                })->where('shipments.shipping_mode_id', '=', $mode)->count();
             $qa_data[$hub->name]['return_delivery_resolved'] = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                     $query->from('user_shipping_infos')
                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -925,7 +933,7 @@ class AdminReportsController extends Controller
                     ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
                     ->whereBetween('created_at', [$from, $to])
                     ->whereIn('shipper_status_id', [22, 24, 27, 29, 33, 35]);
-                })->count();
+                })->where('shipments.shipping_mode_id', '=', $mode)->count();
             $qa_data[$hub->name]['return_receive_pending'] = DB::connection('reports')->table('return_notes')->whereBetween('created_at',[$from,$to])->where('hub_id',$hub->id)->where('status',0)->count();
             $qa_data[$hub->name]['return_receive_resolved'] = DB::connection('reports')->table('return_notes')->whereBetween('updated_at',[$from,$to])->where('hub_id',$hub->id)->where('status',1)->count();
         }
@@ -3723,11 +3731,12 @@ class AdminReportsController extends Controller
     public function debriefing_index() {
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id','name')->get();
         $zones = DB::connection('reports')->table('zones')->get();
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
 
-        return view('admin.reports.debriefing_report')->with(['hubs' => $hubs, 'zones' => $zones]);
+        return view('admin.reports.debriefing_report')->with(['hubs' => $hubs, 'zones' => $zones, 'shipping_modes' => $shipping_modes]);
     }
 
-    private function debriefing_data($date, $hub, $zone, $export = FALSE) {
+    private function debriefing_data($date, $hub, $zone, $export = FALSE, $mode) {
         $settings = DB::connection('reports')->table('global_settings')->where('type', 'debriefing_report_arrival_cut_off_time')->first();
 
         if ($settings) {
@@ -3927,6 +3936,10 @@ class AdminReportsController extends Controller
                     $rows = $rows->select('s.tracking_number')
                     ->where('cities.hub_id', $hub->id);
 
+                    if($mode){
+                        $rows = $rows->where('s.shipping_mode_id', '=', $mode);
+                    }
+
                     if ($rows->exists()) {
                         $rows = $rows->groupBy('s.id');
 
@@ -4085,14 +4098,15 @@ class AdminReportsController extends Controller
         $date = $request->get('search_date');
         $hub = $request->get('search_hub');
         $zone = $request->get('search_zone');
-
-        return $this->debriefing_data($date, $hub, $zone);
+        $mode = $request->get('search_shipping_mode');
+        return $this->debriefing_data($date, $hub, $zone, NULL, $mode);
     }
 
     public function debriefing_export(Request $request) {
         $date = $request->get('search_date');
         $hub = $request->get('search_hub');
         $zone = $request->get('search_zone');
+        $mode = $request->get('search_shipping_mode');
 
         $file_name = 'debriefing_report_';
 
@@ -4112,7 +4126,7 @@ class AdminReportsController extends Controller
 
         $details[] = ['Hubs', 'Delivered', 'Delivery Unsuccessful', 'On Hold', 'Status Not Updated', 'Confirmation Pending', 'Fake Status', 'Total', 'Ratio', 'Delivery Note Pending', 'Total', 'Ratio', 'Delivery Tomorrow', 'Grand Total', 'Ratio'];
 
-        $result = $this->debriefing_data($date, $hub, $zone, TRUE);
+        $result = $this->debriefing_data($date, $hub, $zone, TRUE, $mode);
 
         if ($result['status'] == 0) {
             $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_updated', 'confirmation_pending', 'fake_status', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];

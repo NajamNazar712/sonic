@@ -18,6 +18,15 @@
 							@include('admin.inc.messages')
 
 							<form id="shipment_type_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+
+                                <div class="form-group mr-1">
+                                    <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                        @foreach($shipping_mode as $mode)
+                                            <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
 								<div class="form-group">
 									<select name="shipment_type" class="select2" id="shipment_type">
 										<option value="" selected="selected"></option>
@@ -75,7 +84,8 @@
                         url: '{{ route('admin.cargo.pending.list') }}',
                         data: {
                             'page': 'all',
-                            'shipment_type': $('#shipment_type_search_form #shipment_type').val()
+                            'shipment_type': $('#shipment_type_search_form #shipment_type').val(),
+                            'search_shipping_mode': $('#shipment_type_search_form #search_shipping_mode').val()
                         },
                         success: function (result) {
                             head = [];
@@ -145,6 +155,7 @@
 					url: '{{ route('admin.cargo.pending.list') }}',
 					data: function (d) {
 						d.shipment_type = $('#shipment_type_search_form #shipment_type').val();
+						d.search_shipping_mode = $('#shipment_type_search_form #search_shipping_mode').val();
 					}
 				},
 				rowId: 'id',
@@ -273,7 +284,15 @@
 
 			$('#shipment_type_search_form #shipment_type').select2({
 				width: '150px',
-				placeholder: 'Shipment Type'
+				placeholder: 'Shipment Type',
+                allowClear:true
+			}).bind('change', function() {
+				table.draw();
+			});
+			$('#shipment_type_search_form #search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+				width: '150px',
+				placeholder: 'Shipping Mode',
+                allowClear:true
 			}).bind('change', function() {
 				table.draw();
 			});

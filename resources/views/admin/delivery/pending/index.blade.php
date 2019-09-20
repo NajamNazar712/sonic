@@ -11,6 +11,16 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                        @foreach($shipping_mode as $mode)
+                                            <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
@@ -119,7 +129,13 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
-
+        $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Shipping Mode',
+            allowClear:true
+        }).bind('change', function() {
+            table.draw();
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -128,6 +144,7 @@
                     url: '{{ route('admin.delivery.pending.list') }}',
                     data: {
                         'page': 'all',
+                        'search_shipping_mode': $('#search_shipping_mode').val()
                     },
                     success: function (result) {
                         head = [];
@@ -199,7 +216,12 @@
                     processing: data_table_loader
                 },
             serverSide: true,
-            ajax: '{{ route('admin.delivery.pending.list') }}',
+            ajax:{
+                url: '{{ route('admin.delivery.pending.list') }}',
+                data: function (d) {
+                    d.search_shipping_mode = $('#search_shipping_mode').val();
+                }
+            },
             rowId: 'shId',
             order: [[16, 'desc']],
             columns: [
