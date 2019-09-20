@@ -1921,19 +1921,23 @@ class NotificationsController extends Controller
                   $return_confirmation_pending_shipment_selection_time = $settings->setting_value;
               }
               else {
-                  $return_confirmation_pending_shipment_selection_time = 5;
+                  $return_confirmation_pending_shipment_selection_time = 0;
               }
 
               $yesterday = Carbon::yesterday();
 
               $yesterday->hour = $return_confirmation_pending_shipment_selection_time;
 
+              $today = Carbon::today();
+
+              $today->hour = $return_confirmation_pending_shipment_selection_time;
+
               $user_wise_shipments = array();
 
               foreach ($shipments as $shipment) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first();
 
-                if ($shipment_journey && $shipment_journey->verification && Carbon::parse($shipment_journey->created_at)->startOfDay()->greaterThanOrEqualTo($yesterday)) {
+                if ($shipment_journey && $shipment_journey->verification && Carbon::parse($shipment_journey->created_at)->greaterThanOrEqualTo($yesterday)->lessThan($today)) {
                   $details = array();
 
                   $details['service_type'] = $shipment->booking_type->booking_type;
@@ -2041,8 +2045,6 @@ class NotificationsController extends Controller
                   if ($general_admins->exists()) {
                     $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
                   }
-
-                  $cc[] = 'info@trax.pk';
 
                   self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
 
