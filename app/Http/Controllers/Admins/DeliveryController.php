@@ -49,6 +49,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -4836,6 +4838,22 @@ class DeliveryController extends Controller
         }
         else{
             return redirect()->back()->with(['error' => 'Shipment with given Tracking Number not found!']);
+        }
+    }
+
+    static public function sdn_archive_directory(){
+
+        $files = File::glob(public_path() . '/uploads/sdn/*.*');
+        $now = Carbon::now();
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                $created = date("F d Y H:i:s.",filemtime($file));
+                $file_name = pathinfo($file);
+                if($now->diffInDays($created) > 30){
+                    Storage::disk('s3')->put( 'station_deposit_notes/'.$file_name['basename'], file_get_contents($file));
+                    File::delete($file);
+                }
+            }
         }
     }
 }

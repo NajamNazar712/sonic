@@ -448,7 +448,7 @@
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(113, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.pickups.bookedvsreceived.index') }}">Booked
-                                    VS Received</a></li>
+                                    VS Received VS Delivered VS Returned</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(64, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.pickup_note.index') }}">Pickup Notes

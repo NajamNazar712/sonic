@@ -320,7 +320,7 @@
                                     {
                                         extend: 'excel',
                                         className:'btn btn-primary',
-                                        title: 'Booked VS Received',
+                                        title: 'Booked VS Received VS Delivered VS Returned',
                                         text:'<i class="la la-file-excel-o"></i> Excel',
                                     },
                                 ],

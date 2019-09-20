@@ -203,6 +203,7 @@
                 {
                     extend: 'excel',
                     title: 'Pending Deliveries',
+                    className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },
                 'reset'
