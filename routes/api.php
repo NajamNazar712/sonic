@@ -41,7 +41,7 @@ Route::name('api.')->group(function () {
 		Route::post('charges_calculate', 'APIController@charges_calculate')->name('charges_calculate');
 	});
 
-	Route::middleware('APIThrottle:1,1')->prefix('shipment')->name('shipment.')->group(function() {
+	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {
 		Route::get('track/public', 'APIController@shipment_track_public')->name('track.public');
 	});
 });
