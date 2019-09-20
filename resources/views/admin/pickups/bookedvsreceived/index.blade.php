@@ -319,6 +319,7 @@
                                 buttons: [
                                     {
                                         extend: 'excel',
+                                        className:'btn btn-primary',
                                         title: 'Booked VS Received',
                                         text:'<i class="la la-file-excel-o"></i> Excel',
                                     },
