@@ -3928,7 +3928,7 @@ class AdminReportsController extends Controller
                     ->where('cities.hub_id', $hub->id);
 
                     if($mode){
-                        $rows = $rows->where('shipments.shipping_mode_id', '=', $mode);
+                        $rows = $rows->where('s.shipping_mode_id', '=', $mode);
                     }
 
                     if ($rows->exists()) {
