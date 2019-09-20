@@ -370,7 +370,11 @@ class Permission
             'reports.booked_and_cancelled.index' => 259,
             'reports.booked_and_cancelled.list' => 259,
             'reports.fake_status_shipments.index' => 263,
-            'reports.fake_status_shipments.index' => 263,
+            'reports.fake_status_shipments.list' => 263,
+            'reports.daily_visit.index' => 264,
+            'reports.daily_visit.list' => 264,
+            'reports.daily_visit.business_card' => 264,
+            'reports.daily_visit.location_photo' => 264,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

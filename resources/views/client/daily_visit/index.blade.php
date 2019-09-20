@@ -132,6 +132,7 @@
                         });
                     }
                     else{
+                        getLocation();
                         swal({
                             title: 'Please Wait!',
                             text: 'Uploading Form!',

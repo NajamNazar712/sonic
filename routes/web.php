@@ -1189,6 +1189,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@fake_status_shipments_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@fake_status_shipments_list')->name('list');
         });
+        Route::prefix('daily_visit')->name('daily_visit.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@daily_visit_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@daily_visit_list')->name('list');
+            Route::get('business_card/{business_card}', 'Admins\AdminReportsController@business_card')->name('business_card');
+            Route::get('location_photo/{location_photo}', 'Admins\AdminReportsController@location_photo')->name('location_photo');
+        });
     });
 
     //Reports end
