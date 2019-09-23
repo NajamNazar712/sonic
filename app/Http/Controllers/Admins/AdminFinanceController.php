@@ -1939,30 +1939,38 @@ class AdminFinanceController extends Controller
         if ($payment_type == 0) {
             $payment_shipment = PendingPaymentShipment::where('pending_payment_id', $payment_id)->where('shipment_id', $shipment_id)->latest()->first();
 
-            $payment = $payment_shipment->pending_payment;
+            if ($payment_shipment) {
+                $payment = $payment_shipment->pending_payment;
 
-            $total_shipments = $payment->total_shipments - 1;
+                $total_shipments = $payment->total_shipments - 1;
 
-            if ($total_shipments == 0) {
-                $payment->delete();
-            }
-            else {
-                $payment->total_shipments = $total_shipments;
-
-                if ($payment_shipment->type == 0) {
-                    $payment->delivered_shipments = $payment->delivered_shipments - 1;
-                }
-                if ($payment_shipment->type == 1) {
-                    $payment->returned_shipments = $payment->returned_shipments - 1;
+                if ($total_shipments == 0) {
+                    $payment->delete();
                 }
                 else {
-                    $payment->adjusted_shipments = $payment->adjusted_shipments - 1;
+                    $payment->total_shipments = $total_shipments;
+
+                    if ($payment_shipment->type == 0) {
+                        $delivered_shipments = $payment->delivered_shipments - 1;
+
+                        $payment->delivered_shipments = (($delivered_shipments > 0) ? $delivered_shipments : 0);
+                    }
+                    if ($payment_shipment->type == 1) {
+                        $returned_shipments = $payment->returned_shipments - 1;
+
+                        $payment->returned_shipments = (($returned_shipments > 0) ? $returned_shipments : 0);
+                    }
+                    else {
+                        $adjusted_shipments = $payment->adjusted_shipments - 1;
+
+                        $payment->adjusted_shipments = (($adjusted_shipments > 0) ? $adjusted_shipments : 0);
+                    }
+
+                    $payment->save();
                 }
 
-                $payment->save();
+                $payment_shipment->delete();
             }
-
-            $payment_shipment->delete();
         }
         else {
             $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment_id)->where('shipment_id', $shipment_id)->latest()->first();
@@ -2019,23 +2027,38 @@ class AdminFinanceController extends Controller
             if ($payment_type == 0) {
                 $payment_shipment = PendingPaymentShipment::find($payment_shipment_id);
 
-                $payment = $payment_shipment->pending_payment;
+                if ($payment_shipment) {
+                    $payment = $payment_shipment->pending_payment;
 
-                if ($payment_shipment->type == 0) {
-                    $payment->delivered_shipments = $payment->delivered_shipments - 1;
+                    $total_shipments = $payment->total_shipments - 1;
+
+                    if ($total_shipments == 0) {
+                        $payment->delete();
+                    }
+                    else {
+                        $payment->total_shipments = $total_shipments;
+
+                        if ($payment_shipment->type == 0) {
+                            $delivered_shipments = $payment->delivered_shipments - 1;
+
+                            $payment->delivered_shipments = (($delivered_shipments > 0) ? $delivered_shipments : 0);
+                        }
+                        if ($payment_shipment->type == 1) {
+                            $returned_shipments = $payment->returned_shipments - 1;
+
+                            $payment->returned_shipments = (($returned_shipments > 0) ? $returned_shipments : 0);
+                        }
+                        else {
+                            $adjusted_shipments = $payment->adjusted_shipments - 1;
+
+                            $payment->adjusted_shipments = (($adjusted_shipments > 0) ? $adjusted_shipments : 0);
+                        }
+
+                        $payment->save();
+                    }
+
+                    $payment_shipment->delete();
                 }
-                if ($payment_shipment->type == 1) {
-                    $payment->returned_shipments = $payment->returned_shipments - 1;
-                }
-                else {
-                    $payment->adjusted_shipments = $payment->adjusted_shipments - 1;
-                }
-
-                $payment->total_shipments = $payment->total_shipments - 1;
-
-                $payment->save();
-
-                $payment_shipment->delete();
             }
             else {
                 $payment_shipment = DonePaymentShipment::find($payment_shipment_id);
