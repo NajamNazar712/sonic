@@ -54,6 +54,11 @@
                                 </ul>
                             </li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(265, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.daily_visit.index') }}">Daily Visit Form</a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif

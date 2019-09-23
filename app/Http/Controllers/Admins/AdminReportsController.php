@@ -5520,14 +5520,15 @@ class AdminReportsController extends Controller
         $daily_visit = DB::connection('reports')->table('daily_visits')
             ->join('daily_visit_lead_statuses as dvls','dvls.id', '=', 'daily_visits.lead_status_id')
             ->leftjoin('users as u', 'u.id', '=', 'daily_visits.user_id')
-            ->select('u.name as user_name', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image');
+            ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
+            ->select('u.name as user_name', 'a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image');
 
 
         $datatables = Datatables::of($daily_visit)
         ->editColumn('b_c_photo', function ($dvr){
             $image = '<div class="text-center">';
             if($dvr->business_card_image != null){
-                $image .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.reports.daily_visit.business_card', [$dvr->business_card_image ]).' target="_blank">View</a></button>';
+                $image .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.daily_visit.business_card', [$dvr->business_card_image ]).' target="_blank">View</a></button>';
                 return $image;
             }
             else{
@@ -5537,7 +5538,7 @@ class AdminReportsController extends Controller
         ->editColumn('l_photo', function ($dvr){
             $image = '<div class="text-center">';
             if($dvr->location_image != null){
-                $image .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.reports.daily_visit.location_photo', [$dvr->location_image ]).' target="_blank">View</a></button>';
+                $image .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href='.route('admin.daily_visit.location_photo', [$dvr->location_image ]).' target="_blank">View</a></button>';
                 return $image;
             }
             else{
@@ -5555,16 +5556,6 @@ class AdminReportsController extends Controller
             }
         });
         return $datatables->make(true);
-    }
-    public function business_card($business_card){
-        $url = Storage::url('daily_visit/business_card/' . $business_card);
-
-        return view('admin.reports.view_daily_visit_photo')->with(['url' => $url]);
-    }
-    public function location_photo($location_photo){
-        $url = Storage::url('daily_visit/location/' . $location_photo);
-
-        return view('admin.reports.view_daily_visit_photo')->with(['url' => $url]);
     }
 }
 

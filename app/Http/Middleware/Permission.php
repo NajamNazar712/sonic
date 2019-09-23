@@ -40,6 +40,9 @@ class Permission
             'accounts.sister_account.merged_account.mapping.info' => 242,
             'accounts.sister_account.merged_account.mapping.submit' => 242,
 
+            'daily_visit.index' => 265,
+            'daily_visit.store' => 265,
+
 
             'pickups.pending.index' => 17,
             'pickups.pending.list' => 17,

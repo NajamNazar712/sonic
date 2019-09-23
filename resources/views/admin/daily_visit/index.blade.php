@@ -1,4 +1,4 @@
-@extends('client.layout.master')
+@extends('admin.layout.master')
 @section('title','Daily Visit Form')
 
 @section('content')
@@ -9,12 +9,19 @@
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
-                @include('client.inc.messages')
-                <form id="daily_visit_form" class="form-horizontal" method="post" action="{{route('cod.daily_visit.store')}}" enctype="multipart/form-data">
+                @include('admin.inc.messages')
+                <form id="daily_visit_form" class="form-horizontal" method="post" action="{{route('admin.daily_visit.store')}}" enctype="multipart/form-data">
                 @csrf
                     <div class="col justify-content-center">
                         <input type="hidden" name="latitude" id="latitude">
                         <input type="hidden" name="longitude" id="longitude">
+                        <div class="col form-group">
+                            <select name="shipper" class="select2" id="shipper" data-rule-required="true" data-msg-required="Shipper is required">
+                                @foreach($users as $user)
+                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="col form-group">
                             <input type="text" name="company_name" class="form-control" placeholder="Company Name*" data-rule-required="true" data-msg-required="Company Name is required" data-rule-maxlength="100" data-msg-maxlength="Company Name can be maximum 100 characters">
                         </div>
@@ -97,6 +104,10 @@
             $('#lead_status').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Lead Status*'
+            });
+            $('#shipper').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Shipper*'
             });
 
             $('.phone_number').inputmask({

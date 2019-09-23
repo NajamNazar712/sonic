@@ -1,25 +1,27 @@
 <?php
 
-namespace App\Http\Controllers\Shippers;
+namespace App\Http\Controllers\Admins;
 
 use App\DailyVisit;
 use App\Http\Models\DailyVisitLeadStatus;
+use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
-class ShipperDailyVisitController extends Controller
+class AdminDailyVisitController extends Controller
 {
-    public function __construct() {
-        $this->middleware('auth:web,substitute_users');
+    public function __construct()
+    {
+        $this->middleware('auth:admin');
 
         $this->middleware('Permission');
     }
-
     public function daily_visit_index(){
         $lead_statuses = DailyVisitLeadStatus::get(['id', 'name']);
-        return view('client.daily_visit.index')->with(['lead_statuses' => $lead_statuses]);
+        $users = User::where('status', 3)->get(['id', 'name']);
+        return view('admin.daily_visit.index')->with(['lead_statuses' => $lead_statuses, 'users' => $users]);
     }
 
     public function daily_visit_store(Request $request){
@@ -35,7 +37,8 @@ class ShipperDailyVisitController extends Controller
             $daily_visit->feedback = $request->feedback;
             $daily_visit->latitude = $request->latitude;
             $daily_visit->longitude = $request->longitude;
-            $daily_visit->user_id = Auth::id();
+            $daily_visit->user_id = $request->shipper;
+            $daily_visit->admin_id = Auth::id();
             $daily_visit->save();
 
             if ($request->hasFile('upload_bc_image')) {
@@ -65,5 +68,16 @@ class ShipperDailyVisitController extends Controller
         else{
             return redirect()->back()->with('error', 'Incomplete Information!');
         }
+    }
+
+    public function business_card($business_card){
+        $url = Storage::url('daily_visit/business_card/' . $business_card);
+
+        return view('admin.daily_visit.view_daily_visit_photo')->with(['url' => $url]);
+    }
+    public function location_photo($location_photo){
+        $url = Storage::url('daily_visit/location/' . $location_photo);
+
+        return view('admin.daily_visit.view_daily_visit_photo')->with(['url' => $url]);
     }
 }
