@@ -15,7 +15,7 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">User Name</th>
+                        <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Visit Data/Time</th>
                         <th class="border-primary border-darken-1">Company Name</th>
                         <th class="border-primary border-darken-1">Customer Name</th>
@@ -118,7 +118,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S. No.');
-                            head.push('User Name');
+                            head.push('Shipper');
                             head.push('Visit Date/Time');
                             head.push('Company Name');
                             head.push('Customer Name');
@@ -169,14 +169,6 @@
                 },
                 serverSide: true,ajax: {
                     url: '{{ route('admin.reports.daily_visit.list') }}',
-                    // data: function (d) {
-                    //     d.search_shipping_mode = $('#search_shipping_modes').val();
-                    //     d.search_service_type = $('#search_service_type').val();
-                    //     d.search_status = $('#search_status').val();
-                    //     d.search_shipper = $('#search_shipper').val();
-                    //     d.search_date_from = $('input[name="search_date_from_formatted"]').val();
-                    //     d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-                    // }
                 },
                 order: [[2, 'desc']],
                 columns: [

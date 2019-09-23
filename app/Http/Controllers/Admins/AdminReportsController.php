@@ -5545,10 +5545,10 @@ class AdminReportsController extends Controller
             }
         })
         ->editColumn('location', function ($dvr){
-            $image = '<div class="text-center">';
-            if($dvr->location_image != null){
-                $image .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $dvr->latitude . ',' . $dvr->longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
-                return $image;
+            $location = '<div class="text-center">';
+            if($dvr->latitude != null && $dvr->longitude != null){
+                $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $dvr->latitude . ',' . $dvr->longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                return $location;
             }
             else{
                 return '-';
