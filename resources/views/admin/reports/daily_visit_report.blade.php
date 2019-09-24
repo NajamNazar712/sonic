@@ -15,15 +15,15 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">User Name</th>
+                        <th class="border-primary border-darken-1">Admin Name</th>
                         <th class="border-primary border-darken-1">Visit Data/Time</th>
                         <th class="border-primary border-darken-1">Company Name</th>
                         <th class="border-primary border-darken-1">Customer Name</th>
-                        <th class="border-primary border-darken-1">Address</th>
+                        <th class="border-primary border-darken-1">Customer Address</th>
                         <th class="border-primary border-darken-1">Phone Number</th>
-                        <th class="border-primary border-darken-1">Email</th>
+                        <th class="border-primary border-darken-1">Email Address</th>
                         <th class="border-primary border-darken-1">Lead Status</th>
-                        <th class="border-primary border-darken-1">Feedback</th>
+                        <th class="border-primary border-darken-1">Meeting Feedback</th>
                         <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1">Photo of Location</th>
                         <th class="border-primary border-darken-1">Photo of Business Card</th>
@@ -118,15 +118,15 @@
                         success: function (result) {
                             head = [];
                             head.push('S. No.');
-                            head.push('User Name');
+                            head.push('Admin Name');
                             head.push('Visit Date/Time');
                             head.push('Company Name');
                             head.push('Customer Name');
-                            head.push('Address');
+                            head.push('Customer Address');
                             head.push('Phone Number');
-                            head.push('Email');
+                            head.push('Email Address');
                             head.push('Lead Status');
-                            head.push('Feedback');
+                            head.push('Meeting Feedback');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);

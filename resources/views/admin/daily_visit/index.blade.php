@@ -22,7 +22,7 @@
                             <input type="text" name="customer_name" class="form-control" placeholder="Customer Name*" data-rule-required="true" data-msg-required="Customer Name is required" data-rule-maxlength="100" data-msg-maxlength="Customer Name can be maximum 100 characters">
                         </div>
                         <div class="col form-group">
-                            <textarea name="customer_address" class="form-control" placeholder="Customer Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" rows="6"></textarea>
+                            <textarea name="customer_address" class="form-control" placeholder="Customer Address*" data-rule-required="true" data-msg-required="Customer Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" rows="6"></textarea>
                         </div>
                         <div class="col form-group">
                             <input type="text" name="phone_no" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
