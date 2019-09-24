@@ -37,7 +37,6 @@ class AdminDailyVisitController extends Controller
             $daily_visit->feedback = $request->feedback;
             $daily_visit->latitude = $request->latitude;
             $daily_visit->longitude = $request->longitude;
-            $daily_visit->user_id = $request->shipper;
             $daily_visit->admin_id = Auth::id();
             $daily_visit->save();
 

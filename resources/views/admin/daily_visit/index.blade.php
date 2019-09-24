@@ -16,13 +16,6 @@
                         <input type="hidden" name="latitude" id="latitude">
                         <input type="hidden" name="longitude" id="longitude">
                         <div class="col form-group">
-                            <select name="shipper" class="select2" id="shipper" data-rule-required="true" data-msg-required="Shipper is required">
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col form-group">
                             <input type="text" name="company_name" class="form-control" placeholder="Company Name*" data-rule-required="true" data-msg-required="Company Name is required" data-rule-maxlength="100" data-msg-maxlength="Company Name can be maximum 100 characters">
                         </div>
                         <div class="col form-group">
@@ -48,7 +41,7 @@
                             <textarea name="feedback" class="form-control" placeholder="Meeting Feedback*" data-rule-required="true" data-msg-required="Feedback is required" rows="6"></textarea>
                         </div>
                         <div class="col form-group">
-                            <label for="upload_bc_image"><b>please upload a photo of the business card:</b></label>
+                            <label for="upload_bc_image"><b>Please upload a photo of the business card:</b></label>
                             <input class="form-control form-control-sm" type="file" name="upload_bc_image" id="upload_bc_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                         </div>
 
@@ -104,10 +97,6 @@
             $('#lead_status').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Lead Status*'
-            });
-            $('#shipper').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Shipper*'
             });
 
             $('.phone_number').inputmask({
