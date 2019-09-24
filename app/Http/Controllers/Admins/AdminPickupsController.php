@@ -1154,7 +1154,7 @@ class AdminPickupsController extends Controller
       if ($shipment->exists()) {
         $shipment = $shipment->first();
 
-        if ($shipment->shipper_status_id == 1) {
+        if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
           $exists = FALSE;
 
           $pickup_note = PickupNote::find($request->pickup_receive_pickup_note_id);
@@ -1212,7 +1212,7 @@ class AdminPickupsController extends Controller
       $shipment = Shipment::find($request->id);
 
       if ($shipment) {
-        if ($shipment->shipper_status_id == 1) {
+        if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
           $shipment->actual_weight = NULL;
           $shipment->length = NULL;
           $shipment->breadth = NULL;
@@ -1260,7 +1260,11 @@ class AdminPickupsController extends Controller
       foreach ($shipment_ids as $key => $shipment_id) {
         $shipment = Shipment::find($shipment_id);
 
-        if ($shipment->shipper_status_id == 1) {
+        if ($shipment->shipper_status_id == 17) {
+          ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Reverted Automatically through Arrival', NULL, Auth::id());
+        }
+
+        if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
           if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
             $receiving_sheet_shipment->status = 1;
             $receiving_sheet_shipment->save();
