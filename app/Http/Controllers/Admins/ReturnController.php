@@ -24,6 +24,7 @@ use App\Http\Models\Route;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\http\Models\WarehouseStock;
@@ -1790,6 +1791,11 @@ class ReturnController extends Controller
                             background: #09262e !important;
                             color: #ffffff;
                        }
+                       div.page
+                        {
+                            page-break-after: always;
+                            page-break-inside: avoid;
+                        }
                     </style>
                   </head>
                   <body>
@@ -1800,70 +1806,77 @@ class ReturnController extends Controller
             $total_shipments = 0;
             $shipment_ids = ReturnNoteShipment::where('return_note_id',$request->id)->select('shipment_id')->get();
             $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->orderBy('id')->get();
-            $shipment_details = '
-                      <table class="table table-sm table-bordered border">
-                        <tbody>
-                          <tr>
-                            <td class="color primary"><strong>S. No.</strong></td>
-                            <td class="color primary"><strong>Tracking No.</strong></td>
-                            <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
-                            <td class="color primary"><strong>Contact Person</strong></td>
-                            <td class="color primary"><strong>Contact Person Phone</strong></td>
-                            <td class="color primary"><strong>Client Address</strong></td>
-                            <td class="color primary"><strong>No. of Items</strong></td>
-                            <td class="color primary"><strong>Collection Charges</strong></td>
-                            <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
-                          </tr>
-        ';
+            $filtered_shipments_users = Shipment::whereIn('id',$shipment_ids)->orderBy('id')->groupBy('user_id')->get();
+            $shipment_details = '';
+            foreach ($filtered_shipments_users as $filtered_shipments_user){
+                $shipment_details .= '<div class="page text-center"><b>'. $filtered_shipments_user->user->name .'</b>';
 
-
-            foreach ($filtered_shipments as $shipment) {
-                $total_shipments++;
-                $class = null;
-                if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
-                    $class = 'complaint';
-                }
-                $shipment_details_row_start = '
-                          <tr>
-                            <td>' . $total_shipments . '</td>
-                            <td class="'. $class .'">' . $shipment->tracking_number . '</td>
-                            <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->user->phone2) ? (' / ' . $shipment->user->phone2) : '') . '</td>
-                            <td>' . $shipment->pickup_address->poc . '</td>
-                            <td>' . $shipment->pickup_address->phone . '</td>
-                            <td>' . $shipment->pickup_address->pickup_address . '</td>
-                            <td>' . $shipment->items->sum('quantity') . '</td>
-                ';
-
-                if ($shipment->booking_type_id != 4) {
-                    $shipment_details_row_start .= '
-                            <td></td>
-                    ';
-                }
-                else {
-                    if ($shipment->charges_mode_id == 1) {
-                        $shipment_details_row_start .= '
-                            <td>' . $shipment->return_charges . '</td>
-                        ';
-                    }
-                    else {
-                        $shipment_details_row_start .= '
-                            <td>' . number_format($shipment->amount) . '</td>
-                        ';
-                    }
-                }
-
-                $shipment_details_row_start .= '
-                            <td></td>
-
-                          </tr>
+                $shipment_details .= '
+                          <table class="table table-sm table-bordered border mt-1">
+                            <tbody>
+                              <tr>
+                                <td class="color primary"><strong>S. No.</strong></td>
+                                <td class="color primary"><strong>Tracking No.</strong></td>
+                                <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
+                                <td class="color primary"><strong>Contact Person</strong></td>
+                                <td class="color primary"><strong>Contact Person Phone</strong></td>
+                                <td class="color primary"><strong>Client Address</strong></td>
+                                <td class="color primary"><strong>No. of Items</strong></td>
+                                <td class="color primary"><strong>Collection Charges</strong></td>
+                                <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
+                              </tr>
             ';
 
-                $shipment_details .= $shipment_details_row_start;
-            }
-            $shipment_details .= '
+                foreach ($filtered_shipments as $shipment) {
+                    if($shipment->user_id == $filtered_shipments_user->user_id){
+                        $total_shipments++;
+                        $class = null;
+                        if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
+                            $class = 'complaint';
+                        }
+                        $shipment_details_row_start = '
+                              <tr>
+                                <td>' . $total_shipments . '</td>
+                                <td class="'. $class .'">' . $shipment->tracking_number . '</td>
+                                <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->user->phone2) ? (' / ' . $shipment->user->phone2) : '') . '</td>
+                                <td>' . $shipment->pickup_address->poc . '</td>
+                                <td>' . $shipment->pickup_address->phone . '</td>
+                                <td>' . $shipment->pickup_address->pickup_address . '</td>
+                                <td>' . $shipment->items->sum('quantity') . '</td>
+                    ';
+
+                        if ($shipment->booking_type_id != 4) {
+                            $shipment_details_row_start .= '
+                                <td></td>
+                        ';
+                        }
+                        else {
+                            if ($shipment->charges_mode_id == 1) {
+                                $shipment_details_row_start .= '
+                                <td>' . $shipment->return_charges . '</td>
+                            ';
+                            }
+                            else {
+                                $shipment_details_row_start .= '
+                                <td>' . number_format($shipment->amount) . '</td>
+                            ';
+                            }
+                        }
+
+                        $shipment_details_row_start .= '
+                                <td></td>
+    
+                              </tr>
+                ';
+
+                        $shipment_details .= $shipment_details_row_start;
+                    }
+                }
+                $shipment_details .= '
                         </tbody>
                       </table>
         ';
+            }
             $return_note_details = ReturnNote::where('id',$request->id)->first();
             $rider = Rider::where('id',$return_note_details->rider_id)->first();
             $city_name = $return_note_details->hub->name;
