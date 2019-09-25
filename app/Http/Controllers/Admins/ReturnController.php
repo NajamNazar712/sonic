@@ -1804,16 +1804,65 @@ class ReturnController extends Controller
         $return_note = ReturnNote::where('id',$request->id);
         if($return_note->exists()) {
             $total_shipments = 0;
+            $total_users = 0;
             $shipment_ids = ReturnNoteShipment::where('return_note_id',$request->id)->select('shipment_id')->get();
             $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->orderBy('id')->get();
             $filtered_shipments_users = Shipment::whereIn('id',$shipment_ids)->orderBy('id')->groupBy('user_id')->get();
             $shipment_details = '';
+
+            $shipment_details .= '<div class="page text-center">';
+                $shipment_details .= '
+                          <table class="table table-sm table-bordered border mt-1">
+                            <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="6"><strong style="font-size: large">Summary</strong></td>
+                                </tr>
+                              <tr>
+                                <td class="color primary"><strong>S. No.</strong></td>
+                                <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
+                                <td class="color primary"><strong>Contact Person</strong></td>
+                                <td class="color primary"><strong>Contact Person Phone</strong></td>
+                                <td class="color primary"><strong>Client Address</strong></td>
+                                <td class="color primary"><strong>Total Shipments</strong></td>
+                              </tr>
+            ';
+
             foreach ($filtered_shipments_users as $filtered_shipments_user){
-                $shipment_details .= '<div class="page text-center"><b>'. $filtered_shipments_user->user->name .'</b>';
+                $total_users++;
+                $user_shipment_collection_charges[$filtered_shipments_user->user_id] = 0;
+                $user_total_shipments[$filtered_shipments_user->user_id] = 0;
+                foreach ($filtered_shipments as $shipment) {
+                    if($shipment->user_id == $filtered_shipments_user->user_id){
+                        $user_total_shipments[$filtered_shipments_user->user_id]++;
+                    }
+                }
+                        $shipment_details_row_start_summary = '
+                              <tr>
+                                <td>' . $total_users . '</td>
+                                <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
+                                <td>' . $filtered_shipments_user->pickup_address->poc . '</td>
+                                <td>' . $filtered_shipments_user->pickup_address->phone . '</td>
+                                <td>' . $filtered_shipments_user->pickup_address->pickup_address . '</td>
+                                <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
+                    ';
+
+                        $shipment_details .= $shipment_details_row_start_summary;
+            }
+            $shipment_details .= '
+                        </tbody>
+                      </table>
+                      </div>
+                     
+        ';
+            foreach ($filtered_shipments_users as $filtered_shipments_user){
+                $shipment_details .= '<div class="page text-center">';
 
                 $shipment_details .= '
                           <table class="table table-sm table-bordered border mt-1">
                             <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="9"><strong style="font-size: large">' . $filtered_shipments_user->user->name . '</strong></td>
+                                </tr>
                               <tr>
                                 <td class="color primary"><strong>S. No.</strong></td>
                                 <td class="color primary"><strong>Tracking No.</strong></td>
@@ -1853,7 +1902,7 @@ class ReturnController extends Controller
                         else {
                             if ($shipment->charges_mode_id == 1) {
                                 $shipment_details_row_start .= '
-                                <td>' . $shipment->return_charges . '</td>
+                                <td>' . number_format($shipment->return_charges) . '</td>
                             ';
                             }
                             else {
@@ -1875,6 +1924,7 @@ class ReturnController extends Controller
                 $shipment_details .= '
                         </tbody>
                       </table>
+                      </div>
         ';
             }
             $return_note_details = ReturnNote::where('id',$request->id)->first();
