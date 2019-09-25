@@ -16,7 +16,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Admin User</th>
-                        <th class="border-primary border-darken-1">Visit Data/Time</th>
+                        <th class="border-primary border-darken-1">Visit Date/Time</th>
                         <th class="border-primary border-darken-1">Company Name</th>
                         <th class="border-primary border-darken-1">Customer Name</th>
                         <th class="border-primary border-darken-1">Customer Address</th>
