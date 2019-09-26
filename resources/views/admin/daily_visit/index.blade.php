@@ -1,4 +1,4 @@
-@extends('client.layout.master')
+@extends('admin.layout.master')
 @section('title','Daily Visit Form')
 
 @section('content')
@@ -9,8 +9,8 @@
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
-                @include('client.inc.messages')
-                <form id="daily_visit_form" class="form-horizontal" method="post" action="{{route('cod.daily_visit.store')}}" enctype="multipart/form-data">
+                @include('admin.inc.messages')
+                <form id="daily_visit_form" class="form-horizontal" method="post" action="{{route('admin.daily_visit.store')}}" enctype="multipart/form-data">
                 @csrf
                     <div class="col justify-content-center">
                         <input type="hidden" name="latitude" id="latitude">
@@ -22,13 +22,13 @@
                             <input type="text" name="customer_name" class="form-control" placeholder="Customer Name*" data-rule-required="true" data-msg-required="Customer Name is required" data-rule-maxlength="100" data-msg-maxlength="Customer Name can be maximum 100 characters">
                         </div>
                         <div class="col form-group">
-                            <textarea name="customer_address" class="form-control" placeholder="Customer Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
+                            <textarea name="customer_address" class="form-control" placeholder="Customer Address*" data-rule-required="true" data-msg-required="Customer Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" rows="6"></textarea>
                         </div>
                         <div class="col form-group">
                             <input type="text" name="phone_no" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                         </div>
                         <div class="col form-group">
-                            <input type="email" name="email_address" placeholder="Email Address" class="form-control" data-rule-required="true" data-msg-required="Email Address is required">
+                            <input type="email" name="email_address" placeholder="Email Address*" class="form-control" data-rule-required="true" data-msg-required="Email Address is required">
                         </div>
                         <div class="col form-group">
                             <select name="lead_status" class="select2" id="lead_status" data-rule-required="true" data-msg-required="Lead Status is required">
@@ -41,7 +41,7 @@
                             <textarea name="feedback" class="form-control" placeholder="Meeting Feedback*" data-rule-required="true" data-msg-required="Feedback is required" rows="6"></textarea>
                         </div>
                         <div class="col form-group">
-                            <label for="upload_bc_image"><b>please upload a photo of the business card:</b></label>
+                            <label for="upload_bc_image"><b>Please upload a photo of the business card:</b></label>
                             <input class="form-control form-control-sm" type="file" name="upload_bc_image" id="upload_bc_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                         </div>
 

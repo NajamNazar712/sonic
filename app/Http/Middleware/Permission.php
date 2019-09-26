@@ -40,6 +40,11 @@ class Permission
             'accounts.sister_account.merged_account.mapping.info' => 242,
             'accounts.sister_account.merged_account.mapping.submit' => 242,
 
+            'daily_visit.index' => 265,
+            'daily_visit.store' => 265,
+            'daily_visit.business_card' => 264,
+            'daily_visit.location_photo' => 264,
+
 
             'pickups.pending.index' => 17,
             'pickups.pending.list' => 17,
@@ -373,8 +378,6 @@ class Permission
             'reports.fake_status_shipments.list' => 263,
             'reports.daily_visit.index' => 264,
             'reports.daily_visit.list' => 264,
-            'reports.daily_visit.business_card' => 264,
-            'reports.daily_visit.location_photo' => 264,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

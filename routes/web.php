@@ -257,10 +257,6 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@air_waybill_printing_count_store')->name('store');
         });
     });
-    Route::prefix('daily_visit')->name('daily_visit.')->group(function () {
-        Route::get('', 'Shippers\ShipperDailyVisitController@daily_visit_index')->name('index');
-        Route::post('store', 'Shippers\ShipperDailyVisitController@daily_visit_store')->name('store');
-    });
 
 });
 //Admin Routes Start
@@ -341,6 +337,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('submit', 'Admins\AdminDashboardController@merged_accounts_mapping_submit')->name('submit');
             });
         });
+    });
+
+    Route::prefix('daily_visit')->name('daily_visit.')->group(function () {
+        Route::get('', 'Admins\AdminDailyVisitController@daily_visit_index')->name('index');
+        Route::post('store', 'Admins\AdminDailyVisitController@daily_visit_store')->name('store');
+        Route::get('business_card/{business_card}', 'Admins\AdminDailyVisitController@business_card')->name('business_card');
+        Route::get('location_photo/{location_photo}', 'Admins\AdminDailyVisitController@location_photo')->name('location_photo');
     });
 
     //Datatables data using ajax calls
@@ -1192,8 +1195,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('daily_visit')->name('daily_visit.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@daily_visit_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@daily_visit_list')->name('list');
-            Route::get('business_card/{business_card}', 'Admins\AdminReportsController@business_card')->name('business_card');
-            Route::get('location_photo/{location_photo}', 'Admins\AdminReportsController@location_photo')->name('location_photo');
         });
     });
 

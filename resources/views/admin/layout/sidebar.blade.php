@@ -54,6 +54,11 @@
                                 </ul>
                             </li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(265, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.daily_visit.index') }}">Daily Visit Form</a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -442,7 +447,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 258, 259, 263], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 258, 259, 263, 264], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-file-text-o"></i>Reports</span></a>
 
                     <ul class="menu-content">
@@ -596,7 +601,7 @@
                                     Statuses Shipments</a></li>
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(263, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(264, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.daily_visit.index') }}">Daily
                                     Visit</a></li>
                         @endif

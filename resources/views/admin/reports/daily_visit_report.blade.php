@@ -15,15 +15,15 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">User Name</th>
-                        <th class="border-primary border-darken-1">Visit Data/Time</th>
+                        <th class="border-primary border-darken-1">Admin User</th>
+                        <th class="border-primary border-darken-1">Visit Date/Time</th>
                         <th class="border-primary border-darken-1">Company Name</th>
                         <th class="border-primary border-darken-1">Customer Name</th>
-                        <th class="border-primary border-darken-1">Address</th>
+                        <th class="border-primary border-darken-1">Customer Address</th>
                         <th class="border-primary border-darken-1">Phone Number</th>
-                        <th class="border-primary border-darken-1">Email</th>
+                        <th class="border-primary border-darken-1">Email Address</th>
                         <th class="border-primary border-darken-1">Lead Status</th>
-                        <th class="border-primary border-darken-1">Feedback</th>
+                        <th class="border-primary border-darken-1">Meeting Feedback</th>
                         <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1">Photo of Location</th>
                         <th class="border-primary border-darken-1">Photo of Business Card</th>
@@ -118,19 +118,19 @@
                         success: function (result) {
                             head = [];
                             head.push('S. No.');
-                            head.push('User Name');
+                            head.push('Admin User');
                             head.push('Visit Date/Time');
                             head.push('Company Name');
                             head.push('Customer Name');
-                            head.push('Address');
+                            head.push('Customer Address');
                             head.push('Phone Number');
-                            head.push('Email');
+                            head.push('Email Address');
                             head.push('Lead Status');
-                            head.push('Feedback');
+                            head.push('Meeting Feedback');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.user_name);
+                                row.push(values.admin);
                                 row.push(values.created_at);
                                 row.push(values.company_name);
                                 row.push(values.customer_name);
@@ -169,19 +169,11 @@
                 },
                 serverSide: true,ajax: {
                     url: '{{ route('admin.reports.daily_visit.list') }}',
-                    // data: function (d) {
-                    //     d.search_shipping_mode = $('#search_shipping_modes').val();
-                    //     d.search_service_type = $('#search_service_type').val();
-                    //     d.search_status = $('#search_status').val();
-                    //     d.search_shipper = $('#search_shipper').val();
-                    //     d.search_date_from = $('input[name="search_date_from_formatted"]').val();
-                    //     d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-                    // }
                 },
                 order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'user_name' ,name: 'u.name', class: 'align-middle text-center tracking_number_link'},
+                    { data:'admin' ,name: 'a.name', class: 'align-middle admin'},
                     { data:'created_at' ,name: 'daily_visits.created_at', class: 'align-middle created_at'},
                     { data:'company_name' ,name: 'daily_visits.company_name', class: 'align-middle company_name'},
                     { data:'customer_name' ,name: 'daily_visits.customer_name', class: 'align-middle customer_name'},

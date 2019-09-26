@@ -26,7 +26,7 @@ class CreateDailyVisitsTable extends Migration
             $table->string('location_image')->nullable();
             $table->string('latitude');
             $table->string('longitude');
-            $table->string('user_id');
+            $table->integer('admin_id');
             $table->timestamps();
         });
     }
