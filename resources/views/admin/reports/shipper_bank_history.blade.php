@@ -207,7 +207,8 @@
             } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '500px',
+                // scrollX: true, scrollY: '500px',
+                autoWidth:true,
                 buttons: [
                     {
                         extend: 'excelHtml5',

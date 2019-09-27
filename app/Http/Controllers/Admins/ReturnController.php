@@ -1582,7 +1582,6 @@ class ReturnController extends Controller
     }
 
     public function return_status_delivered(Request $request){
-        $new_return_note_shipments = array();
         if(!empty($request->shipment_ids)){
             foreach ($request->shipment_ids as $shipment){
                 $parcel = Shipment::where('id', $shipment)->first();
@@ -1651,8 +1650,6 @@ class ReturnController extends Controller
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                         NotificationsController::send(39, $shipment);
                     }
-                }else{
-                    $new_return_note_shipments[] = $parcel->tracking_number;
                 }
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
@@ -1671,7 +1668,7 @@ class ReturnController extends Controller
     }
 
     public function receive_return_status_submit_all(Request $request){
-        $new_return_note_shipments = array();
+
         if(!empty($request->shipment_ids)){
             $shipment_ids = $request->shipment_ids;
             $shipment_status = $request->shipment_status;
@@ -1694,12 +1691,9 @@ class ReturnController extends Controller
                             ShipmentsJourneyController::add($shipment_id, 25, 25, NULL, ($request->has('remarks') ? $request->remarks[$shipment_id] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has('received_or_refused_by') ? $request->received_or_refused_by[$shipment_id] : null));
 
                             Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
+                            NotificationsController::send(39, $shipment_id);
                         }
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
-                        NotificationsController::send(39, $shipment_id);
-                    }else{
-                        $new_return_note_shipments[] = $parcel->tracking_number;
-                        NotificationsController::send(39, $shipment_id);
                     }
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment_id])->update(['status'=>1]);
                 }

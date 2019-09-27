@@ -1405,59 +1405,62 @@ class AdminCargoController extends Controller
 
         foreach ($shipment_ids as $shipment_id) {
             $cargo_consignment_shipment = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('shipment_id', $shipment_id)->first();
+            if($cargo_consignment_shipment->status != 1){
+                $cargo_consignment_shipment->status = 1;
 
-            $cargo_consignment_shipment->status = 1;
+                $cargo_consignment_shipment->save();
 
-            $cargo_consignment_shipment->save();
+                $shipment = Shipment::find($shipment_id);
 
-            $shipment = Shipment::find($shipment_id);
+                $shipper_status_id = NULL;
+                $consignee_status_id = NULL;
 
-            $shipper_status_id = NULL;
-            $consignee_status_id = NULL;
-
-            if ($cargo_consignment->type == 1) {
-                if ($shipment->booking_type_id == 4 && $shipment->walk_in_delivery_type_id == 2) {
-                    $shipper_status_id = 15;
-                    $consignee_status_id = 15;
+                if ($cargo_consignment->type == 1) {
+                    if ($shipment->booking_type_id == 4 && $shipment->walk_in_delivery_type_id == 2) {
+                        ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, Auth::id());
+                        $shipper_status_id = 15;
+                        $consignee_status_id = 15;
+                    }
+                    else {
+                        $shipper_status_id = 4;
+                        $consignee_status_id = 4;
+                    }
                 }
                 else {
-                    $shipper_status_id = 4;
-                    $consignee_status_id = 4;
+                    if ($shipment->booking_type_id == 1) {
+                        $shipper_status_id = 22;
+                        $consignee_status_id = 22;
+                    }
+                    else if ($shipment->booking_type_id == 2) {
+                        $shipper_status_id = 27;
+                        $consignee_status_id = 27;
+                    }
+                    else if ($shipment->booking_type_id == 3) {
+                        $shipper_status_id = 33;
+                        $consignee_status_id = 33;
+                    }
+                    else if ($shipment->booking_type_id == 4) {
+                        $shipper_status_id = 22;
+                        $consignee_status_id = 22;
+                    }
+                    else {
+                        $shipper_status_id = 22;
+                        $consignee_status_id = 22;
+                    }
                 }
+
+                $shipment->shipper_status_id = $shipper_status_id;
+                $shipment->consignee_status_id = $consignee_status_id;
+
+                $shipment->save();
+
+                ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
+
+                NotificationsController::send(7, $cargo_consignment_id, $shipment_id);
+
+                NotificationsController::send(8, $cargo_consignment_id, $shipment_id);
             }
-            else {
-                if ($shipment->booking_type_id == 1) {
-                    $shipper_status_id = 22;
-                    $consignee_status_id = 22;
-                }
-                else if ($shipment->booking_type_id == 2) {
-                    $shipper_status_id = 27;
-                    $consignee_status_id = 27;
-                }
-                else if ($shipment->booking_type_id == 3) {
-                    $shipper_status_id = 33;
-                    $consignee_status_id = 33;
-                }
-                else if ($shipment->booking_type_id == 4) {
-                    $shipper_status_id = 22;
-                    $consignee_status_id = 22;
-                }
-                else {
-                    $shipper_status_id = 22;
-                    $consignee_status_id = 22;
-                }
-            }
-
-            $shipment->shipper_status_id = $shipper_status_id;
-            $shipment->consignee_status_id = $consignee_status_id;
-
-            $shipment->save();
-
-            ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
-
-            NotificationsController::send(7, $cargo_consignment_id, $shipment_id);
-
-            NotificationsController::send(8, $cargo_consignment_id, $shipment_id);
+            
         }
 
         $cargo_consignment->received_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('status', 1)->count();

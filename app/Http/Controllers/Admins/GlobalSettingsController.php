@@ -1257,7 +1257,7 @@ class GlobalSettingsController extends Controller
             $return_confirmation_pending_shipment_selection_time = $settings->setting_value;
         }
         else {
-            $return_confirmation_pending_shipment_selection_time = 5;
+            $return_confirmation_pending_shipment_selection_time = 0;
         }
 
         return view('admin.settings.return_confirmation_pending_shipment_selection_time')->with(['return_confirmation_pending_shipment_selection_time' => $return_confirmation_pending_shipment_selection_time]);

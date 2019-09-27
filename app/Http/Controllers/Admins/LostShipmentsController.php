@@ -54,11 +54,11 @@ class LostShipmentsController extends Controller
 //                ->leftJoin('shipment_payment_status as sps', 'sps.id', '=', 'shipments.payment_status_id')
                 ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc')
 //                ->whereRaw('IF (shipments.payment_status_id != NULL, (shipments.payment_status_id > 1), TRUE)')
-                ->where('shipments.shipper_status_id', 18)
-                ->where(function ($sub_query) {
-                    $sub_query->where('shipments.payment_status_id', '=', null)
-                        ->orWhere('shipments.payment_status_id', '>', 1);
-                });
+                ->where('shipments.shipper_status_id', 18);
+                // ->where(function ($sub_query) {
+                //     $sub_query->where('shipments.payment_status_id', '=', null)
+                //         ->orWhere('shipments.payment_status_id', '>', 1);
+                // });
 
 //                ->where(function ($sub_query) {
 //                    $sub_query->where('shipments.payment_status_id', '=', null);

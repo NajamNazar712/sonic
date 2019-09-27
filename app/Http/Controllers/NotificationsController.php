@@ -1934,19 +1934,23 @@ class NotificationsController extends Controller
                   $return_confirmation_pending_shipment_selection_time = $settings->setting_value;
               }
               else {
-                  $return_confirmation_pending_shipment_selection_time = 5;
+                  $return_confirmation_pending_shipment_selection_time = 0;
               }
 
               $yesterday = Carbon::yesterday();
 
               $yesterday->hour = $return_confirmation_pending_shipment_selection_time;
 
+              $today = Carbon::today();
+
+              $today->hour = $return_confirmation_pending_shipment_selection_time;
+
               $user_wise_shipments = array();
 
               foreach ($shipments as $shipment) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first();
 
-                if ($shipment_journey && $shipment_journey->verification && Carbon::parse($shipment_journey->created_at)->startOfDay()->greaterThanOrEqualTo($yesterday)) {
+                if ($shipment_journey && $shipment_journey->verification && Carbon::parse($shipment_journey->created_at)->greaterThanOrEqualTo($yesterday) && Carbon::parse($shipment_journey->created_at)->lessThan($today)) {
                   $details = array();
 
                   $details['service_type'] = $shipment->booking_type->booking_type;
@@ -1999,13 +2003,13 @@ class NotificationsController extends Controller
                   if (strpos($body, '[company_name]') !== FALSE) {
                     $body = str_replace('[company_name]', $shipper->name, $body);
                   }
+                  if (ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                      $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+                  }
+                  else {
+                      $to = $shipper->email;
+                  }
 
-//                  $to = $shipper->email;
-                    if(ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
-                        $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
-                    }else{
-                        $to = $shipper->email;
-                    }
                   $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
 
                   $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
