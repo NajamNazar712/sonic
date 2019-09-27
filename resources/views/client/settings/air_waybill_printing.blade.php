@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Air Waybill Print Count
+        Air Waybill Print
     </h1>
 
     <div class="card">
@@ -36,7 +36,7 @@
                                         <input type="text" name="air_waybill_printing_count" class="form-control air_waybill_printing_count" placeholder="Air Waybill*" data-rule-required="true" data-msg-required="Air Waybill Print Count is required" value="1" data-rule-min="1" data-msg-min="Air Waybill Print Count can not be less than 1" data-rule-max="3" data-msg-min="Air Waybill Print Count can not be more than 3">
                                     @endif
                                     <div class="input-group-append">
-                                        <span class="input-group-text">Print</span>
+                                        <span class="input-group-text">No. of Prints</span>
                                     </div>
                                 </div>
                             </div>

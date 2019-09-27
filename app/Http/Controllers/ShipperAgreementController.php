@@ -120,7 +120,9 @@ class ShipperAgreementController extends Controller
                     <div class="double-border">
       ';
         $shipper = User::find($id);
-
+        if(!$shipper){
+            return redirect(route('cod.404'));
+        }
         $poc_name = '';
         $poc_name = $shipper->poc;
 
@@ -481,8 +483,8 @@ class ShipperAgreementController extends Controller
 
     public function accept($token, $id){
         if(($id != null) && ($token !== null)){
-            $user = User::find($id)->term_and_conditions;
-            if($user == 0){
+            $user = User::find($id);
+            if($user && $user->term_and_conditions == 0){
                 $term = CRFTermsConditions::where('user_id', $id)->where('token', $token);
                 if($term->exists()){
                     $term = $term->delete();
@@ -500,8 +502,9 @@ class ShipperAgreementController extends Controller
 
     public function crf_download($token, $id){
         if(($id != null) && ($token !== null)){
-            $user = User::find($id)->term_and_conditions;
-            if($user == 0){
+            $user = User::find($id);
+            if($user && $user->term_and_conditions == 0){
+
                 $term = CRFTermsConditions::where('user_id', $id)->where('token', $token);
                 if($term->exists()){
                     $html = self::view_crf_agreement($id);
