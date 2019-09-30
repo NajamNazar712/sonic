@@ -283,6 +283,13 @@
                                                     {{--<input type="hidden" name="user_id" value="{{$user->id}}">--}}
                                                 </div>
                                             </div>
+                                            <div class="form-group row">
+                                                <div class="form-group col-md-9">
+                                                    <label>Email Address:</label>
+                                                    <input type="text" id="email" class="form-control border-primary"  value="{{$user->email->address}}" name="phone2">
+                                                    {{--<input type="hidden" name="user_id" value="{{$user->id}}">--}}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
