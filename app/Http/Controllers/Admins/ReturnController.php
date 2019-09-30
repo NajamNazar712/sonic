@@ -245,7 +245,7 @@ class ReturnController extends Controller
                         }
                     }
                     if ((session('role_id') == 1 || in_array(245, session('permissions')))) {
-                        if($result->current_status_id == 12 && $result->journey_shipper_status_id != 53 && $result->pickup == 1 && $result->intercepted == 0){
+                        if(($result->current_status_id == 12 || $result->current_status_id == 52) && $result->journey_shipper_status_id != 53 && $result->pickup == 1 && $result->intercepted == 0){
                             $dropdown .= $intercept;
                         }
                     }
