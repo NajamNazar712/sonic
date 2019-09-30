@@ -1433,24 +1433,26 @@ class AdminPickupsController extends Controller
         else {
           $pickup_request_assigned_shipment = PickupRequestAssignedShipment::where('shipment_id', $shipment_id)->whereIn('status', [0, 1])->first();
 
-          $pickup_request = PickupRequest::find($pickup_request_shipper_wise_ids[$pickup_request_assigned_shipment->pickup_request->shipper_id]);
+          if ($pickup_request_assigned_shipment && isset($pickup_request_assigned_shipment->pickup_request)) {
+            $pickup_request = PickupRequest::find($pickup_request_shipper_wise_ids[$pickup_request_assigned_shipment->pickup_request->shipper_id]);
 
-          $pickup_request->received = $pickup_request->received + 1;
+            $pickup_request->received = $pickup_request->received + 1;
 
-          $short_received_shipment = PickupRequestShortReceivedShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id);
+            $short_received_shipment = PickupRequestShortReceivedShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id);
 
-          if ($short_received_shipment->exists()) {
-            $short_received_shipment->delete();
+            if ($short_received_shipment->exists()) {
+              $short_received_shipment->delete();
 
-            $short_received = $pickup_request->short_received - 1;
+              $short_received = $pickup_request->short_received - 1;
 
-            if ($short_received == 0) {
-              $short_received = NULL;
+              if ($short_received == 0) {
+                $short_received = NULL;
+              }
+
+              $pickup_request->short_received = $short_received;
+
+              $pickup_request->save();
             }
-
-            $pickup_request->short_received = $short_received;
-
-            $pickup_request->save();
           }
 
           if (!empty($receiving_sheet_ids)) {
