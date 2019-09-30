@@ -4850,6 +4850,11 @@ class AdminReportsController extends Controller
             ->editColumn('request_number', function ($crm_request) {
                 return str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT);
             })
+
+            ->addColumn('id_padded_link', function ($crm_request) {
+                return '<u><a href=' . route('admin.crm.request.details', ['id' => $crm_request->request_number]) . ' target="_blank">' . str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT). '</a></u>';
+            })
+
             ->addColumn('launched_by_name', function ($requests){
                 $name = '';
                 if($requests->launched_by_type == 0){
