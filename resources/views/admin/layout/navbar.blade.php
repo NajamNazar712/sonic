@@ -28,12 +28,20 @@
                                 <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-crosshairs m-0"></i></h2>
                             </div>
                         </a>
-                        <a class="nav-link d-inline-flex align-middle p-0" href="http://bit.ly/sonic_manuals" target="_blank">
-                            <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
-                                <span class ="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">HELP</span>
-                                <h2 class="d-inline-block m-0 align-middle primary"><i class="ft-help-circle m-0"></i></h2>
-                            </div>
-                        </a>
+                        @if(session('role_id') == 1 || in_array(204, session('permissions')))
+                            <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('admin.cx_quick_tracking.cx_index') }}" target="_blank">
+                                <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
+                                    <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Quick Tracking</span>
+                                    <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-crosshairs m-0"></i></h2>
+                                </div>
+                            </a>
+                        @endif
+                        {{--<a class="nav-link d-inline-flex align-middle p-0" href="http://bit.ly/sonic_manuals" target="_blank">--}}
+                            {{--<div class="m-0 bg-white primary rounded custom-nav-buttons-padding">--}}
+                                {{--<span class ="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">HELP</span>--}}
+                                {{--<h2 class="d-inline-block m-0 align-middle primary"><i class="ft-help-circle m-0"></i></h2>--}}
+                            {{--</div>--}}
+                        {{--</a>--}}
 
                         <a class="dropdown-toggle nav-link d-flex d-md-inline-flex align-middle dropdown-user-link" href="#" data-toggle="dropdown">
                             <span class="d-inline-block align-middle">
@@ -44,6 +52,7 @@
                             <i class="ft-chevron-down"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="http://bit.ly/sonic_manuals" target="_blank"><i class="ft-help-circle"></i> HELP</a>
                             <a class="dropdown-item" href="{{route('admin.logout')}}" onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();"><i class="ft-power"></i> Logout</a>
                             <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
