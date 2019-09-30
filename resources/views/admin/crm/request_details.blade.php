@@ -61,6 +61,14 @@
                                                 </td>
                                             </tr>
                                             @endif
+                                            @if(!empty($shipment_status_date))
+                                            <tr>
+                                                <th scope="row">Shipment Status Updated At</th>
+                                                <td class="name">
+                                                    <h5 class="mb-0">{{$shipment_status_date}}</h5>
+                                                </td>
+                                            </tr>
+                                            @endif
                                             @if(!empty($shipper))
                                             <tr>
                                                 <th scope="row">Shipper Name</th>
