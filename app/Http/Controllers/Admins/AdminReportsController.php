@@ -4939,7 +4939,7 @@ class AdminReportsController extends Controller
             $datatable->where('a.id', '=', $agent);
         }
         if($status = $request->get('search_status')){
-            $datatable->where('crs.id', '=', $status);
+            $datatable->whereIn('crs.id', $status);
         }
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');

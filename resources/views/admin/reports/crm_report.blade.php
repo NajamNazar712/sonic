@@ -71,7 +71,7 @@
 
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_status" id="search_status" class="form-control select2">
+                            <select name="search_status" id="search_status" class="form-control select2" multiple="multiple">
                                 @foreach($statuses as $status)
                                     <option value="{{$status->id}}">{{$status->name}}</option>
                                 @endforeach
@@ -235,7 +235,7 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_status').select2({
                 placeholder:'Search CRM Status',
                 width:'100%',
                 allowClear:true
@@ -422,6 +422,7 @@
             });
 
             $('#search_filter_btn').on('click',function () {
+                console.log($('#search_status').val());
                 table.draw();
             });
 
