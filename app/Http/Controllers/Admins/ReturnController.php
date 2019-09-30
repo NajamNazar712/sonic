@@ -24,6 +24,7 @@ use App\Http\Models\Route;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
@@ -52,7 +53,8 @@ class ReturnController extends Controller
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
-        return view('admin.return.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
+        $return_confirm_reasons = ShipmentStatusReason::whereIn('id', [2, 5, 9, 38, 39])->select('id', 'name')->get();
+        return view('admin.return.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type, 'return_confirm_reasons' => $return_confirm_reasons]);
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
@@ -274,18 +276,20 @@ class ReturnController extends Controller
 
 
         $shipment_ids = $request->shipment_ids;
-
+        $return_reason = $request->return_reason_select;
         if($request->action == 'confirm'){
+
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
                 $remark_inp = "remark.$shipment";
+
                 if($parcel->shipper_status_id != 20 && $parcel->shipper_status_id != 54 && $parcel->shipper_status_id != 55){
 //                    if (!$parcel->packaging_material_request) {
 
                         $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
                         $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
                         Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                        ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment, 20, 20, $return_reason, $remarks, NULL, Auth::id());
 
                         NotificationsController::send(15, 0, $shipment);
                         NotificationsController::send(16, 0, $shipment);
@@ -373,12 +377,13 @@ class ReturnController extends Controller
 
         $remark = $request->remark;
         if($request->action == 'confirm'){
+            $return_reason = $request->single_return_reason_select;
             $parcel = Shipment::find($request->shipment_id);
             if($parcel->shipper_status_id != 20 && $parcel->shipper_status_id != 54 && $parcel->shipper_status_id != 55){
 //                if (!$parcel->packaging_material_request) {
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
                     $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
-                    ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $remark, NULL, Auth::id());
+                    ShipmentsJourneyController::add($request->shipment_id, 20, 20, $return_reason, $remark, NULL, Auth::id());
 
 
                     NotificationsController::send(15, 0, $request->shipment_id);
