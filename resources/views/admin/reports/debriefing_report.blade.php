@@ -65,9 +65,9 @@
                             <th class="border-primary border-darken-1">Delivered</th>
                             <th class="border-primary border-darken-1">Delivery Unsuccessful</th>
                             <th class="border-primary border-darken-1">On Hold</th>
-                            <th class="border-red border-darken-1 bg-white">Status Not Updated</th>
-                            <th class="border-primary border-darken-1">Confirmation Pending</th>
+                            <th class="border-red border-darken-1 bg-white">Status Not Attempted</th>
                             <th class="border-red border-darken-1 bg-white">Fake Status</th>
+                            <th class="border-primary border-darken-1">Confirmation Pending</th>
                             <th class="border-primary border-darken-1">Total</th>
                             <th class="border-primary border-darken-1">Ratio</th>
                             <th class="border-primary border-darken-1">Delivery Note Pending</th>
@@ -145,11 +145,11 @@
                 paging: false,
                 ordering: false,
                 columnDefs: [
-                    {className: 'red', targets: [4, 6]}
+                    {className: 'red', targets: [4, 5]}
                 ]
             });
 
-            var types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_updated', 'confirmation_pending', 'fake_status', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];
+            var types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_attempted', 'fake_status', 'confirmation_pending', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];
 
             function list() {
                 blockPagePermanently();

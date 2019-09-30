@@ -3779,7 +3779,7 @@ class AdminReportsController extends Controller
                 $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
             }
 
-            $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_updated', 'confirmation_pending', 'fake_status', 'delivery_note_pending', 'delivery_tomorrow'];
+            $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_attempted', 'fake_status', 'confirmation_pending', 'delivery_note_pending', 'delivery_tomorrow'];
 
             $counts = array();
 
@@ -3791,7 +3791,7 @@ class AdminReportsController extends Controller
                 foreach ($types as $type) {
                     $rows = DB::connection('reports')->table('cities');
 
-                    if ($type == 'status_not_updated' || $type == 'delivery_tomorrow') {
+                    if ($type == 'status_not_attempted' || $type == 'delivery_tomorrow') {
                         $rows = $rows->join('shipments as s', function($join) {
                             $join->where(function($query) {
                                 $query->where('cities.id', '=',  DB::connection('reports')->raw('s.consignee_city_id'))
@@ -3811,7 +3811,7 @@ class AdminReportsController extends Controller
                         $rows = $rows->join('shipments as s', 'cities.id', '=', 's.consignee_city_id');
                     }
 
-                    if ($type == 'status_not_updated') {
+                    if ($type == 'status_not_attempted') {
                         $rows = $rows->join('shipments_journey as sj', function($join) use ($from_month, $to) {
                             $join->on('s.id', '=', 'sj.shipment_id')
                             ->where('sj.id', '=', DB::connection('reports')->raw('(select max(shipments_journey.id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from_month . '" and "' . $to . '")'));
@@ -3850,7 +3850,7 @@ class AdminReportsController extends Controller
                     else if ($type == 'on_hold') {
                         $rows = $rows->whereIn('sj.shipper_status_id', [9, 10, 11, 15]);
                     }
-                    else if ($type == 'status_not_updated') {
+                    else if ($type == 'status_not_attempted') {
                         $rows = $rows->where(function ($query) use ($arrival_cut_off_time, $from) {
                             $query->where(function($sub_query) {
                                 $sub_query->where('cities.id', '=', DB::connection('reports')->raw('s.consignee_city_id'))
@@ -4124,14 +4124,14 @@ class AdminReportsController extends Controller
 
         $details = array();
 
-        $details[] = ['Hubs', 'Delivered', 'Delivery Unsuccessful', 'On Hold', 'Status Not Updated', 'Confirmation Pending', 'Fake Status', 'Total', 'Ratio', 'Delivery Note Pending', 'Total', 'Ratio', 'Delivery Tomorrow', 'Grand Total', 'Ratio'];
+        $details[] = ['Hubs', 'Delivered', 'Delivery Unsuccessful', 'On Hold', 'Status Not Attempted', 'Fake Status', 'Confirmation Pending', 'Total', 'Ratio', 'Delivery Note Pending', 'Total', 'Ratio', 'Delivery Tomorrow', 'Grand Total', 'Ratio'];
 
         $result = $this->debriefing_data($date, $hub, $zone, TRUE, $mode);
 
         if ($result['status'] == 0) {
-            $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_updated', 'confirmation_pending', 'fake_status', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];
+            $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_attempted', 'fake_status', 'confirmation_pending', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];
 
-            $type_names = ['delivered' => 'Delivered', 'delivery_unsucessful' => 'Delivery Unsuccessful', 'on_hold' => 'On Hold', 'status_not_updated' => 'Status Not Updated', 'confirmation_pending' => 'Confirmation Pending', 'fake_status' => 'Fake Status', 'total_1' => 'Total', 'total_1_ratio' => 'Ratio', 'delivery_note_pending' => 'Delivery Note Pending', 'total_2' => 'Total', 'total_2_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
+            $type_names = ['delivered' => 'Delivered', 'delivery_unsucessful' => 'Delivery Unsuccessful', 'on_hold' => 'On Hold', 'status_not_attempted' => 'Status Not Attempted', 'fake_status' => 'Fake Status', 'confirmation_pending' => 'Confirmation Pending', 'total_1' => 'Total', 'total_1_ratio' => 'Ratio', 'delivery_note_pending' => 'Delivery Note Pending', 'total_2' => 'Total', 'total_2_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
 
             foreach ($result['counts'] as $hub => $count) {
                 $row = array();
@@ -4168,7 +4168,7 @@ class AdminReportsController extends Controller
             $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE);
 
             $spreadsheet->getActiveSheet()->getStyle('E')->getFont()->getColor()->setARGB('FFFF0000');
-            $spreadsheet->getActiveSheet()->getStyle('G')->getFont()->getColor()->setARGB('FFFF0000');
+            $spreadsheet->getActiveSheet()->getStyle('F')->getFont()->getColor()->setARGB('FFFF0000');
 
             $spreadsheet->getActiveSheet()->setTitle('Overall')->fromArray($details, NULL);
 
