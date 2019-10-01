@@ -1541,7 +1541,7 @@ class ReturnController extends Controller
         $shipments = explode(',',$request->shipment_ids);
         $return_note_id = $request->return_note_id;
         $array_returned = array(25,31,38);
-        $array_returned_status = array(24,29,35,47,48);
+        $array_returned_status = array(24,29,35,47,48, 60);
         if($return_note_id != '') {
             foreach ($shipments as $shipment) {
                 $reasonId = "reason_drop.$shipment";
