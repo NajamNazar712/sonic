@@ -3213,8 +3213,6 @@ class AdminFinanceController extends Controller
         $messages = [
             'required' => ':attribute is Required.',
             'integer' => ':attribute must be an Integer.',
-            'numeric' => ':attribute must be a Number.',
-            'status_text' => ':attribute must be Paid or Reverted.'
         ];
 
         $rules = [
