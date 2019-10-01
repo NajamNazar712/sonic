@@ -49,6 +49,9 @@ use Auth;
 use DB;
 
 use Illuminate\Support\Facades\Storage;
+use Validator;
+use Illuminate\Validation\Rule;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -3199,6 +3202,157 @@ class AdminFinanceController extends Controller
         }
 
         return ['status' => 0, 'success' => 'Payment(s) marked Reverted'];
+    }
+
+    public function done_payments_excel_store(Request $request){
+        $names = [
+            'payment_id' => 'Payment ID',
+            'status' => 'Status',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'numeric' => ':attribute must be a Number.',
+            'status_text' => ':attribute must be Paid or Reverted.'
+        ];
+
+        $rules = [
+            'payment_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('done_payments', 'id')],
+            'status' => ['required', 'string', 'in:paid,Paid,Reverted,reverted'],
+        ];
+
+        $fields = [0 => 'payment_id', 1 => 'status'];
+
+        if($file = $request->file('payments')) {
+
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Payment ID', 'Status'];
+        }
+
+
+        if (isset($spreadsheet)) {
+            $header_correct = TRUE;
+
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if ($index == 1) {}
+                elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                    break;
+                }
+            }
+
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+            else {
+                unset($spreadsheet[0]);
+            }
+        }
+
+        if (!isset($spreadsheet) || !empty($spreadsheet)) {
+            $rows = array();
+
+            if (isset($spreadsheet)) {
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+            }
+
+            $row_id = $key + 2;
+
+            $validate = Validator::make($row, $rules, $messages);
+
+            $validate->setAttributeNames($names);
+
+            if ($validate->fails()) {
+                foreach ($validate->errors()->toArray() as $key => $error_array) {
+                    foreach ($error_array as $error) {
+                        if (!isset($errors[$row_id][$key])) {
+                            $errors[$row_id][$key] = $error;
+                        }
+                    }
+                }
+            }
+            if(isset($errors)){
+                return redirect()->back()->with('errors', $errors);
+            }
+            else{
+                foreach ($rows as $key => $row) {
+                    $payment_id = (int)$row['payment_id'];
+                    $done_payment = DonePayment::find($payment_id);
+                    $status = strtolower($row['status']);
+                    if($status == "paid"){
+                        if ($done_payment->status != 1) {
+                            $done_payment->status = 1;
+
+                            $done_payment->save();
+
+                            foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                                $shipment = $done_payment_shipment->shipment;
+
+                                if ($done_payment_shipment->type == 1) {
+                                    $shipment->payment_status_id = 7;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
+                                }
+                                else {
+                                    $shipment->payment_status_id = 3;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
+                                }
+                            }
+                        }
+                    }
+                    elseif($status == "reverted"){
+                        if ($done_payment->status != 2) {
+                            $done_payment->status = 2;
+
+                            $done_payment->save();
+
+                            foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                                $shipment = $done_payment_shipment->shipment;
+
+                                if ($done_payment_shipment->type == 1) {
+                                    $shipment->payment_status_id = 6;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
+                                }
+                                else {
+                                    $shipment->payment_status_id = 2;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 2, Auth::id(), '', $done_payment->id);
+                                }
+                            }
+                        }
+                    }
+                }
+                return redirect()->back()->with(['success' => 'Status of ' . count($rows) . ' Payment(s) has been Updated']);
+            }
+
+        }
+        else {
+            return redirect()->back()->with('error', 'No Payments in File');
+        }
     }
 
     public function done_payments_delivered_shipments(Request $request) {
