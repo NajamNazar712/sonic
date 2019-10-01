@@ -3284,7 +3284,7 @@ class AdminFinanceController extends Controller
                 $errors = array_map(function ($row, $errors) {
                     return $row . ':' . PHP_EOL . implode(' | ', $errors);
                 }, array_keys($errors), $errors);
-                dd($errors);
+//                dd($errors);
                 return redirect()->back()->withErrors($errors);
             }
             else{
