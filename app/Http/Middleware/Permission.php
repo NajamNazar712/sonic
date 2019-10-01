@@ -224,6 +224,8 @@ class Permission
             'return.history.index' => 126,
             'return.history.list' => 126,
             'return.history.shipments' => 126,
+            'return.cx_sales.index' => 266,
+            'return.cx_sales.list' => 266,
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
