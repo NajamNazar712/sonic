@@ -830,8 +830,8 @@ class ReturnController extends Controller
         if($request->tracking != ''){
 //            $shipment_not_arrived = array(20,24,27,29,33,35,42,44,45,46);
 //            $shipment_arrived = array(22,24,27,29,30,33,35,44,45,46);
-            $allowed_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48);
-            $return_note_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48);
+            $allowed_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48, 60);
+            $return_note_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id',$allowed_statuses);
             $status = '';
             if($shipment->exists()) {
@@ -1112,7 +1112,7 @@ class ReturnController extends Controller
         $hub_id = $request->hub_id;
         $admin = Auth::id();
         //$errors_not_arrived = array();
-        $return_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48);
+        $return_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48, 60);
         $valid_shipments = array();
         $shipments_count = 0;
         if(!empty($trackings)) {
@@ -1365,7 +1365,7 @@ class ReturnController extends Controller
         $return = ReturnNote::where('id',$id);
         if($return->exists()){
             $return = $return->first();
-            $shipment_status = ShipmentStatus::whereIn('id', [24,25, 47, 48])->get();
+            $shipment_status = ShipmentStatus::whereIn('id', [24,25, 47, 48, 60])->get();
 
             return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count, 'return_note_status' => $return->status, 'shipment_statuses' => $shipment_status]);
         }else{
@@ -1446,11 +1446,11 @@ class ReturnController extends Controller
                     return $deliveries->current_status_name;
                 }else{
                     if(in_array($deliveries->booking_type_id,[1,4,5])){
-                        $where = array(24,47,48);
+                        $where = array(24,47,48, 60);
                     }else if($deliveries->booking_type_id == 2){
-                        $where = array(29,47,48);
+                        $where = array(29,47,48, 60);
                     }else if($deliveries->booking_type_id == 3){
-                        $where = array(35,47,48);
+                        $where = array(35,47,48, 60);
                     }
                     $statuses = ShipmentStatus::whereIn('id',$where)->get();
                     $drops = '';
@@ -1541,7 +1541,7 @@ class ReturnController extends Controller
         $shipments = explode(',',$request->shipment_ids);
         $return_note_id = $request->return_note_id;
         $array_returned = array(25,31,38);
-        $array_returned_status = array(24,29,35,47,48);
+        $array_returned_status = array(24,29,35,47,48, 60);
         if($return_note_id != '') {
             foreach ($shipments as $shipment) {
                 $reasonId = "reason_drop.$shipment";
@@ -2198,5 +2198,93 @@ class ReturnController extends Controller
                }
             }
         }
+    }
+
+    public function cx_sales_index(){
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        $shipping_mode = ShippingMode::all();
+        $service_type = BookingType::all();
+        return view('admin.return.cx_sales')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
+    }
+
+    public function cx_sales_list(Request $request){        
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id order by shipments_journey.created_at desc limit 1)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc')
+            ->where('shipments.shipper_status_id',60);
+
+        if (session('role_id') != 1) {
+            $shipments = $shipments->where(function($query) {
+                $query->where(function ($sub_query){
+                    $sub_query->whereIn('dc.hub_id', session('hubs'));
+                    })
+                    ->orWhere(function ($sub_query){
+                    $sub_query->whereIn('oc.hub_id', session('hubs'));
+                    });
+            });
+        }
+
+        $datatables = Datatables::of($shipments)    
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->filterColumn('u.name', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('shipments.booking_type_id', '!=', 4)
+                        ->where('u.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.booking_type_id', '=', 4)
+                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+                    });
+            })
+            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
+            ->editColumn('status_date',function ($shipments){
+                if($shipments->status_date) {
+                    if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
+                        return "<span class='danger font-weight-bold'>" . $shipments->status_date . "</span>";
+                    } else {
+                        return $shipments->status_date;
+                    }
+                }else{
+                    return " - ";
+                }
+            })
+            ->editColumn('arrival',function($shipments){
+                if($shipments->arrival){
+                    return $shipments->arrival;
+                }else{
+                    return " - ";
+                }
+            });
+
+        return $datatables->make(true);
     }
 }
