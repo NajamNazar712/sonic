@@ -3269,24 +3269,23 @@ class AdminFinanceController extends Controller
 
                 unset($spreadsheet);
             }
+            foreach ($rows as $key => $row) {
+                $row_id = $key + 2;
 
-            $row_id = $key + 2;
+                $validate = Validator::make($row, $rules, $messages);
 
-            $validate = Validator::make($row, $rules, $messages);
+                $validate->setAttributeNames($names);
 
-            $validate->setAttributeNames($names);
-
-            if ($validate->fails()) {
-                foreach ($validate->errors()->toArray() as $key => $error_array) {
-                    foreach ($error_array as $error) {
-                        if (!isset($errors[$row_id][$key])) {
-                            $errors[$row_id][$key] = $error;
-                        }
-                    }
+                if ($validate->fails()) {
+                    $errors['Row #' . $row_id] = $validate->errors()->all();
                 }
             }
             if(isset($errors)){
-                return redirect()->back()->with('errors', $errors);
+                $errors = array_map(function ($row, $errors) {
+                    return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                }, array_keys($errors), $errors);
+                dd($errors);
+                return redirect()->back()->withErrors($errors);
             }
             else{
                 foreach ($rows as $key => $row) {
