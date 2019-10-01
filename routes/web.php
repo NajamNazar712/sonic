@@ -689,6 +689,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments', 'Admins\ReturnController@history_shipments')->name('shipments');
 
         });
+        Route::prefix('cx_sales')->name('cx_sales.')->group(function () {
+            Route::get('', 'Admins\ReturnController@cx_sales_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@cx_sales_list')->name('list');
+
+        });
     });
     Route::prefix('cargo')->name('cargo.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
