@@ -374,6 +374,9 @@ class DeliveryController extends Controller
         }
     }
 
+    public function delivery_note_rider_check(Request $request){
+        return $request;
+    }
     public function create_delivery_note(Request $request){
         $shipments = explode(',',$request->shipment_ids);
         $notifications = explode(',',$request->notification_ids);

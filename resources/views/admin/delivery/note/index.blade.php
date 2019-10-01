@@ -527,39 +527,49 @@
                 if(count > 0) {
                     if (errors === 0) {
 
-                        swal({
-                            title: 'Are You Sure?',
-                            text: 'Select Yes to create the Delivery Note!',
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
-                            },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function (confirm) {
-                            if(confirm){
-                                blockPagePermanently();
-                                $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
-                                $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                                $('#create_delivery_note_form input#notification_ids').val(notification_ids);
-                                $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
-                                $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                                $('#create_delivery_note_form input#selected_route_id').val(route);
-
-                                this_form.submit();
+                        $.ajax({
+                            url: '{!! route('admin.delivery.note.rider_check') !!}',
+                            method: 'POST',
+                            data: {
+                                'rider_id': rider,
+                                '_token': '{{ csrf_token() }}'
                             }
+                            }).done(function(data) {
+
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to create the Delivery Note!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if(confirm){
+                                        blockPagePermanently();
+                                        $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                                        $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                                        $('#create_delivery_note_form input#notification_ids').val(notification_ids);
+                                        $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
+                                        $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                        $('#create_delivery_note_form input#selected_route_id').val(route);
+
+                                        this_form.submit();
+                                    }
+                                });
                         });
 
 

@@ -494,6 +494,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\DeliveryController@delivery_note_index')->name('index');
             Route::post('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
+            Route::post('rider_check','Admins\DeliveryController@delivery_note_rider_check')->name('rider_check');
 
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
