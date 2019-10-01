@@ -82,6 +82,10 @@
                                                 <td>{{$user->ntn_no}}</td>
                                             </tr>
                                             <tr>
+                                                <td><b>STRN Number</b></td>
+                                                <td>{{$user->strn_no}}</td>
+                                            </tr>
+                                            <tr>
                                                 <td><b>URL</b></td>
                                                 <td>{{$user->url}}</td>
                                             </tr>

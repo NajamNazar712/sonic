@@ -150,13 +150,19 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="url">URL:</label>
-                                                        <span class="danger">*</span></label>
-                                                        <input type="text" class="form-control required" value="{{ old('url') }}" name="url" placeholder="Webiste / Facebook Page">
+                                                       <label for="strn_no">STRN Number:</label>
+                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567-8)" value="{{ old('strn_no') }}"  name="strn_no">
                                                     </div>
-                                            </div>
+                                                </div>
                                         </div>
                                             <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="url">URL:</label>
+                                                        <span class="danger">*</span>
+                                                        <input type="text" class="form-control required" value="{{ old('url') }}" name="url" placeholder="Webiste / Facebook Page">
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
 
@@ -172,6 +178,22 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="nature_of_account">Nature Of Account:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="nature_of_account" id="nature_of_account" class="select2 form-control required">
+                                                                @foreach($account_types as $type)
+                                                                    <option value="{{$type->id}}" {{ old('nature_of_account') == $type->id ? 'selected' : '' }}>{{$type->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
 
@@ -182,22 +204,6 @@
                                                             <select name="shipper_product_type" id="shipper_product_type" class="select2 form-control required" style="width: 100%">
                                                                 @foreach($products as $product)
                                                                     <option value="{{$product->id}}" {{ old('shipper_product_type') == $product->id ? 'selected' : '' }} >{{$product->product_name}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-6">
-                                                    <div class="form-group">
-                                                        <label for="nature_of_account">Nature Of Account:
-                                                            <span class="danger">*</span>
-                                                        </label>
-                                                        <div>
-                                                            <select name="nature_of_account" id="nature_of_account" class="select2 form-control required">
-                                                                @foreach($account_types as $type)
-                                                                    <option value="{{$type->id}}" {{ old('nature_of_account') == $type->id ? 'selected' : '' }}>{{$type->name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -699,6 +705,7 @@
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='billing_person_phone'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
+        $("input[name='strn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
         $('#shipInfo').perfectScrollbar({
             suppressScrollX : true,
             theme: 'dark',
