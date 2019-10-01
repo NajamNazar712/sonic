@@ -830,8 +830,8 @@ class ReturnController extends Controller
         if($request->tracking != ''){
 //            $shipment_not_arrived = array(20,24,27,29,33,35,42,44,45,46);
 //            $shipment_arrived = array(22,24,27,29,30,33,35,44,45,46);
-            $allowed_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48);
-            $return_note_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48);
+            $allowed_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48, 60);
+            $return_note_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id',$allowed_statuses);
             $status = '';
             if($shipment->exists()) {
@@ -1112,7 +1112,7 @@ class ReturnController extends Controller
         $hub_id = $request->hub_id;
         $admin = Auth::id();
         //$errors_not_arrived = array();
-        $return_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48);
+        $return_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48, 60);
         $valid_shipments = array();
         $shipments_count = 0;
         if(!empty($trackings)) {
@@ -1365,7 +1365,7 @@ class ReturnController extends Controller
         $return = ReturnNote::where('id',$id);
         if($return->exists()){
             $return = $return->first();
-            $shipment_status = ShipmentStatus::whereIn('id', [24,25, 47, 48])->get();
+            $shipment_status = ShipmentStatus::whereIn('id', [24,25, 47, 48, 60])->get();
 
             return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count, 'return_note_status' => $return->status, 'shipment_statuses' => $shipment_status]);
         }else{
@@ -1446,11 +1446,11 @@ class ReturnController extends Controller
                     return $deliveries->current_status_name;
                 }else{
                     if(in_array($deliveries->booking_type_id,[1,4,5])){
-                        $where = array(24,47,48);
+                        $where = array(24,47,48, 60);
                     }else if($deliveries->booking_type_id == 2){
-                        $where = array(29,47,48);
+                        $where = array(29,47,48, 60);
                     }else if($deliveries->booking_type_id == 3){
-                        $where = array(35,47,48);
+                        $where = array(35,47,48, 60);
                     }
                     $statuses = ShipmentStatus::whereIn('id',$where)->get();
                     $drops = '';
