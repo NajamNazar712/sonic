@@ -375,7 +375,20 @@ class DeliveryController extends Controller
     }
 
     public function delivery_note_rider_check(Request $request){
-        return $request;
+        $rider_id = $request->rider_id;
+        $flag = true;
+        $delivery_note_details = array();
+        $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->get();
+        if($delivery_notes){
+            foreach ($delivery_notes as $note) {
+               $count = DeliveryNoteShipment::where('delivery_note_id', $note->id)->where('status', 0)->count();
+               if($count > 0){
+                    $delivery_note_details[$note->id] = $note; 
+                    $flag = false;
+               }
+            }
+        }
+        return response()->json(['flag' => $flag , 'delivery_note' => $delivery_note_details]);
     }
     public function create_delivery_note(Request $request){
         $shipments = explode(',',$request->shipment_ids);
