@@ -3217,7 +3217,7 @@ class AdminFinanceController extends Controller
 
         $rules = [
             'payment_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('done_payments', 'id')],
-            'status' => ['required', 'string', 'in:paid,Paid,Reverted,reverted'],
+            'status' => ['required', 'string', 'in:paid,Paid,Reverted,reverted,PAID,REVERTED'],
         ];
 
         $fields = [0 => 'payment_id', 1 => 'status'];
