@@ -381,11 +381,10 @@ class DeliveryController extends Controller
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->get();
         if($delivery_notes){
             foreach ($delivery_notes as $note) {
-               $count = DeliveryNoteShipment::where('delivery_note_id', $note->id)->where('status', 0)->count();
-               if($count > 0){
+              
                     $delivery_note_details[$note->id] = $note; 
                     $flag = false;
-               }
+               
             }
         }
         return response()->json(['flag' => $flag , 'delivery_note' => $delivery_note_details]);
