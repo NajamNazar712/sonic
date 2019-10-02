@@ -250,6 +250,9 @@ class AdminNotificationsController extends Controller
         else if ($id == 42) {
             $details['fields'] = ['rider_name', 'rider_phone_number'];
         }
+        else if ($id == 43) {
+            $details['fields'] = ['vendor', 'shipper_name', 'shipments_detail'];
+        }
         return $details;
     }
 

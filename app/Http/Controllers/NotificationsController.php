@@ -8,7 +8,10 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -2964,6 +2967,48 @@ class NotificationsController extends Controller
 
                         $to = $user->phone;
                         self::sms($body, $to);
+                    }
+                }
+            }
+			else if($id == 43){
+			    $pickup_request = PickupRequest::find($reference_1_id);
+			    if($pickup_request){
+                    $vendor = $pickup_request->pickup_address->vendor;
+                    if($vendor != null){
+                        $shipper_name = $pickup_request->shipper->name;
+
+                        if (strpos($subject, '[shipper_name]') !== FALSE) {
+                            $subject = str_replace('[shipper_name]', $shipper_name, $subject);
+                        }
+                        if (strpos($body, '[shipper_name]') !== FALSE) {
+                            $body = str_replace('[shipper_name]', $shipper_name, $body);
+                        }
+                        if (strpos($body, '[vendor]') !== FALSE) {
+                            $body = str_replace('[vendor]', $vendor, $body);
+                        }
+
+                        $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
+                        $shipment_details = '<table style="width:100%;">';
+                        $shipment_details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number.</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Item Description</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Quantity</th></tr></thead>';
+                        $shipment_details .= '<tbody>';
+                        foreach ($assigned_shipments as $assigned_shipment){
+                            $shipment = $assigned_shipment->shipment;
+                            $items = ShipmentItem::where('shipment_id', $shipment->id)->first();
+                            $shipment_details .= '<tr>';
+                            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
+                            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->description . '</td>';
+                            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td>';
+                            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->quantity . '</td>';
+                            $shipment_details .= '</tr>';
+                        }
+                        $shipment_details .= '</tbody></table>';
+
+                        if (strpos($body, '[shipments_detail]') !== FALSE) {
+                            $body = str_replace('[shipments_detail]', $shipment_details, $body);
+                        }
+
+                        $to = $pickup_request->pickup_address->email;
+                        self::email($subject, $body, $to);
                     }
                 }
             }
