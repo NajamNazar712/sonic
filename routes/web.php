@@ -897,6 +897,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('details', 'Admins\AdminFinanceController@done_payments_details')->name('details');
             Route::put('update_details', 'Admins\AdminFinanceController@done_payments_update_details')->name('update_details');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@done_payments_export_to_excel')->name('export_to_excel');
+            Route::post('excel_store', 'Admins\AdminFinanceController@done_payments_excel_store')->name('excel_store');
         });
 
         Route::prefix('invoices')->name('invoices.')->group(function () {
