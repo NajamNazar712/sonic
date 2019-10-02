@@ -3291,7 +3291,7 @@ class AdminFinanceController extends Controller
                     $done_payment = DonePayment::find($payment_id);
                     $status = strtolower($row['status']);
                     if($status == "paid"){
-                        if ($done_payment->status != 1) {
+                        if ($done_payment->status != 1 && $done_payment->status != 2) {
                             $done_payment->status = 1;
 
                             $done_payment->save();
