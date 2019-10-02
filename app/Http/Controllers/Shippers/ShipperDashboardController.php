@@ -450,11 +450,13 @@ class ShipperDashboardController extends Controller
                 ]);
                 $flag = true;
                 $user = User::where('email', $request->email)->first();
-                if(session('user_id') == $user->id) {
-                    $flag = true;
-                }
-                else{
-                    $flag = false;
+                if($user){
+                    if(session('user_id') == $user->id) {
+                        $flag = true;
+                    }
+                    else{
+                        $flag = false;
+                    }
                 }
                 if($flag == true){
                     User::where('id', session('user_id'))->update(['poc' => $request->poc, 'phone' => $request->phone, 'phone2' => $request->phone2, 'email' => $request->email,
