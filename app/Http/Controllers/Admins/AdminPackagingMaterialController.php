@@ -136,7 +136,7 @@ class AdminPackagingMaterialController extends Controller
         if ($id) {
             $sizes = PackagingMaterialTypeSizes::where('type_id', $id);
             if ($sizes->exists()) {
-                $sizes = $sizes->select('id', 'size')->get();
+                $sizes = $sizes->select('id', 'size', 'standard_charges')->get();
                 return response()->json(['status' => 0, 'sizes' => $sizes]);
             } else {
                 $type = PackagingMaterialTypes::find($id)->type;

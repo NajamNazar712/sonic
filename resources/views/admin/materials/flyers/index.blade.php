@@ -1026,13 +1026,6 @@
                     $('#request_quantity_error').remove();
                 }
 
-
-
-
-
-
-
-
                 if(flag == false){
                     $.ajax({
                         url: '{!! route('admin.packaging.requests.check_quantity') !!}',

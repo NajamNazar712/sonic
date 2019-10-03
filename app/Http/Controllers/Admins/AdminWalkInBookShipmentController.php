@@ -28,9 +28,10 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
-
+use App\Http\models\PackagingMaterialTypes;
+use App\Http\models\WalkInShipmentPackagingMaterialHistory;
 use Auth;
-
+use App\Http\models\PackagingMaterialTypeSizes;
 use Validator;
 use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
@@ -57,7 +58,7 @@ class AdminWalkInBookShipmentController extends Controller
         return $user_shipping_info->id;
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges) {
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -91,6 +92,7 @@ class AdminWalkInBookShipmentController extends Controller
         $shipment->payment_mode_id = 1;
         $shipment->walk_in_delivery_type_id = $delivery_type;
         $shipment->charges_mode_id = $charges_mode_id;
+        $shipment->packaging_charges = $packaging_charges;
 
         $self_collection = FALSE;
 
@@ -152,7 +154,9 @@ class AdminWalkInBookShipmentController extends Controller
         $shipping_mode = ShippingMode::where('id','!=', 4)->get();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
         $charges_modes = ChargesModes::whereIn('id', [1, 2])->get();
-        return view('admin.shipment.book.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user_shipping_infos' => $user_shipping_infos, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'consignee_cities' => $consignee_cities]);
+        $packaging_type = PackagingMaterialTypes::with('sizes')->where('status', 1)->get();
+        $packaging_sizes = PackagingMaterialTypeSizes::all();
+        return view('admin.shipment.book.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user_shipping_infos' => $user_shipping_infos, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'consignee_cities' => $consignee_cities, 'packaging_types' => $packaging_type, 'packaging_sizes' => $packaging_sizes]);
     }
 
     static public function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
@@ -168,6 +172,7 @@ class AdminWalkInBookShipmentController extends Controller
     }
 
     public function walk_in_store(Request $request) {
+        
         $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
 
         $user_id = $check_id['setting_value'];
@@ -233,6 +238,9 @@ class AdminWalkInBookShipmentController extends Controller
                     else {
                         $package_type = FALSE;
                     }
+                    
+                    $packaging_charges = $request->packaging_charges;
+                    
 
                     $pickup_date = Carbon::now();
 
@@ -282,7 +290,7 @@ class AdminWalkInBookShipmentController extends Controller
                         $r_amount = NULL;
                     }
 
-                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id);
+                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges);
 
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
@@ -301,7 +309,37 @@ class AdminWalkInBookShipmentController extends Controller
 
                         $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $type);
 
+                        if($request->has('pack_type')){
+                            $pickup_address_details = UserShippingInfo::find($pickup_address_id);
+                            $hub_id = $pickup_address_details->city->hub_id;
 
+                            $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id',$hub_id);
+
+                            $fulfilment_hub = $fulfilment_hub->first();
+
+                            $warehouse_id = $fulfilment_hub->warehouse_id;
+                            
+
+                            $packaging_types = PackagingMaterialTypes::all();
+                            foreach ($packaging_types as $key => $value) {
+                                    if (array_key_exists($value->id, $request->pack_type)) {
+                                        $packaging_history = new WalkInShipmentPackagingMaterialHistory();
+                                        $packaging_history->shipment_id = $shipment_id;
+                                        $packaging_history->type_id = $request->pack_type[$value->id];
+                                        $packaging_history->size_id = $request->pack_size[$value->id];
+                                        $packaging_history->quantity = $request->pack_quantity[$value->id];
+                                        $packaging_history->save();
+                                        
+                                        $type_id = $request->pack_type[$value->id];
+                                        $type_size_id = $request->pack_size[$value->id];
+                                        $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id])->first();
+
+                                        $stock->stock = $stock['stock'] - $request->pack_quantity[$value->id];
+                                        $stock->save();
+        
+                                    }
+                            }
+                        }
                     NotificationsController::send(2, $shipment_id);
 
                     if ($request->filled('book_and_print')) {
