@@ -33,6 +33,8 @@ class AdminOperationForecastController extends Controller
             $shipment_count[$hub->id]['regular']['not_attempted'] = 0;
             $shipment_count[$hub->id]['regular']['delivery_unsuccessful'] = 0;
             $shipment_count[$hub->id]['regular']['on_hold'] = 0;
+            $shipment_count[$hub->id]['regular']['delivered'] = 0;
+            $shipment_count[$hub->id]['regular']['return_delivered_to_shipper'] = 0;
             $shipment_count[$hub->id]['replacement']['booked'] = 0;
             $shipment_count[$hub->id]['replacement']['arrived_at_origin'] = 0;
             $shipment_count[$hub->id]['replacement']['in_transit'] = 0;
@@ -40,6 +42,8 @@ class AdminOperationForecastController extends Controller
             $shipment_count[$hub->id]['replacement']['not_attempted'] = 0;
             $shipment_count[$hub->id]['replacement']['delivery_unsuccessful'] = 0;
             $shipment_count[$hub->id]['replacement']['on_hold'] = 0;
+            $shipment_count[$hub->id]['replacement']['replacement_collected'] = 0;
+            $shipment_count[$hub->id]['replacement']['replacement_delivered_to_shipper'] = 0;
             $shipment_count[$hub->id]['try_and_buy']['booked'] = 0;
             $shipment_count[$hub->id]['try_and_buy']['arrived_at_origin'] = 0;
             $shipment_count[$hub->id]['try_and_buy']['in_transit'] = 0;
@@ -47,6 +51,8 @@ class AdminOperationForecastController extends Controller
             $shipment_count[$hub->id]['try_and_buy']['not_attempted'] = 0;
             $shipment_count[$hub->id]['try_and_buy']['delivery_unsuccessful'] = 0;
             $shipment_count[$hub->id]['try_and_buy']['on_hold'] = 0;
+            $shipment_count[$hub->id]['try_and_buy']['delivered'] = 0;
+            $shipment_count[$hub->id]['try_and_buy']['return_delivered_to_shipper'] = 0;
             $shipment_count[$hub->id]['walk_in']['booked'] = 0;
             $shipment_count[$hub->id]['walk_in']['arrived_at_origin'] = 0;
             $shipment_count[$hub->id]['walk_in']['in_transit'] = 0;
@@ -54,6 +60,8 @@ class AdminOperationForecastController extends Controller
             $shipment_count[$hub->id]['walk_in']['not_attempted'] = 0;
             $shipment_count[$hub->id]['walk_in']['delivery_unsuccessful'] = 0;
             $shipment_count[$hub->id]['walk_in']['on_hold'] = 0;
+            $shipment_count[$hub->id]['walk_in']['delivered'] = 0;
+            $shipment_count[$hub->id]['walk_in']['return_delivered_to_shipper'] = 0;
             $shipment_count[$hub->id]['reverse_pickup']['booked'] = 0;
             $shipment_count[$hub->id]['reverse_pickup']['arrived_at_origin'] = 0;
             $shipment_count[$hub->id]['reverse_pickup']['in_transit'] = 0;
@@ -61,8 +69,10 @@ class AdminOperationForecastController extends Controller
             $shipment_count[$hub->id]['reverse_pickup']['not_attempted'] = 0;
             $shipment_count[$hub->id]['reverse_pickup']['delivery_unsuccessful'] = 0;
             $shipment_count[$hub->id]['reverse_pickup']['on_hold'] = 0;
+            $shipment_count[$hub->id]['reverse_pickup']['delivered'] = 0;
+            $shipment_count[$hub->id]['reverse_pickup']['return_delivered_to_shipper'] = 0;
         }
-        $shipments = Shipment::whereIn('shipper_status_id', [1, 2, 3, 4, 7, 8, 9])->whereBetween('updated_at', [$from, $to])->get();
+        $shipments = Shipment::whereIn('shipper_status_id', [1, 2, 3, 4, 7, 8, 9, 14, 30, 25, 31])->whereBetween('updated_at', [$from, $to])->get();
         foreach ($shipments as $shipment) {
             if ($shipment->shipper_status_id == 1) {
                 if ($shipment->booking_type_id == 1) {
@@ -147,6 +157,22 @@ class AdminOperationForecastController extends Controller
                     $shipment_count[$shipment->consignee_city_id]['walk_in']['on_hold'] = $shipment_count[$shipment->consignee_city_id]['walk_in']['on_hold'] + 1;
                 } elseif ($shipment->booking_type_id == 5) {
                     $shipment_count[$shipment->consignee_city_id]['reverse_pickup']['on_hold'] = $shipment_count[$shipment->consignee_city_id]['reverse_pickup']['on_hold'] + 1;
+                }
+            } else if ($shipment->shipper_status_id == 14) {
+                if ($shipment->booking_type_id == 1) {
+                    $shipment_count[$shipment->consignee_city_id]['regular']['delivered'] = $shipment_count[$shipment->consignee_city_id]['regular']['delivered'] + 1;
+                }
+            } else if ($shipment->shipper_status_id == 25) {
+                if ($shipment->booking_type_id == 1) {
+                    $shipment_count[$shipment->consignee_city_id]['regular']['return_delivered_to_shipper'] = $shipment_count[$shipment->consignee_city_id]['regular']['return_delivered_to_shipper'] + 1;
+                }
+            } else if ($shipment->shipper_status_id == 30) {
+                if ($shipment->booking_type_id == 1) {
+                    $shipment_count[$shipment->consignee_city_id]['replacement']['replacement_collected'] = $shipment_count[$shipment->consignee_city_id]['regular']['replacement_collected'] + 1;
+                }
+            } else if ($shipment->shipper_status_id == 31) {
+                if ($shipment->booking_type_id == 1) {
+                    $shipment_count[$shipment->consignee_city_id]['replacement']['replacement_delivered_to_shipper'] = $shipment_count[$shipment->consignee_city_id]['regular']['replacement_delivered_to_shipper'] + 1;
                 }
             }
         }
@@ -258,6 +284,36 @@ class AdminOperationForecastController extends Controller
                             $new_operation_forecast[$hub->id]['regular']['on_hold']->save();
                         }
                     }
+                    $operation_forecast[$hub->id]['regular']['delivered'] = OperationForecast::where('shipper_status_id', 14)->where('hub_id', $hub->id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
+                    if ($operation_forecast[$hub->id]['regular']['delivered']->exists()) {
+                        $new_operation_forecast[$hub->id]['regular']['delivered'] = $operation_forecast[$hub->id]['regular']['delivered']->first();
+                        $new_operation_forecast[$hub->id]['regular']['delivered']->count = $shipment_count[$hub->id]['regular']['delivered'];
+                        $new_operation_forecast[$hub->id]['regular']['delivered']->save();
+                    } else {
+                        if ($shipment_count[$hub->id]['regular']['delivered'] > 0) {
+                            $new_operation_forecast[$hub->id]['regular']['delivered'] = new OperationForecast();
+                            $new_operation_forecast[$hub->id]['regular']['delivered']->shipper_status_id = 14;
+                            $new_operation_forecast[$hub->id]['regular']['delivered']->hub_id = $hub->id;
+                            $new_operation_forecast[$hub->id]['regular']['delivered']->booking_type_id = 1;
+                            $new_operation_forecast[$hub->id]['regular']['delivered']->count = $shipment_count[$hub->id]['regular']['delivered'];
+                            $new_operation_forecast[$hub->id]['regular']['delivered']->save();
+                        }
+                    }
+                    $operation_forecast[$hub->id]['regular']['return_delivered_to_shipper'] = OperationForecast::where('shipper_status_id', 25)->where('hub_id', $hub->id)->where('booking_type_id', 1)->whereBetween('updated_at', [$from, $to]);
+                    if ($operation_forecast[$hub->id]['regular']['return_delivered_to_shipper']->exists()) {
+                        $new_operation_forecast[$hub->id]['regular']['return_delivered_to_shipper'] = $operation_forecast[$hub->id]['regular']['return_delivered_to_shipper']->first();
+                        $new_operation_forecast[$hub->id]['regular']['return_delivered_to_shipper']->count = $shipment_count[$hub->id]['regular']['return_delivered_to_shipper'];
+                        $new_operation_forecast[$hub->id]['regular']['return_delivered_to_shipper']->save();
+                    } else {
+                        if ($shipment_count[$hub->id]['regular']['return_delivered_to_shipper'] > 0) {
+                            $new_operation_forecast[$hub->id]['regular']['return_delivered_to_shipper'] = new OperationForecast();
+                            $new_operation_forecast[$hub->id]['regular']['return_delivered_to_shipper']->shipper_status_id = 25;
+                            $new_operation_forecast[$hub->id]['regular']['return_delivered_to_shipper']->hub_id = $hub->id;
+                            $new_operation_forecast[$hub->id]['regular']['return_delivered_to_shipper']->booking_type_id = 1;
+                            $new_operation_forecast[$hub->id]['regular']['return_delivered_to_shipper']->count = $shipment_count[$hub->id]['regular']['return_delivered_to_shipper'];
+                            $new_operation_forecast[$hub->id]['regular']['return_delivered_to_shipper']->save();
+                        }
+                    }
                 }
                 if (array_key_exists('replacement', $shipment_count[$hub->id])) {
                     $operation_forecast[$hub->id]['replacement']['booked'] = OperationForecast::where('shipper_status_id', 1)->where('hub_id', $hub->id)->where('booking_type_id', 2)->whereBetween('updated_at', [$from, $to]);
@@ -363,6 +419,36 @@ class AdminOperationForecastController extends Controller
                             $new_operation_forecast[$hub->id]['replacement']['on_hold']->booking_type_id = 2;
                             $new_operation_forecast[$hub->id]['replacement']['on_hold']->count = $shipment_count[$hub->id]['replacement']['on_hold'];
                             $new_operation_forecast[$hub->id]['replacement']['on_hold']->save();
+                        }
+                    }
+                    $operation_forecast[$hub->id]['replacement']['replacement_collected'] = OperationForecast::where('shipper_status_id', 30)->where('hub_id', $hub->id)->where('booking_type_id', 2)->whereBetween('updated_at', [$from, $to]);
+                    if ($operation_forecast[$hub->id]['replacement']['replacement_collected']->exists()) {
+                        $new_operation_forecast[$hub->id]['replacement']['replacement_collected'] = $operation_forecast[$hub->id]['replacement']['replacement_collected']->first();
+                        $new_operation_forecast[$hub->id]['replacement']['replacement_collected']->count = $shipment_count[$hub->id]['replacement']['replacement_collected'];
+                        $new_operation_forecast[$hub->id]['replacement']['replacement_collected']->save();
+                    } else {
+                        if ($shipment_count[$hub->id]['replacement']['replacement_collected'] > 0) {
+                            $new_operation_forecast[$hub->id]['replacement']['replacement_collected'] = new OperationForecast();
+                            $new_operation_forecast[$hub->id]['replacement']['replacement_collected']->shipper_status_id = 30;
+                            $new_operation_forecast[$hub->id]['replacement']['replacement_collected']->hub_id = $hub->id;
+                            $new_operation_forecast[$hub->id]['replacement']['replacement_collected']->booking_type_id = 2;
+                            $new_operation_forecast[$hub->id]['replacement']['replacement_collected']->count = $shipment_count[$hub->id]['replacement']['replacement_collected'];
+                            $new_operation_forecast[$hub->id]['replacement']['replacement_collected']->save();
+                        }
+                    }
+                    $operation_forecast[$hub->id]['replacement']['replacement_delivered_to_shipper'] = OperationForecast::where('shipper_status_id', 31)->where('hub_id', $hub->id)->where('booking_type_id', 2)->whereBetween('updated_at', [$from, $to]);
+                    if ($operation_forecast[$hub->id]['replacement']['replacement_delivered_to_shipper']->exists()) {
+                        $new_operation_forecast[$hub->id]['replacement']['replacement_delivered_to_shipper'] = $operation_forecast[$hub->id]['replacement']['replacement_delivered_to_shipper']->first();
+                        $new_operation_forecast[$hub->id]['replacement']['replacement_delivered_to_shipper']->count = $shipment_count[$hub->id]['replacement']['replacement_delivered_to_shipper'];
+                        $new_operation_forecast[$hub->id]['replacement']['replacement_delivered_to_shipper']->save();
+                    } else {
+                        if ($shipment_count[$hub->id]['replacement']['replacement_delivered_to_shipper'] > 0) {
+                            $new_operation_forecast[$hub->id]['replacement']['replacement_delivered_to_shipper'] = new OperationForecast();
+                            $new_operation_forecast[$hub->id]['replacement']['replacement_delivered_to_shipper']->shipper_status_id = 31;
+                            $new_operation_forecast[$hub->id]['replacement']['replacement_delivered_to_shipper']->hub_id = $hub->id;
+                            $new_operation_forecast[$hub->id]['replacement']['replacement_delivered_to_shipper']->booking_type_id = 2;
+                            $new_operation_forecast[$hub->id]['replacement']['replacement_delivered_to_shipper']->count = $shipment_count[$hub->id]['replacement']['replacement_delivered_to_shipper'];
+                            $new_operation_forecast[$hub->id]['replacement']['replacement_delivered_to_shipper']->save();
                         }
                     }
                 }
@@ -472,6 +558,36 @@ class AdminOperationForecastController extends Controller
                             $new_operation_forecast[$hub->id]['try_and_buy']['on_hold']->save();
                         }
                     }
+                    $operation_forecast[$hub->id]['try_and_buy']['delivered'] = OperationForecast::where('shipper_status_id', 14)->where('hub_id', $hub->id)->where('booking_type_id', 3)->whereBetween('updated_at', [$from, $to]);
+                    if ($operation_forecast[$hub->id]['try_and_buy']['delivered']->exists()) {
+                        $new_operation_forecast[$hub->id]['try_and_buy']['delivered'] = $operation_forecast[$hub->id]['try_and_buy']['delivered']->first();
+                        $new_operation_forecast[$hub->id]['try_and_buy']['delivered']->count = $shipment_count[$hub->id]['try_and_buy']['delivered'];
+                        $new_operation_forecast[$hub->id]['try_and_buy']['delivered']->save();
+                    } else {
+                        if ($shipment_count[$hub->id]['try_and_buy']['delivered'] > 0) {
+                            $new_operation_forecast[$hub->id]['try_and_buy']['delivered'] = new OperationForecast();
+                            $new_operation_forecast[$hub->id]['try_and_buy']['delivered']->shipper_status_id = 14;
+                            $new_operation_forecast[$hub->id]['try_and_buy']['delivered']->hub_id = $hub->id;
+                            $new_operation_forecast[$hub->id]['try_and_buy']['delivered']->booking_type_id = 3;
+                            $new_operation_forecast[$hub->id]['try_and_buy']['delivered']->count = $shipment_count[$hub->id]['try_and_buy']['delivered'];
+                            $new_operation_forecast[$hub->id]['try_and_buy']['delivered']->save();
+                        }
+                    }
+                    $operation_forecast[$hub->id]['try_and_buy']['return_delivered_to_shipper'] = OperationForecast::where('shipper_status_id', 25)->where('hub_id', $hub->id)->where('booking_type_id', 3)->whereBetween('updated_at', [$from, $to]);
+                    if ($operation_forecast[$hub->id]['try_and_buy']['return_delivered_to_shipper']->exists()) {
+                        $new_operation_forecast[$hub->id]['try_and_buy']['return_delivered_to_shipper'] = $operation_forecast[$hub->id]['try_and_buy']['return_delivered_to_shipper']->first();
+                        $new_operation_forecast[$hub->id]['try_and_buy']['return_delivered_to_shipper']->count = $shipment_count[$hub->id]['try_and_buy']['return_delivered_to_shipper'];
+                        $new_operation_forecast[$hub->id]['try_and_buy']['return_delivered_to_shipper']->save();
+                    } else {
+                        if ($shipment_count[$hub->id]['try_and_buy']['return_delivered_to_shipper'] > 0) {
+                            $new_operation_forecast[$hub->id]['try_and_buy']['return_delivered_to_shipper'] = new OperationForecast();
+                            $new_operation_forecast[$hub->id]['try_and_buy']['return_delivered_to_shipper']->shipper_status_id = 25;
+                            $new_operation_forecast[$hub->id]['try_and_buy']['return_delivered_to_shipper']->hub_id = $hub->id;
+                            $new_operation_forecast[$hub->id]['try_and_buy']['return_delivered_to_shipper']->booking_type_id = 3;
+                            $new_operation_forecast[$hub->id]['try_and_buy']['return_delivered_to_shipper']->count = $shipment_count[$hub->id]['try_and_buy']['return_delivered_to_shipper'];
+                            $new_operation_forecast[$hub->id]['try_and_buy']['return_delivered_to_shipper']->save();
+                        }
+                    }
                 }
                 if (array_key_exists('walk_in', $shipment_count[$hub->id])) {
                     $operation_forecast[$hub->id]['walk_in']['booked'] = OperationForecast::where('shipper_status_id', 1)->where('hub_id', $hub->id)->where('booking_type_id', 4)->whereBetween('updated_at', [$from, $to]);
@@ -577,6 +693,36 @@ class AdminOperationForecastController extends Controller
                             $new_operation_forecast[$hub->id]['walk_in']['on_hold']->booking_type_id = 4;
                             $new_operation_forecast[$hub->id]['walk_in']['on_hold']->count = $shipment_count[$hub->id]['walk_in']['on_hold'];
                             $new_operation_forecast[$hub->id]['walk_in']['on_hold']->save();
+                        }
+                    }
+                    $operation_forecast[$hub->id]['walk_in']['delivered'] = OperationForecast::where('shipper_status_id', 14)->where('hub_id', $hub->id)->where('booking_type_id', 4)->whereBetween('updated_at', [$from, $to]);
+                    if ($operation_forecast[$hub->id]['walk_in']['delivered']->exists()) {
+                        $new_operation_forecast[$hub->id]['walk_in']['delivered'] = $operation_forecast[$hub->id]['walk_in']['delivered']->first();
+                        $new_operation_forecast[$hub->id]['walk_in']['delivered']->count = $shipment_count[$hub->id]['walk_in']['delivered'];
+                        $new_operation_forecast[$hub->id]['walk_in']['delivered']->save();
+                    } else {
+                        if ($shipment_count[$hub->id]['walk_in']['delivered'] > 0) {
+                            $new_operation_forecast[$hub->id]['walk_in']['delivered'] = new OperationForecast();
+                            $new_operation_forecast[$hub->id]['walk_in']['delivered']->shipper_status_id = 14;
+                            $new_operation_forecast[$hub->id]['walk_in']['delivered']->hub_id = $hub->id;
+                            $new_operation_forecast[$hub->id]['walk_in']['delivered']->booking_type_id = 4;
+                            $new_operation_forecast[$hub->id]['walk_in']['delivered']->count = $shipment_count[$hub->id]['walk_in']['delivered'];
+                            $new_operation_forecast[$hub->id]['walk_in']['delivered']->save();
+                        }
+                    }
+                    $operation_forecast[$hub->id]['walk_in']['return_delivered_to_shipper'] = OperationForecast::where('shipper_status_id', 25)->where('hub_id', $hub->id)->where('booking_type_id', 4)->whereBetween('updated_at', [$from, $to]);
+                    if ($operation_forecast[$hub->id]['walk_in']['return_delivered_to_shipper']->exists()) {
+                        $new_operation_forecast[$hub->id]['walk_in']['return_delivered_to_shipper'] = $operation_forecast[$hub->id]['walk_in']['return_delivered_to_shipper']->first();
+                        $new_operation_forecast[$hub->id]['walk_in']['return_delivered_to_shipper']->count = $shipment_count[$hub->id]['walk_in']['return_delivered_to_shipper'];
+                        $new_operation_forecast[$hub->id]['walk_in']['return_delivered_to_shipper']->save();
+                    } else {
+                        if ($shipment_count[$hub->id]['walk_in']['return_delivered_to_shipper'] > 0) {
+                            $new_operation_forecast[$hub->id]['walk_in']['return_delivered_to_shipper'] = new OperationForecast();
+                            $new_operation_forecast[$hub->id]['walk_in']['return_delivered_to_shipper']->shipper_status_id = 25;
+                            $new_operation_forecast[$hub->id]['walk_in']['return_delivered_to_shipper']->hub_id = $hub->id;
+                            $new_operation_forecast[$hub->id]['walk_in']['return_delivered_to_shipper']->booking_type_id = 4;
+                            $new_operation_forecast[$hub->id]['walk_in']['return_delivered_to_shipper']->count = $shipment_count[$hub->id]['walk_in']['return_delivered_to_shipper'];
+                            $new_operation_forecast[$hub->id]['walk_in']['return_delivered_to_shipper']->save();
                         }
                     }
                 }
@@ -686,6 +832,36 @@ class AdminOperationForecastController extends Controller
                             $new_operation_forecast[$hub->id]['reverse_pickup']['on_hold']->save();
                         }
                     }
+                    $operation_forecast[$hub->id]['reverse_pickup']['delivered'] = OperationForecast::where('shipper_status_id', 14)->where('hub_id', $hub->id)->where('booking_type_id', 5)->whereBetween('updated_at', [$from, $to]);
+                    if ($operation_forecast[$hub->id]['reverse_pickup']['delivered']->exists()) {
+                        $new_operation_forecast[$hub->id]['reverse_pickup']['delivered'] = $operation_forecast[$hub->id]['reverse_pickup']['delivered']->first();
+                        $new_operation_forecast[$hub->id]['reverse_pickup']['delivered']->count = $shipment_count[$hub->id]['reverse_pickup']['delivered'];
+                        $new_operation_forecast[$hub->id]['reverse_pickup']['delivered']->save();
+                    } else {
+                        if ($shipment_count[$hub->id]['reverse_pickup']['delivered'] > 0) {
+                            $new_operation_forecast[$hub->id]['reverse_pickup']['delivered'] = new OperationForecast();
+                            $new_operation_forecast[$hub->id]['reverse_pickup']['delivered']->shipper_status_id = 14;
+                            $new_operation_forecast[$hub->id]['reverse_pickup']['delivered']->hub_id = $hub->id;
+                            $new_operation_forecast[$hub->id]['reverse_pickup']['delivered']->booking_type_id = 5;
+                            $new_operation_forecast[$hub->id]['reverse_pickup']['delivered']->count = $shipment_count[$hub->id]['reverse_pickup']['delivered'];
+                            $new_operation_forecast[$hub->id]['reverse_pickup']['delivered']->save();
+                        }
+                    }
+                    $operation_forecast[$hub->id]['reverse_pickup']['return_delivered_to_shipper'] = OperationForecast::where('shipper_status_id', 25)->where('hub_id', $hub->id)->where('booking_type_id', 5)->whereBetween('updated_at', [$from, $to]);
+                    if ($operation_forecast[$hub->id]['reverse_pickup']['return_delivered_to_shipper']->exists()) {
+                        $new_operation_forecast[$hub->id]['reverse_pickup']['return_delivered_to_shipper'] = $operation_forecast[$hub->id]['reverse_pickup']['return_delivered_to_shipper']->first();
+                        $new_operation_forecast[$hub->id]['reverse_pickup']['return_delivered_to_shipper']->count = $shipment_count[$hub->id]['reverse_pickup']['return_delivered_to_shipper'];
+                        $new_operation_forecast[$hub->id]['reverse_pickup']['return_delivered_to_shipper']->save();
+                    } else {
+                        if ($shipment_count[$hub->id]['reverse_pickup']['return_delivered_to_shipper'] > 0) {
+                            $new_operation_forecast[$hub->id]['reverse_pickup']['return_delivered_to_shipper'] = new OperationForecast();
+                            $new_operation_forecast[$hub->id]['reverse_pickup']['return_delivered_to_shipper']->shipper_status_id = 25;
+                            $new_operation_forecast[$hub->id]['reverse_pickup']['return_delivered_to_shipper']->hub_id = $hub->id;
+                            $new_operation_forecast[$hub->id]['reverse_pickup']['return_delivered_to_shipper']->booking_type_id = 5;
+                            $new_operation_forecast[$hub->id]['reverse_pickup']['return_delivered_to_shipper']->count = $shipment_count[$hub->id]['reverse_pickup']['return_delivered_to_shipper'];
+                            $new_operation_forecast[$hub->id]['reverse_pickup']['return_delivered_to_shipper']->save();
+                        }
+                    }
                 }
             }
         }
@@ -778,6 +954,24 @@ class AdminOperationForecastController extends Controller
                     $new_operation_forecast_shipments['regular']['on_hold']->booking_type_id = $shipment->booking_type_id;
                     $new_operation_forecast_shipments['regular']['on_hold']->save();
                 }
+                if ($shipment->shipper_status_id == 14) {
+                    $new_operation_forecast_shipments['regular']['delivered'] = new OperationForecastShipments();
+                    $new_operation_forecast_shipments['regular']['delivered']->operation_forecast_id = $new_operation_forecast[$shipment->consignee_city_id]['regular']['delivered']->id;
+                    $new_operation_forecast_shipments['regular']['delivered']->weight_range_id = $weight_range_id;
+                    $new_operation_forecast_shipments['regular']['delivered']->shipment_id = $shipment->id;
+                    $new_operation_forecast_shipments['regular']['delivered']->hub_id = $shipment->consignee_city_id;
+                    $new_operation_forecast_shipments['regular']['delivered']->booking_type_id = $shipment->booking_type_id;
+                    $new_operation_forecast_shipments['regular']['delivered']->save();
+                }
+                if ($shipment->shipper_status_id == 25) {
+                    $new_operation_forecast_shipments['regular']['return_delivered_to_shipper'] = new OperationForecastShipments();
+                    $new_operation_forecast_shipments['regular']['return_delivered_to_shipper']->operation_forecast_id = $new_operation_forecast[$shipment->consignee_city_id]['regular']['return_delivered_to_shipper']->id;
+                    $new_operation_forecast_shipments['regular']['return_delivered_to_shipper']->weight_range_id = $weight_range_id;
+                    $new_operation_forecast_shipments['regular']['return_delivered_to_shipper']->shipment_id = $shipment->id;
+                    $new_operation_forecast_shipments['regular']['return_delivered_to_shipper']->hub_id = $shipment->consignee_city_id;
+                    $new_operation_forecast_shipments['regular']['return_delivered_to_shipper']->booking_type_id = $shipment->booking_type_id;
+                    $new_operation_forecast_shipments['regular']['return_delivered_to_shipper']->save();
+                }
             }
             if ($shipment->booking_type_id == 2) {
                 if ($shipment->shipper_status_id == 1) {
@@ -842,6 +1036,24 @@ class AdminOperationForecastController extends Controller
                     $new_operation_forecast_shipments['replacement']['on_hold']->hub_id = $shipment->consignee_city_id;
                     $new_operation_forecast_shipments['replacement']['on_hold']->booking_type_id = $shipment->booking_type_id;
                     $new_operation_forecast_shipments['replacement']['on_hold']->save();
+                }
+                if ($shipment->shipper_status_id == 30) {
+                    $new_operation_forecast_shipments['replacement']['replacement_collected'] = new OperationForecastShipments();
+                    $new_operation_forecast_shipments['replacement']['replacement_collected']->operation_forecast_id = $new_operation_forecast[$shipment->consignee_city_id]['replacement']['replacement_collected']->id;
+                    $new_operation_forecast_shipments['replacement']['replacement_collected']->weight_range_id = $weight_range_id;
+                    $new_operation_forecast_shipments['replacement']['replacement_collected']->shipment_id = $shipment->id;
+                    $new_operation_forecast_shipments['replacement']['replacement_collected']->hub_id = $shipment->consignee_city_id;
+                    $new_operation_forecast_shipments['replacement']['replacement_collected']->booking_type_id = $shipment->booking_type_id;
+                    $new_operation_forecast_shipments['replacement']['replacement_collected']->save();
+                }
+                if ($shipment->shipper_status_id == 31) {
+                    $new_operation_forecast_shipments['replacement']['replacement_delivered_to_shipper'] = new OperationForecastShipments();
+                    $new_operation_forecast_shipments['replacement']['replacement_delivered_to_shipper']->operation_forecast_id = $new_operation_forecast[$shipment->consignee_city_id]['replacement']['replacement_delivered_to_shipper']->id;
+                    $new_operation_forecast_shipments['replacement']['replacement_delivered_to_shipper']->weight_range_id = $weight_range_id;
+                    $new_operation_forecast_shipments['replacement']['replacement_delivered_to_shipper']->shipment_id = $shipment->id;
+                    $new_operation_forecast_shipments['replacement']['replacement_delivered_to_shipper']->hub_id = $shipment->consignee_city_id;
+                    $new_operation_forecast_shipments['replacement']['replacement_delivered_to_shipper']->booking_type_id = $shipment->booking_type_id;
+                    $new_operation_forecast_shipments['replacement']['replacement_delivered_to_shipper']->save();
                 }
             }
             if ($shipment->booking_type_id == 3) {
@@ -908,6 +1120,24 @@ class AdminOperationForecastController extends Controller
                     $new_operation_forecast_shipments['try_and_buy']['on_hold']->booking_type_id = $shipment->booking_type_id;
                     $new_operation_forecast_shipments['try_and_buy']['on_hold']->save();
                 }
+                if ($shipment->shipper_status_id == 14) {
+                    $new_operation_forecast_shipments['try_and_buy']['delivered'] = new OperationForecastShipments();
+                    $new_operation_forecast_shipments['try_and_buy']['delivered']->operation_forecast_id = $new_operation_forecast[$shipment->consignee_city_id]['try_and_buy']['delivered']->id;
+                    $new_operation_forecast_shipments['try_and_buy']['delivered']->weight_range_id = $weight_range_id;
+                    $new_operation_forecast_shipments['try_and_buy']['delivered']->shipment_id = $shipment->id;
+                    $new_operation_forecast_shipments['try_and_buy']['delivered']->hub_id = $shipment->consignee_city_id;
+                    $new_operation_forecast_shipments['try_and_buy']['delivered']->booking_type_id = $shipment->booking_type_id;
+                    $new_operation_forecast_shipments['try_and_buy']['delivered']->save();
+                }
+                if ($shipment->shipper_status_id == 25) {
+                    $new_operation_forecast_shipments['try_and_buy']['return_delivered_to_shipper'] = new OperationForecastShipments();
+                    $new_operation_forecast_shipments['try_and_buy']['return_delivered_to_shipper']->operation_forecast_id = $new_operation_forecast[$shipment->consignee_city_id]['try_and_buy']['return_delivered_to_shipper']->id;
+                    $new_operation_forecast_shipments['try_and_buy']['return_delivered_to_shipper']->weight_range_id = $weight_range_id;
+                    $new_operation_forecast_shipments['try_and_buy']['return_delivered_to_shipper']->shipment_id = $shipment->id;
+                    $new_operation_forecast_shipments['try_and_buy']['return_delivered_to_shipper']->hub_id = $shipment->consignee_city_id;
+                    $new_operation_forecast_shipments['try_and_buy']['return_delivered_to_shipper']->booking_type_id = $shipment->booking_type_id;
+                    $new_operation_forecast_shipments['try_and_buy']['return_delivered_to_shipper']->save();
+                }
             }
             if ($shipment->booking_type_id == 4) {
                 if ($shipment->shipper_status_id == 1) {
@@ -973,6 +1203,24 @@ class AdminOperationForecastController extends Controller
                     $new_operation_forecast_shipments['walk_in']['on_hold']->booking_type_id = $shipment->booking_type_id;
                     $new_operation_forecast_shipments['walk_in']['on_hold']->save();
                 }
+                if ($shipment->shipper_status_id == 14) {
+                    $new_operation_forecast_shipments['walk_in']['delivered'] = new OperationForecastShipments();
+                    $new_operation_forecast_shipments['walk_in']['delivered']->operation_forecast_id = $new_operation_forecast[$shipment->consignee_city_id]['walk_in']['delivered']->id;
+                    $new_operation_forecast_shipments['walk_in']['delivered']->weight_range_id = $weight_range_id;
+                    $new_operation_forecast_shipments['walk_in']['delivered']->shipment_id = $shipment->id;
+                    $new_operation_forecast_shipments['walk_in']['delivered']->hub_id = $shipment->consignee_city_id;
+                    $new_operation_forecast_shipments['walk_in']['delivered']->booking_type_id = $shipment->booking_type_id;
+                    $new_operation_forecast_shipments['walk_in']['delivered']->save();
+                }
+                if ($shipment->shipper_status_id == 25) {
+                    $new_operation_forecast_shipments['walk_in']['return_delivered_to_shipper'] = new OperationForecastShipments();
+                    $new_operation_forecast_shipments['walk_in']['return_delivered_to_shipper']->operation_forecast_id = $new_operation_forecast[$shipment->consignee_city_id]['walk_in']['return_delivered_to_shipper']->id;
+                    $new_operation_forecast_shipments['walk_in']['return_delivered_to_shipper']->weight_range_id = $weight_range_id;
+                    $new_operation_forecast_shipments['walk_in']['return_delivered_to_shipper']->shipment_id = $shipment->id;
+                    $new_operation_forecast_shipments['walk_in']['return_delivered_to_shipper']->hub_id = $shipment->consignee_city_id;
+                    $new_operation_forecast_shipments['walk_in']['return_delivered_to_shipper']->booking_type_id = $shipment->booking_type_id;
+                    $new_operation_forecast_shipments['walk_in']['return_delivered_to_shipper']->save();
+                }
             }
             if ($shipment->booking_type_id == 5) {
                 if ($shipment->shipper_status_id == 1) {
@@ -1037,6 +1285,24 @@ class AdminOperationForecastController extends Controller
                     $new_operation_forecast_shipments['reverse_pickup']['on_hold']->hub_id = $shipment->consignee_city_id;
                     $new_operation_forecast_shipments['reverse_pickup']['on_hold']->booking_type_id = $shipment->booking_type_id;
                     $new_operation_forecast_shipments['reverse_pickup']['on_hold']->save();
+                }
+                if ($shipment->shipper_status_id == 14) {
+                    $new_operation_forecast_shipments['reverse_pickup']['delivered'] = new OperationForecastShipments();
+                    $new_operation_forecast_shipments['reverse_pickup']['delivered']->operation_forecast_id = $new_operation_forecast[$shipment->consignee_city_id]['reverse_pickup']['delivered']->id;
+                    $new_operation_forecast_shipments['reverse_pickup']['delivered']->weight_range_id = $weight_range_id;
+                    $new_operation_forecast_shipments['reverse_pickup']['delivered']->shipment_id = $shipment->id;
+                    $new_operation_forecast_shipments['reverse_pickup']['delivered']->hub_id = $shipment->consignee_city_id;
+                    $new_operation_forecast_shipments['reverse_pickup']['delivered']->booking_type_id = $shipment->booking_type_id;
+                    $new_operation_forecast_shipments['reverse_pickup']['delivered']->save();
+                }
+                if ($shipment->shipper_status_id == 25) {
+                    $new_operation_forecast_shipments['reverse_pickup']['return_delivered_to_shipper'] = new OperationForecastShipments();
+                    $new_operation_forecast_shipments['reverse_pickup']['return_delivered_to_shipper']->operation_forecast_id = $new_operation_forecast[$shipment->consignee_city_id]['reverse_pickup']['return_delivered_to_shipper']->id;
+                    $new_operation_forecast_shipments['reverse_pickup']['return_delivered_to_shipper']->weight_range_id = $weight_range_id;
+                    $new_operation_forecast_shipments['reverse_pickup']['return_delivered_to_shipper']->shipment_id = $shipment->id;
+                    $new_operation_forecast_shipments['reverse_pickup']['return_delivered_to_shipper']->hub_id = $shipment->consignee_city_id;
+                    $new_operation_forecast_shipments['reverse_pickup']['return_delivered_to_shipper']->booking_type_id = $shipment->booking_type_id;
+                    $new_operation_forecast_shipments['reverse_pickup']['return_delivered_to_shipper']->save();
                 }
             }
         }

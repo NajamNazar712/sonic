@@ -224,7 +224,7 @@
                                   <div class="text-center mt-1">
                                       <h3>Operations Incoming Loads Forecast</h3>
                                   </div>
-                                  <div class="row ml-1 mt-4" style="width: 95%">
+                                  <div class="row ml-1 mt-1" style="width: 95%">
                                       <div id="incoming_table">
                                           <table class="table table-sm table-bordered datatable" id="datatable_incoming" style="z-index: 3;">
                                               <thead>
@@ -239,6 +239,20 @@
                                           <canvas id="myChartincoming" width="10%" height="10%"></canvas>
                                       </div>
                                   </div>
+
+                                  <div class="row ml-1 mt-1" style="width: 95%">
+                                      <div id="delivered_returned_table">
+                                          <table class="table table-sm table-bordered datatable" id="datatable_incoming_delivered_returned" style="z-index: 3;">
+                                              <thead>
+                                              <tr role="row" class="black">
+                                                  <th class="black text-center border-darken-1">Description</th>
+                                                  <th class="black text-center border-darken-1">Shipments</th>
+                                              </tr>
+                                              </thead>
+                                          </table>
+                                      </div>
+                                  </div>
+
                                   <div class="ml-1 mt-4 row height-200">
                                       <div class="width-300 mt-1">
                                           <table class="table table-sm table-bordered datatable" id="datatable_incoming_weight_range" style="z-index: 3;">
@@ -771,6 +785,32 @@
                     columns: [
                         {data: 'status', name: 'ss.name', class: 'white align-middle status',orderable: false, searchable: false},
                         {data: 'count_link', name: 'count_link', class: 'text-center white align-middle count', orderable: false, searchable: false },
+
+                    ]
+                });
+                var delivered_returned_table = $('#datatable_incoming_delivered_returned').DataTable({
+                    searching: false,
+                    paging: false,
+                    info: false,
+                    scrollX: false, scrollY: false,
+                    autoWidth: false,
+                    pageLength: 50,
+                    pagingType: 'full_numbers',
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: '{{ route('admin.dashboard.delivered_returned_list') }}',
+                        data: function (d) {
+                            d.search_date_from = $('input[name="from_date_operations_formatted"]').val();
+                            d.search_date_to = $('input[name="to_date_operations_formatted"]').val();
+                            d.search_hub = $('#search_hub').val();
+                            d.search_service_type = $('#search_service_type').val();
+                        }
+                    },
+                    rowId: 'opfs_id',
+                    columns: [
+                        {data: 'status', name: 'ss.name', class: 'align-middle status',orderable: false, searchable: false},
+                        {data: 'count_link', name: 'count_link', class: 'text-center align-middle count', orderable: false, searchable: false },
 
                     ]
                 });
