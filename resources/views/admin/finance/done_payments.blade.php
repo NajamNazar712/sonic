@@ -45,7 +45,7 @@
 										</div>
 										<input type="text" name="search_from"
 											   class="form-control pickadate bg-primary border-primary white rounded-right"
-											   id="search_date_from" placeholder="From">
+											   id="search_date_from" placeholder="Date (From)">
 									</div>
 								</div>
 								<div class="col-3 ">
@@ -57,7 +57,7 @@
 										</div>
 										<input type="text" name="search_to"
 											   class="form-control pickadate bg-primary border-primary white rounded-right"
-											   id="search_date_to" placeholder="To">
+											   id="search_date_to" placeholder="Date (To)">
 									</div>
 								</div>
 								<div class="col-2 text-center">
@@ -68,7 +68,7 @@
 								</div>
 							</div>
 
-							<form id="booking_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.done_payments.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
+							<form id="payment_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.done_payments.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
 								{{ csrf_field() }}
 
 								<div class="row align-items-center justify-content-center">
@@ -1075,6 +1075,31 @@
                 $('#add_request_form')[0].reset();
                 $('#complaint_description').val('');
                 $('#complaint_channels').val('').trigger('change');
+            });
+
+            $('#payment_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your Payment(s) are being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
             });
 		});
 	</script>

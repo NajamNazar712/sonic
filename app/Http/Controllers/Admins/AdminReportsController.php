@@ -163,7 +163,7 @@ class AdminReportsController extends Controller
     public function return_note_index(Request $request){
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
-        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->where('status',1)->select('id','name')->get();
+        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         return view('admin.reports.return_notes_report')->with(['riders' => $riders, 'admins' => $admins, 'hubs' => $hubs]);
     }
     public function return_note_list(Request $request){
@@ -2584,7 +2584,7 @@ class AdminReportsController extends Controller
     public function completed_delivery_notes_index(){
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $admins = DB::connection('reports')->table('admins')->get(['id','name']);
-        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->where('status',1)->select('id','name')->get();
+        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins, 'hubs' => $hubs]);
     }
     public function completed_delivery_notes_list(Request $request){
@@ -5484,7 +5484,7 @@ class AdminReportsController extends Controller
     public function fake_status_shipments_index(){
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $destinations = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
-        $hubs = DB::connection('reports')->table('cities')->where('status',1)->select('id','name')->get();
+        $hubs = DB::connection('reports')->table('cities')->select('id','name')->get();
         return view('admin.reports.fake_statuses_shipments_report')->with(['riders' => $riders, 'hubs' => $hubs, 'destinations' => $destinations]);
     }
 
