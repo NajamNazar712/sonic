@@ -32,6 +32,9 @@ use App\Http\models\PackagingMaterialTypes;
 use App\Http\models\WalkInShipmentPackagingMaterialHistory;
 use Auth;
 use App\Http\models\PackagingMaterialTypeSizes;
+use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
+use App\http\Models\WarehouseStock;
+use App\Http\Models\Warehouse\Warehouse;
 use Validator;
 use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
@@ -173,6 +176,7 @@ class AdminWalkInBookShipmentController extends Controller
 
     public function walk_in_store(Request $request) {
         
+        $test = 0;
         $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
 
         $user_id = $check_id['setting_value'];
@@ -310,6 +314,7 @@ class AdminWalkInBookShipmentController extends Controller
                         $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $type);
 
                         if($request->has('pack_type')){
+                            
                             $pickup_address_details = UserShippingInfo::find($pickup_address_id);
                             $hub_id = $pickup_address_details->city->hub_id;
 
@@ -321,23 +326,29 @@ class AdminWalkInBookShipmentController extends Controller
                             
 
                             $packaging_types = PackagingMaterialTypes::all();
-                            foreach ($packaging_types as $key => $value) {
-                                    if (array_key_exists($value->id, $request->pack_type)) {
+                            $packaging_sizes = PackagingMaterialTypeSizes::all();
+                            foreach ($packaging_types as $ptype) {
+                                foreach ($packaging_sizes as $psize) {
+                                    $index = (int)($ptype->id . $psize->id);
+                                    
+                                    if (array_key_exists($index, $request->pack_type)) {
+                                        $test += 1;
                                         $packaging_history = new WalkInShipmentPackagingMaterialHistory();
                                         $packaging_history->shipment_id = $shipment_id;
-                                        $packaging_history->type_id = $request->pack_type[$value->id];
-                                        $packaging_history->size_id = $request->pack_size[$value->id];
-                                        $packaging_history->quantity = $request->pack_quantity[$value->id];
+                                        $packaging_history->type_id = $request->pack_type[$index];
+                                        $packaging_history->size_id = $request->pack_size[$index];
+                                        $packaging_history->quantity = $request->pack_quantity[$index];
                                         $packaging_history->save();
                                         
-                                        $type_id = $request->pack_type[$value->id];
-                                        $type_size_id = $request->pack_size[$value->id];
+                                        $type_id = $request->pack_type[$index];
+                                        $type_size_id = $request->pack_size[$index];
                                         $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id])->first();
 
-                                        $stock->stock = $stock['stock'] - $request->pack_quantity[$value->id];
+                                        $stock->stock = $stock['stock'] - $request->pack_quantity[$index];
                                         $stock->save();
         
                                     }
+                                }
                             }
                         }
                     NotificationsController::send(2, $shipment_id);
@@ -348,7 +359,7 @@ class AdminWalkInBookShipmentController extends Controller
                     else {
                         $print = FALSE;
                     }
-                    return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
+                    return redirect()->back()->with(['success' => $test .' Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
             else {
                 return redirect()->back()->with('error', 'Shipping Mode needs to be Selected');
@@ -357,6 +368,65 @@ class AdminWalkInBookShipmentController extends Controller
         else {
             return redirect()->back()->with('error', 'Invalid Service Type Selected');
         }
+    }
+
+    public function check_packing_quantity(Request $request){
+        $type_id = $request->type_id;
+        $size_id = $request->size_id;
+        $hub_id = $request->hub_id;
+        $quantity = $request->quantity;
+        if($type_id == null){
+            return response()->json(['status' => 1, 'error' => 'Please select Packaging Material Type']);
+        }
+
+        if($size_id == null){
+            return response()->json(['status' => 1, 'error' => 'Please select Packaging Material Size']);
+        }
+
+        if($hub_id == null){
+            return response()->json(['status' => 1, 'error' => 'Please select Warehouse']);
+        }
+
+        if($quantity == null){
+            return response()->json(['status' => 1, 'error' => 'Please select Packaging Material Quantity']);
+        }
+
+        $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id',$hub_id);
+        if($fulfilment_hub->exists()){
+            $fulfilment_hub = $fulfilment_hub->first();
+            $warehouse_id = $fulfilment_hub->warehouse_id;
+        }else{
+            return response()->json(['status' => 1, 'error' => 'Origin is not linked with any Warehouse!']);
+        }
+
+        
+
+        $warehouse = Warehouse::find($warehouse_id);
+        if($warehouse){
+            if($warehouse->status == 1){
+               $warehouse_stock = WarehouseStock::where('warehouse_id', $warehouse_id)->where('type_id', $type_id)->where('type_size_id', $size_id);
+               if($warehouse_stock->exists()){
+                   $warehouse_stock = $warehouse_stock->first();
+                   if($warehouse_stock->stock > $quantity){
+                       return response()->json(['status' => 0]);
+                   }else{
+                       return response()->json(['status' => 1, 'error' => 'Warehouse does not have selected quantity!']);
+                   }
+
+               }else{
+                   return response()->json(['status' => 1, 'error' => 'Warehouse does not have this packaging material!']);
+               }
+
+            }
+            else{
+                return response()->json(['status' => 1, 'error' => 'Warehouse is disabled, please select another warehouse!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1, 'error' => 'Warehouse is not found!']);
+        }
+
+
     }
 
     public function check_standard_weight(Request $request){

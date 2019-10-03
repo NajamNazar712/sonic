@@ -734,8 +734,14 @@
                 var size_name = $('#pack_material_size option:selected').text();
                 var quantity = $('#pack_material_quantity').val();
 
+                var pickup_address_id = $('#pickup_address').val();
+                if(pickup_address_id == 0){
+                    pickup_address_id = $('#new_pickup_city').val();
+                }else{
+                    pickup_address_id = $('#pickup_address option:selected').data('city-id');
+                }
                 var flag = false;
-                if((type == '' || type == null) || (size == '' || size == null) || (quantity == '' || quantity == null)){
+                if((type == '' || type == null) || (size == '' || size == null) || (quantity == '' || quantity == null) || (pickup_address_id == '' || pickup_address_id == null)){
                 if(type == '' || type == null){
                         flag = true;
                         var error = "<p id='pack_type_error' class='danger'>Type is required</p>";
@@ -764,6 +770,19 @@
                     }else{
                         $('#pack_quantity_error').remove();
                     }
+                    if(pickup_address_id == '' || pickup_address_id == null){
+                        flag = true;
+                        var error = "<p id='pickup_address_error' class='danger'>Pickup Address is required</p>";
+                        if($('#pickup_address').parent('div').find('p#pickup_address_error').length == 0){
+                            $('#pickup_address').parent('div').append(error);
+                        }
+                         toastr.error('Pickup Address is required!', 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                    }else{
+                        $('#pickup_address_error').remove();
+                    }
 
                 }
                 else{
@@ -771,36 +790,61 @@
                     $('#pack_type_error').remove();
                     $('#pack_size_error').remove();
                     $('#pack_quantity_error').remove();
+                    $('#pickup_address_error').remove();
                 }
 
                 if(flag == false){
-                    $.each(packaging_charges, function(key, value){
-                        console.log(value)
-                        if(value.id == size && value.type_id == type){
-                            total_packaging_charges = value.standard_charges;
-                        }
-                    });
 
-                    var charges = parseInt($('#packaging_charges').val());
-                    var row_charges = total_packaging_charges * parseInt(quantity);
-                    charges += row_charges;
+                    $.ajax({
+                        url: '{!! route('admin.shipment.book.check_quantity') !!}',
+                        method: 'POST',
+                        data: {
+                            'hub_id':pickup_address_id,
+                            'type_id': type,
+                            'size_id': size,
+                            'quantity': quantity,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+
+                        if(data.status == 0){
+                            $.each(packaging_charges, function(key, value){
+                        
+                                if(value.id == size && value.type_id == type){
+                                    total_packaging_charges = value.standard_charges;
+                                }
+                            });
+
+                            var charges = parseInt($('#packaging_charges').val());
+                            var row_charges = total_packaging_charges * parseInt(quantity);
+                            charges += row_charges;
+                            
+                            $('#packaging_charges').val(charges);
+                            
+                            var type_cell = '<td><input type="hidden" name="pack_type['+ type + size +']" value="'+ type +'">'+ type_name +'</td>';
+                            var size_cell = '<td><input type="hidden" name="pack_size['+ type + size +']" value="'+ size +'">'+ size_name +'</td>';
+                            var quantity_cell = '<td><input type="hidden" name="pack_quantity['+ type + size +']" value="'+ quantity +'">'+ quantity +'</td>';
+                            var remove = '<a href="javascript:void(0);" class="btn btn-sm btn-danger premove"><i class="la la-close"></i></a>';
+                            ptable.row.add([type_cell,size_cell,quantity_cell, remove]).node().id = rid;
+                            ptable.draw(false);
+                            $('tr#'+rid).attr('charges', row_charges);
+                            packaging_index_array.push(rid);
+                            total_packaging_charges = 0;
+                            already_selected_size.push(parseInt(type+size));
+                            rid++;
+                            $('#pack_material_type').val(null).trigger('change');
+                            $('#pack_material_size').val(null).trigger('change');
+                            $('#pack_material_quantity').val('');
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+
+                    });
                     
-                    $('#packaging_charges').val(charges);
-                    
-                    var type_cell = '<td><input type="hidden" name="pack_type['+ type +']" value="'+ type +'">'+ type_name +'</td>';
-                    var size_cell = '<td><input type="hidden" name="pack_size['+ type +']" value="'+ size +'">'+ size_name +'</td>';
-                    var quantity_cell = '<td><input type="hidden" name="pack_quantity['+ type +']" value="'+ quantity +'">'+ quantity +'</td>';
-                    var remove = '<a href="javascript:void(0);" class="btn btn-sm btn-danger premove"><i class="la la-close"></i></a>';
-                    ptable.row.add([type_cell,size_cell,quantity_cell, remove]).node().id = rid;
-                    ptable.draw(false);
-                    $('tr#'+rid).attr('charges', row_charges);
-                    packaging_index_array.push(rid);
-                    total_packaging_charges = 0;
-                    already_selected_size.push(parseInt(type+size));
-                    rid++;
-                    $('#pack_material_type').val(null).trigger('change');
-                    $('#pack_material_size').val(null).trigger('change');
-                    $('#pack_material_quantity').val('');
                 }
             });
 
