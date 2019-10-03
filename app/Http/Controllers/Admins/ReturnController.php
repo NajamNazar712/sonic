@@ -1807,7 +1807,7 @@ class ReturnController extends Controller
                           <table class="table table-sm table-bordered border mt-1">
                             <tbody>
                                 <tr>
-                                    <td class="color primary" colspan="6"><strong style="font-size: large">Summary</strong></td>
+                                    <td class="color primary" colspan="6"><strong style="font-size: large">SUMMARY</strong></td>
                                 </tr>
                               <tr>
                                 <td class="color primary"><strong>S. No.</strong></td>
@@ -1847,7 +1847,7 @@ class ReturnController extends Controller
                      
         ';
             foreach ($filtered_shipments_users as $filtered_shipments_user){
-                $shipment_details .= '<div class="page text-center">';
+                $shipment_details .= '<div class="mb-1 text-center">';
 
                 $shipment_details .= '
                           <table class="table table-sm table-bordered border">
