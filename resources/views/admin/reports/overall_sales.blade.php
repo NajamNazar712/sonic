@@ -143,6 +143,7 @@
                         <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Estimated Charges</th>
+                        <th class="border-primary border-darken-1">Packing Charges</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                         <th class="border-primary border-darken-1">Sales Person</th>
@@ -367,6 +368,7 @@
                             head.push('GST');
                             head.push('Total Charges');
                             head.push('Estimated Charges');
+                            head.push('Packing Charges');
                             head.push('Net Payable');
                             head.push('Delivered / Returned Date');
                             head.push('Sales Person');
@@ -408,6 +410,7 @@
                                 row.push(values.p_gst);
                                 row.push(values.p_total_charges);
                                 row.push(values.estimated_charges);
+                                row.push(values.packaging_charges);
                                 row.push(values.p_net_payable);
                                 row.push(values.delivered_or_returned);
                                 row.push(values.sales_person);
@@ -495,6 +498,7 @@
                     { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
                     { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
+                    { data:'packaging_charges' ,name: 'shipments.packaging_charges', class: 'align-middle packaging_charges',sortable:false},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
                     { data: 'sales_person' ,name: 'dr.created_at', class: 'align-middle sales_person'}

@@ -161,10 +161,70 @@
                                         <div class="form-group">
                                             <input type="text" name="charges_per_kg" class="form-control charges_per_kg" id="charges_per_kg" placeholder="Charges Per KG*" data-rule-required="true" data-msg-required="Charges Per KG is required">
                                         </div>
+
+                                         <div class="">
+                                            <h4 class="form-section mb-2 text-center">Packaging Charges</h4>
+                                            <div id="send_div">
+
+
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <select name="pack_material_type" class="select2" id="pack_material_type">
+                                                        @foreach($packaging_types as $packaging_type)
+                                                            <option value="{{ $packaging_type->id }}">{{ $packaging_type->type }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <select name="pack_material_size" class="select2" id="pack_material_size"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <input name="pack_material_quantity" class="form-control packaging_quantity" id="pack_material_quantity" placeholder="Quantity"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <button class="btn btn-primary btn-block" type="button" id="add_packaging_material_btn"> Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            
+                                                <table class="table table-bordered packaging_type_datatable" id="packaging_type_datatable" style="z-index: 3;">
+                                                <thead>
+                                                <tr role="row" class="bg-primary white">
+
+                                                    
+                                                    <th class="border-primary border-darken-1">Packaging Type</th>
+                                                    <th class="border-primary border-darken-1">Size</th>
+                                                    <th class="border-primary border-darken-1">Quantity</th>
+                                                    <th class="border-primary border-darken-1"></th>
+
+                                                </tr>
+                                                </thead>
+                                            </table>
+                                            
+                                            
+                                        </div>
+
+                                        
+                                    </div>
+                                        </div>
                                     </div>
 
                                     <div class="col col_custom">
                                         <h4 class="form-section mb-2 text-center">Charges Information</h4>
+
+                                        <div class="form-group">
+                                            <label>Packaging Charges:</label>
+                                            <input type="text" name="packaging_charges" class="form-control packaging_charges" id="packaging_charges" placeholder="Packaging Charges" readonly="readonly" value="0">
+                                        </div>
 
                                         <div class="form-group">
                                             <label>Fuel Surcharge:</label>
@@ -193,7 +253,10 @@
                                                 @endforeach
                                             </select>
                                         </div>
+
+                                       
                                     </div>
+                                    
                                 </div>
 
                                 <div class="row mt-2">
@@ -589,6 +652,220 @@
                 'allowPlus': false,
                 'max': 1000000
             });
+
+
+            //Packaging Material 
+
+            $('.packaging_quantity').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'max': 1000000
+            });
+            var already_selected_size = [];
+            var total_packaging_charges = 0;
+            var packaging_charges = @json($packaging_sizes);
+            $('#pack_material_size').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Packaging Material Size',
+                
+            });
+
+            $('#pack_material_type').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Packaging Material Type',
+            }).bind('select2:select', function () {
+                var type_id = $(this).val();
+                if(type_id){
+                    $.ajax({
+                        url: '{!! route('admin.packaging.requests.sizes') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': type_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            $('#pack_material_size').empty();
+
+                            $.each(data.sizes,function (key,value) {
+                                var type_size = parseInt(type_id+value.id);
+
+                                var index = $.inArray(type_size, already_selected_size);
+
+                                if(index === -1){
+                                    
+                                    var newOption =  "<option value="+value.id+" charges="+value.standard_charges+">"+value.size+"</option>";
+                                    $('#pack_material_size').append(newOption).trigger('change');
+                                    $('#pack_material_size').val('').trigger('change');
+                                }
+
+                            });
+
+                        }else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+
+                }
+            });
+            var packaging_index_array = [];
+            var rid = 100;
+            var ptable = $('#packaging_type_datatable').DataTable({
+                dom: 'ltipr',
+                paging:false,
+                ordering:[0, 'desc'],
+                columns: [
+                    {name: 'packaging_type', class: 'align-middle packaging_type', orderable: false},
+                    {name: 'size', class: 'align-middle size', orderable: false},
+                    {name: 'quantity', class: 'align-middle quantity', orderable: false},
+                    {name: 'action', class: 'align-middle action', orderable: false}
+                ],
+                
+            });
+            
+            $('#add_packaging_material_btn').on('click', function(){
+                var type = $('#pack_material_type').val();
+                var type_name = $('#pack_material_type option:selected').text();
+                var size = $('#pack_material_size').val();
+                var size_name = $('#pack_material_size option:selected').text();
+                var quantity = $('#pack_material_quantity').val();
+
+                var pickup_address_id = $('#pickup_address').val();
+                if(pickup_address_id == 0){
+                    pickup_address_id = $('#new_pickup_city').val();
+                }else{
+                    pickup_address_id = $('#pickup_address option:selected').data('city-id');
+                }
+                var flag = false;
+                if((type == '' || type == null) || (size == '' || size == null) || (quantity == '' || quantity == null) || (pickup_address_id == '' || pickup_address_id == null)){
+                if(type == '' || type == null){
+                        flag = true;
+                        var error = "<p id='pack_type_error' class='danger'>Type is required</p>";
+                        if($('#pack_material_type').parent('div').find('p#pack_type_error').length == 0){
+                            $('#pack_material_type').parent('div').append(error);
+                        }
+                    }else{
+                        // flag = false;
+                        $('#pack_type_error').remove();
+                    }
+                    if(size == '' || size == null){
+                        flag = true;
+                        var error = "<p id='pack_size_error' class='danger'>Size is required</p>";
+                        if($('#pack_material_size').parent('div').find('p#pack_size_error').length == 0){
+                            $('#pack_material_size').parent('div').append(error);
+                        }
+                    }else{
+                        $('#pack_size_error').remove();
+                    }
+                    if(quantity == '' || quantity == null){
+                        flag = true;
+                        var error = "<p id='pack_quantity_error' class='danger'>Quantity is required</p>";
+                        if($('#pack_material_quantity').parent('div').find('p#pack_quantity_error').length == 0){
+                            $('#pack_material_quantity').parent('div').append(error);
+                        }
+                    }else{
+                        $('#pack_quantity_error').remove();
+                    }
+                    if(pickup_address_id == '' || pickup_address_id == null){
+                        flag = true;
+                        var error = "<p id='pickup_address_error' class='danger'>Pickup Address is required</p>";
+                        if($('#pickup_address').parent('div').find('p#pickup_address_error').length == 0){
+                            $('#pickup_address').parent('div').append(error);
+                        }
+                         toastr.error('Pickup Address is required!', 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                    }else{
+                        $('#pickup_address_error').remove();
+                    }
+
+                }
+                else{
+                    flag = false;
+                    $('#pack_type_error').remove();
+                    $('#pack_size_error').remove();
+                    $('#pack_quantity_error').remove();
+                    $('#pickup_address_error').remove();
+                }
+
+                if(flag == false){
+
+                    $.ajax({
+                        url: '{!! route('admin.shipment.book.check_quantity') !!}',
+                        method: 'POST',
+                        data: {
+                            'hub_id':pickup_address_id,
+                            'type_id': type,
+                            'size_id': size,
+                            'quantity': quantity,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+
+                        if(data.status == 0){
+                            $.each(packaging_charges, function(key, value){
+                        
+                                if(value.id == size && value.type_id == type){
+                                    total_packaging_charges = value.standard_charges;
+                                }
+                            });
+
+                            var charges = parseInt($('#packaging_charges').val());
+                            var row_charges = total_packaging_charges * parseInt(quantity);
+                            charges += row_charges;
+                            
+                            $('#packaging_charges').val(charges);
+                            
+                            var type_cell = '<td><input type="hidden" name="pack_type['+ type + size +']" value="'+ type +'">'+ type_name +'</td>';
+                            var size_cell = '<td><input type="hidden" name="pack_size['+ type + size +']" value="'+ size +'">'+ size_name +'</td>';
+                            var quantity_cell = '<td><input type="hidden" name="pack_quantity['+ type + size +']" value="'+ quantity +'">'+ quantity +'</td>';
+                            var remove = '<a href="javascript:void(0);" class="btn btn-sm btn-danger premove"><i class="la la-close"></i></a>';
+                            ptable.row.add([type_cell,size_cell,quantity_cell, remove]).node().id = rid;
+                            ptable.draw(false);
+                            $('tr#'+rid).attr('charges', row_charges);
+                            packaging_index_array.push(rid);
+                            total_packaging_charges = 0;
+                            already_selected_size.push(parseInt(type+size));
+                            rid++;
+                            $('#pack_material_type').val(null).trigger('change');
+                            $('#pack_material_size').val(null).trigger('change');
+                            $('#pack_material_quantity').val('');
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+
+                    });
+                    
+                }
+            });
+
+            $('#packaging_type_datatable').on('click', 'a.premove', function(){
+                var rowId = parseInt($(this).parents('tr').attr('id'));
+
+                var index = $.inArray(rowId, packaging_index_array);
+
+                if (index !== -1) {
+                    already_selected_size.splice(index, 1);
+                    packaging_index_array.splice(index, 1);
+                    
+                }
+                var pcharges = parseInt($(this).parents('tr').attr('charges'));
+                var charges = parseInt($('#packaging_charges').val());
+                charges -= pcharges;
+                $('#packaging_charges').val(charges);
+                ptable.row( $(this).parents('tr') ).remove().draw();
+                
+            });
+
         });
     </script>
 @endsection

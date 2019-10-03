@@ -62,7 +62,7 @@ class AdminDailyVisitController extends Controller
                 $daily_visit->save();
             }
 
-            return redirect()->back()->with('success', 'From submitted successfully');
+            return redirect()->back()->with('success', 'Form submitted successfully');
         }
         else{
             return redirect()->back()->with('error', 'Incomplete Information!');
