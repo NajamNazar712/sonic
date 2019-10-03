@@ -161,10 +161,22 @@ class AdminOperationForecastController extends Controller
             } else if ($shipment->shipper_status_id == 14) {
                 if ($shipment->booking_type_id == 1) {
                     $shipment_count[$shipment->consignee_city_id]['regular']['delivered'] = $shipment_count[$shipment->consignee_city_id]['regular']['delivered'] + 1;
+                } elseif ($shipment->booking_type_id == 3) {
+                    $shipment_count[$shipment->consignee_city_id]['try_and_buy']['delivered'] = $shipment_count[$shipment->consignee_city_id]['try_and_buy']['delivered'] + 1;
+                } elseif ($shipment->booking_type_id == 4) {
+                    $shipment_count[$shipment->consignee_city_id]['walk_in']['delivered'] = $shipment_count[$shipment->consignee_city_id]['walk_in']['delivered'] + 1;
+                } elseif ($shipment->booking_type_id == 5) {
+                    $shipment_count[$shipment->consignee_city_id]['reverse_pickup']['delivered'] = $shipment_count[$shipment->consignee_city_id]['reverse_pickup']['delivered'] + 1;
                 }
             } else if ($shipment->shipper_status_id == 25) {
                 if ($shipment->booking_type_id == 1) {
                     $shipment_count[$shipment->consignee_city_id]['regular']['return_delivered_to_shipper'] = $shipment_count[$shipment->consignee_city_id]['regular']['return_delivered_to_shipper'] + 1;
+                } elseif ($shipment->booking_type_id == 3) {
+                    $shipment_count[$shipment->consignee_city_id]['try_and_buy']['return_delivered_to_shipper'] = $shipment_count[$shipment->consignee_city_id]['try_and_buy']['return_delivered_to_shipper'] + 1;
+                } elseif ($shipment->booking_type_id == 4) {
+                    $shipment_count[$shipment->consignee_city_id]['walk_in']['return_delivered_to_shipper'] = $shipment_count[$shipment->consignee_city_id]['walk_in']['return_delivered_to_shipper'] + 1;
+                } elseif ($shipment->booking_type_id == 5) {
+                    $shipment_count[$shipment->consignee_city_id]['reverse_pickup']['return_delivered_to_shipper'] = $shipment_count[$shipment->consignee_city_id]['reverse_pickup']['return_delivered_to_shipper'] + 1;
                 }
             } else if ($shipment->shipper_status_id == 30) {
                 if ($shipment->booking_type_id == 1) {
