@@ -1457,143 +1457,143 @@ class AdminPickupsController extends Controller
 
               $pickup_request->save();
             }
-          }
 
-          if (!empty($receiving_sheet_ids)) {
+            if (!empty($receiving_sheet_ids)) {
+              if ($shipment->receiving_sheet_shipment) {
+                $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+
+                if (!in_array($receiving_sheet_id, $done_receiving_sheet_ids)) {
+                  $short_received_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->where('status', 0);
+
+                  $pickup_request_short_received_shipments = PickupRequestShortReceivedShipment::where('pickup_request_id', $pickup_request->id);
+
+                  if ($pickup_request_short_received_shipments->exists()) {
+                    $pickup_request_short_received_shipments = $pickup_request_short_received_shipments->pluck('shipment_id')->toArray();
+
+                    $short_received_shipments = $short_received_shipments->whereNotIn('shipment_id', $pickup_request_short_received_shipments);
+                  }
+
+                  $pickup_request->short_received = $pickup_request->short_received + $short_received_shipments->count();
+
+                  foreach ($short_received_shipments->get() as $short_received_shipment) {
+                    $pickup_request_short_received_shipment = new PickupRequestShortReceivedShipment();
+
+                    $pickup_request_short_received_shipment->pickup_request_id = $pickup_request->id;
+                    $pickup_request_short_received_shipment->shipment_id = $short_received_shipment->shipment_id;
+
+                    $pickup_request_short_received_shipment->save();
+                  }
+
+                  $done_receiving_sheet_ids[] = $receiving_sheet_id;
+                }
+              }
+            }
+
+            if (!$shipment->receiving_sheet_shipment) {
+              $pickup_request->over_received = $pickup_request->over_received + 1;
+            }
+
+            $pickup_request->save();
+
+            $pickup_request_received_shipment = new PickupRequestReceivedShipment();
+
+            $pickup_request_received_shipment->pickup_request_id = $pickup_request->id;
+            $pickup_request_received_shipment->shipment_id = $shipment_id;
+
             if ($shipment->receiving_sheet_shipment) {
-              $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
-
-              if (!in_array($receiving_sheet_id, $done_receiving_sheet_ids)) {
-                $short_received_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->where('status', 0);
-
-                $pickup_request_short_received_shipments = PickupRequestShortReceivedShipment::where('pickup_request_id', $pickup_request->id);
-
-                if ($pickup_request_short_received_shipments->exists()) {
-                  $pickup_request_short_received_shipments = $pickup_request_short_received_shipments->pluck('shipment_id')->toArray();
-
-                  $short_received_shipments = $short_received_shipments->whereNotIn('shipment_id', $pickup_request_short_received_shipments);
-                }
-
-                $pickup_request->short_received = $pickup_request->short_received + $short_received_shipments->count();
-
-                foreach ($short_received_shipments->get() as $short_received_shipment) {
-                  $pickup_request_short_received_shipment = new PickupRequestShortReceivedShipment();
-
-                  $pickup_request_short_received_shipment->pickup_request_id = $pickup_request->id;
-                  $pickup_request_short_received_shipment->shipment_id = $short_received_shipment->shipment_id;
-
-                  $pickup_request_short_received_shipment->save();
-                }
-
-                $done_receiving_sheet_ids[] = $receiving_sheet_id;
-              }
-            }
-          }
-
-          if (!$shipment->receiving_sheet_shipment) {
-            $pickup_request->over_received = $pickup_request->over_received + 1;
-          }
-
-          $pickup_request->save();
-
-          $pickup_request_received_shipment = new PickupRequestReceivedShipment();
-
-          $pickup_request_received_shipment->pickup_request_id = $pickup_request->id;
-          $pickup_request_received_shipment->shipment_id = $shipment_id;
-
-          if ($shipment->receiving_sheet_shipment) {
-            $pickup_request_received_shipment->over_received = 0;
-          }
-          else {
-            $pickup_request_received_shipment->over_received = 1;
-          }
-
-          $pickup_request_received_shipment->save();
-
-          $pickup_request = $pickup_request_assigned_shipment->pickup_request;
-
-          $bookings = $pickup_request->bookings - 1;
-
-          $pickup_request->bookings = $bookings;
-
-          if ($pickup_request_assigned_shipment->status == 1) {
-            $pickup_request->pending_bookings = $pickup_request->pending_bookings - 1;
-          }
-
-          $pickup_request_assigned_shipment->status = 3;
-
-          $pickup_request_assigned_shipment->save();
-
-          $weight = $pickup_request->total_estimated_weight - $shipment->estimated_weight;
-
-          $pickup_request->total_estimated_weight = $weight;
-
-          $defined_pickup_weight = GlobalSettings::where('type', 'pickup_weight');
-
-          if ($defined_pickup_weight->exists()) {
-            $defined_pickup_weight = $defined_pickup_weight->first();
-
-            $defined_pickup_weight = $defined_pickup_weight->setting_value;
-          }
-          else {
-            $defined_pickup_weight = 10;
-          }
-
-          if ($weight < $defined_pickup_weight) {
-            $pickup_request->pickup_type = 0;
-          }
-          else {
-            $pickup_request->pickup_type = 1;
-          }
-
-          if ($bookings == 0) {
-            $pickup_request->total_estimated_weight = 0;
-            $pickup_request->pickup_type = 0;
-            $pickup_request->status = 3;
-          }
-
-          $pickup_request->save();
-
-          if ($pickup_request->pickup_note_request) {
-            $pickup_note = $pickup_request->pickup_note_request->pickup_note;
-
-            if ($bookings == 0) {
-              PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request->id)->delete();
-            }
-
-            $pickup_note_requests = $pickup_note->pickup_note_requests;
-
-            if ($pickup_note_requests) {
-              if ($bookings == 0) {
-                $pickup_note->pickups = $pickup_note->pickups - 1;
-              }
-
-              $pickup_note->bookings = $pickup_note->bookings - 1;
-
-              $weight = $pickup_note->total_estimated_weight - $weight;
-
-              $pickup_note->total_estimated_weight = $weight;
-
-              if ($weight < $defined_pickup_weight) {
-                $pickup_note->pickup_type = 0;
-              }
-              else {
-                $pickup_note->pickup_type = 1;
-              }
-
-              $pickup_note->updated_by = Auth::id();
-
-              $pickup_note->save();
+              $pickup_request_received_shipment->over_received = 0;
             }
             else {
-              $pickup_note->pickups = 0;
-              $pickup_note->bookings = 0;
-              $pickup_note->total_estimated_weight = 0;
-              $pickup_note->pickup_type = 0;
-              $pickup_note->status_id = 5;
-              $pickup_note->updated_by = Auth::id();
+              $pickup_request_received_shipment->over_received = 1;
+            }
 
-              $pickup_note->save();
+            $pickup_request_received_shipment->save();
+
+            $pickup_request = $pickup_request_assigned_shipment->pickup_request;
+
+            $bookings = $pickup_request->bookings - 1;
+
+            $pickup_request->bookings = $bookings;
+
+            if ($pickup_request_assigned_shipment->status == 1) {
+              $pickup_request->pending_bookings = $pickup_request->pending_bookings - 1;
+            }
+
+            $pickup_request_assigned_shipment->status = 3;
+
+            $pickup_request_assigned_shipment->save();
+
+            $weight = $pickup_request->total_estimated_weight - $shipment->estimated_weight;
+
+            $pickup_request->total_estimated_weight = $weight;
+
+            $defined_pickup_weight = GlobalSettings::where('type', 'pickup_weight');
+
+            if ($defined_pickup_weight->exists()) {
+              $defined_pickup_weight = $defined_pickup_weight->first();
+
+              $defined_pickup_weight = $defined_pickup_weight->setting_value;
+            }
+            else {
+              $defined_pickup_weight = 10;
+            }
+
+            if ($weight < $defined_pickup_weight) {
+              $pickup_request->pickup_type = 0;
+            }
+            else {
+              $pickup_request->pickup_type = 1;
+            }
+
+            if ($bookings == 0) {
+              $pickup_request->total_estimated_weight = 0;
+              $pickup_request->pickup_type = 0;
+              $pickup_request->status = 3;
+            }
+
+            $pickup_request->save();
+
+            if ($pickup_request->pickup_note_request) {
+              $pickup_note = $pickup_request->pickup_note_request->pickup_note;
+
+              if ($bookings == 0) {
+                PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request->id)->delete();
+              }
+
+              $pickup_note_requests = $pickup_note->pickup_note_requests;
+
+              if ($pickup_note_requests) {
+                if ($bookings == 0) {
+                  $pickup_note->pickups = $pickup_note->pickups - 1;
+                }
+
+                $pickup_note->bookings = $pickup_note->bookings - 1;
+
+                $weight = $pickup_note->total_estimated_weight - $weight;
+
+                $pickup_note->total_estimated_weight = $weight;
+
+                if ($weight < $defined_pickup_weight) {
+                  $pickup_note->pickup_type = 0;
+                }
+                else {
+                  $pickup_note->pickup_type = 1;
+                }
+
+                $pickup_note->updated_by = Auth::id();
+
+                $pickup_note->save();
+              }
+              else {
+                $pickup_note->pickups = 0;
+                $pickup_note->bookings = 0;
+                $pickup_note->total_estimated_weight = 0;
+                $pickup_note->pickup_type = 0;
+                $pickup_note->status_id = 5;
+                $pickup_note->updated_by = Auth::id();
+
+                $pickup_note->save();
+              }
             }
           }
         }
