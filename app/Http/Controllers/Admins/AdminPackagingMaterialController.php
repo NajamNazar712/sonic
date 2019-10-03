@@ -7,8 +7,6 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\PackagingMaterialStockHead;
-use App\Http\Models\Admin\PackagingMaterialStockHub;
 use App\Http\Models\Admin\PackagingStockHistory;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
@@ -272,156 +270,11 @@ class AdminPackagingMaterialController extends Controller
         return response()->json(['status'=>1,'cities'=>$cities]);
 
     }
-    public function send_stock(Request $request){
-//        return $request;
-        $small = 0; $medium = 0; $large = 0; $box = 0;
-        $sm_quantity = ($request->send_stock_smflyer != null)? $request->send_stock_smflyer:0;
-        $md_quantity = ($request->send_stock_mdflyer != null)? $request->send_stock_mdflyer:0;
-        $lg_quantity = ($request->send_stock_lgflyer != null)? $request->send_stock_lgflyer:0;
-        $box_quantity = ($request->send_stock_boxes != null)? $request->send_stock_boxes:0;
-
-        $hub_id = $request->city_select;
-        $reference_number = false;
-        $reference_number = $request->invoice_number;
-        if($reference_number != 0){
-            $cargo_id = CargoConsignment::where('id',$reference_number)->where('status_id','!=',3)->exists();
-        }else if($reference_number == 0){
-            $cargo_id = true;
-        }
-        if($cargo_id){
-            $packaging = PackagingMaterialStockHub::where('hub_id',$hub_id);
-            if($packaging->exists()){
-                $packaging = $packaging->first();
-                if($sm_quantity != 0  || $md_quantity != 0 || $lg_quantity != 0 || $box_quantity != 0){
-                    $result = $this->sub_head_stock($sm_quantity,$md_quantity,$lg_quantity,$box_quantity);
-                }else{
-                    return redirect()->back()->with('error','Canot send 0 Stock!');
-                }
-                $small = $packaging->small_flyers;
-                $medium = $packaging->medium_flyers;
-                $large = $packaging->large_flyers;
-                $box = $packaging->boxes;
-
-                if($result == true) {
-                    $small += $sm_quantity;
-                    $medium += $md_quantity;
-                    $large += $lg_quantity;
-                    $box += $box_quantity;
-                    $packaging_hub = PackagingMaterialStockHub::where('hub_id', $hub_id)->update([
-                        'small_flyers' => $small,
-                        'medium_flyers' => $medium,
-                        'large_flyers' => $large,
-                        'boxes' => $box
-                    ]);
-                    if ($packaging_hub) {
-                        PackagingStockHistory::create([
-                            'admin_id' => Auth::id(),
-                            'small_flyers' => $sm_quantity,
-                            'medium_flyers' => $md_quantity,
-                            'large_flyers' => $lg_quantity,
-                            'boxes' => $box_quantity,
-                            'entry_type' => 1,
-                            'hub_id' => $hub_id,
-                            'reference_number' => $reference_number
-                        ]);
-                    }
-                    return redirect()->back()->with('success', 'Stock added successfully!');
-                }else{
-                    return redirect()->back()->with('error','Stock looks short, check again!');
-
-                }
-            }else{
-                if($sm_quantity != 0  || $md_quantity != 0 || $lg_quantity != 0 || $box_quantity != 0){
-                    $result = $this->sub_head_stock($sm_quantity,$md_quantity,$lg_quantity,$box_quantity);
-                }else{
-                    return redirect()->back()->with('error','Canot send 0 Stock!');
-                }
-                if($result == true) {
-                    $packaging_hub = PackagingMaterialStockHub::create([
-                        'hub_id' => $hub_id,
-                        'small_flyers' => $sm_quantity,
-                        'medium_flyers' => $md_quantity,
-                        'large_flyers' => $lg_quantity,
-                        'boxes' => $box_quantity
-                    ]);
-                    if ($packaging_hub) {
-                        PackagingStockHistory::create([
-                            'admin_id' => Auth::id(),
-                            'small_flyers' => $sm_quantity,
-                            'medium_flyers' => $md_quantity,
-                            'large_flyers' => $lg_quantity,
-                            'boxes' => $box_quantity,
-                            'entry_type' => 1,
-                            'hub_id' => $hub_id,
-                            'reference_number' => $reference_number
-                        ]);
-                    }
-                    return redirect()->back()->with('success', 'Stock added successfully!');
-                }else{
-                    return redirect()->back()->with('error','Stock looks short, check again!');
-                }
-            }
-        }else{
-            return redirect()->back()->with('error','Cargo ID wrong or already received!');
-        }
-    }
-    protected function sub_head_stock($small,$medium,$large,$box){
-        $head_stocks = PackagingMaterialStockHead::latest()->first();
-        $small_flyers = 0; $medium_flyers = 0; $medium_flyers = 0; $large_flyers = 0;
-        $small_flyers = $head_stocks->small_flyers;
-        $medium_flyers = $head_stocks->medium_flyers;
-        $large_flyers = $head_stocks->large_flyers;
-        $boxes = $head_stocks->boxes;
-        if($small <= $small_flyers && $medium <= $medium_flyers && $large <= $large_flyers && $box <= $boxes){
-
-            $small_flyers -= $small;
-            $medium_flyers -= $medium;
-            $large_flyers -= $large;
-            $boxes -= $box;
-            $packaging_head =  PackagingMaterialStockHead::create([
-                'small_flyers'=>$small_flyers,
-                'medium_flyers'=>$medium_flyers,
-                'large_flyers'=>$large_flyers,
-                'boxes'=>$boxes
-            ]);
-            if($packaging_head){
-                return 1;
-            }
-        }else{
-            return 0;
-        }
-    }
-    protected function sub_hub_stock($hub,$small,$medium,$large,$box){
-        $head_stocks = PackagingMaterialStockHub::where('hub_id',$hub)->first();
-        $small_flyers = 0; $medium_flyers = 0; $medium_flyers = 0; $large_flyers = 0;
-        $small_flyers = $head_stocks->small_flyers;
-        $medium_flyers = $head_stocks->medium_flyers;
-        $large_flyers = $head_stocks->large_flyers;
-        $boxes = $head_stocks->boxes;
-        if($small <= $small_flyers && $medium <= $medium_flyers && $large <= $large_flyers && $box <= $boxes){
-
-            $small_flyers -= $small;
-            $medium_flyers -= $medium;
-            $large_flyers -= $large;
-            $boxes -= $box;
-            $packaging_head =  PackagingMaterialStockHub::where('hub_id',$hub)->update([
-                'small_flyers'=>$small_flyers,
-                'medium_flyers'=>$medium_flyers,
-                'large_flyers'=>$large_flyers,
-                'boxes'=>$boxes
-            ]);
-            if($packaging_head){
-                return 1;
-            }
-        }else{
-            return 0;
-        }
-    }
+    
     public function request_index(Request $request){
         $payment_mode = PackagingPaymentMode::all();
         $packaging_request_status = PackagingMaterialRequestStatus::select('id', 'name')->get();
-        $packaging = PackagingMaterialStockHead::latest()->first();
-        return view('admin.materials.requests.index')->with(['packaging'=>$packaging,'payment_mode'=>$payment_mode, 'packaging_request_status' => $packaging_request_status]);
+        return view('admin.materials.requests.index')->with(['payment_mode'=>$payment_mode, 'packaging_request_status' => $packaging_request_status]);
     }
     public function request_list(Request $request){
         $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')
@@ -436,7 +289,7 @@ class AdminPackagingMaterialController extends Controller
             })
             ->leftjoin('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'packaging_material_requests.status_id')
             ->leftjoin('packaging_material_request_details as pmrd', 'pmrd.packaging_material_request_id', '=', 'packaging_material_requests.id')
-            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks', 'dc.id as origin', 'oc.id as destination'])
+            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link','pmrs.name as status','packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks'])
         ->groupBy('packaging_material_requests.id');
 
         if(session('department_id') == 7){
