@@ -788,7 +788,7 @@
 
                     ]
                 });
-                var delivered_returned_table = $('#datatable_incoming_delivered_returned').DataTable({
+                var table_delivered_returned = $('#datatable_incoming_delivered_returned').DataTable({
                     searching: false,
                     paging: false,
                     info: false,
@@ -1176,6 +1176,7 @@
                 var hub = $('#search_hub').val();
                 var service_type = $('#search_service_type').val();
                 table_incoming.draw();
+                table_delivered_returned.draw();
                 table_bar_incoming.draw();
                 table_outgoing.draw();
                 table_bar_outgoing.draw();
