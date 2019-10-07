@@ -39,7 +39,8 @@ use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
 
 use Carbon\Carbon;
-
+use DB;
+use Illuminate\Support\Facades\Storage;
 use App\Mail\Notifications;
 
 use App\Jobs\ProcessSMS;
@@ -3013,18 +3014,126 @@ class NotificationsController extends Controller
                 }
             }
             else if($id == 44){
+                $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id','name');
+                if($hubs->exists()){
+                  $hubs = $hubs->get();
+                  $date = $reference_1_id;
+                  foreach ($hubs as $hub) {
                     if (strpos($subject, '[hub]') !== FALSE) {
-                        $subject = str_replace('[hub]', $shipper_name, $subject);
+                      $subject = str_replace('[hub]', $hub->name, $subject);
                     }
-                    if (strpos($body, '[shipper_name]') !== FALSE) {
-                        $body = str_replace('[shipper_name]', $shipper_name, $body);
+                    if (strpos($body, '[hub]') !== FALSE) {
+                        $body = str_replace('[hub]', $hub->name, $body);
                     }
+
+                    if (strpos($subject, '[date]') !== FALSE) {
+                    $subject = str_replace('[date]', $date, $subject);
+                    }
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+                    $file = Storage::disk('public')->url('/reports/debriefing/hubs/debriefing_report_'.$date.'_'. $hub->id .'.xlsx');
+                    $link = '<div class="row"><button onclick="window.open(' . $file . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">Download</button>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                    $subject = str_replace('[link]', $link, $subject);
+                    }
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+                    $operation_admins = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('admins.role_id', [9, 10])->where('admin_hubs.hub_id','=', $hub->id);
+                    if ($operation_admins->exists()) {
+                          $to = $operation_admins->pluck('admins.email')->toArray();
+                    }
+                  $cc = array();
+
+                  $general_managers = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $hub->id);
+
+                  if ($general_managers->exists()) {
+                    $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
+                  }
+
+                  self::email($subject, $body, $to, $cc);
+
+
+                  }
+                }
+                
             }
             else if($id == 45){
+                $zones = DB::connection('reports')->table('zones')->where('status', 1)->select('id','name');
+                if($zones->exists()){
+                  $zones = $zones->get();
+                  $date = $reference_1_id;
+                  foreach ($zones as $zone) {
+                    if (strpos($subject, '[zone]') !== FALSE) {
+                      $subject = str_replace('[zone]', $zone->name, $subject);
+                    }
+                    if (strpos($body, '[zone]') !== FALSE) {
+                        $body = str_replace('[zone]', $zone->name, $body);
+                    }
 
+                    if (strpos($subject, '[date]') !== FALSE) {
+                    $subject = str_replace('[date]', $date, $subject);
+                    }
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+                    $file = Storage::disk('public')->url('/reports/debriefing/zones/debriefing_report_'.$date.'_'. $zone->id .'.xlsx');
+
+                    $link = '<div class="row"><button onclick="window.open(' . $file . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">Download</button>';
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+                    $operation_admins = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->join('cities','cities.id','=','admin_hubs.hub_id')->whereIn('admins.role_id', [8, 9])->where('cities.zone_id','=', $zone->id);
+                    if ($operation_admins->exists()) {
+                        $to = $operation_admins->pluck('admins.email')->toArray();
+                    }
+                  $cc = array();
+
+                  $general_managers = Admin::join('admin_hubs','admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 6, 8, 15, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id','=', $zone->id);
+
+                  if ($general_managers->exists()) {
+                      $cc = $general_managers->pluck('admins.email')->toArray();
+                  }
+
+                  self::email($subject, $body, $to, $cc);
+
+
+                  }
+                }
             }
             else if($id == 46){
+                $date = $reference_1_id;
+                if (strpos($subject, '[date]') !== FALSE) {
+                    $subject = str_replace('[date]', $date, $subject);
+                }
+                if (strpos($body, '[date]') !== FALSE) {
+                    $body = str_replace('[date]', $date, $body);
+                }
+                
+                
+                $file = Storage::disk('public')->url('/reports/debriefing/overall/debriefing_report_'.$date.'.xlsx');
+                $link = '<div class="row"><button onclick="window.open(' . $file . ')" type="button" style="height: 40px; background-color: transparent; border: 2px solid black; border-radius: 5px; font-size: 18px; font-weight: bold;">Download</button>';
+                if (strpos($subject, '[link]') !== FALSE) {
+                    $subject = str_replace('[link]', $link, $subject);
+                }
+                if (strpos($body, '[link]') !== FALSE) {
+                    $body = str_replace('[link]', $link, $body);
+                }
+                $to = 'hassan@trax.pk';
+                $cc = array();
 
+                $department_heads = Admin::whereIn('role_id', [2, 3, 4, 6, 15, 19, 22, 34, 36])->where('status', 1);
+
+                if ($department_heads->exists()) {
+                  $cc = array_merge($cc, $department_heads->pluck('email')->toArray());
+                }
+
+                self::email($subject, $body, $to, $cc);
             }
         }
       }
