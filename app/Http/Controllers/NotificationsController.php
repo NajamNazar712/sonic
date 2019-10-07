@@ -3012,6 +3012,20 @@ class NotificationsController extends Controller
                     }
                 }
             }
+            else if($id == 44){
+                    if (strpos($subject, '[hub]') !== FALSE) {
+                        $subject = str_replace('[hub]', $shipper_name, $subject);
+                    }
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper_name, $body);
+                    }
+            }
+            else if($id == 45){
+
+            }
+            else if($id == 46){
+
+            }
         }
       }
     }

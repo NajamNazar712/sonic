@@ -4105,12 +4105,7 @@ class AdminReportsController extends Controller
         return $this->debriefing_data($date, $hub, $zone, NULL, $mode);
     }
 
-    public function debriefing_export(Request $request) {
-        $date = $request->get('search_date');
-        $hub = $request->get('search_hub');
-        $zone = $request->get('search_zone');
-        $mode = $request->get('search_shipping_mode');
-
+    public function debriefing_export_file($date, $hub, $zone, $mode, $type) {
         $file_name = 'debriefing_report_';
 
         $file_name .= $date;
@@ -4237,12 +4232,32 @@ class AdminReportsController extends Controller
             $writer = new Xlsx($spreadsheet);
         }
 
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $file_name . '"');
-        header('Cache-Control: max-age=0');
+        if ($type == 0) {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $file_name . '"');
+            header('Cache-Control: max-age=0');
 
-        $writer->save('php://output');
+            $writer->save('php://output');
+        }
+        else if($type == 1) {
+            $file_name = public_path() .'/reports/debriefing/hubs/'.$file_name ;
+            $writer->save("$file_name");
+        }
     }
+
+    public function debriefing_export(Request $request) {
+        $date = $request->get('search_date');
+        $hub = $request->get('search_hub');
+        $zone = $request->get('search_zone');
+        $mode = $request->get('search_shipping_mode');
+
+        return $this->debriefing_export_file($date, $hub, $zone, $mode, 1);
+    }
+
+    public function debriefing_hub_wise_report(){
+
+    }
+
     public function cargo_returns_shipment_index(){
 
         $cities = DB::connection('reports')->table('cities')->select('id','name')->where('hub',1)->get();
