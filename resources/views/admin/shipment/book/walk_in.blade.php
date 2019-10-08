@@ -91,7 +91,7 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
+                                            <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" rows="5"></textarea>
                                         </div>
 
                                         <div class="form-group">
@@ -107,7 +107,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col col_custom_middle">
+                                    <div class="col col_custom">
                                         <h4 class="form-section mb-2 text-center">Order Information</h4>
 
                                         <div class="form-group">
@@ -124,7 +124,7 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="500" data-msg-maxlength="Item Description can be maximum 500 characters"></textarea>
+                                                <textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="500" data-msg-maxlength="Item Description can be maximum 500 characters" rows="5"></textarea>
                                             </div>
 
                                             <div class="form-group input-group">
@@ -133,11 +133,11 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <textarea name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="190" data-msg-maxlength="Special Instructions can be maximum 190 characters"></textarea>
+                                            <textarea name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="190" data-msg-maxlength="Special Instructions can be maximum 190 characters" rows="5"></textarea>
                                         </div>
                                     </div>
 
-                                    <div class="col col_custom">
+                                    <div class="col col_custom_middle">
                                         <h4 class="form-section mb-2 text-center">Shipping Information</h4>
 
                                         <div class="form-group">
@@ -187,9 +187,9 @@
                                                     <input name="pack_material_quantity" class="form-control packaging_quantity" id="pack_material_quantity" placeholder="Quantity"/>
                                                 </div>
                                             </div>
-                                            <div class="col-12">
+                                            <div class="col-12 text-center">
                                                 <div class="form-group">
-                                                    <button class="btn btn-primary btn-block" type="button" id="add_packaging_material_btn"> Add</button>
+                                                    <button class="btn btn-primary pl-2 pr-2" type="button" id="add_packaging_material_btn"> Add</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -717,6 +717,7 @@
             var ptable = $('#packaging_type_datatable').DataTable({
                 dom: 'ltipr',
                 paging:false,
+                "bInfo" : false,
                 ordering:[0, 'desc'],
                 columns: [
                     {name: 'packaging_type', class: 'align-middle packaging_type', orderable: false},
