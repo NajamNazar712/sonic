@@ -816,10 +816,13 @@
                             });
 
                             var charges = parseInt($('#packaging_charges').val());
+                            var total_receivable = parseInt($('#total_receivable').val());
+                            console.log(total_receivable)
                             var row_charges = total_packaging_charges * parseInt(quantity);
                             charges += row_charges;
-                            
+                            total_receivable += row_charges;
                             $('#packaging_charges').val(charges);
+                            $('#total_receivable').val(total_receivable);
                             
                             var type_cell = '<td><input type="hidden" name="pack_type['+ type + size +']" value="'+ type +'">'+ type_name +'</td>';
                             var size_cell = '<td><input type="hidden" name="pack_size['+ type + size +']" value="'+ size +'">'+ size_name +'</td>';
@@ -860,8 +863,11 @@
                 }
                 var pcharges = parseInt($(this).parents('tr').attr('charges'));
                 var charges = parseInt($('#packaging_charges').val());
+                var total_receivable = parseInt($('#total_receivable').val());
                 charges -= pcharges;
+                total_receivable -= pcharges;
                 $('#packaging_charges').val(charges);
+                $('#total_receivable').val(total_receivable);
                 ptable.row( $(this).parents('tr') ).remove().draw();
                 
             });
