@@ -201,9 +201,9 @@
                                                 <tr role="row" class="bg-primary white">
 
                                                     
-                                                    <th class="border-primary border-darken-1">Packaging Type</th>
+                                                    <th class="border-primary border-darken-1">Type</th>
                                                     <th class="border-primary border-darken-1">Size</th>
-                                                    <th class="border-primary border-darken-1">Quantity</th>
+                                                    <th class="border-primary border-darken-1">Qty.</th>
                                                     <th class="border-primary border-darken-1"></th>
 
                                                 </tr>

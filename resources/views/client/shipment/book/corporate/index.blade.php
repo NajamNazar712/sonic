@@ -136,7 +136,7 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
+                                            <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" rows="5"></textarea>
                                         </div>
 
                                         <div class="form-group">
@@ -173,7 +173,7 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="500" data-msg-maxlength="Item Description can be maximum 500 characters"></textarea>
+                                                <textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="500" data-msg-maxlength="Item Description can be maximum 500 characters" rows="5"></textarea>
                                             </div>
 
                                             <div class="form-group input-group">
@@ -298,7 +298,7 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <textarea name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="190" data-msg-maxlength="Special Instructions can be maximum 190 characters"></textarea>
+                                            <textarea name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="190" data-msg-maxlength="Special Instructions can be maximum 190 characters" rows="5"></textarea>
                                         </div>
                                     </div>
 
