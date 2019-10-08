@@ -172,6 +172,10 @@ class ShipperPackagingMaterialController extends Controller
             $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_ids[$index]])->latest()->first();
             if($charges != null){
                     $total_charges += $packaging_quantities[$index] * $charges->charges;
+            }else{
+                $charges = PackagingMaterialTypeSizes::find($packaging_size_ids[$index]);
+
+                $total_charges += $packaging_quantities[$index] * $charges->standard_charges;
             }
         }
 
