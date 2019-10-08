@@ -852,7 +852,7 @@
                 }
             });
 
-            $('#packaging_type_datatable').on('click', 'a.premove', function(){
+            $('#packaging_type_datatable').on('click', 'td.action a.premove', function(){
                 var rowId = parseInt($(this).parents('tr').attr('id'));
 
                 var index = $.inArray(rowId, packaging_index_array);
