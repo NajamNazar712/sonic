@@ -128,7 +128,7 @@
                                             </div>
 
                                             <div class="form-group input-group">
-                                                <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
+                                                <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Qty.*" data-rule-required="true" data-msg-required="Item Quantity is required">
                                             </div>
                                         </div>
 
@@ -852,7 +852,7 @@
                 }
             });
 
-            $('#packaging_type_datatable').on('click', 'a.premove', function(){
+            $('#packaging_type_datatable').on('click', 'td.action a.premove', function(){
                 var rowId = parseInt($(this).parents('tr').attr('id'));
 
                 var index = $.inArray(rowId, packaging_index_array);

@@ -378,7 +378,7 @@ class DeliveryController extends Controller
         $rider_id = $request->rider_id;
         $flag = true;
         $delivery_note_details = array();
-        $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->get();
+        $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('pending_status', 0)->get();
         if($delivery_notes){
             foreach ($delivery_notes as $note) {
               

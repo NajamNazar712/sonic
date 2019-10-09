@@ -874,8 +874,9 @@ class AdminWalkInBookShipmentController extends Controller
             $total_weight_charges = 0;
             $total_weight_charges = $shipment->weight_charges;
             $total_fuel_surcharge = $shipment->fuel_surcharge;
+            $total_packaging_charges = $shipment->packaging_charges;
             $total_charges = 0;
-            $total_charges = $total_weight_charges + $total_fuel_surcharge;
+            $total_charges = $total_weight_charges + $total_fuel_surcharge + $total_packaging_charges;
             $total_gst = 0;
             $total_gst = $shipment->gst;
             $total_invoice_amount = 0;
@@ -895,6 +896,10 @@ class AdminWalkInBookShipmentController extends Controller
                         <tr>
                           <td class="text-left">Fuel Surcharge</td>
                           <td class="text-right">' . number_format($total_fuel_surcharge) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Packaging Charges</td>
+                          <td class="text-right">' . number_format($total_packaging_charges) . '</td>
                         </tr>
                       </tbody>
                     </table>
