@@ -67,30 +67,31 @@
 									</button>
 								</div>
 							</div>
+							@if(session('role_id') == 1 || in_array(268, session('permissions')))
+								<form id="payment_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.done_payments.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
+									{{ csrf_field() }}
 
-							<form id="payment_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.done_payments.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
-								{{ csrf_field() }}
+									<div class="row align-items-center justify-content-center">
+										<div class="col">
+											<div class="form-group">
+												<input type="file" name="payments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+											</div>
+										</div>
 
-								<div class="row align-items-center justify-content-center">
-									<div class="col">
-										<div class="form-group">
-											<input type="file" name="payments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+										<div class="col">
+											<div class="form-group text-left">
+												<button type="submit" name="upload" class="btn btn-primary">Upload</button>
+											</div>
+										</div>
+
+										<div class="col ml-auto">
+											<div class="form-group text-right">
+												<a href="{{ asset('file/Done Payment Update Status Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+											</div>
 										</div>
 									</div>
-
-									<div class="col">
-										<div class="form-group text-left">
-											<button type="submit" name="upload" class="btn btn-primary">Upload</button>
-										</div>
-									</div>
-
-									<div class="col ml-auto">
-										<div class="form-group text-right">
-											<a href="{{ asset('file/Done Payment Update Status Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
-										</div>
-									</div>
-								</div>
-							</form>
+								</form>
+							@endif
 
 
 
@@ -1076,31 +1077,32 @@
                 $('#complaint_description').val('');
                 $('#complaint_channels').val('').trigger('change');
             });
+			@if(session('role_id') == 1 || in_array(268, session('permissions')))
+				$('#payment_form').validate({
+					errorClass: 'danger',
+					successClass: 'success',
+					normalizer: function(value) {
+						return $.trim(value);
+					},
+					errorPlacement: function(error, element) {
+						error.addClass('w-100').appendTo(element.parent('.form-group'));
+					},
+					submitHandler: function(form) {
+						$(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-            $('#payment_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                normalizer: function(value) {
-                    return $.trim(value);
-                },
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+						swal({
+							title: 'Please Wait!',
+							text: 'Your Payment(s) are being updated!',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
 
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Your Payment(s) are being updated!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-            });
+						form.submit();
+					}
+				});
+            @endif
 		});
 	</script>
 @endsection

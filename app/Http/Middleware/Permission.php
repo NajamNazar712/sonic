@@ -270,6 +270,7 @@ class Permission
             'finance.done_payments.details' => 61,
             'finance.done_payments.update_details' => 61,
             'finance.done_payments.export_to_excel' => 61,
+            'finance.done_payments.excel_store' => 268,
             'finance.invoices.index' => 120,
             'finance.invoices.list' => 120,
             'finance.invoices.print' => 120,
