@@ -35,6 +35,7 @@ class OrderManagementController extends Controller
     }
 
     public function index(){
+
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $service_type = BookingType::all();
         $products = Product::select('id','product_name')->get();

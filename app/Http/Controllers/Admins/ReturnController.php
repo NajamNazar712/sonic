@@ -279,12 +279,15 @@ class ReturnController extends Controller
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
                 $remark_inp = "remark.$shipment";
-                if($parcel->shipper_status_id != 20 && $parcel->shipper_status_id != 54 && $parcel->shipper_status_id != 55){
+                if(!in_array($parcel->shipper_status_id, [13, 20, 54, 55])){
 //                    if (!$parcel->packaging_material_request) {
 
                         $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
                         $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
-                        Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
+                        $parcel->shipper_status_id = 20;
+                        $parcel->consignee_status_id = 20;
+                        $parcel->save();
+                        
                         ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 
                         NotificationsController::send(15, 0, $shipment);
@@ -328,16 +331,13 @@ class ReturnController extends Controller
         if($request->action == 'reattempt'){
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
-                if($parcel->shipper_status_id != 13){
+                if(!in_array($parcel->shipper_status_id, [13, 20])){
                     $remark_inp = "remark.$shipment";
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
-                    Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
+                   
                     $journey = ShipmentsJourney::where('shipment_id', $shipment)->where('shipper_status_id', 12)->latest('id')->first();
 
-                    ShipmentsJourneyController::add($shipment, 13, 13, NULL, $remarks, NULL, Auth::id());
-
-                    NotificationsController::send(15, 0, $shipment);
-                    NotificationsController::send(16, 0, $shipment);
+                    
 
                     if ($journey) {
                         if ($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
@@ -361,6 +361,15 @@ class ReturnController extends Controller
                             }
                         }
                     }
+
+                    $parcel->shipper_status_id = 13;
+                    $parcel->consignee_status_id = 13;
+                    $parcel->save();
+
+                    ShipmentsJourneyController::add($shipment, 13, 13, NULL, $remarks, NULL, Auth::id());
+
+                    NotificationsController::send(15, 0, $shipment);
+                    NotificationsController::send(16, 0, $shipment);
                 }
 
             }
@@ -374,10 +383,10 @@ class ReturnController extends Controller
         $remark = $request->remark;
         if($request->action == 'confirm'){
             $parcel = Shipment::find($request->shipment_id);
-            if($parcel->shipper_status_id != 20 && $parcel->shipper_status_id != 54 && $parcel->shipper_status_id != 55){
+            if(!in_array($parcel->shipper_status_id, [13, 20, 54, 55])){
 //                if (!$parcel->packaging_material_request) {
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                    $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
+                    
                     ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $remark, NULL, Auth::id());
 
 
@@ -415,14 +424,8 @@ class ReturnController extends Controller
 
         }elseif($request->action == 'reattempt'){
             $parcel = Shipment::find($request->shipment_id);
-            if($parcel->shipper_status_id != 13){
-                Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
+            if(!in_array($parcel->shipper_status_id, [13, 20])){  
                 $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
-
-                ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remark, NULL, Auth::id());
-
-                NotificationsController::send(15, 0, $request->shipment_id);
-                NotificationsController::send(16, 0, $request->shipment_id);
 
                 if ($journey) {
                     if ($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
@@ -445,6 +448,15 @@ class ReturnController extends Controller
                             ShipmentChargesController::nsa_osa_charges($request->shipment_id);
                         }
                     }
+
+                    $parcel->shipper_status_id = 13;
+                    $parcel->consignee_status_id = 13;
+                    $parcel->save();
+
+                    ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remark, NULL, Auth::id());
+
+                    NotificationsController::send(15, 0, $request->shipment_id);
+                    NotificationsController::send(16, 0, $request->shipment_id);
                 }
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Re-Attempt"];
