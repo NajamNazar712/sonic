@@ -386,7 +386,7 @@ class ReturnController extends Controller
             if(!in_array($parcel->shipper_status_id, [13, 20, 54, 55])){
 //                if (!$parcel->packaging_material_request) {
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
+                    $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
                     ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $remark, NULL, Auth::id());
 
 
