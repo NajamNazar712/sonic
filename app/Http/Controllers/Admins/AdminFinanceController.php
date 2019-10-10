@@ -4612,67 +4612,69 @@ class AdminFinanceController extends Controller
                 foreach ($payment_shipments as $invoice_shipment) {
                     $shipment = $invoice_shipment->shipment;
 
-                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
+                    if ($invoice_shipment->type != 2 || ($invoice_shipment->type == 2 && $invoice_shipment->payable < 0)) {
+                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
-                    if ($shipment_journey->exists()) {
-                        $date = $shipment_journey->first()->created_at;
-                    }
-                    else {
-                        $date = $shipment->created_at;
-                    }
-
-                    $date = Carbon::parse($date)->format('Y-m-d');
-
-                    $shipment_details .= '
-                                <tr>
-                                  <td>' . $serial_number . '</td>
-                                  <td>' . $shipment->tracking_number . '</td>
-                                  <td>' . $shipment->pickup_address->city->name . '</td>
-                                  <td>' . $shipment->consignee_city->name . '</td>
-                                  <td>' . $date . '</td>
-                                  <td>' . $shipment->actual_weight . '</td>
-                                  <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
-                                  <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
-                                  <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
-                                  <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->payable, 2) : '0') . '</td>
-                                  <td>' . number_format($invoice_shipment->charges, 2) . '</td>
-                                  <td>' . number_format($invoice_shipment->gst, 2) . '</td>
-                                  <td>' . (($invoice_shipment->type != 2) ? number_format(($invoice_shipment->charges + $invoice_shipment->gst), 2) : number_format($invoice_shipment->payable, 2)) . '</td>
-                                </tr>
-                    ';
-
-                    $serial_number++;
-
-                    if ($invoice_shipment->type != 2) {
-                        if ($invoice_shipment->type == 0) {
-                            $total_cash_handling_charges += $shipment->cash_handling_charges;
-                            $total_replacement_charges += $shipment->replacement_charges;
-                            // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                        if ($shipment_journey->exists()) {
+                            $date = $shipment_journey->first()->created_at;
                         }
                         else {
-                            $total_return_charges += $shipment->return_charges;
+                            $date = $shipment->created_at;
                         }
 
-                        $total_weight_charges += $shipment->weight_charges;
+                        $date = Carbon::parse($date)->format('Y-m-d');
 
-                        if ($shipment->packaging_material_request) {
-                            $total_packaging_material_charges += $shipment->packaging_material_charges;
+                        $shipment_details .= '
+                                    <tr>
+                                      <td>' . $serial_number . '</td>
+                                      <td>' . $shipment->tracking_number . '</td>
+                                      <td>' . $shipment->pickup_address->city->name . '</td>
+                                      <td>' . $shipment->consignee_city->name . '</td>
+                                      <td>' . $date . '</td>
+                                      <td>' . $shipment->actual_weight . '</td>
+                                      <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
+                                      <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
+                                      <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
+                                      <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->payable, 2) : '0') . '</td>
+                                      <td>' . number_format($invoice_shipment->charges, 2) . '</td>
+                                      <td>' . number_format($invoice_shipment->gst, 2) . '</td>
+                                      <td>' . (($invoice_shipment->type != 2) ? number_format(($invoice_shipment->charges + $invoice_shipment->gst), 2) : number_format($invoice_shipment->payable, 2)) . '</td>
+                                    </tr>
+                        ';
+
+                        $serial_number++;
+
+                        if ($invoice_shipment->type != 2) {
+                            if ($invoice_shipment->type == 0) {
+                                $total_cash_handling_charges += $shipment->cash_handling_charges;
+                                $total_replacement_charges += $shipment->replacement_charges;
+                                // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                            }
+                            else {
+                                $total_return_charges += $shipment->return_charges;
+                            }
+
+                            $total_weight_charges += $shipment->weight_charges;
+
+                            if ($shipment->packaging_material_request) {
+                                $total_packaging_material_charges += $shipment->packaging_material_charges;
+                            }
+
+                            $total_insurance_charges += $shipment->insurance_charges;
+                            $total_fuel_surcharge += $shipment->fuel_surcharge;
+                            $total_intercept_charges += $shipment->intercept_charges;
+                            $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                        }
+                        else {
+                            $total_adjustment_charges += $invoice_shipment->payable;
+
+                            $total_charges += $invoice_shipment->payable;
                         }
 
-                        $total_insurance_charges += $shipment->insurance_charges;
-                        $total_fuel_surcharge += $shipment->fuel_surcharge;
-                        $total_intercept_charges += $shipment->intercept_charges;
-                        $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                        $total_charges += $invoice_shipment->charges;
+                        $total_gst += $invoice_shipment->gst;
+                        $total_invoice_amount += ($invoice_shipment->charges + $invoice_shipment->gst);
                     }
-                    else {
-                        $total_adjustment_charges += $invoice_shipment->payable;
-
-                        $total_invoice_amount += $invoice_shipment->payable;
-                    }
-
-                    $total_charges += $invoice_shipment->charges;
-                    $total_gst += $invoice_shipment->gst;
-                    $total_invoice_amount += ($invoice_shipment->charges + $invoice_shipment->gst);
                 }
             }
 
