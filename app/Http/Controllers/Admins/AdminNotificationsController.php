@@ -242,7 +242,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['shipper_name','button','trax_logo'];
         }
         else if ($id == 39) {
-            $details['fields'] = ['tracking_number', 'status_updated_at', 'receiver_name'];
+            $details['fields'] = ['company_name','tracking_number', 'status_updated_at', 'receiver_name'];
         }
         else if ($id == 41) {
             $details['fields'] = ['request_id'];
