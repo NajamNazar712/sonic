@@ -2894,24 +2894,150 @@ class NotificationsController extends Controller
                 }
             }
 			else if($id == 39){
-                $journey = ShipmentsJourney::where('shipment_id', $reference_1_id)->where('shipper_status_id', 25)->latest('id')->first();
-                $shipment = Shipment::find($reference_1_id);
-                if (strpos($subject, '[tracking_number]') !== FALSE) {
-                    $subject = str_replace('[tracking_number]', $shipment->tracking_number, $subject);
-                }
-                if (strpos($body, '[tracking_number]') !== FALSE) {
-                    $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
-                }
-                if (strpos($body, '[status_updated_at]') !== FALSE) {
-                    $body = str_replace('[status_updated_at]', $journey->created_at, $body);
+
+                $subject = $notification->subject;
+                $body = $notification->body;
+
+                $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $rdts_time = $settings->setting_value;
+                }else {
+                    $rdts_time = 0;
                 }
 
-                if (strpos($body, '[receiver_name]') !== FALSE) {
-                    $body = str_replace('[receiver_name]', $journey->received_or_refused_by, $body);
-                }
-                $to = $shipment->user->email;
+                // $yesterday = Carbon::yesterday();
+                $yesterday = Carbon::createFromDate(2017, 1, 1);
 
-                self::email($subject, $body, $to);
+                $yesterday->hour = $rdts_time;
+
+                $today = Carbon::today();
+
+                $today->hour = $rdts_time;
+
+                $possible_fields = ['tracking_number', 'status_updated_at', 'receiver_name'];
+
+                $field_names = ['tracking_number' => 'Tracking Number', 'status_updated_at' => 'Status Updated At', 'receiver_name' => 'Received By'];
+
+                $present_fields = array();
+
+                $first_field = NULL;
+
+                $position = NULL;
+
+                foreach ($possible_fields as $field) {
+                  $new_position = strpos($body, '[' . $field . ']');
+
+                  if ($new_position !== FALSE) {
+                    if ($position == NULL) {
+                      $present_fields[] = $field;
+
+                      $first_field = $field;
+                    }
+                    else if ($new_position > $position) {
+                      $present_fields[] = $field;
+                    }
+                    else {
+                      array_unshift($present_fields, $field);
+                    }
+
+                    $position = $new_position;
+                  }
+                }
+
+                $user_wise_shipments = array();
+                $shipment_details = ShipmentsJourney::join('shipments', 'shipments.id', '=', 'shipments_journey.shipment_id')->where('shipments.shipper_status_id', 25)->where('shipments_journey.shipper_status_id', 25)->whereBetween('shipments_journey.created_at', [$yesterday, $today])->select('shipments.user_id','shipments.tracking_number','shipments_journey.created_at','shipments_journey.received_or_refused_by');
+
+                if ($shipment_details->exists()) {
+                
+                  $shipment_details = $shipment_details->get();
+
+                  foreach ($shipment_details as $data) {
+                    
+                    $details = array();
+
+                    $details['tracking_number'] = $data->tracking_number;
+                    $details['status_updated_at'] = $data->created_at;
+                    $details['receiver_name'] = $data->received_or_refused_by;
+
+                    $user_wise_shipments[$data->user_id][] = $details;
+                   
+                  }
+                  
+                  if(!empty($user_wise_shipments)){
+                    $original_subject = $subject;
+                    $original_body = $body;
+
+                    foreach ($user_wise_shipments as $user_id => $shipments) {
+                         $shipper = User::find($user_id);
+
+                         if (strpos($subject, '[company_name]') !== FALSE) {
+                            $subject = str_replace('[company_name]', $shipper->name, $subject);
+                          }
+
+                          if (strpos($body, '[company_name]') !== FALSE) {
+                            $body = str_replace('[company_name]', $shipper->name, $body);
+                          }
+                          
+                         if (ShipperNotificationEmail::where('user_id',$shipper->id)->exists()){
+                        
+                          $to = ShipperNotificationEmail::where('user_id',$shipper->id)->pluck('email')->toArray();
+                          }
+                          else {
+                              $to = $shipper->email;
+                          }
+
+
+                          $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
+
+                          $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
+
+                          foreach ($present_fields as $field) {
+                            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">' . $field_names[$field] . '</td>';
+                          }
+
+                          $shipment_details .= '</tr>';
+
+                          $serial_number = 1;
+
+                          foreach ($shipments as $shipment) {
+                            $shipment_details .= '<tr>';
+
+                            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial_number . '</td>';
+
+                            foreach ($present_fields as $field) {
+                              if (!empty($shipment[$field])) {
+                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment[$field] . '</td>';
+                              }
+                              else {
+                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                              }
+                            }
+
+                            $shipment_details .= '</tr>';
+
+                            $serial_number++;
+                          }
+
+                          $shipment_details .= '</tbody></table>';
+
+                          foreach ($present_fields as $field) {
+                            if ($field != $first_field) {
+                              $body = str_replace('[' . $field . ']', '', $body);
+                            }
+                          }
+
+                          $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
+                      
+                          self::email($subject, $body, $to);
+
+                          $subject = $original_subject;
+                          $body = $original_body;
+                    }
+
+                  }
+                }
             }
 			else if($id == 40){
                 $delivery_note = DeliveryNote::find($reference_1_id);

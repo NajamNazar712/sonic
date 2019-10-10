@@ -33,7 +33,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
-
 class GlobalSettingsController extends Controller
 {
     public function __construct()
@@ -1319,5 +1318,38 @@ class GlobalSettingsController extends Controller
 
             return response()->json(['status' => 1, 'success' => 'New Case Nature Type added successfully!']);
         }
+    }
+
+    public function return_delivered_to_shipper_email_cut_off_time_index() {
+      
+        $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time')->first();
+
+        if ($settings) {
+            $rdts_email_cut_off_time = $settings->setting_value;
+        }
+        else {
+            $rdts_email_cut_off_time = 12;
+        }
+
+        return view('admin.settings.return_delivered_to_shipper_cut_off_time')->with(['rdts_email_cut_off_time' => $rdts_email_cut_off_time]);
+    }
+
+    public function return_delivered_to_shipper_email_cut_off_time_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        }
+        else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'return_delivered_to_shipper_cut_off_time';
+        }
+
+        $settings->setting_value = $request->rdts_email_cut_off_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
     }
 }

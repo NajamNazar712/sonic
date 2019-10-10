@@ -1329,6 +1329,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\GlobalSettingsController@crm_case_nature_types_list')->name('list');
             Route::post('store', 'Admins\GlobalSettingsController@crm_case_nature_types_store')->name('store');
         });
+
+        Route::prefix('return_delivered_to_shipper_email_cut_off_time')->name('return_delivered_to_shipper_email_cut_off_time.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@return_delivered_to_shipper_email_cut_off_time_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@return_delivered_to_shipper_email_cut_off_time_store')->name('store');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {

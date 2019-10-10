@@ -804,6 +804,9 @@
                                     @if (session('role_id') == 1 || in_array(175, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.debriefing_report_cut_off_time.index')}}">Debriefing Report Cut-Off Time</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(269, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.return_delivered_to_shipper_email_cut_off_time.index')}}">Return Delivered To Shipper Email Cut-Off Time</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
