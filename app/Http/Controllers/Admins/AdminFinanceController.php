@@ -4638,6 +4638,8 @@ class AdminFinanceController extends Controller
                                   <td>' . number_format($invoice_shipment->charges, 2) . '</td>
                                   <td>' . number_format($invoice_shipment->gst, 2) . '</td>
                                   <td>' . number_format($invoice_shipment->payable, 2) . '</td>
+
+                                  <td>' . (($invoice_shipment->type != 2) ? number_format(($shipment->charges + $invoice_shipment->gst), 2) : number_format($invoice_shipment->payable, 2)) . '</td>
                                 </tr>
                     ';
 
@@ -4666,11 +4668,13 @@ class AdminFinanceController extends Controller
                     }
                     else {
                         $total_adjustment_charges += $invoice_shipment->payable;
+
+                        $total_charges += $invoice_shipment->payable;
                     }
 
                     $total_charges += $invoice_shipment->charges;
                     $total_gst += $invoice_shipment->gst;
-                    $total_invoice_amount += $invoice_shipment->payable;
+                    $total_invoice_amount += $invoice_shipment->charges + $invoice_shipment->gst);
                 }
             }
 
