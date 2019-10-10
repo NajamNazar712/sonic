@@ -4667,7 +4667,7 @@ class AdminFinanceController extends Controller
                     else {
                         $total_adjustment_charges += $invoice_shipment->payable;
 
-                        $total_charges += $invoice_shipment->payable;
+                        $total_invoice_amount += $invoice_shipment->payable;
                     }
 
                     $total_charges += $invoice_shipment->charges;
