@@ -2907,8 +2907,7 @@ class NotificationsController extends Controller
                     $rdts_time = 0;
                 }
 
-                // $yesterday = Carbon::yesterday();
-                $yesterday = Carbon::createFromDate(2017, 1, 1);
+                $yesterday = Carbon::yesterday();
 
                 $yesterday->hour = $rdts_time;
 
