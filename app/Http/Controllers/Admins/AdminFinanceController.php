@@ -4674,7 +4674,7 @@ class AdminFinanceController extends Controller
 
                     $total_charges += $invoice_shipment->charges;
                     $total_gst += $invoice_shipment->gst;
-                    $total_invoice_amount += $invoice_shipment->charges + $invoice_shipment->gst);
+                    $total_invoice_amount += ($invoice_shipment->charges + $invoice_shipment->gst);
                 }
             }
 
