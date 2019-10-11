@@ -3967,7 +3967,7 @@ class AdminFinanceController extends Controller
                                 </tr>
                                 <tr>
                                   <td class="color secondary"><strong>NTN</strong></td>
-                                  <td>' . $shipper_bank->ntn_no . '</td>
+                                  <td>' . $shipper->ntn_no . '</td>
                                 </tr>
                                </tbody>
                             </table>
