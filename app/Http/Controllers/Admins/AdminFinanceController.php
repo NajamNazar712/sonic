@@ -3733,6 +3733,7 @@ class AdminFinanceController extends Controller
                                     </tr>
                                   </tbody>
                                 </table>
+                                <span style="color: red">* 13% GST is applicable for Sindh Region 16% GST for Punjab .KPK</span>
                             </div>
                         </div>
                       </div>
