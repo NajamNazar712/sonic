@@ -489,9 +489,49 @@
 
         });
 
-       // $('#datatable tbody').on('click', '.view_crf', function () {
-       //    alert(123);
-       // });
+        $('#datatable').on('click', 'button.warehousing_enable', function(){
+            var id = $(this).parents('tr').attr('id');
+            if(id){
+               $.ajax({
+                   url: '{!! route('admin.accounts.warehousing.active') !!}',
+                   method: 'POST',
+                   data: {
+                       'id':id,
+                       '_token': '{{ csrf_token() }}'
+                   }
+               }).done(function (data) {
+                   if(data.status == 1){
+                       table.draw('false');
+                       toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                   }else{
+                       toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                   }
+
+               });
+            }
+        });
+
+        $('#datatable').on('click', 'button.warehousing_disable', function(){
+            var id = $(this).parents('tr').attr('id');
+            if(id){
+               $.ajax({
+                   url: '{!! route('admin.accounts.warehousing.inactive') !!}',
+                   method: 'POST',
+                   data: {
+                       'id':id,
+                       '_token': '{{ csrf_token() }}'
+                   }
+               }).done(function (data) {
+                   if(data.status == 1){
+                       table.draw('false');
+                       toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                   }else{
+                       toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                   }
+
+               });
+            }
+        });
     });
 
 </script>

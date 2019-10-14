@@ -5768,7 +5768,8 @@ class AdminDashboardController extends Controller
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
 
-    public function activeAccountListAjax(){		$users = User::join('cities', 'users.city_id', '=', 'cities.id')
+    public function activeAccountListAjax(){		
+        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
            ->leftjoin('products as p','p.id','=','users.product_id')
            ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
            ->leftjoin('admins as rabna','rabna.id','=','users.rates_updated_by')
@@ -5779,7 +5780,7 @@ class AdminDashboardController extends Controller
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','users.warehousing'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -5900,6 +5901,15 @@ class AdminDashboardController extends Controller
                 if(session('role_id') == 1 || in_array(110, session('permissions')))
                 {
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
+                }
+
+                if((session('role_id') == 1 || in_array(270, session('permissions'))) && ($result->warehousing == 0))
+                {
+                    $dropdown .= '<button type="button" class="dropdown-item warehousing_enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable Warehousing</div></button>';
+                }
+                if((session('role_id') == 1 || in_array(270, session('permissions'))) && ($result->warehousing == 1))
+                {
+                    $dropdown .= '<button type="button" class="dropdown-item warehousing_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable Warehousing</div></button>';
                 }
 
                 $merged = MergedSisterAccount::where('user_id', $result->id);
@@ -7217,6 +7227,29 @@ class AdminDashboardController extends Controller
         }
         else{
             return redirect()->back()->with('success', "Mapping updated successfully!");
+        }
+    }
+
+    public function warehousing_active(Request $request){
+        $shipper = User::find($request->id);
+        if($shipper && ($shipper->warehousing == 0)){
+            $shipper->warehousing = 1;
+            $shipper->save();
+
+            return response()->json(['status' => 1, 'success' => 'Warehousing activated successfully!']);
+        }else{
+            return response()->json(['status' => 0, 'error' => 'Warehousing already activated!']);
+        }
+    }
+    public function warehousing_inactive(Request $request){
+        $shipper = User::find($request->id);
+        if($shipper && ($shipper->warehousing == 1)){
+            $shipper->warehousing = 0;
+            $shipper->save();
+
+            return response()->json(['status' => 1, 'success' => 'Warehousing deactivated successfully!']);
+        }else{
+            return response()->json(['status' => 0, 'error' => 'Warehousing already deactivated!']);
         }
     }
 }
