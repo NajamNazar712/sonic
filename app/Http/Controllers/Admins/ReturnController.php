@@ -888,6 +888,7 @@ class ReturnController extends Controller
                                 else {
                                     $role_ids = array();
                                 }
+                                array_push($role_ids, 1);
 
                                 if (!in_array(session('role_id'), $role_ids)) {
                                     $shipper_payable = 0;
@@ -948,6 +949,7 @@ class ReturnController extends Controller
                                     if ($settings->exists()) {
                                         $settings = $settings->first();
                                         $role_ids = array_map('intval', explode(',', $settings->text));
+                                        array_push($role_ids, 1);
                                         if (!in_array(session('role_id'), $role_ids)) {
                                             $shipper_payable = 0;
                                             $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
@@ -1011,6 +1013,7 @@ class ReturnController extends Controller
                                     if ($settings->exists()) {
                                         $settings = $settings->first();
                                         $role_ids = array_map('intval', explode(',', $settings->text));
+                                        array_push($role_ids, 1);
                                         if (!in_array(session('role_id'), $role_ids)) {
                                             $shipper_payable = 0;
                                             $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
@@ -1070,6 +1073,7 @@ class ReturnController extends Controller
                                         if ($settings->exists()) {
                                             $settings = $settings->first();
                                             $role_ids = array_map('intval', explode(',', $settings->text));
+                                            array_push($role_ids, 1);
                                             if (!in_array(session('role_id'), $role_ids)) {
                                                 $shipper_payable = 0;
                                                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
@@ -1552,6 +1556,7 @@ class ReturnController extends Controller
         $array_returned = array(25,31,38);
         $array_returned_status = array(24,29,35,47,48, 60);
         if($return_note_id != '') {
+            $return_note_details = ReturnNote::find($return_note_id);
             foreach ($shipments as $shipment) {
                 $reasonId = "reason_drop.$shipment";
                 $parcel = Shipment::where('id', $shipment)->first();
@@ -1575,7 +1580,14 @@ class ReturnController extends Controller
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$return_note_id,'status'=>0])->count();
             if($shipment_status == 0){
-                ReturnNote::where('id',$return_note_id)->update(['status' => 3 ,'updated_by' => Auth::id()]);
+                if($return_note_details->completion_status == 0){
+                    $return_note_details->status = 1;
+                    $return_note_details->updated_by = Auth::id();
+                }else{
+                    $return_note_details->status = 3;
+                    $return_note_details->updated_by = Auth::id();
+                }
+                $return_note_details->save();
             }
 
             NotificationsController::send(15, $return_note_id);
@@ -1597,6 +1609,7 @@ class ReturnController extends Controller
 
     public function return_status_delivered(Request $request){
         if(!empty($request->shipment_ids)){
+           $return_note_details = ReturnNote::find($request->return_note_id);
             foreach ($request->shipment_ids as $shipment){
                 $parcel = Shipment::where('id', $shipment)->first();
                 if(!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id','>', $request->return_note_id)->where('shipment_id', $shipment)->exists()) {
@@ -1664,11 +1677,17 @@ class ReturnController extends Controller
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
                     }
+                    if($return_note_details->completion_status == 0){
+                        $return_note_details->completion_status = 1;
+                        $return_note_details->save();
+                    }
                 }
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
             if($shipment_status == 0){
-                ReturnNote::where('id',$request->return_note_id)->update(['status' => 3 ,'updated_by'=>Auth::id()]);
+                $return_note_details->status = 3;
+                $return_note_details->updated_by = Auth::id();
+                $return_note_details->save();
             }
 
             NotificationsController::send(15, $request->return_note_id);
@@ -1686,6 +1705,7 @@ class ReturnController extends Controller
         if(!empty($request->shipment_ids)){
             $shipment_ids = $request->shipment_ids;
             $shipment_status = $request->shipment_status;
+            $return_note_details = ReturnNote::find($request->return_note_id);
             if($shipment_status == 25){
                 foreach ($shipment_ids as $shipment_id) {
                     $parcel = Shipment::where('id', $shipment_id)->first();
@@ -1707,13 +1727,19 @@ class ReturnController extends Controller
                             Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
 
                         }
-                        ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
+                        // ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
                     }
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment_id])->update(['status'=>1]);
+                    if($return_note_details->completion_status == 0){
+                        $return_note_details->completion_status = 1;
+                        $return_note_details->save();
+                    }
                 }
                 $shipment_status_count = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
                 if($shipment_status_count == 0){
-                    ReturnNote::where('id',$request->return_note_id)->update(['updated_by'=>Auth::id(),'status'=>1]);
+                    $return_note_details->updated_by = Auth::id();
+                    $return_note_details->status = 3;
+                    $return_note_details->save();
                 }
 
                 NotificationsController::send(15, $request->return_note_id);
@@ -1731,7 +1757,16 @@ class ReturnController extends Controller
                 }
                 $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
                 if($shipment_status == 0){
-                    ReturnNote::where('id',$request->return_note_id)->update(['status' => 3 ,'updated_by'=>Auth::id()]);
+                    if($return_note_details->completion_status == 0){
+                        $return_note_details->status = 1;
+                        $return_note_details->updated_by = Auth::id();
+                        
+                    }else{
+                        $return_note_details->status = 3;
+                        $return_note_details->updated_by = Auth::id();
+                    }
+                        $return_note_details->save();
+                   
                 }
 
                 NotificationsController::send(15, $request->return_note_id);
