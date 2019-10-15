@@ -1775,6 +1775,85 @@
                                 </div>
                             </div>
 
+                            <div id="" class="card-header mt-1 border-primary">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3 class="display-inline card-title lead primary">Warehousing</h3>
+                                        
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info"/></a>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div id="warehousing" class="border-primary no-border-top card hide">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-3 form-group">
+                                                <select name="invoicing_cycle" class="select2" id="invoicing_cycle_select" data-rule-required="true" data-msg-required="Invoicing cycle is required">
+                                                    @foreach($invoicing_cycles as $cycle)
+                                                        <option value="{{ $cycle->id }}">{{ $cycle->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div id="invoicing_date_div" class="col-3 d-none">
+                                                <div class="form-group">
+                                                    <select name="invoicing_date" id="invoicing_date_select" class="select2 form-control" data-rule-required="true" data-msg-required="Date is required"></select>
+                                                </div>
+                                                
+                                            </div>
+
+                                        </div>
+                                        <div class="card border-primary p-2">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <h3 class="card-title">Stocking Charges</h3>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <div class="col-4 text-center">
+                                                        <fieldset>
+                                                            <div class="input-group input-group-sm form-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text" id="">Per Product Charges</span>
+                                                                </div>
+                                                                <div class="input-group-prepend">
+                                                                      <span class="input-group-text" id="">
+                                                                        <input type="checkbox" name="ppc_switch" class="switchery PPCSwitch" data-size="xs" />
+                                                                      </span>
+                                                                </div>
+                                                                <input type="text"  class="form-control ppc-inp"  data-rule-required="true" data-msg-required="This field is required" name="ppc_charges" disabled>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div>
+                                                     <div class="col-4 text-center">
+                                                        <fieldset>
+                                                            <div class="input-group input-group-sm form-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text" id="">Per Square Foot Charges</span>
+                                                                </div>
+                                                                <div class="input-group-prepend">
+                                                                      <span class="input-group-text" id="">
+                                                                        <input type="checkbox" name="psf_switch" class="switchery PSFSwitch" data-size="xs" />
+                                                                      </span>
+                                                                </div>
+                                                                <input type="text"  class="form-control psf-inp"  data-rule-required="true" data-msg-required="This field is required" name="psf_charges" disabled>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div>
+                                                </div>
+                                               
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="text-center mt-2">
                                 <div class="form-group">
 
@@ -1793,6 +1872,7 @@
 
 @endsection
 @section('css')
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <style type="text/css">
         .hide{
             display:none;
@@ -1803,6 +1883,7 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
@@ -1919,6 +2000,19 @@
 
                 }
             });
+
+            $('#warehouse_main_switch').on('change',function(){
+                var warehousemainswitch = document.querySelector('.switchery.warehouse-main-switch');
+                if (warehousemainswitch.checked === true) {
+                    $('#warehousing').slideDown('slow');
+
+                } else if (warehousemainswitch.checked === false) {
+                    $('#warehousing').slideUp('slow');
+
+
+                }
+            });
+
         });
 
         $('.decimal').inputmask({
@@ -2907,55 +3001,55 @@
 
             }
         }
-        //Main switches
-        // overnightSwitch.onchange = function() {
-        //     if(overnightSwitch.checked === true){
-        //         errors = 0;
-        //     }else if(overnightSwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        // overlandSwitch.onchange = function() {
-        //     if(overlandSwitch.checked === true){
-        //         errors = 0;
-        //     }else if(overlandSwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        // detainSwitch.onchange = function() {
-        //     if(detainSwitch.checked === true){
-        //         errors = 0;
-        //     }else if(detainSwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        // samedayDiscountSwitch.onchange = function() {
-        //     if(samedaySwitch.checked === true){
-        //         errors = 0;
-        //     }else if(samedaySwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        //
+        
 
+        //Warehousing
+        var weekly = [1, 2, 3, 4, 5, 6, 7];
+        var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+        $('#invoicing_date_select').prepend('<option value="" selected="selected"></option>').select2({
+            width:'100%',
+            placeholder:'Select Date'
+        });
+        
+        $('#invoicing_cycle_select').prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Invoicing Cycle",
+            width:'100%'
+        }).bind('change', function() {
 
-        // var overnight_switch = new Switchery('#overnight_switch');
+           if (this.value == 1) {
+               $('#invoicing_date_div').removeClass('d-none');
+               $('#invoicing_date_select').empty().trigger('change');
+               $('#invoicing_date_select').select2({data:weekly,placeholder:'Select Date'});
+           }
+           else if(this.value == 3){
+               $('#invoicing_date_div').removeClass('d-none');
+               $('#invoicing_date_select').empty().trigger('change');
+               $('#invoicing_date_select').select2({data:monthly,placeholder:'Select Date'});
+           }else if(this.value == 2){
+               $('#invoicing_date_div').addClass('d-none');
+           }
+       });
 
-        // $('#overnight_switch').bind('change', function() {
-        //     // var switchery = new Switchery(overnightSwitch);
-        //     // overnight_switch.disable();
-        //     // setTimeout(function(){ overnightSwitch.disable(); }, 1000);
-        //     if(this.checked == true){
-        //         $('#overnight').collapse('show');
-        //     }else{
-        //         $('#overnight').collapse('hide');
-        //     }
-        // });
-        // $("#overnight_switch").dblclick(function (event)
-        // {
-        //     console.log('double');
-        //     event.preventDefault();
-        // });
+        var PPCSwitch = document.querySelector('.switchery.PPCSwitch');
+        PPCSwitch.onchange = function () {
+            if(PPCSwitch.checked === true){
+                $('input[name="ppc_charges"]').prop('disabled', false);
+            }else if(PPCSwitch.checked === false){
+                $('input[name="ppc_charges"]').prop('disabled', true);
+            }
+        };
+        var PSFSwitch = document.querySelector('.switchery.PSFSwitch');
+        PSFSwitch.onchange = function () {
+            if(PSFSwitch.checked === true){
+                $('input[name="psf_charges"]').prop('disabled', false);
+            }else if(PSFSwitch.checked === false){
+                $('input[name="psf_charges"]').prop('disabled', true);
+            }
+        };
+
+       
+
+       
         $('#ratesAdditionForm').on('keypress',function (e) {
             if(e.which == 13 || e.keyCode == 13) {
                 e.preventDefault();
