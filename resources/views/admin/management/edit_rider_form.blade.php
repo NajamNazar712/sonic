@@ -37,7 +37,7 @@
             </div>
             <div class="col">
                 <fieldset class="form-group">
-                    <input type="text" class="form-control" name="phone"  value="{{$rider->phone}}" placeholder="Phone No." required data-rule-required="true" data-msg-required="This field is required">
+                    <input type="text" class="form-control" name="phone"  value="{{$rider->phone}}" placeholder="Phone No." required data-rule-required="true" data-msg-required="This field is required" data-rule-remote="{{ route('admin.management.rider.phone_unique', ['id' => $rider_id]) }}" data-msg-remote="Phone must be unique">
                 </fieldset>
             </div>
             <div class="col">
@@ -45,6 +45,11 @@
                     <input type="text" class="form-control" name="cnic"  value="{{$rider->cnic}}" placeholder="CNIC" required data-rule-required="true" data-msg-required="This field is required">
                 </fieldset>
             </div>
+            <div class="col">
+            <fieldset class="form-group">
+                <input type="text" class="form-control" name="pin"  placeholder="PIN" data-rule-minlength="4" data-rule-maxlength="4">
+            </fieldset>
+        </div>
         </div>
 
         <div class="row mb-2">

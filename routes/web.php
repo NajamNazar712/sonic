@@ -401,6 +401,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/edit', 'Admins\AdminDashboardController@editRiderView')->name('edit');
             Route::put('{id}/edit', 'Admins\AdminDashboardController@editRiderDetails')->name('edit');
             Route::put('/status', 'Admins\AdminDashboardController@riderStatus')->name('status');
+            Route::get('/phone_unique', 'Admins\AdminDashboardController@rider_phone_unique')->name('phone_unique');
         });
 
         Route::prefix('zonal')->name('zonal.')->group(function () {

@@ -28,12 +28,17 @@
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <input type="text" class="form-control" name="phone"  placeholder="Phone No." required data-rule-required="true" data-msg-required="This field is required">
+                <input type="text" class="form-control" name="phone"  placeholder="Phone No." required data-rule-required="true" data-msg-required="This field is required" data-rule-remote="{{ route('admin.management.rider.phone_unique') }}" data-msg-remote="Phone must be unique">
             </fieldset>
         </div>
         <div class="col">
             <fieldset class="form-group">
                 <input type="text" class="form-control" name="cnic"  placeholder="CNIC" required data-rule-required="true" data-msg-required="This field is required">
+            </fieldset>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" class="form-control" name="pin"  placeholder="PIN" required data-rule-required="true" data-msg-required="This field is required" data-rule-minlength="4" data-rule-maxlength="4">
             </fieldset>
         </div>
     </div>

@@ -44,4 +44,18 @@ Route::name('api.')->group(function () {
 	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {
 		Route::get('track/public', 'APIController@shipment_track_public')->name('track.public');
 	});
+
+
+	Route::prefix('rider')->name('rider.')->group(function() {
+		Route::post('login', 'Rider\RiderAPIController@login')->name('login');
+
+		Route::middleware('RiderAPIToken')->group(function () {
+			Route::prefix('pickup')->name('pickup.')->group(function () {
+                Route::get('summary', 'Rider\RiderAPIController@pickup_summary')->name('pickup_summary');
+                Route::post('pick', 'Rider\RiderAPIController@pickup_pick')->name('pickup_pick');
+                Route::post('not_pick', 'Rider\RiderAPIController@pickup_not_pick')->name('pickup_not_pick');
+                Route::post('action_log', 'Rider\RiderAPIController@pickup_action_log')->name('pickup_action_log');
+	        });
+		});
+	});
 });
