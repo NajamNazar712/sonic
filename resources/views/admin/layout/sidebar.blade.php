@@ -224,6 +224,9 @@
                                     @if (session('role_id') == 1 || in_array(49, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.return.receive.index') }}">Receive</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(266, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.return.cx_sales.index') }}">Return for CX & Sales</a></li>
+                                    @endif
                                     @if (session('role_id') == 1 || in_array(126, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.return.history.index') }}">History</a></li>
                                     @endif

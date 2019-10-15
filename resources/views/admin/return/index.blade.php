@@ -140,6 +140,77 @@
         </div>
     </div>
 
+    <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Return Confirm Reason</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                        @if($return_confirm_reasons)
+                        <select id="return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
+                            @foreach($return_confirm_reasons as $reason)
+                                <option value="{{$reason->id}}">{{$reason->name}}</option>
+                            @endforeach
+                        </select>
+                        @endif
+                        </div>
+
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary update_return_confirm" value="Add">Update To Return Confirm</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="ReturnConfirmReasonSingleModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonSingleModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Return Confirm Reason</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="single_update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                        @if($return_confirm_reasons)
+                        <select id="single_return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
+                            @foreach($return_confirm_reasons as $reason)
+                                <option value="{{$reason->id}}">{{$reason->name}}</option>
+                            @endforeach
+                        </select>
+                        @endif
+                        </div>
+
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary single_update_return_confirm" value="Add">Update To Return Confirm</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -220,6 +291,14 @@
             }).bind('change', function() {
                 table.draw();
             });
+            $('#return_reason_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Reason'
+            });
+            $('#single_return_reason_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Reason'
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -291,6 +370,8 @@
                     return {body: body, header: head};
                 }
             } );
+            
+            var return_confirm_reasons = @json($return_confirm_reasons);
             var selected_rows = [];
             var shipment_remarks = {};
             var table = $('#datatable').DataTable({
@@ -305,62 +386,7 @@
                             enabled: false,
                             action: function (e, dt, node, config) {
                                 if(selected_rows !== ''){
-                                    swal({
-                                        title: 'Are You Sure?',
-                                        text: 'Select Yes to change shipment status to Return-Confirm!',
-                                        icon: 'warning',
-                                        buttons: {
-                                            cancel: {
-                                                text: 'No',
-                                                value: null,
-                                                visible: true,
-                                                closeModal: true,
-                                            },
-                                            confirm: {
-                                                text: 'Yes',
-                                                value: true,
-                                                visible: true,
-                                                closeModal: true
-                                            }
-                                        },
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false,
-                                        dangerMode: true
-                                    }).then(function (confirm) {
-                                        if (confirm) {
-                                            blockPagePermanently();
-                                            table.rows().nodes().each(function(index) {
-                                                var row = table.row(index);
-                                                if ($(row.node()).hasClass('selected')) {
-                                                    var id = parseInt(row.id());
-                                                    var remarks = $(row.node()).find('td.shipment_remarks input').val();
-                                                    shipment_remarks[id] = remarks;
-                                                }
-                                            });
-
-                                            $.ajax({
-                                                url:"{{route('admin.return.confirm.status')}}",
-                                                method:'POST',
-                                                data:{
-                                                    'shipment_ids':selected_rows,
-                                                    '_token':'{{ csrf_token() }}',
-                                                    'action': 'confirm',
-                                                    'remark': shipment_remarks
-                                                }
-                                            }).done(function (data) {
-                                                UnblockPagePermanently();
-                                                table.rows().deselect();
-                                                selected_rows = [];
-                                                shipment_remarks = {};
-                                                table.button('.confirm').disable();
-                                                table.button('.re-attempt').disable();
-                                                table.draw('false');
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                                            });
-                                        }
-                                    });
-
+                                   $('#ReturnConfirmReasonModal').modal('show');
 
                                 }else{
                                     var error = "Not selected any shipments!";
@@ -734,11 +760,13 @@
                 var remark = $(this).parents('tr').find('td.shipment_remarks input').val();
                 if(action === 'confirm'){
                     atext = 'Select Yes to change shipment status to Return-Confirm!';
+                    $('#ReturnConfirmReasonSingleModal').modal('show');
+                    single_return_reason(row_id, remark);
                 }else if(action === 'reattempt'){
                     atext = 'Select Yes to change shipment status to Re-Attempt!';
                 }
 
-                if(row_id != '' && action != ''){
+                if(row_id != '' && action === 'reattempt'){
                     swal({
                         title: 'Are You Sure?',
                         text: atext,
@@ -840,6 +868,148 @@
                     form.submit();
                 }
             });
+            $('#update_return_reason_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+
+                    var return_reason_select = $('#return_reason_select').val();
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to change shipment status to Return-Confirm!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+                                if ($(row.node()).hasClass('selected')) {
+                                    var id = parseInt(row.id());
+                                    var remarks = $(row.node()).find('td.shipment_remarks input').val();
+                                    shipment_remarks[id] = remarks;
+                                }
+                            });
+
+                            $.ajax({
+                                url:"{{route('admin.return.confirm.status')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_ids':selected_rows,
+                                    '_token':'{{ csrf_token() }}',
+                                    'action': 'confirm',
+                                    'remark': shipment_remarks,
+                                    'return_reason_select': return_reason_select
+                                }
+                            }).done(function (data) {
+                                UnblockPagePermanently();
+                                table.rows().deselect();
+                                selected_rows = [];
+                                shipment_remarks = {};
+                                table.button('.confirm').disable();
+                                table.button('.re-attempt').disable();
+                                table.draw('false');
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                $('#ReturnConfirmReasonModal').modal('hide');
+                                $('#return_reason_select').val(null).trigger('change');
+                                $('button.update_return_confirm').attr('disabled', false);
+                            });
+                        }
+                    });
+
+                }
+            });
+
+            function  single_return_reason(id, remark) {
+                $('#single_update_return_reason_form').validate({
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function(form) {
+
+                        var single_return_reason_select = $('#single_return_reason_select').val();
+                        var atext = 'Select Yes to change shipment status to Return-Confirm!';
+                        var action = 'confirm';
+                        swal({
+                            title: 'Are You Sure?',
+                            text: atext,
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                blockPagePermanently();
+                                $.ajax({
+                                    url:"{{route('admin.return.marked.status.single')}}",
+                                    method:'POST',
+                                    data:{
+                                        'shipment_id':id,
+                                        '_token':'{{ csrf_token() }}',
+                                        'action': action,
+                                        'remark':remark,
+                                        'single_return_reason_select': single_return_reason_select
+                                    }
+                                }).done(function (data) {
+                                    if(data.status == 1){
+                                        UnblockPagePermanently();
+                                        table.draw('false');
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                    }else{
+                                        UnblockPagePermanently();
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                    }
+                                    $('#single_return_reason_select').val(null).trigger('select');
+                                    $('#ReturnConfirmReasonSingleModal').modal('hide');
+
+                                });
+                            }
+                        });
+
+                    }
+                });
+            }
+
+
+
             var select = $('#track_form .tracking_numbers').selectize({
                 placeholder: 'Tracking Number(s)*',
                 delimiter: ',',

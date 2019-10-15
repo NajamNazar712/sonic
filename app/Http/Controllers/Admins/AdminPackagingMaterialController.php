@@ -7,8 +7,6 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\PackagingMaterialStockHead;
-use App\Http\Models\Admin\PackagingMaterialStockHub;
 use App\Http\Models\Admin\PackagingStockHistory;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
@@ -136,7 +134,7 @@ class AdminPackagingMaterialController extends Controller
         if ($id) {
             $sizes = PackagingMaterialTypeSizes::where('type_id', $id);
             if ($sizes->exists()) {
-                $sizes = $sizes->select('id', 'size')->get();
+                $sizes = $sizes->select('id', 'size', 'standard_charges')->get();
                 return response()->json(['status' => 0, 'sizes' => $sizes]);
             } else {
                 $type = PackagingMaterialTypes::find($id)->type;
@@ -272,156 +270,11 @@ class AdminPackagingMaterialController extends Controller
         return response()->json(['status'=>1,'cities'=>$cities]);
 
     }
-    public function send_stock(Request $request){
-//        return $request;
-        $small = 0; $medium = 0; $large = 0; $box = 0;
-        $sm_quantity = ($request->send_stock_smflyer != null)? $request->send_stock_smflyer:0;
-        $md_quantity = ($request->send_stock_mdflyer != null)? $request->send_stock_mdflyer:0;
-        $lg_quantity = ($request->send_stock_lgflyer != null)? $request->send_stock_lgflyer:0;
-        $box_quantity = ($request->send_stock_boxes != null)? $request->send_stock_boxes:0;
-
-        $hub_id = $request->city_select;
-        $reference_number = false;
-        $reference_number = $request->invoice_number;
-        if($reference_number != 0){
-            $cargo_id = CargoConsignment::where('id',$reference_number)->where('status_id','!=',3)->exists();
-        }else if($reference_number == 0){
-            $cargo_id = true;
-        }
-        if($cargo_id){
-            $packaging = PackagingMaterialStockHub::where('hub_id',$hub_id);
-            if($packaging->exists()){
-                $packaging = $packaging->first();
-                if($sm_quantity != 0  || $md_quantity != 0 || $lg_quantity != 0 || $box_quantity != 0){
-                    $result = $this->sub_head_stock($sm_quantity,$md_quantity,$lg_quantity,$box_quantity);
-                }else{
-                    return redirect()->back()->with('error','Canot send 0 Stock!');
-                }
-                $small = $packaging->small_flyers;
-                $medium = $packaging->medium_flyers;
-                $large = $packaging->large_flyers;
-                $box = $packaging->boxes;
-
-                if($result == true) {
-                    $small += $sm_quantity;
-                    $medium += $md_quantity;
-                    $large += $lg_quantity;
-                    $box += $box_quantity;
-                    $packaging_hub = PackagingMaterialStockHub::where('hub_id', $hub_id)->update([
-                        'small_flyers' => $small,
-                        'medium_flyers' => $medium,
-                        'large_flyers' => $large,
-                        'boxes' => $box
-                    ]);
-                    if ($packaging_hub) {
-                        PackagingStockHistory::create([
-                            'admin_id' => Auth::id(),
-                            'small_flyers' => $sm_quantity,
-                            'medium_flyers' => $md_quantity,
-                            'large_flyers' => $lg_quantity,
-                            'boxes' => $box_quantity,
-                            'entry_type' => 1,
-                            'hub_id' => $hub_id,
-                            'reference_number' => $reference_number
-                        ]);
-                    }
-                    return redirect()->back()->with('success', 'Stock added successfully!');
-                }else{
-                    return redirect()->back()->with('error','Stock looks short, check again!');
-
-                }
-            }else{
-                if($sm_quantity != 0  || $md_quantity != 0 || $lg_quantity != 0 || $box_quantity != 0){
-                    $result = $this->sub_head_stock($sm_quantity,$md_quantity,$lg_quantity,$box_quantity);
-                }else{
-                    return redirect()->back()->with('error','Canot send 0 Stock!');
-                }
-                if($result == true) {
-                    $packaging_hub = PackagingMaterialStockHub::create([
-                        'hub_id' => $hub_id,
-                        'small_flyers' => $sm_quantity,
-                        'medium_flyers' => $md_quantity,
-                        'large_flyers' => $lg_quantity,
-                        'boxes' => $box_quantity
-                    ]);
-                    if ($packaging_hub) {
-                        PackagingStockHistory::create([
-                            'admin_id' => Auth::id(),
-                            'small_flyers' => $sm_quantity,
-                            'medium_flyers' => $md_quantity,
-                            'large_flyers' => $lg_quantity,
-                            'boxes' => $box_quantity,
-                            'entry_type' => 1,
-                            'hub_id' => $hub_id,
-                            'reference_number' => $reference_number
-                        ]);
-                    }
-                    return redirect()->back()->with('success', 'Stock added successfully!');
-                }else{
-                    return redirect()->back()->with('error','Stock looks short, check again!');
-                }
-            }
-        }else{
-            return redirect()->back()->with('error','Cargo ID wrong or already received!');
-        }
-    }
-    protected function sub_head_stock($small,$medium,$large,$box){
-        $head_stocks = PackagingMaterialStockHead::latest()->first();
-        $small_flyers = 0; $medium_flyers = 0; $medium_flyers = 0; $large_flyers = 0;
-        $small_flyers = $head_stocks->small_flyers;
-        $medium_flyers = $head_stocks->medium_flyers;
-        $large_flyers = $head_stocks->large_flyers;
-        $boxes = $head_stocks->boxes;
-        if($small <= $small_flyers && $medium <= $medium_flyers && $large <= $large_flyers && $box <= $boxes){
-
-            $small_flyers -= $small;
-            $medium_flyers -= $medium;
-            $large_flyers -= $large;
-            $boxes -= $box;
-            $packaging_head =  PackagingMaterialStockHead::create([
-                'small_flyers'=>$small_flyers,
-                'medium_flyers'=>$medium_flyers,
-                'large_flyers'=>$large_flyers,
-                'boxes'=>$boxes
-            ]);
-            if($packaging_head){
-                return 1;
-            }
-        }else{
-            return 0;
-        }
-    }
-    protected function sub_hub_stock($hub,$small,$medium,$large,$box){
-        $head_stocks = PackagingMaterialStockHub::where('hub_id',$hub)->first();
-        $small_flyers = 0; $medium_flyers = 0; $medium_flyers = 0; $large_flyers = 0;
-        $small_flyers = $head_stocks->small_flyers;
-        $medium_flyers = $head_stocks->medium_flyers;
-        $large_flyers = $head_stocks->large_flyers;
-        $boxes = $head_stocks->boxes;
-        if($small <= $small_flyers && $medium <= $medium_flyers && $large <= $large_flyers && $box <= $boxes){
-
-            $small_flyers -= $small;
-            $medium_flyers -= $medium;
-            $large_flyers -= $large;
-            $boxes -= $box;
-            $packaging_head =  PackagingMaterialStockHub::where('hub_id',$hub)->update([
-                'small_flyers'=>$small_flyers,
-                'medium_flyers'=>$medium_flyers,
-                'large_flyers'=>$large_flyers,
-                'boxes'=>$boxes
-            ]);
-            if($packaging_head){
-                return 1;
-            }
-        }else{
-            return 0;
-        }
-    }
+    
     public function request_index(Request $request){
         $payment_mode = PackagingPaymentMode::all();
         $packaging_request_status = PackagingMaterialRequestStatus::select('id', 'name')->get();
-        $packaging = PackagingMaterialStockHead::latest()->first();
-        return view('admin.materials.requests.index')->with(['packaging'=>$packaging,'payment_mode'=>$payment_mode, 'packaging_request_status' => $packaging_request_status]);
+        return view('admin.materials.requests.index')->with(['payment_mode'=>$payment_mode, 'packaging_request_status' => $packaging_request_status]);
     }
     public function request_list(Request $request){
         $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')
@@ -507,7 +360,7 @@ class AdminPackagingMaterialController extends Controller
                     if ($packaging->status_id >= 2) {
                         $dropdown .= '<button type="button" class="dropdown-item grn"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Print GRN</div></button>';
                     }
-                    if ($packaging->status_id == 2 && ($packaging->shipper_status_id == 4 || $packaging->shipper_status_id == 2) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
+                    if ($packaging->status_id == 2 && $packaging->shipper_status_id == 1 && (session('role_id') == 1 || in_array(80, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item dispatch"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Dispatch</div></button>';
                     }
                     if($packaging->confirmed_date != null){
@@ -612,10 +465,10 @@ class AdminPackagingMaterialController extends Controller
             $shipment_consignee_name = "Packaging Material to $shipper_details->name";
 
             if($request_details->packaging_payment_mode_id == 1) {
-                $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request_details->city_id, $shipment_consignee_name, $request_details->address, $request_details->phone, null, null, null, 0, $now, null, 1, 1, null, $total_charges, 1, 2, 2);
+                $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request_details->city_id, $shipment_consignee_name, $request_details->address, $request_details->phone, null, null, null, 0, $now, null, 1, 1, null, $total_charges, 1, 1, 1);
             }
             else{
-                $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request_details->city_id, $shipment_consignee_name, $request_details->address, $request_details->phone, null, null, null, 0, $now, null, 1, 1, null, 0, 1, 2, 2, $total_charges);
+                $shipment = $this->book($user_id, 1, $trax_address->id, 1, $request_details->city_id, $shipment_consignee_name, $request_details->address, $request_details->phone, null, null, null, 0, $now, null, 1, 1, null, 0, 1, 1, 1, $total_charges);
             }
 
             $new_tracking_number = $this->generate_tracking_number($shipment->id, $trax_address->city_id, $request_details->city_id);
@@ -630,7 +483,6 @@ class AdminPackagingMaterialController extends Controller
 
 
             ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, NULL, Auth::id(), $request_id);
-            ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, NULL, Auth::id(), $request_id);
 
             ShipmentChargesController::packaging_material($shipment->id, $request_details->packaging_payment_mode_id, $total_charges);
 
@@ -752,6 +604,15 @@ class AdminPackagingMaterialController extends Controller
             }
             $packaging_material_request->status_id = 3;
             $packaging_material_request->save();
+
+            $shipment = Shipment::where('tracking_number', $packaging_material_request->tracking_number)->first();
+            if($shipment){
+                Shipment::where('id', $shipment->id)->update([
+                    'shipper_status_id' => 2,
+                    'consignee_status_id' => 2,
+                ]);
+                ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, NULL, Auth::id(), $packaging_material_request->id);
+            }
 
 
             $packaging_request_history = new PackagingMaterialRequestHistory();

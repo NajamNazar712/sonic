@@ -224,6 +224,8 @@ class Permission
             'return.history.index' => 126,
             'return.history.list' => 126,
             'return.history.shipments' => 126,
+            'return.cx_sales.index' => 266,
+            'return.cx_sales.list' => 266,
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
@@ -268,6 +270,7 @@ class Permission
             'finance.done_payments.details' => 61,
             'finance.done_payments.update_details' => 61,
             'finance.done_payments.export_to_excel' => 61,
+            'finance.done_payments.excel_store' => 268,
             'finance.invoices.index' => 120,
             'finance.invoices.list' => 120,
             'finance.invoices.print' => 120,

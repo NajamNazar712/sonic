@@ -343,6 +343,17 @@ class ShipperFinanceController extends Controller
                               <td>' . $shipper->name . '</td>
                             </tr>
                             <tr>
+                              <td class="color secondary"><strong>NTN</strong></td>
+                              <td>' . $shipper->ntn_no . '</td>
+                            </tr>';
+                              if($shipper->strn_no){
+                                    $html .= '
+                                        <tr>
+                                          <td class="color secondary"><strong>STRN</strong></td>
+                                          <td>' . $shipper->strn_no . '</td>
+                                        </tr>';
+                              };
+                   $html .='<tr>
                               <td class="color secondary"><strong>Client Bank</strong></td>
                               <td>' . $shipper_bank->bank->name . '</td>
                             </tr>
@@ -570,6 +581,7 @@ class ShipperFinanceController extends Controller
                                     </tr>
                                   </tbody>
                                 </table>
+                                <span style="color: red">* 13% GST is applicable for Sindh Region 16% GST for Punjab .KPK</span>
                             </div>
                         </div>
                       </div>

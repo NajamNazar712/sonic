@@ -78,6 +78,10 @@
                                     <td>{{$user->ntn_no}}</td>
                                 </tr>
                                 <tr>
+                                    <td><b>STRN Number</b></td>
+                                    <td>{{$user->strn_no}}</td>
+                                </tr>
+                                <tr>
                                     <td><b>URL</b></td>
                                     <td>{{$user->url}}</td>
                                 </tr>
@@ -393,6 +397,16 @@
                                                 <option value="{{$city->id}}" {{ $user->city_id == $city->id ? 'selected' : '' }} >{{$city->name}}</option>
                                             @endforeach
                                         </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group row">
+                                    <div class="col-md-9">
+                                        <label>STRN Number</label>
+                                        <input type="text" id="strn_no" class="form-control border-primary" value="{{$user->strn_no}}" name="strn_no">
                                     </div>
                                 </div>
                             </div>
@@ -772,6 +786,7 @@
             $("input[name='phone'],input[name='phone2']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             $("input[name='billing_person_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
+            $("input[name='strn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
 
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',

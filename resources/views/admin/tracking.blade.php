@@ -525,8 +525,8 @@
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Weight</strong></td>';
                                 shipment += '<td>' + details.order_information.weight + ' kg</td>';
-                                shipment += '<td><strong>Shipping Mode</strong></td>';
-                                shipment += '<td>' + details.order_information.shipping_mode + '</td>';
+                                shipment += '<td><strong>Service Type</strong></td>';
+                                shipment += '<td>' + details.order_information.booking_type + '</td>';
                                 shipment += '<td><strong>Collection Amount</strong></td>';
                                 shipment += '<td>Rs. ' + details.order_information.amount + '</td>';
                                 shipment += '</tr>';
@@ -534,6 +534,8 @@
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Order ID</strong></td>';
                                 shipment += '<td>' + ((details.order_information.order_id) ? details.order_information.order_id : '-') + '</td>';
+                                shipment += '<td><strong>Shipping Mode</strong></td>';
+                                shipment += '<td>' + details.order_information.shipping_mode + '</td>';
                                 shipment += '<td><strong>Instructions</strong></td>';
 
                                 if (details.order_information.charges_mode_id) {

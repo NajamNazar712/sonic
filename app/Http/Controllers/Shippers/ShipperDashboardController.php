@@ -441,16 +441,39 @@ class ShipperDashboardController extends Controller
 
     public function updateProfile(Request $request)
     {
-
         //1 for Admin, 0 for User
-        $request->validate([
+        if (session('user_type') == 1) {
+                $request->validate([
+                    'poc'=>'required|string|max:255',
+                    'phone'=>'required|string|max:255',
+                    'email'=>'required|email|between:0,100',
+                ]);
+                $flag = true;
+                $user = User::where('email', $request->email)->first();
+                if($user){
+                    if(session('user_id') == $user->id) {
+                        $flag = true;
+                    }
+                    else{
+                        $flag = false;
+                    }
+                }
+                if($flag == true){
+                    User::where('id', session('user_id'))->update(['poc' => $request->poc, 'phone' => $request->phone, 'phone2' => $request->phone2, 'email' => $request->email,
+                        'updated_by_type' => 0, 'updated_by_id' => session('user_id')]);
+                }
+                else{
+                    return redirect()->back()->with(['error'=>"Email Address must be unique"]);
+                }
+            }
+        else{
+            $request->validate([
             'poc'=>'required|string|max:255',
             'phone'=>'required|string|max:255',
         ]);
-
-
-        User::where('id', session('user_id'))->update(['poc'=>$request->poc,'phone'=>$request->phone,'phone2'=>$request->phone2,
-            'updated_by_type'=>0,'updated_by_id'=> session('user_id')]);
+            User::where('id', session('user_id'))->update(['poc'=>$request->poc,'phone'=>$request->phone,'phone2'=>$request->phone2,
+                'updated_by_type'=>0,'updated_by_id'=> session('user_id')]);
+        }
 
 
         return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);

@@ -467,6 +467,10 @@ class AdminPickupsController extends Controller
 
         $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
 
+        if($pickup_request->pickup_address->vendor != NULL){
+            NotificationsController::send(43, $pickup_request->id, $pickup_request->pickup_address->id);
+        }
+
         if ($assigned_shipments) {
           foreach ($assigned_shipments as $assigned_shipment) {
             $shipment = $assigned_shipment->shipment;

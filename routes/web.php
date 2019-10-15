@@ -274,6 +274,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@index')->name('index');
         Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
         Route::get('incoming_list','Admins\AdminDashboardController@incoming_list')->name('incoming_list');
+        Route::get('delivered_returned_list','Admins\AdminDashboardController@delivered_returned_list')->name('delivered_returned_list');
         Route::get('outgoing_top_customers_list','Admins\AdminDashboardController@outgoing_top_customers_list')->name('outgoing_top_customers_list');
         Route::get('incoming_weight_range_list','Admins\AdminDashboardController@incoming_weight_range_list')->name('incoming_weight_range_list');
         Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
@@ -494,6 +495,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\DeliveryController@delivery_note_index')->name('index');
             Route::post('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
+            Route::post('rider_check','Admins\DeliveryController@delivery_note_rider_check')->name('rider_check');
 
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
@@ -687,6 +689,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\ReturnController@history_index')->name('index');
             Route::get('list', 'Admins\ReturnController@history_list')->name('list');
             Route::post('shipments', 'Admins\ReturnController@history_shipments')->name('shipments');
+
+        });
+        Route::prefix('cx_sales')->name('cx_sales.')->group(function () {
+            Route::get('', 'Admins\ReturnController@cx_sales_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@cx_sales_list')->name('list');
 
         });
     });
@@ -891,6 +898,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('details', 'Admins\AdminFinanceController@done_payments_details')->name('details');
             Route::put('update_details', 'Admins\AdminFinanceController@done_payments_update_details')->name('update_details');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@done_payments_export_to_excel')->name('export_to_excel');
+            Route::post('excel_store', 'Admins\AdminFinanceController@done_payments_excel_store')->name('excel_store');
         });
 
         Route::prefix('invoices')->name('invoices.')->group(function () {
@@ -1344,6 +1352,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print_air_waybill', 'Admins\AdminWalkInBookShipmentController@print_air_waybill')->name('print_air_waybill');
             Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
             Route::post('check_min_charges', 'Admins\AdminWalkInBookShipmentController@check_min_charges')->name('check_min_charges');
+            Route::post('check_quantity', 'Admins\AdminWalkInBookShipmentController@check_packing_quantity')->name('check_quantity');
         });
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@history_index')->name('walk_in_history');

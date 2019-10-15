@@ -102,6 +102,7 @@ class AdminTrackingController extends Controller
     			$details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
                 $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
 
+                $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
                 $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
 
                 if ($shipment->booking_type_id != 4) {

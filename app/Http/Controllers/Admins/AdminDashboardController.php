@@ -787,6 +787,7 @@ class AdminDashboardController extends Controller
         }
         $operation_incoming = OperationForecast::leftjoin('shipment_status as ss', 'ss.id', '=', 'operation_forecasts.shipper_status_id')
             ->select('operation_forecasts.id as opfs_id', 'ss.id as shipper_status_id', 'ss.name as status', DB::raw('(SELECT SUM(count) FROM operation_forecasts AS opfs WHERE opfs.shipper_status_id = operation_forecasts.shipper_status_id AND opfs.hub_id = "' . $hub . '" AND opfs.booking_type_id = "' . $service_type_id . '" AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))
+            ->whereIn('shipper_status_id', [1, 2, 3, 4, 5, 7, 8, 9])
             ->where('operation_forecasts.hub_id', $hub)
             ->where('operation_forecasts.booking_type_id', $service_type_id)
             ->whereBetween('operation_forecasts.updated_at', [$from, $to])
@@ -822,6 +823,48 @@ class AdminDashboardController extends Controller
                 if($shipments->count > 0){
                     $route = route('admin.operation_forecasting.incoming.shipments_list');
                     return "<u><a href='{$route}/$from/$to/$service_type_id/$hub/$shipments->shipper_status_id' class='white' target='_blank'>$shipments->count</a></u>";
+                }
+                else{
+                    return 0;
+                }
+            });
+        return $datatable->make(true);
+    }
+    public function delivered_returned_list(Request $request){
+        if($request->get('search_date_from') && $request->get('search_date_to')){
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+        }
+        else{
+            $from = Carbon::now()->subDays(29);
+            $to = Carbon::now()->endOfDay();
+        }
+        if($request->get('search_hub')){
+            $hub = $request->get('search_hub');
+        }
+        else{
+            $admin = Admin::where('id', Auth::id())->first();
+            $hub = $admin->default_hub_id;
+        }
+        if($request->get('search_service_type')){
+            $service_type_id = $request->get('search_service_type');
+        }
+        else{
+            $service_type_id = 1;
+        }
+        $operation_incoming_delivered_returned = OperationForecast::leftjoin('shipment_status as ss', 'ss.id', '=', 'operation_forecasts.shipper_status_id')
+            ->select('operation_forecasts.id as opfs_id', 'ss.id as shipper_status_id', 'ss.name as status', DB::raw('(SELECT SUM(count) FROM operation_forecasts AS opfs WHERE opfs.shipper_status_id = operation_forecasts.shipper_status_id AND opfs.hub_id = "' . $hub . '" AND opfs.booking_type_id = "' . $service_type_id . '" AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))
+            ->whereIn('shipper_status_id', [14, 25, 30, 31])
+            ->where('operation_forecasts.hub_id', $hub)
+            ->where('operation_forecasts.booking_type_id', $service_type_id)
+            ->whereBetween('operation_forecasts.updated_at', [$from, $to])
+            ->groupBy('shipper_status_id')
+            ->orderBy('shipper_status_id', 'asc');
+        $datatable = Datatables::of($operation_incoming_delivered_returned)
+            ->editColumn('count_link', function ($shipments) use($from, $to, $service_type_id, $hub) {
+                if($shipments->count > 0){
+                    $route = route('admin.operation_forecasting.incoming.shipments_list');
+                    return "<u><a href='{$route}/$from/$to/$service_type_id/$hub/$shipments->shipper_status_id' target='_blank'>$shipments->count</a></u>";
                 }
                 else{
                     return 0;
@@ -6130,7 +6173,7 @@ class AdminDashboardController extends Controller
         if($request->password=="" || $request->password==null)
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                'ntn_no'=>$request->ntn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
+                'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
                 'url'=>$request->url,'product_id'=>$request->product_id]);
             AdminLogs::create([
                 'admin_id'=>Auth::id(),
