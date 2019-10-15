@@ -291,7 +291,7 @@ class ReturnController extends Controller
                         $parcel->consignee_status_id = 20;
                         $parcel->save();
                         
-                        ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment, 20, 20, $return_reason, $remarks, NULL, Auth::id());
 
                         NotificationsController::send(15, 0, $shipment);
                         NotificationsController::send(16, 0, $shipment);
