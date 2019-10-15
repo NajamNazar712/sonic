@@ -1851,12 +1851,12 @@
                                                             <h3 class="card-title">Storage Type Charges</h3>
                                                         </div>
 
-                                                        <div class="col-12">
+                                                        <div class="col-12" id="wms_storage_types_div">
                                                             <div class="row">
                                                                 
-                                                                <div class="col-md-2 text-center">
+                                                                <div class="col-md-2">
                                                                     <fieldset class="form-group">
-                                                                        <select class="select2 form-control">
+                                                                        <select class="select2 form-control storage_type" name="storage_type[0]" data-rule-required="true" data-msg-required="This field is required">
                                                                             @foreach($storage_types as $types)
                                                                                 <option value="{{$types->id}}">{{$types->name}}</option>
                                                                             @endforeach
@@ -1864,14 +1864,21 @@
                                                                     </fieldset>
                                                                 </div>
 
-                                                                <div class="col-md-2 text-center">
+                                                                <div class="col-md-2">
                                                                     <fieldset class="form-group">
-                                                                        <input name="storage_type[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="">
+                                                                        <input name="storage_type_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric">
                                                                     </fieldset>
                                                                 </div>
-                                                               
                                                             </div>
+                                                            
                                                         </div>
+                                                        <div class="row">
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <button id="storage_type_add" type="button" class="btn btn-outline-primary ml-1" title="Add" ><i class="la la-plus"></i></button>
+                                                                    </fieldset>
+                                                                </div>
+                                                            </div>
                                                     </div>
 
                                                 </div>
@@ -3061,6 +3068,17 @@
            }
        });
 
+        var storage_type_selected = [];
+        $('select[name="storage_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+            width:'100%',
+            placeholder:'Select Storage Type'
+        }).bind('selec2:select', function(){
+            var storage_id = $(this).val();
+            alert(storage_id);
+            storage_type_selected.push($(this).val());
+            console.log(storage_type_selected)
+        });
+
         var PPCSwitch = document.querySelector('.switchery.PPCSwitch');
         PPCSwitch.onchange = function () {
             if(PPCSwitch.checked === true){
@@ -3078,6 +3096,40 @@
             }
         };
 
+        var storage_type_rows = 1;
+        var storage_type_data = @json($storage_types);
+        $('#storage_type_add').on('click', function(){
+            wms_storage_types_div
+            var htmldiv = '<div class="row" id="storage_type_row'+storage_type_rows+'">\n' +
+                '                                                <div class="col-md-2">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <select class="select2 form-control storage_type" name="storage_type['+ storage_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
+                '                                                    </fieldset>\n' +
+                '                                                </div>\n' +
+                '                                                <div class="col-md-2">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <input name="storage_type_charges['+storage_type_rows+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
+                '                                                    </fieldset>\n' +
+                '                                                </div>\n' +
+                '<div class="col">\n' +
+                '<span class="storage_type_row_delete btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
+
+            $('#wms_storage_types_div').append(htmldiv);
+            
+            var storage_data = $.map(storage_type_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.name;
+                return obj;
+            });
+            $('select[name="storage_type['+ storage_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:storage_data,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            });
+
+            storage_type_rows++;
+
+        });
        
 
        
