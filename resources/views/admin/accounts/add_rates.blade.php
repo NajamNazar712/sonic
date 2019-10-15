@@ -1911,6 +1911,8 @@
 @endsection
 @section('css')
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
     <style type="text/css">
         .hide{
             display:none;
@@ -1924,6 +1926,8 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -3072,11 +3076,15 @@
         $('select[name="storage_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
             width:'100%',
             placeholder:'Select Storage Type'
-        }).bind('selec2:select', function(){
+        }).bind('select2:select', function(){
             var storage_id = $(this).val();
-            alert(storage_id);
-            storage_type_selected.push($(this).val());
-            console.log(storage_type_selected)
+            var index = $.inArray(storage_id, storage_type_selected);
+
+            if(index === -1){
+                storage_type_selected.push(storage_id);
+                console.log(storage_type_selected)
+            }
+            
         });
 
         var PPCSwitch = document.querySelector('.switchery.PPCSwitch');
@@ -3125,7 +3133,22 @@
                 data:storage_data,
                 width:'100%',
                 placeholder:'Select Storage Type'
-            });
+            }).bind('select2:select', function(){
+            var storage_id = $(this).val();
+            var index = $.inArray(storage_id, storage_type_selected);
+            console.log(index)
+            if(index === -1){
+                storage_type_selected.push(storage_id);
+            }else{
+                var error = "Storage type already selected!";
+                toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                $(this).val(null).trigger('change');
+            }
+            
+        });
 
             storage_type_rows++;
 
