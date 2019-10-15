@@ -89,7 +89,7 @@ use App\Http\Models\Rates\PendingReturnCharge;
 use App\Http\Models\Rates\PendingDiscountCharge;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ShippingMode;
-
+use App\Http\Models\WMS\WmsStorageType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
@@ -1172,6 +1172,7 @@ class AdminDashboardController extends Controller
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             $packaging_sizes = array();
             $invoicing_cycles = InvoicingCycle::all();
+            $storage_types = WmsStorageType::all()->where('status', 1);
             if(count($packaging_material_types) > 0){
 
                 foreach($packaging_material_types as $type){
@@ -1179,7 +1180,7 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles]);
+            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }

@@ -1813,36 +1813,67 @@
                                                 </div>
 
                                                 <div class="col-12">
-                                                    <div class="col-4 text-center">
-                                                        <fieldset>
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text" id="">Per Product Charges</span>
+                                                    <div class="row">
+                                                        <div class="col-4 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text" id="">Per Product Charges</span>
+                                                                    </div>
+                                                                    <div class="input-group-prepend">
+                                                                          <span class="input-group-text" id="">
+                                                                            <input type="checkbox" name="ppc_switch" class="switchery PPCSwitch" data-size="xs" />
+                                                                          </span>
+                                                                    </div>
+                                                                    <input type="text"  class="form-control numeric ppc-inp"  data-rule-required="true" data-msg-required="This field is required" name="ppc_charges" disabled>
                                                                 </div>
-                                                                <div class="input-group-prepend">
-                                                                      <span class="input-group-text" id="">
-                                                                        <input type="checkbox" name="ppc_switch" class="switchery PPCSwitch" data-size="xs" />
-                                                                      </span>
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col-4 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text" id="">Per Square Foot Charges</span>
+                                                                    </div>
+                                                                    <div class="input-group-prepend">
+                                                                          <span class="input-group-text" id="">
+                                                                            <input type="checkbox" name="psf_switch" class="switchery PSFSwitch" data-size="xs" />
+                                                                          </span>
+                                                                    </div>
+                                                                    <input type="text"  class="form-control numeric psf-inp"  data-rule-required="true" data-msg-required="This field is required" name="psf_charges" disabled>
                                                                 </div>
-                                                                <input type="text"  class="form-control ppc-inp"  data-rule-required="true" data-msg-required="This field is required" name="ppc_charges" disabled>
-                                                            </div>
-                                                        </fieldset>
+                                                            </fieldset>
+                                                        </div>
                                                     </div>
-                                                     <div class="col-4 text-center">
-                                                        <fieldset>
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text" id="">Per Square Foot Charges</span>
+
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <h3 class="card-title">Storage Type Charges</h3>
+                                                        </div>
+
+                                                        <div class="col-12">
+                                                            <div class="row">
+                                                                
+                                                                <div class="col-md-2 text-center">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control">
+                                                                            @foreach($storage_types as $types)
+                                                                                <option value="{{$types->id}}">{{$types->name}}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </fieldset>
                                                                 </div>
-                                                                <div class="input-group-prepend">
-                                                                      <span class="input-group-text" id="">
-                                                                        <input type="checkbox" name="psf_switch" class="switchery PSFSwitch" data-size="xs" />
-                                                                      </span>
+
+                                                                <div class="col-md-2 text-center">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="storage_type[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="">
+                                                                    </fieldset>
                                                                 </div>
-                                                                <input type="text"  class="form-control psf-inp"  data-rule-required="true" data-msg-required="This field is required" name="psf_charges" disabled>
+                                                               
                                                             </div>
-                                                        </fieldset>
+                                                        </div>
                                                     </div>
+
                                                 </div>
                                                
                                                 </div>

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateUsersTableForWarehousing extends Migration
+class CreateWmsLabellingChargesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,11 @@ class UpdateUsersTableForWarehousing extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->tinyInteger('warehousing')->default(0);
+        Schema::create('wms_labelling_charges', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('user_id');
+            $table->double('charges');
+            $table->timestamps();
         });
     }
 
@@ -25,8 +28,6 @@ class UpdateUsersTableForWarehousing extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('warehousing');
-        });
+        Schema::dropIfExists('wms_labelling_charges');
     }
 }
