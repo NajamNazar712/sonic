@@ -3108,7 +3108,7 @@
         var storage_type_data = @json($storage_types);
         $('#storage_type_add').on('click', function(){
             wms_storage_types_div
-            var htmldiv = '<div class="row" id="storage_type_row'+storage_type_rows+'">\n' +
+            var htmldiv = '<div class="row" id="storage_type_row'+storage_type_rows+'" row="'+ storage_type_rows +'">\n' +
                 '                                                <div class="col-md-2">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <select class="select2 form-control storage_type" name="storage_type['+ storage_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
@@ -3151,6 +3151,13 @@
         });
 
             storage_type_rows++;
+
+        });
+
+        $('body').on('click','span.storage_type_row_delete', function(){
+            var row_id = $(this).parent().parent().attr('row');
+            $('select[name=""]')
+            $(this).parent().parent().remove();
 
         });
        
