@@ -213,7 +213,7 @@ public function change_status_to_self_collection(Request $request){
     public function return_marked_single_status(Request $request){
             $parcel = Shipment::find($request->shipment_id);
             if($parcel){
-                if($parcel->shipper_status_id != 20){
+                if(($parcel->shipper_status_id != 20) && ($parcel->shipper_status_id != 52)){
                     if (!$parcel->packaging_material_request) {
                         Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
                         $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
@@ -252,7 +252,7 @@ public function change_status_to_self_collection(Request $request){
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
 
-                if($parcel->shipper_status_id != 20){
+                if(($parcel->shipper_status_id != 20)  && ($parcel->shipper_status_id != 52)){
 
                     $remark_inp = "remark.$shipment";
 
