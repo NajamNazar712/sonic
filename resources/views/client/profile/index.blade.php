@@ -82,6 +82,10 @@
                                                 <td>{{$user->ntn_no}}</td>
                                             </tr>
                                             <tr>
+                                                <td><b>STRN Number</b></td>
+                                                <td>{{$user->strn_no}}</td>
+                                            </tr>
+                                            <tr>
                                                 <td><b>URL</b></td>
                                                 <td>{{$user->url}}</td>
                                             </tr>
@@ -284,6 +288,18 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @if(session('user_type') == 1)
+                                            <div class="col-md-6">
+                                                <div class="form-group row">
+                                                    <div class="form-group col-md-9">
+                                                        <label>Email Address:</label>
+                                                        <span class="danger">*</span>
+                                                        <input type="email" id="email" class="form-control border-primary" data-rule-required="true" data-msg-required="Phone Number is required" value="{{$user->email}}" name="email" required>
+                                                        {{--<input type="hidden" name="user_id" value="{{$user->id}}">--}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="form-actions right">
@@ -495,6 +511,8 @@
                 $("#phone2").val("{{$user->phone2}}");
                 $("#poc").val("");
                 $("#poc").val("{{$user->poc}}");
+                $("#email").val("");
+                $("#email").val("{{$user->email}}");
                 $("#tabs").show();
             });
 

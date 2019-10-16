@@ -172,6 +172,7 @@ class RegisterController extends Controller
             'phone2'=>$data['shipper_phone2'],
             'cnic' => $data['cnic'],
             'ntn_no' => $data['ntn_no'],
+            'strn_no' => $data['strn_no'],
             'url' => $data['url'],
             'city_id'=>$data['shipper_city'],
             'product_id'=>$data['shipper_product_type'],

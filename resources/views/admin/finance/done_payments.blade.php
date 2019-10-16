@@ -45,7 +45,7 @@
 										</div>
 										<input type="text" name="search_from"
 											   class="form-control pickadate bg-primary border-primary white rounded-right"
-											   id="search_date_from" placeholder="From">
+											   id="search_date_from" placeholder="Date (From)">
 									</div>
 								</div>
 								<div class="col-3 ">
@@ -57,7 +57,7 @@
 										</div>
 										<input type="text" name="search_to"
 											   class="form-control pickadate bg-primary border-primary white rounded-right"
-											   id="search_date_to" placeholder="To">
+											   id="search_date_to" placeholder="Date (To)">
 									</div>
 								</div>
 								<div class="col-2 text-center">
@@ -67,6 +67,31 @@
 									</button>
 								</div>
 							</div>
+							@if(session('role_id') == 1 || in_array(268, session('permissions')))
+								<form id="payment_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.done_payments.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
+									{{ csrf_field() }}
+
+									<div class="row align-items-center justify-content-center">
+										<div class="col">
+											<div class="form-group">
+												<input type="file" name="payments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+											</div>
+										</div>
+
+										<div class="col">
+											<div class="form-group text-left">
+												<button type="submit" name="upload" class="btn btn-primary">Upload</button>
+											</div>
+										</div>
+
+										<div class="col ml-auto">
+											<div class="form-group text-right">
+												<a href="{{ asset('file/Done Payment Update Status Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+											</div>
+										</div>
+									</div>
+								</form>
+							@endif
 
 
 
@@ -87,6 +112,7 @@
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
+										<th class="border-primary border-darken-1">Packing Charges</th>
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
@@ -350,6 +376,7 @@
                             head.push('Total Amount');
                             head.push('Total Charges');
                             head.push('Total GST');
+                            head.push('Packing Charges');
                             head.push('Total Deductable');
                             head.push('Total Payable');
                             head.push('Bank');
@@ -375,6 +402,7 @@
                                 row.push(values.total_amount);
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
+                                row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
                                 row.push(values.total_payable);
                                 row.push(values.bank);
@@ -579,6 +607,7 @@
 					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount', orderable: false},
 					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', orderable: false},
+					{data:'packaging_charges', name: 's.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
@@ -619,7 +648,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.packaging_charges')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))
@@ -1048,6 +1077,32 @@
                 $('#complaint_description').val('');
                 $('#complaint_channels').val('').trigger('change');
             });
+			@if(session('role_id') == 1 || in_array(268, session('permissions')))
+				$('#payment_form').validate({
+					errorClass: 'danger',
+					successClass: 'success',
+					normalizer: function(value) {
+						return $.trim(value);
+					},
+					errorPlacement: function(error, element) {
+						error.addClass('w-100').appendTo(element.parent('.form-group'));
+					},
+					submitHandler: function(form) {
+						$(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+						swal({
+							title: 'Please Wait!',
+							text: 'Your Payment(s) are being updated!',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+
+						form.submit();
+					}
+				});
+            @endif
 		});
 	</script>
 @endsection

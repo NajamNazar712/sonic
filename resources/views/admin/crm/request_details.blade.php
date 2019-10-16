@@ -30,7 +30,7 @@
                                 <button type="button" class="btn btn-primary width-10-per" id="tag"><span
                                             class="d-none d-lg-block" style="color: white">Tag</span></button>
                             @endif
-                                @if(($crm_details['status_id'] == 1) && (session('role_id') == 1 || in_array(213, session('permissions'))))
+                                @if((session('role_id') == 1 || in_array(213, session('permissions'))))
                                 <button type="button" class="btn btn-primary width-10-per" id="edit_request"><span
                                             class="d-none d-lg-block" style="color: white">Edit Request</span></button>
                             @endif
@@ -58,6 +58,14 @@
                                                 <th scope="row">Shipment Status</th>
                                                 <td class="name">
                                                     <h5 class="mb-0">{{$shipment_status}}</h5>
+                                                </td>
+                                            </tr>
+                                            @endif
+                                            @if(!empty($shipment_status_date))
+                                            <tr>
+                                                <th scope="row">Shipment Status Updated At</th>
+                                                <td class="name">
+                                                    <h5 class="mb-0">{{$shipment_status_date}}</h5>
                                                 </td>
                                             </tr>
                                             @endif
