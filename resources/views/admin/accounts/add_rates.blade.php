@@ -1806,12 +1806,13 @@
                                             </div>
 
                                         </div>
-                                        <div class="card border-primary p-2">
-                                            <div class="row">
-                                                <div class="col-12">
+                                        <div class="col-12">
                                                     <h3 class="card-title">Stocking Charges</h3>
                                                 </div>
 
+                                        <div class="card border-primary p-2">
+                                            <div class="row">
+                        
                                                 <div class="col-12">
                                                     <div class="row">
                                                         <div class="col-4 text-center">
@@ -1866,7 +1867,7 @@
 
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
-                                                                        <input name="storage_type_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Cha">
+                                                                        <input name="storage_type_charges[0]" data-rule-required="true" data-msg-required="Charges are required" type="text" class="form-control numeric" placeholder="Charges">
                                                                     </fieldset>
                                                                 </div>
                                                             </div>
@@ -1888,59 +1889,34 @@
                                         </div>
                                         
                                         <div class="card-body">
-                                            <div class="card border-primary p-2">
-                                            <div class="row">
-                                                <div class="col-12">
+                                                <div>
                                                     <h3 class="card-title">Fulfillment Charges</h3>
                                                 </div>
 
+                                            <div class="card border-primary p-2">
+                                            <div class="row">
+                                                
                                                 <div class="col-12">
-                                                    <div class="row">
-                                                        <div class="col-4 text-center">
-                                                            <fieldset>
-                                                                <div class="input-group input-group-sm form-group">
-                                                                    <div class="input-group-prepend">
-                                                                        <span class="input-group-text" id="">Per Product Charges</span>
-                                                                    </div>
-                                                                    <div class="input-group-prepend">
-                                                                          <span class="input-group-text" id="">
-                                                                            <input type="checkbox" name="ppc_switch" class="switchery PPCSwitch" data-size="xs" />
-                                                                          </span>
-                                                                    </div>
-                                                                    <input type="text"  class="form-control numeric ppc-inp"  data-rule-required="true" data-msg-required="This field is required" name="ppc_charges" disabled>
-                                                                </div>
-                                                            </fieldset>
-                                                        </div>
-                                                        <div class="col-4 text-center">
-                                                            <fieldset>
-                                                                <div class="input-group input-group-sm form-group">
-                                                                    <div class="input-group-prepend">
-                                                                        <span class="input-group-text" id="">Per Square Foot Charges</span>
-                                                                    </div>
-                                                                    <div class="input-group-prepend">
-                                                                          <span class="input-group-text" id="">
-                                                                            <input type="checkbox" name="psf_switch" class="switchery PSFSwitch" data-size="xs" />
-                                                                          </span>
-                                                                    </div>
-                                                                    <input type="text"  class="form-control numeric psf-inp"  data-rule-required="true" data-msg-required="This field is required" name="psf_charges" disabled>
-                                                                </div>
-                                                            </fieldset>
-                                                        </div>
-                                                    </div>
+                                                    
 
                                                     <div class="row">
-                                                        <div class="col-12">
-                                                            <h3 class="card-title">Storage Type Charges</h3>
+                                                        <div class="col-3">
+                                                            <h3 class="card-title">Packing Charges</h3>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="packing_charges_switch" class="switchery packingCharges" data-color="success" data-size="sm" checked/>
+                                                            </div>
                                                         </div>
 
-                                                        <div class="col-12" id="wms_storage_types_div">
+                                                        <div class="col-12" id="wms_packing_charges_div">
                                                             <div class="row">
                                                                 
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
-                                                                        <select class="select2 form-control storage_type" name="storage_type[0]" data-rule-required="true" data-msg-required="This field is required">
-                                                                            @foreach($storage_types as $types)
-                                                                                <option value="{{$types->id}}">{{$types->name}}</option>
+                                                                        <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required">
+                                                                            @foreach($packaging_material_types as $mtype)
+                                                                                <option value="{{$mtype->id}}">{{$mtype->type}}</option>
                                                                             @endforeach
                                                                         </select>
                                                                     </fieldset>
@@ -1948,7 +1924,7 @@
 
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
-                                                                        <input name="storage_type_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
+                                                                        <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
                                                                     </fieldset>
                                                                 </div>
                                                             </div>
@@ -1957,7 +1933,7 @@
                                                         <div class="row">
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
-                                                                        <button id="storage_type_add" type="button" class="btn btn-outline-primary ml-1" title="Add" ><i class="la la-plus"></i></button>
+                                                                        <button id="packing_type_add" type="button" class="btn btn-outline-primary ml-1" title="Add" ><i class="la la-plus"></i></button>
                                                                     </fieldset>
                                                                 </div>
                                                             </div>
@@ -3190,6 +3166,7 @@
                 $('input[name="psf_charges"]').prop('disabled', true);
             }
         };
+        
 
         var storage_type_rows = 1;
         var storage_type_data = @json($storage_types);
@@ -3203,7 +3180,7 @@
                 '                                                </div>\n' +
                 '                                                <div class="col-md-2">\n' +
                 '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="storage_type_charges['+storage_type_rows+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="Charges are required" placeholder="Charges">\n' +
+                '                                                        <input name="storage_type_charges['+storage_type_rows+']" type="text" class="form-control validated" data-rule-required="true" data-msg-required="Charges are required" placeholder="Charges">\n' +
                 '                                                    </fieldset>\n' +
                 '                                                </div>\n' +
                 '<div class="col">\n' +
@@ -3234,8 +3211,15 @@
                                 });
                     $(this).val(null).trigger('change');
                 }
-            
-        });
+            });
+            $('input[name="storage_type_charges['+storage_type_rows+']"]').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 0,
+                'max': 1000000
+            });
 
             storage_type_rows++;
 
@@ -3251,9 +3235,88 @@
                 }
             }
             $(this).parent().parent().remove();
-            console.log(storage_type_selected)
+        });
+
+        var packingSwitch = document.querySelector('.switchery.packingCharges');
+        packingSwitch.onchange = function () {
+            if(packingSwitch.checked === true){
+                $('#wms_packing_charges_div input, #wms_packing_charges_div select').prop('disabled', false);
+            }else if(packingSwitch.checked === false){
+                $('#wms_packing_charges_div input, #wms_packing_charges_div select').prop('disabled', true);
+            }
+        };
+
+
+        var packing_type_rows = 1;
+        var packing_type_selected = [];
+        var packing_material_data = @json($packaging_material_types);
+        $('#storage_type_add').on('click', function(){
+            wms_storage_types_div
+            var htmldiv = '<div class="row" id="packing_type_row'+packing_type_rows+'" row="'+ packing_type_rows +'">\n' +
+                '                                                <div class="col-md-2">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <select class="select2 form-control storage_type" name="packing_type['+ packing_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
+                '                                                    </fieldset>\n' +
+                '                                                </div>\n' +
+                '                                                <div class="col-md-2">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <input name="packing_charges['+packing_type_rows+']" type="text" class="form-control validated" data-rule-required="true" data-msg-required="Charges are required" placeholder="Charges">\n' +
+                '                                                    </fieldset>\n' +
+                '                                                </div>\n' +
+                '<div class="col">\n' +
+                '<span class="packing_type_row_delete btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
+
+            $('#wms_storage_types_div').append(htmldiv);
+            
+            var storage_data = $.map(packing_material_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.name;
+                return obj;
+            });
+            $('select[name="storage_type['+ packing_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:storage_data,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).bind('select2:select', function(){
+                var storage_id = $(this).val();
+                var index = $.inArray(storage_id, packing_type_selected);
+                
+                if(index === -1){
+                    packing_type_selected.push(storage_id);
+                }else{
+                    var error = "Storage type already selected!";
+                    toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                    $(this).val(null).trigger('change');
+                }
+            });
+            $('input[name="storage_type_charges['+packing_type_rows+']"]').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 0,
+                'max': 1000000
+            });
+
+            packing_type_rows++;
 
         });
+
+        $('body').on('click','span.packing_type_row_delete', function(){
+            var row_id = $(this).parent().parent().attr('row');
+            var selected = $('select[name="storage_type['+ row_id +']"]').val();
+            if(selected !== ''){
+                var index = $.inArray(selected, packing_type_selected);
+                if(index !== -1){
+                    packing_type_selected.splice(index, 1);
+                }
+            }
+            $(this).parent().parent().remove();
+        });
+
        
 
        
