@@ -485,6 +485,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('delivered', 'Admins\AdminPickupsController@bookedvsreceived_delivered_list')->name('delivered');
             Route::post('returned', 'Admins\AdminPickupsController@bookedvsreceived_returned_list')->name('returned');
         });
+
+        Route::prefix('rider')->name('rider.')->group(function () {
+            Route::get('', 'Rider\RiderPickupsController@pickups_index')->name('index');
+            Route::get('list', 'Rider\RiderPickupsController@pickups_list')->name('list');
+
+            Route::prefix('action_log')->name('action_log.')->group(function () {
+                Route::get('', 'Rider\RiderPickupsController@pickups_action_log_index')->name('index');
+                Route::get('list', 'Rider\RiderPickupsController@pickups_action_log_list')->name('list');
+            });
+        });
     });
     Route::prefix('delivery')->name('delivery.')->group(function(){
         Route::prefix('pending')->name('pending.')->group(function () {

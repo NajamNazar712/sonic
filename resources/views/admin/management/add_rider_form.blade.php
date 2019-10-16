@@ -96,6 +96,13 @@
         });
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+        $("input[name='pin']").inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'mask':"9999"
+        });
         $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').attr('disabled','disabled');
 
 
