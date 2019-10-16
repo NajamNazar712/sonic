@@ -950,37 +950,61 @@
                     var error = 'Select a reason!';
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }else{
-                    
-                    var action = 'confirm';
-                    blockPagePermanently();
-                    $.ajax({
-                        url:"{{route('admin.return.marked.status.single')}}",
-                        method:'POST',
-                        data:{
-                            'shipment_id':shipment_id,
-                            '_token':'{{ csrf_token() }}',
-                            'action': action,
-                            'remark':remarks,
-                            'single_return_reason_select': single_return_reason_select
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to change shipment status to Return-Confirm!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                             var action = 'confirm';
+                            blockPagePermanently();
+                            $.ajax({
+                                url:"{{route('admin.return.marked.status.single')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_id':shipment_id,
+                                    '_token':'{{ csrf_token() }}',
+                                    'action': action,
+                                    'remark':remarks,
+                                    'single_return_reason_select': single_return_reason_select
+                                }
+                            }).done(function (data) {
+                                if(data.status == 1){
+                                    UnblockPagePermanently();
+                                    table.draw('false');
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                }else{
+                                    UnblockPagePermanently();
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                }
+                                $('#single_return_reason_select').val(null).trigger('change');
+                                $('#return_reason_shipment_id').val('');
+                                $('#return_reason_shipment_remarks').val('');
+                                $('#ReturnConfirmReasonSingleModal').modal('hide');
+
+                            });
                         }
-                    }).done(function (data) {
-                        if(data.status == 1){
-                            UnblockPagePermanently();
-                            table.draw('false');
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                        }else{
-                            UnblockPagePermanently();
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                        }
-                        $('#single_return_reason_select').val(null).trigger('change');
-                        $('#return_reason_shipment_id').val('');
-                        $('#return_reason_shipment_remarks').val('');
-                        $('#ReturnConfirmReasonSingleModal').modal('hide');
-
-
                     });
+                   
 
                 }
 
