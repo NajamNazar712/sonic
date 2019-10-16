@@ -527,117 +527,152 @@
                 if(count > 0) {
                     if (errors === 0) {
 
-                        $.ajax({
-                            url: '{!! route('admin.delivery.note.rider_check') !!}',
-                            method: 'POST',
-                            data: {
-                                'rider_id': rider,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                            }).done(function(data) {
-                                if(data.flag){
-                                    swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to create the Delivery Note!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if(confirm){
-                                        blockPagePermanently();
-                                        $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
-                                        $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                                        $('#create_delivery_note_form input#notification_ids').val(notification_ids);
-                                        $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
-                                        $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                                        $('#create_delivery_note_form input#selected_route_id').val(route);
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to create the Delivery Note!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if(confirm){
+                                blockPagePermanently();
+                                $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                                $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                                $('#create_delivery_note_form input#notification_ids').val(notification_ids);
+                                $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
+                                $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                $('#create_delivery_note_form input#selected_route_id').val(route);
 
-                                        this_form.submit();
-                                    }
-                                });
+                                this_form.submit();
                             }
-                            else{
-                                    var html = '';
-                                    html += '<table class="table table-sm table-borderless mb-0">';
-                                    html += '<thead><tr><td>Delivery Note ID</td><td>No. of Shipments</td><td>Amount</td></tr></thead>'
-                                    html += '<tbody>';
+                        });
+                                
+                        // $.ajax({
+                        //     url: '{!! route('admin.delivery.note.rider_check') !!}',
+                        //     method: 'POST',
+                        //     data: {
+                        //         'rider_id': rider,
+                        //         '_token': '{{ csrf_token() }}'
+                        //     }
+                        //     }).done(function(data) {
+                        //         if(data.flag){
+                        //             swal({
+                        //             title: 'Are You Sure?',
+                        //             text: 'Select Yes to create the Delivery Note!',
+                        //             icon: 'warning',
+                        //             buttons: {
+                        //                 cancel: {
+                        //                     text: 'No',
+                        //                     value: null,
+                        //                     visible: true,
+                        //                     closeModal: true,
+                        //                 },
+                        //                 confirm: {
+                        //                     text: 'Yes',
+                        //                     value: true,
+                        //                     visible: true,
+                        //                     closeModal: true
+                        //                 }
+                        //             },
+                        //             closeOnClickOutside: false,
+                        //             closeOnEsc: false,
+                        //             dangerMode: true
+                        //         }).then(function (confirm) {
+                        //             if(confirm){
+                        //                 blockPagePermanently();
+                        //                 $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                        //                 $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                        //                 $('#create_delivery_note_form input#notification_ids').val(notification_ids);
+                        //                 $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
+                        //                 $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                        //                 $('#create_delivery_note_form input#selected_route_id').val(route);
+
+                        //                 this_form.submit();
+                        //             }
+                        //         });
+                        //     }
+                        //     else{
+                        //             var html = '';
+                        //             html += '<table class="table table-sm table-borderless mb-0">';
+                        //             html += '<thead><tr><td>Delivery Note ID</td><td>No. of Shipments</td><td>Amount</td></tr></thead>'
+                        //             html += '<tbody>';
 
                                    
-                                    $.each(data.delivery_note, function(key, value){
-                                            html += '<tr>';
-                                            html += '<td>'+ value.id +'</td><td>'+ value.shipments_count + '</td><td>'+ value.total_cod_amount + '</td>';
-                                            html += '</tr>';
+                        //             $.each(data.delivery_note, function(key, value){
+                        //                     html += '<tr>';
+                        //                     html += '<td>'+ value.id +'</td><td>'+ value.shipments_count + '</td><td>'+ value.total_cod_amount + '</td>';
+                        //                     html += '</tr>';
 
-                                    });
-                                    html += '</tbody></table>';
-                                    content = document.createElement('div');
-                                    content.innerHTML = html;
+                        //             });
+                        //             html += '</tbody></table>';
+                        //             content = document.createElement('div');
+                        //             content.innerHTML = html;
 
-                                swal({
-                                    title: 'Previously unclosed delivery note(s)!',
-                                    content: content, 
-                                    icon: 'warning',
-                                    @if (session('role_id') == 1 || in_array(267, session('permissions')))
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Proceed',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    @else
-                                    buttons: {
-                                        cancel: {
-                                            text: 'Close',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                    },
-                                    @endif
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if(confirm){
-                                        blockPagePermanently();
-                                        $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
-                                        $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                                        $('#create_delivery_note_form input#notification_ids').val(notification_ids);
-                                        $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
-                                        $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                                        $('#create_delivery_note_form input#selected_route_id').val(route);
+                        //         swal({
+                        //             title: 'Previously unclosed delivery note(s)!',
+                        //             content: content, 
+                        //             icon: 'warning',
+                        //             @if (session('role_id') == 1 || in_array(267, session('permissions')))
+                        //             buttons: {
+                        //                 cancel: {
+                        //                     text: 'No',
+                        //                     value: null,
+                        //                     visible: true,
+                        //                     closeModal: true,
+                        //                 },
+                        //                 confirm: {
+                        //                     text: 'Proceed',
+                        //                     value: true,
+                        //                     visible: true,
+                        //                     closeModal: true
+                        //                 }
+                        //             },
+                        //             @else
+                        //             buttons: {
+                        //                 cancel: {
+                        //                     text: 'Close',
+                        //                     value: null,
+                        //                     visible: true,
+                        //                     closeModal: true,
+                        //                 },
+                        //             },
+                        //             @endif
+                        //             closeOnClickOutside: false,
+                        //             closeOnEsc: false,
+                        //             dangerMode: true
+                        //         }).then(function (confirm) {
+                        //             if(confirm){
+                        //                 blockPagePermanently();
+                        //                 $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                        //                 $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                        //                 $('#create_delivery_note_form input#notification_ids').val(notification_ids);
+                        //                 $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
+                        //                 $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                        //                 $('#create_delivery_note_form input#selected_route_id').val(route);
 
-                                        this_form.submit();
-                                    }
-                                });
+                        //                 this_form.submit();
+                        //             }
+                        //         });
 
 
-                            }
+                        //     }
                                 
-                        });
+                        // });
 
 
                     }
