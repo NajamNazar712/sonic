@@ -252,12 +252,15 @@
 
                                             }
                                         }).done(function (data) {
-                                            table.rows().deselect();
-                                            selected_rows = [];
-                                            shipment_remarks = {};
-                                            table.button('.confirm').disable();
-                                            table.draw('false');
-                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            if(data.status){
+                                                table.rows().deselect();
+                                                selected_rows = [];
+                                                shipment_remarks = {};
+                                                table.button('.confirm').disable();
+                                                table.draw('false');
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }
+                                            
 
 
                                         });
@@ -524,7 +527,7 @@
                 rowId: 'shId',
                 order: [[18, 'desc']],
                 columns: [
-                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
@@ -548,10 +551,12 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if ($.inArray(data.shId, selected_rows) !== -1) {
-                        table.row(row).select();
+                    if (data.shipper_status_id != 52) {
+                        $('td:eq(0)', row).addClass('select-checkbox');
+                        if ($.inArray(data.shId, selected_rows) !== -1) {
+                            table.row(row).select();
+                        }
                     }
                 },
                 initComplete: function() {

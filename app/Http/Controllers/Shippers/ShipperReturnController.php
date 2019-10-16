@@ -116,8 +116,11 @@ class ShipperReturnController extends Controller
                         <div class='btn-group'>
                             <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
                             <div class='dropdown-menu dropdown-menu-sm'>";
-                        $dropdown .= $confirm_button;
-                        $dropdown .= $reattempt_button;
+                            if($result->shipper_status_id != 52){
+                                $dropdown .= $confirm_button;
+                                $dropdown .= $reattempt_button;
+                            }
+                        
 
                         if (($result->shipper_status_id == 12 || $result->shipper_status_id == 52) && $result->journey_shipper_status_id != 53 && $result->pickup == 1 && $result->intercepted == 0) {
                             $dropdown .= $intercept;
@@ -248,6 +251,7 @@ public function change_status_to_self_collection(Request $request){
 
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
+
                 if($parcel->shipper_status_id != 20){
 
                     $remark_inp = "remark.$shipment";
