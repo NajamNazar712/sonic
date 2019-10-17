@@ -388,7 +388,7 @@ class RiderAPIController extends Controller {
             return response()->json(['status' => 0, 'message' => 'Pickup(s) are Assigned', 'information' => $information]);
         }
         else {
-            return response()->json(['status' => 1, 'message' => 'No Pickup(s) Assigned']);
+            return response()->json(['status' => 0, 'message' => 'No Pickup(s) Assigned']);
         }
     }
 
