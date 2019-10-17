@@ -404,7 +404,7 @@ class AdminPickupsController extends Controller
 
       $existing_pickup_note = FALSE;
 
-      $pickup_note = PickupNote::where('rider_id', $rider_id)->where('status_id', '=', 1);
+      $pickup_note = PickupNote::where('rider_id', $rider_id)->whereIn('status_id', [1, 2]);
 
       if ($pickup_note->exists()) {
         $pickup_note = $pickup_note->first();
