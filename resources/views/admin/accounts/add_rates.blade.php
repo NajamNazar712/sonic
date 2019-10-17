@@ -1789,8 +1789,8 @@
                             </div>
                             <div id="warehousing" class="border-primary no-border-top card hide">
                                 <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="row mb-3">
+                                    <div class="card-body pb-0">
+                                        <div class="row">
                                             <div class="col-3 form-group">
                                                 <select name="invoicing_cycle" class="select2" id="invoicing_cycle_select" data-rule-required="true" data-msg-required="Invoicing cycle is required">
                                                     @foreach($invoicing_cycles as $cycle)
@@ -1823,7 +1823,7 @@
                                                                     </div>
                                                                     <div class="input-group-prepend">
                                                                           <span class="input-group-text" id="">
-                                                                            <input type="checkbox" name="ppc_switch" class="switchery PPCSwitch" data-size="xs" />
+                                                                            <input type="checkbox" name="ppc_switch" data-color="info" class="switchery PPCSwitch" data-size="xs" />
                                                                           </span>
                                                                     </div>
                                                                     <input type="text"  class="form-control numeric ppc-inp"  data-rule-required="true" data-msg-required="This field is required" name="ppc_charges" disabled>
@@ -1838,7 +1838,7 @@
                                                                     </div>
                                                                     <div class="input-group-prepend">
                                                                           <span class="input-group-text" id="">
-                                                                            <input type="checkbox" name="psf_switch" class="switchery PSFSwitch" data-size="xs" />
+                                                                            <input type="checkbox" name="psf_switch" data-color="info" class="switchery PSFSwitch" data-size="xs" />
                                                                           </span>
                                                                     </div>
                                                                     <input type="text"  class="form-control numeric psf-inp"  data-rule-required="true" data-msg-required="This field is required" name="psf_charges" disabled>
@@ -1905,7 +1905,7 @@
                                                         </div>
                                                         <div class="col-3">
                                                             <div class="form-group ">
-                                                                <input type="checkbox" name="packing_charges_switch" class="switchery packingCharges" data-color="success" data-size="sm" checked/>
+                                                                <input type="checkbox" name="packing_charges_switch" class="switchery packingCharges" data-color="info" data-size="sm" checked/>
                                                             </div>
                                                         </div>
 
@@ -1939,12 +1939,35 @@
                                                             </div>
                                                     </div>
 
+                                                    <div class="row">
+                                                        <div class="col-2">
+                                                            <h3 class="card-title">Labelling Charges</h3>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="labelling_charges_switch" class="switchery labellingSwitch" data-color="info" data-size="sm" checked/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                        
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <fieldset class="form-group">
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+                                                            
+                                                        
+                                                    </div>
+
+
                                                 </div>
                                                
                                                 </div>
                                             </div>
                                         </div>
-                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -3166,6 +3189,15 @@
                 $('input[name="psf_charges"]').prop('disabled', true);
             }
         };
+
+        var LabellingSwitch = document.querySelector('.switchery.labellingSwitch');
+        LabellingSwitch.onchange = function () {
+            if(LabellingSwitch.checked === true){
+                $('input[name="labelling_charges"]').prop('disabled', false);
+            }else if(LabellingSwitch.checked === false){
+                $('input[name="labelling_charges"]').prop('disabled', true);
+            }
+        };
         
 
         var storage_type_rows = 1;
@@ -3237,6 +3269,29 @@
             $(this).parent().parent().remove();
         });
 
+
+        var packing_type_rows = 1;
+        var packing_type_selected = [];
+        var packing_material_data = @json($packaging_material_types);
+        $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).bind('select2:select', function(){
+                var packing_id = $(this).val();
+                var index = $.inArray(packing_id, packing_type_selected);
+                
+                if(index === -1){
+                    packing_type_selected.push(packing_id);
+                }else{
+                    var error = "Storage type already selected!";
+                    toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                    $(this).val(null).trigger('change');
+                }
+            });
+
         var packingSwitch = document.querySelector('.switchery.packingCharges');
         packingSwitch.onchange = function () {
             if(packingSwitch.checked === true){
@@ -3246,12 +3301,14 @@
             }
         };
 
-
-        var packing_type_rows = 1;
-        var packing_type_selected = [];
-        var packing_material_data = @json($packaging_material_types);
-        $('#storage_type_add').on('click', function(){
-            wms_storage_types_div
+        var packing_data = $.map(packing_material_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.type;
+                return obj;
+            });
+        
+        $('#packing_type_add').on('click', function(){
+            
             var htmldiv = '<div class="row" id="packing_type_row'+packing_type_rows+'" row="'+ packing_type_rows +'">\n' +
                 '                                                <div class="col-md-2">\n' +
                 '                                                    <fieldset class="form-group">\n' +
@@ -3266,23 +3323,19 @@
                 '<div class="col">\n' +
                 '<span class="packing_type_row_delete btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
 
-            $('#wms_storage_types_div').append(htmldiv);
+            $('#wms_packing_charges_div').append(htmldiv);
             
-            var storage_data = $.map(packing_material_data, function (obj) {
-                obj.id = obj.id;
-                obj.text = obj.name;
-                return obj;
-            });
-            $('select[name="storage_type['+ packing_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
-                data:storage_data,
+            
+            $('select[name="packing_type['+ packing_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:packing_data,
                 width:'100%',
-                placeholder:'Select Storage Type'
+                placeholder:'Select Packing Type'
             }).bind('select2:select', function(){
-                var storage_id = $(this).val();
-                var index = $.inArray(storage_id, packing_type_selected);
+                var packing_id = $(this).val();
+                var index = $.inArray(packing_id, packing_type_selected);
                 
                 if(index === -1){
-                    packing_type_selected.push(storage_id);
+                    packing_type_selected.push(packing_id);
                 }else{
                     var error = "Storage type already selected!";
                     toastr.error(error, 'Error!', {

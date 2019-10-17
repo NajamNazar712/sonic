@@ -4735,7 +4735,7 @@ class AdminDashboardController extends Controller
      * @return int
      */
     public function addRates(Request $request, $id){
-
+        return $request;
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
@@ -4953,6 +4953,23 @@ class AdminDashboardController extends Controller
             'sameday_discount_title.required_with'=>'The sameday discount title field is required',
             'sameday_daterange.required_with'=>'The sameday discount date field is required',
             //sameday ends
+
+            //warehouse starts
+            'invoicing_cycle.*.required' => 'Invoicing Cycle field is required.',
+            'invoicing_date.*.required' => 'Invoicing Cycle field is required.',
+            'invoicing_cycle.*.numeric' => 'Invoicing Cycle field must be numeric.',
+            'invoicing_date.*.numeric' => 'Invoicing Cycle field must be numeric.',
+            'ppc_charges.required' => 'Per product charges field id required',
+            'psf_charges.required' => 'Per square foot charges field id required',
+            'storage_type.*.required' => 'Storage type field is required.',
+            'storage_type_charges.*.required' => 'Storage type charges field is required',
+            'storage_type.*.numeric' => 'Storage type field must be numeric.',
+            'storage_type_charges.*.required' => 'Storage type charges field must be numeric',
+            'packing_type.*.required' => 'Packing type field is required',
+            'packing_charges.*.required' => 'Packing charges field is required',
+            'packing_charges.*.numeric' => 'Packing charges field must be numeric',
+            'labelling_charges.required' => 'Labelling charges field is required',
+            'labelling_charges.numeric' => 'Labelling charges field must be numeric',
         ];
 
         $validations = array();
@@ -5098,6 +5115,20 @@ class AdminDashboardController extends Controller
             ];
         }
 
+        if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+            $warehouse_validations = [
+                'invoicing_cycle' => 'required|numeric',
+                'invoicing_date.*' => 'required_if:invoicing_cycle,1,3',
+                'ppc_charges'=>'required_if:ppc_switch,==,on',
+                'psf_charges'=>'required_if:psf_switch,==,on',
+                'storage_type.*'=>'required',
+                'storage_type_charges.*'=>'required|numeric',
+                'packing_type.*' => 'required_if:packing_charges_switch,==,on',
+                'packing_charges.*' => 'required_if:packing_charges_switch,==,on|numeric',
+                'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
+            ];
+        }
+
         $validations = array_merge($on_validations, $ol_validations, $detain_validations, $sameday_validations);
 
         $validate = Validator::make($request->all(), $validations, $messages);
@@ -5107,6 +5138,28 @@ class AdminDashboardController extends Controller
                 ->withErrors($validate)
                 ->withInput();
         }
+
+
+
+        if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+            $wms_user_info = new WmsUserInformation();
+            $wms_user_info->user_id = $id;
+            $wms_user_info->warehousing = 1;
+            $wms_user_info->per_product_charges = 1;
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         //Packaging Charges
@@ -5782,7 +5835,7 @@ class AdminDashboardController extends Controller
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','users.warehousing'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -5903,15 +5956,6 @@ class AdminDashboardController extends Controller
                 if(session('role_id') == 1 || in_array(110, session('permissions')))
                 {
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
-                }
-
-                if((session('role_id') == 1 || in_array(270, session('permissions'))) && ($result->warehousing == 0))
-                {
-                    $dropdown .= '<button type="button" class="dropdown-item warehousing_enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable Warehousing</div></button>';
-                }
-                if((session('role_id') == 1 || in_array(270, session('permissions'))) && ($result->warehousing == 1))
-                {
-                    $dropdown .= '<button type="button" class="dropdown-item warehousing_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable Warehousing</div></button>';
                 }
 
                 $merged = MergedSisterAccount::where('user_id', $result->id);
