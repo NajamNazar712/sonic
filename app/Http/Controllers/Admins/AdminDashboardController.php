@@ -18,7 +18,8 @@ use App\Http\Models\CityHistory;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\InvoicingCycle;
-use App\Http\models\PackagingMaterialTypes;use App\Http\Models\Operataions\OperationForecast;
+use App\Http\models\PackagingMaterialTypes;
+use App\Http\Models\Operataions\OperationForecast;
 use App\Http\Models\Operataions\OperationForecastShipments;
 use App\Http\Models\Operataions\OperationForecastWeightRange;
 use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
@@ -75,6 +76,12 @@ use App\Http\Models\Route;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\WMS\WmsUserInformation;
+use App\Http\Models\WMS\WmsPerProductCharge;
+use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Http\Models\WMS\WmsLabellingCharge;
+use App\Http\Models\WMS\WmsPackingCharge;
+use App\Http\Models\WMS\WmsStorageTypeCharge;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Shipper\User;
@@ -95,6 +102,8 @@ use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+
+
 class AdminDashboardController extends Controller
 {
 
@@ -1210,7 +1219,14 @@ class AdminDashboardController extends Controller
         $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
         $rate_status = $user['rate_status'];
         $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
-
+        $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+        $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+        $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+        $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+        $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+        $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+        $storage_types = WmsStorageType::all()->where('status', 1);
+        $invoicing_cycles = InvoicingCycle::all();
         $packaging_charges = array();
         if(count($packaging) > 0){
 
@@ -1218,7 +1234,7 @@ class AdminDashboardController extends Controller
                 $packaging_charges[$charge->type_id][] = $charge;
             }
         }
-        return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+        return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
 
     }
 
@@ -4735,7 +4751,7 @@ class AdminDashboardController extends Controller
      * @return int
      */
     public function addRates(Request $request, $id){
-        return $request;
+        
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
@@ -5138,29 +5154,6 @@ class AdminDashboardController extends Controller
                 ->withErrors($validate)
                 ->withInput();
         }
-
-
-
-        if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
-            $wms_user_info = new WmsUserInformation();
-            $wms_user_info->user_id = $id;
-            $wms_user_info->warehousing = 1;
-            $wms_user_info->per_product_charges = 1;
-
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         //Packaging Charges
         if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
@@ -5816,6 +5809,60 @@ class AdminDashboardController extends Controller
 
             }
         }
+
+        if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+
+            $wms_user_info = new WmsUserInformation();
+            $wms_user_info->user_id = $id;
+            $wms_user_info->warehousing = 1;
+            $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
+            $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+            $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
+            $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
+            $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
+            $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch'))? 1:0;
+            $wms_user_info->save();
+
+            if($request->has('ppc_switch')){
+                $ppc = new WmsPerProductCharge();
+                $ppc->user_id = $id;
+                $ppc->charges = $request->ppc_charges;
+                $ppc->save();
+            }
+            if($request->has('psf_switch')){
+                $psf = new WmsPerSquareFootCharge();
+                $psf->user_id = $id;
+                $psf->charges = $request->psf_charges;
+                $psf->save();
+            }
+
+            foreach ($request->storage_type as $key => $storage_type) {
+                $storage_charges = new WmsStorageTypeCharge();
+                $storage_charges->user_id = $id;
+                $storage_charges->storage_type_id = $storage_type;
+                $storage_charges->charges = $request->storage_type_charges[$key];
+                $storage_charges->save();
+            }
+
+            if($request->has('packing_charges_switch')){
+                foreach ($request->packing_type as $key => $packing) {
+                    $ptype = new WmsPackingCharge();
+                    $ptype->user_id = $id;
+                    $ptype->packing_type_id = $packing;
+                    $ptype->charges = $request->packing_charges[$key];
+                    $ptype->save();
+                }
+            }
+
+            if($request->has('labelling_charges_switch')){
+                $labelling = new WmsLabellingCharge();
+                $labelling->user_id = $id;
+                $labelling->charges = $request->labelling_charges;
+                $labelling->save();
+            }
+        }
+
+
         User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
 
         NotificationsController::send(38, $id);

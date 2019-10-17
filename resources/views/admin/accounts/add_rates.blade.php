@@ -1823,10 +1823,10 @@
                                                                     </div>
                                                                     <div class="input-group-prepend">
                                                                           <span class="input-group-text" id="">
-                                                                            <input type="checkbox" name="ppc_switch" data-color="info" class="switchery PPCSwitch" data-size="xs" />
+                                                                            <input type="checkbox" name="ppc_switch" data-color="info" class="switchery PPCSwitch" data-size="xs" checked/>
                                                                           </span>
                                                                     </div>
-                                                                    <input type="text"  class="form-control numeric ppc-inp"  data-rule-required="true" data-msg-required="This field is required" name="ppc_charges" disabled>
+                                                                    <input type="text"  class="form-control numeric ppc-inp"  data-rule-required="true" data-msg-required="This field is required" name="ppc_charges" >
                                                                 </div>
                                                             </fieldset>
                                                         </div>
@@ -1838,10 +1838,10 @@
                                                                     </div>
                                                                     <div class="input-group-prepend">
                                                                           <span class="input-group-text" id="">
-                                                                            <input type="checkbox" name="psf_switch" data-color="info" class="switchery PSFSwitch" data-size="xs" />
+                                                                            <input type="checkbox" name="psf_switch" data-color="info" class="switchery PSFSwitch" data-size="xs" checked/>
                                                                           </span>
                                                                     </div>
-                                                                    <input type="text"  class="form-control numeric psf-inp"  data-rule-required="true" data-msg-required="This field is required" name="psf_charges" disabled>
+                                                                    <input type="text"  class="form-control numeric psf-inp"  data-rule-required="true" data-msg-required="This field is required" name="psf_charges" >
                                                                 </div>
                                                             </fieldset>
                                                         </div>
@@ -1990,7 +1990,7 @@
 
 @endsection
 @section('css')
-<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
     <style type="text/css">
@@ -3337,7 +3337,7 @@
                 if(index === -1){
                     packing_type_selected.push(packing_id);
                 }else{
-                    var error = "Storage type already selected!";
+                    var error = "Packing type already selected!";
                     toastr.error(error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'

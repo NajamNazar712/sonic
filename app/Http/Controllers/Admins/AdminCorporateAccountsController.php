@@ -27,6 +27,15 @@ use App\Http\Models\CorporateStandardMinChargeableWeight;
 use App\Http\Models\CorporateStandardReturnCharge;
 use App\Http\Models\CorporateStandardWeightCharge;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\models\PackagingMaterialTypes;
+use App\Http\Models\WMS\WmsUserInformation;
+use App\Http\Models\WMS\WmsPerProductCharge;
+use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Http\Models\WMS\WmsLabellingCharge;
+use App\Http\Models\WMS\WmsPackingCharge;
+use App\Http\Models\WMS\WmsStorageTypeCharge;
+use App\Http\Models\WMS\WmsStorageType;
+use App\Http\Models\InvoicingCycle;
 use App\Http\Models\Rates\CorporateRateHistory;
 use App\Http\Models\Rates\HistoryCorporateBookingTypeCharges;
 use App\Http\Models\Rates\HistoryCorporateMinChargeableWeight;
@@ -75,7 +84,10 @@ class AdminCorporateAccountsController extends Controller
             $insurance = CorporateStandardInsuranceCharge::all()->groupBy('shipping_mode_id');
             $return = CorporateStandardReturnCharge::all()->groupBy('shipping_mode_id');
             $fuel = CorporateStandardFuelSurcharge::all()->groupBy('shipping_mode_id');
-            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight,'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person]);
+            $invoicing_cycles = InvoicingCycle::all();
+            $storage_types = WmsStorageType::all()->where('status', 1);
+            $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
+            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight,'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }
@@ -308,6 +320,25 @@ class AdminCorporateAccountsController extends Controller
             'sameday_discount_title.required_with'=>'The sameday discount title field is required',
             'sameday_daterange.required_with'=>'The sameday discount date field is required',
             //sameday ends
+
+
+            //warehouse
+
+            'invoicing_cycle.*.required' => 'Invoicing Cycle field is required.',
+            'invoicing_date.*.required' => 'Invoicing Cycle field is required.',
+            'invoicing_cycle.*.numeric' => 'Invoicing Cycle field must be numeric.',
+            'invoicing_date.*.numeric' => 'Invoicing Cycle field must be numeric.',
+            'ppc_charges.required' => 'Per product charges field id required',
+            'psf_charges.required' => 'Per square foot charges field id required',
+            'storage_type.*.required' => 'Storage type field is required.',
+            'storage_type_charges.*.required' => 'Storage type charges field is required',
+            'storage_type.*.numeric' => 'Storage type field must be numeric.',
+            'storage_type_charges.*.required' => 'Storage type charges field must be numeric',
+            'packing_type.*.required' => 'Packing type field is required',
+            'packing_charges.*.required' => 'Packing charges field is required',
+            'packing_charges.*.numeric' => 'Packing charges field must be numeric',
+            'labelling_charges.required' => 'Labelling charges field is required',
+            'labelling_charges.numeric' => 'Labelling charges field must be numeric',
         ];
 
         $validations = array();
@@ -481,6 +512,20 @@ class AdminCorporateAccountsController extends Controller
             ];
         }
 
+        if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+            $warehouse_validations = [
+                'invoicing_cycle' => 'required|numeric',
+                'invoicing_date.*' => 'required_if:invoicing_cycle,1,3',
+                'ppc_charges'=>'required_if:ppc_switch,==,on',
+                'psf_charges'=>'required_if:psf_switch,==,on',
+                'storage_type.*'=>'required',
+                'storage_type_charges.*'=>'required|numeric',
+                'packing_type.*' => 'required_if:packing_charges_switch,==,on',
+                'packing_charges.*' => 'required_if:packing_charges_switch,==,on|numeric',
+                'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
+            ];
+        }
+
         $validations = array_merge($on_validations, $ol_validations, $detain_validations, $sameday_validations);
 
         $validate = Validator::make($request->all(), $validations, $messages);
@@ -490,7 +535,7 @@ class AdminCorporateAccountsController extends Controller
                 ->withErrors($validate)
                 ->withInput();
         }
-//        return $request;
+
 
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
             if($request->has('on_default') && $request->on_default == 'on'){
@@ -1132,6 +1177,59 @@ class AdminCorporateAccountsController extends Controller
 
             }
         }
+
+        if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+
+            $wms_user_info = new WmsUserInformation();
+            $wms_user_info->user_id = $id;
+            $wms_user_info->warehousing = 1;
+            $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
+            $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+            $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
+            $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
+            $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
+            $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch'))? 1:0;
+            $wms_user_info->save();
+
+            if($request->has('ppc_switch')){
+                $ppc = new WmsPerProductCharge();
+                $ppc->user_id = $id;
+                $ppc->charges = $request->ppc_charges;
+                $ppc->save();
+            }
+            if($request->has('psf_switch')){
+                $psf = new WmsPerSquareFootCharge();
+                $psf->user_id = $id;
+                $psf->charges = $request->psf_charges;
+                $psf->save();
+            }
+
+            foreach ($request->storage_type as $key => $storage_type) {
+                $storage_charges = new WmsStorageTypeCharge();
+                $storage_charges->user_id = $id;
+                $storage_charges->storage_type_id = $storage_type;
+                $storage_charges->charges = $request->storage_type_charges[$key];
+                $storage_charges->save();
+            }
+
+            if($request->has('packing_charges_switch')){
+                foreach ($request->packing_type as $key => $packing) {
+                    $ptype = new WmsPackingCharge();
+                    $ptype->user_id = $id;
+                    $ptype->packing_type_id = $packing;
+                    $ptype->charges = $request->packing_charges[$key];
+                    $ptype->save();
+                }
+            }
+
+            if($request->has('labelling_charges_switch')){
+                $labelling = new WmsLabellingCharge();
+                $labelling->user_id = $id;
+                $labelling->charges = $request->labelling_charges;
+                $labelling->save();
+            }
+        }
+
         User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
 
         NotificationsController::send(38, $id);
@@ -4943,8 +5041,16 @@ class AdminCorporateAccountsController extends Controller
         $return = CorporateReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $fuel = CorporateFuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $discount = CorporateDiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
         $sale_person = SalePersonTag::where('user_id',$id)->first();
-
-        return view('admin.accounts.corporate.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person]);
+        $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+        $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+        $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+        $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+        $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+        $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+        $storage_types = WmsStorageType::all()->where('status', 1);
+        $invoicing_cycles = InvoicingCycle::all();
+        return view('admin.accounts.corporate.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types]);
     }
 }
