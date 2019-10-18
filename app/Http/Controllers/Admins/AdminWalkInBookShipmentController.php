@@ -29,7 +29,7 @@ use App\Http\Models\ShipmentItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use App\Http\models\PackagingMaterialTypes;
-use App\Http\models\WalkInShipmentPackagingMaterialHistory;
+use App\Http\models\WalkInPackagingHistory;
 use Auth;
 use App\Http\models\PackagingMaterialTypeSizes;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
@@ -333,7 +333,7 @@ class AdminWalkInBookShipmentController extends Controller
                                     
                                     if (array_key_exists($index, $request->pack_type)) {
                                         $test += 1;
-                                        $packaging_history = new WalkInShipmentPackagingMaterialHistory();
+                                        $packaging_history = new WalkInPackagingHistory();
                                         $packaging_history->shipment_id = $shipment_id;
                                         $packaging_history->type_id = $request->pack_type[$index];
                                         $packaging_history->size_id = $request->pack_size[$index];
