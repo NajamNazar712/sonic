@@ -53,7 +53,7 @@ class ReturnController extends Controller
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
-        $return_confirm_reasons = ShipmentStatusReason::whereIn('id', [2, 5, 9, 38, 39])->select('id', 'name')->get();
+        $return_confirm_reasons = ShipmentStatusReason::whereIn('id', [2, 5, 8, 9, 10, 12, 19, 20, 34, 38, 39, 40, 41])->select('id', 'name')->get();
         return view('admin.return.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type, 'return_confirm_reasons' => $return_confirm_reasons]);
     }
 
