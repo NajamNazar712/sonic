@@ -1255,7 +1255,14 @@ class AdminDashboardController extends Controller
             $fuel = FuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $packaging = PackagingCharge::all()->where('user_id', $id);
             $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
-
+            $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+            $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+            $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+            $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+            $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+            $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+            $storage_types = WmsStorageType::all()->where('status', 1);
+            $invoicing_cycles = InvoicingCycle::all();
             $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
             $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
@@ -1271,10 +1278,9 @@ class AdminDashboardController extends Controller
         }
         elseif(($user['rate_status']>=1) && $user['status']==3){
             $switches = PendingRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//        return $switches;
-//        var_dump(empty($switches));exit();
+
             $weight = PendingWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//        $cash = '';
+
             $bookingType = PendingBookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $cash = PendingCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = PendingInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1285,7 +1291,14 @@ class AdminDashboardController extends Controller
             $rate_status = $user['rate_status'];
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
-
+            $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+            $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+            $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+            $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+            $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+            $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+            $storage_types = WmsStorageType::all()->where('status', 1);
+            $invoicing_cycles = InvoicingCycle::all();
             $packaging_charges = array();
 
             if(count($packaging) > 0){
@@ -1298,7 +1311,7 @@ class AdminDashboardController extends Controller
         else {
             return redirect(route('admin.accounts.pending'));
         }
-        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
 
     }
 
