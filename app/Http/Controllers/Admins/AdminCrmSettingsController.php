@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\http\Models\CRM\CrmSettings;
-use App\http\Models\CRM\CrmTatHolidays;
+use App\Http\Models\CRM\CrmSettings;
+use App\Http\Models\CRM\CrmTatHolidays;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;

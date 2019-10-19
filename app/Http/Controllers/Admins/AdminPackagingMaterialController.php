@@ -30,7 +30,7 @@ use App\Http\Models\Warehouse\Warehouse;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubsHistory;
 use App\Http\Models\Warehouse\WarehouseHistory;
-use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockLog;
 use App\Http\Models\WarehouseStockLogDetail;
 use App\Http\Models\WarehouseStockRequest;

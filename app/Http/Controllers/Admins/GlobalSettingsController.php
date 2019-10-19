@@ -16,7 +16,7 @@ use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\http\Models\CRM\CrmTatHolidays;
+use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;

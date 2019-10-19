@@ -44,7 +44,7 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedAccountHead;
 use App\Http\Models\Sister_account\MergedSisterAccount;
-use App\http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
 use Illuminate\Support\Facades\DB;

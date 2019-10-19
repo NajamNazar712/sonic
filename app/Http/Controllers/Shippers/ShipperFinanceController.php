@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\BanksList;
-use App\http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 

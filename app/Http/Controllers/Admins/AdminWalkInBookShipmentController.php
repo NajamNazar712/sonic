@@ -33,7 +33,7 @@ use App\Http\Models\WalkInShipmentPackagingMaterialHistory;
 use Auth;
 use App\Http\Models\PackagingMaterialTypeSizes;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
-use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStock;
 use App\Http\Models\Warehouse\Warehouse;
 use Validator;
 use Illuminate\Validation\Rule;

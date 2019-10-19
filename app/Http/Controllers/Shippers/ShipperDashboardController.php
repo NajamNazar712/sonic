@@ -10,7 +10,7 @@ use App\Http\Models\Product;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipperNotificationEmail;
-use App\http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
