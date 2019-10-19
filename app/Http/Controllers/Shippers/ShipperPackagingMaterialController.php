@@ -8,7 +8,7 @@ use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
-use App\http\Models\PackagingMaterialRequestStatus;
+use App\Http\Models\PackagingMaterialRequestStatus;
 use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\PackagingMaterialTypeSizes;
 use App\Http\Models\PackagingPaymentMode;
