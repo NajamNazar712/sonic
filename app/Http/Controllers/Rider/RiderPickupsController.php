@@ -41,7 +41,7 @@ class RiderPickupsController extends Controller {
     	->join('users as u', 'pr.shipper_id', 'u.id')
     	->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
     	->join('cities as c', 'usi.city_id', 'c.id')
-    	->select('rider_pickups.id', 'rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'rider_pickups.pickup_type', 'rider_pickups.start_location_latitude', 'rider_pickups.start_location_longitude', 'rider_pickups.actual_location_latitude', 'rider_pickups.actual_location_longitude', 'rider_pickups.distance_from_start_to_actual', 'rider_pickups.current_location_latitude', 'rider_pickups.current_location_longitude', 'rider_pickups.distance_from_current_to_actual', DB::raw('(SELECT COUNT(pnpr.id) FROM rider_pickup_shipments AS rps WHERE rider_pickups.id = rps.rider_pickup_id) AS shipments'), 'pnpr.name as reason', 'rider_pickups.picture_path', 'rider_pickups.pickup_note_id', 'rider_pickups.pickup_request_id');
+    	->select('rider_pickups.id', 'rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'rider_pickups.pickup_type', 'rider_pickups.start_location_latitude', 'rider_pickups.start_location_longitude', 'rider_pickups.actual_location_latitude', 'rider_pickups.actual_location_longitude', 'rider_pickups.distance_from_start_to_actual', 'rider_pickups.current_location_latitude', 'rider_pickups.current_location_longitude', 'rider_pickups.distance_from_current_to_actual', 'rider_pickups.shipments', 'pnpr.name as reason', 'rider_pickups.picture_path', 'rider_pickups.pickup_note_id', 'rider_pickups.pickup_request_id');
 
         $datatables = Datatables::of($rider_pickups)
         ->editColumn('pickup_note_id', function ($rider_pickup) {
@@ -82,7 +82,7 @@ class RiderPickupsController extends Controller {
             }
         })
         ->editColumn('shipments', function ($rider_pickup) {
-            if ($rider_pickup->pickup_type == 1 && $rider_pickup->shipments > 0) {
+            if ($rider_pickup->pickup_type == 1) {
                 return '<a class="btn btn-sm btn-outline-info align-middle" href="#">' . $rider_pickup->shipments . '</a>';
             }
             else {

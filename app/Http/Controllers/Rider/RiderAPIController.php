@@ -467,6 +467,7 @@ class RiderAPIController extends Controller {
 
                 $tracking_numbers = array_keys(array_flip($request->tracking_numbers));
 
+                $valid_shipments = 0;
                 $invalid_shipments = 0;
 
                 foreach ($tracking_numbers as $key => $tracking_number) {
@@ -486,6 +487,8 @@ class RiderAPIController extends Controller {
                         $shipment->save();
 
                         ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, $rider_id, $request->pickup_note_id);
+
+                        $valid_shipments++;
                     }
                     else {
                         $invalid_shipments++;
@@ -493,6 +496,10 @@ class RiderAPIController extends Controller {
                         unset($tracking_numbers[$key]);
                     }
                 }
+
+                $rider_pickup->shipments = $valid_shipments;
+
+                $rider_pickup->save();
 
                 PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
             }

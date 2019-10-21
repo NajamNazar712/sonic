@@ -97,6 +97,7 @@
 				},
 				serverSide: true,
 				ajax: '{{ route('admin.pickups.rider.list') }}',
+				rowId: 'id',
 				order: [[0, 'desc']],
 				columns: [
 					{data: 'added_at', name: 'rider_pickups.added_at', class: 'align-middle added_at'},
@@ -113,7 +114,7 @@
 					{data: 'current_location_latitude', name: 'rider_pickups.current_location_latitude', class: 'align-middle current_location_latitude'},
 					{data: 'current_location_longitude', name: 'rider_pickups.current_location_longitude', class: 'align-middle current_location_longitude'},
 					{data: 'distance_from_current_to_actual', name: 'rider_pickups.distance_from_current_to_actual', class: 'align-middle distance_from_current_to_actual'},
-					{data: 'shipments', name: 'shipments', class: 'align-middle shipments', orderable: false, searchable: false},
+					{data: 'shipments', name: 'rider_pickups.shipments', class: 'align-middle shipments'},
 					{data: 'reason', name: 'rider_pickups.pickup_not_pick_reason_id', class: 'align-middle reason'},
 					{data: 'picture_path', name: 'rider_pickups.picture_path', class: 'align-middle picture_path', orderable: false, searchable: false},
 					{data: 'pickup_note_id', name: 'rider_pickups.pickup_note_id', class: 'align-middle pickup_note_id'},
