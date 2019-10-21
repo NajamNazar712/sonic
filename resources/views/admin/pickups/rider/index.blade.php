@@ -34,6 +34,7 @@
 										<th class="border-primary border-darken-1">Current Location Latitude</th>
 										<th class="border-primary border-darken-1">Current Location Longitude</th>
 										<th class="border-primary border-darken-1">Distance (Current to Actual)</th>
+										<th class="border-primary border-darken-1">Shipment(s)</th>
 										<th class="border-primary border-darken-1">Reason</th>
 										<th class="border-primary border-darken-1">Picture</th>
 										<th class="border-primary border-darken-1">Pickup Note ID</th>
@@ -41,6 +42,25 @@
 									</tr>
 								</thead>
 							</table>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
+					<div class="modal-dialog modal-sm" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title" id="shipments_modal_title">Shipment(s)</h4>
+
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">×</span>
+								</button>
+							</div>
+							<div class="modal-body text-center">
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -60,21 +80,21 @@
 	<script>
 		$(document).ready(function() {
 			var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+				dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				buttons: [{
-                    extend: 'excel',
-                    title: 'Rider Pickups',
-                    className:'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel'
-                }, 'reset'],
+					extend: 'excel',
+					title: 'Rider Pickups',
+					className:'btn btn-primary',
+					text: '<i class="la la-file-excel-o"></i> Excel'
+				}, 'reset'],
 				scrollX: true,
 				lengthMenu: [[10, 50, 100, 500, 1000, -1], [10, 50, 100, 500, 1000, 'All']],
 				pageLength: 10,
 				pagingType: 'full_numbers',
 				processing: true,
-                language: {
-                    processing: data_table_loader
-                },
+				language: {
+					processing: data_table_loader
+				},
 				serverSide: true,
 				ajax: '{{ route('admin.pickups.rider.list') }}',
 				order: [[0, 'desc']],
@@ -93,6 +113,7 @@
 					{data: 'current_location_latitude', name: 'rider_pickups.current_location_latitude', class: 'align-middle current_location_latitude'},
 					{data: 'current_location_longitude', name: 'rider_pickups.current_location_longitude', class: 'align-middle current_location_longitude'},
 					{data: 'distance_from_current_to_actual', name: 'rider_pickups.distance_from_current_to_actual', class: 'align-middle distance_from_current_to_actual'},
+					{data: 'shipments', name: 'shipments', class: 'align-middle shipments', orderable: false, searchable: false},
 					{data: 'reason', name: 'rider_pickups.pickup_not_pick_reason_id', class: 'align-middle reason'},
 					{data: 'picture_path', name: 'rider_pickups.picture_path', class: 'align-middle picture_path', orderable: false, searchable: false},
 					{data: 'pickup_note_id', name: 'rider_pickups.pickup_note_id', class: 'align-middle pickup_note_id'},
@@ -160,6 +181,39 @@
 
                     this.api().table().columns.adjust();
 				}
+			});
+
+			var route = '{!! route('admin.tracking.index') !!}';
+
+			$('#datatable tbody').on('click','tr td.shipments button', function () {
+				var id = parseInt($(this).parents('tr').attr('id'));
+
+				$('#shipments_modal .modal-body').html('');
+
+				$.ajax({
+					url: '{!! route('admin.pickups.rider.shipments') !!}',
+					method: 'GET',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'rider_pickup_id': id
+					}
+				})
+				.done(function(data) {
+					if (data.status == 0) {
+						var tracking_numbers = '';
+
+						$.each(data.tracking_numbers, function (index, tracking_number) {
+							tracking_numbers += '<a href="' + route + '?tracking_number=' + tracking_number + '" target="_blank">'
+						});
+
+						$('#shipments_modal .modal-body').html(tracking_numbers);
+
+						$('#shipments_modal').modal('show');
+					}
+					else {
+						toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					}
+				});
 			});
 		});
 	</script>
