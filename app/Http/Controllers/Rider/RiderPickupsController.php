@@ -83,7 +83,7 @@ class RiderPickupsController extends Controller {
         })
         ->editColumn('shipments', function ($rider_pickup) {
             if ($rider_pickup->pickup_type == 1) {
-                return '<a class="btn btn-sm btn-outline-info align-middle" href="#">' . $rider_pickup->shipments . '</a>';
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $rider_pickup->shipments . '</button>';
             }
             else {
                 return '';
@@ -102,7 +102,7 @@ class RiderPickupsController extends Controller {
     }
 
     public function pickups_shipments(Request $request) {
-        $rider_pickup_shipments = RiderPickupShipment::where('pickup_note_id', $request->rider_pickup_id);
+        $rider_pickup_shipments = RiderPickupShipment::where('rider_pickup_id', $request->rider_pickup_id);
 
         if ($rider_pickup_shipments->exists()) {
             $rider_pickup_shipments = $rider_pickup_shipments->get();
