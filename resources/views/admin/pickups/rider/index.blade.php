@@ -204,7 +204,7 @@
 						var tracking_numbers = '';
 
 						$.each(data.tracking_numbers, function (index, tracking_number) {
-							tracking_numbers += '<a href="' + route + '?tracking_number=' + tracking_number + '" target="_blank">';
+							tracking_numbers += '<u><a href="' + route + '?tracking_number=' + tracking_number + '" target="_blank"></u><br/>';
 						});
 
 						$('#shipments_modal .modal-body').html(tracking_numbers);
