@@ -399,7 +399,7 @@
             'reset'],
             @endif
             scrollX: true, scrollY: '500px',
-            lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+            lengthMenu: [[50, 100], [50, 100]],
             pageLength: 50,
             pagingType: 'full_numbers',
             processing: true,
