@@ -2999,7 +2999,9 @@
                                                                 </div>
                                                                 <div class="col actions">
                                                                         <span id="storage_type_add" class="btn btn-sm btn-outline-primary {{ ($storage_count == $row_count)? '':'d-none' }}"><i class="la la-check"></i></span>
-                                                                        <span class="storage_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
+                                                                        @if($key > 0)
+                                                                        <span  row="{{$key}}" class="storage_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
+                                                                        @endif
                                                                 </div>
                                                             </div>
                                                             @php  $row_count++ @endphp
@@ -3056,13 +3058,15 @@
 
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
-                                                                        <input name="packing_charges[{{$pkey}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{$packing->charges}}">
+                                                                        <input name="packing_charges[{{$pkey}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{$packing->charges}}" {{ ($wms_user_info->packing_charges)? '':'disabled'}}>
                                                                     </fieldset>
                                                                 </div>
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
-                                                                        <span id="packing_type_add" class="btn btn-outline-primary {{ ($packing_count == $packing_row_count)? '':'d-none' }}" title="Add" ><i class="la la-check"></i></span>
-                                                                        <span class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
+                                                                        <span id="packing_type_add" class="btn btn-sm btn-outline-primary {{ ($packing_count == $packing_row_count)? '':'d-none' }}" title="Add" ><i class="la la-check"></i></span>
+                                                                        @if($pkey > 0)
+                                                                        <span row="{{$pkey}}" class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
+                                                                        @endif
                                                                     </fieldset>
                                                                 </div>
                                                             </div>
@@ -3086,7 +3090,7 @@
                                                     <div class="row">
                                                         <div class="col-md-2">
                                                             <fieldset class="form-group">
-                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{ $wms_labelling_charges->charges }}">
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{ ($wms_labelling_charges)? $wms_labelling_charges->charges:0 }}" {{ ($wms_labelling_charges)? '':'disabled'}}>
                                                             </fieldset>
                                                         </div>
                                                     </div>

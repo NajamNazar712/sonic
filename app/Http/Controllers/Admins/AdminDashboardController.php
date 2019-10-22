@@ -94,7 +94,6 @@ use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
 use App\Http\Models\WMS\WmsHistoryLabellingCharge;
 use App\Http\Models\WMS\WmsHistoryPackingCharge;
 use App\Http\Models\WMS\WmsHistoryStorageTypeCharge;
-use App\Http\Models\WMS\WmsStorageType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Shipper\User;
@@ -1305,12 +1304,12 @@ class AdminDashboardController extends Controller
             $rate_status = $user['rate_status'];
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
-            $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
-            $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
-            $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
-            $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
-            $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
-            $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+            $wms_user_info = WmsPendingUserInformation::where('user_id', $id)->first();
+            $wms_product_charges = WmsPendingPerProductCharge::where('user_id', $id)->first();
+            $wms_square_foot_charges = WmsPendingPerSquareFootCharge::where('user_id', $id)->first();
+            $wms_packing_charges = WmsPendingPackingCharge::where('user_id', $id)->get();
+            $wms_labelling_charges = WmsPendingLabellingCharge::where('user_id', $id)->first();
+            $wms_storage_charges = WmsPendingStorageTypeCharge::where('user_id', $id)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
             $invoicing_cycles = InvoicingCycle::all();
             $packaging_charges = array();
@@ -1356,13 +1355,13 @@ class AdminDashboardController extends Controller
                 'on_cash_range_down.*.required_if' => 'The overnight cash range down field is required.',
                 'on_cash_range_down.*.numeric' => 'The overnight cash range down field must be numeric.',
                 'on_cash_charges.*.required_if' => 'The overnight cash charges field is required.',
-                //'on_cash_charges.*.string' => 'The overnight cash charges field must be string.',
+                
                 'on_ins_range_up.*.required_if' => 'The overnight insurance range up field is required.',
                 'on_ins_range_up.*.numeric' => 'The overnight insurance range up field must be numeric or percentage.',
                 'on_ins_range_down.*.required_if' => 'The overnight insurance range down field is required.',
                 'on_ins_range_down.*.numeric' => 'The overnight insurance range down field must be numeric or percentage.',
                 'on_ins_charges.*.required_if' => 'The overnight insurance charges field is required.',
-                //'on_ins_charges.*.string' => 'The overnight insurance charges field must be string.',
+                
                 'on_return_local_charges.required_if' => 'The overnight return local charges field is required.',
                 'on_return_local_charges.numeric' => 'The overnight return local charges field must be numeric or percentage.',
                 'on_return_class_0_charges.*.numeric' => 'The overnight class A return charges field must be numeric.',
@@ -1376,15 +1375,10 @@ class AdminDashboardController extends Controller
                 'on_discount_title.required_if' => 'The overnight discount title field must be required',
                 'on_daterange.required_if' => 'The overnight discount date range field must be required',
                 'on_discount_weight_rate.required_if' => 'The overnight discount weight field must be required',
-//            'on_discount_weight_rate.numeric' => 'The overnight discount weight field must be numeric',
                 'on_discount_cash_rate.required_if' => 'The overnight discount cash field must be required',
-//            'on_discount_cash_rate.numeric' => 'The overnight discount cash field must be numeric',
                 'on_discount_insurance_rate.required_if' => 'The overnight discount insurance field must be required',
-//            'on_discount_insurance_rate.numeric' => 'The overnight discount insurance field must be numeric',
                 'on_discount_return_rate.required_if' => 'The overnight discount return field must be required',
-//            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
                 'on_discount_packaging_rate.required_if' => 'The overnight discount packaging field must be required',
-//            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
                 'on_discount_title.required_with' => 'The overnight discount title field is required',
                 'on_daterange.required_with' => 'The overnight discount date field is required',
                 //overland starts
@@ -1411,13 +1405,11 @@ class AdminDashboardController extends Controller
                 'ol_cash_range_down.*.required_if' => 'The overland cash range down field is required.',
                 'ol_cash_range_down.*.numeric' => 'The overland cash range down field must be numeric.',
                 'ol_cash_charges.*.required_if' => 'The overland cash charges field is required.',
-                //'ol_cash_charges.*.numeric' => 'The overland cash charges field must be numeric or percentage.',
                 'ol_ins_range_up.*.required_if' => 'The overland insurance range up field is required.',
                 'ol_ins_range_up.*.numeric' => 'The overland insurance range up field must be numeric or percentage.',
                 'ol_ins_range_down.*.required_if' => 'The overland insurance range down field is required.',
                 'ol_ins_range_down.*.numeric' => 'The overland insurance range down field must be numeric or percentage.',
                 'ol_ins_charges.*.required_if' => 'The overland insurance charges field is required.',
-                //'ol_ins_charges.*.numeric' => 'The overland insurance charges field must be numeric or percentage.',
                 'ol_return_local_charges.required_if' => 'The overland return local charges field is required.',
                 'ol_return_local_charges.numeric' => 'The overland return local charges field must be numeric or percentage.',
                 'ol_return_class_0_charges.*.required_if' => 'The overland class A return charges field is required.',
@@ -1430,15 +1422,10 @@ class AdminDashboardController extends Controller
                 'ol_discount_title.required_if' => 'The overland discount title field must be required',
                 'ol_daterange.required_if' => 'The overland discount date range field must be required',
                 'ol_discount_weight_rate.required_if' => 'The overland discount weight field must be required',
-//            'ol_discount_weight_rate.numeric' => 'The overland discount weight field must be numeric',
                 'ol_discount_cash_rate.required_if' => 'The overland discount cash field must be required',
-//            'ol_discount_cash_rate.numeric' => 'The overland discount cash field must be numeric',
                 'ol_discount_insurance_rate.required_if' => 'The overland discount insurance field must be required',
-//            'ol_discount_insurance_rate.numeric' => 'The overland discount insurance field must be numeric',
                 'ol_discount_return_rate.required_if' => 'The overland discount return field must be required',
-//            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
                 'ol_discount_packaging_rate.required_if' => 'The overland discount packaging field must be required',
-//            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
                 'ol_discount_title.required_with' => 'The overland discount title field is required',
                 'ol_daterange.required_with' => 'The overland discount date field is required',
                 //overland end and detain starts
@@ -1465,13 +1452,11 @@ class AdminDashboardController extends Controller
                 'detain_cash_range_down.*.required_if' => 'The detain cash range down field is required.',
                 'detain_cash_range_down.*.numeric' => 'The detain cash range down field must be numeric.',
                 'detain_cash_charges.*.required_if' => 'The detain cash charges field is required.',
-                //'detain_cash_charges.*.numeric' => 'The detain cash charges field must be numeric or percentage.',
                 'detain_ins_range_up.*.required_if' => 'The detain insurance range up field is required.',
                 'detain_ins_range_up.*.numeric' => 'The detain insurance range up field must be numeric or percentage.',
                 'detain_ins_range_down.*.required_if' => 'The detain insurance range down field is required.',
                 'detain_ins_range_down.*.numeric' => 'The detain insurance range down field must be numeric or percentage.',
                 'detain_ins_charges.*.required_if' => 'The detain insurance charges field is required.',
-                //'detain_ins_charges.*.numeric' => 'The detain insurance charges field must be numeric or percentage.',
                 'detain_return_local_charges.required_if' => 'The detain return local charges field is required.',
                 'detain_return_local_charges.numeric' => 'The detain return local charges field must be numeric or percentage.',
                 'detain_return_class_0_charges.*.required_if' => 'The detain class A return charges field is required.',
@@ -1484,15 +1469,10 @@ class AdminDashboardController extends Controller
                 'detain_discount_title.required_if' => 'The detain discount title field must be required',
                 'detain_daterange.required_if' => 'The detain discount date range field must be required',
                 'detain_discount_weight_rate.required_if' => 'The detain discount weight field must be required',
-//            'detain_discount_weight_rate.numeric' => 'The detain discount weight field must be numeric',
                 'detain_discount_cash_rate.required_if' => 'The detain discount cash field must be required',
-//            'detain_discount_cash_rate.numeric' => 'The detain discount cash field must be numeric',
                 'detain_discount_insurance_rate.required_if' => 'The detain discount insurance field must be required',
-//            'detain_discount_insurance_rate.numeric' => 'The detain discount insurance field must be numeric',
                 'detain_discount_return_rate.required_if' => 'The detain discount return field must be required',
-//            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
                 'detain_discount_packaging_rate.required_if' => 'The detain discount packaging field must be required',
-//            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
                 'detain_discount_title.required_with' => 'The detain discount title field is required',
                 'detain_daterange.required_with' => 'The detain discount date field is required',
                 //detain ends and sameday starts
@@ -1516,13 +1496,11 @@ class AdminDashboardController extends Controller
                 'sameday_cash_range_down.*.required_if' => 'The sameday cash range down field is required.',
                 'sameday_cash_range_down.*.numeric' => 'The sameday cash range down field must be numeric.',
                 'sameday_cash_charges.*.required_if' => 'The sameday cash charges field is required.',
-                // 'sameday_cash_charges.*.numeric' => 'The sameday cash charges field must be numeric or percentage.',
                 'sameday_ins_range_up.*.required_if' => 'The sameday insurance range up field is required.',
                 'sameday_ins_range_up.*.numeric' => 'The sameday insurance range up field must be numeric or percentage.',
                 'sameday_ins_range_down.*.required_if' => 'The sameday insurance range down field is required.',
                 'sameday_ins_range_down.*.numeric' => 'The sameday insurance range down field must be numeric or percentage.',
                 'sameday_ins_charges.*.required_if' => 'The sameday insurance charges field is required.',
-                //'sameday_ins_charges.*.numeric' => 'The sameday insurance charges field must be numeric or percentage.',
                 'sameday_return_local_charges.required_if' => 'The sameday return local charges field is required.',
                 'sameday_return_local_charges.numeric' => 'The sameday return local charges field must be numeric or percentage.',
                 'sameday_return_class_0_charges.*.required_if' => 'The sameday class A return charges field is required.',
@@ -1535,15 +1513,10 @@ class AdminDashboardController extends Controller
                 'sameday_discount_title.required_if' => 'The sameday discount title field must be required',
                 'sameday_daterange.required_if' => 'The sameday discount date range field must be required',
                 'sameday_discount_weight_rate.required_if' => 'The sameday discount weight field must be required',
-//            'sameday_discount_weight_rate.numeric' => 'The sameday discount weight field must be numeric',
                 'sameday_discount_cash_rate.required_if' => 'The sameday discount cash field must be required',
-//            'sameday_discount_cash_rate.numeric' => 'The sameday discount cash field must be numeric',
                 'sameday_discount_insurance_rate.required_if' => 'The sameday discount insurance field must be required',
-//            'sameday_discount_insurance_rate.numeric' => 'The sameday discount insurance field must be numeric',
                 'sameday_discount_return_rate.required_if' => 'The sameday discount return field must be required',
-//            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
                 'sameday_discount_packaging_rate.required_if' => 'The sameday discount packaging field must be required',
-//            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
                 'sameday_discount_title.required_with' => 'The sameday discount title field is required',
                 'sameday_daterange.required_with' => 'The sameday discount date field is required',
                 //sameday ends
@@ -4021,7 +3994,6 @@ class AdminDashboardController extends Controller
             WmsPendingStorageTypeCharge::where('user_id', $id)->delete();
             WmsPendingPackingCharge::where('user_id', $id)->delete();
             WmsPendingLabellingCharge::where('user_id', $id)->delete();
-
             if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
 
             $wms_user_info = new WmsPendingUserInformation();
