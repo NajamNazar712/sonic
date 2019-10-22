@@ -42,8 +42,7 @@ class RiderAPIController extends Controller {
         'start_location_latitude' => 'Location Latitude',
         'start_location_longitude' => 'Location Longitude',
 
-        'tracking_numbers' => 'Tracking Numbers',
-        'tracking_numbers.*' => 'Tracking Number',
+        'shipments' => 'Shipments',
 
         'reason_id' => 'Reason ID',
         'picture' => 'Picture',
@@ -322,10 +321,8 @@ class RiderAPIController extends Controller {
 
             $information['summary'] = array();
             $information['summary']['pickups'] = 0;
-            $information['summary']['shipments'] = 0;
 
             $information['summary']['received']['pickups'] = 0;
-            $information['summary']['received']['shipments'] = 0;
 
             $rider = Rider::find($rider_id);
             $city = City::find($rider->city_id);
@@ -351,10 +348,6 @@ class RiderAPIController extends Controller {
 
                 $pickup_address = $pickup_request->pickup_address;
 
-                $shipments = PickupRequestAssignedShipment::where('pickup_request_id', $pickup_request->id)->count();
-
-                $information['summary']['shipments'] += $shipments;
-
                 $pickup = array();
 
                 $pickup['pickup_request_id'] = $pickup_request->id;
@@ -363,14 +356,6 @@ class RiderAPIController extends Controller {
 
                 if ($pickup_note_request->status) {
                     $information['summary']['received']['pickups']++;
-
-                    $rider_pickup = RiderPickup::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request->id);
-
-                    if ($rider_pickup->exists()) {
-                        $rider_pickup = $rider_pickup->first();
-
-                        $information['summary']['received']['shipments'] += RiderPickupShipment::where('rider_pickup_id', $rider_pickup->id)->count();
-                    }
                 }
 
                 $pickup['shipper_name'] = $pickup_address->user->name;
@@ -379,8 +364,6 @@ class RiderAPIController extends Controller {
                 $pickup['address'] = $pickup_address->pickup_address;
                 $pickup['location_latitude'] = $pickup_address->location_latitude;
                 $pickup['location_longitude'] = $pickup_address->location_longitude;
-
-                $pickup['shipments'] = $shipments;
 
                 $information['pickups'][] = $pickup;
             }
@@ -401,8 +384,7 @@ class RiderAPIController extends Controller {
             'start_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
             'actual_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
-            'tracking_numbers' => ['required', 'array', 'min:1'],
-            'tracking_numbers.*' => ['required', 'integer', 'digits_between:12,20']
+            'shipments' => ['required', 'integer', 'digits_between:1,10']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -459,52 +441,14 @@ class RiderAPIController extends Controller {
                     $pickup_address->save();
                 }
 
-                $rider_pickup->pickup_not_pick_reason_id = $request->reason_id;
-
-                $rider_pickup->save();
-
-                $rider_pickup_id = $rider_pickup->id;
-
-                $tracking_numbers = array_keys(array_flip($request->tracking_numbers));
-
-                $valid_shipments = 0;
-                $invalid_shipments = 0;
-
-                foreach ($tracking_numbers as $key => $tracking_number) {
-                    $shipment = Shipment::where('tracking_number', $tracking_number)->first();
-
-                    if ($shipment && ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53)) {
-                        $rider_pickup_shipment = new RiderPickupShipment();
-
-                        $rider_pickup_shipment->rider_pickup_id = $rider_pickup_id;
-                        $rider_pickup_shipment->shipment_id = $shipment->id;
-
-                        $rider_pickup_shipment->save();
-
-                        $shipment->shipper_status_id = 53;
-                        $shipment->consignee_status_id = 53;
-
-                        $shipment->save();
-
-                        ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, $rider_id, $request->pickup_note_id);
-
-                        $valid_shipments++;
-                    }
-                    else {
-                        $invalid_shipments++;
-
-                        unset($tracking_numbers[$key]);
-                    }
-                }
-
-                $rider_pickup->shipments = $valid_shipments;
+                $rider_pickup->shipments = $request->shipments;
 
                 $rider_pickup->save();
 
                 PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
             }
 
-            return response()->json(['status' => 0, 'message' => 'Pickup Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id, 'invalid_shipments' => $invalid_shipments]);
+            return response()->json(['status' => 0, 'message' => 'Pickup Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);
         }
     }
 

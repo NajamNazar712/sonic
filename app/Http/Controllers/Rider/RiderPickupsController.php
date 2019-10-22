@@ -81,14 +81,6 @@ class RiderPickupsController extends Controller {
                 return $distance_from_current_to_actual;
             }
         })
-        ->editColumn('shipments', function ($rider_pickup) {
-            if ($rider_pickup->pickup_type == 1) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $rider_pickup->shipments . '</button>';
-            }
-            else {
-                return '';
-            }
-        })
 		->editColumn('picture_path', function ($rider_pickup) {
 			if ($rider_pickup->pickup_type == 0) {
 				return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('storage/' . $rider_pickup->picture_path) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
