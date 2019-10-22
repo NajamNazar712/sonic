@@ -1853,14 +1853,11 @@
                                                         </div>
 
                                                         <div class="col-12" id="wms_storage_types_div">
-                                                            <div class="row">
-                                                                
-                                                                <div class="col-md-2">
+                                                            <div class="row storage_type_row" id="storage_type_row0">
+                                                                <input type="hidden" id="storage_type_input0" name="storage_type[0]">
+                                                                <div class="col-md-2 st_select">
                                                                     <fieldset class="form-group">
                                                                         <select class="select2 form-control storage_type" name="storage_type[0]" data-rule-required="true" data-msg-required="This field is required">
-                                                                            @foreach($storage_types as $types)
-                                                                                <option value="{{$types->id}}">{{$types->name}}</option>
-                                                                            @endforeach
                                                                         </select>
                                                                     </fieldset>
                                                                 </div>
@@ -1870,16 +1867,15 @@
                                                                         <input name="storage_type_charges[0]" data-rule-required="true" data-msg-required="Charges are required" type="text" class="form-control numeric" placeholder="Charges">
                                                                     </fieldset>
                                                                 </div>
-                                                            </div>
-                                                            
-                                                        </div>
-                                                        <div class="row">
-                                                                <div class="col-md-2">
-                                                                    <fieldset class="form-group">
-                                                                        <button id="storage_type_add" type="button" class="btn btn-outline-primary ml-1" title="Add" ><i class="la la-plus"></i></button>
-                                                                    </fieldset>
+                                                                <div class="col actions">
+                                                                        <span id="storage_type_add" class="btn btn-sm btn-outline-primary d-none"><i class="la la-check"></i></span>
+                                                                        <span class="storage_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
                                                                 </div>
                                                             </div>
+                                                            
+                                                            
+                                                        </div>
+                                                        
                                                     </div>
 
                                                 </div>
@@ -1910,14 +1906,11 @@
                                                         </div>
 
                                                         <div class="col-12" id="wms_packing_charges_div">
-                                                            <div class="row">
-                                                                
+                                                            <div class="row packing_type_row" id="packing_type_row0">
+                                                                <input type="hidden" id="packing_type_input0" name="packing_type[0]">
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
                                                                         <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required">
-                                                                            @foreach($packaging_material_types as $mtype)
-                                                                                <option value="{{$mtype->id}}">{{$mtype->type}}</option>
-                                                                            @endforeach
                                                                         </select>
                                                                     </fieldset>
                                                                 </div>
@@ -1927,16 +1920,16 @@
                                                                         <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
                                                                     </fieldset>
                                                                 </div>
-                                                            </div>
-                                                            
-                                                        </div>
-                                                        <div class="row">
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
-                                                                        <button id="packing_type_add" type="button" class="btn btn-outline-primary ml-1" title="Add" ><i class="la la-plus"></i></button>
+                                                                        <span id="packing_type_add" class="btn btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
+                                                                        <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
                                                                     </fieldset>
                                                                 </div>
                                                             </div>
+                                                            
+                                                        </div>
+                                                        
                                                     </div>
 
                                                     <div class="row">
@@ -1969,8 +1962,6 @@
                                         </div>
                                         
                                     </div>
-                                </div>
-                            </div>
 
                             <div class="text-center mt-2">
                                 <div class="form-group">
@@ -2123,17 +2114,7 @@
                 }
             });
 
-            $('#warehouse_main_switch').on('change',function(){
-                var warehousemainswitch = document.querySelector('.switchery.warehouse-main-switch');
-                if (warehousemainswitch.checked === true) {
-                    $('#warehousing').slideDown('slow');
 
-                } else if (warehousemainswitch.checked === false) {
-                    $('#warehousing').slideUp('slow');
-
-
-                }
-            });
 
         });
 
@@ -3125,7 +3106,19 @@
         }
         
 
-        //Warehousing
+       //Warehousing
+
+        $('#warehouse_main_switch').on('change',function(){
+                var warehousemainswitch = document.querySelector('.switchery.warehouse-main-switch');
+                if (warehousemainswitch.checked === true) {
+                    $('#warehousing').slideDown('slow');
+
+                } else if (warehousemainswitch.checked === false) {
+                    $('#warehousing').slideUp('slow');
+
+
+                }
+            });
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
         $('#invoicing_date_select').prepend('<option value="" selected="selected"></option>').select2({
@@ -3151,25 +3144,26 @@
                $('#invoicing_date_div').addClass('d-none');
            }
        });
-
+        var current_selection = null;
         var storage_type_selected = [];
+        var storage_type_data = @json($storage_types);
+
+        var storage_data = $.map(storage_type_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.name;
+                return obj;
+            });
+
+
         $('select[name="storage_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+            data:storage_data,
             width:'100%',
             placeholder:'Select Storage Type'
         }).bind('select2:select', function(){
-            var storage_id = $(this).val();
-            var index = $.inArray(storage_id, storage_type_selected);
+            
+            $(this).parents('div.storage_type_row').find('span#storage_type_add').removeClass('d-none');
+            $('input[name="storage_type[0]"]').val($(this).val());
 
-            if(index === -1){
-                storage_type_selected.push(storage_id);
-            }else{
-                var error = "Storage type already selected!";
-                toastr.error(error, 'Error!', {
-                    positionClass: 'toast-top-center',
-                    containerId: 'toast-top-center'
-                });
-                $(this).val(null).trigger('change');
-            }
             
         });
 
@@ -3201,11 +3195,18 @@
         
 
         var storage_type_rows = 1;
-        var storage_type_data = @json($storage_types);
-        $('#storage_type_add').on('click', function(){
-            wms_storage_types_div
-            var htmldiv = '<div class="row" id="storage_type_row'+storage_type_rows+'" row="'+ storage_type_rows +'">\n' +
-                '                                                <div class="col-md-2">\n' +
+        
+        $('body').on('click','#storage_type_add', function(){
+            var previous_row = storage_type_rows - 1;
+              
+            $(this).addClass('d-none');
+            var previous_select = $('select[name="storage_type['+ previous_row +']"]');
+            storage_type_selected.push(previous_select.val());
+            previous_select.prop('disabled', true);
+            
+
+            var htmldiv = '<div class="row storage_type_row" id="storage_type_row'+storage_type_rows+'">\n' +
+                '                                                <input id="storage_type_input'+ storage_type_rows +'" type="hidden" name="storage_type['+ storage_type_rows +']" value=""><div class="col-md-2 st_select">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <select class="select2 form-control storage_type" name="storage_type['+ storage_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
                 '                                                    </fieldset>\n' +
@@ -3215,34 +3216,31 @@
                 '                                                        <input name="storage_type_charges['+storage_type_rows+']" type="text" class="form-control validated" data-rule-required="true" data-msg-required="Charges are required" placeholder="Charges">\n' +
                 '                                                    </fieldset>\n' +
                 '                                                </div>\n' +
-                '<div class="col">\n' +
-                '<span class="storage_type_row_delete btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
+                '<div class="col"><span id="storage_type_add" class="btn btn-sm btn-outline-primary d-none"><i class="la la-check"></i></span>\n'+
+                '<span row="'+ storage_type_rows +'" class="storage_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span></div>';
 
             $('#wms_storage_types_div').append(htmldiv);
-            
-            var storage_data = $.map(storage_type_data, function (obj) {
-                obj.id = obj.id;
-                obj.text = obj.name;
-                return obj;
-            });
-            $('select[name="storage_type['+ storage_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
-                data:storage_data,
-                width:'100%',
-                placeholder:'Select Storage Type'
-            }).bind('select2:select', function(){
-                var storage_id = $(this).val();
-                var index = $.inArray(storage_id, storage_type_selected);
+
+            var storage_data_new = $.map(storage_type_data, function (obj) {
+                var current_id = obj.id.toString();
+                var index = $.inArray(current_id, storage_type_selected);
                 
                 if(index === -1){
-                    storage_type_selected.push(storage_id);
-                }else{
-                    var error = "Storage type already selected!";
-                    toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                    $(this).val(null).trigger('change');
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+                    return obj;
                 }
+                
+            });
+            var last_id = storage_type_rows;
+            $('select[name="storage_type['+ storage_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:storage_data_new,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).on('change', function(){
+                var selected_id = $(this).val();
+                $(this).parents('div.storage_type_row').find('span#storage_type_add').removeClass('d-none');
+                $(this).parents('div.storage_type_row').find('input#storage_type_input'+last_id).val(selected_id);
             });
             $('input[name="storage_type_charges['+storage_type_rows+']"]').inputmask({
                 'alias': 'integer',
@@ -3258,39 +3256,38 @@
         });
 
         $('body').on('click','span.storage_type_row_delete', function(){
-            var row_id = $(this).parent().parent().attr('row');
-            var selected = $('select[name="storage_type['+ row_id +']"]').val();
+            var row_id = $(this).attr('row');
+            var row_selector = $('#storage_type_row'+row_id);
+            var selected = $('input[name="storage_type['+ row_id +']"]').val();
             if(selected !== ''){
                 var index = $.inArray(selected, storage_type_selected);
                 if(index !== -1){
                     storage_type_selected.splice(index, 1);
                 }
             }
-            $(this).parent().parent().remove();
+            row_selector.remove();
         });
 
 
         var packing_type_rows = 1;
         var packing_type_selected = [];
         var packing_material_data = @json($packaging_material_types);
+        var packing_data = $.map(packing_material_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.type;
+                return obj;
+            });
+
         $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:packing_data,
                 width:'100%',
                 placeholder:'Select Storage Type'
             }).bind('select2:select', function(){
-                var packing_id = $(this).val();
-                var index = $.inArray(packing_id, packing_type_selected);
-                
-                if(index === -1){
-                    packing_type_selected.push(packing_id);
-                }else{
-                    var error = "Storage type already selected!";
-                    toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                    $(this).val(null).trigger('change');
-                }
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
+                $('input[name="packing_type[0]"]').val($(this).val());
+
             });
+
 
         var packingSwitch = document.querySelector('.switchery.packingCharges');
         packingSwitch.onchange = function () {
@@ -3307,10 +3304,16 @@
                 return obj;
             });
         
-        $('#packing_type_add').on('click', function(){
-            
-            var htmldiv = '<div class="row" id="packing_type_row'+packing_type_rows+'" row="'+ packing_type_rows +'">\n' +
-                '                                                <div class="col-md-2">\n' +
+        $('body').on('click','#packing_type_add', function(){
+            var previous_row = packing_type_rows - 1;
+            $(this).addClass('d-none');
+
+            var previous_select = $('select[name="packing_type['+ previous_row +']"]');
+            packing_type_selected.push(previous_select.val());
+            previous_select.prop('disabled', true);
+
+            var htmldiv = '<div class="row packing_type_row" id="packing_type_row'+packing_type_rows+'">\n' +
+                '                                                <input id="packing_type_input'+ packing_type_rows +'" type="hidden" name="packing_type['+ packing_type_rows +']" value=""><div class="col-md-2">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <select class="select2 form-control storage_type" name="packing_type['+ packing_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
                 '                                                    </fieldset>\n' +
@@ -3320,30 +3323,31 @@
                 '                                                        <input name="packing_charges['+packing_type_rows+']" type="text" class="form-control validated" data-rule-required="true" data-msg-required="Charges are required" placeholder="Charges">\n' +
                 '                                                    </fieldset>\n' +
                 '                                                </div>\n' +
-                '<div class="col">\n' +
-                '<span class="packing_type_row_delete btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
+                '<div class="col"><span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none"><i class="la la-check"></i></span>\n' +
+                '<span row="'+ packing_type_rows +'" class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span></div></div>';
 
             $('#wms_packing_charges_div').append(htmldiv);
             
-            
-            $('select[name="packing_type['+ packing_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
-                data:packing_data,
-                width:'100%',
-                placeholder:'Select Packing Type'
-            }).bind('select2:select', function(){
-                var packing_id = $(this).val();
-                var index = $.inArray(packing_id, packing_type_selected);
+            var packing_data_new = $.map(packing_material_data, function (obj) {
+                var current_id = obj.id.toString();
+                var index = $.inArray(current_id, packing_type_selected);
                 
                 if(index === -1){
-                    packing_type_selected.push(packing_id);
-                }else{
-                    var error = "Packing type already selected!";
-                    toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                    $(this).val(null).trigger('change');
+                    obj.id = obj.id;
+                    obj.text = obj.type;
+                    return obj;
                 }
+                
+            });
+            var last_id = packing_type_rows;
+            $('select[name="packing_type['+ packing_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:packing_data_new,
+                width:'100%',
+                placeholder:'Select Packing Type'
+            }).on('change', function(){
+                var packing_id = $(this).val();
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
+                $(this).parents('div.packing_type_row').find('input#packing_type_input'+last_id).val(packing_id);
             });
             $('input[name="storage_type_charges['+packing_type_rows+']"]').inputmask({
                 'alias': 'integer',
@@ -3360,7 +3364,7 @@
 
         $('body').on('click','span.packing_type_row_delete', function(){
             var row_id = $(this).parent().parent().attr('row');
-            var selected = $('select[name="storage_type['+ row_id +']"]').val();
+            var selected = $('select[name="packing_type['+ row_id +']"]').val();
             if(selected !== ''){
                 var index = $.inArray(selected, packing_type_selected);
                 if(index !== -1){

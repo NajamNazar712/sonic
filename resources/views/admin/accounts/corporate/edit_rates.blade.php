@@ -3228,6 +3228,414 @@
                                     </div>
                                 </div>
                             </div>
+                            @isset($wms_user_info->warehousing)
+                            <div id="" class="card-header mt-1 border-primary">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3 class="display-inline card-title lead primary">Warehousing</h3>
+                                        
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info" {{ ($wms_user_info->warehousing)? 'checked':'' }}/></a>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div id="warehousing" class="border-primary no-border-top card {{ ($wms_user_info->warehousing)? '':'hide' }}">
+                                <div class="card-content">
+                                    <div class="card-body pb-0">
+                                        <div class="row">
+                                            <div class="col-3 form-group">
+                                                <select name="invoicing_cycle" class="select2" id="invoicing_cycle_select" data-rule-required="true" data-msg-required="Invoicing cycle is required">
+                                                    @foreach($invoicing_cycles as $cycle)
+                                                        @if($cycle->id == $wms_user_info->invoicing_cycle)
+                                                            <option value="{{ $cycle->id }}" selected="selected">{{ $cycle->name }}</option>
+                                                        @else
+                                                            <option value="{{ $cycle->id }}">{{ $cycle->name }}</option>
+                                                        @endif
+                                                        
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            @php
+                                            $class = '';
+                                                if($wms_user_info->invoicing_cycle == 2){
+                                                    $class = 'd-none';
+                                                }
+                                            @endphp
+                                            <div id="invoicing_date_div" class="col-3 {{ $class }}">
+                                                <div class="form-group">
+                                                    <select name="invoicing_date" id="invoicing_date_select" class="select2 form-control" data-rule-required="true" data-msg-required="Date is required"></select>
+                                                </div>
+                                                
+                                            </div>
+
+                                        </div>
+                                        <div class="col-12">
+                                                    <h3 class="card-title">Stocking Charges</h3>
+                                                </div>
+
+                                        <div class="card border-primary p-2">
+                                            <div class="row">
+                        
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <div class="col-4 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text" id="">Per Product Charges</span>
+                                                                    </div>
+                                                                    <div class="input-group-prepend">
+                                                                          <span class="input-group-text" id="">
+                                                                            <input type="checkbox" name="ppc_switch" data-color="info" class="switchery PPCSwitch" data-size="xs" {{ ($wms_user_info->per_product_charges)? 'checked':'' }}/>
+                                                                          </span>
+                                                                    </div>
+                                                                    <input type="text"  class="form-control numeric ppc-inp"  data-rule-required="true" data-msg-required="This field is required" name="ppc_charges" value="{{ isset($wms_product_charges)? $wms_product_charges->charges:0}}">
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col-4 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text" id="">Per Square Foot Charges</span>
+                                                                    </div>
+                                                                    <div class="input-group-prepend">
+                                                                          <span class="input-group-text" id="">
+                                                                            <input type="checkbox" name="psf_switch" data-color="info" class="switchery PSFSwitch" data-size="xs" {{ ($wms_user_info->per_square_foot_charges)? 'checked':'' }}/>
+                                                                          </span>
+                                                                    </div>
+                                                                    <input type="text"  class="form-control numeric psf-inp"  data-rule-required="true" data-msg-required="This field is required" name="psf_charges" value="{{ isset($wms_square_foot_charges)? $wms_square_foot_charges->charges:0 }}">
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <h3 class="card-title">Storage Type Charges</h3>
+                                                        </div>
+
+                                                        <div class="col-12" id="wms_storage_types_div">
+                                                            @php
+                                                                $storage_count = count($wms_storage_charges);
+                                                                $row_count = 1;
+                                                            @endphp
+                                                            @foreach($wms_storage_charges as $key => $storage)
+                                                            <div class="row storage_type_row" id="storage_type_row{{$key}}">
+                                                                <input type="hidden" id="storage_type_input{{$key}}" name="storage_type[{{$key}}]" value="{{$storage->storage_type_id}}">
+                                                                <div class="col-md-2 st_select">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control storage_type" name="storage_type[{{$key}}]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
+                                                                            @foreach($storage_types as $types)
+                                                                               <option value="{{$types->id}}">{{$types->name}}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="storage_type_charges[{{$key}}]" data-rule-required="true" data-msg-required="Charges are required" type="text" class="form-control numeric" placeholder="Charges" value="{{ $storage->charges }}">
+                                                                    </fieldset>
+                                                                </div>
+                                                                <div class="col actions">
+                                                                        <span id="storage_type_add" class="btn btn-sm btn-outline-primary {{ ($storage_count == $row_count)? '':'d-none' }}"><i class="la la-check"></i></span>
+                                                                        <span class="storage_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
+                                                                </div>
+                                                            </div>
+                                                            @php  $row_count++ @endphp
+                                                            @endforeach
+                                                            
+                                                        </div>
+                                                        
+                                                    </div>
+
+                                                </div>
+                                               
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card-body">
+                                                <div>
+                                                    <h3 class="card-title">Fulfillment Charges</h3>
+                                                </div>
+
+                                            <div class="card border-primary p-2">
+                                            <div class="row">
+                                                
+                                                <div class="col-12">
+                                                    
+
+                                                    <div class="row">
+                                                        <div class="col-3">
+                                                            <h3 class="card-title">Packing Charges</h3>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="packing_charges_switch" class="switchery packingCharges" data-color="info" data-size="sm" {{ ($wms_user_info->packing_charges)? 'checked':''}}/>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12" id="wms_packing_charges_div">
+                                                            @php
+                                                                $packing_count = count($wms_packing_charges);
+                                                                $packing_row_count = 1;
+                                                            @endphp
+                                                            @foreach($wms_packing_charges as $pkey => $packing)
+                                                            <div class="row packing_type_row" id="packing_type_row{{$pkey}}">
+                                                                <input type="hidden" id="packing_type_input{{$pkey}}" name="packing_type[{{$pkey}}]" value="{{$packing->packing_type_id}}">
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control packing_type" name="packing_type[{{$pkey}}]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
+                                                                            @foreach($packaging_material_types as $mtype)
+                                                                                <option value="{{$mtype->id}}">{{$mtype->type}}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="packing_charges[{{$pkey}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{$packing->charges}}">
+                                                                    </fieldset>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <span id="packing_type_add" class="btn btn-outline-primary {{ ($packing_count == $packing_row_count)? '':'d-none' }}" title="Add" ><i class="la la-check"></i></span>
+                                                                        <span class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
+                                                                    </fieldset>
+                                                                </div>
+                                                            </div>
+                                                            @php  $packing_row_count++ @endphp
+                                                            @endforeach
+                                                        </div>
+                                                        
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-2">
+                                                            <h3 class="card-title">Labelling Charges</h3>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="labelling_charges_switch" class="switchery labellingSwitch" data-color="info" data-size="sm" {{ ($wms_user_info->labelling_charges)? 'checked':''}}/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                        
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <fieldset class="form-group">
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{ $wms_labelling_charges->charges }}">
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+                                                            
+                                                        
+                                                    </div>
+
+
+                                                </div>
+                                               
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                            @else
+                            <div id="" class="card-header mt-1 border-primary">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h3 class="display-inline card-title lead primary">Warehousing</h3>
+                                            
+                                        </div>
+                                        <div class="col-md-6">
+                                            <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info"/></a>
+                                        </div>
+                                    </div>
+
+                            </div>
+                            <div id="warehousing" class="border-primary no-border-top card hide">
+                                <div class="card-content">
+                                    <div class="card-body pb-0">
+                                        <div class="row">
+                                            <div class="col-3 form-group">
+                                                <select name="invoicing_cycle" class="select2" id="invoicing_cycle_select" data-rule-required="true" data-msg-required="Invoicing cycle is required">
+                                                    @foreach($invoicing_cycles as $cycle)
+                                                        <option value="{{ $cycle->id }}">{{ $cycle->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div id="invoicing_date_div" class="col-3 d-none">
+                                                <div class="form-group">
+                                                    <select name="invoicing_date" id="invoicing_date_select" class="select2 form-control" data-rule-required="true" data-msg-required="Date is required"></select>
+                                                </div>
+                                                
+                                            </div>
+
+                                        </div>
+                                        <div class="col-12">
+                                                    <h3 class="card-title">Stocking Charges</h3>
+                                                </div>
+
+                                        <div class="card border-primary p-2">
+                                            <div class="row">
+                        
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <div class="col-4 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text" id="">Per Product Charges</span>
+                                                                    </div>
+                                                                    <div class="input-group-prepend">
+                                                                          <span class="input-group-text" id="">
+                                                                            <input type="checkbox" name="ppc_switch" data-color="info" class="switchery PPCSwitch" data-size="xs" checked/>
+                                                                          </span>
+                                                                    </div>
+                                                                    <input type="text"  class="form-control numeric ppc-inp"  data-rule-required="true" data-msg-required="This field is required" name="ppc_charges" >
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col-4 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text" id="">Per Square Foot Charges</span>
+                                                                    </div>
+                                                                    <div class="input-group-prepend">
+                                                                          <span class="input-group-text" id="">
+                                                                            <input type="checkbox" name="psf_switch" data-color="info" class="switchery PSFSwitch" data-size="xs" checked/>
+                                                                          </span>
+                                                                    </div>
+                                                                    <input type="text"  class="form-control numeric psf-inp"  data-rule-required="true" data-msg-required="This field is required" name="psf_charges" >
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <h3 class="card-title">Storage Type Charges</h3>
+                                                        </div>
+
+                                                        <div class="col-12" id="wms_storage_types_div">
+                                                            <div class="row storage_type_row" id="storage_type_row0">
+                                                                <input type="hidden" id="storage_type_input0" name="storage_type[0]">
+                                                                <div class="col-md-2 st_select">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control storage_type" name="storage_type[0]" data-rule-required="true" data-msg-required="This field is required">
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="storage_type_charges[0]" data-rule-required="true" data-msg-required="Charges are required" type="text" class="form-control numeric" placeholder="Charges">
+                                                                    </fieldset>
+                                                                </div>
+                                                                <div class="col actions">
+                                                                        <span id="storage_type_add" class="btn btn-sm btn-outline-primary d-none"><i class="la la-check"></i></span>
+                                                                        <span class="storage_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            
+                                                        </div>
+                                                        
+                                                    </div>
+
+                                                </div>
+                                               
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card-body">
+                                                <div>
+                                                    <h3 class="card-title">Fulfillment Charges</h3>
+                                                </div>
+
+                                            <div class="card border-primary p-2">
+                                            <div class="row">
+                                                
+                                                <div class="col-12">
+                                                    
+
+                                                    <div class="row">
+                                                        <div class="col-3">
+                                                            <h3 class="card-title">Packing Charges</h3>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="packing_charges_switch" class="switchery packingCharges" data-color="info" data-size="sm" checked/>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12" id="wms_packing_charges_div">
+                                                            <div class="row packing_type_row" id="packing_type_row0">
+                                                                <input type="hidden" id="packing_type_input0" name="packing_type[0]">
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required">
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
+                                                                    </fieldset>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <span id="packing_type_add" class="btn btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
+                                                                        <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
+                                                                    </fieldset>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                        </div>
+                                                        
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-2">
+                                                            <h3 class="card-title">Labelling Charges</h3>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="labelling_charges_switch" class="switchery labellingSwitch" data-color="info" data-size="sm" checked/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                        
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <fieldset class="form-group">
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+                                                            
+                                                        
+                                                    </div>
+
+
+                                                </div>
+                                               
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                 @endisset   
+                                </div>
+                            </div>
 
                             <div class="text-center mt-2">
                                 <div class="form-group">
@@ -3245,6 +3653,7 @@
                                 </div>
                             </div>
 
+                            
 
                         </form>
 
@@ -3263,6 +3672,9 @@
     @endif
 @endsection
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
     <style type="text/css">
         .hide{
             display:none;
@@ -3273,8 +3685,10 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -4302,6 +4716,345 @@
 
             }
         }
+
+
+        //Warehousing
+
+        $('#warehouse_main_switch').on('change',function(){
+                var warehousemainswitch = document.querySelector('.switchery.warehouse-main-switch');
+                if (warehousemainswitch.checked === true) {
+                    $('#warehousing').slideDown('slow');
+
+                } else if (warehousemainswitch.checked === false) {
+                    $('#warehousing').slideUp('slow');
+
+
+                }
+            });
+
+        var weekly = [1, 2, 3, 4, 5, 6, 7];
+        var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+
+        
+        $('#invoicing_cycle_select').prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Invoicing Cycle",
+            width:'100%'
+        }).bind('change', function() {
+
+           if (this.value == 1) {
+               $('#invoicing_date_div').removeClass('d-none');
+               $('#invoicing_date_select').empty().trigger('change');
+               $('#invoicing_date_select').select2({data:weekly,placeholder:'Select Date'});
+           }
+           else if(this.value == 3){
+               $('#invoicing_date_div').removeClass('d-none');
+               $('#invoicing_date_select').empty().trigger('change');
+               $('#invoicing_date_select').select2({data:monthly,placeholder:'Select Date'});
+           }else if(this.value == 2){
+               $('#invoicing_date_div').addClass('d-none');
+           }
+       });
+        var storage_type_selected = [];
+        var packing_type_selected = [];
+        @if(!empty($wms_user_info))
+        $('#invoicing_cycle_select').val({{$wms_user_info->invoicing_cycle}}).trigger('change');
+            @if($wms_user_info->invoicing_cycle == 1)
+            $('#invoicing_date_select').prepend('<option value="" selected="selected"></option>').select2({
+                data:weekly,
+                width:'100%',
+                placeholder:'Select Date'
+            });
+            $('#invoicing_date_select').val({{$wms_user_info->invoicing_date}}).trigger('change');
+            @elseif($wms_user_info->invoicing_cycle == 3)
+            $('#invoicing_date_select').prepend('<option value="" selected="selected"></option>').select2({
+                data:monthly,
+                width:'100%',
+                placeholder:'Select Date'
+            });
+            $('#invoicing_date_select').val({{$wms_user_info->invoicing_date}}).trigger('change');
+            @else
+            $('#invoicing_date_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:'Select Date'
+            });
+            @endif
+
+            @foreach($wms_storage_charges as $skey => $storage)
+                $('select[name="storage_type[{{$skey}}]"]').select2({
+                    width:'100%',
+                    placeholder:'Select Storage Type'
+                });
+                $('select[name="storage_type[{{$skey}}]"]').val({{$storage->storage_type_id}}).trigger('change');
+                storage_type_selected.push('{{$storage->storage_type_id}}');
+            @endforeach
+            
+            @foreach($wms_packing_charges as $indx => $packing)
+            $('select[name="packing_type[{{$indx}}]"]').select2({
+                width:'100%',
+                placeholder:'Select Packing Type'
+            });
+            $('select[name="packing_type[{{$indx}}]"]').val({{$packing->packing_type_id}}).trigger('change');
+                packing_type_selected.push('{{$packing->packing_type_id}}');
+            @endforeach
+
+            @else
+            var storage_type_data = @json($storage_types);
+            var storage_data = $.map(storage_type_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.name;
+                return obj;
+            });
+             $('select[name="storage_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:storage_data,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).bind('select2:select', function(){
+                
+                $(this).parents('div.storage_type_row').find('span#storage_type_add').removeClass('d-none');
+                $('input[name="storage_type[0]"]').val($(this).val());
+
+                
+            });
+
+            var packing_material_data = @json($packaging_material_types);
+            var packing_data = $.map(packing_material_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.type;
+                return obj;
+            });
+
+            $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:packing_data,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).bind('select2:select', function(){
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
+                $('input[name="packing_type[0]"]').val($(this).val());
+
+            });
+
+        @endif
+        var current_selection = null;
+        var storage_type_data = @json($storage_types);
+         var storage_data = $.map(storage_type_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.name;
+                return obj;
+            });
+        
+        
+
+        var PPCSwitch = document.querySelector('.switchery.PPCSwitch');
+        PPCSwitch.onchange = function () {
+            if(PPCSwitch.checked === true){
+                $('input[name="ppc_charges"]').prop('disabled', false);
+            }else if(PPCSwitch.checked === false){
+                $('input[name="ppc_charges"]').prop('disabled', true);
+            }
+        };
+        var PSFSwitch = document.querySelector('.switchery.PSFSwitch');
+        PSFSwitch.onchange = function () {
+            if(PSFSwitch.checked === true){
+                $('input[name="psf_charges"]').prop('disabled', false);
+            }else if(PSFSwitch.checked === false){
+                $('input[name="psf_charges"]').prop('disabled', true);
+            }
+        };
+
+        var LabellingSwitch = document.querySelector('.switchery.labellingSwitch');
+        LabellingSwitch.onchange = function () {
+            if(LabellingSwitch.checked === true){
+                $('input[name="labelling_charges"]').prop('disabled', false);
+            }else if(LabellingSwitch.checked === false){
+                $('input[name="labelling_charges"]').prop('disabled', true);
+            }
+        };
+        
+        @if(count($wms_storage_charges) > 0)
+        var storage_type_rows = {{ count($wms_storage_charges) }};
+        @else
+        var storage_type_rows = 1;
+        @endempty
+        
+        
+        $('body').on('click','#storage_type_add', function(){
+            console.log(storage_type_selected)
+            var previous_row = storage_type_rows - 1;
+              
+            $(this).addClass('d-none');
+            var previous_select = $('select[name="storage_type['+ previous_row +']"]');
+            var index = $.inArray(previous_select.val(), storage_type_selected);
+            if(index === -1){
+                console.log(previous_select.val())
+                storage_type_selected.push(previous_select.val());
+            }
+            previous_select.prop('disabled', true);
+            
+
+            var htmldiv = '<div class="row storage_type_row" id="storage_type_row'+storage_type_rows+'">\n' +
+                '                                                <input id="storage_type_input'+ storage_type_rows +'" type="hidden" name="storage_type['+ storage_type_rows +']" value=""><div class="col-md-2 st_select">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <select class="select2 form-control storage_type" name="storage_type['+ storage_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
+                '                                                    </fieldset>\n' +
+                '                                                </div>\n' +
+                '                                                <div class="col-md-2">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <input name="storage_type_charges['+storage_type_rows+']" type="text" class="form-control validated" data-rule-required="true" data-msg-required="Charges are required" placeholder="Charges">\n' +
+                '                                                    </fieldset>\n' +
+                '                                                </div>\n' +
+                '<div class="col"><span id="storage_type_add" class="btn btn-sm btn-outline-primary d-none"><i class="la la-check"></i></span>\n'+
+                '<span row="'+ storage_type_rows +'" class="storage_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span></div>';
+
+            $('#wms_storage_types_div').append(htmldiv);
+
+            var storage_data_new = $.map(storage_type_data, function (obj) {
+                var current_id = obj.id.toString();
+                var index = $.inArray(current_id, storage_type_selected);
+                
+                if(index === -1){
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+                    return obj;
+                }
+                
+            });
+            var last_id = storage_type_rows;
+            $('select[name="storage_type['+ storage_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:storage_data_new,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).on('change', function(){
+                var selected_id = $(this).val();
+                $(this).parents('div.storage_type_row').find('span#storage_type_add').removeClass('d-none');
+                $(this).parents('div.storage_type_row').find('input#storage_type_input'+last_id).val(selected_id);
+            });
+            $('input[name="storage_type_charges['+storage_type_rows+']"]').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 0,
+                'max': 1000000
+            });
+
+            storage_type_rows++;
+
+        });
+
+        $('body').on('click','span.storage_type_row_delete', function(){
+            var row_id = $(this).attr('row');
+            var row_selector = $('#storage_type_row'+row_id);
+            var selected = $('input[name="storage_type['+ row_id +']"]').val();
+            if(selected !== ''){
+                var index = $.inArray(selected, storage_type_selected);
+                if(index !== -1){
+                    storage_type_selected.splice(index, 1);
+                }
+            }
+            row_selector.remove();
+        });
+
+
+        @if(count($wms_packing_charges) > 0)
+        var packing_type_rows = {{ count($wms_packing_charges) }};
+        @else
+        var packing_type_rows = 1;
+        @endif
+       
+        var packing_material_data = @json($packaging_material_types);
+        var packing_data = $.map(packing_material_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.type;
+                return obj;
+            });
+
+
+        var packingSwitch = document.querySelector('.switchery.packingCharges');
+        packingSwitch.onchange = function () {
+            if(packingSwitch.checked === true){
+                $('#wms_packing_charges_div input, #wms_packing_charges_div select').prop('disabled', false);
+            }else if(packingSwitch.checked === false){
+                $('#wms_packing_charges_div input, #wms_packing_charges_div select').prop('disabled', true);
+            }
+        };
+
+        
+        
+        $('body').on('click','#packing_type_add', function(){
+            var previous_row = packing_type_rows - 1;
+            $(this).addClass('d-none');
+
+            var previous_select = $('select[name="packing_type['+ previous_row +']"]');
+            var index = $.inArray(previous_select.val(), packing_type_selected);
+            if(index === -1){
+                packing_type_selected.push(previous_select.val());
+            }
+            
+            previous_select.prop('disabled', true);
+
+            var htmldiv = '<div class="row packing_type_row" id="packing_type_row'+packing_type_rows+'">\n' +
+                '                                                <input id="packing_type_input'+ packing_type_rows +'" type="hidden" name="packing_type['+ packing_type_rows +']" value=""><div class="col-md-2">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <select class="select2 form-control storage_type" name="packing_type['+ packing_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
+                '                                                    </fieldset>\n' +
+                '                                                </div>\n' +
+                '                                                <div class="col-md-2">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <input name="packing_charges['+packing_type_rows+']" type="text" class="form-control validated" data-rule-required="true" data-msg-required="Charges are required" placeholder="Charges">\n' +
+                '                                                    </fieldset>\n' +
+                '                                                </div>\n' +
+                '<div class="col"><span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none"><i class="la la-check"></i></span>\n' +
+                '<span row="'+ packing_type_rows +'" class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span></div></div>';
+
+            $('#wms_packing_charges_div').append(htmldiv);
+            
+            var packing_data_new = $.map(packing_material_data, function (obj) {
+                var current_id = obj.id.toString();
+                var index = $.inArray(current_id, packing_type_selected);
+                
+                if(index === -1){
+                    obj.id = obj.id;
+                    obj.text = obj.type;
+                    return obj;
+                }
+                
+            });
+            var last_id = packing_type_rows;
+            $('select[name="packing_type['+ packing_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:packing_data_new,
+                width:'100%',
+                placeholder:'Select Packing Type'
+            }).on('change', function(){
+                var packing_id = $(this).val();
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
+                $(this).parents('div.packing_type_row').find('input#packing_type_input'+last_id).val(packing_id);
+            });
+            $('input[name="storage_type_charges['+packing_type_rows+']"]').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 0,
+                'max': 1000000
+            });
+
+            packing_type_rows++;
+
+        });
+
+        $('body').on('click','span.packing_type_row_delete', function(){
+            var row_id = $(this).parent().parent().attr('row');
+            var selected = $('select[name="packing_type['+ row_id +']"]').val();
+            if(selected !== ''){
+                var index = $.inArray(selected, packing_type_selected);
+                if(index !== -1){
+                    packing_type_selected.splice(index, 1);
+                }
+            }
+            $(this).parent().parent().remove();
+        });
+
+
 
         $('#ratesAdditionForm').on('keypress',function (e) {
             if(e.which == 13 || e.keyCode == 13) {

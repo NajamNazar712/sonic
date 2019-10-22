@@ -2815,7 +2815,8 @@
                                     </div>
                                 </div>
                             </div>
-                            @isset($wms_user_info)
+
+                            @isset($wms_user_info->warehousing)
                             <div id="" class="card-header mt-1 border-primary">
                                 <div class="row">
                                     <div class="col-md-6">
@@ -2828,7 +2829,7 @@
                                 </div>
 
                             </div>
-                            @if($wms_user_info->warehousing)
+                            
                             <div id="warehousing" class="border-primary no-border-top card {{ ($wms_user_info->warehousing)? '':'hide' }}">
                                 <div class="card-content">
                                     <div class="card-body pb-0">
@@ -3014,8 +3015,20 @@
                                     </div>
                                 </div>
                             </div>
-                            @endif
-                            @endif
+                            @else
+                            <div id="" class="card-header mt-1 border-primary">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3 class="display-inline card-title lead primary">Warehousing</h3>
+                                        
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info" disabled/></a>
+                                    </div>
+                                </div>
+
+                            </div>
+                            @endisset
 
                         </form>
 
@@ -3051,7 +3064,7 @@
         $(document).ready(function () {
             $(".touchspin-color").trigger("touchspin.updatesettings", {min: 0.5,step: 0.5, decimals: 2});
 
-        
+        @isset($wms_user_info->warehousing)
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
         $('#invoicing_date_select').select2({
@@ -3113,6 +3126,7 @@
                 $('input[name="labelling_charges"]').prop('disabled', true);
             }
         };
+        @endisset
 
  });
 

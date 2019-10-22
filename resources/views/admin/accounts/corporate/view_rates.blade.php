@@ -3181,7 +3181,7 @@
                                         </div>
                                     </div>
 
-                                    @isset($wms_user_info)
+                                   @isset($wms_user_info->warehousing)
                             <div id="" class="card-header mt-1 border-primary">
                                 <div class="row">
                                     <div class="col-md-6">
@@ -3194,7 +3194,7 @@
                                 </div>
 
                             </div>
-                            @if($wms_user_info->warehousing)
+                            
                             <div id="warehousing" class="border-primary no-border-top card {{ ($wms_user_info->warehousing)? '':'hide' }}">
                                 <div class="card-content">
                                     <div class="card-body pb-0">
@@ -3380,8 +3380,20 @@
                                     </div>
                                 </div>
                             </div>
-                            @endif
-                            @endif
+                            @else
+                            <div id="" class="card-header mt-1 border-primary">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3 class="display-inline card-title lead primary">Warehousing</h3>
+                                        
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info" disabled/></a>
+                                    </div>
+                                </div>
+
+                            </div>
+                            @endisset
 
 
 
@@ -3422,197 +3434,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('input[name="on_door_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="on_door_range_down[0]"]').val(maxvalue);
-                $('input[name="on_door_range_up[1]"]').val(minvalue);
-            });
-
-            $('input[name="on_hub_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="on_hub_range_down[0]"]').val(maxvalue);
-                $('input[name="on_hub_range_up[1]"]').val(minvalue);
-            });
-            $('input[name="ol_door_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="ol_door_range_down[0]"]').val(maxvalue);
-                $('input[name="ol_door_range_up[1]"]').val(minvalue);
-            });
-            $('input[name="ol_hub_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="ol_hub_range_down[0]"]').val(maxvalue);
-                $('input[name="ol_hub_range_up[1]"]').val(minvalue);
-            });
-            $('input[name="detain_door_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="detain_door_range_down[0]"]').val(maxvalue);
-                $('input[name="detain_door_range_up[1]"]').val(minvalue);
-            });
-            $('input[name="detain_hub_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="detain_hub_range_down[0]"]').val(maxvalue);
-                $('input[name="detain_hub_range_up[1]"]').val(minvalue);
-            });
-            $('input[name="sameday_door_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="sameday_door_range_down[0]"]').val(maxvalue);
-                $('input[name="sameday_door_range_up[1]"]').val(minvalue);
-            });
-            $('input[name="sameday_hub_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="sameday_hub_range_down[0]"]').val(maxvalue);
-                $('input[name="sameday_hub_range_up[1]"]').val(minvalue);
-            });
-
-            // var on_main_switch = document.querySelector('#on_main_switch');
-            $('#on_main_switch').on('change',function(){
-
-                var onmainswitch = document.querySelector('.switchery.on-main-switch');
-                if (onmainswitch.checked === true) {
-                    $('#overnight').slideDown('slow');
-
-                } else if (onmainswitch.checked === false) {
-                    $('#overnight').slideUp('slow');
-
-
-                }
-            });
-            $('#ol_main_switch').on('change',function(){
-
-                var olmainswitch = document.querySelector('.switchery.ol-main-switch');
-                if (olmainswitch.checked === true) {
-                    $('#overland').slideDown('slow');
-
-                } else if (olmainswitch.checked === false) {
-                    $('#overland').slideUp('slow');
-
-
-                }
-            });
-            $('#detain_main_switch').on('change',function(){
-                var detainmainswitch = document.querySelector('.switchery.detain-main-switch');
-                if (detainmainswitch.checked === true) {
-                    $('#detain').slideDown('slow');
-
-                } else if (detainmainswitch.checked === false) {
-                    $('#detain').slideUp('slow');
-
-
-                }
-            });
-            $('#sameday_main_switch').on('change',function(){
-                var samedaymainswitch = document.querySelector('.switchery.sameday-main-switch');
-                if (samedaymainswitch.checked === true) {
-                    $('#sameday').slideDown('slow');
-
-                } else if (samedaymainswitch.checked === false) {
-                    $('#sameday').slideUp('slow');
-
-
-                }
-            });
-
-
-
-        $('.decimal').inputmask({
-            'alias': 'decimal',
-            'allowMinus': false,
-            'allowPlus': false,
-            'rightAlign': false,
-            'digits': 3,
-            'min': 0.00,
-            'max': 10000
-        });
-        $('.amount').inputmask({
-            'alias': 'decimal',
-            'allowMinus': false,
-            'allowPlus': false,
-            'rightAlign': false,
-            'digits': 2,
-            'min': 0.00,
-            'max': 1000000.00
-        });
-
-        $('.percent').inputmask({
-            'alias': 'numeric',
-            'allowMinus': false,
-            'allowPlus': false,
-            'rightAlign': false,
-            'min': 0,
-            'max': 500
-        });
-        $('.numeric').inputmask({
-            'alias': 'integer',
-            'allowMinus': false,
-            'allowPlus': false,
-            'rightAlign': false,
-            'min': 0,
-            'max': 1000000
-        });
-        $('.dec-percent').inputmask("Regex",{
-            'allowMinus': false,
-            'allowPlus': false,
-            'rightAlign': false,
-            regex: '^\\d{1,9}(\\.\\d{1,2})?%?$'
-        });
-
-        $(".daterange").daterangepicker();
-
-       
-
-
-        function masks() {
-
-            $('.decimal').inputmask({
-                'alias': 'decimal',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'digits': 3,
-                'min': 0.00,
-                'max': 10000
-            });
-            $('.amount').inputmask({
-                'alias': 'decimal',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'digits': 2,
-                'min': 0.00,
-                'max': 1000000.00
-            });
-            $('.numeric').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'min': 0,
-                'max': 1000000
-            });
-            $('.dec-percent').inputmask("Regex",{
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                regex: '^\\d{1,9}(\\.\\d{1,2})?%?$'
-            });
-        }
-
+            @isset($wms_user_info->warehousing)
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
         $('#invoicing_date_select').select2({
@@ -3649,31 +3471,8 @@
         $('select[name="packing_type[{{$ind}}]"]').val({{$packing->packing_type_id}}).trigger('change');
         @endforeach
 
-        var PPCSwitch = document.querySelector('.switchery.PPCSwitch');
-        PPCSwitch.onchange = function () {
-            if(PPCSwitch.checked === true){
-                $('input[name="ppc_charges"]').prop('disabled', false);
-            }else if(PPCSwitch.checked === false){
-                $('input[name="ppc_charges"]').prop('disabled', true);
-            }
-        };
-        var PSFSwitch = document.querySelector('.switchery.PSFSwitch');
-        PSFSwitch.onchange = function () {
-            if(PSFSwitch.checked === true){
-                $('input[name="psf_charges"]').prop('disabled', false);
-            }else if(PSFSwitch.checked === false){
-                $('input[name="psf_charges"]').prop('disabled', true);
-            }
-        };
-
-        var LabellingSwitch = document.querySelector('.switchery.labellingSwitch');
-        LabellingSwitch.onchange = function () {
-            if(LabellingSwitch.checked === true){
-                $('input[name="labelling_charges"]').prop('disabled', false);
-            }else if(LabellingSwitch.checked === false){
-                $('input[name="labelling_charges"]').prop('disabled', true);
-            }
-        };
+        
+        @endisset
 
         });
 
