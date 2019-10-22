@@ -6880,7 +6880,8 @@ class AdminDashboardController extends Controller
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
-            'rider_category'=>'required|numeric'
+            'rider_category'=>'required|numeric',
+            'pin' => 'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -6896,7 +6897,8 @@ class AdminDashboardController extends Controller
             'address'=>$request->address,
             'route_id'=>$request->route_id,
             'rider_category_id'=>$request->rider_category,
-            'status'=>1
+            'status'=>1,
+            'pin'=> bcrypt($request->pin)
         ]);
         if($rider){
             return redirect()->back()->with('success','Rider added successfully');
@@ -6935,6 +6937,23 @@ class AdminDashboardController extends Controller
             'route_id'=>$request->route_id,
             'rider_category_id'=>$request->rider_category
         ]);
+
+        $rider = Rider::find($id);
+
+        $rider->city_id = $request->city_id;
+        $rider->name = $request->rider_name;
+        $rider->phone = $request->phone;
+        $rider->cnic = $request->cnic;
+        $rider->address = $request->address;
+        $rider->route_id = $request->route_id;
+        $rider->rider_category_id = $request->rider_category;
+
+        if($request->pin != '') {
+            $rider->pin = bcrypt($request->pin);
+        }
+
+        $rider->save();
+
         if($rider){
             return redirect()->back()->with('success','Rider updated successfully');
         }
@@ -6956,6 +6975,26 @@ class AdminDashboardController extends Controller
 
         }
 
+    }
+
+    public function rider_phone_unique(Request $request) {
+        if ($request->filled('phone')) {
+            $rider = Rider::where('phone', $request->input('phone'));
+
+            if ($request->has('id')) {
+                $rider = $rider->where('id', '!=', $request->input('id'));
+            }
+
+            if (!$rider->exists()) {
+                return 'true';
+            }
+            else {
+                return 'false';
+            }
+        }
+        else {
+            return 'true';
+        }
     }
 
     public function add_notification_emails(Request $request){
