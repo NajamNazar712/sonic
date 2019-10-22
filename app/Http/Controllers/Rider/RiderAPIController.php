@@ -42,9 +42,6 @@ class RiderAPIController extends Controller {
         'start_location_latitude' => 'Location Latitude',
         'start_location_longitude' => 'Location Longitude',
 
-        'tracking_numbers' => 'Tracking Numbers',
-        'tracking_numbers.*' => 'Tracking Number',
-
         'shipments' => 'Shipments',
 
         'reason_id' => 'Reason ID',
