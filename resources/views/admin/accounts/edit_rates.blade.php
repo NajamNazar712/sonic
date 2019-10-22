@@ -3062,12 +3062,12 @@
                                                                     </fieldset>
                                                                 </div>
                                                                 <div class="col-md-2">
-                                                                    <fieldset class="form-group">
+                                                                    
                                                                         <span id="packing_type_add" class="btn btn-sm btn-outline-primary {{ ($packing_count == $packing_row_count)? '':'d-none' }}" title="Add" ><i class="la la-check"></i></span>
                                                                         @if($pkey > 0)
                                                                         <span row="{{$pkey}}" class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
                                                                         @endif
-                                                                    </fieldset>
+                                                                   
                                                                 </div>
                                                             </div>
                                                             @php  $packing_row_count++ @endphp
