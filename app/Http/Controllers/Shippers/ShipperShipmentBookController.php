@@ -45,6 +45,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Validator;
 use Illuminate\Validation\Rule;
 
+use SnappyPDF;
+
 class ShipperShipmentBookController extends Controller
 {
 //    private function unique_order_id($order_id) {
@@ -149,9 +151,9 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function __construct() {
-        $this->middleware('auth:web,substitute_users')->except(['print_air_waybill', 'corporate_invoice']);
+        $this->middleware('auth:web,substitute_users')->except(['print_air_waybill', 'print_air_waybill_custom_size', 'corporate_invoice']);
 
-        $this->middleware('auth:admin,web,substitute_users')->only(['print_air_waybill', 'corporate_invoice']);
+        $this->middleware('auth:admin,web,substitute_users')->only(['print_air_waybill', 'print_air_waybill_custom_size', 'corporate_invoice']);
 
         $this->middleware('Permission');
     }
@@ -573,7 +575,7 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE) {
+    public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL) {
 
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
@@ -607,7 +609,7 @@ class ShipperShipmentBookController extends Controller
                     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
             ';
 
-            if ($user_type != 4) {
+            if ($user_type != 4 && $type != 'pdf') {
                 $html .= '
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
                 ';
@@ -709,6 +711,16 @@ class ShipperShipmentBookController extends Controller
                   <body>
                     <div>
             ';
+
+            if ($type == 'pdf') {
+                $html .= '
+                    <style>
+                      body {
+                        font-size: 0.7rem !important;
+                      }
+                    </style>
+                ';
+            }
         }
 
         $shipment_details = '';
@@ -725,25 +737,44 @@ class ShipperShipmentBookController extends Controller
                             <tbody>
                 ';
 
-                if ($user_type != 4) {
+                if ($user_type != 4 && $type != 'pdf') {
                     $table_start .= '
                                 <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto">' . $print_details . '</td>
                     ';
                 }
                 else {
-                    $table_start .= '
+                    if ($type != 'pdf') {
+                        $table_start .= '
                                 <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo.png') . '" width="150" class="d-block mx-auto">' . $print_details . '</td>
-                    ';
+                        ';
+                    }
+                    else {
+                        $table_start .= '
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                        ';
+                    }
                 }
 
-                $table_start .= '
+                if ($type != 'pdf') {
+                    $table_start .= '
                                 <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
 
                                 <td class="color primary border twice-left"><strong>Service</strong></td>
-                ';
+                    ';
+                }
+                else {
+                    $table_start .= '
+                                <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
+                                  <span><strong>' . $shipment->tracking_number . '</strong></span>
+                                </td>
+
+                                <td class="color primary border twice-left"><strong>Service</strong></td>
+                    ';
+                }
 
                 if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
                     $table_start  .= '
@@ -927,9 +958,13 @@ class ShipperShipmentBookController extends Controller
 
                 $table_end .= '
                       </div>
-
-                      <hr>
                 ';
+
+                if ($type != 'pdf') {
+                    $table_end .= '
+                      <hr>
+                    ';
+                }
 
                 if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
                     $shipment_details .= $table_start;
@@ -1041,7 +1076,7 @@ class ShipperShipmentBookController extends Controller
                     </div>
             ';
 
-            if ($user_type != 4) {
+            if ($user_type != 4 && $type != 'pdf') {
                 $html .= '
                 <script>
                   window.onload = function() {
@@ -1082,7 +1117,23 @@ class ShipperShipmentBookController extends Controller
         }
 
         if ($user_type) {
-            return $this->air_waybill($user_type, $user_id, $request->ids);
+            if (count($request->ids) == 1) {
+                $shipment_id = $request->ids[0];
+
+                $shipment = Shipment::find($shipment_id);
+
+                if ($shipment) {
+                    if ($shipment->user_id == 2842) {
+                        return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_id);
+                    }
+                    else {
+                        return $this->air_waybill($user_type, $user_id, $request->ids);
+                    }
+                }
+            }
+            else {
+                return $this->air_waybill($user_type, $user_id, $request->ids);
+            }
         }
     }
 
@@ -2657,5 +2708,22 @@ class ShipperShipmentBookController extends Controller
                 return response()->json(['status' => 0, 'error' => 'Consignee Information not found!']);
             }
         }
+    }
+
+    public static function air_waybill_sticker_pdf($user_type, $user_id, $shipment_id) {
+        $air_waybill = self::air_waybill($user_type, $user_id, [$shipment_id], FALSE, 'pdf');
+
+        $pdf = SnappyPDF::loadHTML($air_waybill);
+
+        $pdf->setOption('margin-top', 0);
+        $pdf->setOption('margin-bottom', 0);
+        $pdf->setOption('margin-left', 0);
+        $pdf->setOption('margin-right', 0);
+        $pdf->setOption('page-width', '6in');
+        $pdf->setOption('page-height', '4in');
+
+        $filename = 'air_waybill_'. $shipment_id . '.pdf';
+
+        return $pdf->download($filename);
     }
 }
