@@ -1201,7 +1201,7 @@ class AdminDashboardController extends Controller
         $return = ReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $fuel = FuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 1)->first();
+        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
         $packaging = PackagingCharge::all()->where('user_id', $id);
         $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
 
