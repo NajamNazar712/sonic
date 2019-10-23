@@ -1233,7 +1233,7 @@ class AdminDashboardController extends Controller
 
     public function editRatesView($id){
         $user = User::find($id);
-        $sale_person = SalePersonTag::where('user_id',$id)->first();
+        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
         if ((($user['rate_status']>=0) && $user['status']==1) || (($user['rate_status']==0) && $user['status']==3)) {
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
@@ -1290,7 +1290,17 @@ class AdminDashboardController extends Controller
         else {
             return redirect(route('admin.accounts.pending'));
         }
-        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+        if(session('department_id') == 7){
+            if($sale_person['admin_id'] == Auth::id()){
+                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+            }
+            else{
+                return view('admin.access_denied');
+            }
+        }
+        else{
+            return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+        }
 
     }
 
