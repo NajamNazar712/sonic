@@ -402,6 +402,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/edit', 'Admins\AdminDashboardController@editRiderView')->name('edit');
             Route::put('{id}/edit', 'Admins\AdminDashboardController@editRiderDetails')->name('edit');
             Route::put('/status', 'Admins\AdminDashboardController@riderStatus')->name('status');
+            Route::get('/phone_unique', 'Admins\AdminDashboardController@rider_phone_unique')->name('phone_unique');
         });
 
         Route::prefix('zonal')->name('zonal.')->group(function () {
@@ -484,6 +485,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('received', 'Admins\AdminPickupsController@bookedvsreceived_received_list')->name('received');
             Route::post('delivered', 'Admins\AdminPickupsController@bookedvsreceived_delivered_list')->name('delivered');
             Route::post('returned', 'Admins\AdminPickupsController@bookedvsreceived_returned_list')->name('returned');
+        });
+
+        Route::prefix('rider')->name('rider.')->group(function () {
+            Route::get('', 'Rider\RiderPickupsController@pickups_index')->name('index');
+            Route::get('list', 'Rider\RiderPickupsController@pickups_list')->name('list');
+            Route::get('shipments', 'Rider\RiderPickupsController@pickups_shipments')->name('shipments');
+
+            Route::prefix('action_log')->name('action_log.')->group(function () {
+                Route::get('', 'Rider\RiderPickupsController@pickups_action_log_index')->name('index');
+                Route::get('list', 'Rider\RiderPickupsController@pickups_action_log_list')->name('list');
+            });
         });
     });
     Route::prefix('delivery')->name('delivery.')->group(function(){

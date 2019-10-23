@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Rider extends Model
 {
     protected $fillable = [
-        'city_id','name','phone','cnic','address','route_id','rider_category_id','status, pin'
+        'city_id','name','phone','cnic','address','route_id','rider_category_id','status','pin'
     ];
     public function city(){
         return $this->belongsTo('App\Http\Models\City');
