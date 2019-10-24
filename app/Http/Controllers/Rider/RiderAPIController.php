@@ -416,29 +416,40 @@ class RiderAPIController extends Controller {
                 $rider_pickup->actual_location_latitude = $request->actual_location_latitude;
                 $rider_pickup->actual_location_longitude = $request->actual_location_longitude;
 
-                $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
+                if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
+                    $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
 
-                $rider_pickup->distance_from_start_to_actual = $this->distance($origin, $destination);
+                    $rider_pickup->distance_from_start_to_actual = $this->distance($origin, $destination);
 
-                if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
-                    $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
-                    $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
+                    if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
+                        $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
+                        $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
 
-                    $origin = $pickup_address->location_latitude . ',' . $pickup_address->location_longitude;
+                        $origin = $pickup_address->location_latitude . ',' . $pickup_address->location_longitude;
 
-                    $distance = $this->distance($origin, $destination);
+                        $distance = $this->distance($origin, $destination);
 
-                    $rider_pickup->distance_from_current_to_actual = $distance;
+                        $rider_pickup->distance_from_current_to_actual = $distance;
 
-                    if ($distance > 0.1) {
-                        $this->verify_pickup_address_location($pickup_address->id);
+                        if ($distance > 0.1) {
+                            $this->verify_pickup_address_location($pickup_address->id);
+                        }
+                    }
+                    else {
+                        $pickup_address->location_latitude = $request->actual_location_latitude;
+                        $pickup_address->location_longitude = $request->actual_location_longitude;
+
+                        $pickup_address->save();
                     }
                 }
                 else {
-                    $pickup_address->location_latitude = $request->actual_location_latitude;
-                    $pickup_address->location_longitude = $request->actual_location_longitude;
+                    $rider_pickup->distance_from_start_to_actual = 0;
 
-                    $pickup_address->save();
+                    if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
+                        $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
+                        $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
+                        $rider_pickup->distance_from_current_to_actual = 0;
+                    }
                 }
 
                 $rider_pickup->shipments = $request->shipments;
@@ -494,17 +505,28 @@ class RiderAPIController extends Controller {
                 $rider_pickup->actual_location_latitude = $request->actual_location_latitude;
                 $rider_pickup->actual_location_longitude = $request->actual_location_longitude;
 
-                $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
+                if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
+                    $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
 
-                $rider_pickup->distance_from_start_to_actual = $this->distance($origin, $destination);
+                    $rider_pickup->distance_from_start_to_actual = $this->distance($origin, $destination);
 
-                if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
-                    $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
-                    $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
+                    if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
+                        $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
+                        $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
 
-                    $origin = $pickup_address->location_latitude . ',' . $pickup_address->location_longitude;
+                        $origin = $pickup_address->location_latitude . ',' . $pickup_address->location_longitude;
 
-                    $rider_pickup->distance_from_current_to_actual = $this->distance($origin, $destination);
+                        $rider_pickup->distance_from_current_to_actual = $this->distance($origin, $destination);
+                    }
+                }
+                else {
+                    $rider_pickup->distance_from_start_to_actual = 0;
+
+                    if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
+                        $rider_pickup->current_location_latitude = $pickup_address->location_latitude;
+                        $rider_pickup->current_location_longitude = $pickup_address->location_longitude;
+                        $rider_pickup->distance_from_current_to_actual = 0;
+                    }
                 }
 
                 $rider_pickup->pickup_not_pick_reason_id = $request->reason_id;
