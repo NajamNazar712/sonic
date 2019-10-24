@@ -1201,7 +1201,7 @@ class AdminDashboardController extends Controller
         $return = ReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $fuel = FuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $sale_person = SalePersonTag::where('user_id',$id)->first();
+        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
         $packaging = PackagingCharge::all()->where('user_id', $id);
         $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
 
@@ -1216,14 +1216,24 @@ class AdminDashboardController extends Controller
                 $packaging_charges[$charge->type_id][] = $charge;
             }
         }
-        return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+        if(session('department_id') == 7){
+            if($sale_person['admin_id'] == Auth::id()){
+                return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+            }
+            else{
+                return view('admin.access_denied');
+            }
+        }
+        else{
+            return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+        }
 
     }
 
 
     public function editRatesView($id){
         $user = User::find($id);
-        $sale_person = SalePersonTag::where('user_id',$id)->first();
+        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
         if ((($user['rate_status']>=0) && $user['status']==1) || (($user['rate_status']==0) && $user['status']==3)) {
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
@@ -1280,7 +1290,17 @@ class AdminDashboardController extends Controller
         else {
             return redirect(route('admin.accounts.pending'));
         }
-        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+        if(session('department_id') == 7){
+            if($sale_person['admin_id'] == Auth::id()){
+                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+            }
+            else{
+                return view('admin.access_denied');
+            }
+        }
+        else{
+            return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+        }
 
     }
 
