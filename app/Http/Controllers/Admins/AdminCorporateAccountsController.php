@@ -1169,7 +1169,7 @@ class AdminCorporateAccountsController extends Controller
             $rate_status = $user['rate_status'];
         }
         if(session('department_id') == 7){
-            if($sale_person['admin_id'] == Auth::id()){
+            if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
                 return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person]);
             }
             else{
@@ -4956,7 +4956,7 @@ class AdminCorporateAccountsController extends Controller
         $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
 
         if(session('department_id') == 7){
-            if($sale_person['admin_id'] == Auth::id()){
+            if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
                 return view('admin.accounts.corporate.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person]);
             }
             else{
