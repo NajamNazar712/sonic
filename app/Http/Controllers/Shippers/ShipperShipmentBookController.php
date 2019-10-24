@@ -13,6 +13,7 @@ use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -1117,19 +1118,8 @@ class ShipperShipmentBookController extends Controller
         }
 
         if ($user_type) {
-            if (count($request->ids) == 1) {
-                $shipment_id = $request->ids[0];
-
-                $shipment = Shipment::find($shipment_id);
-
-                if ($shipment) {
-                    if ($shipment->user_id == 2842) {
-                        return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_id);
-                    }
-                    else {
-                        return $this->air_waybill($user_type, $user_id, $request->ids);
-                    }
-                }
+            if ($shipment->user_id == 2842) {
+                return $this->air_waybill_sticker_pdf($user_type, $user_id, $request->ids);
             }
             else {
                 return $this->air_waybill($user_type, $user_id, $request->ids);
@@ -2710,20 +2700,22 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    public static function air_waybill_sticker_pdf($user_type, $user_id, $shipment_id) {
-        $air_waybill = self::air_waybill($user_type, $user_id, [$shipment_id], FALSE, 'pdf');
+    public static function air_waybill_sticker_pdf($user_type, $user_id, $shipment_ids) {
+        $air_waybills = array();
 
-        $pdf = SnappyPDF::loadHTML($air_waybill);
+        foreach ($shipment_ids as $shipment_id) {
+            $air_waybills[] = self::air_waybill($user_type, $user_id, [$shipment_id], FALSE, 'pdf');
+        }
 
-        $pdf->setOption('margin-top', 0);
-        $pdf->setOption('margin-bottom', 0);
-        $pdf->setOption('margin-left', 0);
-        $pdf->setOption('margin-right', 0);
-        $pdf->setOption('page-width', '6in');
-        $pdf->setOption('page-height', '4in');
+        $options = ['margin-top' => '0.125in', 'margin-bottom' => '0.125in', 'margin-left' => '0.125in', 'margin-right' => '0.125in', 'page-width' => '6in', 'page-height' => '4in'];
 
-        $filename = 'air_waybill_'. $shipment_id . '.pdf';
+        $pdf = SnappyPDF::snappy()->getOutputFromHtml($air_waybills, $options);
 
-        return $pdf->download($filename);
+        $filename = 'air_waybills.pdf';
+
+        return new Response($pdf, 200, array(
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$filename.'"',
+        ));
     }
 }
