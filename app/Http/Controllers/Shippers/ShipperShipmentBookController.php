@@ -1118,29 +1118,22 @@ class ShipperShipmentBookController extends Controller
         }
 
         if ($user_type) {
-            // if ($shipment->user_id == 2842) {
-            //     return $this->air_waybill_sticker_pdf($user_type, $user_id, $request->ids);
-            // }
-            // else {
+            $sticker = TRUE;
+
+            foreach ($request->ids as $id) {
+                $shipment = Shipment::find($id);
+
+                if ($shipment->user_id != 2842) {
+                    $sticker = FALSE;
+                }
+            }
+
+            if ($sticker) {
+                return $this->air_waybill_sticker_pdf($user_type, $user_id, $request->ids);
+            }
+            else {
                 return $this->air_waybill($user_type, $user_id, $request->ids);
-            // }
-            // if (count($request->ids) == 1) {
-            //     $shipment_id = $request->ids[0];
-
-            //     $shipment = Shipment::find($shipment_id);
-
-            //     if ($shipment) {
-            //         // if ($shipment->user_id == 2842) {
-            //             return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_id);
-            //         // }
-            //         // else {
-            //             return $this->air_waybill($user_type, $user_id, $request->ids);
-            //         // }
-            //     }
-            // }
-            // else {
-            //     return $this->air_waybill($user_type, $user_id, $request->ids);
-            // }
+            }
         }
     }
 
