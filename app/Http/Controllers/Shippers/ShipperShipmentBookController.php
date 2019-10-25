@@ -13,6 +13,7 @@ use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -716,7 +717,36 @@ class ShipperShipmentBookController extends Controller
                 $html .= '
                     <style>
                       body {
-                        font-size: 0.7rem !important;
+                        font-size: 0.75rem !important;
+                        font-weight: bold !important;
+                      }
+
+                      td.replacement span {
+                        width: auto !important;
+                      }
+
+                      .border.twice {
+                        border-width: 1px !important;
+                      }
+
+                      .border.twice-top {
+                        border-top-width: 1px !important;
+                      }
+
+                      .border.twice-bottom {
+                        border-bottom-width: 1px !important;
+                      }
+
+                      .border.twice-left {
+                        border-left-width: 1px !important;
+                      }
+
+                      .border.twice-right {
+                        border-right-width: 1px !important;
+                      }
+
+                      .font-small {
+                        font-size: 0.65rem !important;
                       }
                     </style>
                 ';
@@ -782,9 +812,16 @@ class ShipperShipmentBookController extends Controller
                     ';
                 }
                 else if ($shipment->booking_type_id == 2) {
-                    $table_start  .= '
+                    if ($type != 'pdf') {
+                        $table_start  .= '
                                 <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
-                    ';
+                        ';
+                    }
+                    else {
+                        $table_start  .= '
+                                <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong></td>
+                        ';
+                    }
                 }
                 else if ($shipment->booking_type_id == 3) {
                     $table_start  .= '
@@ -797,16 +834,17 @@ class ShipperShipmentBookController extends Controller
                     ';
                 }
 
-                $table_start  .= '
+                if ($type != 'pdf') {
+                    $table_start  .= '
                                 <td class="color primary"><strong>Datetime</strong></td>
                                 <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
                               </tr>
                               <tr>
                                 <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
                                 <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
-                ';
+                    ';
 
-                $table_start .= '
+                    $table_start .= '
                                 <td class="color primary"><strong>Order ID</strong></td>
                                 <td>' . $shipment->order_id . '</td>
                               </tr>
@@ -822,7 +860,36 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary"><strong>Name</strong></td>
-                ';
+                    ';
+                }
+                else {
+                    $table_start  .= '
+                                <td class="color primary"><strong>Order ID</strong></td>
+                                <td>' . $shipment->order_id . '</td>
+                              </tr>
+                              <tr>
+                                <td class="color primary border twice-left"><strong>Shipping</strong></td>
+                                <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
+                    ';
+
+                    $table_start .= '
+                                <td class="color primary"><strong>Date</strong></td>
+                                <td>' . $shipment->created_at->format('Y-m-d') . '</td>
+                              </tr>
+                              <tr>
+                                <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
+                                <td class="color primary border twice-bottom"><strong>Destination</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                              </tr>
+                              <tr>
+                                <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
+                                <td colspan="4" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="color secondary"><strong>Name</strong></td>
+                    ';
+                }
 
                 if ($shipment->booking_type_id != 4) {
                     $table_start .= '
@@ -871,29 +938,55 @@ class ShipperShipmentBookController extends Controller
                 ';
 
                 if ($shipment->information_display == 1) {
-                    if ($shipment->booking_type_id != 4) {
-                        $table_start .= '
+                    if ($type != 'pdf') {
+                        if ($shipment->booking_type_id != 4) {
+                            $table_start .= '
                                 <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
                                 <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                        ';
+                            ';
+                        }
+                        else {
+                            $table_start .= '
+                                <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
+                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                            ';
+                        }
                     }
                     else {
-                        $table_start .= '
-                                <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
+                        if ($shipment->booking_type_id != 4) {
+                            $table_start .= '
+                                <td class="color secondary border twice-bottom"><strong>Phone No(s).</strong></td>
                                 <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                        ';
+                            ';
+                        }
+                        else {
+                            $table_start .= '
+                                <td class="color secondary border twice-bottom"><strong>Phone No(s).</strong></td>
+                                <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                            ';
+                        }
                     }
                 }
                 else {
                 }
 
-                $table_start .= '
+                if ($type != 'pdf') {
+                    $table_start .= '
                                 <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
                                 <td colspan="3" class="border twice-bottom">' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
                               </tr>
-                ';
+                    ';
+                }
+                else {
+                    $table_start .= '
+                                <td class="color secondary border twice-bottom twice-left"><strong>Phone No(s).</strong></td>
+                                <td colspan="3" class="border twice-bottom">' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+                              </tr>
+                    ';
+                }
 
-                $table_end = '
+                if ($type != 'pdf') {
+                    $table_end = '
                               <tr>
                                 <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
                                 <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
@@ -901,25 +994,35 @@ class ShipperShipmentBookController extends Controller
                                 <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
                               </tr>
                               <tr>
-                ';
+                    ';
 
-                if ($shipment->booking_type_id == 5) {
-                    $table_end .= '
+                    if ($shipment->booking_type_id == 5) {
+                        $table_end .= '
                                 <td class="border twice-top twice-bottom twice-left" colspan="2" rowspan="2" style="height: 32px;"></td>
                               </tr>
                               <tr>
-                    ';
-                }
-                elseif ($shipment->booking_type_id != 4) {
-                    $table_end .= '
+                        ';
+                    }
+                    elseif ($shipment->booking_type_id != 4) {
+                        $table_end .= '
                                 <td class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
                                 <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->payment_mode->mode . '</strong></td>
-                    ';
-                }
-                else {
-                    $table_end .= '
+                        ';
+                    }
+                    else {
+                        $table_end .= '
                                 <td class="color primary border twice-top twice-bottom twice-left"><strong>Charges Mode</strong></td>
                                 <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->charges_mode->charges_mode . '</strong></td>
+                        ';
+                    }
+                }
+                else {
+                    $table_end = '
+                              <tr>
+                                <td rowspan="2" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
+                                <td rowspan="2" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
+                                <td class="color primary border twice-top twice-bottom twice-left"><strong>Weight</strong></td>
+                                <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
                     ';
                 }
 
@@ -944,7 +1047,7 @@ class ShipperShipmentBookController extends Controller
                 $table_end .= '
                               </tr>
                               <tr>
-                                <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
+                                <td colspan="8" class="text-center border twice-top font-small"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
                               </tr>
                             </tbody>
                         </table>
@@ -1117,19 +1220,18 @@ class ShipperShipmentBookController extends Controller
         }
 
         if ($user_type) {
-            if (count($request->ids) == 1) {
-                $shipment_id = $request->ids[0];
+            $sticker = TRUE;
 
-                $shipment = Shipment::find($shipment_id);
+            foreach ($request->ids as $id) {
+                $shipment = Shipment::find($id);
 
-                if ($shipment) {
-                    if ($shipment->user_id == 2842) {
-                        return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_id);
-                    }
-                    else {
-                        return $this->air_waybill($user_type, $user_id, $request->ids);
-                    }
+                if ($shipment->user_id != 2842) {
+                    $sticker = FALSE;
                 }
+            }
+
+            if ($sticker) {
+                return $this->air_waybill_sticker_pdf($user_type, $user_id, $request->ids);
             }
             else {
                 return $this->air_waybill($user_type, $user_id, $request->ids);
@@ -2710,20 +2812,22 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    public static function air_waybill_sticker_pdf($user_type, $user_id, $shipment_id) {
-        $air_waybill = self::air_waybill($user_type, $user_id, [$shipment_id], FALSE, 'pdf');
+    public static function air_waybill_sticker_pdf($user_type, $user_id, $shipment_ids) {
+        $air_waybills = array();
 
-        $pdf = SnappyPDF::loadHTML($air_waybill);
+        foreach ($shipment_ids as $shipment_id) {
+            $air_waybills[] = self::air_waybill($user_type, $user_id, [$shipment_id], FALSE, 'pdf');
+        }
 
-        $pdf->setOption('margin-top', 0);
-        $pdf->setOption('margin-bottom', 0);
-        $pdf->setOption('margin-left', 0);
-        $pdf->setOption('margin-right', 0);
-        $pdf->setOption('page-width', '6in');
-        $pdf->setOption('page-height', '4in');
+        $options = ['margin-top' => '0.125in', 'margin-bottom' => '0.125in', 'margin-left' => '0.125in', 'margin-right' => '0.125in', 'page-width' => '6in', 'page-height' => '4in'];
 
-        $filename = 'air_waybill_'. $shipment_id . '.pdf';
+        $pdf = SnappyPDF::snappy()->getOutputFromHtml($air_waybills, $options);
 
-        return $pdf->download($filename);
+        $filename = 'air_waybills.pdf';
+
+        return new Response($pdf, 200, array(
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$filename.'"',
+        ));
     }
 }

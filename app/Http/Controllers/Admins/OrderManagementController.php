@@ -69,7 +69,14 @@ class OrderManagementController extends Controller
             ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','shipments_journey.shipper_status_id as status_id'])
             ->groupBy('shipments.id');
 
-        if (session('role_id') != 1) {
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $shipments = $shipments->where(function ($query) {
+                    $query->whereIn('u.id', session('tagged_shippers'));
+                });
+            }
+        }
+        else if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
                 $query->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
             });
