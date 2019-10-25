@@ -223,7 +223,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.disable_remarks')) {
+                    if ($(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.disable_remarks') || $(header).is('.rate_status')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))
