@@ -39,7 +39,7 @@ class ClearPickupNote extends Command
      */
     public function handle()
     {
-        $pickup_notes = PickupNote::where('status', 3);
+        $pickup_notes = PickupNote::where('status_id', 3);
 
         if ($pickup_notes->exists()) {
             $pickup_notes = $pickup_notes->get();
