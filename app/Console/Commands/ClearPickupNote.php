@@ -47,13 +47,17 @@ class ClearPickupNote extends Command
             foreach ($pickup_notes as $pickup_note) {
                 $completed = TRUE;
 
-                foreach ($pickup_note->pickup_note_requests as $pickup_note_request) {
-                    $pickup_request = $pickup_note_request->pickup_request;
+                $pickup_note_requests = $pickup_note->pickup_note_requests;
 
-                    if ($pickup_request->status < 2) {
-                        $completed = FALSE;
+                if ($pickup_note_requests) {
+                    foreach ($pickup_note_requests as $pickup_note_request) {
+                        $pickup_request = $pickup_note_request->pickup_request;
 
-                        break;
+                        if ($pickup_request->status < 2) {
+                            $completed = FALSE;
+
+                            break;
+                        }
                     }
                 }
 
