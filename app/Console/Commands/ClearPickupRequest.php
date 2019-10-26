@@ -51,7 +51,7 @@ class ClearPickupRequest extends Command
                     $clear = TRUE;
 
                     foreach ($assigned_shipments as $assigned_shipment) {
-                        if ($assigned_shipment->shipment->shipper_status_id == 1) {
+                        if ($assigned_shipment->shipment->shipper_status_id == 1 || $assigned_shipment->shipment->shipper_status_id == 53) {
                             $clear = FALSE;
 
                             break;
