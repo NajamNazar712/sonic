@@ -63,6 +63,6 @@ class ClearPickupNote extends Command
                     $pickup_note->save();
                 }
             }
-        });
+        }
     }
 }
