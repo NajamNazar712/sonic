@@ -303,7 +303,7 @@ class AdminCRMController extends Controller
         $request_id = $request->request_id;
         if(($comment_id != null) && ($request_id != null)){
             $name = '';
-            $comment_details = CrmComments::where('crm_request_id', $request_id)->latest()->first();
+            $comment_details = CrmComments::where('crm_request_id', $request_id)->latest('id')->first();
             if($comment_details){
                 if($comment_details->id > $comment_id){
                     if($comment_details->comment_by == 0){
