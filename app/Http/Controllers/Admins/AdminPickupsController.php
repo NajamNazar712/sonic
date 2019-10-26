@@ -362,7 +362,16 @@ class AdminPickupsController extends Controller
 
     public function pending_assign(Request $request) {
       $pickup_request_ids = $request->input('pickup_request_ids');
+
       $rider_id = $request->input('rider_id');
+
+      if (empty($pickup_request_ids)) {
+        return ['status' => 1, 'error' => 'No Pickup Request Selected'];
+      }
+
+      if (empty($rider_id)) {
+        return ['status' => 1, 'error' => 'No Rider Selected'];
+      }
 
       foreach ($pickup_request_ids as $pickup_request_id) {
         $pickup_request = PickupRequest::find($pickup_request_id);
