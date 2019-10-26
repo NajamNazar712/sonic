@@ -67,8 +67,8 @@ class ShipperDashboardController extends Controller
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                    ->where('shipments_journey.created_at', '=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
+                    ->where('shipments_journey.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
             })
             ->join('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
