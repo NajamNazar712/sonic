@@ -5028,7 +5028,7 @@
                 obj.text = obj.type;
                 return obj;
             });
-
+        @isset($wms_user_info->warehousing)
         @if(!$wms_user_info->packing_charges)
         
 
@@ -5042,7 +5042,7 @@
 
             });
         @endif
-
+        @endisset
 
         var packingSwitch = document.querySelector('.switchery.packingCharges');
         packingSwitch.onchange = function () {

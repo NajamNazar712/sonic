@@ -4789,7 +4789,7 @@
                 obj.text = obj.type;
                 return obj;
             });
-
+        @isset($wms_user_info->warehousing)
         @if(!$wms_user_info->packing_charges)
 
         $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
@@ -4802,7 +4802,7 @@
 
             });
         @endif
-
+        @endisset
         var packingSwitch = document.querySelector('.switchery.packingCharges');
         packingSwitch.onchange = function () {
             if(packingSwitch.checked === true){
