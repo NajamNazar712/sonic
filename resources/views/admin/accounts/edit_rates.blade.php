@@ -4695,7 +4695,25 @@
         var storage_type_rows = 1;
         @endempty
         
-        
+        @if($wms_user_info->packing_charges)
+        var packing_material_data = @json($packaging_material_types);
+        var packing_data = $.map(packing_material_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.type;
+                return obj;
+            });
+
+        $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:packing_data,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).bind('select2:select', function(){
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
+                $('input[name="packing_type[0]"]').val($(this).val());
+
+            });
+        @endif
+
         $('body').on('click','#storage_type_add', function(){
             console.log(storage_type_selected)
             var previous_row = storage_type_rows - 1;
