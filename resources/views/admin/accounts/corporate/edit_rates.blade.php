@@ -3459,7 +3459,7 @@
                                                     <div class="row">
                                                         <div class="col-md-2">
                                                             <fieldset class="form-group">
-                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{ ($wms_labelling_charges)? $wms_labelling_charges->charges:0 }}" {{ ($wms_labelling_charges)? '':'disabled'}}>
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{ ($wms_labelling_charges)? $wms_labelling_charges->charges:0 }}" {{ ($$wms_user_info->labelling_charges)? '':'disabled'}}>
                                                             </fieldset>
                                                         </div>
                                                     </div>
@@ -3623,7 +3623,7 @@
                                                                 </div>
                                                                 <div class="col-md-2">
                                                                     
-                                                                        <span id="packing_type_add" class="bt btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
+                                                                        <span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
                                                                         <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
                                                                     
                                                                 </div>
