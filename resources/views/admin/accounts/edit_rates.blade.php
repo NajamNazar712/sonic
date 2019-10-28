@@ -3089,10 +3089,10 @@
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col-md-2">
-                                                                        <fieldset class="form-group">
+                                                                       
                                                                             <span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
                                                                             <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
-                                                                        </fieldset>
+                                                                        
                                                                     </div>
                                                                 </div>
                                                                     
@@ -3279,10 +3279,10 @@
                                                                     </fieldset>
                                                                 </div>
                                                                 <div class="col-md-2">
-                                                                    <fieldset class="form-group">
+                                                                    
                                                                         <span id="packing_type_add" class="btn btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
                                                                         <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
-                                                                    </fieldset>
+                                                                    
                                                                 </div>
                                                             </div>
                                                             
@@ -4697,7 +4697,7 @@
         
 
         $('body').on('click','#storage_type_add', function(){
-            console.log(storage_type_selected)
+            
             var previous_row = storage_type_rows - 1;
               
             $(this).addClass('d-none');
@@ -4720,7 +4720,7 @@
                 
             });
 
-            if(storage_data_new.length != 0){
+            if(storage_data_new.length !== 0){
                 var htmldiv = '<div class="row storage_type_row" id="storage_type_row'+storage_type_rows+'">\n' +
                 '                                                <input id="storage_type_input'+ storage_type_rows +'" type="hidden" name="storage_type['+ storage_type_rows +']" value=""><div class="col-md-2 st_select">\n' +
                 '                                                    <fieldset class="form-group">\n' +
@@ -4837,7 +4837,7 @@
                 }
                 
             });
-            if(packing_data_new.length != 0){
+            if(packing_data_new.length !== 0){
                 var htmldiv = '<div class="row packing_type_row" id="packing_type_row'+packing_type_rows+'">\n' +
                 '                                                <input id="packing_type_input'+ packing_type_rows +'" type="hidden" name="packing_type['+ packing_type_rows +']" value=""><div class="col-md-2">\n' +
                 '                                                    <fieldset class="form-group">\n' +

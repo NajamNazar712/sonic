@@ -3432,12 +3432,12 @@
                                                                     </fieldset>
                                                                 </div>
                                                                 <div class="col-md-2">
-                                                                    <fieldset class="form-group">
+                                                                    
                                                                         <span id="packing_type_add" class="btn btn-sm btn-outline-primary {{ ($packing_count == $packing_row_count)? '':'d-none' }}" title="Add" ><i class="la la-check"></i></span>
                                                                         @if($pkey > 0)
                                                                         <span row="{{$pkey}}" class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
                                                                         @endif
-                                                                    </fieldset>
+                                                                    
                                                                 </div>
                                                             </div>
                                                             @php  $packing_row_count++ @endphp
@@ -3459,10 +3459,10 @@
                                                                             </fieldset>
                                                                         </div>
                                                                         <div class="col-md-2">
-                                                                            <fieldset class="form-group">
+                                                                            
                                                                                 <span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
                                                                                 <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
-                                                                            </fieldset>
+                                                                            
                                                                         </div>
                                                                     </div>
                                                                     
@@ -3649,10 +3649,9 @@
                                                                     </fieldset>
                                                                 </div>
                                                                 <div class="col-md-2">
-                                                                    <fieldset class="form-group">
                                                                         <span id="packing_type_add" class="btn btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
                                                                         <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
-                                                                    </fieldset>
+                                                                   
                                                                 </div>
                                                             </div>
                                                             
@@ -4942,7 +4941,7 @@
             var previous_select = $('select[name="storage_type['+ previous_row +']"]');
             var index = $.inArray(previous_select.val(), storage_type_selected);
             if(index === -1){
-                console.log(previous_select.val())
+                
                 storage_type_selected.push(previous_select.val());
             }
             previous_select.prop('disabled', true);
@@ -4957,7 +4956,8 @@
                 }
                 
             });
-            if(storage_data_new.length != 0){
+            console.log(storage_data_new)
+            if(storage_data_new.length !== 0){
                 var htmldiv = '<div class="row storage_type_row" id="storage_type_row'+storage_type_rows+'">\n' +
                 '                                                <input id="storage_type_input'+ storage_type_rows +'" type="hidden" name="storage_type['+ storage_type_rows +']" value=""><div class="col-md-2 st_select">\n' +
                 '                                                    <fieldset class="form-group">\n' +
@@ -5056,6 +5056,7 @@
         
         
         $('body').on('click','#packing_type_add', function(){
+
             var previous_row = packing_type_rows - 1;
             $(this).addClass('d-none');
 
@@ -5078,7 +5079,7 @@
                 }
                 
             });
-            if(packing_data_new.length != 0){
+            if(packing_data_new.length !== 0){
                 var htmldiv = '<div class="row packing_type_row" id="packing_type_row'+packing_type_rows+'">\n' +
                 '                                                <input id="packing_type_input'+ packing_type_rows +'" type="hidden" name="packing_type['+ packing_type_rows +']" value=""><div class="col-md-2">\n' +
                 '                                                    <fieldset class="form-group">\n' +
