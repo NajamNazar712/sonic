@@ -3318,7 +3318,6 @@
                                                         </div>
 
                                                         <div class="col-12" id="wms_storage_types_div">
-                                                            @if($wms_user_info->packing_charges)
                                                             @php
                                                                 $storage_count = count($wms_storage_charges);
                                                                 $row_count = 1;
@@ -3350,32 +3349,7 @@
                                                             </div>
                                                             @php  $row_count++ @endphp
                                                             @endforeach
-                                                            @else
-
-                                                            <div class="row packing_type_row" id="packing_type_row0">
-                                                                <input type="hidden" id="packing_type_input0" name="packing_type[0]">
-                                                                <div class="col-md-2">
-                                                                    <fieldset class="form-group">
-                                                                        <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
-                                                                        </select>
-                                                                    </fieldset>
-                                                                </div>
-
-                                                                <div class="col-md-2">
-                                                                    <fieldset class="form-group">
-                                                                        <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" disabled="disabled">
-                                                                    </fieldset>
-                                                                </div>
-                                                                <div class="col-md-2">
-                                                                    <fieldset class="form-group">
-                                                                        <span id="packing_type_add" class="btn btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
-                                                                        <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
-                                                                    </fieldset>
-                                                                </div>
-                                                            </div>
                                                             
-                                                        
-                                                            @endif
                                                         </div>
                                                         
                                                     </div>
@@ -3432,39 +3406,38 @@
                                                                     </fieldset>
                                                                 </div>
                                                                 <div class="col-md-2">
-                                                                    
                                                                         <span id="packing_type_add" class="btn btn-sm btn-outline-primary {{ ($packing_count == $packing_row_count)? '':'d-none' }}" title="Add" ><i class="la la-check"></i></span>
                                                                         @if($pkey > 0)
                                                                         <span row="{{$pkey}}" class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
                                                                         @endif
-                                                                    
+                                                                   
                                                                 </div>
                                                             </div>
                                                             @php  $packing_row_count++ @endphp
                                                             @endforeach
                                                             @else
                                                                  
-                                                                    <div class="row packing_type_row" id="packing_type_row0">
-                                                                        <input type="hidden" id="packing_type_input0" name="packing_type[0]">
-                                                                        <div class="col-md-2">
-                                                                            <fieldset class="form-group">
-                                                                                <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
-                                                                                </select>
-                                                                            </fieldset>
-                                                                        </div>
-
-                                                                        <div class="col-md-2">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" disabled="disabled">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col-md-2">
-                                                                            
-                                                                                <span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
-                                                                                <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
-                                                                            
-                                                                        </div>
+                                                                <div class="row packing_type_row" id="packing_type_row0">
+                                                                    <input type="hidden" id="packing_type_input0" name="packing_type[0]">
+                                                                    <div class="col-md-2">
+                                                                        <fieldset class="form-group">
+                                                                            <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
+                                                                            </select>
+                                                                        </fieldset>
                                                                     </div>
+
+                                                                    <div class="col-md-2">
+                                                                        <fieldset class="form-group">
+                                                                            <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" disabled="disabled">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                       
+                                                                            <span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
+                                                                            <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
+                                                                        
+                                                                    </div>
+                                                                </div>
                                                                     
                                                                 
                                                             @endif
@@ -3649,9 +3622,10 @@
                                                                     </fieldset>
                                                                 </div>
                                                                 <div class="col-md-2">
-                                                                        <span id="packing_type_add" class="btn btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
+                                                                    
+                                                                        <span id="packing_type_add" class="bt btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
                                                                         <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
-                                                                   
+                                                                    
                                                                 </div>
                                                             </div>
                                                             
@@ -3689,9 +3663,7 @@
                                         </div>
                                         
                                     </div>
-                                 @endisset   
-                                </div>
-                            </div>
+                                 @endisset 
 
                             <div class="text-center mt-2">
                                 <div class="form-group">
@@ -4933,15 +4905,16 @@
         @endempty
         
         
+
         $('body').on('click','#storage_type_add', function(){
-            console.log(storage_type_selected)
+            
             var previous_row = storage_type_rows - 1;
               
             $(this).addClass('d-none');
             var previous_select = $('select[name="storage_type['+ previous_row +']"]');
             var index = $.inArray(previous_select.val(), storage_type_selected);
             if(index === -1){
-                
+                console.log(previous_select.val())
                 storage_type_selected.push(previous_select.val());
             }
             previous_select.prop('disabled', true);
@@ -4956,7 +4929,7 @@
                 }
                 
             });
-            console.log(storage_data_new)
+
             if(storage_data_new.length !== 0){
                 var htmldiv = '<div class="row storage_type_row" id="storage_type_row'+storage_type_rows+'">\n' +
                 '                                                <input id="storage_type_input'+ storage_type_rows +'" type="hidden" name="storage_type['+ storage_type_rows +']" value=""><div class="col-md-2 st_select">\n' +
@@ -4996,7 +4969,6 @@
 
             storage_type_rows++;
             }
-
             
 
         });
@@ -5021,7 +4993,6 @@
         var packing_type_rows = 1;
         @endif
        
-
         var packing_material_data = @json($packaging_material_types);
         var packing_data = $.map(packing_material_data, function (obj) {
                 obj.id = obj.id;
@@ -5030,7 +5001,6 @@
             });
         @isset($wms_user_info->warehousing)
         @if(!$wms_user_info->packing_charges)
-        
 
         $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
                 data:packing_data,
@@ -5043,7 +5013,6 @@
             });
         @endif
         @endisset
-
         var packingSwitch = document.querySelector('.switchery.packingCharges');
         packingSwitch.onchange = function () {
             if(packingSwitch.checked === true){
@@ -5056,7 +5025,6 @@
         
         
         $('body').on('click','#packing_type_add', function(){
-
             var previous_row = packing_type_rows - 1;
             $(this).addClass('d-none');
 

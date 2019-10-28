@@ -3280,7 +3280,7 @@
                                                                 </div>
                                                                 <div class="col-md-2">
                                                                     
-                                                                        <span id="packing_type_add" class="btn btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
+                                                                        <span id="packing_type_add" class="bt btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
                                                                         <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
                                                                     
                                                                 </div>
