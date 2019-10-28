@@ -3074,27 +3074,27 @@
                                                             @endforeach
                                                             @else
                                                                  
-                                                                    <div class="row packing_type_row" id="packing_type_row0">
-                                                                        <input type="hidden" id="packing_type_input0" name="packing_type[0]">
-                                                                        <div class="col-md-2">
-                                                                            <fieldset class="form-group">
-                                                                                <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
-                                                                                </select>
-                                                                            </fieldset>
-                                                                        </div>
-
-                                                                        <div class="col-md-2">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" disabled="disabled">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col-md-2">
-                                                                            <fieldset class="form-group">
-                                                                                <span id="packing_type_add" class="btn btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
-                                                                                <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
-                                                                            </fieldset>
-                                                                        </div>
+                                                                <div class="row packing_type_row" id="packing_type_row0">
+                                                                    <input type="hidden" id="packing_type_input0" name="packing_type[0]">
+                                                                    <div class="col-md-2">
+                                                                        <fieldset class="form-group">
+                                                                            <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
+                                                                            </select>
+                                                                        </fieldset>
                                                                     </div>
+
+                                                                    <div class="col-md-2">
+                                                                        <fieldset class="form-group">
+                                                                            <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" disabled="disabled">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <fieldset class="form-group">
+                                                                            <span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
+                                                                            <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                </div>
                                                                     
                                                                 
                                                             @endif
