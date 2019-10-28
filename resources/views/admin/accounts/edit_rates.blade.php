@@ -3063,7 +3063,6 @@
                                                                     </fieldset>
                                                                 </div>
                                                                 <div class="col-md-2">
-                                                                    
                                                                         <span id="packing_type_add" class="btn btn-sm btn-outline-primary {{ ($packing_count == $packing_row_count)? '':'d-none' }}" title="Add" ><i class="la la-check"></i></span>
                                                                         @if($pkey > 0)
                                                                         <span row="{{$pkey}}" class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
@@ -3074,19 +3073,19 @@
                                                             @php  $packing_row_count++ @endphp
                                                             @endforeach
                                                             @else
-                                                                 <div class="col-12" id="wms_packing_charges_div">
+                                                                 
                                                                     <div class="row packing_type_row" id="packing_type_row0">
                                                                         <input type="hidden" id="packing_type_input0" name="packing_type[0]">
                                                                         <div class="col-md-2">
                                                                             <fieldset class="form-group">
-                                                                                <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required">
+                                                                                <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
                                                                                 </select>
                                                                             </fieldset>
                                                                         </div>
 
                                                                         <div class="col-md-2">
                                                                             <fieldset class="form-group">
-                                                                                <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
+                                                                                <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" disabled="disabled">
                                                                             </fieldset>
                                                                         </div>
                                                                         <div class="col-md-2">
@@ -3097,7 +3096,7 @@
                                                                         </div>
                                                                     </div>
                                                                     
-                                                                </div>
+                                                                
                                                             @endif
                                                         </div>
                                                         
@@ -4695,24 +4694,7 @@
         var storage_type_rows = 1;
         @endempty
         
-        @if($wms_user_info->packing_charges)
-        var packing_material_data = @json($packaging_material_types);
-        var packing_data = $.map(packing_material_data, function (obj) {
-                obj.id = obj.id;
-                obj.text = obj.type;
-                return obj;
-            });
-
-        $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
-                data:packing_data,
-                width:'100%',
-                placeholder:'Select Storage Type'
-            }).bind('select2:select', function(){
-                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
-                $('input[name="packing_type[0]"]').val($(this).val());
-
-            });
-        @endif
+        
 
         $('body').on('click','#storage_type_add', function(){
             console.log(storage_type_selected)
@@ -4726,9 +4708,20 @@
                 storage_type_selected.push(previous_select.val());
             }
             previous_select.prop('disabled', true);
-            
+            var storage_data_new = $.map(storage_type_data, function (obj) {
+                var current_id = obj.id.toString();
+                var index = $.inArray(current_id, storage_type_selected);
+                
+                if(index === -1){
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+                    return obj;
+                }
+                
+            });
 
-            var htmldiv = '<div class="row storage_type_row" id="storage_type_row'+storage_type_rows+'">\n' +
+            if(storage_data_new.length != 0){
+                var htmldiv = '<div class="row storage_type_row" id="storage_type_row'+storage_type_rows+'">\n' +
                 '                                                <input id="storage_type_input'+ storage_type_rows +'" type="hidden" name="storage_type['+ storage_type_rows +']" value=""><div class="col-md-2 st_select">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <select class="select2 form-control storage_type" name="storage_type['+ storage_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
@@ -4744,17 +4737,7 @@
 
             $('#wms_storage_types_div').append(htmldiv);
 
-            var storage_data_new = $.map(storage_type_data, function (obj) {
-                var current_id = obj.id.toString();
-                var index = $.inArray(current_id, storage_type_selected);
-                
-                if(index === -1){
-                    obj.id = obj.id;
-                    obj.text = obj.name;
-                    return obj;
-                }
-                
-            });
+            
             var last_id = storage_type_rows;
             $('select[name="storage_type['+ storage_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
                 data:storage_data_new,
@@ -4775,6 +4758,8 @@
             });
 
             storage_type_rows++;
+            }
+            
 
         });
 
@@ -4805,6 +4790,18 @@
                 return obj;
             });
 
+        @if(!$wms_user_info->packing_charges)
+
+        $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:packing_data,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).bind('select2:select', function(){
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
+                $('input[name="packing_type[0]"]').val($(this).val());
+
+            });
+        @endif
 
         var packingSwitch = document.querySelector('.switchery.packingCharges');
         packingSwitch.onchange = function () {
@@ -4829,7 +4826,19 @@
             
             previous_select.prop('disabled', true);
 
-            var htmldiv = '<div class="row packing_type_row" id="packing_type_row'+packing_type_rows+'">\n' +
+            var packing_data_new = $.map(packing_material_data, function (obj) {
+                var current_id = obj.id.toString();
+                var index = $.inArray(current_id, packing_type_selected);
+                
+                if(index === -1){
+                    obj.id = obj.id;
+                    obj.text = obj.type;
+                    return obj;
+                }
+                
+            });
+            if(packing_data_new.length != 0){
+                var htmldiv = '<div class="row packing_type_row" id="packing_type_row'+packing_type_rows+'">\n' +
                 '                                                <input id="packing_type_input'+ packing_type_rows +'" type="hidden" name="packing_type['+ packing_type_rows +']" value=""><div class="col-md-2">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <select class="select2 form-control storage_type" name="packing_type['+ packing_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
@@ -4845,17 +4854,7 @@
 
             $('#wms_packing_charges_div').append(htmldiv);
             
-            var packing_data_new = $.map(packing_material_data, function (obj) {
-                var current_id = obj.id.toString();
-                var index = $.inArray(current_id, packing_type_selected);
-                
-                if(index === -1){
-                    obj.id = obj.id;
-                    obj.text = obj.type;
-                    return obj;
-                }
-                
-            });
+            
             var last_id = packing_type_rows;
             $('select[name="packing_type['+ packing_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
                 data:packing_data_new,
@@ -4876,6 +4875,8 @@
             });
 
             packing_type_rows++;
+            }
+            
 
         });
 
