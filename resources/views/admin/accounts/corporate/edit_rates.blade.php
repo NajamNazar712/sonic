@@ -3318,6 +3318,7 @@
                                                         </div>
 
                                                         <div class="col-12" id="wms_storage_types_div">
+                                                            @if($wms_user_info->packing_charges)
                                                             @php
                                                                 $storage_count = count($wms_storage_charges);
                                                                 $row_count = 1;
@@ -3349,7 +3350,32 @@
                                                             </div>
                                                             @php  $row_count++ @endphp
                                                             @endforeach
+                                                            @else
+                                                                 <div class="col-12" id="wms_packing_charges_div">
+                                                            <div class="row packing_type_row" id="packing_type_row0">
+                                                                <input type="hidden" id="packing_type_input0" name="packing_type[0]">
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required">
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
+                                                                    </fieldset>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <span id="packing_type_add" class="btn btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
+                                                                        <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
+                                                                    </fieldset>
+                                                                </div>
+                                                            </div>
                                                             
+                                                        </div>
+                                                            @endif
                                                         </div>
                                                         
                                                     </div>
