@@ -2960,6 +2960,7 @@
                                                         </div>
 
                                                         <div class="col-12" id="wms_packing_charges_div">
+                                                            @if($wms_user_info->packing_charges)
                                                             @foreach($wms_packing_charges as $key => $packing)
                                                             <div class="row">
                                                                 <div class="col-md-2">
@@ -2979,6 +2980,7 @@
                                                                 </div>
                                                             </div>
                                                             @endforeach
+                                                            @endif
                                                         </div>
 
                                                     </div>
@@ -2997,7 +2999,11 @@
                                                     <div class="row">
                                                         <div class="col-md-2">
                                                             <fieldset class="form-group">
+                                                                @if($wms_user_info->labelling_charges)
                                                                 <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{ $wms_labelling_charges->charges }}" disabled="disabled">
+                                                                @else
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="0" disabled="disabled">
+                                                                @endif
                                                             </fieldset>
                                                         </div>
                                                     </div>
