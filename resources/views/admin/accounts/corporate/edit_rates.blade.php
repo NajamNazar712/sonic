@@ -3459,7 +3459,7 @@
                                                     <div class="row">
                                                         <div class="col-md-2">
                                                             <fieldset class="form-group">
-                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{ ($wms_labelling_charges)? $wms_labelling_charges->charges:0 }}" {{ ($$wms_user_info->labelling_charges)? '':'disabled'}}>
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{ ($wms_labelling_charges)? $wms_labelling_charges->charges:0 }}" {{ ($wms_user_info->labelling_charges)? '':'disabled'}}>
                                                             </fieldset>
                                                         </div>
                                                     </div>
