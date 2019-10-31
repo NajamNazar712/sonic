@@ -1930,6 +1930,9 @@ class DeliveryController extends Controller
                 foreach ($shipments as $shipment) {
                     $in_new_delivery_note = DeliveryNoteShipment::where('delivery_note_id', '>', $delivery_note_id)->where('shipment_id', $shipment)->exists();
                     $shipper_status_details = Shipment::where('id', $shipment)->first();
+                    if(!$shipper_status_details){
+                        continue;
+                    }
                     $call = "call_verification.$shipment";
                     $fake = "fake_status.$shipment";
                     $status_drop = "status_drop.$shipment";
