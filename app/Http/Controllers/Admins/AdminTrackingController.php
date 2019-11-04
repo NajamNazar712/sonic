@@ -50,7 +50,7 @@ class AdminTrackingController extends Controller
                 $check = false;
                 if(session('department_id') == 7){
                     if(session('role_id') != 4 ){
-                        if(in_array($shipment->user->id, session('tagged_shippers'))){
+                        if(in_array($shipment->user->id, session('tagged_shippers')) || in_array(273, session('permissions'))){
                             $check = true;
                         }
                     }
