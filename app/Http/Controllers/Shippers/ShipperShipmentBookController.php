@@ -1231,7 +1231,9 @@ class ShipperShipmentBookController extends Controller
             }
 
             if ($sticker) {
-                return $this->air_waybill_sticker_pdf($user_type, $user_id, $request->ids);
+                $shipment_ids = Shipment::whereIn('id', $request->ids)->orderBy('order_id', 'ASC')->orderBy('id', 'ASC')->pluck('id')->toArray();
+
+                return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_ids);
             }
             else {
                 return $this->air_waybill($user_type, $user_id, $request->ids);
