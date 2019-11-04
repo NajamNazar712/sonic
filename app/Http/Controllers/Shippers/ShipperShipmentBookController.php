@@ -555,17 +555,23 @@ class ShipperShipmentBookController extends Controller
         $shipment_ids = array();
         if($request->ids){
             $i = 0;
+            $sticker = TRUE;
+
             foreach ($request->ids as $id){
-                $shipment_id = Shipment::find($id);
-                if($shipment_id){
-                    if($shipment_id->shipper_status_id == 1){
+                $shipment = Shipment::find($id);
+                if($shipment){
+                    if($shipment->shipper_status_id == 1){
                         $shipment_ids[$i] = $id;
                         $i++;
+
+                        if ($shipment->user_id != 2842) {
+                            $sticker = FALSE;
+                        }
                     }
                 }
             }
             if($i > 0) {
-                return ['status' => 1, 'ids' => $shipment_ids];
+                return ['status' => 1, 'ids' => $shipment_ids, 'sticker' => $sticker];
             }
             else{
                 return ['status' => 2];
@@ -1220,17 +1226,7 @@ class ShipperShipmentBookController extends Controller
         }
 
         if ($user_type) {
-            $sticker = TRUE;
-
-            foreach ($request->ids as $id) {
-                $shipment = Shipment::find($id);
-
-                if ($shipment->user_id != 2842) {
-                    $sticker = FALSE;
-                }
-            }
-
-            if ($sticker) {
+            if ($request->sticker) {
                 $shipment_ids = Shipment::whereIn('id', $request->ids)->orderBy('order_id', 'ASC')->orderBy('id', 'ASC')->pluck('id')->toArray();
 
                 return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_ids);
@@ -2829,7 +2825,7 @@ class ShipperShipmentBookController extends Controller
 
         return new Response($pdf, 200, array(
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="'.$filename.'"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ));
     }
 }
