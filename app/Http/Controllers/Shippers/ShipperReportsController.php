@@ -21,9 +21,10 @@ class ShipperReportsController extends Controller
     }
 
     public function sales_index(){
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->select('id','mode')->get();
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
-        return view('client.reports.sales_report')->with(['cities'=>$cities,'statuses'=>$statuses]);
+        return view('client.reports.sales_report')->with(['cities'=>$cities,'statuses'=>$statuses,'shipping_modes' => $shipping_modes]);
     }
     public function sales_list(Request $request){
             $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
@@ -33,6 +34,7 @@ class ShipperReportsController extends Controller
                 ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
                 ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
                 ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
+                ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
                 ->leftJoin('shipments_journey as sj', function ($join) {
                     $join->on('sj.shipment_id', '=', 'shipments.id')
                         ->where('sj.created_at','=',
@@ -53,7 +55,7 @@ class ShipperReportsController extends Controller
                         ->where('si.type','=',0);
                 })
                 ->leftjoin('products as p','p.id','=','si.product_type_id')
-                ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount')
+                ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode')
                 ->whereNotIn('shipments.shipper_status_id',[1,17]);
 //                ->where('u.id', session('user_id'))
 //                ->orwhereIn('shipments.user_id', session('sister_users'));
@@ -99,6 +101,9 @@ class ShipperReportsController extends Controller
             }
             if($status = $request->get('search_status')){
                 $datatable->where('ss.id', '=', $status);
+            }
+            if($mode = $request->get('search_shipping_mode')){
+                $datatable->where('sm.id', '=', $mode);
             }
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');

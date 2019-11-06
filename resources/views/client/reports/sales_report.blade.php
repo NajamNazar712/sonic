@@ -45,6 +45,15 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                @foreach($shipping_modes as $shipping_mode)
+                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
 
                     <div class="col-4">
 
@@ -88,6 +97,7 @@
                         <th class="border-primary border-darken-1">Product Category</th>
                         <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
@@ -199,6 +209,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Shipping Mode',
+                width:'100%',
+                allowClear:true
+            });
 
 
             var from_date = $('#search_date_from').pickadate({
@@ -264,6 +279,7 @@
                             'search_origin': $('#search_origin').val(),
                             'search_destination': $('#search_destination').val(),
                             'search_status': $('#search_status').val(),
+                            'search_shipping_mode': $('#search_shipping_mode').val(),
                             'search_date_from': $('input[name="search_date_from_formatted"]').val(),
                             'search_date_to': $('input[name="search_date_to_formatted"]').val()
                         },
@@ -281,6 +297,7 @@
                             head.push('Product Category');
                             head.push('Description');
                             head.push('Arrival Date');
+                            head.push('Shipping Mode');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Collection Amount');
@@ -302,6 +319,7 @@
                                 row.push(values.product_name);
                                 row.push(values.description);
                                 row.push(values.arrival_date);
+                                row.push(values.shipping_mode);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.p_collection_amount);
@@ -343,6 +361,7 @@
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_status = $('#search_status').val();
+                        d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
@@ -360,6 +379,7 @@
                     { data:'product_name', name: 'p.product_name', class: 'align-middle product_name'},
                     { data:'description', name: 'si.description', class: 'align-middle description'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
+                    { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
