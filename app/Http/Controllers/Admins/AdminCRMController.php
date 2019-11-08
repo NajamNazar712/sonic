@@ -670,6 +670,10 @@ class AdminCRMController extends Controller
                 $join->on('ccs.crm_request_id', '=', 'crm_requests.id')
                     ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id)'));
             })
+            ->leftjoin('sale_person_tags as spt', function($join){
+                $join->on('spt.user_id', '=', 'crm_requests.user_id')
+                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = crm_requests.user_id and sale_person_tags.status = 0)'));
+            })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'dh.name as destination_hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id')
@@ -700,6 +704,11 @@ class AdminCRMController extends Controller
                         });
                 });
             });
+        }
+        else if (session('department_id') == 7){
+            if(session('role_id') != 4){
+                $in_process_request = $in_process_request->where('spt.admin_id', Auth::id());
+            }
         }
 
         $datatables = Datatables::of($in_process_request)
@@ -983,6 +992,10 @@ class AdminCRMController extends Controller
                     ->where('crth.id', '=',
                         DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)'));
             })
+            ->leftjoin('sale_person_tags as spt', function($join){
+                $join->on('spt.user_id', '=', 'crm_requests.user_id')
+                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = crm_requests.user_id and sale_person_tags.status = 0)'));
+            })
             ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crth.tagged_id')
             ->leftjoin('admins as at', 'at.id', '=', 'crth.tagged_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'ra.name as resolved_by', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id')
@@ -1011,6 +1024,11 @@ class AdminCRMController extends Controller
                         });
                 });
             });
+        }
+        else if (session('department_id') == 7){
+            if(session('role_id') != 4){
+                $resolved_request = $resolved_request->where('spt.admin_id', Auth::id());
+            }
         }
 
         $datatables = Datatables::of($resolved_request)
@@ -1222,6 +1240,10 @@ class AdminCRMController extends Controller
                     ->where('crth.id', '=',
                         DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)'));
             })
+            ->leftjoin('sale_person_tags as spt', function($join){
+                $join->on('spt.user_id', '=', 'crm_requests.user_id')
+                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = crm_requests.user_id and sale_person_tags.status = 0)'));
+            })
             ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crth.tagged_id')
             ->leftjoin('admins as at', 'at.id', '=', 'crth.tagged_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'crm_requests.launched_by_id')
@@ -1250,6 +1272,11 @@ class AdminCRMController extends Controller
                             });
                     });
             });
+        }
+        else if (session('department_id') == 7){
+            if(session('role_id') != 4){
+                $closed_request = $closed_request->where('spt.admin_id', Auth::id());
+            }
         }
 
         $datatables = Datatables::of($closed_request)
