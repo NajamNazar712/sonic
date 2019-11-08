@@ -408,7 +408,7 @@ class AdminCRMController extends Controller
                     });
                 });
         }
-        elseif (session('department_id') == 7){
+        if (session('department_id') == 7){
             if(session('role_id') != 4){
                 $launched_request = $launched_request
                     ->where(function ($sub_query){
