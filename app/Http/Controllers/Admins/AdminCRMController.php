@@ -405,11 +405,16 @@ class AdminCRMController extends Controller
                     ->orWhere(function ($sub_query) {
                         $sub_query->where('crm_requests.launched_by', 0)
                             ->where('crm_requests.launched_by_id', Auth::id());
-                    })
-                    ->orWhere(function ($sub_query){
-                        $sub_query->where('spt.admin_id', Auth::id());
                     });
                 });
+        }
+        elseif (session('department_id') == 7){
+            if(session('role_id') != 4){
+                $launched_request = $launched_request
+                    ->where(function ($sub_query){
+                        $sub_query->where('spt.admin_id', Auth::id());
+                    });
+            }
         }
 
         $datatables = Datatables::of($launched_request)
