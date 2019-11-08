@@ -389,8 +389,8 @@ class AdminCRMController extends Controller
                     ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id)'));
             })
             ->leftjoin('sale_person_tags as spt', function($join){
-                $join->on('spt.user_id', '=', 'u.id')
-                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 0)'));
+                $join->on('spt.user_id', '=', 'crm_requests.user_id')
+                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = crm_requests.user_id and sale_person_tags.status = 0)'));
             })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
