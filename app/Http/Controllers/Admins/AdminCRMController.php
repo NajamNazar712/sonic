@@ -9,6 +9,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\RevertStatusRequest;
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
@@ -270,6 +271,7 @@ class AdminCRMController extends Controller
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
 
+        $sale_person = SalePersonTag::where('user_id', $crm_request->shipper_id)->where('status', 0)->first();
 
         if($crm_request){
             return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date]);
@@ -389,8 +391,8 @@ class AdminCRMController extends Controller
                     ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id)'));
             })
             ->leftjoin('sale_person_tags as spt', function($join){
-                $join->on('spt.user_id', '=', 'crm_requests.user_id')
-                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = crm_requests.user_id and sale_person_tags.status = 0)'));
+                $join->on('spt.user_id', '=', 'crm_requests.shipper_id')
+                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.shipper_id = crm_requests.user_id and sale_person_tags.status = 0)'));
             })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
@@ -669,10 +671,6 @@ class AdminCRMController extends Controller
             ->leftjoin('crm_comments as ccs', function($join){
                 $join->on('ccs.crm_request_id', '=', 'crm_requests.id')
                     ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id)'));
-            })
-            ->leftjoin('sale_person_tags as spt', function($join){
-                $join->on('spt.user_id', '=', 'crm_requests.user_id')
-                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = crm_requests.user_id and sale_person_tags.status = 0)'));
             })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
@@ -993,8 +991,8 @@ class AdminCRMController extends Controller
                         DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)'));
             })
             ->leftjoin('sale_person_tags as spt', function($join){
-                $join->on('spt.user_id', '=', 'crm_requests.user_id')
-                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = crm_requests.user_id and sale_person_tags.status = 0)'));
+                $join->on('spt.user_id', '=', 'crm_requests.shipper_id')
+                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = crm_requests.shipper_id and sale_person_tags.status = 0)'));
             })
             ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crth.tagged_id')
             ->leftjoin('admins as at', 'at.id', '=', 'crth.tagged_id')
@@ -1241,8 +1239,8 @@ class AdminCRMController extends Controller
                         DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)'));
             })
             ->leftjoin('sale_person_tags as spt', function($join){
-                $join->on('spt.user_id', '=', 'crm_requests.user_id')
-                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = crm_requests.user_id and sale_person_tags.status = 0)'));
+                $join->on('spt.user_id', '=', 'crm_requests.shipper_id')
+                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.shipper_id = crm_requests.user_id and sale_person_tags.status = 0)'));
             })
             ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crth.tagged_id')
             ->leftjoin('admins as at', 'at.id', '=', 'crth.tagged_id')
