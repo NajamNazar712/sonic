@@ -388,6 +388,10 @@ class AdminCRMController extends Controller
                 $join->on('ccs.crm_request_id', '=', 'crm_requests.id')
                     ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id)'));
             })
+            ->leftjoin('sale_person_tags as spt', function($join){
+                $join->on('spt.user_id', '=', 'u.id')
+                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.status = 0)'));
+            })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
             ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id')
@@ -401,6 +405,9 @@ class AdminCRMController extends Controller
                     ->orWhere(function ($sub_query) {
                         $sub_query->where('crm_requests.launched_by', 0)
                             ->where('crm_requests.launched_by_id', Auth::id());
+                    })
+                    ->orWhere(function ($sub_query){
+                        $sub_query->where('spt.admin_id', Auth::id());
                     });
                 });
         }
