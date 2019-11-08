@@ -408,12 +408,9 @@ class AdminCRMController extends Controller
                     });
                 });
         }
-        elseif (session('department_id') == 7){
+        else if (session('department_id') == 7){
             if(session('role_id') != 4){
-                $launched_request = $launched_request
-                    ->where(function ($sub_query){
-                        $sub_query->where('spt.admin_id', Auth::id());
-                    });
+                $launched_request = $launched_request->where('spt.admin_id', Auth::id());
             }
         }
 
