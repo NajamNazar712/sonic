@@ -48,14 +48,16 @@ class AdminTrackingController extends Controller
     		if ($shipment->exists()) {
     			$shipment = $shipment->first();
                 $check = false;
-                if(session('department_id') == 7){
-                    if(session('role_id') != 4 ){
-                        if(in_array($shipment->user->id, session('tagged_shippers'))){
+
+                if (session('department_id') == 7) {
+                    if (session('role_id') != 4 ) {
+                        if (in_array($shipment->user->id, session('tagged_shippers')) || in_array(273, session('permissions'))) {
                             $check = true;
                         }
                     }
                 }
-                if((session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4 )){
+
+                if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4)) {
                     $details = array();
 
                     $details['tracking_number'] = $tracking_number;

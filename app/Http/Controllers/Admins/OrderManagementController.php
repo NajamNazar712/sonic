@@ -330,17 +330,22 @@ class OrderManagementController extends Controller
 
         if (!empty($shipment_ids)) {
             $valid_ids = array();
+            $sticker = TRUE;
 
             foreach ($shipment_ids as $shipment_id) {
                 $shipment = Shipment::find($shipment_id);
 
                 if ($shipment && ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2) && !$shipment->packaging_material_request) {
                     $valid_ids[] = $shipment_id;
+
+                    if ($shipment->user_id != 2842) {
+                        $sticker = FALSE;
+                    }
                 }
             }
 
             if (!empty($valid_ids)) {
-                return ['status' => 0, 'success' => 'Valid Shipment(s) Found', 'valid_ids' => $valid_ids];
+                return ['status' => 0, 'success' => 'Valid Shipment(s) Found', 'valid_ids' => $valid_ids, 'sticker' => $sticker];
             }
             else {
                 return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];

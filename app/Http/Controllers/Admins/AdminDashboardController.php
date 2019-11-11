@@ -189,137 +189,136 @@ class AdminDashboardController extends Controller
         $cities = City::where('status',1)->select('id','name')->get();
         $service_type = BookingType::where('id', '!=', 3)->select('id','booking_type')->get();
 
-        $admin = Admin::where('id', Auth::id())->first();
-        //incoming
-        $doughnut_chart_shipments_count['booked'] = OperationForecast::where('shipper_status_id', 1)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['arrived_at_origin'] = OperationForecast::where('shipper_status_id', 2)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['in_transit'] = OperationForecast::where('shipper_status_id', 3)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['arrived_at_destination'] = OperationForecast::where('shipper_status_id', 4)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['not_attempted'] = OperationForecast::where('shipper_status_id', 7)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['delivery_unsuccessful'] = OperationForecast::where('shipper_status_id', 8)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['on_hold'] = OperationForecast::where('shipper_status_id', 9)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['total'] = $doughnut_chart_shipments_count['booked'] + $doughnut_chart_shipments_count['arrived_at_origin'] + $doughnut_chart_shipments_count['in_transit'] + $doughnut_chart_shipments_count['arrived_at_destination'] + $doughnut_chart_shipments_count['not_attempted'] + $doughnut_chart_shipments_count['delivery_unsuccessful'] + $doughnut_chart_shipments_count['on_hold'];
-
-        $incoming_bar_chart_shipments['one'] = OperationForecastShipments::where('weight_range_id',1)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-        $incoming_bar_chart_shipments['two'] = OperationForecastShipments::where('weight_range_id',2)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-        $incoming_bar_chart_shipments['three'] = OperationForecastShipments::where('weight_range_id',3)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-        $incoming_bar_chart_shipments['four'] = OperationForecastShipments::where('weight_range_id',4)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-
-        $riders_count = Rider::where('status', 1)->where('city_id', $admin->default_hub_id)->count();
-        $sixtyDays = Carbon::now()->subDays(58)->startOfDay();
-        if($riders_count == 0){
-            $per_rider_loads = ceil(($incoming_bar_chart_shipments['one'] + $incoming_bar_chart_shipments['two'] + $incoming_bar_chart_shipments['three'] + $incoming_bar_chart_shipments['four']));
-        }
-        else{
-            $per_rider_loads = ceil(($incoming_bar_chart_shipments['one'] + $incoming_bar_chart_shipments['two'] + $incoming_bar_chart_shipments['three'] + $incoming_bar_chart_shipments['four']) / $riders_count);
-        }
-
-        $light_deliveries = ($incoming_bar_chart_shipments['one'] + $incoming_bar_chart_shipments['two']);
-        $heavy_deliveries = ($incoming_bar_chart_shipments['three'] + $incoming_bar_chart_shipments['four']);
-
-        $day_wise_growth_thirty = OperationForecast::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-        $day_wise_growth_sixty = OperationForecast::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$sixtyDays,$thirtyDays])->sum('operation_forecasts.count');
-        if($day_wise_growth_sixty == 0){
-            $day_wise_growth_percentage = 0;
-        }
-        else{
-            $day_wise_growth = ($day_wise_growth_thirty - $day_wise_growth_sixty) / $day_wise_growth_sixty;
-            $day_wise_growth_percentage = number_format($day_wise_growth * 100,1);
-        }
-        $operation_incoming['per_rider_loads'] = $per_rider_loads;
-        $operation_incoming['day_wise_growth'] = $day_wise_growth_percentage . '%';
-        $operation_incoming['heavy_deliveries'] = $heavy_deliveries;
-        $operation_incoming['light_deliveries'] = $light_deliveries;
-
+//        $admin = Admin::where('id', Auth::id())->first();
+//        //incoming
+//        $doughnut_chart_shipments_count['booked'] = OperationForecast::where('shipper_status_id', 1)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+//        $doughnut_chart_shipments_count['arrived_at_origin'] = OperationForecast::where('shipper_status_id', 2)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+//        $doughnut_chart_shipments_count['in_transit'] = OperationForecast::where('shipper_status_id', 3)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+//        $doughnut_chart_shipments_count['arrived_at_destination'] = OperationForecast::where('shipper_status_id', 4)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+//        $doughnut_chart_shipments_count['not_attempted'] = OperationForecast::where('shipper_status_id', 7)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+//        $doughnut_chart_shipments_count['delivery_unsuccessful'] = OperationForecast::where('shipper_status_id', 8)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+//        $doughnut_chart_shipments_count['on_hold'] = OperationForecast::where('shipper_status_id', 9)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+//        $doughnut_chart_shipments_count['total'] = $doughnut_chart_shipments_count['booked'] + $doughnut_chart_shipments_count['arrived_at_origin'] + $doughnut_chart_shipments_count['in_transit'] + $doughnut_chart_shipments_count['arrived_at_destination'] + $doughnut_chart_shipments_count['not_attempted'] + $doughnut_chart_shipments_count['delivery_unsuccessful'] + $doughnut_chart_shipments_count['on_hold'];
+//
+//        $incoming_bar_chart_shipments['one'] = OperationForecastShipments::where('weight_range_id',1)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
+//        $incoming_bar_chart_shipments['two'] = OperationForecastShipments::where('weight_range_id',2)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
+//        $incoming_bar_chart_shipments['three'] = OperationForecastShipments::where('weight_range_id',3)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
+//        $incoming_bar_chart_shipments['four'] = OperationForecastShipments::where('weight_range_id',4)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
+//
+//        $riders_count = Rider::where('status', 1)->where('city_id', $admin->default_hub_id)->count();
+//        $sixtyDays = Carbon::now()->subDays(58)->startOfDay();
+//        if($riders_count == 0){
+//            $per_rider_loads = ceil(($incoming_bar_chart_shipments['one'] + $incoming_bar_chart_shipments['two'] + $incoming_bar_chart_shipments['three'] + $incoming_bar_chart_shipments['four']));
+//        }
+//        else{
+//            $per_rider_loads = ceil(($incoming_bar_chart_shipments['one'] + $incoming_bar_chart_shipments['two'] + $incoming_bar_chart_shipments['three'] + $incoming_bar_chart_shipments['four']) / $riders_count);
+//        }
+//
+//        $light_deliveries = ($incoming_bar_chart_shipments['one'] + $incoming_bar_chart_shipments['two']);
+//        $heavy_deliveries = ($incoming_bar_chart_shipments['three'] + $incoming_bar_chart_shipments['four']);
+//
+//        $day_wise_growth_thirty = OperationForecast::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
+//        $day_wise_growth_sixty = OperationForecast::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$sixtyDays,$thirtyDays])->sum('operation_forecasts.count');
+//        if($day_wise_growth_sixty == 0){
+//            $day_wise_growth_percentage = 0;
+//        }
+//        else{
+//            $day_wise_growth = ($day_wise_growth_thirty - $day_wise_growth_sixty) / $day_wise_growth_sixty;
+//            $day_wise_growth_percentage = number_format($day_wise_growth * 100,1);
+//        }
+//        $operation_incoming['per_rider_loads'] = $per_rider_loads;
+//        $operation_incoming['day_wise_growth'] = $day_wise_growth_percentage . '%';
+//        $operation_incoming['heavy_deliveries'] = $heavy_deliveries;
+//        $operation_incoming['light_deliveries'] = $light_deliveries;
+//
+//
+//
+//        $operation_dates['from'] = $graph_dates['old_date'];
+//        $operation_dates['to'] = $graph_dates['current'];
+//
+//        //outgoing
 //        $operation_outgoing_pickups['no_of_shipments'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
-//        $operation_outgoing_pickups['pickups'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->count('operations_outgoing_pickup_requests.id');
+//        $operation_outgoing_pickups['pickups_count'] = OperationsOutgoingPickupRequests::select(DB::raw('count(operations_outgoing_pickup_requests.id) as count'))->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->get();
+//        $operation_outgoing_pickups['pickups'] = 0;
+//        foreach ($operation_outgoing_pickups['pickups_count'] as $pickups_count){
+//            $operation_outgoing_pickups['pickups'] = $operation_outgoing_pickups['pickups'] + $pickups_count->count;
+//        }
+//
+//        $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('u.name as name', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "'. $thirtyDays .'" AND "'. $today .'") AS count'))
+//            ->whereBetween('operations_outgoing_top_customers.created_at',[$thirtyDays,$today])
+//            ->orderBy('count', 'desc')
+//            ->groupBy('u.id')
+//            ->take(5)->get()->toArray();
+//        if(array_key_exists(0, $outgoing_top_five_customers)){
+//            $outgoing_doughnut_top_five_customers['first'] = $outgoing_top_five_customers[0];
+//        }
+//        else{
+//            $outgoing_doughnut_top_five_customers['first']['name'] = '-';
+//            $outgoing_doughnut_top_five_customers['first']['count'] = 0;
+//        }
+//        if(array_key_exists(1, $outgoing_top_five_customers)){
+//            $outgoing_doughnut_top_five_customers['second'] = $outgoing_top_five_customers[1];
+//        }
+//        else{
+//            $outgoing_doughnut_top_five_customers['second']['name'] = '-';
+//            $outgoing_doughnut_top_five_customers['second']['count'] = 0;
+//        }
+//        if(array_key_exists(2, $outgoing_top_five_customers)){
+//            $outgoing_doughnut_top_five_customers['third'] = $outgoing_top_five_customers[2];
+//        }
+//        else{
+//            $outgoing_doughnut_top_five_customers['third']['name'] = '-';
+//            $outgoing_doughnut_top_five_customers['third']['count'] = 0;
+//        }
+//        if(array_key_exists(3, $outgoing_top_five_customers)){
+//            $outgoing_doughnut_top_five_customers['fourth'] = $outgoing_top_five_customers[3];
+//        }
+//        else{
+//            $outgoing_doughnut_top_five_customers['fourth']['name'] = '-';
+//            $outgoing_doughnut_top_five_customers['fourth']['count'] = 0;
+//        }
+//        if(array_key_exists(4, $outgoing_top_five_customers)){
+//            $outgoing_doughnut_top_five_customers['fifth'] = $outgoing_top_five_customers[4];
+//        }
+//        else{
+//            $outgoing_doughnut_top_five_customers['fifth']['name'] = '-';
+//            $outgoing_doughnut_top_five_customers['fifth']['count'] = 0;
+//        }
+//        $outgoing_doughnut_top_five_customers['total'] = $outgoing_doughnut_top_five_customers['first']['count'] + $outgoing_doughnut_top_five_customers['second']['count'] + $outgoing_doughnut_top_five_customers['third']['count'] + $outgoing_doughnut_top_five_customers['fourth']['count'] + $outgoing_doughnut_top_five_customers['fifth']['count'];
+//
+//        $outgoing_bar_chart_shipments['one'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',1)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
+//        $outgoing_bar_chart_shipments['two'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',2)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
+//        $outgoing_bar_chart_shipments['three'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',3)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
+//        $outgoing_bar_chart_shipments['four'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',4)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
+//
+//
+//        if($riders_count == 0){
+//            $outgoing_per_rider_loads = ceil(($outgoing_bar_chart_shipments['one'] + $outgoing_bar_chart_shipments['two'] + $outgoing_bar_chart_shipments['three'] + $outgoing_bar_chart_shipments['four']));
+//        }
+//        else{
+//            $outgoing_per_rider_loads = ceil(($outgoing_bar_chart_shipments['one'] + $outgoing_bar_chart_shipments['two'] + $outgoing_bar_chart_shipments['three'] + $outgoing_bar_chart_shipments['four']) / $riders_count);
+//        }
+//        $outgoing_light_deliveries = ($outgoing_bar_chart_shipments['one'] + $outgoing_bar_chart_shipments['two']);
+//        $outgoing_heavy_deliveries = ($outgoing_bar_chart_shipments['three'] + $outgoing_bar_chart_shipments['four']);
+//
+//        $outgoing_day_wise_growth_thirty = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
+//        $outgoing_day_wise_growth_sixty = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$sixtyDays,$thirtyDays])->sum('operations_outgoing_pickup_requests.shipments_count');
+//        if($outgoing_day_wise_growth_sixty == 0){
+//            $outgoing_day_wise_growth_percentage = 0;
+//        }
+//        else{
+//            $outgoing_day_wise_growth = ($outgoing_day_wise_growth_thirty - $outgoing_day_wise_growth_sixty) / $outgoing_day_wise_growth_sixty;
+//            $outgoing_day_wise_growth_percentage = number_format($outgoing_day_wise_growth * 100, 1);
+//        }
+//        $operation_outgoing['per_rider_loads'] = $outgoing_per_rider_loads;
+//        $operation_outgoing['day_wise_growth'] = $outgoing_day_wise_growth_percentage . '%';
+//        $operation_outgoing['heavy_deliveries'] = $outgoing_heavy_deliveries;
+//        $operation_outgoing['light_deliveries'] = $outgoing_light_deliveries;
+//
+//        $last_updated_at = OperationsForecastLastUpdatedTime::latest('created_at')->first();
 
-
-        $operation_dates['from'] = $graph_dates['old_date'];
-        $operation_dates['to'] = $graph_dates['current'];
-
-        //outgoing
-        $operation_outgoing_pickups['no_of_shipments'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
-        $operation_outgoing_pickups['pickups_count'] = OperationsOutgoingPickupRequests::select(DB::raw('count(operations_outgoing_pickup_requests.id) as count'))->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->get();
-        $operation_outgoing_pickups['pickups'] = 0;
-        foreach ($operation_outgoing_pickups['pickups_count'] as $pickups_count){
-            $operation_outgoing_pickups['pickups'] = $operation_outgoing_pickups['pickups'] + $pickups_count->count;
-        }
-
-        $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('u.name as name', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "'. $thirtyDays .'" AND "'. $today .'") AS count'))
-            ->whereBetween('operations_outgoing_top_customers.created_at',[$thirtyDays,$today])
-            ->orderBy('count', 'desc')
-            ->groupBy('u.id')
-            ->take(5)->get()->toArray();
-        if(array_key_exists(0, $outgoing_top_five_customers)){
-            $outgoing_doughnut_top_five_customers['first'] = $outgoing_top_five_customers[0];
-        }
-        else{
-            $outgoing_doughnut_top_five_customers['first']['name'] = '-';
-            $outgoing_doughnut_top_five_customers['first']['count'] = 0;
-        }
-        if(array_key_exists(1, $outgoing_top_five_customers)){
-            $outgoing_doughnut_top_five_customers['second'] = $outgoing_top_five_customers[1];
-        }
-        else{
-            $outgoing_doughnut_top_five_customers['second']['name'] = '-';
-            $outgoing_doughnut_top_five_customers['second']['count'] = 0;
-        }
-        if(array_key_exists(2, $outgoing_top_five_customers)){
-            $outgoing_doughnut_top_five_customers['third'] = $outgoing_top_five_customers[2];
-        }
-        else{
-            $outgoing_doughnut_top_five_customers['third']['name'] = '-';
-            $outgoing_doughnut_top_five_customers['third']['count'] = 0;
-        }
-        if(array_key_exists(3, $outgoing_top_five_customers)){
-            $outgoing_doughnut_top_five_customers['fourth'] = $outgoing_top_five_customers[3];
-        }
-        else{
-            $outgoing_doughnut_top_five_customers['fourth']['name'] = '-';
-            $outgoing_doughnut_top_five_customers['fourth']['count'] = 0;
-        }
-        if(array_key_exists(4, $outgoing_top_five_customers)){
-            $outgoing_doughnut_top_five_customers['fifth'] = $outgoing_top_five_customers[4];
-        }
-        else{
-            $outgoing_doughnut_top_five_customers['fifth']['name'] = '-';
-            $outgoing_doughnut_top_five_customers['fifth']['count'] = 0;
-        }
-        $outgoing_doughnut_top_five_customers['total'] = $outgoing_doughnut_top_five_customers['first']['count'] + $outgoing_doughnut_top_five_customers['second']['count'] + $outgoing_doughnut_top_five_customers['third']['count'] + $outgoing_doughnut_top_five_customers['fourth']['count'] + $outgoing_doughnut_top_five_customers['fifth']['count'];
-
-        $outgoing_bar_chart_shipments['one'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',1)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-        $outgoing_bar_chart_shipments['two'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',2)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-        $outgoing_bar_chart_shipments['three'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',3)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-        $outgoing_bar_chart_shipments['four'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',4)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-
-
-        if($riders_count == 0){
-            $outgoing_per_rider_loads = ceil(($outgoing_bar_chart_shipments['one'] + $outgoing_bar_chart_shipments['two'] + $outgoing_bar_chart_shipments['three'] + $outgoing_bar_chart_shipments['four']));
-        }
-        else{
-            $outgoing_per_rider_loads = ceil(($outgoing_bar_chart_shipments['one'] + $outgoing_bar_chart_shipments['two'] + $outgoing_bar_chart_shipments['three'] + $outgoing_bar_chart_shipments['four']) / $riders_count);
-        }
-        $outgoing_light_deliveries = ($outgoing_bar_chart_shipments['one'] + $outgoing_bar_chart_shipments['two']);
-        $outgoing_heavy_deliveries = ($outgoing_bar_chart_shipments['three'] + $outgoing_bar_chart_shipments['four']);
-
-        $outgoing_day_wise_growth_thirty = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
-        $outgoing_day_wise_growth_sixty = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$sixtyDays,$thirtyDays])->sum('operations_outgoing_pickup_requests.shipments_count');
-        if($outgoing_day_wise_growth_sixty == 0){
-            $outgoing_day_wise_growth_percentage = 0;
-        }
-        else{
-            $outgoing_day_wise_growth = ($outgoing_day_wise_growth_thirty - $outgoing_day_wise_growth_sixty) / $outgoing_day_wise_growth_sixty;
-            $outgoing_day_wise_growth_percentage = number_format($outgoing_day_wise_growth * 100, 1);
-        }
-        $operation_outgoing['per_rider_loads'] = $outgoing_per_rider_loads;
-        $operation_outgoing['day_wise_growth'] = $outgoing_day_wise_growth_percentage . '%';
-        $operation_outgoing['heavy_deliveries'] = $outgoing_heavy_deliveries;
-        $operation_outgoing['light_deliveries'] = $outgoing_light_deliveries;
-
-        $last_updated_at = OperationsForecastLastUpdatedTime::latest('created_at')->first();
-
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_dates' => $operation_dates, 'default_hub_id' => $admin->default_hub_id, 'operation_incoming' => $operation_incoming, 'service_types' => $service_type, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing, 'last_updated_at' => $last_updated_at]);
+//        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_dates' => $operation_dates, 'default_hub_id' => $admin->default_hub_id, 'operation_incoming' => $operation_incoming, 'service_types' => $service_type, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing, 'last_updated_at' => $last_updated_at]);
+        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers]);
     }
     public function statistics_search(Request $request){
 //        return $request;

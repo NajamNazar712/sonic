@@ -426,33 +426,58 @@
                 })
                 .done(function(data) {
                     if (data.status == 0) {
-                        $.ajax({
-                            url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
-                            method: 'POST',
-                            data: {
-                                'ids[]': data.valid_ids,
-                                'admin': {!! Auth::id() !!},
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                        .done(function(data) {
-                            var tab = window.open('', '_blank');
+                        if (data.sticker) {
+                            $.ajax({
+                                url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                                xhrFields: {
+                                    responseType: 'blob'
+                                },
+                                method: 'POST',
+                                data: {
+                                    'ids[]': data.valid_ids,
+                                    'admin': {!! Auth::id() !!},
+                                    'sticker': 1,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                            .done(function(data) {
+                                var blob = new Blob([data]);
+                                var link = document.createElement('a');
+                                link.href = window.URL.createObjectURL(blob);
+                                link.download = 'air_waybills.pdf';
+                                link.click();
+                            });
+                        }
+                        else {
+                            $.ajax({
+                                url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                                method: 'POST',
+                                data: {
+                                    'ids[]': data.valid_ids,
+                                    'admin': {!! Auth::id() !!},
+                                    'sticker': 0,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                            .done(function(data) {
+                                var tab = window.open('', '_blank');
 
-                            if(!tab) {
-                                swal({
-                                    title: 'Popup Blocker Enabled!',
-                                    text: 'Please add this site to your exception list.',
-                                    icon: 'error',
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false
-                                });
-                            }
-                            else {
-                                tab.document.write(data);
-                                tab.document.close();
-                                tab.focus();
-                            }
-                        });
+                                if(!tab) {
+                                    swal({
+                                        title: 'Popup Blocker Enabled!',
+                                        text: 'Please add this site to your exception list.',
+                                        icon: 'error',
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+                                }
+                                else {
+                                    tab.document.write(data);
+                                    tab.document.close();
+                                    tab.focus();
+                                }
+                            });
+                        }
                     }
                     else {
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});

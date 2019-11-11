@@ -418,7 +418,7 @@
                 });
 
                 table = $('#datatable').DataTable({
-                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                    dom: '<"d-inline-block"l>tipr',
                     lengthMenu: [[10, 50, 100], [10, 50, 100]],
                     pageLength: 10,
                     pagingType: 'full_numbers',

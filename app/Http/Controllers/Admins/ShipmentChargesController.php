@@ -156,6 +156,13 @@ class ShipmentChargesController extends Controller
                         $charges = $charges * ROUND($weight, 0);
                     }
 
+                    if (strpos($discount, '%') !== FALSE) {
+                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                    }
+                    else {
+                        $discount = floatval($discount);
+                    }
+
                     $result = array();
 
                     if ($charges < $discount) {
@@ -805,6 +812,13 @@ class ShipmentChargesController extends Controller
 
                     $charges = ($charges * $replacement_multiplier);
 
+                    if (strpos($discount, '%') !== FALSE) {
+                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                    }
+                    else {
+                        $discount = floatval($discount);
+                    }
+
                     if ($charges < $discount) {
                         $shipment->replacement_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                     }
@@ -1251,6 +1265,13 @@ class ShipmentChargesController extends Controller
 
                     if ($account_type_id == 2) {
                         $charges = $charges * ROUND($shipment->actual_weight, 0);
+                    }
+
+                    if (strpos($discount, '%') !== FALSE) {
+                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                    }
+                    else {
+                        $discount = floatval($discount);
                     }
 
                     if ($charges < $discount) {
