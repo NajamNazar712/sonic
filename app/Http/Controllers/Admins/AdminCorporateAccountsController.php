@@ -27,7 +27,7 @@ use App\Http\Models\CorporateStandardMinChargeableWeight;
 use App\Http\Models\CorporateStandardReturnCharge;
 use App\Http\Models\CorporateStandardWeightCharge;
 use App\Http\Models\CorporateWeightCharge;
-use App\Http\models\PackagingMaterialTypes;
+use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\WMS\WmsUserInformation;
 use App\Http\Models\WMS\WmsPerProductCharge;
 use App\Http\Models\WMS\WmsPerSquareFootCharge;
