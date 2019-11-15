@@ -19,7 +19,7 @@ use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
-use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +35,7 @@ class OrderManagementController extends Controller
     }
 
     public function index(){
+
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $service_type = BookingType::all();
         $products = Product::select('id','product_name')->get();
@@ -68,7 +69,14 @@ class OrderManagementController extends Controller
             ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','shipments_journey.shipper_status_id as status_id'])
             ->groupBy('shipments.id');
 
-        if (session('role_id') != 1) {
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $shipments = $shipments->where(function ($query) {
+                    $query->whereIn('u.id', session('tagged_shippers'));
+                });
+            }
+        }
+        else if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
                 $query->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
             });
@@ -322,17 +330,22 @@ class OrderManagementController extends Controller
 
         if (!empty($shipment_ids)) {
             $valid_ids = array();
+            $sticker = TRUE;
 
             foreach ($shipment_ids as $shipment_id) {
                 $shipment = Shipment::find($shipment_id);
 
                 if ($shipment && ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2) && !$shipment->packaging_material_request) {
                     $valid_ids[] = $shipment_id;
+
+                    if ($shipment->user_id != 2842) {
+                        $sticker = FALSE;
+                    }
                 }
             }
 
             if (!empty($valid_ids)) {
-                return ['status' => 0, 'success' => 'Valid Shipment(s) Found', 'valid_ids' => $valid_ids];
+                return ['status' => 0, 'success' => 'Valid Shipment(s) Found', 'valid_ids' => $valid_ids, 'sticker' => $sticker];
             }
             else {
                 return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];

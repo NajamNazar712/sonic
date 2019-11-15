@@ -187,7 +187,8 @@
                 </div>
                 <div class="modal-body text-center">
                     <form id="single_update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
-
+                        <input type="hidden" id="return_reason_shipment_id">
+                        <input type="hidden" id="return_reason_shipment_remarks">
                         <div class="form-group">
                         @if($return_confirm_reasons)
                         <select id="single_return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
@@ -199,7 +200,7 @@
                         </div>
 
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary single_update_return_confirm" value="Add">Update To Return Confirm</button>
+                            <button type="button" name="add" class="btn btn-primary single_update_return_confirm" id="single_reason_update_btn">Update To Return Confirm</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                         </div>
@@ -761,7 +762,8 @@
                 if(action === 'confirm'){
                     atext = 'Select Yes to change shipment status to Return-Confirm!';
                     $('#ReturnConfirmReasonSingleModal').modal('show');
-                    single_return_reason(row_id, remark);
+                    $('#return_reason_shipment_id').val(row_id);
+                    $('#return_reason_shipment_remarks').val(remark);
                 }else if(action === 'reattempt'){
                     atext = 'Select Yes to change shipment status to Re-Attempt!';
                 }
@@ -940,73 +942,73 @@
                 }
             });
 
-            function  single_return_reason(id, remark) {
-                $('#single_update_return_reason_form').validate({
-                    errorClass: 'danger',
-                    successClass: 'success',
-                    errorPlacement: function(error, element) {
-                        error.addClass('w-100').appendTo(element.parent('.form-group'));
-                    },
-                    submitHandler: function(form) {
-
-                        var single_return_reason_select = $('#single_return_reason_select').val();
-                        var atext = 'Select Yes to change shipment status to Return-Confirm!';
-                        var action = 'confirm';
-                        swal({
-                            title: 'Are You Sure?',
-                            text: atext,
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
+            $('#single_reason_update_btn').on('click', function(){
+                var shipment_id = $('#return_reason_shipment_id').val();
+                var remarks = $('#return_reason_shipment_remarks').val();
+                var single_return_reason_select = $('#single_return_reason_select').val();
+                if(single_return_reason_select === ''){
+                    var error = 'Select a reason!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }else{
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to change shipment status to Return-Confirm!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
                             },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function (confirm) {
-                            if (confirm) {
-                                blockPagePermanently();
-                                $.ajax({
-                                    url:"{{route('admin.return.marked.status.single')}}",
-                                    method:'POST',
-                                    data:{
-                                        'shipment_id':id,
-                                        '_token':'{{ csrf_token() }}',
-                                        'action': action,
-                                        'remark':remark,
-                                        'single_return_reason_select': single_return_reason_select
-                                    }
-                                }).done(function (data) {
-                                    if(data.status == 1){
-                                        UnblockPagePermanently();
-                                        table.draw('false');
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                                    }else{
-                                        UnblockPagePermanently();
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                    }
-                                    $('#single_return_reason_select').val(null).trigger('select');
-                                    $('#ReturnConfirmReasonSingleModal').modal('hide');
-
-                                });
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
                             }
-                        });
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                             var action = 'confirm';
+                            blockPagePermanently();
+                            $.ajax({
+                                url:"{{route('admin.return.marked.status.single')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_id':shipment_id,
+                                    '_token':'{{ csrf_token() }}',
+                                    'action': action,
+                                    'remark':remarks,
+                                    'single_return_reason_select': single_return_reason_select
+                                }
+                            }).done(function (data) {
+                                if(data.status == 1){
+                                    UnblockPagePermanently();
+                                    table.draw('false');
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                    }
-                });
-            }
+                                }else{
+                                    UnblockPagePermanently();
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                }
+                                $('#single_return_reason_select').val(null).trigger('change');
+                                $('#return_reason_shipment_id').val('');
+                                $('#return_reason_shipment_remarks').val('');
+                                $('#ReturnConfirmReasonSingleModal').modal('hide');
+
+                            });
+                        }
+                    });
+                   
+
+                }
+
+            });
 
 
 

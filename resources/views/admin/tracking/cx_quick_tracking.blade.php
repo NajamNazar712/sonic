@@ -417,67 +417,10 @@
                     'clearIncomplete': true
                 });
 
-                jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
-                    if (this.context.length) {
-                        body = [];
-
-                        var jsonResult = $.ajax({
-                            url: '{{ route('admin.cx_quick_tracking.cx_list') }}',
-                            data: {
-                                'page': 'all',
-                                'search_tracking': $('#search_tracking_number').val(),
-                                'search_shipper': $('#search_shipper').val(),
-                                'search_phone_no': $('#search_consignee_phone_number').val(),
-                                'search_order_id': $('#search_order_id').val(),
-                            },
-                            success: function (result) {
-                                head = [];
-
-                                head.push('S. No');
-                                head.push('Tracking Number');
-                                head.push('Order ID');
-                                head.push('Origin');
-                                head.push('Destination');
-                                head.push('Address');
-                                head.push('COD Amount.');
-                                head.push('Status');
-                                head.push('Shipper Name');
-                                head.push('Consignee Name');
-                                head.push('Consignee Phone Number');
-                                $.each(result.data, function (index, values) {
-                                    row = [];
-
-                                    row.push(index + 1);
-                                    row.push(values.tracking_number);
-                                    row.push(values.order_id);
-                                    row.push(values.origin);
-                                    row.push(values.destination);
-                                    row.push(values.address);
-                                    row.push(values.cod_amount);
-                                    row.push(values.status);
-                                    row.push(values.shipper_name);
-                                    row.push(values.consignee_name);
-                                    row.push(values.consignee_phone_no);
-
-                                    body.push(row);
-                                });
-                            },
-                            async: false
-                        });
-
-                        return {body: body, header: head};
-                    }
-                });
                 table = $('#datatable').DataTable({
-                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                    buttons: [{
-                        extend: 'excel',
-                        title: 'CX Quick Tracking',
-                        className: 'btn btn-primary mb-1',
-                        text: '<i class="la la-file-excel-o"></i> Excel',
-                    }],
-                    lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                    pageLength: 50,
+                    dom: '<"d-inline-block"l>tipr',
+                    lengthMenu: [[10, 50, 100], [10, 50, 100]],
+                    pageLength: 10,
                     pagingType: 'full_numbers',
                     processing: true,
                     serverSide: true,

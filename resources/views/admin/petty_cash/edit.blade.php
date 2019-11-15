@@ -220,11 +220,12 @@
                         @if($petty_statement->status != 6)
                             {
                                 title: 'Edit Details',
-                                className: 'btn btn-primary',
+                                className: 'btn btn-primary edit_btn',
                                 text: '<i class="la la-plus"></i> Edit Details',
                                 action:function (e) {
                                     edit_finance();
                                     $('#statement_submit').attr('disabled', false);
+                                    table.button('.edit_btn').disable();
 
                                 }
                             }
@@ -235,11 +236,12 @@
                         @if($petty_statement->status != 6)
                             {
                                 title: 'Edit Details',
-                                className: 'btn btn-primary',
+                                className: 'btn btn-primary edit_btn',
                                 text: '<i class="la la-plus"></i> Edit Details',
                                 action:function (e) {
                                     edit_finance();
                                     $('#statement_submit').attr('disabled', false);
+                                    table.button('.edit_btn').disable();
 
                                 }
                             }
@@ -250,7 +252,7 @@
                 buttons: ['reset'],
                 @endif
                 autoWidth: false,
-                scrollX: true, scrollY:'200px',
+                scrollX: true, scrollY:'500px',
                 ajax: '{{ route('admin.petty_cash.statements.edit.list',['id'=>$petty_statement->id]) }}',
                 processing: true,
                 language: {
@@ -555,7 +557,10 @@
                         $(row.node()).find('td.reference_no input').attr('disabled',false);
                         $(row.node()).find('td.remarks textarea').attr('disabled',false);
                         $(row.node()).find('td.reference_document input').attr('disabled',false);
-                        selected_rows.push(id);
+                        var index = $.inArray(id, selected_rows);
+                        if(index === -1){
+                            selected_rows.push(id);
+                        }
                     }
 
                 });
@@ -576,7 +581,10 @@
                         $(row.node()).find('td.reference_no input').attr('disabled',false);
                         $(row.node()).find('td.remarks textarea').attr('disabled',false);
                         $(row.node()).find('td.reference_document input').attr('disabled',false);
-                        selected_rows.push(id);
+                        var index = $.inArray(id, selected_rows);
+                        if(index === -1){
+                            selected_rows.push(id);
+                        }
                     }
 
                 });

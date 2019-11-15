@@ -24,7 +24,10 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\OperationForecastHourlyUpdate',
         '\App\Console\Commands\ReturnNoteImageArchive',
         '\App\Console\Commands\StationDepositNoteImageArchive',
+		'\App\Console\Commands\ReturnDeliveredToShipperEmail',
         '\App\Console\Commands\DebriefingEmail',
+        '\App\Console\Commands\ClearPickupRequest',
+        '\App\Console\Commands\ClearPickupNote',
     ];
 
     /**
@@ -61,13 +64,26 @@ class Kernel extends ConsoleKernel
 
             $schedule->command('invoice:generate')->dailyAt($time)->runInBackground();
         }
-        $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->runInBackground();
+
+        $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
+
         $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
 
-        $schedule->command('pickuprequest:clear')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
         $schedule->command('archive:stationdepositnoteimage')->dailyAt('00:00')->runInBackground();
-        $schedule->command('email:debriefingemail')->dailyAt('00:00')->runInBackground();
+		$schedule->command('email:debriefingemail')->dailyAt('00:00')->runInBackground();
 
+        $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $rdts_time = $settings->setting_value . ':00';
+
+            $schedule->command('email:returndeliveredtoshipper')->dailyAt($rdts_time)->runInBackground();
+        }
+
+        $schedule->command('pickuprequest:clear')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
+        $schedule->command('pickupnote:clear')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
     }
 
     /**

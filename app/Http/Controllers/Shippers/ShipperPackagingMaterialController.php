@@ -8,9 +8,9 @@ use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
-use App\http\models\PackagingMaterialRequestStatus;
-use App\Http\models\PackagingMaterialTypes;
-use App\Http\models\PackagingMaterialTypeSizes;
+use App\Http\Models\PackagingMaterialRequestStatus;
+use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\PackagingMaterialTypeSizes;
 use App\Http\Models\PackagingPaymentMode;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipper\User;
@@ -172,6 +172,10 @@ class ShipperPackagingMaterialController extends Controller
             $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_ids[$index]])->latest()->first();
             if($charges != null){
                     $total_charges += $packaging_quantities[$index] * $charges->charges;
+            }else{
+                $charges = PackagingMaterialTypeSizes::find($packaging_size_ids[$index]);
+
+                $total_charges += $packaging_quantities[$index] * $charges->standard_charges;
             }
         }
 

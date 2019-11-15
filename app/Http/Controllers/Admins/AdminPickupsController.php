@@ -362,7 +362,16 @@ class AdminPickupsController extends Controller
 
     public function pending_assign(Request $request) {
       $pickup_request_ids = $request->input('pickup_request_ids');
+
       $rider_id = $request->input('rider_id');
+
+      if (empty($pickup_request_ids)) {
+        return ['status' => 1, 'error' => 'No Pickup Request Selected'];
+      }
+
+      if (empty($rider_id)) {
+        return ['status' => 1, 'error' => 'No Rider Selected'];
+      }
 
       foreach ($pickup_request_ids as $pickup_request_id) {
         $pickup_request = PickupRequest::find($pickup_request_id);
@@ -404,7 +413,7 @@ class AdminPickupsController extends Controller
 
       $existing_pickup_note = FALSE;
 
-      $pickup_note = PickupNote::where('rider_id', $rider_id)->where('status_id', '=', 1);
+      $pickup_note = PickupNote::where('rider_id', $rider_id)->whereIn('status_id', [1, 2]);
 
       if ($pickup_note->exists()) {
         $pickup_note = $pickup_note->first();
@@ -841,7 +850,7 @@ class AdminPickupsController extends Controller
               foreach ($assigned_shipments as $assigned_shipment) {
                 $shipment = $assigned_shipment->shipment;
 
-                if ($shipment->shipper_status_id == 1) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 53) {
                   ShipmentsPickupJourneyController::add($shipment->id, 3, Auth::id(), $pickup_note->id);
                 }
               }
@@ -1158,7 +1167,7 @@ class AdminPickupsController extends Controller
       if ($shipment->exists()) {
         $shipment = $shipment->first();
 
-        if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+        if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
           $exists = FALSE;
 
           $pickup_note = PickupNote::find($request->pickup_receive_pickup_note_id);
@@ -1216,7 +1225,7 @@ class AdminPickupsController extends Controller
       $shipment = Shipment::find($request->id);
 
       if ($shipment) {
-        if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+        if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
           $shipment->actual_weight = NULL;
           $shipment->length = NULL;
           $shipment->breadth = NULL;
@@ -1268,7 +1277,7 @@ class AdminPickupsController extends Controller
           ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Reverted Automatically through Arrival', NULL, Auth::id());
         }
 
-        if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+        if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53) {
           if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
             $receiving_sheet_shipment->status = 1;
             $receiving_sheet_shipment->save();

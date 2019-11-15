@@ -1251,7 +1251,7 @@ class AdminCorporateAccountsController extends Controller
 
     public function edit_rates_index($id){
         $user = User::find($id);
-        $sale_person = SalePersonTag::where('user_id',$id)->first();
+        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
         if ((($user['rate_status'] >= 0) && $user['status']==1) || (($user['rate_status']==0) && $user['status']==3)) {
             $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1295,6 +1295,17 @@ class AdminCorporateAccountsController extends Controller
             $invoicing_cycles = InvoicingCycle::all();
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             $rate_status = $user['rate_status'];
+        }
+        if(session('department_id') == 7){
+            if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
+                return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person]);
+            }
+            else{
+                return view('admin.access_denied');
+            }
+        }
+        else{
+            return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person]);
         }
 //        return $discount;
         return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
@@ -5414,9 +5425,7 @@ class AdminCorporateAccountsController extends Controller
         $return = CorporateReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $fuel = CorporateFuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $discount = CorporateDiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
-        $sale_person = SalePersonTag::where('user_id',$id)->first();
-        $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+        $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();        $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
         $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
         $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
         $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
@@ -5424,6 +5433,13 @@ class AdminCorporateAccountsController extends Controller
         $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
         $storage_types = WmsStorageType::all()->where('status', 1);
         $invoicing_cycles = InvoicingCycle::all();
-        return view('admin.accounts.corporate.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types]);
-    }
+		if(session('department_id') == 7){
+            if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
+                return view('admin.accounts.corporate.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person]);
+            }
+            else{
+                return view('admin.access_denied');
+            }
+
+        return view('admin.accounts.corporate.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types]);    }
 }

@@ -378,17 +378,40 @@
                         'ids[]': selected_rows,
                         '_token': '{{ csrf_token() }}'
                     }
-                })
+                    })
                     .done(function (data) {
                         if(data.status === 1) {
-                            $.ajax({
-                                url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
-                                method: 'POST',
-                                data: {
-                                    'ids[]': data.ids,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            })
+                            if (data.sticker) {
+                                $.ajax({
+                                    url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                                    xhrFields: {
+                                        responseType: 'blob'
+                                    },
+                                    method: 'POST',
+                                    data: {
+                                        'ids[]': data.ids,
+                                        'sticker': 1,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                })
+                                .done(function(data) {
+                                    var blob = new Blob([data]);
+                                    var link = document.createElement('a');
+                                    link.href = window.URL.createObjectURL(blob);
+                                    link.download = 'air_waybills.pdf';
+                                    link.click();
+                                });
+                            }
+                            else {
+                                $.ajax({
+                                    url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        'ids[]': data.ids,
+                                        'sticker': 0,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                })
                                 .done(function (data) {
                                     var tab = window.open('', '_blank');
 
@@ -406,6 +429,7 @@
                                         tab.focus();
                                     }
                                 });
+                            }
                         }
                     });
             }
@@ -569,8 +593,8 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
+                lengthMenu: [[10, 50, 100, 500], [10, 50, 100, 500]],
+                pageLength: 10,
                 pagingType: 'full_numbers',
                 processing: true,
                 language: {

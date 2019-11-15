@@ -179,12 +179,12 @@ class AdminOperationForecastController extends Controller
                     $shipment_count[$shipment->consignee_city_id]['reverse_pickup']['return_delivered_to_shipper'] = $shipment_count[$shipment->consignee_city_id]['reverse_pickup']['return_delivered_to_shipper'] + 1;
                 }
             } else if ($shipment->shipper_status_id == 30) {
-                if ($shipment->booking_type_id == 1) {
-                    $shipment_count[$shipment->consignee_city_id]['replacement']['replacement_collected'] = $shipment_count[$shipment->consignee_city_id]['regular']['replacement_collected'] + 1;
+                if ($shipment->booking_type_id == 2) {
+                    $shipment_count[$shipment->consignee_city_id]['replacement']['replacement_collected'] = $shipment_count[$shipment->consignee_city_id]['replacement']['replacement_collected'] + 1;
                 }
             } else if ($shipment->shipper_status_id == 31) {
-                if ($shipment->booking_type_id == 1) {
-                    $shipment_count[$shipment->consignee_city_id]['replacement']['replacement_delivered_to_shipper'] = $shipment_count[$shipment->consignee_city_id]['regular']['replacement_delivered_to_shipper'] + 1;
+                if ($shipment->booking_type_id == 2) {
+                    $shipment_count[$shipment->consignee_city_id]['replacement']['replacement_delivered_to_shipper'] = $shipment_count[$shipment->consignee_city_id]['replacement']['replacement_delivered_to_shipper'] + 1;
                 }
             }
         }

@@ -342,6 +342,14 @@
                                 containerId: 'toast-top-center'
                             });
                         }
+                        if (data.unauthorized !== undefined) {
+                            var message = 'You are not allowed for Tracking Number(s): ' + data.unauthorized.join(', ');
+                            scan_sound(2);
+                            toastr.error(message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
 
                         if (data.shipments != undefined) {
                             $.each(data.shipments, function (id, details) {

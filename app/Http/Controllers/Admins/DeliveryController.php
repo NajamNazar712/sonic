@@ -41,7 +41,7 @@ use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
-use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use Carbon\Carbon;
@@ -378,7 +378,7 @@ class DeliveryController extends Controller
         $rider_id = $request->rider_id;
         $flag = true;
         $delivery_note_details = array();
-        $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('pending_status', 0)->get();
+        $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('pending_status', 0)->where('status', '!=', 4)->get();
         if($delivery_notes){
             foreach ($delivery_notes as $note) {
               
@@ -1930,6 +1930,9 @@ class DeliveryController extends Controller
                 foreach ($shipments as $shipment) {
                     $in_new_delivery_note = DeliveryNoteShipment::where('delivery_note_id', '>', $delivery_note_id)->where('shipment_id', $shipment)->exists();
                     $shipper_status_details = Shipment::where('id', $shipment)->first();
+                    if(!$shipper_status_details){
+                        continue;
+                    }
                     $call = "call_verification.$shipment";
                     $fake = "fake_status.$shipment";
                     $status_drop = "status_drop.$shipment";

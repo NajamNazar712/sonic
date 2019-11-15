@@ -491,7 +491,7 @@ class Permission
             'settings.ticker.store' => 152,
 
             'settings.walk_in.store' => 154,
-			'settings.petty_cash.heads.index' => 157,
+		'settings.petty_cash.heads.index' => 157,
             'settings.petty_cash.heads.list' => 157,
             'settings.petty_cash.heads.add' => 159,
             'settings.petty_cash.heads.edit' => 160,
@@ -525,6 +525,8 @@ class Permission
             'settings.return_confirmation_pending_shipment_selection_time.index' => 253,
             'settings.return_confirmation_pending_shipment_selection_time.store' => 253,
 
+            'settings.return_delivered_to_shipper_email_cut_off_time.index' => 269,
+            'settings.return_delivered_to_shipper_email_cut_off_time.store' => 269,
 
 
             'cancelled_shipments.index' => 117,
