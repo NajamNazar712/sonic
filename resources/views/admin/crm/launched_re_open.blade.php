@@ -40,6 +40,8 @@
                                     <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
+                                    <th class="border-primary border-darken-1">Hub</th>
+                                    <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
@@ -232,6 +234,8 @@
                             head.push('Shipper Name');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Hub');
+                            head.push('Zone');
                             head.push('Shipment Status');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
@@ -257,6 +261,8 @@
                                 row.push(values.shipper_name);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.hub);
+                                row.push(values.zone);
                                 row.push(values.shipment_status);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
@@ -450,7 +456,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[16, 'desc']],
+                order: [[18, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -459,6 +465,8 @@
                     {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'hub', name: 'dh.name', class: 'align-middle hub'},
+                    {data: 'zone', name: 'z.id', class: 'align-middle zone'},
                     {data: 'shipment_status', name: 'shipment_status', class: 'align-middle shipment_status'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
@@ -499,6 +507,7 @@
                     var status = '<select name="status" id="status" class="select2 form-control"></select>';
                     var channel = '<select name="channel" id="channel" class="select2 form-control"></select>';
                     var case_nature_type = '<select name="case_nature_type" id="case_nature_type" class="select2 form-control"></select>';
+                    var zones = '<select name="zones" id="zones" class="select2 form-control"></select>';
                     var added_by = '<select name="launched_by" id="added_by" class="select2 form-control">' +
                         '<option value="0">Admin</option>' +
                         '<option value="1">Shipper</option>' +
@@ -514,6 +523,12 @@
                         }
                         else if ($(header).is('.status')) {
                             $(status).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                        else if ($(header).is('.zone')) {
+                            $(zones).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -654,6 +669,21 @@
                     $('#shipment_status').prepend('<option value="" selected></option>').select2({
                         data:data4,
                         placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var data5 = $.map({!! $zones !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $('#zones').prepend('<option value="" selected></option>').select2({
+                        data:data5,
+                        placeholder: "Select Zone",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
