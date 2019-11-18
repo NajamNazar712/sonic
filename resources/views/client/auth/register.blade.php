@@ -151,7 +151,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                        <label for="strn_no">STRN Number:</label>
-                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567-8)" value="{{ old('strn_no') }}"  name="strn_no">
+                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567891234)" value="{{ old('strn_no') }}"  name="strn_no">
                                                     </div>
                                                 </div>
                                         </div>
@@ -722,7 +722,7 @@
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='billing_person_phone'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-        $("input[name='strn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
+        $("input[name='strn_no']").inputmask({'mask': "9999999999999", 'clearIncomplete': true});
         $('#shipInfo').perfectScrollbar({
             suppressScrollX : true,
             theme: 'dark',
