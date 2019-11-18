@@ -210,6 +210,18 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="nature_of_account">Average Shipments:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <input type="text" class="form-control required" value="{{ old('average_shipment') }}" name="average_shipment" placeholder="Average Shipments">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </fieldset>
                                         <!-- Step 2 -->
                                         <h6>Shipping Information</h6>
@@ -700,6 +712,11 @@
         $('select[name="shipper_product_type"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Product Type',
             dropdownParent:$('#registership')
+        });
+        $("input[name='average_shipment']").inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false
         });
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});

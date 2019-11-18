@@ -102,6 +102,10 @@
                                                 <td>{{$user->account_type->name}}</td>
                                             </tr>
                                             <tr>
+                                                <td><b>Average Shipments</b></td>
+                                                <td>{{$user->average_shipments}}</td>
+                                            </tr>
+                                            <tr>
                                                 <td><b>API Key</b></td>
                                                 <td>{{$user->api_token}}</td>
                                             </tr>

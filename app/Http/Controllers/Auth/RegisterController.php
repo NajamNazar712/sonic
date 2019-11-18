@@ -80,6 +80,7 @@ class RegisterController extends Controller
                 'company_address'=>'required|string|max:255',
                 'shipper_phone'=>'required|string|max:255',
                 'nature_of_account' => 'required',
+                'average_shipment' => 'required',
                 'cnic'=>'required|string|max:255',
 				'url'=>'required|string|max:255',
                 'shipper_city'=>'required|string|max:255',
@@ -108,6 +109,7 @@ class RegisterController extends Controller
                 'company_address'=>'required|string|max:255',
                 'shipper_phone'=>'required|string|max:255',
                 'nature_of_account' => 'required',
+                'average_shipment' => 'required',
                 'cnic'=>'required|string|max:255',
 				'url'=>'required|string|max:255',
                 'shipper_city'=>'required|string|max:255',
@@ -177,6 +179,7 @@ class RegisterController extends Controller
             'city_id'=>$data['shipper_city'],
             'product_id'=>$data['shipper_product_type'],
             'account_type_id' => $data['nature_of_account'],
+            'average_shipments' => $data['average_shipment'],
             'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);
