@@ -4838,6 +4838,7 @@ class DeliveryController extends Controller
             $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest('delivery_note_id')->first();
             if($delivery_note_shipment){
                 $delivery_note_shipment->fake_status = 1;
+                $delivery_note_shipment->remarks = $request->remarks;
                 $delivery_note_shipment->fake_status_updated_at = Carbon::now();
                 $delivery_note_shipment->save();
 

@@ -9,9 +9,6 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-
-
-
                 <div class="row mb-2 justify-content-center">
 
                         <div class="form-group">
