@@ -4837,18 +4837,11 @@ class DeliveryController extends Controller
         if($shipment){
             $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest('delivery_note_id')->first();
             if($delivery_note_shipment){
-                if($shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 12 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 9 || $shipment->shipper_status_id == 15 || $shipment->shipper_status_id == 56){
+                $delivery_note_shipment->fake_status = 1;
+                $delivery_note_shipment->fake_status_updated_at = Carbon::now();
+                $delivery_note_shipment->save();
 
-                    $delivery_note_shipment->fake_status = 1;
-                    $delivery_note_shipment->fake_status_updated_at = Carbon::now();
-                    $delivery_note_shipment->save();
-
-                    return redirect()->back()->with(['success' => 'Shipment successfully marked as Fake Status!']);
-                }
-                else{
-                    $shipment_status = ShipmentStatus::where('id', $shipment->shipper_status_id)->first();
-                    return redirect()->back()->with(['error' => 'Shipment status (' . $shipment_status->name . ') can\'t be marked as fake status!']);
-                }
+                return redirect()->back()->with(['success' => 'Shipment successfully marked as Fake Status!']);
             }
             else{
                 return redirect()->back()->with(['error' => 'Shipment with given Tracking Number not found in Delivery Note!']);
