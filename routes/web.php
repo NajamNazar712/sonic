@@ -231,6 +231,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 	            Route::get('list', 'Shippers\ShipperCRMController@requests_list')->name('list');
 	            Route::get('{id}/details', 'Shippers\ShipperCRMController@request_details')->name('details');
 	            Route::post('add', 'Shippers\ShipperCRMController@add_request')->name('add');
+	            Route::post('re_open', 'Shippers\ShipperCRMController@re_open_request')->name('re_open');
 	        });
 	        Route::prefix('feedback')->name('feedback.')->group(function(){
 	            Route::post('add', 'Shippers\ShipperCRMController@add_feedback')->name('add');
@@ -1353,6 +1354,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('return_delivered_to_shipper_email_cut_off_time')->name('return_delivered_to_shipper_email_cut_off_time.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_delivered_to_shipper_email_cut_off_time_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@return_delivered_to_shipper_email_cut_off_time_store')->name('store');
+        });
+
+        Route::prefix('crm_reopen')->name('crm_reopen.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@crm_reopen_count_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@crm_reopen_count_submit')->name('update');
         });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {

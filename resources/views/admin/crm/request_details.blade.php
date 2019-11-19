@@ -437,7 +437,11 @@
                                                             @if($status_history->agent_id != null)
                                                                 <td>{{$status_history->agent->name}}</td>
                                                             @else
-                                                                <td>-</td>
+                                                                @if($status_history->status_id == 5)
+                                                                    <td>{{$shipper}} (Shipper)</td>
+                                                                @else
+                                                                    <td>-</td>
+                                                                @endif
                                                             @endif
                                                             <td>{{$status_history->created_at}}</td>
                                                         </tr>

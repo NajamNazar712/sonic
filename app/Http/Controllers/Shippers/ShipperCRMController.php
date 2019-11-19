@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Shippers;
 use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\CRM\CrmRequestStatus;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\Shipment;
@@ -158,7 +160,21 @@ class ShipperCRMController extends Controller
                 $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
             }
             if($crm_request){
-                return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'shipment_status' => $shipment_status]);
+                $settings = GlobalSettings::where('type', 'crm_reopen_count')->first();
+                if($settings->text == "on") {
+                    $reopen_count = (int)$crm_request->reopen_count;
+                    $setting_value = (int)$settings->setting_value;
+                    if ($reopen_count < $setting_value) {
+                        $reopen_check = true;
+                    }
+                    else {
+                        $reopen_check = false;
+                    }
+                }
+                else{
+                    $reopen_check = false;
+                }
+                return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'shipment_status' => $shipment_status, 'reopen_check' => $reopen_check]);
             }else{
                 return redirect()->back()->with('danger', 'CRM Request Not found!');
             }
@@ -339,6 +355,26 @@ class ShipperCRMController extends Controller
         }
 
 
+    }
+    public function re_open_request(Request $request){
+        $crm_request = CrmRequest::where('id', $request->req_id)->first();
+        if ($crm_request->status_id == 4) {
+            if ($crm_request['status_id'] != 5) {
+                $count = $crm_request->reopen_count + 1;
+                CrmRequest::where('id', $request->req_id)->update([
+                    'status_id' => 5,
+                    'reopen_count' => $count
+                ]);
+                CrmRequestStatusHistory::create([
+                    'crm_request_id' => $request->req_id,
+                    'status_id' => 5,
+                    'agent_id' => null
+                ]);
+                return redirect()->back()->with(['success' => 'Request marked as Re-Open']);
+            } else {
+                return redirect()->back()->with(['error' => 'Request is already marked as Re-Open']);
+            }
+        }
     }
 
 }
