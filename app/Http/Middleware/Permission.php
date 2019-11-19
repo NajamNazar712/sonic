@@ -528,6 +528,9 @@ class Permission
             'settings.return_delivered_to_shipper_email_cut_off_time.index' => 269,
             'settings.return_delivered_to_shipper_email_cut_off_time.store' => 269,
 
+            'settings.crm_reopen.index' => 274,
+            'settings.crm_reopen.update' => 274,
+
 
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,

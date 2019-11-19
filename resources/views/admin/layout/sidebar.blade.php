@@ -768,7 +768,7 @@
                                     @if (session('role_id') == 1 || in_array(260, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.crm_case_nature_types.index') }}">Case Nature Types</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(260, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(274, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.crm_reopen.index') }}">Crm Re-Open Count</a></li>
                                     @endif
                                 </ul>
