@@ -65,7 +65,7 @@ class Kernel extends ConsoleKernel
             $schedule->command('invoice:generate')->dailyAt($time)->runInBackground();
         }
 
-        $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
+        // $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
 
         $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
 
@@ -82,8 +82,8 @@ class Kernel extends ConsoleKernel
             $schedule->command('email:returndeliveredtoshipper')->dailyAt($rdts_time)->runInBackground();
         }
 
-        $schedule->command('pickuprequest:clear')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
-        $schedule->command('pickupnote:clear')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
+        $schedule->command('pickuprequest:clear')->everyFifteenMinutes()->withoutOverlapping()->runInBackground();
+        $schedule->command('pickupnote:clear')->everyThirtyMinutes()->withoutOverlapping()->runInBackground();
     }
 
     /**
