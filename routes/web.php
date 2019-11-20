@@ -1431,5 +1431,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/{row_id}','Admins\AdminInterceptRebookRequestHistoryController@intercept_re_book_index')->name('index');
         Route::post('update','Admins\AdminInterceptRebookRequestHistoryController@intercept_re_book_update')->name('update');
     });
+    Route::prefix('resources')->name('resources.')->group(function (){
+        Route::get('','Admins\AdminResourcesController@index')->name('index');
+        Route::get('city_list','Admins\AdminResourcesController@get_network_list')->name('city_list');
+    });
 });
 
