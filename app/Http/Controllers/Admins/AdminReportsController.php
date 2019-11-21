@@ -2309,7 +2309,7 @@ use Yajra\Datatables\Datatables;
                 $file_name = public_path() .'/'.$file_name_without_path ;
             }
             else{
-                $file_name_without_path = "reports/daily_pickup_sales_report_".$date_file_name.'_'.$city_name.$time_string.".xlsx";
+                $file_name_without_path = "C:/laragon/www/sonic/storage/public/reports/daily_pickup_sales_report_".$date_file_name.'_'.$city_name.$time_string.".xlsx";
                 $file_name = public_path() . "/reports/daily_pickup_sales_report_".$date_file_name.'_'.$time_string.".xlsx";
             }
             $writer->save($file_name);
