@@ -5670,5 +5670,55 @@ use Yajra\Datatables\Datatables;
             });
             return $datatables->make(true);
         }
+        public function delivered_shipment_index(){
+            $toDays = Carbon::now();
+            $fromDays = Carbon::now()->subDays(29);
+            $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
+            $riders = DB::connection('reports')->table('riders')->get(['id','name']);
+            return view('admin.reports.delivered_shipment_report')->with(['cities' => $cities, 'riders' => $riders, 'fromDays' => $fromDays, 'toDays' => $toDays]);
+        }
+        public function delivered_shipment_list(Request $request){
+            $from = $request->search_date_from;
+            $to = $request->search_date_to;
+            if($from == null || $to == null){
+                $toDays = Carbon::now()->endOfDay();
+                $fromDays = Carbon::now()->subDays(30)->startOfDay();
+            }else{
+                $fromDays = $from;
+                $toDays = $to;
+            }
+            $delivered_shipments = DB::connection('reports')->table('riders')
+                ->join('rider_categories as rc','rc.id', '=', 'riders.rider_category_id')
+                ->join('cities as c','c.id', '=', 'riders.city_id')
+                ->leftJoin('rider_routes as rr', function ($join) {
+                    $join->on('rr.rider_id', '=', 'riders.id')
+                        ->where('rr.default_route','=', 1);
+                })
+                ->leftjoin('routes as rou', 'rou.id', '=', 'rr.route_id')
+                ->leftJoin('delivery_notes as dn', function ($join) use ($fromDays, $toDays){
+                    $join->on('dn.rider_id', '=', 'riders.id')
+                        ->whereBetween('dn.created_at', [$fromDays,$toDays]);
+                })
+                ->leftJoin('shipments_journey as sj', function ($join) use ($fromDays, $toDays) {
+                    $join->on('sj.reference_1_id', '=', 'dn.id')
+                        ->where('sj.shipper_status_id', '=', 14)
+                        ->where('sj.verification', '=', 1)
+                        ->whereBetween('sj.updated_at', [$fromDays,$toDays]);
+                })
+                ->leftJoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'dn.id')
+                ->select('riders.name as courier_name', 'rc.name as courier_type', 'rou.code as route_code', DB::raw('count(dns.shipment_id) as shipments_count'), DB::raw('count(sj.id) as delivered_shipments_count'), DB::raw('count(dns.shipment_id)/count(sj.id) as delivery_ratio'), 'c.name as station')
+                ->groupBy('riders.id');
+
+
+            $datatables = Datatables::of($delivered_shipments);
+
+            if($rider = $request->get('search_rider')){
+                $datatables = $datatables->where('riders.id', '=', $rider);
+            }
+            if($station = $request->get('search_station')){
+                $datatables = $datatables->where('c.id', '=', $station);
+            }
+            return $datatables->make(true);
+        }
     }
 

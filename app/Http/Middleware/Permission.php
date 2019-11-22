@@ -381,6 +381,8 @@ class Permission
             'reports.fake_status_shipments.list' => 263,
             'reports.daily_visit.index' => 264,
             'reports.daily_visit.list' => 264,
+            'reports.delivered_shipment.index' => 275,
+            'reports.delivered_shipment.list' => 275,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
