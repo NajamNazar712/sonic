@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateSalePersonNumbersTable extends Migration
+class CreateMonthAveragesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,14 @@ class CreateSalePersonNumbersTable extends Migration
      */
     public function up()
     {
-        Schema::create('sale_person_numbers', function (Blueprint $table) {
+        Schema::create('month_averages', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('admin_id');
+            $table->integer('origin_id');
             $table->integer('shipments');
             $table->decimal('revenue');
             $table->decimal('avg_revenue');
-            $table->decimal('contribution');
+            $table->decimal('avg_shipments');
+            $table->decimal('month_speed');
             $table->timestamps();
         });
     }
@@ -31,6 +32,6 @@ class CreateSalePersonNumbersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sale_person_numbers');
+        Schema::dropIfExists('month_averages');
     }
 }

@@ -8,6 +8,8 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Models\Excel_reports\HubWiseSplit;
+use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
@@ -3287,6 +3289,10 @@ class NotificationsController extends Controller
                 $sale_person_number_data = SalePersonNumbers::whereBetween('created_at', [$date, $date_end])->get();
                 $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Admin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Contribution</strong></th></tr></thead><tbody>';
                 $serial = 1;
+                $shipments_count = 0;
+                $revenue_count = 0;
+                $avg_revenue_count = 0;
+                $contribution_count = 0;
                 foreach ($sale_person_number_data as $sale_person_number) {
                     $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
@@ -3296,15 +3302,19 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $sale_person_number->avg_revenue . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $sale_person_number->contribution . '</td>';
                     $html .= '</tr>';
+                    $shipments_count = $shipments_count + $sale_person_number->shipments;
+                    $revenue_count = $revenue_count + $sale_person_number->revenue;
+                    $avg_revenue_count = $avg_revenue_count + $sale_person_number->avg_revenue;
+                    $contribution_count = $contribution_count + $sale_person_number->contribution;
                     $serial++;
                 }
                 $html .= '<tr>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Revenue</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $sale_person_number_data[0]->total_revenue . '</td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipments_count . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $revenue_count . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $avg_revenue_count . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $contribution_count . '</td>';
                 $html .= '</tr>';
 
                 $html .= '</tr>';
@@ -3335,6 +3345,171 @@ class NotificationsController extends Controller
                 }
 
                 self::email($subject, $body, $to);
+            }
+            else if ($id == 48) {
+                if (strpos($subject, '[date]') !== FALSE) {
+                    $subject = str_replace('[date]', $reference_1_id, $subject);
+                }
+
+                if (strpos($body, '[date]') !== FALSE) {
+                    $body = str_replace('[date]', $reference_1_id, $body);
+                }
+//                $file = storage_path($reference_2_id);
+
+                $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                if (strpos($subject, '[link]') !== FALSE) {
+                    $subject = str_replace('[link]', $link, $subject);
+                }
+
+                if (strpos($body, '[link]') !== FALSE) {
+                    $body = str_replace('[link]', $link, $body);
+                }
+                $date = Carbon::today()->startOfDay()->toDateTimeString();
+                $date_end = Carbon::today()->endOfDay()->toDateTimeString();
+                $hub_wise_split_data = HubWiseSplit::whereBetween('created_at', [$date, $date_end])->get();
+                $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Hub</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Count of Parcels</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Ratio</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Actual Weight</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Actual Weight</strong></th></tr></thead><tbody>';
+                $serial = 1;
+                $shipments_count = 0;
+                $ratio_count = 0;
+                $actual_weight_count = 0;
+                $avg_actual_weight_count = 0;
+                foreach ($hub_wise_split_data as $hub_wise_split) {
+                    $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->city->name . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->shipments . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->ratio . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->actual_weight . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->avg_actual_weight . '</td>';
+                    $html .= '</tr>';
+                    $shipments_count = $shipments_count + $hub_wise_split->shipments;
+                    $ratio_count = $ratio_count + $hub_wise_split->ratio;
+                    $actual_weight_count = $actual_weight_count + $hub_wise_split->actual_weight;
+                    $avg_actual_weight_count = $avg_actual_weight_count + $hub_wise_split->avg_actual_weight;
+                    $serial++;
+                }
+                $html .= '<tr>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipments_count . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $ratio_count . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $actual_weight_count . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $avg_actual_weight_count . '</td>';
+                $html .= '</tr>';
+
+                $html .= '</tr>';
+                $html .= '</tbody></table>';
+
+                if (strpos($body, '[preview]') !== FALSE) {
+                    $body = str_replace('[preview]', $html, $body);
+                }
+
+                $to = array();
+                $cc = array();
+
+                $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
+
+                if ($admins->exists()) {
+                    $cc = array_merge($to, $admins->pluck('email')->toArray());
+                }
+
+                $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
+
+                if ($admins->exists()) {
+                    $to = array_merge($to, $admins->pluck('admins.email')->toArray());
+                }
+
+                $ceo = Admin::find(8);
+                if ($ceo) {
+                    $cc[] = $ceo->email;
+                }
+
+                self::email($subject, $body, $to, $cc);
+            }
+            else if ($id == 49) {
+                if (strpos($subject, '[date]') !== FALSE) {
+                    $subject = str_replace('[date]', $reference_1_id, $subject);
+                }
+
+                if (strpos($body, '[date]') !== FALSE) {
+                    $body = str_replace('[date]', $reference_1_id, $body);
+                }
+//                $file = storage_path($reference_2_id);
+
+                $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                if (strpos($subject, '[link]') !== FALSE) {
+                    $subject = str_replace('[link]', $link, $subject);
+                }
+
+                if (strpos($body, '[link]') !== FALSE) {
+                    $body = str_replace('[link]', $link, $body);
+                }
+                $date = Carbon::today()->startOfDay()->toDateTimeString();
+                $date_end = Carbon::today()->endOfDay()->toDateTimeString();
+                $month_average_data = MonthAverage::whereBetween('created_at', [$date, $date_end])->get();
+                $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Total Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Month Speed</strong></th></tr></thead><tbody>';
+                $serial = 1;
+                $shipments_count = 0;
+                $revenue_count = 0;
+                $avg_revenue_count = 0;
+                $avg_shipments_count = 0;
+                $month_speed_count = 0;
+                foreach ($month_average_data as $month_average) {
+                    $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $month_average->city->name . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $month_average->shipments . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $month_average->revenue . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $month_average->avg_revenue . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $month_average->avg_shipments . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $month_average->month_speed . '</td>';
+                    $html .= '</tr>';
+                    $shipments_count = $shipments_count + $month_average->shipments;
+                    $revenue_count = $revenue_count + $month_average->revenue;
+                    $avg_revenue_count = $avg_revenue_count + $month_average->avg_revenue;
+                    $avg_shipments_count = $avg_shipments_count + $month_average->avg_shipments;
+                    $month_speed_count = $month_speed_count + $month_average->month_speed;
+                    $serial++;
+                }
+                $html .= '<tr>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipments_count . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $revenue_count . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $avg_revenue_count . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $avg_shipments_count . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $month_speed_count . '</td>';
+                $html .= '</tr>';
+
+                $html .= '</tr>';
+                $html .= '</tbody></table>';
+
+                if (strpos($body, '[preview]') !== FALSE) {
+                    $body = str_replace('[preview]', $html, $body);
+                }
+
+                $to = array();
+
+                $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
+
+                if ($admins->exists()) {
+                    $to = array_merge($to, $admins->pluck('email')->toArray());
+                }
+
+                $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
+
+                if ($admins->exists()) {
+                    $to = array_merge($to, $admins->pluck('admins.email')->toArray());
+                }
+
+                $ceo = Admin::find(8);
+
+                $cc = array();
+                $cc = [$ceo->email, 'asad@trax.pk'];
+
+                self::email($subject, $body, $to, $cc);
             }
         }
       }
