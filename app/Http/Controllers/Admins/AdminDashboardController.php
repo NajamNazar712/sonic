@@ -18,7 +18,10 @@ use App\Http\Models\CityHistory;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\InvoicingCycle;
-use App\Http\Models\PackagingMaterialTypes;use App\Http\Models\Operataions\OperationForecast;
+use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\Operataions\OperationForecast;
+
+
 use App\Http\Models\Operataions\OperationForecastShipments;
 use App\Http\Models\Operataions\OperationForecastWeightRange;
 use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
@@ -75,6 +78,24 @@ use App\Http\Models\Route;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\WMS\WmsUserInformation;
+use App\Http\Models\WMS\WmsPerProductCharge;
+use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Http\Models\WMS\WmsLabellingCharge;
+use App\Http\Models\WMS\WmsPackingCharge;
+use App\Http\Models\WMS\WmsStorageTypeCharge;
+use App\Http\Models\WMS\WmsPendingUserInformation;
+use App\Http\Models\WMS\WmsPendingPerProductCharge;
+use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
+use App\Http\Models\WMS\WmsPendingLabellingCharge;
+use App\Http\Models\WMS\WmsPendingPackingCharge;
+use App\Http\Models\WMS\WmsPendingStorageTypeCharge;
+use App\Http\Models\WMS\WmsHistoryUserInformation;
+use App\Http\Models\WMS\WmsHistoryPerProductCharge;
+use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
+use App\Http\Models\WMS\WmsHistoryLabellingCharge;
+use App\Http\Models\WMS\WmsHistoryPackingCharge;
+use App\Http\Models\WMS\WmsHistoryStorageTypeCharge;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Shipper\User;
@@ -89,12 +110,14 @@ use App\Http\Models\Rates\PendingReturnCharge;
 use App\Http\Models\Rates\PendingDiscountCharge;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ShippingMode;
-
+use App\Http\Models\WMS\WmsStorageType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+
+
 class AdminDashboardController extends Controller
 {
 
@@ -1170,6 +1193,8 @@ class AdminDashboardController extends Controller
             $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             $packaging_sizes = array();
+            $invoicing_cycles = InvoicingCycle::all();
+            $storage_types = WmsStorageType::all()->where('status', 1);
             if(count($packaging_material_types) > 0){
 
                 foreach($packaging_material_types as $type){
@@ -1177,7 +1202,7 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes]);
+            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }
@@ -1188,6 +1213,7 @@ class AdminDashboardController extends Controller
 //    }
 
     public function viewRates($id){
+
         $user = User::find($id);
         $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
 //        return $switches;
@@ -1207,7 +1233,14 @@ class AdminDashboardController extends Controller
         $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
         $rate_status = $user['rate_status'];
         $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
-
+        $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+        $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+        $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+        $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+        $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+        $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+        $storage_types = WmsStorageType::all()->where('status', 1);
+        $invoicing_cycles = InvoicingCycle::all();
         $packaging_charges = array();
         if(count($packaging) > 0){
 
@@ -1215,18 +1248,17 @@ class AdminDashboardController extends Controller
                 $packaging_charges[$charge->type_id][] = $charge;
             }
         }
-        if(session('department_id') == 7){
+if(session('department_id') == 7){
             if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
-                return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+                return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
             }
             else{
                 return view('admin.access_denied');
             }
         }
         else{
-            return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+            return view('admin.accounts.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
         }
-
     }
 
 
@@ -1246,7 +1278,14 @@ class AdminDashboardController extends Controller
             $fuel = FuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $packaging = PackagingCharge::all()->where('user_id', $id);
             $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
-
+            $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+            $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+            $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+            $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+            $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+            $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+            $storage_types = WmsStorageType::all()->where('status', 1);
+            $invoicing_cycles = InvoicingCycle::all();
             $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
             $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
@@ -1262,10 +1301,9 @@ class AdminDashboardController extends Controller
         }
         elseif(($user['rate_status']>=1) && $user['status']==3){
             $switches = PendingRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//        return $switches;
-//        var_dump(empty($switches));exit();
+
             $weight = PendingWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//        $cash = '';
+
             $bookingType = PendingBookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $cash = PendingCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = PendingInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1276,7 +1314,14 @@ class AdminDashboardController extends Controller
             $rate_status = $user['rate_status'];
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
-
+            $wms_user_info = WmsPendingUserInformation::where('user_id', $id)->first();
+            $wms_product_charges = WmsPendingPerProductCharge::where('user_id', $id)->first();
+            $wms_square_foot_charges = WmsPendingPerSquareFootCharge::where('user_id', $id)->first();
+            $wms_packing_charges = WmsPendingPackingCharge::where('user_id', $id)->get();
+            $wms_labelling_charges = WmsPendingLabellingCharge::where('user_id', $id)->first();
+            $wms_storage_charges = WmsPendingStorageTypeCharge::where('user_id', $id)->get();
+            $storage_types = WmsStorageType::all()->where('status', 1);
+            $invoicing_cycles = InvoicingCycle::all();
             $packaging_charges = array();
 
             if(count($packaging) > 0){
@@ -1291,14 +1336,14 @@ class AdminDashboardController extends Controller
         }
         if(session('department_id') == 7){
             if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
-                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
             }
             else{
                 return view('admin.access_denied');
             }
         }
         else{
-            return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+            return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
         }
 
     }
@@ -1330,13 +1375,13 @@ class AdminDashboardController extends Controller
                 'on_cash_range_down.*.required_if' => 'The overnight cash range down field is required.',
                 'on_cash_range_down.*.numeric' => 'The overnight cash range down field must be numeric.',
                 'on_cash_charges.*.required_if' => 'The overnight cash charges field is required.',
-                //'on_cash_charges.*.string' => 'The overnight cash charges field must be string.',
+                
                 'on_ins_range_up.*.required_if' => 'The overnight insurance range up field is required.',
                 'on_ins_range_up.*.numeric' => 'The overnight insurance range up field must be numeric or percentage.',
                 'on_ins_range_down.*.required_if' => 'The overnight insurance range down field is required.',
                 'on_ins_range_down.*.numeric' => 'The overnight insurance range down field must be numeric or percentage.',
                 'on_ins_charges.*.required_if' => 'The overnight insurance charges field is required.',
-                //'on_ins_charges.*.string' => 'The overnight insurance charges field must be string.',
+                
                 'on_return_local_charges.required_if' => 'The overnight return local charges field is required.',
                 'on_return_local_charges.numeric' => 'The overnight return local charges field must be numeric or percentage.',
                 'on_return_class_0_charges.*.numeric' => 'The overnight class A return charges field must be numeric.',
@@ -1350,15 +1395,10 @@ class AdminDashboardController extends Controller
                 'on_discount_title.required_if' => 'The overnight discount title field must be required',
                 'on_daterange.required_if' => 'The overnight discount date range field must be required',
                 'on_discount_weight_rate.required_if' => 'The overnight discount weight field must be required',
-//            'on_discount_weight_rate.numeric' => 'The overnight discount weight field must be numeric',
                 'on_discount_cash_rate.required_if' => 'The overnight discount cash field must be required',
-//            'on_discount_cash_rate.numeric' => 'The overnight discount cash field must be numeric',
                 'on_discount_insurance_rate.required_if' => 'The overnight discount insurance field must be required',
-//            'on_discount_insurance_rate.numeric' => 'The overnight discount insurance field must be numeric',
                 'on_discount_return_rate.required_if' => 'The overnight discount return field must be required',
-//            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
                 'on_discount_packaging_rate.required_if' => 'The overnight discount packaging field must be required',
-//            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
                 'on_discount_title.required_with' => 'The overnight discount title field is required',
                 'on_daterange.required_with' => 'The overnight discount date field is required',
                 //overland starts
@@ -1385,13 +1425,11 @@ class AdminDashboardController extends Controller
                 'ol_cash_range_down.*.required_if' => 'The overland cash range down field is required.',
                 'ol_cash_range_down.*.numeric' => 'The overland cash range down field must be numeric.',
                 'ol_cash_charges.*.required_if' => 'The overland cash charges field is required.',
-                //'ol_cash_charges.*.numeric' => 'The overland cash charges field must be numeric or percentage.',
                 'ol_ins_range_up.*.required_if' => 'The overland insurance range up field is required.',
                 'ol_ins_range_up.*.numeric' => 'The overland insurance range up field must be numeric or percentage.',
                 'ol_ins_range_down.*.required_if' => 'The overland insurance range down field is required.',
                 'ol_ins_range_down.*.numeric' => 'The overland insurance range down field must be numeric or percentage.',
                 'ol_ins_charges.*.required_if' => 'The overland insurance charges field is required.',
-                //'ol_ins_charges.*.numeric' => 'The overland insurance charges field must be numeric or percentage.',
                 'ol_return_local_charges.required_if' => 'The overland return local charges field is required.',
                 'ol_return_local_charges.numeric' => 'The overland return local charges field must be numeric or percentage.',
                 'ol_return_class_0_charges.*.required_if' => 'The overland class A return charges field is required.',
@@ -1404,15 +1442,10 @@ class AdminDashboardController extends Controller
                 'ol_discount_title.required_if' => 'The overland discount title field must be required',
                 'ol_daterange.required_if' => 'The overland discount date range field must be required',
                 'ol_discount_weight_rate.required_if' => 'The overland discount weight field must be required',
-//            'ol_discount_weight_rate.numeric' => 'The overland discount weight field must be numeric',
                 'ol_discount_cash_rate.required_if' => 'The overland discount cash field must be required',
-//            'ol_discount_cash_rate.numeric' => 'The overland discount cash field must be numeric',
                 'ol_discount_insurance_rate.required_if' => 'The overland discount insurance field must be required',
-//            'ol_discount_insurance_rate.numeric' => 'The overland discount insurance field must be numeric',
                 'ol_discount_return_rate.required_if' => 'The overland discount return field must be required',
-//            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
                 'ol_discount_packaging_rate.required_if' => 'The overland discount packaging field must be required',
-//            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
                 'ol_discount_title.required_with' => 'The overland discount title field is required',
                 'ol_daterange.required_with' => 'The overland discount date field is required',
                 //overland end and detain starts
@@ -1439,13 +1472,11 @@ class AdminDashboardController extends Controller
                 'detain_cash_range_down.*.required_if' => 'The detain cash range down field is required.',
                 'detain_cash_range_down.*.numeric' => 'The detain cash range down field must be numeric.',
                 'detain_cash_charges.*.required_if' => 'The detain cash charges field is required.',
-                //'detain_cash_charges.*.numeric' => 'The detain cash charges field must be numeric or percentage.',
                 'detain_ins_range_up.*.required_if' => 'The detain insurance range up field is required.',
                 'detain_ins_range_up.*.numeric' => 'The detain insurance range up field must be numeric or percentage.',
                 'detain_ins_range_down.*.required_if' => 'The detain insurance range down field is required.',
                 'detain_ins_range_down.*.numeric' => 'The detain insurance range down field must be numeric or percentage.',
                 'detain_ins_charges.*.required_if' => 'The detain insurance charges field is required.',
-                //'detain_ins_charges.*.numeric' => 'The detain insurance charges field must be numeric or percentage.',
                 'detain_return_local_charges.required_if' => 'The detain return local charges field is required.',
                 'detain_return_local_charges.numeric' => 'The detain return local charges field must be numeric or percentage.',
                 'detain_return_class_0_charges.*.required_if' => 'The detain class A return charges field is required.',
@@ -1458,15 +1489,10 @@ class AdminDashboardController extends Controller
                 'detain_discount_title.required_if' => 'The detain discount title field must be required',
                 'detain_daterange.required_if' => 'The detain discount date range field must be required',
                 'detain_discount_weight_rate.required_if' => 'The detain discount weight field must be required',
-//            'detain_discount_weight_rate.numeric' => 'The detain discount weight field must be numeric',
                 'detain_discount_cash_rate.required_if' => 'The detain discount cash field must be required',
-//            'detain_discount_cash_rate.numeric' => 'The detain discount cash field must be numeric',
                 'detain_discount_insurance_rate.required_if' => 'The detain discount insurance field must be required',
-//            'detain_discount_insurance_rate.numeric' => 'The detain discount insurance field must be numeric',
                 'detain_discount_return_rate.required_if' => 'The detain discount return field must be required',
-//            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
                 'detain_discount_packaging_rate.required_if' => 'The detain discount packaging field must be required',
-//            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
                 'detain_discount_title.required_with' => 'The detain discount title field is required',
                 'detain_daterange.required_with' => 'The detain discount date field is required',
                 //detain ends and sameday starts
@@ -1490,13 +1516,11 @@ class AdminDashboardController extends Controller
                 'sameday_cash_range_down.*.required_if' => 'The sameday cash range down field is required.',
                 'sameday_cash_range_down.*.numeric' => 'The sameday cash range down field must be numeric.',
                 'sameday_cash_charges.*.required_if' => 'The sameday cash charges field is required.',
-                // 'sameday_cash_charges.*.numeric' => 'The sameday cash charges field must be numeric or percentage.',
                 'sameday_ins_range_up.*.required_if' => 'The sameday insurance range up field is required.',
                 'sameday_ins_range_up.*.numeric' => 'The sameday insurance range up field must be numeric or percentage.',
                 'sameday_ins_range_down.*.required_if' => 'The sameday insurance range down field is required.',
                 'sameday_ins_range_down.*.numeric' => 'The sameday insurance range down field must be numeric or percentage.',
                 'sameday_ins_charges.*.required_if' => 'The sameday insurance charges field is required.',
-                //'sameday_ins_charges.*.numeric' => 'The sameday insurance charges field must be numeric or percentage.',
                 'sameday_return_local_charges.required_if' => 'The sameday return local charges field is required.',
                 'sameday_return_local_charges.numeric' => 'The sameday return local charges field must be numeric or percentage.',
                 'sameday_return_class_0_charges.*.required_if' => 'The sameday class A return charges field is required.',
@@ -1509,18 +1533,31 @@ class AdminDashboardController extends Controller
                 'sameday_discount_title.required_if' => 'The sameday discount title field must be required',
                 'sameday_daterange.required_if' => 'The sameday discount date range field must be required',
                 'sameday_discount_weight_rate.required_if' => 'The sameday discount weight field must be required',
-//            'sameday_discount_weight_rate.numeric' => 'The sameday discount weight field must be numeric',
                 'sameday_discount_cash_rate.required_if' => 'The sameday discount cash field must be required',
-//            'sameday_discount_cash_rate.numeric' => 'The sameday discount cash field must be numeric',
                 'sameday_discount_insurance_rate.required_if' => 'The sameday discount insurance field must be required',
-//            'sameday_discount_insurance_rate.numeric' => 'The sameday discount insurance field must be numeric',
                 'sameday_discount_return_rate.required_if' => 'The sameday discount return field must be required',
-//            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
                 'sameday_discount_packaging_rate.required_if' => 'The sameday discount packaging field must be required',
-//            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
                 'sameday_discount_title.required_with' => 'The sameday discount title field is required',
                 'sameday_daterange.required_with' => 'The sameday discount date field is required',
                 //sameday ends
+
+                //warehouse starts
+                'invoicing_cycle.*.required' => 'Invoicing Cycle field is required.',
+                'invoicing_date.*.required' => 'Invoicing Cycle field is required.',
+                'invoicing_cycle.*.numeric' => 'Invoicing Cycle field must be numeric.',
+                'invoicing_date.*.numeric' => 'Invoicing Cycle field must be numeric.',
+                'ppc_charges.required' => 'Per product charges field id required',
+                'psf_charges.required' => 'Per square foot charges field id required',
+                'storage_type.*.required' => 'Storage type field is required.',
+                'storage_type_charges.*.required' => 'Storage type charges field is required',
+                'storage_type.*.numeric' => 'Storage type field must be numeric.',
+                'storage_type_charges.*.required' => 'Storage type charges field must be numeric',
+                'packing_type.*.required' => 'Packing type field is required',
+                'packing_charges.*.required' => 'Packing charges field is required',
+                'packing_charges.*.numeric' => 'Packing charges field must be numeric',
+                'labelling_charges.required' => 'Labelling charges field is required',
+                'labelling_charges.numeric' => 'Labelling charges field must be numeric',
+
             ];
 
             $validations = array();
@@ -1666,6 +1703,19 @@ class AdminDashboardController extends Controller
                 ];
             }
 
+            if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+                $warehouse_validations = [
+                    'invoicing_cycle' => 'required|numeric',
+                    'invoicing_date.*' => 'required_if:invoicing_cycle,1,3',
+                    'ppc_charges'=>'required_if:ppc_switch,==,on',
+                    'psf_charges'=>'required_if:psf_switch,==,on',
+                    'storage_type.*'=>'required',
+                    'storage_type_charges.*'=>'required|numeric',
+                    'packing_type.*' => 'required_if:packing_charges_switch,==,on',
+                    'packing_charges.*' => 'required_if:packing_charges_switch,==,on|numeric',
+                    'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
+                ];
+            }
             $validations = array_merge($on_validations, $ol_validations, $detain_validations, $sameday_validations);
 
             $validate = Validator::make($request->all(), $validations, $messages);
@@ -2781,6 +2831,102 @@ class AdminDashboardController extends Controller
                 }
                 //dd($weightAlready);
             }
+            if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+                $wms_user_info = WmsUserInformation::where('user_id', $id);
+                if($wms_user_info->exists()){
+                    $wms_user_info = $wms_user_info->first();
+                    $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
+                    $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+                    $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
+                    $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
+                    $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
+                    $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch'))? 1:0;
+                }else{
+                    $wms_user_info = new WmsUserInformation();
+                    $wms_user_info->user_id = $id;
+                    $wms_user_info->warehousing = 1;
+                    $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
+                    $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+                    $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
+                    $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
+                    $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
+                    $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch'))? 1:0;
+                    
+                }
+                $wms_user_info->save();
+
+                if($request->has('ppc_switch')){
+                    $ppc = WmsPerProductCharge::where('user_id', $id);
+                    if($ppc->exists()){
+                        $ppc = $ppc->first();
+                        $ppc->charges = $request->ppc_charges;
+                    }else{
+                        $ppc = new WmsPerProductCharge();
+                        $ppc->user_id = $id;
+                        $ppc->charges = $request->ppc_charges;
+                    }
+                    $ppc->save();
+                }else{
+                    WmsPerProductCharge::where('user_id', $id)->delete();
+                }
+                if($request->has('psf_switch')){
+                    $psf = WmsPerSquareFootCharge::where('user_id', $id);
+                    if($psf->exists()){
+                        $psf = $psf->first();
+                        $psf->charges = $request->psf_charges;
+                    }else{
+                        $psf = new WmsPerSquareFootCharge();
+                        $psf->user_id = $id;
+                        $psf->charges = $request->psf_charges;
+                    }
+                    $psf->save();
+                    
+                }
+                WmsStorageTypeCharge::where('user_id', $id)->delete();
+                foreach ($request->storage_type as $key => $storage_type) {
+                    $storage_charges = new WmsStorageTypeCharge();
+                    $storage_charges->user_id = $id;
+                    $storage_charges->storage_type_id = $storage_type;
+                    $storage_charges->charges = $request->storage_type_charges[$key];
+                    $storage_charges->save();
+                }
+
+                if($request->has('packing_charges_switch')){
+                    WmsPackingCharge::where('user_id', $id)->delete();
+                    foreach ($request->packing_type as $key => $packing) {
+                        $ptype = new WmsPackingCharge();
+                        $ptype->user_id = $id;
+                        $ptype->packing_type_id = $packing;
+                        $ptype->charges = $request->packing_charges[$key];
+                        $ptype->save();
+                    }
+                }else{
+                    WmsPackingCharge::where('user_id', $id)->delete();
+                }
+
+                if($request->has('labelling_charges_switch')){
+                    $labelling = WmsLabellingCharge::where('user_id',$id);
+                    if($labelling->exists()){
+                        $labelling = $labelling->first();
+                        $labelling->charges = $request->labelling_charges;
+                    }else{
+                        $labelling = new WmsLabellingCharge();
+                        $labelling->user_id = $id;
+                        $labelling->charges = $request->labelling_charges;
+                    }
+                    $labelling->save();
+                    
+                }else{
+                    WmsLabellingCharge::where('user_id', $id)->delete();
+                }
+            }else{
+                $wms_user_info = WmsUserInformation::where('user_id', $id);
+                if($wms_user_info->exists()){
+                    $wms_user_info = $wms_user_info->first();
+                    $wms_user_info->warehousing = 0;
+                    $wms_user_info->save();
+                }
+            }
             User::where('id',$id)->update(['rate_status'=>1]);
             if($request->authorize == 1){
                 User::where('id',$id)->update(['rate_status'=>0,'status'=>2,'rates_authorized_by'=>Auth::id()]);
@@ -3006,6 +3152,24 @@ class AdminDashboardController extends Controller
                 'sameday_discount_title.required_with' => 'The sameday discount title field is required',
                 'sameday_daterange.required_with' => 'The sameday discount date field is required',
                 //sameday ends
+
+                //warehouse starts
+                'invoicing_cycle.*.required' => 'Invoicing Cycle field is required.',
+                'invoicing_date.*.required' => 'Invoicing Cycle field is required.',
+                'invoicing_cycle.*.numeric' => 'Invoicing Cycle field must be numeric.',
+                'invoicing_date.*.numeric' => 'Invoicing Cycle field must be numeric.',
+                'ppc_charges.required' => 'Per product charges field id required',
+                'psf_charges.required' => 'Per square foot charges field id required',
+                'storage_type.*.required' => 'Storage type field is required.',
+                'storage_type_charges.*.required' => 'Storage type charges field is required',
+                'storage_type.*.numeric' => 'Storage type field must be numeric.',
+                'storage_type_charges.*.required' => 'Storage type charges field must be numeric',
+                'packing_type.*.required' => 'Packing type field is required',
+                'packing_charges.*.required' => 'Packing charges field is required',
+                'packing_charges.*.numeric' => 'Packing charges field must be numeric',
+                'labelling_charges.required' => 'Labelling charges field is required',
+                'labelling_charges.numeric' => 'Labelling charges field must be numeric',
+
             ];
 
             $validations = array();
@@ -3148,6 +3312,20 @@ class AdminDashboardController extends Controller
                     'sameday_discount_insurance_rate' => 'required_if:sameday_discount_insurance_switch,==,on',
                     'sameday_discount_return_rate' => 'required_if:sameday_discount_return_switch,==,on',
                     'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
+                ];
+            }
+
+            if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+                $warehouse_validations = [
+                    'invoicing_cycle' => 'required|numeric',
+                    'invoicing_date.*' => 'required_if:invoicing_cycle,1,3',
+                    'ppc_charges'=>'required_if:ppc_switch,==,on',
+                    'psf_charges'=>'required_if:psf_switch,==,on',
+                    'storage_type.*'=>'required',
+                    'storage_type_charges.*'=>'required|numeric',
+                    'packing_type.*' => 'required_if:packing_charges_switch,==,on',
+                    'packing_charges.*' => 'required_if:packing_charges_switch,==,on|numeric',
+                    'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
                 ];
             }
 
@@ -3829,6 +4007,65 @@ class AdminDashboardController extends Controller
 
                 }
             }
+
+            WmsPendingUserInformation::where('user_id', $id)->delete();
+            WmsPendingPerProductCharge::where('user_id', $id)->delete();
+            WmsPendingPerSquareFootCharge::where('user_id', $id)->delete();
+            WmsPendingStorageTypeCharge::where('user_id', $id)->delete();
+            WmsPendingPackingCharge::where('user_id', $id)->delete();
+            WmsPendingLabellingCharge::where('user_id', $id)->delete();
+            if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+
+            $wms_user_info = new WmsPendingUserInformation();
+            $wms_user_info->user_id = $id;
+            $wms_user_info->warehousing = 1;
+            $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
+            $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+            $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
+            $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
+            $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
+            $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch'))? 1:0;
+            $wms_user_info->save();
+
+            if($request->has('ppc_switch')){
+                $ppc = new WmsPendingPerProductCharge();
+                $ppc->user_id = $id;
+                $ppc->charges = $request->ppc_charges;
+                $ppc->save();
+            }
+            if($request->has('psf_switch')){
+                $psf = new WmsPendingPerSquareFootCharge();
+                $psf->user_id = $id;
+                $psf->charges = $request->psf_charges;
+                $psf->save();
+            }
+
+            foreach ($request->storage_type as $key => $storage_type) {
+                $storage_charges = new WmsPendingStorageTypeCharge();
+                $storage_charges->user_id = $id;
+                $storage_charges->storage_type_id = $storage_type;
+                $storage_charges->charges = $request->storage_type_charges[$key];
+                $storage_charges->save();
+            }
+
+            if($request->has('packing_charges_switch')){
+                foreach ($request->packing_type as $key => $packing) {
+                    $ptype = new WmsPendingPackingCharge();
+                    $ptype->user_id = $id;
+                    $ptype->packing_type_id = $packing;
+                    $ptype->charges = $request->packing_charges[$key];
+                    $ptype->save();
+                }
+            }
+
+            if($request->has('labelling_charges_switch')){
+                $labelling = new WmsPendingLabellingCharge();
+                $labelling->user_id = $id;
+                $labelling->charges = $request->labelling_charges;
+                $labelling->save();
+            }
+        }
+
             //dd($weightAlready);
 
             if ($request->approve == 1) {
@@ -4281,6 +4518,65 @@ class AdminDashboardController extends Controller
                     'to_date' => Carbon::now()
                 ]);
 
+                if($wms_user_info = WmsUserInformation::where('user_id', $id)->first()){
+                    $wms_user_information = new WmsHistoryUserInformation();
+                    $wms_user_information->user_id = $id;
+                    $wms_user_information->warehousing = $wms_user_info['warehousing'];
+                    $wms_user_information->invoicing_cycle = $wms_user_info['invoicing_cycle'];
+                    $wms_user_information->invoicing_date = $wms_user_info['invoicing_date'];
+                    $wms_user_information->per_product_charges = $wms_user_info['per_product_charges'];
+                    $wms_user_information->per_square_foot_charges = $wms_user_info['per_square_foot_charges'];
+                    $wms_user_information->packing_charges = $wms_user_info['packing_charges'];
+                    $wms_user_information->labelling_charges = $wms_user_info['labelling_charges'];
+                    $wms_user_information->save();
+                }
+                if($ppc = WmsPerProductCharge::where('user_id', $id)->first()){
+                    $ppc_history = new WmsHistoryPerProductCharge();
+                    $ppc_history->user_id = $ppc['user_id'];
+                    $ppc_history->charges = $ppc['charges'];
+                    $ppc_history->save();
+                }
+                if($psf = WmsPerSquareFootCharge::where('user_id', $id)->first()){
+                    $psf_history = new WmsHistoryPerSquareFootCharge();
+                    $psf_history->user_id = $psf['user_id'];
+                    $psf_history->charges = $psf['charges'];
+                    $psf_history->save();
+                }
+
+                if($storage_type_charges = WmsStorageTypeCharge::where('user_id', $id)->get()){
+                    foreach ($storage_type_charges as $storage_charges) {
+                        $history_storage_charge = new WmsHistoryStorageTypeCharge();
+                        $history_storage_charge->user_id = $id;
+                        $history_storage_charge->storage_type_id = $storage_charges['storage_type_id'];
+                        $history_storage_charge->charges = $storage_charges['charges'];
+                        $history_storage_charge->save();
+                    }
+                }
+
+                if($packing_charges = WmsPackingCharge::where('user_id', $id)->get()){
+                    foreach ($packing_charges as $packing_charges) {
+                        $history_packing_charge = new WmsHistoryPackingCharge();
+                        $history_packing_charge->user_id = $id;
+                        $history_packing_charge->packing_type_id = $packing_charges['packing_type_id'];
+                        $history_packing_charge->charges = $packing_charges['charges'];
+                        $history_packing_charge->save();
+                    }
+                }
+
+                if($labelling = WmsLabellingCharge::where('user_id', $id)->first()){
+                    $labelling_history = new WmsHistoryLabellingCharge();
+                    $labelling_history->user_id = $labelling['user_id'];
+                    $labelling_history->charges = $labelling['charges'];
+                    $labelling_history->save();
+                }
+
+                WmsUserInformation::where('user_id', $id)->delete();
+                WmsPerProductCharge::where('user_id', $id)->delete();
+                WmsPerSquareFootCharge::where('user_id', $id)->delete();
+                WmsStorageTypeCharge::where('user_id', $id)->delete();
+                WmsPackingCharge::where('user_id', $id)->delete();
+                WmsLabellingCharge::where('user_id', $id)->delete();
+
                 RateStatus::where('user_id', $id)->delete();
                 WeightCharge::where('user_id', $id)->delete();
                 BookingTypeCharges::where('user_id', $id)->delete();
@@ -4727,6 +5023,66 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
+
+                if($wms_user_info = WmsPendingUserInformation::where('user_id', $id)->first()){
+                    $wms_user_information = new WmsUserInformation();
+                    $wms_user_information->user_id = $id;
+                    $wms_user_information->warehousing = $wms_user_info['warehousing'];
+                    $wms_user_information->invoicing_cycle = $wms_user_info['invoicing_cycle'];
+                    $wms_user_information->invoicing_date = $wms_user_info['invoicing_date'];
+                    $wms_user_information->per_product_charges = $wms_user_info['per_product_charges'];
+                    $wms_user_information->per_square_foot_charges = $wms_user_info['per_square_foot_charges'];
+                    $wms_user_information->packing_charges = $wms_user_info['packing_charges'];
+                    $wms_user_information->labelling_charges = $wms_user_info['labelling_charges'];
+                    $wms_user_information->save();
+                }
+                if($ppc = WmsPendingPerProductCharge::where('user_id', $id)->first()){
+                    $ppc_history = new WmsPerProductCharge();
+                    $ppc_history->user_id = $ppc['user_id'];
+                    $ppc_history->charges = $ppc['charges'];
+                    $ppc_history->save();
+                }
+                if($psf = WmsPendingPerSquareFootCharge::where('user_id', $id)->first()){
+                    $psf_history = new WmsPerSquareFootCharge();
+                    $psf_history->user_id = $psf['user_id'];
+                    $psf_history->charges = $psf['charges'];
+                    $psf_history->save();
+                }
+
+                if($storage_type_charges = WmsPendingStorageTypeCharge::where('user_id', $id)->get()){
+                    foreach ($storage_type_charges as $storage_charges) {
+                        $history_storage_charge = new WmsStorageTypeCharge();
+                        $history_storage_charge->user_id = $id;
+                        $history_storage_charge->storage_type_id = $storage_charges['storage_type_id'];
+                        $history_storage_charge->charges = $storage_charges['charges'];
+                        $history_storage_charge->save();
+                    }
+                }
+
+                if($packing_charges = WmsPendingPackingCharge::where('user_id', $id)->get()){
+                    foreach ($packing_charges as $packing_charges) {
+                        $history_packing_charge = new WmsPackingCharge();
+                        $history_packing_charge->user_id = $id;
+                        $history_packing_charge->packing_type_id = $packing_charges['packing_type_id'];
+                        $history_packing_charge->charges = $packing_charges['charges'];
+                        $history_packing_charge->save();
+                    }
+                }
+
+                if($labelling = WmsPendingLabellingCharge::where('user_id', $id)->first()){
+                    $labelling_history = new WmsLabellingCharge();
+                    $labelling_history->user_id = $labelling['user_id'];
+                    $labelling_history->charges = $labelling['charges'];
+                    $labelling_history->save();
+                }
+
+                WmsPendingUserInformation::where('user_id', $id)->delete();
+                WmsPendingPerProductCharge::where('user_id', $id)->delete();
+                WmsPendingPerSquareFootCharge::where('user_id', $id)->delete();
+                WmsPendingStorageTypeCharge::where('user_id', $id)->delete();
+                WmsPendingPackingCharge::where('user_id', $id)->delete();
+                WmsPendingLabellingCharge::where('user_id', $id)->delete();
+
                 PendingRateStatus::where('user_id', $id)->delete();
                 PendingWeightCharge::where('user_id', $id)->delete();
                 PendingBookingTypeCharges::where('user_id', $id)->delete();
@@ -4752,7 +5108,7 @@ class AdminDashboardController extends Controller
      * @return int
      */
     public function addRates(Request $request, $id){
-
+        
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
@@ -4970,6 +5326,23 @@ class AdminDashboardController extends Controller
             'sameday_discount_title.required_with'=>'The sameday discount title field is required',
             'sameday_daterange.required_with'=>'The sameday discount date field is required',
             //sameday ends
+
+            //warehouse starts
+            'invoicing_cycle.*.required' => 'Invoicing Cycle field is required.',
+            'invoicing_date.*.required' => 'Invoicing Cycle field is required.',
+            'invoicing_cycle.*.numeric' => 'Invoicing Cycle field must be numeric.',
+            'invoicing_date.*.numeric' => 'Invoicing Cycle field must be numeric.',
+            'ppc_charges.required' => 'Per product charges field id required',
+            'psf_charges.required' => 'Per square foot charges field id required',
+            'storage_type.*.required' => 'Storage type field is required.',
+            'storage_type_charges.*.required' => 'Storage type charges field is required',
+            'storage_type.*.numeric' => 'Storage type field must be numeric.',
+            'storage_type_charges.*.required' => 'Storage type charges field must be numeric',
+            'packing_type.*.required' => 'Packing type field is required',
+            'packing_charges.*.required' => 'Packing charges field is required',
+            'packing_charges.*.numeric' => 'Packing charges field must be numeric',
+            'labelling_charges.required' => 'Labelling charges field is required',
+            'labelling_charges.numeric' => 'Labelling charges field must be numeric',
         ];
 
         $validations = array();
@@ -5115,6 +5488,20 @@ class AdminDashboardController extends Controller
             ];
         }
 
+        if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+            $warehouse_validations = [
+                'invoicing_cycle' => 'required|numeric',
+                'invoicing_date.*' => 'required_if:invoicing_cycle,1,3',
+                'ppc_charges'=>'required_if:ppc_switch,==,on',
+                'psf_charges'=>'required_if:psf_switch,==,on',
+                'storage_type.*'=>'required',
+                'storage_type_charges.*'=>'required|numeric',
+                'packing_type.*' => 'required_if:packing_charges_switch,==,on',
+                'packing_charges.*' => 'required_if:packing_charges_switch,==,on|numeric',
+                'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
+            ];
+        }
+
         $validations = array_merge($on_validations, $ol_validations, $detain_validations, $sameday_validations);
 
         $validate = Validator::make($request->all(), $validations, $messages);
@@ -5124,7 +5511,6 @@ class AdminDashboardController extends Controller
                 ->withErrors($validate)
                 ->withInput();
         }
-
 
         //Packaging Charges
         if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
@@ -5780,6 +6166,60 @@ class AdminDashboardController extends Controller
 
             }
         }
+
+        if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+
+            $wms_user_info = new WmsUserInformation();
+            $wms_user_info->user_id = $id;
+            $wms_user_info->warehousing = 1;
+            $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
+            $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+            $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
+            $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
+            $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
+            $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch'))? 1:0;
+            $wms_user_info->save();
+
+            if($request->has('ppc_switch')){
+                $ppc = new WmsPerProductCharge();
+                $ppc->user_id = $id;
+                $ppc->charges = $request->ppc_charges;
+                $ppc->save();
+            }
+            if($request->has('psf_switch')){
+                $psf = new WmsPerSquareFootCharge();
+                $psf->user_id = $id;
+                $psf->charges = $request->psf_charges;
+                $psf->save();
+            }
+
+            foreach ($request->storage_type as $key => $storage_type) {
+                $storage_charges = new WmsStorageTypeCharge();
+                $storage_charges->user_id = $id;
+                $storage_charges->storage_type_id = $storage_type;
+                $storage_charges->charges = $request->storage_type_charges[$key];
+                $storage_charges->save();
+            }
+
+            if($request->has('packing_charges_switch')){
+                foreach ($request->packing_type as $key => $packing) {
+                    $ptype = new WmsPackingCharge();
+                    $ptype->user_id = $id;
+                    $ptype->packing_type_id = $packing;
+                    $ptype->charges = $request->packing_charges[$key];
+                    $ptype->save();
+                }
+            }
+
+            if($request->has('labelling_charges_switch')){
+                $labelling = new WmsLabellingCharge();
+                $labelling->user_id = $id;
+                $labelling->charges = $request->labelling_charges;
+                $labelling->save();
+            }
+        }
+
+
         User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
 
         NotificationsController::send(38, $id);
@@ -5787,7 +6227,8 @@ class AdminDashboardController extends Controller
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
 
-    public function activeAccountListAjax(){		$users = User::join('cities', 'users.city_id', '=', 'cities.id')
+    public function activeAccountListAjax(){		
+        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
            ->leftjoin('products as p','p.id','=','users.product_id')
            ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
            ->leftjoin('admins as rabna','rabna.id','=','users.rates_updated_by')
@@ -7276,6 +7717,29 @@ class AdminDashboardController extends Controller
         }
         else{
             return redirect()->back()->with('success', "Mapping updated successfully!");
+        }
+    }
+
+    public function warehousing_active(Request $request){
+        $shipper = User::find($request->id);
+        if($shipper && ($shipper->warehousing == 0)){
+            $shipper->warehousing = 1;
+            $shipper->save();
+
+            return response()->json(['status' => 1, 'success' => 'Warehousing activated successfully!']);
+        }else{
+            return response()->json(['status' => 0, 'error' => 'Warehousing already activated!']);
+        }
+    }
+    public function warehousing_inactive(Request $request){
+        $shipper = User::find($request->id);
+        if($shipper && ($shipper->warehousing == 1)){
+            $shipper->warehousing = 0;
+            $shipper->save();
+
+            return response()->json(['status' => 1, 'success' => 'Warehousing deactivated successfully!']);
+        }else{
+            return response()->json(['status' => 0, 'error' => 'Warehousing already deactivated!']);
         }
     }
 }
