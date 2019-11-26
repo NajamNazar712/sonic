@@ -72,7 +72,7 @@
                                                                         <div class="col-md-3 text-center">
                                                                             <label class="card-title">{{$size->size}}</label>
                                                                             <fieldset class="form-group">
-                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control @if ((isset($e_packaging_charges[$type->id][$ind]) && $e_packaging_charges[$type->id][$ind]->size_id == $size->id) && ($e_packaging_charges[$type->id][$ind]->charges != $packaging_charges[$type->id][$ind]->charges)) changed @endif amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging_charges[$type->id][$ind]->charges}}">
+                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control @if ((isset($e_packaging_charges[$type->id][$ind]) && isset($packaging_charges[$type->id][$ind]) && $e_packaging_charges[$type->id][$ind]->size_id == $size->id) && ($e_packaging_charges[$type->id][$ind]->charges != $packaging_charges[$type->id][$ind]->charges)) changed @endif amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging_charges[$type->id][$ind]->charges}}">
                                                                             </fieldset>
                                                                         </div>
                                                                     @else
@@ -298,7 +298,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" >Replacement</span>
                                                         </div>
-                                                        <input type="text" class="form-control @if(isset($e_shippingType[1][0]) && $e_shippingType[1][0]->replacement_charges != $shippingType[1][0]->replacement_charges) changed @elseif(!isset($e_shippingType[1][0]) && $existing == 1) new @endif percent" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->replacement_charges != '')? $shippingType[1][0]->replacement_charges : ''}}" name="on_replacement_charges">
+                                                        <input type="text" class="form-control @if(isset($e_shippingType[1][0]) && isset($shippingType[1][0]) && $e_shippingType[1][0]->replacement_charges != $shippingType[1][0]->replacement_charges) changed @elseif(!isset($e_shippingType[1][0]) && $existing == 1) new @endif percent" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->replacement_charges != '')? $shippingType[1][0]->replacement_charges : ''}}" name="on_replacement_charges">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" >%</span>
                                                         </div>
@@ -311,7 +311,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" >Try &amp; Buy</span>
                                                         </div>
-                                                        <input type="text" class="form-control @if(isset($e_shippingType[1][0]) && $e_shippingType[1][0]->try_and_buy_charges != $shippingType[1][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[1][0]) && $existing == 1) new @endif percent" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->try_and_buy_charges != '')? $shippingType[1][0]->try_and_buy_charges : ''}}" name="on_tnb_charges">
+                                                        <input type="text" class="form-control @if(isset($e_shippingType[1][0]) && isset($shippingType[1][0]) && $e_shippingType[1][0]->try_and_buy_charges != $shippingType[1][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[1][0]) && $existing == 1) new @endif percent" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->try_and_buy_charges != '')? $shippingType[1][0]->try_and_buy_charges : ''}}" name="on_tnb_charges">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" >%</span>
                                                         </div>
@@ -525,31 +525,31 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && $e_returnCharges[1][0]->local != $returnCharges[1][0]->local) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif amount" name="on_return_local_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->local !== '')? $returnCharges[1][0]->local : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && isset($returnCharges[1][0]) && $e_returnCharges[1][0]->local != $returnCharges[1][0]->local) changed @elseif(!isset($e_returnCharges[1][0]) && isset($returnCharges[1][0]) && $existing == 1) new @endif amount" name="on_return_local_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->local !== '')? $returnCharges[1][0]->local : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && $e_returnCharges[1][0]->national_charges_class_0 != $returnCharges[1][0]->national_charges_class_0) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif amount" name="on_return_class_0_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_0 !== '')? $returnCharges[1][0]->national_charges_class_0 : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && isset($returnCharges[1][0]) && $e_returnCharges[1][0]->national_charges_class_0 != $returnCharges[1][0]->national_charges_class_0) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif amount" name="on_return_class_0_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_0 !== '')? $returnCharges[1][0]->national_charges_class_0 : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class B</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && $e_returnCharges[1][0]->national_charges_class_1 != $returnCharges[1][0]->national_charges_class_1) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif dec-percent" name="on_return_class_1_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_1 !== '')? $returnCharges[1][0]->national_charges_class_1 : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && isset($returnCharges[1][0]) && $e_returnCharges[1][0]->national_charges_class_1 != $returnCharges[1][0]->national_charges_class_1) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif dec-percent" name="on_return_class_1_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_1 !== '')? $returnCharges[1][0]->national_charges_class_1 : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class C</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && $e_returnCharges[1][0]->national_charges_class_2 != $returnCharges[1][0]->national_charges_class_2) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif dec-percent" name="on_return_class_2_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_2 !== '')? $returnCharges[1][0]->national_charges_class_2 : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && isset($returnCharges[1][0]) && $e_returnCharges[1][0]->national_charges_class_2 != $returnCharges[1][0]->national_charges_class_2) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif dec-percent" name="on_return_class_2_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_2 !== '')? $returnCharges[1][0]->national_charges_class_2 : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class D</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && $e_returnCharges[1][0]->national_charges_class_3 != $returnCharges[1][0]->national_charges_class_3) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif dec-percent" name="on_return_class_3_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_3 !== '')? $returnCharges[1][0]->national_charges_class_3 : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && isset($returnCharges[1][0]) && $e_returnCharges[1][0]->national_charges_class_3 != $returnCharges[1][0]->national_charges_class_3) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif dec-percent" name="on_return_class_3_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_3 !== '')? $returnCharges[1][0]->national_charges_class_3 : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -583,7 +583,7 @@
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
                                                     <div class="input-group form-group">
-                                                        <input type="text"  class="form-control @if(isset($e_fuelCharges[1][0]) && $e_fuelCharges[1][0]->fuel_surcharge != $fuelCharges[1][0]->fuel_surcharge) changed @elseif(!isset($e_fuelCharges[1][0]) && $existing == 1) new @endif " name="overnight_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[1][0]) && $fuelCharges[1][0]->fuel_surcharge != '')? $fuelCharges[1][0]->fuel_surcharge : ''}}" {{$on_fuel_sw}}>
+                                                        <input type="text"  class="form-control @if(isset($e_fuelCharges[1][0]) && isset($fuelCharges[1][0]) && $e_fuelCharges[1][0]->fuel_surcharge != $fuelCharges[1][0]->fuel_surcharge) changed @elseif(!isset($e_fuelCharges[1][0]) && $existing == 1) new @endif " name="overnight_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[1][0]) && $fuelCharges[1][0]->fuel_surcharge != '')? $fuelCharges[1][0]->fuel_surcharge : ''}}" {{$on_fuel_sw}}>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -604,9 +604,6 @@
                                             $on_discount_id = '';
                                             if((isset($discountCharges[1][0])) && $discountCharges[1][0]->id != ''){
                                             $on_discount_id = $discountCharges[1][0]->id;
-                                            }
-                                            if((isset($e_discountCharges[1][0])) && $e_discountCharges[1][0]->id != ''){
-                                                $e_on_discount_id = $e_discountCharges[1][0]->id;
                                             }
                                                     $on_discount_title_switch = '';
                                                         $on_discount_title = '';
@@ -652,15 +649,13 @@
 
                                             }
                                             if((isset($e_discountCharges[1][0]) && $e_discountCharges[1][0]->to != '')){
+                                                $e_to = date('m/d/Y', strtotime($e_discountCharges[1][0]->to));
+                                                $e_from = date('m/d/Y', strtotime($e_discountCharges[1][0]->from));
 
-                                            $e_to = date('m/d/Y', strtotime($e_discountCharges[1][0]->to));
-                                            $e_from = date('m/d/Y', strtotime($e_discountCharges[1][0]->from));
-
-                                            $e_on_discount_daterange = $e_to.' - '.$e_from;
+                                                $e_on_discount_daterange = $e_to.' - '.$e_from;
 
                                              }else{
-                                            $e_on_discount_daterange = '';
-
+                                                $e_on_discount_daterange = '';
                                             }
                                             if((isset($discountCharges[1][0]->cash)) || (isset($discountCharges[1][0]->weight)) || (isset($discountCharges[1][0]->insurance)) || (isset($discountCharges[1][0]->return)) || (isset($discountCharges[1][0]->packaging))){
                                             $on_discount_daterange_switch = '';
@@ -1056,7 +1051,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Replacement</span>
                                                         </div>
-                                                        <input type="text" class="form-control @if(isset($e_shippingType[2][0]) && $e_shippingType[2][0]->replacement_charges != $shippingType[2][0]->replacement_charges) changed @elseif(!isset($e_shippingType[2][0]) && $existing == 1) new @endif percent" data-rule-required="true" data-msg-required="This field is required" name="ol_replacement_charges" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->replacement_charges != '')? $shippingType[2][0]->replacement_charges : ''}}">
+                                                        <input type="text" class="form-control @if(isset($e_shippingType[2][0]) && isset($shippingType[2][0]) && $e_shippingType[2][0]->replacement_charges != $shippingType[2][0]->replacement_charges) changed @elseif(!isset($e_shippingType[2][0]) && $existing == 1) new @endif percent" data-rule-required="true" data-msg-required="This field is required" name="ol_replacement_charges" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->replacement_charges != '')? $shippingType[2][0]->replacement_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1069,7 +1064,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try &amp; Buy</span>
                                                         </div>
-                                                        <input type="text" class="form-control @if(isset($e_shippingType[2][0]) && $e_shippingType[2][0]->try_and_buy_charges != $shippingType[2][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[2][0]) && $existing == 1) new @endif percent" data-rule-required="true" data-msg-required="This field is required" name="ol_tnb_charges" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->try_and_buy_charges != '')? $shippingType[2][0]->try_and_buy_charges : ''}}">
+                                                        <input type="text" class="form-control @if(isset($e_shippingType[2][0]) && isset($shippingType[2][0]) && $e_shippingType[2][0]->try_and_buy_charges != $shippingType[2][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[2][0]) && $existing == 1) new @endif percent" data-rule-required="true" data-msg-required="This field is required" name="ol_tnb_charges" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->try_and_buy_charges != '')? $shippingType[2][0]->try_and_buy_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1282,32 +1277,32 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control @if(isset($e_returnCharges[2][0]) && $e_returnCharges[2][0]->local != $returnCharges[2][0]->local) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif amount" name="ol_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->local !== '')? $returnCharges[2][0]->local : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" class="form-control @if(isset($e_returnCharges[2][0]) && isset($returnCharges[2][0]) && $e_returnCharges[2][0]->local != $returnCharges[2][0]->local) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif amount" name="ol_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->local !== '')? $returnCharges[2][0]->local : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
 
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[2][0]) && $e_returnCharges[2][0]->national_charges_class_0 != $returnCharges[2][0]->national_charges_class_0) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif amount" name="ol_return_class_0_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_0 !== '')? $returnCharges[2][0]->national_charges_class_0 : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[2][0]) && isset($returnCharges[2][0]) && $e_returnCharges[2][0]->national_charges_class_0 != $returnCharges[2][0]->national_charges_class_0) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif amount" name="ol_return_class_0_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_0 !== '')? $returnCharges[2][0]->national_charges_class_0 : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class B</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[2][0]) && $e_returnCharges[2][0]->national_charges_class_1 != $returnCharges[2][0]->national_charges_class_1) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif dec-percent" name="ol_return_class_1_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_1 !== '')? $returnCharges[2][0]->national_charges_class_1 : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[2][0]) && isset($returnCharges[2][0]) && $e_returnCharges[2][0]->national_charges_class_1 != $returnCharges[2][0]->national_charges_class_1) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif dec-percent" name="ol_return_class_1_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_1 !== '')? $returnCharges[2][0]->national_charges_class_1 : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class C</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[2][0]) && $e_returnCharges[2][0]->national_charges_class_2 != $returnCharges[2][0]->national_charges_class_2) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif dec-percent" name="ol_return_class_2_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_2 !== '')? $returnCharges[2][0]->national_charges_class_2 : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[2][0]) && isset($returnCharges[2][0]) && $e_returnCharges[2][0]->national_charges_class_2 != $returnCharges[2][0]->national_charges_class_2) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif dec-percent" name="ol_return_class_2_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_2 !== '')? $returnCharges[2][0]->national_charges_class_2 : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class D</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[2][0]) && $e_returnCharges[2][0]->national_charges_class_3 != $returnCharges[2][0]->national_charges_class_3) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif dec-percent" name="ol_return_class_3_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_3 !== '')? $returnCharges[2][0]->national_charges_class_3 : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[2][0]) && isset($returnCharges[2][0]) && $e_returnCharges[2][0]->national_charges_class_3 != $returnCharges[2][0]->national_charges_class_3) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif dec-percent" name="ol_return_class_3_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_3 !== '')? $returnCharges[2][0]->national_charges_class_3 : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1341,7 +1336,7 @@
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
                                                     <div class="input-group form-group">
-                                                        <input type="text"  class="form-control @if(isset($e_fuelCharges[2][0]) && $e_fuelCharges[2][0]->fuel_surcharge != $fuelCharges[2][0]->fuel_surcharge) changed @elseif(!isset($e_fuelCharges[2][0]) && $existing == 1) new @endif" name="overland_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->fuel_surcharge != '')? $fuelCharges[2][0]->fuel_surcharge : ''}}" {{$ol_fuel_sw}}>
+                                                        <input type="text"  class="form-control @if(isset($e_fuelCharges[2][0]) && isset($fuelCharges[2][0]) && $e_fuelCharges[2][0]->fuel_surcharge != $fuelCharges[2][0]->fuel_surcharge) changed @elseif(!isset($e_fuelCharges[2][0]) && $existing == 1) new @endif" name="overland_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->fuel_surcharge != '')? $fuelCharges[2][0]->fuel_surcharge : ''}}" {{$ol_fuel_sw}}>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1358,12 +1353,8 @@
                                         </div>
                                         @php
                                         $ol_discount_id = '';
-                                        $e_ol_discount_id = '';
                                             if((isset($discountCharges[2][0])) && $discountCharges[2][0]->id != ''){
                                             $ol_discount_id = $discountCharges[2][0]->id;
-                                            }
-                                            if((isset($e_discountCharges[2][0])) && $e_discountCharges[2][0]->id != ''){
-                                            $e_ol_discount_id = $e_discountCharges[2][0]->id;
                                             }
                                             $ol_discount_title_switch = '';
                                                 $ol_discount_title = '';
@@ -1815,7 +1806,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Replacement</span>
                                                         </div>
-                                                        <input type="text"  class="form-control @if(isset($e_shippingType[3][0]) && $e_shippingType[3][0]->replacement_charges != $shippingType[3][0]->replacement_charges) changed @elseif(!isset($e_shippingType[3][0]) && $existing == 1) new @endif percent" name="detain_replacement_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->replacement_charges != '')? $shippingType[3][0]->replacement_charges : ''}}">
+                                                        <input type="text"  class="form-control @if(isset($e_shippingType[3][0]) && isset($shippingType[3][0]) && $e_shippingType[3][0]->replacement_charges != $shippingType[3][0]->replacement_charges) changed @elseif(!isset($e_shippingType[3][0]) && $existing == 1) new @endif percent" name="detain_replacement_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->replacement_charges != '')? $shippingType[3][0]->replacement_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1828,7 +1819,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try &amp; Buy</span>
                                                         </div>
-                                                        <input type="text"  class="form-control @if(isset($e_shippingType[3][0]) && $e_shippingType[3][0]->try_and_buy_charges != $shippingType[3][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[3][0]) && $existing == 1) new @endif percent" name="detain_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->try_and_buy_charges != '')? $shippingType[3][0]->try_and_buy_charges : ''}}">
+                                                        <input type="text"  class="form-control @if(isset($e_shippingType[3][0]) && isset($shippingType[3][0]) && $e_shippingType[3][0]->try_and_buy_charges != $shippingType[3][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[3][0]) && $existing == 1) new @endif percent" name="detain_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->try_and_buy_charges != '')? $shippingType[3][0]->try_and_buy_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -2043,32 +2034,32 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control @if(isset($e_returnCharges[3][0]) && $e_returnCharges[3][0]->local != $returnCharges[3][0]->local) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif amount" name="detain_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->local !== '')? $returnCharges[3][0]->local : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" class="form-control @if(isset($e_returnCharges[3][0]) && isset($returnCharges[3][0]) && $e_returnCharges[3][0]->local != $returnCharges[3][0]->local) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif amount" name="detain_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->local !== '')? $returnCharges[3][0]->local : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
 
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[3][0]) && $e_returnCharges[3][0]->national_charges_class_0 != $returnCharges[3][0]->national_charges_class_0) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif amount" name="detain_return_class_0_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_0 !== '')? $returnCharges[3][0]->national_charges_class_0 : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[3][0]) && isset($returnCharges[3][0]) && $e_returnCharges[3][0]->national_charges_class_0 != $returnCharges[3][0]->national_charges_class_0) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif amount" name="detain_return_class_0_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_0 !== '')? $returnCharges[3][0]->national_charges_class_0 : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class B</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[3][0]) && $e_returnCharges[3][0]->national_charges_class_1 != $returnCharges[3][0]->national_charges_class_1) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif dec-percent" name="detain_return_class_1_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_1 !== '')? $returnCharges[3][0]->national_charges_class_1 : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[3][0]) && isset($returnCharges[3][0]) && $e_returnCharges[3][0]->national_charges_class_1 != $returnCharges[3][0]->national_charges_class_1) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif dec-percent" name="detain_return_class_1_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_1 !== '')? $returnCharges[3][0]->national_charges_class_1 : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class C</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[3][0]) && $e_returnCharges[3][0]->national_charges_class_2 != $returnCharges[3][0]->national_charges_class_2) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif dec-percent" name="detain_return_class_2_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_2 !== '')? $returnCharges[3][0]->national_charges_class_2 : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[3][0]) && isset($returnCharges[3][0]) && $e_returnCharges[3][0]->national_charges_class_2 != $returnCharges[3][0]->national_charges_class_2) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif dec-percent" name="detain_return_class_2_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_2 !== '')? $returnCharges[3][0]->national_charges_class_2 : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class D</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[3][0]) && $e_returnCharges[3][0]->national_charges_class_3 != $returnCharges[3][0]->national_charges_class_3) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif dec-percent" name="detain_return_class_3_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_3 !== '')? $returnCharges[3][0]->national_charges_class_3 : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[3][0]) && isset($returnCharges[3][0]) && $e_returnCharges[3][0]->national_charges_class_3 != $returnCharges[3][0]->national_charges_class_3) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif dec-percent" name="detain_return_class_3_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_3 !== '')? $returnCharges[3][0]->national_charges_class_3 : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -2103,7 +2094,7 @@
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
                                                     <div class="input-group form-group">
-                                                        <input type="text"  class="form-control @if(isset($e_fuelCharges[3][0]) && $e_fuelCharges[3][0]->fuel_surcharge != $fuelCharges[3][0]->fuel_surcharge) changed @elseif(!isset($e_fuelCharges[3][0]) && $existing == 1) new @endif" name="detain_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[3][0]) && $fuelCharges[3][0]->fuel_surcharge != '')? $fuelCharges[3][0]->fuel_surcharge : ''}}" {{$det_fuel_sw}}>
+                                                        <input type="text"  class="form-control @if(isset($e_fuelCharges[3][0]) && isset($fuelCharges[3][0]) && $e_fuelCharges[3][0]->fuel_surcharge != $fuelCharges[3][0]->fuel_surcharge) changed @elseif(!isset($e_fuelCharges[3][0]) && $existing == 1) new @endif" name="detain_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[3][0]) && $fuelCharges[3][0]->fuel_surcharge != '')? $fuelCharges[3][0]->fuel_surcharge : ''}}" {{$det_fuel_sw}}>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -2122,9 +2113,6 @@
                                         $detain_discount_id = '';
                                             if((isset($discountCharges[3][0])) && $discountCharges[3][0]->id != ''){
                                             $detain_discount_id = $discountCharges[3][0]->id;
-                                            }
-                                            if((isset($e_discountCharges[3][0])) && $e_discountCharges[3][0]->id != ''){
-                                            $e_detain_discount_id = $e_discountCharges[3][0]->id;
                                             }
                                             $det_discount_title_switch = '';
                                             $det_discount_title = '';
@@ -2542,7 +2530,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Replacement</span>
                                                         </div>
-                                                        <input type="text"  class="form-control @if(isset($e_shippingType[4][0]) && $e_shippingType[4][0]->replacement_charges != $shippingType[4][0]->replacement_charges) changed @elseif(!isset($e_shippingType[4][0]) && $existing == 1) new @endif percent" name="sameday_replacement_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->replacement_charges != '')? $shippingType[4][0]->replacement_charges : ''}}">
+                                                        <input type="text"  class="form-control @if(isset($e_shippingType[4][0]) && isset($shippingType[4][0]) && $e_shippingType[4][0]->replacement_charges != $shippingType[4][0]->replacement_charges) changed @elseif(!isset($e_shippingType[4][0]) && $existing == 1) new @endif percent" name="sameday_replacement_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->replacement_charges != '')? $shippingType[4][0]->replacement_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -2555,7 +2543,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try & Buy</span>
                                                         </div>
-                                                        <input type="text"  class="form-control @if(isset($e_shippingType[4][0]) && $e_shippingType[4][0]->try_and_buy_charges != $shippingType[4][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[4][0]) && $existing == 1) new @endif percent" name="sameday_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->try_and_buy_charges != '')? $shippingType[4][0]->try_and_buy_charges : ''}}">
+                                                        <input type="text"  class="form-control @if(isset($e_shippingType[4][0]) && isset($shippingType[4][0]) && $e_shippingType[4][0]->try_and_buy_charges != $shippingType[4][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[4][0]) && $existing == 1) new @endif percent" name="sameday_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->try_and_buy_charges != '')? $shippingType[4][0]->try_and_buy_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -2772,13 +2760,13 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text"  class="form-control @if(isset($e_returnCharges[4][0]) && $e_returnCharges[4][0]->local != $returnCharges[4][0]->local) changed @elseif(!isset($e_returnCharges[4][0]) && $existing == 1) new @endif amount" name="sameday_return_local_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->local !== '')? $returnCharges[4][0]->local : ''}}" {{$same_return_sw}}>
+                                                    <input type="text"  class="form-control @if(isset($e_returnCharges[4][0]) && isset($returnCharges[4][0]) && $e_returnCharges[4][0]->local != $returnCharges[4][0]->local) changed @elseif(!isset($e_returnCharges[4][0]) && $existing == 1) new @endif amount" name="sameday_return_local_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->local !== '')? $returnCharges[4][0]->local : ''}}" {{$same_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[4][0]) && $e_returnCharges[4][0]->national_charges_class_0 != $returnCharges[4][0]->national_charges_class_0) changed @elseif(!isset($e_returnCharges[4][0]) && $existing == 1) new @endif amount" name="sameday_return_class_0_charges"  value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national_charges_class_0 !== '')? $returnCharges[4][0]->national_charges_class_0 : ''}}" {{$same_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[4][0]) && isset($returnCharges[4][0]) && $e_returnCharges[4][0]->national_charges_class_0 != $returnCharges[4][0]->national_charges_class_0) changed @elseif(!isset($e_returnCharges[4][0]) && $existing == 1) new @endif amount" name="sameday_return_class_0_charges"  value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national_charges_class_0 !== '')? $returnCharges[4][0]->national_charges_class_0 : ''}}" {{$same_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -2813,7 +2801,7 @@
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
                                                     <div class="input-group form-group">
-                                                        <input type="text"  class="form-control @if(isset($e_fuelCharges[4][0]) && $e_fuelCharges[4][0]->fuel_surcharge != $fuelCharges[4][0]->fuel_surcharge) changed @elseif(!isset($e_fuelCharges[4][0]) && $existing == 1) new @endif" name="sameday_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[4][0]) && $fuelCharges[4][0]->fuel_surcharge != '')? $fuelCharges[4][0]->fuel_surcharge : ''}}" {{$same_fuel_sw}}>
+                                                        <input type="text"  class="form-control @if(isset($e_fuelCharges[4][0]) && isset($fuelCharges[4][0]) && $e_fuelCharges[4][0]->fuel_surcharge != $fuelCharges[4][0]->fuel_surcharge) changed @elseif(!isset($e_fuelCharges[4][0]) && $existing == 1) new @endif" name="sameday_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[4][0]) && $fuelCharges[4][0]->fuel_surcharge != '')? $fuelCharges[4][0]->fuel_surcharge : ''}}" {{$same_fuel_sw}}>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>

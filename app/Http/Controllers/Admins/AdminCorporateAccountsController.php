@@ -3259,6 +3259,7 @@ class AdminCorporateAccountsController extends Controller
                     ->withInput();
             }
             PendingCorporateRateStatus::where('user_id', $id)->delete();
+            PendingCorporateBookingTypeCharges::where('user_id', $id)->delete();
             PendingCorporateWeightCharge::where('user_id', $id)->delete();
             PendingCorporateCashHandlingCharge::where('user_id', $id)->delete();
             PendingCorporateInsuranceCharge::where('user_id', $id)->delete();

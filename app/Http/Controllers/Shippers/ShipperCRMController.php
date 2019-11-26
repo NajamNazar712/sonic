@@ -172,7 +172,7 @@ class ShipperCRMController extends Controller
                     }
                 }
                 else{
-                    $reopen_check = false;
+                    $reopen_check = true;
                 }
                 return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'shipment_status' => $shipment_status, 'reopen_check' => $reopen_check]);
             }else{

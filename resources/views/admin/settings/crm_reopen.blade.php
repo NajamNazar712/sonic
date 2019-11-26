@@ -29,7 +29,7 @@
                                                     @else
                                                         <input type="radio" class="custom-control-input" id="defaultInline1" name="reopen" value="on">
                                                     @endif
-                                                    <label class="custom-control-label" for="defaultInline1">On</label>
+                                                    <label class="custom-control-label" for="defaultInline1">Limited</label>
                                                 </div>
 
                                                 <div class="custom-control custom-radio custom-control-inline">
@@ -38,7 +38,7 @@
                                                     @else
                                                         <input type="radio" class="custom-control-input" id="defaultInline2" name="reopen" value="off">
                                                     @endif
-                                                    <label class="custom-control-label" for="defaultInline2">Off</label>
+                                                    <label class="custom-control-label" for="defaultInline2">Unlimited</label>
                                                 </div>
                                             </div>
                                         </div>

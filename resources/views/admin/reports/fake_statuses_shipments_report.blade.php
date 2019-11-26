@@ -79,6 +79,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Fake Status Date/Time</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -227,6 +228,7 @@
                             head.push('Hub');
                             head.push('Fake Reason Date/Time');
                             head.push('Rider Name');
+                            head.push('Remarks');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -237,6 +239,7 @@
                                 row.push(values.hub);
                                 row.push(values.updated_at);
                                 row.push(values.rider_name);
+                                row.push(values.remarks);
 
                                 body.push(row);
                             });
@@ -289,6 +292,7 @@
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'updated_at', name: 'delivery_note_shipments.fake_status_updated_at', class: 'align-middle text-center updated_at'},
                     {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
+                    {data: 'remarks', name: 'dns.remarks', class: 'align-middle remarks'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

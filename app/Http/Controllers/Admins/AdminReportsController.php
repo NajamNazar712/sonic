@@ -5598,7 +5598,7 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
                 ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
                 ->leftjoin('users as u', 'u.id', '=', 's.user_id')
-                ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at')
+                ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at', 'delivery_note_shipments.remarks as remarks')
                 ->where('delivery_note_shipments.fake_status', 1);
 
 
