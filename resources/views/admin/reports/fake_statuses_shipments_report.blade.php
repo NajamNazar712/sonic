@@ -292,7 +292,7 @@
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'updated_at', name: 'delivery_note_shipments.fake_status_updated_at', class: 'align-middle text-center updated_at'},
                     {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
-                    {data: 'remarks', name: 'dns.remarks', class: 'align-middle remarks'},
+                    {data: 'remarks', name: 'delivery_note_shipments.remarks', class: 'align-middle remarks'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
