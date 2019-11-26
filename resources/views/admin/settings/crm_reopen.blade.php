@@ -43,7 +43,7 @@
                                             </div>
                                         </div>
                                         <div class="row justify-content-center" id="reopen_count_div">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <div class="form-group">
                                                     <div class="input-group">
                                                         <div class="input-group-prepend">
