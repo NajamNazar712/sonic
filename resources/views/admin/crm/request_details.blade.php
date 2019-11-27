@@ -313,7 +313,7 @@
                                                 </div>
                                             </section>
 
-                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || in_array(201, session('permissions')) || $sale_person->admin_id == Auth::id())
+                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || in_array(201, session('permissions')) || ($sale_person && $sale_person->admin_id == Auth::id()))
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
@@ -349,7 +349,7 @@
                                                         </div>
                                                     </form>
                                                 </section>
-                                            @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ))) || $sale_person->admin_id == Auth::id())
+                                            @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ))) || ($sale_person && $sale_person->admin_id == Auth::id()))
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
