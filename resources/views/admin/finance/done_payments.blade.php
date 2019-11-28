@@ -17,17 +17,17 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 							<div class="row justify-content-center">
-								<div class="col-2">
+								<div class="col-3 text-center">
 									<form id="tracking_number_search_form"
-										  class="form-inline mb-1 mr-1" novalidate="novalidate">
+										  class="form" novalidate="novalidate">
 										<div class="form-group">
 											<input type="text" name="tracking_number"
-												   class="form-control tracking_number w-100" id="tracking_number"
+												   class="form-control tracking_number" id="tracking_number"
 												   placeholder="Tracking Number">
 										</div>
 									</form>
 								</div>
-								<div class="col-9 offset-1">
+								<div class="col-12">
 									<div class="row">
 										<div class="col-2">
 											<fieldset class="form-group">
