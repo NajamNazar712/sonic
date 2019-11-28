@@ -2144,7 +2144,8 @@ class AdminFinanceController extends Controller
 
     public function make_payments_index() {
         $banks = BanksList::all();
-        return view('admin.finance.make_payments')->with(['banks'=>$banks]);
+        $shipper_status = [1 => 'Active', 2 => 'Inactive'];
+        return view('admin.finance.make_payments')->with(['banks'=>$banks, 'shipper_status' => $shipper_status]);
     }
 
     public function make_payments_list(Request $request) {
@@ -2336,6 +2337,15 @@ class AdminFinanceController extends Controller
             }
             else if ($positive_negative_filter == 2) {
                 $datatables->having('total_payable', '<', 0);
+            }
+        }
+
+        if ($shipper_status = $request->get('shipper_status')) {
+            if ($shipper_status == 1) {
+                $datatables->where('u.status', '=', 3)->where('u.blacklist', 0);
+            }
+            else {
+                $datatables->where('u.status', '!=', 3);
             }
         }
 
@@ -2926,13 +2936,14 @@ class AdminFinanceController extends Controller
     }
 
     public function done_payments_index() {
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $shippers = User::select('id', 'name')->get();
+        $shipper_status = [1 => 'Active', 2 => 'Inactive'];
 
         $banks = BanksList::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
 
-        return view('admin.finance.done_payments')->with(['banks'=>$banks,'company_banks'=>$company_banks, 'shippers'=>$shippers, 'case_nature_channels'=>$case_nature_channels]);
+        return view('admin.finance.done_payments')->with(['banks'=>$banks,'company_banks'=>$company_banks, 'shippers'=>$shippers, 'case_nature_channels'=>$case_nature_channels, 'shipper_status' => $shipper_status]);
     }
 
     public function done_payments_list(Request $request) {
@@ -3153,6 +3164,15 @@ class AdminFinanceController extends Controller
 
         if ($shipper = $request->get('search_shipper')) {
             $datatables->where('u.id', '=', $shipper);
+        }
+
+        if ($shipper_status = $request->get('search_shipper_status')) {
+            if ($shipper_status == 1) {
+                $datatables->where('u.status', '=', 3)->where('u.blacklist', 0);
+            }
+            else {
+                $datatables->where('u.status', '!=', 3);
+            }
         }
 
         if ($request->get('search_from') && $request->get('search_to')) {
@@ -4707,7 +4727,7 @@ class AdminFinanceController extends Controller
     public function invoice_for_reimbursement_index(Request $request) {
         $payment_types = [['id' => 0, 'name' => 'Make'], ['id' => 1, 'name' => 'Done']];
 
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $shippers = User::select('id', 'name')->get();
 
         return view('admin.finance.invoice_for_reimbursement')->with(['payment_types' => $payment_types, 'shippers' => $shippers]);
     }

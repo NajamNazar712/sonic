@@ -381,6 +381,8 @@ class Permission
             'reports.fake_status_shipments.list' => 263,
             'reports.daily_visit.index' => 264,
             'reports.daily_visit.list' => 264,
+            'reports.delivered_shipment.index' => 275,
+            'reports.delivered_shipment.list' => 275,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -527,6 +529,9 @@ class Permission
 
             'settings.return_delivered_to_shipper_email_cut_off_time.index' => 269,
             'settings.return_delivered_to_shipper_email_cut_off_time.store' => 269,
+
+            'settings.crm_reopen.index' => 274,
+            'settings.crm_reopen.update' => 274,
 
 
             'cancelled_shipments.index' => 117,
