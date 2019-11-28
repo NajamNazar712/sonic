@@ -17,54 +17,67 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 							<div class="row justify-content-center">
-								{{--<div class="col-3">--}}
+								<div class="col-2">
 									<form id="tracking_number_search_form"
 										  class="form-inline mb-1 mr-1" novalidate="novalidate">
 										<div class="form-group">
 											<input type="text" name="tracking_number"
-												   class="form-control tracking_number" id="tracking_number"
+												   class="form-control tracking_number w-100" id="tracking_number"
 												   placeholder="Tracking Number">
 										</div>
 									</form>
-								{{--</div>--}}
-								<div class="col-3">
-									<fieldset class="form-group">
-										<select name="search_shipper" id="search_shipper" class="form-control select2">
-											@foreach($shippers as $shipper)
-												<option value="{{$shipper->id}}">{{$shipper->name}}</option>
-											@endforeach
-										</select>
-									</fieldset>
 								</div>
-								<div class="col-3">
-									<div class="form-group input-group ml">
-										<div class="input-group-prepend">
-											<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-												<span class="la la-calendar-o"></span>
-											</span>
+								<div class="col-9 offset-1">
+									<div class="row">
+										<div class="col-2">
+											<fieldset class="form-group">
+												<select name="search_shipper" id="search_shipper" class="form-control select2">
+													@foreach($shippers as $shipper)
+														<option value="{{$shipper->id}}">{{$shipper->name}}</option>
+													@endforeach
+												</select>
+											</fieldset>
 										</div>
-										<input type="text" name="search_from"
-											   class="form-control pickadate bg-primary border-primary white rounded-right"
-											   id="search_date_from" placeholder="Date (From)">
-									</div>
-								</div>
-								<div class="col-3 ">
-									<div class="form-group input-group ml">
-										<div class="input-group-prepend">
-											<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-												<span class="la la-calendar-o"></span>
-											</span>
+										<div class="col-2">
+											<fieldset class="form-group">
+												<select name="search_shipper_status" id="search_shipper_status" class="form-control select2">
+													@foreach($shipper_status as $id => $status)
+														<option value="{{$id}}">{{$status}}</option>
+													@endforeach
+												</select>
+											</fieldset>
 										</div>
-										<input type="text" name="search_to"
-											   class="form-control pickadate bg-primary border-primary white rounded-right"
-											   id="search_date_to" placeholder="Date (To)">
+										<div class="col-3">
+											<div class="form-group input-group ml">
+												<div class="input-group-prepend">
+													<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+														<span class="la la-calendar-o"></span>
+													</span>
+												</div>
+												<input type="text" name="search_from"
+													   class="form-control pickadate bg-primary border-primary white rounded-right"
+													   id="search_date_from" placeholder="Date (From)">
+											</div>
+										</div>
+										<div class="col-3">
+											<div class="form-group input-group ml">
+												<div class="input-group-prepend">
+													<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+														<span class="la la-calendar-o"></span>
+													</span>
+												</div>
+												<input type="text" name="search_to"
+													   class="form-control pickadate bg-primary border-primary white rounded-right"
+													   id="search_date_to" placeholder="Date (To)">
+											</div>
+										</div>
+										<div class="col-2 text-right">
+											<button type="button" id="search_filter_btn"
+													class="btn btn-outline-primary w-100"><i
+														class="la la-search"></i> Search
+											</button>
+										</div>
 									</div>
-								</div>
-								<div class="col-2 text-center">
-									<button type="button" id="search_filter_btn"
-											class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i
-												class="la la-search"></i> Search
-									</button>
 								</div>
 							</div>
 							@if(session('role_id') == 1 || in_array(268, session('permissions')))
@@ -300,7 +313,12 @@
 	<script>
 		$(document).ready(function() {
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Shipper',
+                placeholder:'Shipper',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_shipper_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Shipper Status',
                 width:'100%',
                 allowClear:true
             });
@@ -357,6 +375,7 @@
                             'page': 'all',
                             'tracking_number': $('#tracking_number_search_form #tracking_number').val(),
                             'search_shipper': $('#search_shipper').val(),
+                            'search_shipper_status': $('#search_shipper_status').val(),
                             'search_from': $('input[name="search_from_formatted"]').val(),
                             'search_to': $('input[name="search_to_formatted"]').val(),
                         },
@@ -586,6 +605,7 @@
 					data: function (d) {
 						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
                         d.search_shipper = $('#search_shipper').val();
+                        d.search_shipper_status = $('#search_shipper_status').val();
                         d.search_from = $('input[name="search_from_formatted"]').val();
                         d.search_to = $('input[name="search_to_formatted"]').val();
 					}

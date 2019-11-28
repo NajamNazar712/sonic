@@ -32,6 +32,16 @@
 										</select>
 									</div>
 								</form>
+
+								<form id="shipper_status_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate">
+									<div class="form-group">
+										<select name="shipper_status" class="select2 shipper_status">
+											@foreach($shipper_status as $id => $status)
+												<option value="{{$id}}">{{$status}}</option>
+											@endforeach
+										</select>
+									</div>
+								</form>
 							</div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -273,6 +283,14 @@
 				table.draw(false);
 			});
 
+			$('#shipper_status_form select.shipper_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Shipper Status',
+                width:'100%',
+                allowClear:true
+            }).bind('change', function() {
+				table.draw(false);
+			});
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -282,7 +300,8 @@
                         data: {
                             'page': 'all',
                             'tracking_number': $('#tracking_number_search_form #tracking_number').val(),
-                            'positive_negative_filter': $('#positive_negative_filter_form select.positive_negative_filter').val()
+                            'positive_negative_filter': $('#positive_negative_filter_form select.positive_negative_filter').val(),
+                            'shipper_status': $('#shipper_status_form select.shipper_status').val()
                         },
                         success: function (result) {
                             head = [];
@@ -474,6 +493,7 @@
 					data: function (d) {
 						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
 						d.positive_negative_filter = $('#positive_negative_filter_form select.positive_negative_filter').val();
+						d.shipper_status = $('#shipper_status_form select.shipper_status').val();
 					}
 				},
 				rowId: 'id',
