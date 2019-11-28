@@ -1,27 +1,30 @@
 <?php
 
-namespace App\Http\Controllers\Shippers;
+namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Controller;
-use App\Http\Models\City;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Models\City;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-class ShipperResourcesController extends Controller
+class AdminResourcesController extends Controller
 {
-    public function __construct() {
-        $this->middleware('auth:web,substitute_users');
+    public function __construct()
+    {
+        $this->middleware('auth:admin');
 
+        $this->middleware('Permission');
     }
+
+
 
     public function index(){
-        return view('client.documents.index');
+        return view('admin.documents.index');
     }
     public function get_network_list(Request $request){
-
         $zones = Zone::where('status', 1)->get();
         if($zones){
             $cell_st =[
