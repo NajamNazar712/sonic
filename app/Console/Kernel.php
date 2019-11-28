@@ -84,6 +84,9 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('pickuprequest:clear')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
         $schedule->command('pickupnote:clear')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
+        $schedule->command('saleperson:numbers')->dailyAt('08:00')->runInBackground();
+        $schedule->command('month:average')->dailyAt('08:00')->runInBackground();
+        $schedule->command('hubwise:split')->dailyAt('08:00')->runInBackground();
     }
 
     /**

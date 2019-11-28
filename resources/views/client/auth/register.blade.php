@@ -221,6 +221,18 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="reference">Reference:</label>
+                                                        <div>
+                                                            <select name="reference" id="reference" class="select2 form-control" style="width: 100%">
+                                                                @foreach($references as $reference)
+                                                                    <option value="{{$reference->id}}" {{ old('reference') == $reference->id ? 'selected' : '' }} >{{$reference->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </fieldset>
                                         <!-- Step 2 -->
@@ -711,6 +723,10 @@
         });
         $('select[name="shipper_product_type"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Product Type',
+            dropdownParent:$('#registership')
+        });
+        $('select[name="reference"]').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Reference',
             dropdownParent:$('#registership')
         });
         $("input[name='average_shipment']").inputmask({
