@@ -64,7 +64,7 @@ use Yajra\Datatables\Datatables;
                 })
                 ->leftjoin('products as p','p.id','=','si.product_type_id')
                 ->select(['p.product_name as product_type','si.description as description','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name', 'shipments.booking_type_id', 'usi.poc','u.id as account_no','sm.mode as shipping_mode'])
-                ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,25,31,36,38,39,40,41,43,47]);
+                ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,25,31,36,38,39,40,41,43,47,51]);
             if (session('role_id') != 1) {
                 $shipments = $shipments->where(function($query) {
                     $query->where(function ($sub_query){
