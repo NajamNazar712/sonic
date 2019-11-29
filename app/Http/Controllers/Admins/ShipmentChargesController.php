@@ -110,7 +110,7 @@ class ShipmentChargesController extends Controller
                             $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
                         }
 
-                        if ($zone_class_city) {
+                        if ($zone_class_city->exists()) {
                             $zone_class_city = $zone_class_city->first();
 
                             $class = $zone_class_city->class;
@@ -588,7 +588,7 @@ class ShipmentChargesController extends Controller
                             $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
                         }
 
-                        if ($zone_class_city) {
+                        if ($zone_class_city->exists()) {
                             $zone_class_city = $zone_class_city->first();
 
                             $class = $zone_class_city->class;
@@ -764,7 +764,7 @@ class ShipmentChargesController extends Controller
                             $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
                         }
 
-                        if ($zone_class_city) {
+                        if ($zone_class_city->exists()) {
                             $zone_class_city = $zone_class_city->first();
 
                             $class = $zone_class_city->class;
@@ -1104,7 +1104,7 @@ class ShipmentChargesController extends Controller
                     $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
                 }
 
-                if ($zone_class_city) {
+                if ($zone_class_city->exists()) {
                     $zone_class_city = $zone_class_city->first();
 
                     $class = $zone_class_city->class;
@@ -1221,7 +1221,7 @@ class ShipmentChargesController extends Controller
                             $zone_class_city = $zone_class_city->where('zone_classification_id', 1);
                         }
 
-                        if ($zone_class_city) {
+                        if ($zone_class_city->exists()) {
                             $zone_class_city = $zone_class_city->first();
 
                             $class = $zone_class_city->class;

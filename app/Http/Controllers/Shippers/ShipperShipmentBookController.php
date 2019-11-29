@@ -593,7 +593,8 @@ class ShipperShipmentBookController extends Controller
             $user_name = User::find($user_id)->name . ' (Shipper)';
         }
         else if ($user_type == 2) {
-            $user_name = SubstituteUser::where('user_id',$user_id)->select('name')->first() . ' (Sub-Shipper)';
+            $sub_shipper = SubstituteUser::where('user_id',$user_id)->select('name')->first();
+            $user_name = $sub_shipper->name . ' (Sub-Shipper)';
         }
         else if ($user_type == 4) {
             $user_name = User::find($user_id)->name . ' (API)';
