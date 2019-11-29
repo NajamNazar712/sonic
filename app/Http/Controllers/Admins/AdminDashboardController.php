@@ -1231,7 +1231,7 @@ class AdminDashboardController extends Controller
         $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
 
         $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-        $rate_status = $user['rate_status'];
+
         $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
         $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
         $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
@@ -1267,10 +1267,9 @@ if(session('department_id') == 7){
         $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
         if ((($user['rate_status']>=0) && $user['status']==1) || (($user['rate_status']==0) && $user['status']==3)) {
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//        return $switches;
-//        var_dump(empty($switches));exit();
+
             $weight = WeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//        $cash = '';
+
             $bookingType = BookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $cash = CashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = InsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
