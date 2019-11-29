@@ -283,7 +283,7 @@ class AdminTrackingController extends Controller
                         }
                     }
 
-                    $complain = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5]);
+                    $complain = CrmRequest::where('shipment_id', $shipment->id)->whereIn('status_id', [2, 3, 5]);
 
                     if ($complain->exists()) {
                         $complain = $complain->first();

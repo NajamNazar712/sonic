@@ -1352,4 +1352,20 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+    public function crm_reopen_count_index() {
+        $settings = GlobalSettings::where('type', 'crm_reopen_count')->first();
+        return view('admin.settings.crm_reopen')->with(['settings' => $settings]);
+    }
+
+    public function crm_reopen_count_submit(Request $request) {
+        $settings = GlobalSettings::where('type', 'crm_reopen_count')->first();
+
+        $settings->setting_value = $request->count;
+        $settings->text = $request->reopen;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }
