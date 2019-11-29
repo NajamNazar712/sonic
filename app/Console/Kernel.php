@@ -28,6 +28,9 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\DebriefingEmail',
         '\App\Console\Commands\ClearPickupRequest',
         '\App\Console\Commands\ClearPickupNote',
+        '\App\Console\Commands\SalePersonShipmentNumbers',
+        '\App\Console\Commands\MonthAverageReportEmail',
+        '\App\Console\Commands\HubWiseSplitEmail',
     ];
 
     /**
