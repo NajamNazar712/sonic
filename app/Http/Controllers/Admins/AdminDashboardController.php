@@ -1300,6 +1300,38 @@ if(session('department_id') == 7){
 
         }
         elseif(($user['rate_status']>=1) && $user['status']==3){
+            $e_switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+//        return $switches;
+//        var_dump(empty($switches));exit();
+            $e_weight = WeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+//        $cash = '';
+            $e_bookingType = BookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_cash = CashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_insurance = InsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_return = ReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_fuel = FuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_packaging = PackagingCharge::all()->where('user_id', $id);
+            $e_packaging_type_ids = array_unique($e_packaging->pluck('type_id')->toArray());
+            $e_wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+            $e_wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+            $e_wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+            $e_wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+            $e_wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+            $e_wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+            $e_storage_types = WmsStorageType::all()->where('status', 1);
+            $e_invoicing_cycles = InvoicingCycle::all();
+            $e_discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_rate_status = $user['rate_status'];
+            $e_packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
+
+            $e_packaging_charges = array();
+            if(count($e_packaging) > 0){
+
+                foreach($e_packaging as $e_charge){
+                    $e_packaging_charges[$e_charge->type_id][] = $e_charge;
+                }
+            }
+
             $switches = PendingRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
             $weight = PendingWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1330,20 +1362,33 @@ if(session('department_id') == 7){
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
             }
+            $existing = 1;
+            if(session('department_id') == 7){
+                if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
+                    return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing]);
+                }
+                else{
+                    return view('admin.access_denied');
+                }
+            }
+            else{
+                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types]);
+            }
         }
         else {
             return redirect(route('admin.accounts.pending'));
         }
+        $existing = 0;
         if(session('department_id') == 7){
             if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
-                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
+                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing]);
             }
             else{
                 return view('admin.access_denied');
             }
         }
         else{
-            return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
+            return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing]);
         }
 
     }
