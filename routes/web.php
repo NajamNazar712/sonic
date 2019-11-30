@@ -339,6 +339,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('submit', 'Admins\AdminDashboardController@merged_accounts_mapping_submit')->name('submit');
             });
         });
+
+        Route::prefix('warehousing')->name('warehousing.')->group(function(){
+            Route::post('active','Admins\AdminDashboardController@warehousing_active')->name('active');
+            Route::post('inactive','Admins\AdminDashboardController@warehousing_inactive')->name('inactive');
+        });
     });
 
     Route::prefix('daily_visit')->name('daily_visit.')->group(function () {
@@ -359,6 +364,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('accounts/{id}/view_crf_agreement', 'ShipperAgreementController@view_crf_agreement')->name('accounts.view_crf_agreement');
     //
     Route::get('/accounts/{id}/view/rates','Admins\AdminDashboardController@viewRates')->name('view.rates');
+
+
+
     Route::prefix('corporate')->name('corporate.')->group(function (){
         Route::get('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_index')->name('add.rates');
         Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_submit')->name('add.rates');
@@ -1217,6 +1225,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@daily_visit_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@daily_visit_list')->name('list');
         });
+        Route::prefix('delivered_shipment')->name('delivered_shipment.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@delivered_shipment_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@delivered_shipment_list')->name('list');
+        });
     });
 
     //Reports end
@@ -1430,6 +1442,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('intercept')->name('intercept.')->group(function (){
         Route::get('/{row_id}','Admins\AdminInterceptRebookRequestHistoryController@intercept_re_book_index')->name('index');
         Route::post('update','Admins\AdminInterceptRebookRequestHistoryController@intercept_re_book_update')->name('update');
+    });
+    Route::prefix('resources')->name('resources.')->group(function (){
+        Route::get('','Admins\AdminResourcesController@index')->name('index');
+        Route::get('city_list','Admins\AdminResourcesController@get_network_list')->name('city_list');
     });
 });
 

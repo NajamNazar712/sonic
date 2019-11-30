@@ -263,7 +263,7 @@ class ShipperReportsController extends Controller
                     ->where('si.type','=',0);
             })
             ->leftjoin('products as p','p.id','=','si.product_type_id')
-            ->select(['u.name as user_name', 'shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','p.product_name','si.description','sj.created_at as arrival_date','oc.name as origin','dc.name as destination']);
+            ->select(['u.name as user_name', 'shipments.id as shipment_id','shipments.order_id','shipments.tracking_number','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','ss.name as current_status','sps.name as payment_status','bt.booking_type as service_type','p.product_name','si.description','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.consignee_name as consignee_name','shipments.consignee_phone_number_1 as consignee_phone']);
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');

@@ -72,7 +72,7 @@
                                                                         <div class="col-md-3 text-center">
                                                                             <label class="card-title">{{$size->size}}</label>
                                                                             <fieldset class="form-group">
-                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging_charges[$type->id][$ind]->charges}}">
+                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control @if ((isset($e_packaging_charges[$type->id][$ind]) && isset($packaging_charges[$type->id][$ind]) && $e_packaging_charges[$type->id][$ind]->size_id == $size->id) && ($e_packaging_charges[$type->id][$ind]->charges != $packaging_charges[$type->id][$ind]->charges)) changed @endif amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packaging_charges[$type->id][$ind]->charges}}">
                                                                             </fieldset>
                                                                         </div>
                                                                     @else
@@ -170,13 +170,13 @@
                                                     <input type="hidden" name="on_weight_record[{{$index}}]" value="{{$onweight->id}}">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_up}}" name="on_wa_range_up[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->range_up != $onweight->range_up) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_up}}" name="on_wa_range_up[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_down}}" name="on_wa_range_down[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->range_down != $onweight->range_down) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_down}}" name="on_wa_range_down[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -189,34 +189,34 @@
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="{{$onweight->spkg}}" {{ ($onweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
+                                                                <input type="text" class="touchspin-color @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->spkg != $onweight->spkg) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif input-sm spkg" value="{{$onweight->spkg}}" {{ ($onweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
                                                                        data-bts-button-up-class="btn btn-success" name="on_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->local_or_6hr}}" name="on_wa_local_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->local_or_6hr != $onweight->local_or_6hr) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif amount" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->local_or_6hr}}" name="on_wa_local_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_0}}" name="on_class_0_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->national_charges_class_0 != $onweight->national_charges_class_0) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif amount" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_0}}" name="on_class_0_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_1}}" name="on_class_1_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->national_charges_class_1 != $onweight->national_charges_class_1) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_1}}" name="on_class_1_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_2}}" name="on_class_2_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->national_charges_class_2 != $onweight->national_charges_class_2) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_2}}" name="on_class_2_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_3}}" name="on_class_3_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[1][$index]->id) && $e_weight[1][$index]->national_charges_class_3 != $onweight->national_charges_class_3) changed @elseif(!isset($e_weight[1][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_3}}" name="on_class_3_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
@@ -298,7 +298,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" >Replacement</span>
                                                         </div>
-                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->replacement_charges != '')? $shippingType[1][0]->replacement_charges : ''}}" name="on_replacement_charges">
+                                                        <input type="text" class="form-control @if(isset($e_shippingType[1][0]) && isset($shippingType[1][0]) && $e_shippingType[1][0]->replacement_charges != $shippingType[1][0]->replacement_charges) changed @elseif(!isset($e_shippingType[1][0]) && $existing == 1) new @endif percent" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->replacement_charges != '')? $shippingType[1][0]->replacement_charges : ''}}" name="on_replacement_charges">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" >%</span>
                                                         </div>
@@ -311,7 +311,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" >Try &amp; Buy</span>
                                                         </div>
-                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->try_and_buy_charges != '')? $shippingType[1][0]->try_and_buy_charges : ''}}" name="on_tnb_charges">
+                                                        <input type="text" class="form-control @if(isset($e_shippingType[1][0]) && isset($shippingType[1][0]) && $e_shippingType[1][0]->try_and_buy_charges != $shippingType[1][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[1][0]) && $existing == 1) new @endif percent" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->try_and_buy_charges != '')? $shippingType[1][0]->try_and_buy_charges : ''}}" name="on_tnb_charges">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" >%</span>
                                                         </div>
@@ -361,18 +361,18 @@
                                                     <input type="hidden" name="on_cash_record[{{$index}}]" value="{{$cash->id}}">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="on_cash_range_up[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="{{$cash->range_up}}" {{$on_cash_sw}}>
+                                                            <input name="on_cash_range_up[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control @if(isset($e_cashHandling[1][$index]->id) && $e_cashHandling[1][$index]->range_up != $cash->range_up) changed @elseif(!isset($e_cashHandling[1][$index]->id) && $existing == 1) new @endif numeric"  value="{{$cash->range_up}}" {{$on_cash_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="on_cash_range_down[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="{{$cash->range_down}}" {{$on_cash_sw}}>
+                                                            <input name="on_cash_range_down[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control @if(isset($e_cashHandling[1][$index]->id) && $e_cashHandling[1][$index]->range_down != $cash->range_down) changed @elseif(!isset($e_cashHandling[1][$index]->id) && $existing == 1) new @endif numeric"  value="{{$cash->range_down}}" {{$on_cash_sw}}>
                                                         </fieldset>
                                                     </div>
 
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="on_cash_charges[{{$index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->charges}}" {{$on_cash_sw}}>
+                                                            <input name="on_cash_charges[{{$index}}]" type="text" class="form-control @if(isset($e_cashHandling[1][$index]->id) && $e_cashHandling[1][$index]->charges != $cash->charges) changed @elseif(!isset($e_cashHandling[1][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->charges}}" {{$on_cash_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     @if($index>0)
@@ -450,18 +450,18 @@
                                                     <input type="hidden" name="on_insurance_record[{{$index}}]" value="{{$insurance->id}}">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="on_ins_range_up[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="{{$insurance->range_up}}" {{$on_ins_sw}}>
+                                                            <input name="on_ins_range_up[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control @if(isset($e_insuranceCharges[1][$index]->id) && $e_insuranceCharges[1][$index]->range_up != $insurance->range_up) changed @elseif(!isset($e_insuranceCharges[1][$index]->id) && $existing == 1) new @endif numeric"  value="{{$insurance->range_up}}" {{$on_ins_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="on_ins_range_down[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="{{$insurance->range_down}}" {{$on_ins_sw}}>
+                                                            <input name="on_ins_range_down[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control @if(isset($e_insuranceCharges[1][$index]->id) && $e_insuranceCharges[1][$index]->range_down != $insurance->range_down) changed @elseif(!isset($e_insuranceCharges[1][$index]->id) && $existing == 1) new @endif numeric"  value="{{$insurance->range_down}}" {{$on_ins_sw}}>
                                                         </fieldset>
                                                     </div>
 
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="on_ins_charges[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent"  value="{{$insurance->charges}}" {{$on_ins_sw}}>
+                                                            <input name="on_ins_charges[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control @if(isset($e_insuranceCharges[1][$index]->id) && $e_insuranceCharges[1][$index]->charges != $insurance->charges) changed @elseif(!isset($e_insuranceCharges[1][$index]->id) && $existing == 1) new @endif dec-percent"  value="{{$insurance->charges}}" {{$on_ins_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     @if($index>0)
@@ -525,31 +525,31 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->local !== '')? $returnCharges[1][0]->local : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && isset($returnCharges[1][0]) && $e_returnCharges[1][0]->local != $returnCharges[1][0]->local) changed @elseif(!isset($e_returnCharges[1][0]) && isset($returnCharges[1][0]) && $existing == 1) new @endif amount" name="on_return_local_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->local !== '')? $returnCharges[1][0]->local : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_class_0_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_0 !== '')? $returnCharges[1][0]->national_charges_class_0 : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && isset($returnCharges[1][0]) && $e_returnCharges[1][0]->national_charges_class_0 != $returnCharges[1][0]->national_charges_class_0) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif amount" name="on_return_class_0_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_0 !== '')? $returnCharges[1][0]->national_charges_class_0 : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class B</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_1_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_1 !== '')? $returnCharges[1][0]->national_charges_class_1 : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && isset($returnCharges[1][0]) && $e_returnCharges[1][0]->national_charges_class_1 != $returnCharges[1][0]->national_charges_class_1) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif dec-percent" name="on_return_class_1_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_1 !== '')? $returnCharges[1][0]->national_charges_class_1 : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class C</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_2_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_2 !== '')? $returnCharges[1][0]->national_charges_class_2 : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && isset($returnCharges[1][0]) && $e_returnCharges[1][0]->national_charges_class_2 != $returnCharges[1][0]->national_charges_class_2) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif dec-percent" name="on_return_class_2_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_2 !== '')? $returnCharges[1][0]->national_charges_class_2 : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class D</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="on_return_class_3_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_3 !== '')? $returnCharges[1][0]->national_charges_class_3 : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[1][0]) && isset($returnCharges[1][0]) && $e_returnCharges[1][0]->national_charges_class_3 != $returnCharges[1][0]->national_charges_class_3) changed @elseif(!isset($e_returnCharges[1][0]) && $existing == 1) new @endif dec-percent" name="on_return_class_3_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national_charges_class_3 !== '')? $returnCharges[1][0]->national_charges_class_3 : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -583,7 +583,7 @@
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
                                                     <div class="input-group form-group">
-                                                        <input type="text"  class="form-control " name="overnight_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[1][0]) && $fuelCharges[1][0]->fuel_surcharge != '')? $fuelCharges[1][0]->fuel_surcharge : ''}}" {{$on_fuel_sw}}>
+                                                        <input type="text"  class="form-control @if(isset($e_fuelCharges[1][0]) && isset($fuelCharges[1][0]) && $e_fuelCharges[1][0]->fuel_surcharge != $fuelCharges[1][0]->fuel_surcharge) changed @elseif(!isset($e_fuelCharges[1][0]) && $existing == 1) new @endif " name="overnight_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[1][0]) && $fuelCharges[1][0]->fuel_surcharge != '')? $fuelCharges[1][0]->fuel_surcharge : ''}}" {{$on_fuel_sw}}>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -607,10 +607,16 @@
                                             }
                                                     $on_discount_title_switch = '';
                                                         $on_discount_title = '';
+                                                        $e_on_discount_title = '';
                                                     if((isset($discountCharges[1][0]) && $discountCharges[1][0]->title != '')){
                                                     $on_discount_title = $discountCharges[1][0]->title;
                                                      }else{
                                                     $on_discount_title = '';
+                                                    }
+                                                    if((isset($e_discountCharges[1][0]) && $e_discountCharges[1][0]->title != '')){
+                                                    $e_on_discount_title = $e_discountCharges[1][0]->title;
+                                                     }else{
+                                                    $e_on_discount_title = '';
                                                     }
                                                     if((isset($discountCharges[1][0]->cash)) || (isset($discountCharges[1][0]->weight)) || (isset($discountCharges[1][0]->insurance)) || (isset($discountCharges[1][0]->return)) || (isset($discountCharges[1][0]->packaging))){
                                                         $on_discount_title_switch = '';
@@ -623,12 +629,13 @@
                                             <div class="col-md-6">
                                                 <label class="">Title</label>
                                                 <div class='form-group'>
-                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" {{$on_discount_title_switch}} name="on_discount_title" value="{{$on_discount_title}}"/>
+                                                    <input type='text' class="form-control @if(isset($e_discountCharges[1][0]) && $on_discount_title != $e_on_discount_title) changed @elseif(!isset($e_discountCharges[1][0]) && $existing == 1) new @endif" data-rule-required="true" data-msg-required="This field is required" {{$on_discount_title_switch}} name="on_discount_title" value="{{$on_discount_title}}"/>
                                                 </div>
 
                                             </div>
                                             @php
                                                 $on_discount_daterange = '';
+                                                $e_on_discount_daterange = '';
                                                 $on_discount_daterange_switch = '';
                                             if((isset($discountCharges[1][0]) && $discountCharges[1][0]->to != '')){
 
@@ -641,6 +648,15 @@
                                             $on_discount_daterange = '';
 
                                             }
+                                            if((isset($e_discountCharges[1][0]) && $e_discountCharges[1][0]->to != '')){
+                                                $e_to = date('m/d/Y', strtotime($e_discountCharges[1][0]->to));
+                                                $e_from = date('m/d/Y', strtotime($e_discountCharges[1][0]->from));
+
+                                                $e_on_discount_daterange = $e_to.' - '.$e_from;
+
+                                             }else{
+                                                $e_on_discount_daterange = '';
+                                            }
                                             if((isset($discountCharges[1][0]->cash)) || (isset($discountCharges[1][0]->weight)) || (isset($discountCharges[1][0]->insurance)) || (isset($discountCharges[1][0]->return)) || (isset($discountCharges[1][0]->packaging))){
                                             $on_discount_daterange_switch = '';
                                             }else{
@@ -650,7 +666,7 @@
                                             <div class="col-md-6">
                                                 <label class="">Apply [to - from]{{$on_discount_daterange}}</label>
                                                 <div class='input-group form-group'>
-                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" {{$on_discount_daterange_switch}} name="on_daterange" value="{{$on_discount_daterange}}"/>
+                                                    <input type='text' class="form-control @if(isset($e_discountCharges[1][0]) && $e_on_discount_daterange != $on_discount_daterange) changed @elseif(!isset($e_discountCharges[1][0]) && $existing == 1) new @endif daterange" data-rule-required="true" data-msg-required="This field is required" {{$on_discount_daterange_switch}} name="on_daterange" value="{{$on_discount_daterange}}"/>
                                                     <div class="input-group-append">
                                                             <span class="input-group-text">
                                                               <span class="la la-calendar"></span>
@@ -662,6 +678,7 @@
                                         </div>
                                         @php
                                             $on_discount_weight_sw = '';
+                                            $e_on_discount_weight_sw = '';
                                             $on_discount_weight_switch = '';
                                             $on_discount_weight_disable = '';
                                         if((isset($discountCharges[1][0]) && $discountCharges[1][0]->weight != '')){
@@ -672,6 +689,11 @@
                                         $on_discount_weight_sw = '';
                                         $on_discount_weight_switch = '';
                                         $on_discount_weight_disable = 'disabled';
+                                        }
+                                        if((isset($e_discountCharges[1][0]) && $e_discountCharges[1][0]->weight != '')){
+                                        $e_on_discount_weight_sw = $e_discountCharges[1][0]->weight;
+                                         }else{
+                                        $e_on_discount_weight_sw = '';
                                         }
                                         @endphp
                                         <div class="row">
@@ -686,7 +708,7 @@
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesOvernight" name="on_discount_weight_switch" data-size="xs" {{$on_discount_weight_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_weight_rate" value="{{$on_discount_weight_sw}}" {{$on_discount_weight_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[1][0]) && $e_on_discount_weight_sw != $on_discount_weight_sw) changed @elseif(!isset($e_discountCharges[1][0]) && $existing == 1) new @endif dec-percent on-discount-inp" name="on_discount_weight_rate" value="{{$on_discount_weight_sw}}" {{$on_discount_weight_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -703,6 +725,11 @@
                                             $on_discount_cash_switch = '';
                                             $on_discount_cash_disable = 'disabled';
                                             }
+                                            if((isset($e_discountCharges[1][0]) && $e_discountCharges[1][0]->cash != '')){
+                                            $e_on_discount_cash_sw = $e_discountCharges[1][0]->cash;
+                                             }else{
+                                            $e_on_discount_cash_sw = '';
+                                            }
                                             @endphp
                                             <div class="col text-center">
                                                 <fieldset>
@@ -715,12 +742,13 @@
                                                                 <input type="checkbox" name="on_discount_cash_switch" class="switchery discountSwitchesOvernight" data-size="xs" {{$on_discount_cash_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_cash_rate" value="{{$on_discount_cash_sw}}" {{$on_discount_cash_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[1][0]) && $e_on_discount_cash_sw != $on_discount_cash_sw) changed @elseif(!isset($e_discountCharges[1][0]) && $existing == 1) new @endif dec-percent on-discount-inp" name="on_discount_cash_rate" value="{{$on_discount_cash_sw}}" {{$on_discount_cash_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $on_discount_insurance_sw = '';
+                                                $e_on_discount_insurance_sw = '';
                                                 $on_discount_insurance_switch = '';
                                                 $on_discount_insurance_disable = '';
                                             if((isset($discountCharges[1][0]) && $discountCharges[1][0]->insurance != '')){
@@ -731,6 +759,11 @@
                                             $on_discount_insurance_sw = '';
                                             $on_discount_insurance_switch = '';
                                             $on_discount_insurance_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[1][0]) && $e_discountCharges[1][0]->insurance != '')){
+                                            $e_on_discount_insurance_sw = $e_discountCharges[1][0]->insurance;
+                                             }else{
+                                            $e_on_discount_insurance_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -744,12 +777,13 @@
                                                                 <input type="checkbox" name="on_discount_insurance_switch" class="switchery discountSwitchesOvernight" data-size="xs" {{$on_discount_insurance_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_insurance_rate" value="{{$on_discount_insurance_sw}}" {{$on_discount_insurance_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[1][0]) && $e_on_discount_insurance_sw != $on_discount_insurance_sw) changed @elseif(!isset($e_discountCharges[1][0]) && $existing == 1) new @endif dec-percent on-discount-inp" name="on_discount_insurance_rate" value="{{$on_discount_insurance_sw}}" {{$on_discount_insurance_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $on_discount_return_sw = '';
+                                                $e_on_discount_return_sw = '';
                                                 $on_discount_return_switch = '';
                                                 $on_discount_return_disable = '';
                                             if((isset($discountCharges[1][0]) && $discountCharges[1][0]->return != '')){
@@ -760,6 +794,11 @@
                                             $on_discount_return_sw = '';
                                             $on_discount_return_switch = '';
                                             $on_discount_return_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[1][0]) && $e_discountCharges[1][0]->return != '')){
+                                            $e_on_discount_return_sw = $e_discountCharges[1][0]->return;
+                                             }else{
+                                            $e_on_discount_return_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -773,12 +812,13 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_return_switch" {{$on_discount_return_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_return_rate" value="{{$on_discount_return_sw}}" {{$on_discount_return_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[1][0]) && $e_on_discount_return_sw != $on_discount_return_sw) changed @elseif(!isset($e_discountCharges[1][0]) && $existing == 1) new @endif dec-percent on-discount-inp" name="on_discount_return_rate" value="{{$on_discount_return_sw}}" {{$on_discount_return_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $on_discount_packaging_sw = '';
+                                                $e_on_discount_packaging_sw = '';
                                                 $on_discount_packaging_switch = '';
                                                 $on_discount_packaging_disable = '';
                                             if((isset($discountCharges[1][0]) && $discountCharges[1][0]->packaging != '')){
@@ -790,6 +830,12 @@
                                             $on_discount_packaging_sw = '';
                                             $on_discount_packaging_switch = '';
                                             $on_discount_packaging_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[1][0]) && $e_discountCharges[1][0]->packaging != '')){
+                                            $e_on_discount_packaging_sw = $e_discountCharges[1][0]->packaging;
+
+                                             }else{
+                                            $e_on_discount_packaging_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -803,7 +849,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_packaging_switch" {{$on_discount_packaging_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_packaging_rate" value="{{$on_discount_packaging_sw}}" {{$on_discount_packaging_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[1][0]) && $e_on_discount_packaging_sw != $on_discount_packaging_sw) changed @elseif(!isset($e_discountCharges[1][0]) && $existing == 1) new @endif dec-percent on-discount-inp" name="on_discount_packaging_rate" value="{{$on_discount_packaging_sw}}" {{$on_discount_packaging_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -879,13 +925,13 @@
                                                     <input type="hidden" name="ol_weight_record[{{$index}}]" value="{{$olweight->id}}">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_up}}" name="ol_wa_range_up[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->range_up != $olweight->range_up) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_up}}" name="ol_wa_range_up[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_down}}" name="ol_wa_range_down[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->range_down != $olweight->range_down) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_down}}" name="ol_wa_range_down[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -898,34 +944,34 @@
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="{{$olweight->spkg}}" {{ ($olweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
+                                                                <input type="text" class="touchspin-color @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->spkg != $olweight->spkg) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif input-sm spkg" value="{{$olweight->spkg}}" {{ ($olweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
                                                                        data-bts-button-up-class="btn btn-success" name="ol_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->local_or_6hr}}" name="ol_wa_local_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->local_or_6hr != $olweight->local_or_6hr) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->local_or_6hr}}" name="ol_wa_local_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_0}}" name="ol_class_0_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->national_charges_class_0 != $olweight->national_charges_class_0) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_0}}" name="ol_class_0_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_1}}" name="ol_class_1_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->national_charges_class_1 != $olweight->national_charges_class_1) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_1}}" name="ol_class_1_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_2}}" name="ol_class_2_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->national_charges_class_2 != $olweight->national_charges_class_2) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_2}}" name="ol_class_2_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_3}}" name="ol_class_3_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[2][$index]->id) && $e_weight[2][$index]->national_charges_class_3 != $olweight->national_charges_class_3) changed @elseif(!isset($e_weight[2][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_3}}" name="ol_class_3_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
@@ -1005,7 +1051,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Replacement</span>
                                                         </div>
-                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" name="ol_replacement_charges" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->replacement_charges != '')? $shippingType[2][0]->replacement_charges : ''}}">
+                                                        <input type="text" class="form-control @if(isset($e_shippingType[2][0]) && isset($shippingType[2][0]) && $e_shippingType[2][0]->replacement_charges != $shippingType[2][0]->replacement_charges) changed @elseif(!isset($e_shippingType[2][0]) && $existing == 1) new @endif percent" data-rule-required="true" data-msg-required="This field is required" name="ol_replacement_charges" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->replacement_charges != '')? $shippingType[2][0]->replacement_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1018,7 +1064,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try &amp; Buy</span>
                                                         </div>
-                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" name="ol_tnb_charges" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->try_and_buy_charges != '')? $shippingType[2][0]->try_and_buy_charges : ''}}">
+                                                        <input type="text" class="form-control @if(isset($e_shippingType[2][0]) && isset($shippingType[2][0]) && $e_shippingType[2][0]->try_and_buy_charges != $shippingType[2][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[2][0]) && $existing == 1) new @endif percent" data-rule-required="true" data-msg-required="This field is required" name="ol_tnb_charges" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->try_and_buy_charges != '')? $shippingType[2][0]->try_and_buy_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1067,18 +1113,18 @@
                                                     <input type="hidden" name="ol_cash_record[{{$index}}]" value="{{$cash->id}}">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="ol_cash_range_up[{{$index}}]" type="text" class="form-control  numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_up}}" {{$ol_cash_sw}}>
+                                                            <input name="ol_cash_range_up[{{$index}}]" type="text" class="form-control @if(isset($e_cashHandling[2][$index]->id) && $e_cashHandling[2][$index]->range_up != $cash->range_up) changed @elseif(!isset($e_cashHandling[2][$index]->id) && $existing == 1) new @endif numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_up}}" {{$ol_cash_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="ol_cash_range_down[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_down}}" {{$ol_cash_sw}}>
+                                                            <input name="ol_cash_range_down[{{$index}}]" type="text" class="form-control @if(isset($e_cashHandling[2][$index]->id) && $e_cashHandling[2][$index]->range_down != $cash->range_down) changed @elseif(!isset($e_cashHandling[2][$index]->id) && $existing == 1) new @endif numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_down}}" {{$ol_cash_sw}}>
                                                         </fieldset>
                                                     </div>
 
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="ol_cash_charges[{{$index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->charges}}" {{$ol_cash_sw}}>
+                                                            <input name="ol_cash_charges[{{$index}}]" type="text" class="form-control @if(isset($e_cashHandling[2][$index]->id) && $e_cashHandling[2][$index]->charges != $cash->charges) changed @elseif(!isset($e_cashHandling[2][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->charges}}" {{$ol_cash_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
@@ -1155,18 +1201,18 @@
                                                     <input type="hidden" name="ol_insurance_record[{{$index}}]" value="{{$ol_insurance->id}}">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="ol_ins_range_up[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$ol_insurance->range_up}}" {{$ol_ins_sw}}>
+                                                            <input name="ol_ins_range_up[{{$index}}]" type="text" class="form-control @if(isset($e_insuranceCharges[2][$index]->id) && $e_insuranceCharges[2][$index]->range_up != $ol_insurance->range_up) changed @elseif(!isset($e_insuranceCharges[2][$index]->id) && $existing == 1) new @endif numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$ol_insurance->range_up}}" {{$ol_ins_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="ol_ins_range_down[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$ol_insurance->range_down}}" {{$ol_ins_sw}}>
+                                                            <input name="ol_ins_range_down[{{$index}}]" type="text" class="form-control @if(isset($e_insuranceCharges[2][$index]->id) && $e_insuranceCharges[2][$index]->range_down != $ol_insurance->range_down) changed @elseif(!isset($e_insuranceCharges[2][$index]->id) && $existing == 1) new @endif numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$ol_insurance->range_down}}" {{$ol_ins_sw}}>
                                                         </fieldset>
                                                     </div>
 
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="ol_ins_charges[{{$index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$ol_insurance->charges}}" {{$ol_ins_sw}}>
+                                                            <input name="ol_ins_charges[{{$index}}]" type="text" class="form-control @if(isset($e_insuranceCharges[2][$index]->id) && $e_insuranceCharges[2][$index]->charges != $ol_insurance->charges) changed @elseif(!isset($e_insuranceCharges[2][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$ol_insurance->charges}}" {{$ol_ins_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
@@ -1231,32 +1277,32 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="ol_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->local !== '')? $returnCharges[2][0]->local : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" class="form-control @if(isset($e_returnCharges[2][0]) && isset($returnCharges[2][0]) && $e_returnCharges[2][0]->local != $returnCharges[2][0]->local) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif amount" name="ol_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->local !== '')? $returnCharges[2][0]->local : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
 
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="ol_return_class_0_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_0 !== '')? $returnCharges[2][0]->national_charges_class_0 : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[2][0]) && isset($returnCharges[2][0]) && $e_returnCharges[2][0]->national_charges_class_0 != $returnCharges[2][0]->national_charges_class_0) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif amount" name="ol_return_class_0_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_0 !== '')? $returnCharges[2][0]->national_charges_class_0 : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class B</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="ol_return_class_1_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_1 !== '')? $returnCharges[2][0]->national_charges_class_1 : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[2][0]) && isset($returnCharges[2][0]) && $e_returnCharges[2][0]->national_charges_class_1 != $returnCharges[2][0]->national_charges_class_1) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif dec-percent" name="ol_return_class_1_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_1 !== '')? $returnCharges[2][0]->national_charges_class_1 : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class C</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="ol_return_class_2_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_2 !== '')? $returnCharges[2][0]->national_charges_class_2 : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[2][0]) && isset($returnCharges[2][0]) && $e_returnCharges[2][0]->national_charges_class_2 != $returnCharges[2][0]->national_charges_class_2) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif dec-percent" name="ol_return_class_2_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_2 !== '')? $returnCharges[2][0]->national_charges_class_2 : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class D</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="ol_return_class_3_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_3 !== '')? $returnCharges[2][0]->national_charges_class_3 : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[2][0]) && isset($returnCharges[2][0]) && $e_returnCharges[2][0]->national_charges_class_3 != $returnCharges[2][0]->national_charges_class_3) changed @elseif(!isset($e_returnCharges[2][0]) && $existing == 1) new @endif dec-percent" name="ol_return_class_3_charges"  value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national_charges_class_3 !== '')? $returnCharges[2][0]->national_charges_class_3 : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1290,7 +1336,7 @@
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
                                                     <div class="input-group form-group">
-                                                        <input type="text"  class="form-control " name="overland_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->fuel_surcharge != '')? $fuelCharges[2][0]->fuel_surcharge : ''}}" {{$ol_fuel_sw}}>
+                                                        <input type="text"  class="form-control @if(isset($e_fuelCharges[2][0]) && isset($fuelCharges[2][0]) && $e_fuelCharges[2][0]->fuel_surcharge != $fuelCharges[2][0]->fuel_surcharge) changed @elseif(!isset($e_fuelCharges[2][0]) && $existing == 1) new @endif" name="overland_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->fuel_surcharge != '')? $fuelCharges[2][0]->fuel_surcharge : ''}}" {{$ol_fuel_sw}}>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1317,6 +1363,11 @@
                                              }else{
                                             $ol_discount_title = '';
                                             }
+                                            if((isset($e_discountCharges[2][0]) && $e_discountCharges[2][0]->title != '')){
+                                            $e_ol_discount_title = $e_discountCharges[2][0]->title;
+                                             }else{
+                                            $e_ol_discount_title = '';
+                                            }
                                             if((isset($discountCharges[2][0]->cash)) || (isset($discountCharges[2][0]->weight)) || (isset($discountCharges[2][0]->insurance)) || (isset($discountCharges[2][0]->return)) || (isset($discountCharges[2][0]->packaging))){
                                                 $ol_discount_title_switch = '';
                                                 }else{
@@ -1328,12 +1379,13 @@
                                             <div class="col-md-6">
                                                 <label class="">Title</label>
                                                 <div class='form-group'>
-                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" {{$ol_discount_title_switch}} name="ol_discount_title" value="{{$ol_discount_title}}" />
+                                                    <input type='text' class="form-control @if(isset($e_discountCharges[2][0]) && $ol_discount_title != $e_ol_discount_title) changed @elseif(!isset($e_discountCharges[2][0]) && $existing == 1) new @endif" data-rule-required="true" data-msg-required="This field is required" {{$ol_discount_title_switch}} name="ol_discount_title" value="{{$ol_discount_title}}" />
                                                 </div>
 
                                             </div>
                                             @php
                                                 $ol_discount_daterange = '';
+                                                $e_ol_discount_daterange = '';
                                                 $ol_discount_daterange_switch = '';
                                             if((isset($discountCharges[2][0]) && $discountCharges[2][0]->daterange != '')){
 
@@ -1346,6 +1398,18 @@
                                             $ol_discount_daterange = '';
 
                                             }
+
+                                            if((isset($e_discountCharges[2][0]) && $e_discountCharges[2][0]->daterange != '')){
+
+                                            $e_to = date('m/d/Y', strtotime($e_discountCharges[2][0]->to));
+                                            $e_from = date('m/d/Y', strtotime($e_discountCharges[2][0]->from));
+
+                                            $e_ol_discount_daterange = $e_to.' - '.$e_from;
+
+                                             }else{
+                                            $e_ol_discount_daterange = '';
+
+                                            }
                                             if((isset($discountCharges[2][0]->cash)) || (isset($discountCharges[2][0]->weight)) || (isset($discountCharges[2][0]->insurance)) || (isset($discountCharges[2][0]->return)) || (isset($discountCharges[2][0]->packaging))){
                                             $ol_discount_daterange_switch = '';
                                             }else{
@@ -1355,7 +1419,7 @@
                                             <div class="col-md-6">
                                                 <label class="">Apply [to - from]</label>
                                                 <div class='input-group form-group'>
-                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" {{$ol_discount_daterange_switch}} name="ol_daterange" {{$ol_discount_daterange_switch}} value="{{$ol_discount_daterange}}" />
+                                                    <input type='text' class="form-control @if(isset($e_discountCharges[2][0]) && $e_ol_discount_daterange != $ol_discount_daterange) changed @elseif(!isset($e_discountCharges[2][0]) && $existing == 1) new @endif daterange" data-rule-required="true" data-msg-required="This field is required" {{$ol_discount_daterange_switch}} name="ol_daterange" {{$ol_discount_daterange_switch}} value="{{$ol_discount_daterange}}" />
                                                     <div class="input-group-append">
                                                             <span class="input-group-text">
                                                               <span class="la la-calendar"></span>
@@ -1366,6 +1430,7 @@
                                         </div>
                                          @php
                                             $ol_discount_weight_sw = '';
+                                            $e_ol_discount_weight_sw = '';
                                             $ol_discount_weight_switch = '';
                                             $ol_discount_weight_disable = '';
                                         if((isset($discountCharges[2][0]) && $discountCharges[2][0]->weight != '')){
@@ -1376,6 +1441,11 @@
                                         $ol_discount_weight_sw = '';
                                         $ol_discount_weight_switch = '';
                                         $ol_discount_weight_disable = 'disabled';
+                                        }
+                                        if((isset($e_discountCharges[2][0]) && $e_discountCharges[2][0]->weight != '')){
+                                        $e_ol_discount_weight_sw = $e_discountCharges[2][0]->weight;
+                                         }else{
+                                        $e_ol_discount_weight_sw = '';
                                         }
                                         @endphp
                                         <div class="row">
@@ -1390,12 +1460,13 @@
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesOverland" name="ol_discount_weight_switch" data-size="xs" {{$ol_discount_weight_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_weight_rate" {{$ol_discount_weight_disable}} value="{{$ol_discount_weight_sw}}">
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[2][0]) && $e_ol_discount_weight_sw != $ol_discount_weight_sw) changed @elseif(!isset($e_discountCharges[2][0]) && $existing == 1) new @endif dec-percent ol-discount-inp" name="ol_discount_weight_rate" {{$ol_discount_weight_disable}} value="{{$ol_discount_weight_sw}}">
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $ol_discount_cash_sw = '';
+                                                $e_ol_discount_cash_sw = '';
                                                 $ol_discount_cash_switch = '';
                                                 $ol_discount_cash_disable = '';
                                             if((isset($discountCharges[2][0]) && $discountCharges[2][0]->cash != '')){
@@ -1406,6 +1477,11 @@
                                             $ol_discount_cash_sw = '';
                                             $ol_discount_cash_switch = '';
                                             $ol_discount_cash_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[2][0]) && $e_discountCharges[2][0]->cash != '')){
+                                            $e_ol_discount_cash_sw = $e_discountCharges[2][0]->cash;
+                                             }else{
+                                            $e_ol_discount_cash_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -1419,12 +1495,13 @@
                                                                 <input type="checkbox" name="ol_cash_weight_switch" class="switchery discountSwitchesOverland" data-size="xs" {{$ol_discount_cash_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_cash_rate" {{$ol_discount_cash_disable}} value="{{$ol_discount_cash_sw}}">
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[2][0]) && $e_ol_discount_cash_sw != $ol_discount_cash_sw) changed @elseif(!isset($e_discountCharges[2][0]) && $existing == 1) new @endif dec-percent ol-discount-inp" name="ol_discount_cash_rate" {{$ol_discount_cash_disable}} value="{{$ol_discount_cash_sw}}">
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $ol_discount_insurance_sw = '';
+                                                $e_ol_discount_insurance_sw = '';
                                                 $ol_discount_insurance_switch = '';
                                                 $ol_discount_insurance_disable = '';
                                             if((isset($discountCharges[2][0]) && $discountCharges[2][0]->insurance != '')){
@@ -1435,6 +1512,11 @@
                                             $ol_discount_insurance_sw = '';
                                             $ol_discount_insurance_switch = '';
                                             $ol_discount_insurance_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[2][0]) && $e_discountCharges[2][0]->insurance != '')){
+                                            $e_ol_discount_insurance_sw = $e_discountCharges[2][0]->insurance;
+                                             }else{
+                                            $e_ol_discount_insurance_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -1448,12 +1530,13 @@
                                                                 <input type="checkbox" name="ol_discount_insurance_switch" class="switchery discountSwitchesOverland" data-size="xs" {{$ol_discount_insurance_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_insurance_rate" value="{{$ol_discount_insurance_sw}}" {{$ol_discount_insurance_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[2][0]) && $e_ol_discount_insurance_sw != $ol_discount_insurance_sw) changed @elseif(!isset($e_discountCharges[2][0]) && $existing == 1) new @endif dec-percent ol-discount-inp" name="ol_discount_insurance_rate" value="{{$ol_discount_insurance_sw}}" {{$ol_discount_insurance_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $ol_discount_return_sw = '';
+                                                $e_ol_discount_return_sw = '';
                                                 $ol_discount_return_switch = '';
                                                 $ol_discount_return_disable = '';
                                             if((isset($discountCharges[2][0]) && $discountCharges[2][0]->return != '')){
@@ -1464,6 +1547,11 @@
                                             $ol_discount_return_sw = '';
                                             $ol_discount_return_switch = '';
                                             $ol_discount_return_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[2][0]) && $e_discountCharges[2][0]->return != '')){
+                                            $e_ol_discount_return_sw = $e_discountCharges[2][0]->return;
+                                             }else{
+                                            $e_ol_discount_return_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -1477,12 +1565,13 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_return_switch" {{$ol_discount_return_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_return_rate" value="{{$ol_discount_return_sw}}" {{$ol_discount_return_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[2][0]) && $e_ol_discount_return_sw != $ol_discount_return_sw) changed @elseif(!isset($e_discountCharges[2][0]) && $existing == 1) new @endif dec-percent ol-discount-inp" name="ol_discount_return_rate" value="{{$ol_discount_return_sw}}" {{$ol_discount_return_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $ol_discount_packaging_sw = '';
+                                                $e_ol_discount_packaging_sw = '';
                                                 $ol_discount_packaging_switch = '';
                                                 $ol_discount_packaging_disable = '';
                                             if((isset($discountCharges[2][0]) && $discountCharges[2][0]->packaging != '')){
@@ -1494,6 +1583,12 @@
                                             $ol_discount_packaging_sw = '';
                                             $ol_discount_packaging_switch = '';
                                             $ol_discount_packaging_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[2][0]) && $e_discountCharges[2][0]->packaging != '')){
+                                            $e_ol_discount_packaging_sw = $discountCharges[2][0]->packaging;
+
+                                             }else{
+                                            $e_ol_discount_packaging_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -1507,7 +1602,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_packaging_switch" {{$ol_discount_packaging_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_packaging_rate" value="{{$ol_discount_packaging_sw}}" {{$ol_discount_packaging_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[2][0]) && $e_ol_discount_packaging_sw != $ol_discount_packaging_sw) changed @elseif(!isset($e_discountCharges[2][0]) && $existing == 1) new @endif dec-percent ol-discount-inp" name="ol_discount_packaging_rate" value="{{$ol_discount_packaging_sw}}" {{$ol_discount_packaging_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1583,13 +1678,13 @@
                                                     <input type="hidden" name="detain_weight_record[{{$index}}]" value="{{$detweight->id}}">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->range_up}}" name="detain_wa_range_up[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->range_up != $detweight->range_up) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->range_up}}" name="detain_wa_range_up[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal"data-rule-required="true" data-msg-required="This field is required"  value="{{$detweight->range_down}}" name="detain_wa_range_down[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->range_down != $detweight->range_down) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif decimal" data-rule-required="true" data-msg-required="This field is required"  value="{{$detweight->range_down}}" name="detain_wa_range_down[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -1602,34 +1697,34 @@
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="{{$detweight->spkg}}" {{ ($detweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
+                                                                <input type="text" class="touchspin-color @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->spkg != $detweight->spkg) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif input-sm spkg" value="{{$detweight->spkg}}" {{ ($detweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
                                                                        data-bts-button-up-class="btn btn-success" name="detain_wa_spkg[{{$index}}]">
                                                             </div>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->local_or_6hr}}" name="detain_wa_local_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->local_or_6hr != $detweight->local_or_6hr) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->local_or_6hr}}" name="detain_wa_local_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_0}}" name="detain_class_0_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->national_charges_class_0 != $detweight->national_charges_class_0) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_0}}" name="detain_class_0_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_1}}" name="detain_class_1_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->national_charges_class_1 != $detweight->national_charges_class_1) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_1}}" name="detain_class_1_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_2}}" name="detain_class_2_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->national_charges_class_2 != $detweight->national_charges_class_2) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_2}}" name="detain_class_2_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_3}}" name="detain_class_3_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[3][$index]->id) && $e_weight[3][$index]->national_charges_class_3 != $detweight->national_charges_class_3) changed @elseif(!isset($e_weight[3][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_3}}" name="detain_class_3_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
@@ -1711,7 +1806,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Replacement</span>
                                                         </div>
-                                                        <input type="text"  class="form-control percent" name="detain_replacement_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->replacement_charges != '')? $shippingType[3][0]->replacement_charges : ''}}">
+                                                        <input type="text"  class="form-control @if(isset($e_shippingType[3][0]) && isset($shippingType[3][0]) && $e_shippingType[3][0]->replacement_charges != $shippingType[3][0]->replacement_charges) changed @elseif(!isset($e_shippingType[3][0]) && $existing == 1) new @endif percent" name="detain_replacement_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->replacement_charges != '')? $shippingType[3][0]->replacement_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1724,7 +1819,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try &amp; Buy</span>
                                                         </div>
-                                                        <input type="text"  class="form-control percent" name="detain_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->try_and_buy_charges != '')? $shippingType[3][0]->try_and_buy_charges : ''}}">
+                                                        <input type="text"  class="form-control @if(isset($e_shippingType[3][0]) && isset($shippingType[3][0]) && $e_shippingType[3][0]->try_and_buy_charges != $shippingType[3][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[3][0]) && $existing == 1) new @endif percent" name="detain_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->try_and_buy_charges != '')? $shippingType[3][0]->try_and_buy_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1773,18 +1868,18 @@
                                                     <input type="hidden" name="detain_cash_record[{{$index}}]" value="{{$cash->id}}">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="detain_cash_range_up[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_up}}" {{$det_cash_sw}}>
+                                                            <input name="detain_cash_range_up[{{$index}}]" type="text" class="form-control @if(isset($e_cashHandling[3][$index]->id) && $e_cashHandling[3][$index]->range_up != $cash->range_up) changed @elseif(!isset($e_cashHandling[3][$index]->id) && $existing == 1) new @endif numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_up}}" {{$det_cash_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="detain_cash_range_down[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_down}}" {{$det_cash_sw}}>
+                                                            <input name="detain_cash_range_down[{{$index}}]" type="text" class="form-control @if(isset($e_cashHandling[3][$index]->id) && $e_cashHandling[3][$index]->range_down != $cash->range_down) changed @elseif(!isset($e_cashHandling[3][$index]->id) && $existing == 1) new @endif numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_down}}" {{$det_cash_sw}}>
                                                         </fieldset>
                                                     </div>
 
                                                     <div class="col-md-2">
                                                         <fieldset class="form-group">
-                                                            <input name="detain_cash_charges[{{$index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->charges}}" {{$det_cash_sw}}>
+                                                            <input name="detain_cash_charges[{{$index}}]" type="text" class="form-control @if(isset($e_cashHandling[3][$index]->id) && $e_cashHandling[3][$index]->charges != $cash->charges) changed @elseif(!isset($e_cashHandling[3][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->charges}}" {{$det_cash_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
@@ -1862,18 +1957,18 @@
                                                 <div class="row det_insurance_row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="detain_ins_range_up[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$det_insurance->range_up}}" {{$det_ins_sw}}>
+                                                            <input name="detain_ins_range_up[{{$index}}]" type="text" class="form-control @if(isset($e_insuranceCharges[3][$index]->id) && $e_insuranceCharges[3][$index]->range_up != $det_insurance->range_up) changed @elseif(!isset($e_insuranceCharges[3][$index]->id) && $existing == 1) new @endif numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$det_insurance->range_up}}" {{$det_ins_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="detain_ins_range_down[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$det_insurance->range_down}}" {{$det_ins_sw}}>
+                                                            <input name="detain_ins_range_down[{{$index}}]" type="text" class="form-control @if(isset($e_insuranceCharges[3][$index]->id) && $e_insuranceCharges[3][$index]->range_down != $det_insurance->range_down) changed @elseif(!isset($e_insuranceCharges[3][$index]->id) && $existing == 1) new @endif numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$det_insurance->range_down}}" {{$det_ins_sw}}>
                                                         </fieldset>
                                                     </div>
 
                                                     <div class="col-md-2">
                                                         <fieldset class="form-group">
-                                                            <input name="detain_ins_charges[{{$index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$det_insurance->charges}}" {{$det_ins_sw}}>
+                                                            <input name="detain_ins_charges[{{$index}}]" type="text" class="form-control @if(isset($e_insuranceCharges[3][$index]->id) && $e_insuranceCharges[3][$index]->charges != $det_insurance->charges) changed @elseif(!isset($e_insuranceCharges[3][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$det_insurance->charges}}" {{$det_ins_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
@@ -1939,32 +2034,32 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="detain_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->local !== '')? $returnCharges[3][0]->local : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" class="form-control @if(isset($e_returnCharges[3][0]) && isset($returnCharges[3][0]) && $e_returnCharges[3][0]->local != $returnCharges[3][0]->local) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif amount" name="detain_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->local !== '')? $returnCharges[3][0]->local : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
 
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class A</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="detain_return_class_0_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_0 !== '')? $returnCharges[3][0]->national_charges_class_0 : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[3][0]) && isset($returnCharges[3][0]) && $e_returnCharges[3][0]->national_charges_class_0 != $returnCharges[3][0]->national_charges_class_0) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif amount" name="detain_return_class_0_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_0 !== '')? $returnCharges[3][0]->national_charges_class_0 : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class B</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="detain_return_class_1_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_1 !== '')? $returnCharges[3][0]->national_charges_class_1 : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[3][0]) && isset($returnCharges[3][0]) && $e_returnCharges[3][0]->national_charges_class_1 != $returnCharges[3][0]->national_charges_class_1) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif dec-percent" name="detain_return_class_1_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_1 !== '')? $returnCharges[3][0]->national_charges_class_1 : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class C</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="detain_return_class_2_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_2 !== '')? $returnCharges[3][0]->national_charges_class_2 : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[3][0]) && isset($returnCharges[3][0]) && $e_returnCharges[3][0]->national_charges_class_2 != $returnCharges[3][0]->national_charges_class_2) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif dec-percent" name="detain_return_class_2_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_2 !== '')? $returnCharges[3][0]->national_charges_class_2 : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col text-center">
                                                 <label class="card-title">National Charges Class D</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent" name="detain_return_class_3_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_3 !== '')? $returnCharges[3][0]->national_charges_class_3 : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[3][0]) && isset($returnCharges[3][0]) && $e_returnCharges[3][0]->national_charges_class_3 != $returnCharges[3][0]->national_charges_class_3) changed @elseif(!isset($e_returnCharges[3][0]) && $existing == 1) new @endif dec-percent" name="detain_return_class_3_charges"  value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national_charges_class_3 !== '')? $returnCharges[3][0]->national_charges_class_3 : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1999,7 +2094,7 @@
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
                                                     <div class="input-group form-group">
-                                                        <input type="text"  class="form-control " name="detain_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[3][0]) && $fuelCharges[3][0]->fuel_surcharge != '')? $fuelCharges[3][0]->fuel_surcharge : ''}}" {{$det_fuel_sw}}>
+                                                        <input type="text"  class="form-control @if(isset($e_fuelCharges[3][0]) && isset($fuelCharges[3][0]) && $e_fuelCharges[3][0]->fuel_surcharge != $fuelCharges[3][0]->fuel_surcharge) changed @elseif(!isset($e_fuelCharges[3][0]) && $existing == 1) new @endif" name="detain_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[3][0]) && $fuelCharges[3][0]->fuel_surcharge != '')? $fuelCharges[3][0]->fuel_surcharge : ''}}" {{$det_fuel_sw}}>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -2021,10 +2116,16 @@
                                             }
                                             $det_discount_title_switch = '';
                                             $det_discount_title = '';
+                                            $e_det_discount_title = '';
                                             if((isset($discountCharges[3][0]) && $discountCharges[3][0]->title != '')){
                                             $det_discount_title = $discountCharges[3][0]->title;
                                              }else{
                                             $det_discount_title = '';
+                                            }
+                                            if((isset($e_discountCharges[3][0]) && $e_discountCharges[3][0]->title != '')){
+                                            $e_det_discount_title = $e_discountCharges[3][0]->title;
+                                             }else{
+                                            $e_det_discount_title = '';
                                             }
                                             if((isset($discountCharges[3][0]->cash)) || (isset($discountCharges[3][0]->weight)) || (isset($discountCharges[3][0]->insurance)) || (isset($discountCharges[3][0]->return)) || (isset($discountCharges[3][0]->packaging))){
                                                 $det_discount_title_switch = '';
@@ -2038,12 +2139,13 @@
                                             <div class="col-md-6">
                                                 <label class="">Title</label>
                                                 <div class='form-group'>
-                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" {{$det_discount_title_switch}} name="detain_discount_title" value="{{$det_discount_title}}"/>
+                                                    <input type='text' class="form-control @if(isset($e_discountCharges[3][0]) && $e_det_discount_title != $det_discount_title) changed @elseif(!isset($e_discountCharges[3][0]) && $existing == 1) new @endif" data-rule-required="true" data-msg-required="This field is required" {{$det_discount_title_switch}} name="detain_discount_title" value="{{$det_discount_title}}"/>
                                                 </div>
 
                                             </div>
                                             @php
                                                 $det_discount_daterange = '';
+                                                $e_det_discount_daterange = '';
                                                 $det_discount_daterange_switch = '';
                                             if((isset($discountCharges[3][0]) && $discountCharges[3][0]->daterange != '')){
 
@@ -2056,6 +2158,17 @@
                                             $det_discount_daterange = '';
 
                                             }
+                                            if((isset($e_discountCharges[3][0]) && $e_discountCharges[3][0]->daterange != '')){
+
+                                            $e_to = date('m/d/Y', strtotime($e_discountCharges[3][0]->to));
+                                            $e_from = date('m/d/Y', strtotime($e_discountCharges[3][0]->from));
+
+                                            $e_det_discount_daterange = $e_to.' - '.$e_from;
+
+                                             }else{
+                                            $e_det_discount_daterange = '';
+
+                                            }
                                             if((isset($discountCharges[3][0]->cash)) || (isset($discountCharges[3][0]->weight)) || (isset($discountCharges[3][0]->insurance)) || (isset($discountCharges[3][0]->return)) || (isset($discountCharges[3][0]->packaging))){
                                             $det_discount_daterange_switch = '';
                                             }else{
@@ -2065,7 +2178,7 @@
                                             <div class="col-md-6">
                                                 <label class="">Apply [to - from]</label>
                                                 <div class='input-group form-group'>
-                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" name="detain_daterange" value="{{$det_discount_daterange}}"  {{$det_discount_daterange_switch}}/>
+                                                    <input type='text' class="form-control @if(isset($e_discountCharges[3][0]) && $e_det_discount_daterange != $det_discount_daterange) changed @elseif(!isset($e_discountCharges[3][0]) && $existing == 1) new @endif daterange" data-rule-required="true" data-msg-required="This field is required" name="detain_daterange" value="{{$det_discount_daterange}}"  {{$det_discount_daterange_switch}}/>
                                                     <div class="input-group-append">
                                                             <span class="input-group-text">
                                                               <span class="la la-calendar"></span>
@@ -2077,6 +2190,7 @@
                                         </div>
                                         @php
                                             $det_discount_weight_sw = '';
+                                            $e_det_discount_weight_sw = '';
                                             $det_discount_weight_switch = '';
                                             $det_discount_weight_disable = '';
                                         if((isset($discountCharges[3][0]) && $discountCharges[3][0]->weight != '')){
@@ -2087,6 +2201,11 @@
                                         $det_discount_weight_sw = '';
                                         $det_discount_weight_switch = '';
                                         $det_discount_weight_disable = 'disabled';
+                                        }
+                                        if((isset($e_discountCharges[3][0]) && $e_discountCharges[3][0]->weight != '')){
+                                        $e_det_discount_weight_sw = $e_discountCharges[3][0]->weight;
+                                         }else{
+                                        $e_det_discount_weight_sw = '';
                                         }
                                         @endphp
                                         <div class="row">
@@ -2101,12 +2220,13 @@
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesDetain" name="detain_discount_weight_switch" data-size="xs" {{$det_discount_weight_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_weight_rate" value="{{$det_discount_weight_sw}}" {{$det_discount_weight_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[3][0]) && $e_det_discount_weight_sw != $det_discount_weight_sw) changed @elseif(!isset($e_discountCharges[3][0]) && $existing == 1) new @endif dec-percent detain-discount-inp" name="detain_discount_weight_rate" value="{{$det_discount_weight_sw}}" {{$det_discount_weight_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $det_discount_cash_sw = '';
+                                                $e_det_discount_cash_sw = '';
                                                 $det_discount_cash_switch = '';
                                                 $det_discount_cash_disable = '';
                                             if((isset($discountCharges[3][0]) && $discountCharges[3][0]->cash != '')){
@@ -2117,6 +2237,11 @@
                                             $det_discount_cash_sw = '';
                                             $det_discount_cash_switch = '';
                                             $det_discount_cash_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[3][0]) && $e_discountCharges[3][0]->cash != '')){
+                                            $e_det_discount_cash_sw = $e_discountCharges[3][0]->cash;
+                                             }else{
+                                            $e_det_discount_cash_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -2130,12 +2255,13 @@
                                                                 <input type="checkbox" name="detain_cash_weight_switch" class="switchery discountSwitchesDetain" data-size="xs" {{$det_discount_cash_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_cash_rate" value="{{$det_discount_cash_sw}}" {{$det_discount_cash_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[3][0]) && $e_det_discount_cash_sw != $det_discount_cash_sw) changed @elseif(!isset($e_discountCharges[3][0]) && $existing == 1) new @endif dec-percent detain-discount-inp" name="detain_discount_cash_rate" value="{{$det_discount_cash_sw}}" {{$det_discount_cash_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $det_discount_insurance_sw = '';
+                                                $e_det_discount_insurance_sw = '';
                                                 $det_discount_insurance_switch = '';
                                                 $det_discount_insurance_disable = '';
                                             if((isset($discountCharges[3][0]) && $discountCharges[3][0]->insurance != '')){
@@ -2146,6 +2272,11 @@
                                             $det_discount_insurance_sw = '';
                                             $det_discount_insurance_switch = '';
                                             $det_discount_insurance_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[3][0]) && $e_discountCharges[3][0]->insurance != '')){
+                                            $e_det_discount_insurance_sw = $e_discountCharges[3][0]->insurance;
+                                             }else{
+                                            $e_det_discount_insurance_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -2159,12 +2290,13 @@
                                                                 <input type="checkbox" name="detain_discount_insurance_switch" class="switchery discountSwitchesDetain" data-size="xs" {{$det_discount_insurance_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_insurance_rate" value="{{$det_discount_insurance_sw}}" {{$det_discount_insurance_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[3][0]) && $e_det_discount_insurance_sw != $det_discount_insurance_sw) changed @elseif(!isset($e_discountCharges[3][0]) && $existing == 1) new @endif dec-percent detain-discount-inp" name="detain_discount_insurance_rate" value="{{$det_discount_insurance_sw}}" {{$det_discount_insurance_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $det_discount_return_sw = '';
+                                                $e_det_discount_return_sw = '';
                                                 $det_discount_return_switch = '';
                                                 $det_discount_return_disable = '';
                                             if((isset($discountCharges[3][0]) && $discountCharges[3][0]->return != '')){
@@ -2175,6 +2307,11 @@
                                             $det_discount_return_sw = '';
                                             $det_discount_return_switch = '';
                                             $det_discount_return_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[3][0]) && $e_discountCharges[3][0]->return != '')){
+                                            $e_det_discount_return_sw = $e_discountCharges[3][0]->return;
+                                             }else{
+                                            $e_det_discount_return_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -2188,12 +2325,13 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_return_switch" {{$det_discount_return_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_return_rate" value="{{$det_discount_return_sw}}" {{$det_discount_return_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[3][0]) && $e_det_discount_return_sw != $det_discount_return_sw) changed @elseif(!isset($e_discountCharges[3][0]) && $existing == 1) new @endif dec-percent detain-discount-inp" name="detain_discount_return_rate" value="{{$det_discount_return_sw}}" {{$det_discount_return_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $det_discount_packaging_sw = '';
+                                                $e_det_discount_packaging_sw = '';
                                                 $det_discount_packaging_switch = '';
                                                 $det_discount_packaging_disable = '';
                                             if((isset($discountCharges[3][0]) && $discountCharges[3][0]->packaging != '')){
@@ -2205,6 +2343,12 @@
                                             $det_discount_packaging_sw = '';
                                             $det_discount_packaging_switch = '';
                                             $det_discount_packaging_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[3][0]) && $e_discountCharges[3][0]->packaging != '')){
+                                            $e_det_discount_packaging_sw = $e_discountCharges[3][0]->packaging;
+
+                                             }else{
+                                            $e_det_discount_packaging_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -2218,7 +2362,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_packaging_switch" {{$det_discount_packaging_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_packaging_rate" value="{{$det_discount_packaging_sw}}" {{$det_discount_packaging_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_discountCharges[3][0]) && $e_det_discount_packaging_sw != $det_discount_packaging_sw) changed @elseif(!isset($e_discountCharges[3][0]) && $existing == 1) new @endif dec-percent detain-discount-inp" name="detain_discount_packaging_rate" value="{{$det_discount_packaging_sw}}" {{$det_discount_packaging_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -2288,13 +2432,13 @@
 
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_up}}" name="sameday_wa_range_up[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->range_up != $sameweight->range_up) changed @elseif(!isset($e_weight[4][$index]->id) && $existing == 1) new @endif decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_up}}" name="sameday_wa_range_up[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_down}}" name="sameday_wa_range_down[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->range_down != $sameweight->range_down) changed @elseif(!isset($e_weight[4][$index]->id) && $existing == 1) new @endif decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_down}}" name="sameday_wa_range_down[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
@@ -2307,19 +2451,19 @@
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->spkg}}" {{ ($sameweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
+                                                                <input type="text" class="touchspin-color @if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->spkg != $sameweight->spkg) changed @elseif(!isset($e_weight[4][$index]->id) && $existing == 1) new @endif input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->spkg}}" {{ ($sameweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
                                                                        data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg[{{$index}}]">
                                                             </div>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->local_or_6hr}}" name="sameday_wa_local_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->local_or_6hr != $sameweight->local_or_6hr) changed @elseif(!isset($e_weight[4][$index]->id) && $existing == 1) new @endif amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->local_or_6hr}}" name="sameday_wa_local_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_0}}" name="sameday_class_0_charges[{{$index}}]">
+                                                            <input type="text" class="form-control @if(isset($e_weight[4][$index]->id) && $e_weight[4][$index]->national_charges_class_0 != $sameweight->national_charges_class_0) changed @elseif(!isset($e_weight[4][$index]->id) && $existing == 1) new @endif amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_0}}" name="sameday_class_0_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     
@@ -2386,7 +2530,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Replacement</span>
                                                         </div>
-                                                        <input type="text"  class="form-control percent" name="sameday_replacement_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->replacement_charges != '')? $shippingType[4][0]->replacement_charges : ''}}">
+                                                        <input type="text"  class="form-control @if(isset($e_shippingType[4][0]) && isset($shippingType[4][0]) && $e_shippingType[4][0]->replacement_charges != $shippingType[4][0]->replacement_charges) changed @elseif(!isset($e_shippingType[4][0]) && $existing == 1) new @endif percent" name="sameday_replacement_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->replacement_charges != '')? $shippingType[4][0]->replacement_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -2399,7 +2543,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try & Buy</span>
                                                         </div>
-                                                        <input type="text"  class="form-control percent" name="sameday_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->try_and_buy_charges != '')? $shippingType[4][0]->try_and_buy_charges : ''}}">
+                                                        <input type="text"  class="form-control @if(isset($e_shippingType[4][0]) && isset($shippingType[4][0]) && $e_shippingType[4][0]->try_and_buy_charges != $shippingType[4][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[4][0]) && $existing == 1) new @endif percent" name="sameday_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->try_and_buy_charges != '')? $shippingType[4][0]->try_and_buy_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -2449,18 +2593,18 @@
 
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="sameday_cash_range_up[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_up}}" {{$same_cash_sw}}>
+                                                            <input name="sameday_cash_range_up[{{$index}}]" type="text" class="form-control @if(isset($e_cashHandling[4][$index]->id) && $e_cashHandling[4][$index]->range_up != $cash->range_up) changed @elseif(!isset($e_cashHandling[4][$index]->id) && $existing == 1) new @endif numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_up}}" {{$same_cash_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="sameday_cash_range_down[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_down}}" {{$same_cash_sw}}>
+                                                            <input name="sameday_cash_range_down[{{$index}}]" type="text" class="form-control @if(isset($e_cashHandling[4][$index]->id) && $e_cashHandling[4][$index]->range_down != $cash->range_down) changed @elseif(!isset($e_cashHandling[4][$index]->id) && $existing == 1) new @endif numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_down}}" {{$same_cash_sw}}>
                                                         </fieldset>
                                                     </div>
 
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="sameday_cash_charges[{{$index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->charges}}" {{$same_cash_sw}}>
+                                                            <input name="sameday_cash_charges[{{$index}}]" type="text" class="form-control @if(isset($e_cashHandling[4][$index]->id) && $e_cashHandling[4][$index]->charges != $cash->charges) changed @elseif(!isset($e_cashHandling[4][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->charges}}" {{$same_cash_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
@@ -2539,18 +2683,18 @@
                                                 <div class="row same_insurance_row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="sameday_ins_range_up[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$same_insurance->range_up}}" {{$same_ins_sw}}>
+                                                            <input name="sameday_ins_range_up[{{$index}}]" type="text" class="form-control @if(isset($e_insuranceCharges[4][$index]->id) && $e_insuranceCharges[4][$index]->range_up != $same_insurance->range_up) changed @elseif(!isset($e_insuranceCharges[4][$index]->id) && $existing == 1) new @endif numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$same_insurance->range_up}}" {{$same_ins_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="sameday_ins_range_down[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$same_insurance->range_down}}" {{$same_ins_sw}}>
+                                                            <input name="sameday_ins_range_down[{{$index}}]" type="text" class="form-control @if(isset($e_insuranceCharges[4][$index]->id) && $e_insuranceCharges[4][$index]->range_down != $same_insurance->range_down) changed @elseif(!isset($e_insuranceCharges[4][$index]->id) && $existing == 1) new @endif numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$same_insurance->range_down}}" {{$same_ins_sw}}>
                                                         </fieldset>
                                                     </div>
 
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="sameday_ins_charges[{{$index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$same_insurance->charges}}" {{$same_ins_sw}}>
+                                                            <input name="sameday_ins_charges[{{$index}}]" type="text" class="form-control @if(isset($e_insuranceCharges[4][$index]->id) && $e_insuranceCharges[4][$index]->charges != $same_insurance->charges) changed @elseif(!isset($e_insuranceCharges[4][$index]->id) && $existing == 1) new @endif dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$same_insurance->charges}}" {{$same_ins_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
@@ -2616,13 +2760,13 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text"  class="form-control amount" name="sameday_return_local_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->local !== '')? $returnCharges[4][0]->local : ''}}" {{$same_return_sw}}>
+                                                    <input type="text"  class="form-control @if(isset($e_returnCharges[4][0]) && isset($returnCharges[4][0]) && $e_returnCharges[4][0]->local != $returnCharges[4][0]->local) changed @elseif(!isset($e_returnCharges[4][0]) && $existing == 1) new @endif amount" name="sameday_return_local_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->local !== '')? $returnCharges[4][0]->local : ''}}" {{$same_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="sameday_return_class_0_charges"  value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national_charges_class_0 !== '')? $returnCharges[4][0]->national_charges_class_0 : ''}}" {{$same_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_returnCharges[4][0]) && isset($returnCharges[4][0]) && $e_returnCharges[4][0]->national_charges_class_0 != $returnCharges[4][0]->national_charges_class_0) changed @elseif(!isset($e_returnCharges[4][0]) && $existing == 1) new @endif amount" name="sameday_return_class_0_charges"  value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national_charges_class_0 !== '')? $returnCharges[4][0]->national_charges_class_0 : ''}}" {{$same_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -2657,7 +2801,7 @@
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
                                                     <div class="input-group form-group">
-                                                        <input type="text"  class="form-control " name="sameday_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[4][0]) && $fuelCharges[4][0]->fuel_surcharge != '')? $fuelCharges[4][0]->fuel_surcharge : ''}}" {{$same_fuel_sw}}>
+                                                        <input type="text"  class="form-control @if(isset($e_fuelCharges[4][0]) && isset($fuelCharges[4][0]) && $e_fuelCharges[4][0]->fuel_surcharge != $fuelCharges[4][0]->fuel_surcharge) changed @elseif(!isset($e_fuelCharges[4][0]) && $existing == 1) new @endif" name="sameday_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[4][0]) && $fuelCharges[4][0]->fuel_surcharge != '')? $fuelCharges[4][0]->fuel_surcharge : ''}}" {{$same_fuel_sw}}>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -2676,12 +2820,21 @@
                                             if((isset($discountCharges[4][0])) && $discountCharges[4][0]->id != ''){
                                             $sameday_discount_id = $discountCharges[4][0]->id;
                                             }
+                                            if((isset($e_discountCharges[4][0])) && $e_discountCharges[4][0]->id != ''){
+                                            $e_sameday_discount_id = $e_discountCharges[4][0]->id;
+                                            }
                                             $same_discount_title_switch = '';
                                                 $same_discount_title = '';
+                                                $e_same_discount_title = '';
                                             if((isset($discountCharges[4][0]) && $discountCharges[4][0]->title != '')){
                                             $same_discount_title = $discountCharges[4][0]->title;
                                              }else{
                                             $same_discount_title = '';
+                                            }
+                                            if((isset($e_discountCharges[4][0]) && $e_discountCharges[4][0]->title != '')){
+                                            $e_same_discount_title = $e_discountCharges[4][0]->title;
+                                             }else{
+                                            $e_same_discount_title = '';
                                             }
                                             if((isset($discountCharges[4][0]->cash)) || (isset($discountCharges[4][0]->weight)) || (isset($discountCharges[4][0]->insurance)) || (isset($discountCharges[4][0]->return)) || (isset($discountCharges[4][0]->packaging))){
                                                 $same_discount_title_switch = '';
@@ -2695,12 +2848,13 @@
                                             <div class="col-md-6">
                                                 <label class="">Title</label>
                                                 <div class='form-group'>
-                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required"  name="sameday_discount_title" value="{{$same_discount_title}}" {{$same_discount_title_switch}}/>
+                                                    <input type='text' class="form-control @if(isset($e_discountCharges[4][0]) && $same_discount_title != $e_same_discount_title) changed @elseif(!isset($e_discountCharges[4][0]) && $existing == 1) new @endif" data-rule-required="true" data-msg-required="This field is required"  name="sameday_discount_title" value="{{$same_discount_title}}" {{$same_discount_title_switch}}/>
                                                 </div>
 
                                             </div>
                                             @php
                                                 $same_discount_daterange = '';
+                                                $e_same_discount_daterange = '';
                                                 $same_discount_daterange_switch = '';
                                             if((isset($discountCharges[4][0]) && $discountCharges[4][0]->daterange != '')){
 
@@ -2713,6 +2867,17 @@
                                             $same_discount_daterange = '';
 
                                             }
+                                            if((isset($e_discountCharges[1][0]) && $e_discountCharges[1][0]->daterange != '')){
+
+                                            $e_to = date('m/d/Y', strtotime($e_discountCharges[1][0]->to));
+                                            $e_from = date('m/d/Y', strtotime($e_discountCharges[1][0]->from));
+
+                                            $e_same_discount_daterange = $e_to.' - '.$e_from;
+
+                                             }else{
+                                            $e_same_discount_daterange = '';
+
+                                            }
                                             if((isset($discountCharges[4][0]->cash)) || (isset($discountCharges[4][0]->weight)) || (isset($discountCharges[4][0]->insurance)) || (isset($discountCharges[4][0]->return)) || (isset($discountCharges[4][0]->packaging))){
                                             $same_discount_daterange_switch = '';
                                             }else{
@@ -2722,7 +2887,7 @@
                                             <div class="col-md-6">
                                                 <label class="">Apply [to - from]</label>
                                                 <div class='input-group form-group'>
-                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" {{$same_discount_daterange_switch}} name="sameday_daterange" value="{{$same_discount_daterange}}"/>
+                                                    <input type='text' class="form-control @if(isset($e_discountCharges[4][0]) && $e_same_discount_daterange != $same_discount_daterange) changed @elseif(!isset($e_discountCharges[4][0]) && $existing == 1) new @endif daterange" data-rule-required="true" data-msg-required="This field is required" {{$same_discount_daterange_switch}} name="sameday_daterange" value="{{$same_discount_daterange}}"/>
                                                     <div class="input-group-append">
                                                             <span class="input-group-text">
                                                               <span class="la la-calendar"></span>
@@ -2733,6 +2898,7 @@
                                         </div>
                                         @php
                                             $same_discount_weight_sw = '';
+                                            $e_same_discount_weight_sw = '';
                                             $same_discount_weight_switch = '';
                                             $same_discount_weight_disable = '';
                                         if((isset($discountCharges[4][0]) && $discountCharges[4][0]->weight != '')){
@@ -2743,6 +2909,11 @@
                                         $same_discount_weight_sw = '';
                                         $same_discount_weight_switch = '';
                                         $same_discount_weight_disable = 'disabled';
+                                        }
+                                        if((isset($e_discountCharges[4][0]) && $e_discountCharges[4][0]->weight != '')){
+                                        $e_same_discount_weight_sw = $e_discountCharges[4][0]->weight;
+                                         }else{
+                                        $e_same_discount_weight_sw = '';
                                         }
                                         @endphp
                                         <div class="row">
@@ -2757,12 +2928,13 @@
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesSameday" name="sameday_discount_weight_switch" data-size="xs" {{$same_discount_weight_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_weight_rate" {{$same_discount_weight_disable}} value="{{$same_discount_weight_sw}}">
+                                                        <input type="text"  class="form-control @if(isset($e_discountCharges[4][0]) && $e_same_discount_weight_sw != $same_discount_weight_sw) changed @elseif(!isset($e_discountCharges[4][0]) && $existing == 1) new @endif dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_weight_rate" {{$same_discount_weight_disable}} value="{{$same_discount_weight_sw}}">
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $same_discount_cash_sw = '';
+                                                $e_same_discount_cash_sw = '';
                                                 $same_discount_cash_switch = '';
                                                 $same_discount_cash_disable = '';
                                             if((isset($discountCharges[4][0]) && $discountCharges[4][0]->cash != '')){
@@ -2773,6 +2945,11 @@
                                             $same_discount_cash_sw = '';
                                             $same_discount_cash_switch = '';
                                             $same_discount_cash_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[4][0]) && $e_discountCharges[4][0]->weight != '')){
+                                            $e_same_discount_cash_sw = $e_discountCharges[4][0]->cash;
+                                             }else{
+                                            $e_same_discount_cash_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -2786,12 +2963,13 @@
                                                                 <input type="checkbox" name="sameday_cash_weight_switch" class="switchery discountSwitchesSameday" data-size="xs" {{$same_discount_cash_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_cash_rate" value="{{$same_discount_cash_sw}}" {{$same_discount_cash_disable}}>
+                                                        <input type="text"  class="form-control dec-percent @if(isset($e_discountCharges[4][0]) && $e_same_discount_cash_sw != $same_discount_cash_sw) changed @elseif(!isset($e_discountCharges[4][0]) && $existing == 1) new @endif sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_cash_rate" value="{{$same_discount_cash_sw}}" {{$same_discount_cash_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $same_discount_insurance_sw = '';
+                                                $e_same_discount_insurance_sw = '';
                                                 $same_discount_insurance_switch = '';
                                                 $same_discount_insurance_disable = '';
                                             if((isset($discountCharges[4][0]) && $discountCharges[4][0]->insurance != '')){
@@ -2802,6 +2980,11 @@
                                             $same_discount_insurance_sw = '';
                                             $same_discount_insurance_switch = '';
                                             $same_discount_insurance_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[4][0]) && $e_discountCharges[4][0]->insurance != '')){
+                                            $e_same_discount_insurance_sw = $e_discountCharges[4][0]->insurance;
+                                             }else{
+                                            $e_same_discount_insurance_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -2815,12 +2998,13 @@
                                                                 <input type="checkbox" name="sameday_discount_insurance_switch" class="switchery discountSwitchesSameday" data-size="xs" {{$same_discount_insurance_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_insurance_rate" value="{{$same_discount_insurance_sw}}" {{$same_discount_insurance_disable}}>
+                                                        <input type="text"  class="form-control dec-percent @if(isset($e_discountCharges[4][0]) && $e_same_discount_insurance_sw != $same_discount_insurance_sw) changed @elseif(!isset($e_discountCharges[4][0]) && $existing == 1) new @endif sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_insurance_rate" value="{{$same_discount_insurance_sw}}" {{$same_discount_insurance_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $same_discount_return_sw = '';
+                                                $e_same_discount_return_sw = '';
                                                 $same_discount_return_switch = '';
                                                 $same_discount_return_disable = '';
                                             if((isset($discountCharges[4][0]) && $discountCharges[4][0]->return != '')){
@@ -2831,6 +3015,11 @@
                                             $same_discount_return_sw = '';
                                             $same_discount_return_switch = '';
                                             $same_discount_return_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[4][0]) && $e_discountCharges[4][0]->return != '')){
+                                            $e_same_discount_return_sw = $e_discountCharges[4][0]->return;
+                                             }else{
+                                            $e_same_discount_return_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -2844,12 +3033,13 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_return_switch" {{$same_discount_return_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_return_rate" value="{{$same_discount_return_sw}}" {{$same_discount_return_disable}}>
+                                                        <input type="text"  class="form-control @if(isset($e_discountCharges[4][0]) && $e_same_discount_return_sw != $same_discount_return_sw) changed @elseif(!isset($e_discountCharges[4][0]) && $existing == 1) new @endif dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_return_rate" value="{{$same_discount_return_sw}}" {{$same_discount_return_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
                                             @php
                                                 $same_discount_packaging_sw = '';
+                                                $e_same_discount_packaging_sw = '';
                                                 $same_discount_packaging_switch = '';
                                                 $same_discount_packaging_disable = '';
                                             if((isset($discountCharges[4][0]) && $discountCharges[4][0]->packaging != '')){
@@ -2861,6 +3051,12 @@
                                             $same_discount_packaging_sw = '';
                                             $same_discount_packaging_switch = '';
                                             $same_discount_packaging_disable = 'disabled';
+                                            }
+                                            if((isset($e_discountCharges[4][0]) && $e_discountCharges[4][0]->packaging != '')){
+                                            $e_same_discount_packaging_sw = $e_discountCharges[4][0]->packaging;
+
+                                             }else{
+                                            $e_same_discount_packaging_sw = '';
                                             }
                                             @endphp
                                             <div class="col text-center">
@@ -2874,7 +3070,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_packaging_switch" {{$same_discount_packaging_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_packaging_rate" value="{{$same_discount_packaging_sw}}" {{$same_discount_packaging_disable}}>
+                                                        <input type="text"  class="form-control @if(isset($e_discountCharges[4][0]) && $e_same_discount_packaging_sw != $same_discount_packaging_sw) changed @elseif(!isset($e_discountCharges[4][0]) && $existing == 1) new @endif dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_packaging_rate" value="{{$same_discount_packaging_sw}}" {{$same_discount_packaging_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -2883,6 +3079,445 @@
                                     </div>
                                 </div>
                             </div>
+
+                            
+                            @isset($wms_user_info->warehousing)
+                            <div id="" class="card-header mt-1 border-primary">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3 class="display-inline card-title lead primary">Warehousing</h3>
+                                        
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info" {{ ($wms_user_info->warehousing)? 'checked':'' }}/></a>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div id="warehousing" class="border-primary no-border-top card {{ ($wms_user_info->warehousing)? '':'hide' }}">
+                                <div class="card-content">
+                                    <div class="card-body pb-0">
+                                        <div class="row">
+                                            <div class="col-3 form-group">
+                                                <select name="invoicing_cycle" class="select2" id="invoicing_cycle_select" data-rule-required="true" data-msg-required="Invoicing cycle is required">
+                                                    @foreach($invoicing_cycles as $cycle)
+                                                        @if($cycle->id == $wms_user_info->invoicing_cycle)
+                                                            <option value="{{ $cycle->id }}" selected="selected">{{ $cycle->name }}</option>
+                                                        @else
+                                                            <option value="{{ $cycle->id }}">{{ $cycle->name }}</option>
+                                                        @endif
+                                                        
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            @php
+                                            $class = '';
+                                                if($wms_user_info->invoicing_cycle == 2){
+                                                    $class = 'd-none';
+                                                }
+                                            @endphp
+                                            <div id="invoicing_date_div" class="col-3 {{ $class }}">
+                                                <div class="form-group">
+                                                    <select name="invoicing_date" id="invoicing_date_select" class="select2 form-control" data-rule-required="true" data-msg-required="Date is required"></select>
+                                                </div>
+                                                
+                                            </div>
+
+                                        </div>
+                                        <div class="col-12">
+                                                    <h3 class="card-title">Stocking Charges</h3>
+                                                </div>
+
+                                        <div class="card border-primary p-2">
+                                            <div class="row">
+                        
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <div class="col-4 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text" id="">Per Product Charges</span>
+                                                                    </div>
+                                                                    <div class="input-group-prepend">
+                                                                          <span class="input-group-text" id="">
+                                                                            <input type="checkbox" name="ppc_switch" data-color="info" class="switchery PPCSwitch" data-size="xs" {{ ($wms_user_info->per_product_charges)? 'checked':'' }}/>
+                                                                          </span>
+                                                                    </div>
+                                                                    <input type="text"  class="form-control numeric ppc-inp"  data-rule-required="true" data-msg-required="This field is required" name="ppc_charges" value="{{ isset($wms_product_charges)? $wms_product_charges->charges:0}}">
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col-4 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text" id="">Per Square Foot Charges</span>
+                                                                    </div>
+                                                                    <div class="input-group-prepend">
+                                                                          <span class="input-group-text" id="">
+                                                                            <input type="checkbox" name="psf_switch" data-color="info" class="switchery PSFSwitch" data-size="xs" {{ ($wms_user_info->per_square_foot_charges)? 'checked':'' }}/>
+                                                                          </span>
+                                                                    </div>
+                                                                    <input type="text"  class="form-control numeric psf-inp"  data-rule-required="true" data-msg-required="This field is required" name="psf_charges" value="{{ isset($wms_square_foot_charges)? $wms_square_foot_charges->charges:0 }}">
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <h3 class="card-title">Storage Type Charges</h3>
+                                                        </div>
+
+                                                        <div class="col-12" id="wms_storage_types_div">
+                                                            @php
+                                                                $storage_count = count($wms_storage_charges);
+                                                                $row_count = 1;
+                                                            @endphp
+                                                            @foreach($wms_storage_charges as $key => $storage)
+                                                            <div class="row storage_type_row" id="storage_type_row{{$key}}">
+                                                                <input type="hidden" id="storage_type_input{{$key}}" name="storage_type[{{$key}}]" value="{{$storage->storage_type_id}}">
+                                                                <div class="col-md-2 st_select">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control storage_type" name="storage_type[{{$key}}]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
+                                                                            @foreach($storage_types as $types)
+                                                                               <option value="{{$types->id}}">{{$types->name}}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="storage_type_charges[{{$key}}]" data-rule-required="true" data-msg-required="Charges are required" type="text" class="form-control numeric" placeholder="Charges" value="{{ $storage->charges }}">
+                                                                    </fieldset>
+                                                                </div>
+                                                                <div class="col actions">
+                                                                        <span id="storage_type_add" class="btn btn-sm btn-outline-primary {{ ($storage_count == $row_count)? '':'d-none' }}"><i class="la la-check"></i></span>
+                                                                        @if($key > 0)
+                                                                        <span  row="{{$key}}" class="storage_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
+                                                                        @endif
+                                                                </div>
+                                                            </div>
+                                                            @php  $row_count++ @endphp
+                                                            @endforeach
+                                                            
+                                                        </div>
+                                                        
+                                                    </div>
+
+                                                </div>
+                                               
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card-body">
+                                                <div>
+                                                    <h3 class="card-title">Fulfillment Charges</h3>
+                                                </div>
+
+                                            <div class="card border-primary p-2">
+                                            <div class="row">
+                                                
+                                                <div class="col-12">
+                                                    
+
+                                                    <div class="row">
+                                                        <div class="col-3">
+                                                            <h3 class="card-title">Packing Charges</h3>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="packing_charges_switch" class="switchery packingCharges" data-color="info" data-size="sm" {{ ($wms_user_info->packing_charges)? 'checked':''}}/>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12" id="wms_packing_charges_div">
+                                                            @if($wms_user_info->packing_charges)
+                                                            @php
+                                                                $packing_count = count($wms_packing_charges);
+                                                                $packing_row_count = 1;
+                                                            @endphp
+                                                            @foreach($wms_packing_charges as $pkey => $packing)
+                                                            <div class="row packing_type_row" id="packing_type_row{{$pkey}}">
+                                                                <input type="hidden" id="packing_type_input{{$pkey}}" name="packing_type[{{$pkey}}]" value="{{$packing->packing_type_id}}">
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control packing_type" name="packing_type[{{$pkey}}]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
+                                                                            @foreach($packaging_material_types as $mtype)
+                                                                                <option value="{{$mtype->id}}">{{$mtype->type}}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="packing_charges[{{$pkey}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{$packing->charges}}" {{ ($wms_user_info->packing_charges)? '':'disabled'}}>
+                                                                    </fieldset>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                        <span id="packing_type_add" class="btn btn-sm btn-outline-primary {{ ($packing_count == $packing_row_count)? '':'d-none' }}" title="Add" ><i class="la la-check"></i></span>
+                                                                        @if($pkey > 0)
+                                                                        <span row="{{$pkey}}" class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
+                                                                        @endif
+                                                                   
+                                                                </div>
+                                                            </div>
+                                                            @php  $packing_row_count++ @endphp
+                                                            @endforeach
+                                                            @else
+                                                                 
+                                                                <div class="row packing_type_row" id="packing_type_row0">
+                                                                    <input type="hidden" id="packing_type_input0" name="packing_type[0]">
+                                                                    <div class="col-md-2">
+                                                                        <fieldset class="form-group">
+                                                                            <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
+                                                                            </select>
+                                                                        </fieldset>
+                                                                    </div>
+
+                                                                    <div class="col-md-2">
+                                                                        <fieldset class="form-group">
+                                                                            <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" disabled="disabled">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                       
+                                                                            <span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
+                                                                            <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
+                                                                        
+                                                                    </div>
+                                                                </div>
+                                                                    
+                                                                
+                                                            @endif
+                                                        </div>
+                                                        
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-2">
+                                                            <h3 class="card-title">Labelling Charges</h3>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="labelling_charges_switch" class="switchery labellingSwitch" data-color="info" data-size="sm" {{ ($wms_user_info->labelling_charges)? 'checked':''}}/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                        
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <fieldset class="form-group">
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{ ($wms_labelling_charges)? $wms_labelling_charges->charges:0 }}" {{ ($wms_user_info->labelling_charges)? '':'disabled'}}>
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+                                                            
+                                                        
+                                                    </div>
+
+
+                                                </div>
+                                               
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                            @else
+                            <div id="" class="card-header mt-1 border-primary">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h3 class="display-inline card-title lead primary">Warehousing</h3>
+                                            
+                                        </div>
+                                        <div class="col-md-6">
+                                            <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info"/></a>
+                                        </div>
+                                    </div>
+
+                            </div>
+                            <div id="warehousing" class="border-primary no-border-top card hide">
+                                <div class="card-content">
+                                    <div class="card-body pb-0">
+                                        <div class="row">
+                                            <div class="col-3 form-group">
+                                                <select name="invoicing_cycle" class="select2" id="invoicing_cycle_select" data-rule-required="true" data-msg-required="Invoicing cycle is required">
+                                                    @foreach($invoicing_cycles as $cycle)
+                                                        <option value="{{ $cycle->id }}">{{ $cycle->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div id="invoicing_date_div" class="col-3 d-none">
+                                                <div class="form-group">
+                                                    <select name="invoicing_date" id="invoicing_date_select" class="select2 form-control" data-rule-required="true" data-msg-required="Date is required"></select>
+                                                </div>
+                                                
+                                            </div>
+
+                                        </div>
+                                        <div class="col-12">
+                                                    <h3 class="card-title">Stocking Charges</h3>
+                                                </div>
+
+                                        <div class="card border-primary p-2">
+                                            <div class="row">
+                        
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <div class="col-4 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text" id="">Per Product Charges</span>
+                                                                    </div>
+                                                                    <div class="input-group-prepend">
+                                                                          <span class="input-group-text" id="">
+                                                                            <input type="checkbox" name="ppc_switch" data-color="info" class="switchery PPCSwitch" data-size="xs" checked/>
+                                                                          </span>
+                                                                    </div>
+                                                                    <input type="text"  class="form-control numeric ppc-inp"  data-rule-required="true" data-msg-required="This field is required" name="ppc_charges" >
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col-4 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text" id="">Per Square Foot Charges</span>
+                                                                    </div>
+                                                                    <div class="input-group-prepend">
+                                                                          <span class="input-group-text" id="">
+                                                                            <input type="checkbox" name="psf_switch" data-color="info" class="switchery PSFSwitch" data-size="xs" checked/>
+                                                                          </span>
+                                                                    </div>
+                                                                    <input type="text"  class="form-control numeric psf-inp"  data-rule-required="true" data-msg-required="This field is required" name="psf_charges" >
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <h3 class="card-title">Storage Type Charges</h3>
+                                                        </div>
+
+                                                        <div class="col-12" id="wms_storage_types_div">
+                                                            <div class="row storage_type_row" id="storage_type_row0">
+                                                                <input type="hidden" id="storage_type_input0" name="storage_type[0]">
+                                                                <div class="col-md-2 st_select">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control storage_type" name="storage_type[0]" data-rule-required="true" data-msg-required="This field is required">
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="storage_type_charges[0]" data-rule-required="true" data-msg-required="Charges are required" type="text" class="form-control numeric" placeholder="Charges">
+                                                                    </fieldset>
+                                                                </div>
+                                                                <div class="col actions">
+                                                                        <span id="storage_type_add" class="btn btn-sm btn-outline-primary d-none"><i class="la la-check"></i></span>
+                                                                        <span class="storage_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            
+                                                        </div>
+                                                        
+                                                    </div>
+
+                                                </div>
+                                               
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card-body">
+                                                <div>
+                                                    <h3 class="card-title">Fulfillment Charges</h3>
+                                                </div>
+
+                                            <div class="card border-primary p-2">
+                                            <div class="row">
+                                                
+                                                <div class="col-12">
+                                                    
+
+                                                    <div class="row">
+                                                        <div class="col-3">
+                                                            <h3 class="card-title">Packing Charges</h3>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="packing_charges_switch" class="switchery packingCharges" data-color="info" data-size="sm" checked/>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12" id="wms_packing_charges_div">
+                                                            <div class="row packing_type_row" id="packing_type_row0">
+                                                                <input type="hidden" id="packing_type_input0" name="packing_type[0]">
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control packing_type" name="packing_type[0]" data-rule-required="true" data-msg-required="This field is required">
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
+                                                                    </fieldset>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    
+                                                                        <span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
+                                                                        <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
+                                                                    
+                                                                </div>
+                                                            </div>
+                                                            
+                                                        </div>
+                                                        
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-2">
+                                                            <h3 class="card-title">Labelling Charges</h3>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="labelling_charges_switch" class="switchery labellingSwitch" data-color="info" data-size="sm" checked/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                        
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <fieldset class="form-group">
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+                                                            
+                                                        
+                                                    </div>
+
+
+                                                </div>
+                                               
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                 @endisset 
+                            
 
                             <div class="text-center mt-2">
                                 <input type="hidden" name="authorize" id="authorize">
@@ -2898,17 +3533,16 @@
                                     @if ($shipper->rate_status ==1 && $shipper->status == 3 && (session('role_id') == 1 || in_array(140, session('permissions'))))
                                         <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
                                     @endif
+                                    @if (($shipper->rate_status ==0 && $shipper->status == 1 && (session('role_id') == 1 || in_array(8, session('permissions'))))|| ($shipper->rate_status ==1 && (session('role_id') == 1 || in_array(140, session('permissions')))))
+                                        <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
+                                    @endif
                                 </div>
 
                             </div>
 
 
                         </form>
-                        <div style="text-align:center;">
-                        @if (($shipper->rate_status ==0 && $shipper->status == 1 && (session('role_id') == 1 || in_array(8, session('permissions'))))|| ($shipper->rate_status ==1 && (session('role_id') == 1 || in_array(140, session('permissions')))))
-                            <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
-                        @endif
-                        </div>
+                       
                     </div>
                 </div>
             </div>
@@ -2940,16 +3574,25 @@
     @endif
 @endsection
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style type="text/css">
         .hide{
             display:none;
+        }
+
+        .changed{
+            background-color: #F7F087;
+        }
+        .new{
+            background-color: #78FF67;
         }
     </style>
 
 
 @endsection
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
@@ -4095,6 +4738,363 @@
 
             }
         }
+
+//Warehousing
+
+        $('#warehouse_main_switch').on('change',function(){
+                var warehousemainswitch = document.querySelector('.switchery.warehouse-main-switch');
+                if (warehousemainswitch.checked === true) {
+                    $('#warehousing').slideDown('slow');
+
+                } else if (warehousemainswitch.checked === false) {
+                    $('#warehousing').slideUp('slow');
+
+
+                }
+            });
+
+        var weekly = [1, 2, 3, 4, 5, 6, 7];
+        var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+
+        
+        $('#invoicing_cycle_select').prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Invoicing Cycle",
+            width:'100%'
+        }).bind('change', function() {
+
+           if (this.value == 1) {
+               $('#invoicing_date_div').removeClass('d-none');
+               $('#invoicing_date_select').empty().trigger('change');
+               $('#invoicing_date_select').select2({data:weekly,placeholder:'Select Date'});
+           }
+           else if(this.value == 3){
+               $('#invoicing_date_div').removeClass('d-none');
+               $('#invoicing_date_select').empty().trigger('change');
+               $('#invoicing_date_select').select2({data:monthly,placeholder:'Select Date'});
+           }else if(this.value == 2){
+               $('#invoicing_date_div').addClass('d-none');
+           }
+       });
+        var storage_type_selected = [];
+        var packing_type_selected = [];
+        @if(!empty($wms_user_info))
+        $('#invoicing_cycle_select').val({{$wms_user_info->invoicing_cycle}}).trigger('change');
+            @if($wms_user_info->invoicing_cycle == 1)
+            $('#invoicing_date_select').prepend('<option value="" selected="selected"></option>').select2({
+                data:weekly,
+                width:'100%',
+                placeholder:'Select Date'
+            });
+            $('#invoicing_date_select').val({{$wms_user_info->invoicing_date}}).trigger('change');
+            @elseif($wms_user_info->invoicing_cycle == 3)
+            $('#invoicing_date_select').prepend('<option value="" selected="selected"></option>').select2({
+                data:monthly,
+                width:'100%',
+                placeholder:'Select Date'
+            });
+            $('#invoicing_date_select').val({{$wms_user_info->invoicing_date}}).trigger('change');
+            @else
+            $('#invoicing_date_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:'Select Date'
+            });
+            @endif
+
+            @foreach($wms_storage_charges as $skey => $storage)
+                $('select[name="storage_type[{{$skey}}]"]').select2({
+                    width:'100%',
+                    placeholder:'Select Storage Type'
+                });
+                $('select[name="storage_type[{{$skey}}]"]').val({{$storage->storage_type_id}}).trigger('change');
+                storage_type_selected.push('{{$storage->storage_type_id}}');
+            @endforeach
+            
+            @foreach($wms_packing_charges as $indx => $packing)
+            $('select[name="packing_type[{{$indx}}]"]').select2({
+                width:'100%',
+                placeholder:'Select Packing Type'
+            });
+            $('select[name="packing_type[{{$indx}}]"]').val({{$packing->packing_type_id}}).trigger('change');
+                packing_type_selected.push('{{$packing->packing_type_id}}');
+            @endforeach
+
+            @else
+            var storage_type_data = @json($storage_types);
+            var storage_data = $.map(storage_type_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.name;
+                return obj;
+            });
+             $('select[name="storage_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:storage_data,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).bind('select2:select', function(){
+                
+                $(this).parents('div.storage_type_row').find('span#storage_type_add').removeClass('d-none');
+                $('input[name="storage_type[0]"]').val($(this).val());
+
+                
+            });
+
+            var packing_material_data = @json($packaging_material_types);
+            var packing_data = $.map(packing_material_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.type;
+                return obj;
+            });
+
+            $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:packing_data,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).bind('select2:select', function(){
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
+                $('input[name="packing_type[0]"]').val($(this).val());
+
+            });
+
+        @endif
+        var current_selection = null;
+        var storage_type_data = @json($storage_types);
+         var storage_data = $.map(storage_type_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.name;
+                return obj;
+            });
+        
+        
+
+        var PPCSwitch = document.querySelector('.switchery.PPCSwitch');
+        PPCSwitch.onchange = function () {
+            if(PPCSwitch.checked === true){
+                $('input[name="ppc_charges"]').prop('disabled', false);
+            }else if(PPCSwitch.checked === false){
+                $('input[name="ppc_charges"]').prop('disabled', true);
+            }
+        };
+        var PSFSwitch = document.querySelector('.switchery.PSFSwitch');
+        PSFSwitch.onchange = function () {
+            if(PSFSwitch.checked === true){
+                $('input[name="psf_charges"]').prop('disabled', false);
+            }else if(PSFSwitch.checked === false){
+                $('input[name="psf_charges"]').prop('disabled', true);
+            }
+        };
+
+        var LabellingSwitch = document.querySelector('.switchery.labellingSwitch');
+        LabellingSwitch.onchange = function () {
+            if(LabellingSwitch.checked === true){
+                $('input[name="labelling_charges"]').prop('disabled', false);
+            }else if(LabellingSwitch.checked === false){
+                $('input[name="labelling_charges"]').prop('disabled', true);
+            }
+        };
+        
+        @if(count($wms_storage_charges) > 0)
+        var storage_type_rows = {{ count($wms_storage_charges) }};
+        @else
+        var storage_type_rows = 1;
+        @endempty
+        
+        
+
+        $('body').on('click','#storage_type_add', function(){
+            
+            var previous_row = storage_type_rows - 1;
+              
+            $(this).addClass('d-none');
+            var previous_select = $('select[name="storage_type['+ previous_row +']"]');
+            var index = $.inArray(previous_select.val(), storage_type_selected);
+            if(index === -1){
+                console.log(previous_select.val())
+                storage_type_selected.push(previous_select.val());
+            }
+            previous_select.prop('disabled', true);
+            var storage_data_new = $.map(storage_type_data, function (obj) {
+                var current_id = obj.id.toString();
+                var index = $.inArray(current_id, storage_type_selected);
+                
+                if(index === -1){
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+                    return obj;
+                }
+                
+            });
+
+            if(storage_data_new.length !== 0){
+                var htmldiv = '<div class="row storage_type_row" id="storage_type_row'+storage_type_rows+'">\n' +
+                '                                                <input id="storage_type_input'+ storage_type_rows +'" type="hidden" name="storage_type['+ storage_type_rows +']" value=""><div class="col-md-2 st_select">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <select class="select2 form-control storage_type" name="storage_type['+ storage_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
+                '                                                    </fieldset>\n' +
+                '                                                </div>\n' +
+                '                                                <div class="col-md-2">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <input name="storage_type_charges['+storage_type_rows+']" type="text" class="form-control validated" data-rule-required="true" data-msg-required="Charges are required" placeholder="Charges">\n' +
+                '                                                    </fieldset>\n' +
+                '                                                </div>\n' +
+                '<div class="col"><span id="storage_type_add" class="btn btn-sm btn-outline-primary d-none"><i class="la la-check"></i></span>\n'+
+                '<span row="'+ storage_type_rows +'" class="storage_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span></div>';
+
+            $('#wms_storage_types_div').append(htmldiv);
+
+            
+            var last_id = storage_type_rows;
+            $('select[name="storage_type['+ storage_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:storage_data_new,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).on('change', function(){
+                var selected_id = $(this).val();
+                $(this).parents('div.storage_type_row').find('span#storage_type_add').removeClass('d-none');
+                $(this).parents('div.storage_type_row').find('input#storage_type_input'+last_id).val(selected_id);
+            });
+            $('input[name="storage_type_charges['+storage_type_rows+']"]').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 0,
+                'max': 1000000
+            });
+
+            storage_type_rows++;
+            }
+            
+
+        });
+
+        $('body').on('click','span.storage_type_row_delete', function(){
+            var row_id = $(this).attr('row');
+            var row_selector = $('#storage_type_row'+row_id);
+            var selected = $('input[name="storage_type['+ row_id +']"]').val();
+            if(selected !== ''){
+                var index = $.inArray(selected, storage_type_selected);
+                if(index !== -1){
+                    storage_type_selected.splice(index, 1);
+                }
+            }
+            row_selector.remove();
+        });
+
+
+        @if(count($wms_packing_charges) > 0)
+        var packing_type_rows = {{ count($wms_packing_charges) }};
+        @else
+        var packing_type_rows = 1;
+        @endif
+       
+        var packing_material_data = @json($packaging_material_types);
+        var packing_data = $.map(packing_material_data, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.type;
+                return obj;
+            });
+        @isset($wms_user_info->warehousing)
+        @if(!$wms_user_info->packing_charges)
+
+        $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:packing_data,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).bind('select2:select', function(){
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
+                $('input[name="packing_type[0]"]').val($(this).val());
+
+            });
+        @endif
+        @endisset
+        var packingSwitch = document.querySelector('.switchery.packingCharges');
+        packingSwitch.onchange = function () {
+            if(packingSwitch.checked === true){
+                $('#wms_packing_charges_div input, #wms_packing_charges_div select').prop('disabled', false);
+            }else if(packingSwitch.checked === false){
+                $('#wms_packing_charges_div input, #wms_packing_charges_div select').prop('disabled', true);
+            }
+        };
+
+        
+        
+        $('body').on('click','#packing_type_add', function(){
+            var previous_row = packing_type_rows - 1;
+            $(this).addClass('d-none');
+
+            var previous_select = $('select[name="packing_type['+ previous_row +']"]');
+            var index = $.inArray(previous_select.val(), packing_type_selected);
+            if(index === -1){
+                packing_type_selected.push(previous_select.val());
+            }
+            
+            previous_select.prop('disabled', true);
+
+            var packing_data_new = $.map(packing_material_data, function (obj) {
+                var current_id = obj.id.toString();
+                var index = $.inArray(current_id, packing_type_selected);
+                
+                if(index === -1){
+                    obj.id = obj.id;
+                    obj.text = obj.type;
+                    return obj;
+                }
+                
+            });
+            if(packing_data_new.length !== 0){
+                var htmldiv = '<div class="row packing_type_row" id="packing_type_row'+packing_type_rows+'">\n' +
+                '                                                <input id="packing_type_input'+ packing_type_rows +'" type="hidden" name="packing_type['+ packing_type_rows +']" value=""><div class="col-md-2">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <select class="select2 form-control storage_type" name="packing_type['+ packing_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
+                '                                                    </fieldset>\n' +
+                '                                                </div>\n' +
+                '                                                <div class="col-md-2">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <input name="packing_charges['+packing_type_rows+']" type="text" class="form-control validated" data-rule-required="true" data-msg-required="Charges are required" placeholder="Charges">\n' +
+                '                                                    </fieldset>\n' +
+                '                                                </div>\n' +
+                '<div class="col"><span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none"><i class="la la-check"></i></span>\n' +
+                '<span row="'+ packing_type_rows +'" class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span></div></div>';
+
+            $('#wms_packing_charges_div').append(htmldiv);
+            
+            
+            var last_id = packing_type_rows;
+            $('select[name="packing_type['+ packing_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:packing_data_new,
+                width:'100%',
+                placeholder:'Select Packing Type'
+            }).on('change', function(){
+                var packing_id = $(this).val();
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
+                $(this).parents('div.packing_type_row').find('input#packing_type_input'+last_id).val(packing_id);
+            });
+            $('input[name="storage_type_charges['+packing_type_rows+']"]').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 0,
+                'max': 1000000
+            });
+
+            packing_type_rows++;
+            }
+            
+
+        });
+
+        $('body').on('click','span.packing_type_row_delete', function(){
+            var row_id = $(this).parent().parent().attr('row');
+            var selected = $('select[name="packing_type['+ row_id +']"]').val();
+            if(selected !== ''){
+                var index = $.inArray(selected, packing_type_selected);
+                if(index !== -1){
+                    packing_type_selected.splice(index, 1);
+                }
+            }
+            $(this).parent().parent().remove();
+        });
+
 
         $('#ratesAdditionForm').on('keypress',function (e) {
             if(e.which == 13 || e.keyCode == 13) {
