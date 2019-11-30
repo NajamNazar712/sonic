@@ -137,10 +137,11 @@ class AdminDashboardController extends Controller
         $stats['total'] = Shipment::whereBetween('created_at',[$thirtyDays,$today]);
         $stats['booked'] = Shipment::where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['canceled'] = Shipment::where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['received'] = Shipment::whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['arrived'] = Shipment::where('shipper_status_id',2)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['in_transit'] = Shipment::where('shipper_status_id',3)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['pending'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['pending'] = Shipment::whereIn('shipper_status_id',[4, 5,6,7,8,9,10,11,12,13,15,18,19,49])->whereBetween('created_at',[$thirtyDays,$today]);
 
         if (session('role_id') != 1) {
             $stats['total'] = $stats['total']->where(function($query) {
@@ -156,7 +157,9 @@ class AdminDashboardController extends Controller
                 })->orWhereHas('consignee_city', function ($sub_query) {
                     $sub_query->whereIn('hub_id', session('hubs'));
                 });
-            });$stats['canceled'] = $stats['canceled']->where(function($query) {
+            });
+
+            $stats['canceled'] = $stats['canceled']->where(function($query) {
                 $query->whereHas('pickup_address.city', function ($sub_query) {
                     $sub_query->whereIn('hub_id', session('hubs'));
                 })->orWhereHas('consignee_city', function ($sub_query) {
@@ -164,7 +167,15 @@ class AdminDashboardController extends Controller
                 });
             });
 
-            $stats['received'] = $stats['received']->where(function($query) {
+            $stats['arrived'] = $stats['arrived']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+
+            $stats['in_transit'] = $stats['in_transit']->where(function($query) {
                 $query->whereHas('pickup_address.city', function ($sub_query) {
                     $sub_query->whereIn('hub_id', session('hubs'));
                 })->orWhereHas('consignee_city', function ($sub_query) {
@@ -200,7 +211,8 @@ class AdminDashboardController extends Controller
         $stats['total'] = number_format($stats['total']->count());
         $stats['booked'] = number_format($stats['booked']->count());
         $stats['canceled'] = number_format($stats['canceled']->count());
-        $stats['received'] = number_format($stats['received']->count());
+        $stats['arrived'] = number_format($stats['arrived']->count());
+        $stats['in_transit'] = number_format($stats['in_transit']->count());
         $stats['delivered'] = number_format($stats['delivered']->count());
         $stats['return'] = number_format($stats['return']->count());
         $stats['pending'] = number_format($stats['pending']->count());
@@ -364,10 +376,11 @@ class AdminDashboardController extends Controller
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
                 $booked = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination, 'shipper_status_id' => 1]);
-                $received = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4]);
+                $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id', 2);
+                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id', 3);
                 $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->where('shipper_status_id', 17);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
-                $pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
+                $pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
                 $return = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
 
                 if (session('role_id') != 1) {
@@ -379,13 +392,22 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $received = $received->where(function($query) {
+                    $arrived = $arrived->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
+
+                    $in_transit = $in_transit->where(function($query) {
+                        $query->whereHas('pickup_address.city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        })->orWhereHas('consignee_city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        });
+                    });
+
                     $canceled = $canceled->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
@@ -420,7 +442,8 @@ class AdminDashboardController extends Controller
                 }
 
                 $graph['booked'][] = $booked->count();
-                $graph['received'][] = $received->count();
+                $graph['arrived'][] = $arrived->count();
+                $graph['in_transit'][] = $in_transit->count();
                 $graph['canceled'][] = $canceled->count();
                 $graph['delivered'][] = $delivered->count();
                 $graph['pending'][] = $pending->count();
@@ -432,10 +455,11 @@ class AdminDashboardController extends Controller
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
                 $booked = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id',1);
-                $received = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [2, 3, 4]);
+                $arrived = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 2);
+                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 3);
                 $canceled = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 17);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
-                $pending = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
+                $pending = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
                 $return = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
 
                 if (session('role_id') != 1) {
@@ -447,13 +471,22 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $received = $received->where(function($query) {
+                    $arrived = $arrived->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
+
+                    $in_transit = $in_transit->where(function($query) {
+                        $query->whereHas('pickup_address.city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        })->orWhereHas('consignee_city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        });
+                    });
+
                     $canceled = $canceled->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
@@ -488,7 +521,8 @@ class AdminDashboardController extends Controller
                 }
 
                 $graph['booked'][] = $booked->count();
-                $graph['received'][] = $received->count();
+                $graph['arrived'][] = $arrived->count();
+                $graph['in_transit'][] = $in_transit->count();
                 $graph['canceled'][] = $canceled->count();
                 $graph['delivered'][] = $delivered->count();
                 $graph['pending'][] = $pending->count();
@@ -500,10 +534,11 @@ class AdminDashboardController extends Controller
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
                 $booked = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id',1);
-                $received = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4]);
+                $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id', 2);
+                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id', 3);
                 $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id', 17);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
-                $pending = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
+                $pending = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
                 $return = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
 
                 if (session('role_id') != 1) {
@@ -515,13 +550,22 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $received = $received->where(function($query) {
+                    $arrived = $arrived->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
+
+                    $in_transit = $in_transit->where(function($query) {
+                        $query->whereHas('pickup_address.city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        })->orWhereHas('consignee_city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        });
+                    });
+
                     $canceled = $canceled->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
@@ -556,7 +600,8 @@ class AdminDashboardController extends Controller
                 }
 
                 $graph['booked'][] = $booked->count();
-                $graph['received'][] = $received->count();
+                $graph['arrived'][] = $arrived->count();
+                $graph['in_transit'][] = $in_transit->count();
                 $graph['canceled'][] = $canceled->count();
                 $graph['delivered'][] = $delivered->count();
                 $graph['pending'][] = $pending->count();
@@ -568,10 +613,11 @@ class AdminDashboardController extends Controller
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
                 $booked = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',1);
-                $received = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [2, 3, 4]);
+                $arrived = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 2);
+                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 3);
                 $canceled = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 17);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
-                $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
+                $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
                 $return = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
 
                 if (session('role_id') != 1) {
@@ -583,13 +629,22 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $received = $received->where(function($query) {
+                    $arrived = $arrived->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
+
+                    $in_transit = $in_transit->where(function($query) {
+                        $query->whereHas('pickup_address.city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        })->orWhereHas('consignee_city', function ($sub_query) {
+                            $sub_query->whereIn('hub_id', session('hubs'));
+                        });
+                    });
+
                     $canceled = $canceled->where(function($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
@@ -624,8 +679,9 @@ class AdminDashboardController extends Controller
                 }
 
                 $graph['booked'][] = $booked->count();
-                $graph['received'][] = $received->count();
-                $graph['canceled'][] = $received->count();
+                $graph['arrived'][] = $arrived->count();
+                $graph['in_transit'][] = $in_transit->count();
+                $graph['canceled'][] = $canceled->count();
                 $graph['delivered'][] = $delivered->count();
                 $graph['pending'][] = $pending->count();
                 $graph['return'][] = $return->count();

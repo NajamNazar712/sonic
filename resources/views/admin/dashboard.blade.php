@@ -53,14 +53,34 @@
                                       <i class="icon-layers text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['received']}}</h3>
-                                      <span>Received Shipment(s)</span>
+                                      <h3 class="text-white">{{$stats['arrived']}}</h3>
+                                      <span>Arrived Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
                       </div>
                   </div>
-              </div><div class="col-3">
+              </div>
+              <div class="col-3">
+                  <div class="card bg-gradient-directional-purple pull-up">
+                      <div class="card-content">
+                          <div class="card-body">
+                              <div class="media d-flex">
+                                  <div class="align-self-center">
+                                      <i class="icon-direction text-white font-large-2 float-left"></i>
+                                  </div>
+                                  <div class="media-body text-white text-right">
+                                      <h3 class="text-white">{{$stats['in_transit']}}</h3>
+                                      <span>In Transit Shipment(s)</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+            <div class="row justify-content-center">
+              <div class="col-3">
                   <div class="card bg-gradient-directional-success pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -77,9 +97,7 @@
                       </div>
                   </div>
               </div>
-          </div>
-              <div class="row justify-content-center">
-                  <div class="col-3">
+              <div class="col-3">
                   <div class="card bg-gradient-directional-warning pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -652,7 +670,7 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)', 'Cancelled Shipment(s)']
+                                data: ['Pending Shipment(s)', 'Arrived Shipment(s)', 'In Transit Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)', 'Cancelled Shipment(s)']
                             },
                             color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a','#FF0000'],
 
@@ -675,9 +693,14 @@
                                     data: data.graph['booked']
                                 },
                                 {
-                                    name: 'Received Shipment(s)',
+                                    name: 'Arrived Shipment(s)',
                                     type: 'line',
-                                    data: data.graph['received']
+                                    data: data.graph['arrived']
+                                },
+                                {
+                                    name: 'In Transit Shipment(s)',
+                                    type: 'line',
+                                    data: data.graph['in_transit']
                                 },
                                 {
                                     name: 'Delivered Shipment(s)',
