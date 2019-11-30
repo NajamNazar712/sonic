@@ -5690,11 +5690,7 @@ use Yajra\Datatables\Datatables;
             $delivered_shipments = DB::connection('reports')->table('riders')
                 ->join('rider_categories as rc','rc.id', '=', 'riders.rider_category_id')
                 ->join('cities as c','c.id', '=', 'riders.city_id')
-                ->leftJoin('rider_routes as rr', function ($join) {
-                    $join->on('rr.rider_id', '=', 'riders.id')
-                        ->where('rr.default_route','=', 1);
-                })
-                ->leftjoin('routes as rou', 'rou.id', '=', 'rr.route_id')
+                ->leftjoin('routes as rou', 'rou.id', '=', 'riders.route_id')
                 ->leftJoin('delivery_notes as dn', function ($join) use ($fromDays, $toDays){
                     $join->on('dn.rider_id', '=', 'riders.id')
                         ->whereBetween('dn.created_at', [$fromDays,$toDays]);
