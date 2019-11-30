@@ -38,6 +38,7 @@ use App\Http\Models\Rates\HistoryReturnCharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\PendingRateStatus;
 use App\Http\Models\Rates\RateHistory;
+use App\Http\Models\Reference;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -1261,6 +1262,25 @@ class AdminDashboardController extends Controller
 
         }
         elseif(($user['rate_status']>=1) && $user['status']==3){
+            $e_switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_weight = WeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_bookingType = BookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_cash = CashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_insurance = InsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_return = ReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_fuel = FuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_packaging = PackagingCharge::all()->where('user_id', $id);
+            $e_packaging_type_ids = array_unique($e_packaging->pluck('type_id')->toArray());
+            $e_discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_rate_status = $user['rate_status'];
+            $e_packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
+
+            $e_packaging_charges = array();
+            if(count($e_packaging) > 0){
+                foreach($e_packaging as $e_charge){
+                    $e_packaging_charges[$e_charge->type_id][] = $e_charge;
+                }
+            }
             $switches = PendingRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
 //        var_dump(empty($switches));exit();
@@ -1285,20 +1305,33 @@ class AdminDashboardController extends Controller
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
             }
+            $existing = 1;
+            if(session('department_id') == 7){
+                if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
+                    return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'existing' => $existing]);
+                }
+                else{
+                    return view('admin.access_denied');
+                }
+            }
+            else{
+                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'existing' => $existing]);
+            }
         }
         else {
             return redirect(route('admin.accounts.pending'));
         }
+        $existing = 0;
         if(session('department_id') == 7){
             if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
-                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing]);
             }
             else{
                 return view('admin.access_denied');
             }
         }
         else{
-            return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges]);
+            return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing]);
         }
 
     }
@@ -5793,12 +5826,13 @@ class AdminDashboardController extends Controller
            ->leftjoin('admins as rabna','rabna.id','=','users.rates_updated_by')
            ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
            ->leftjoin('admins as rabba','rabba.id','=','users.account_activated_by')
+            ->leftjoin('account_types as at','at.id','=','users.account_type_id')
            ->leftjoin('sale_person_tags as spt', function ($join) {
                $join->on('spt.user_id', '=', 'users.id')
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -5946,12 +5980,13 @@ class AdminDashboardController extends Controller
             ->leftjoin('products','products.id','=','users.product_id')
             ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
             ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
+            ->leftjoin('account_types as at','at.id','=','users.account_type_id')
             ->leftjoin('sale_person_tags as spt', function ($join) {
                 $join->on('spt.user_id', '=', 'users.id')
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                     ->where('spt.status','=',0);
             })
-            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6169,7 +6204,8 @@ class AdminDashboardController extends Controller
         $emails = ShipperNotificationEmail::where('user_id',$user->id)->select('email')->get();
         $email_ids = ShipperNotificationEmail::where('user_id',$user->id)->pluck('email')->toArray();
         $email_ids = implode(',', $email_ids);
-        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids]);
+        $reference = Reference::where('id', $user->reference_id)->first();
+        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference]);
     }
 
 

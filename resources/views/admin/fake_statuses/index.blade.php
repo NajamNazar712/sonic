@@ -17,6 +17,9 @@
                         <div class="form-group">
                             <input type="text" class="form-control" name="tracking_number" id="tracking_number" placeholder="Tracking Number" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                         </div>
+                        <div class="form-group">
+                            <textarea type="text" class="form-control" name="remarks" id="remarks" placeholder="Remarks" data-tags-input-name="remarks" data-rule-required="true" data-msg-required="Remarks is required" rows="6"></textarea>
+                        </div>
                         <div class="col">
                             <button type="submit" name="add_fake_status" class="btn btn-primary btn-min-width">Add</button>
                         </div>

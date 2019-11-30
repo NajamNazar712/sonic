@@ -53,6 +53,7 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
                             <a class="dropdown-item" href="http://bit.ly/sonic_manuals" target="_blank"><i class="ft-help-circle"></i> HELP</a>
+                            <a class="dropdown-item" href="{{ route('admin.resources.index') }}"><span class="menu-title"><i class="ft-file"></i>Resources</span></a>
                             <a class="dropdown-item" href="{{route('admin.logout')}}" onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();"><i class="ft-power"></i> Logout</a>
                             <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
