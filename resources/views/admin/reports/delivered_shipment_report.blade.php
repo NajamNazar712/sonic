@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Delivered Shipment Report')
+@section('title', 'Delivered Shipment Report (Rider Wise)')
 
 @section('content')
     <h1 class="mb-1">
-        Delivered Shipment Report
+        Delivered Shipment Report (Rider Wise)
     </h1>
 
     <div class="card">
