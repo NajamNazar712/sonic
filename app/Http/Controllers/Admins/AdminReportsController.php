@@ -64,7 +64,7 @@ use Yajra\Datatables\Datatables;
                 })
                 ->leftjoin('products as p','p.id','=','si.product_type_id')
                 ->select(['p.product_name as product_type','si.description as description','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name', 'shipments.booking_type_id', 'usi.poc','u.id as account_no','sm.mode as shipping_mode'])
-                ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,25,31,36,38,39,40,41,43,47]);
+                ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,25,31,36,38,39,40,41,43,47,51]);
             if (session('role_id') != 1) {
                 $shipments = $shipments->where(function($query) {
                     $query->where(function ($sub_query){
@@ -2309,7 +2309,7 @@ use Yajra\Datatables\Datatables;
                 $file_name = public_path() .'/'.$file_name_without_path ;
             }
             else{
-                $file_name_without_path = "reports/daily_pickup_sales_report_".$date_file_name.'_'.$city_name.$time_string.".xlsx";
+                $file_name_without_path = "C:/laragon/www/sonic/storage/public/reports/daily_pickup_sales_report_".$date_file_name.'_'.$city_name.$time_string.".xlsx";
                 $file_name = public_path() . "/reports/daily_pickup_sales_report_".$date_file_name.'_'.$time_string.".xlsx";
             }
             $writer->save($file_name);
@@ -5598,7 +5598,7 @@ use Yajra\Datatables\Datatables;
                 ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
                 ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
                 ->leftjoin('users as u', 'u.id', '=', 's.user_id')
-                ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at')
+                ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at', 'delivery_note_shipments.remarks as remarks')
                 ->where('delivery_note_shipments.fake_status', 1);
 
 
@@ -5668,6 +5668,52 @@ use Yajra\Datatables\Datatables;
                     return '-';
                 }
             });
+            return $datatables->make(true);
+        }
+        public function delivered_shipment_index(){
+            $toDays = Carbon::now();
+            $fromDays = Carbon::now()->subDays(29);
+            $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
+            $riders = DB::connection('reports')->table('riders')->get(['id','name']);
+            return view('admin.reports.delivered_shipment_report')->with(['cities' => $cities, 'riders' => $riders, 'fromDays' => $fromDays, 'toDays' => $toDays]);
+        }
+        public function delivered_shipment_list(Request $request){
+            $from = $request->search_date_from;
+            $to = $request->search_date_to;
+            if($from == null || $to == null){
+                $toDays = Carbon::now()->endOfDay();
+                $fromDays = Carbon::now()->subDays(30)->startOfDay();
+            }else{
+                $fromDays = $from;
+                $toDays = $to;
+            }
+            $delivered_shipments = DB::connection('reports')->table('riders')
+                ->join('rider_categories as rc','rc.id', '=', 'riders.rider_category_id')
+                ->join('cities as c','c.id', '=', 'riders.city_id')
+                ->leftjoin('routes as rou', 'rou.id', '=', 'riders.route_id')
+                ->leftJoin('delivery_notes as dn', function ($join) use ($fromDays, $toDays){
+                    $join->on('dn.rider_id', '=', 'riders.id')
+                        ->whereBetween('dn.created_at', [$fromDays,$toDays]);
+                })
+                ->leftJoin('shipments_journey as sj', function ($join) use ($fromDays, $toDays) {
+                    $join->on('sj.reference_1_id', '=', 'dn.id')
+                        ->where('sj.shipper_status_id', '=', 14)
+                        ->where('sj.verification', '=', 1)
+                        ->whereBetween('sj.updated_at', [$fromDays,$toDays]);
+                })
+                ->leftJoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'dn.id')
+                ->select('riders.name as courier_name', 'rc.name as courier_type', 'rou.code as route_code', DB::raw('count(dns.shipment_id) as shipments_count'), DB::raw('count(sj.id) as delivered_shipments_count'), DB::raw('count(dns.shipment_id)/count(sj.id) as delivery_ratio'), 'c.name as station')
+                ->groupBy('riders.id');
+
+
+            $datatables = Datatables::of($delivered_shipments);
+
+            if($rider = $request->get('search_rider')){
+                $datatables = $datatables->where('riders.id', '=', $rider);
+            }
+            if($station = $request->get('search_station')){
+                $datatables = $datatables->where('c.id', '=', $station);
+            }
             return $datatables->make(true);
         }
     }

@@ -1274,10 +1274,31 @@ class AdminCorporateAccountsController extends Controller
             $invoicing_cycles = InvoicingCycle::all();
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             $rate_status = $user['rate_status'];
+
+            $existing = 0;
+            if (session('department_id') == 7) {
+                if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4) {
+                    return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing]);
+                } else {
+                    return view('admin.access_denied');
+                }
+            } else {
+                return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
+            }
+
         } elseif (($user['rate_status'] >= 1) && $user['status'] == 3) {
+            $e_switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_cash = CorporateCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_insurance = CorporateInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_return = CorporateReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_fuel = CorporateFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_discount = CorporateDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_rate_status = $user['rate_status'];
+
             $switches = PendingCorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//        return $switches;
-//        var_dump(empty($switches));exit();
             $min_weight = PendingCorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $weight = PendingCorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $bookingType = PendingCorporateBookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1295,16 +1316,20 @@ class AdminCorporateAccountsController extends Controller
             $storage_types = WmsStorageType::all()->where('status', 1);
             $invoicing_cycles = InvoicingCycle::all();
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
+
             $rate_status = $user['rate_status'];
-        }
-        if (session('department_id') == 7) {
-            if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4) {
-                return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
-            } else {
-                return view('admin.access_denied');
+            $existing = 1;
+            if(session('department_id') == 7){
+                if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
+                    return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types', $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types]);
+                }
+                else{
+                    return view('admin.access_denied');
+                }
             }
-        } else {
-            return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types]);
+            else{
+                return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types]);
+            }
         }
     }
 
@@ -3524,6 +3549,7 @@ class AdminCorporateAccountsController extends Controller
                     ->withInput();
             }
             PendingCorporateRateStatus::where('user_id', $id)->delete();
+            PendingCorporateBookingTypeCharges::where('user_id', $id)->delete();
             PendingCorporateWeightCharge::where('user_id', $id)->delete();
             PendingCorporateCashHandlingCharge::where('user_id', $id)->delete();
             PendingCorporateInsuranceCharge::where('user_id', $id)->delete();
@@ -5158,7 +5184,7 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if ($pendinginsurance = PendingCorporateInsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
+                if ($pendinginsurances = PendingCorporateInsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendinginsurances as $pendinginsurance) {
                         CorporateInsuranceCharge::create([
                             'user_id' => $id,
@@ -5438,6 +5464,8 @@ class AdminCorporateAccountsController extends Controller
             } else {
                 return view('admin.access_denied');
             }
+        }else{
+            return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types]);
         }
     }
 }

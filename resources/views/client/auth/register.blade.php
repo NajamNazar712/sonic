@@ -151,7 +151,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                        <label for="strn_no">STRN Number:</label>
-                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567-8)" value="{{ old('strn_no') }}"  name="strn_no">
+                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567891234)" value="{{ old('strn_no') }}"  name="strn_no">
                                                     </div>
                                                 </div>
                                         </div>
@@ -204,6 +204,30 @@
                                                             <select name="shipper_product_type" id="shipper_product_type" class="select2 form-control required" style="width: 100%">
                                                                 @foreach($products as $product)
                                                                     <option value="{{$product->id}}" {{ old('shipper_product_type') == $product->id ? 'selected' : '' }} >{{$product->product_name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="nature_of_account">Average Shipments:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <input type="text" class="form-control required" value="{{ old('average_shipment') }}" name="average_shipment" placeholder="Average Shipments">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="reference">Reference:</label>
+                                                        <div>
+                                                            <select name="reference" id="reference" class="select2 form-control" style="width: 100%">
+                                                                @foreach($references as $reference)
+                                                                    <option value="{{$reference->id}}" {{ old('reference') == $reference->id ? 'selected' : '' }} >{{$reference->name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -701,11 +725,20 @@
             placeholder:'Select Product Type',
             dropdownParent:$('#registership')
         });
+        $('select[name="reference"]').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Reference',
+            dropdownParent:$('#registership')
+        });
+        $("input[name='average_shipment']").inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false
+        });
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='billing_person_phone'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-        $("input[name='strn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
+        $("input[name='strn_no']").inputmask({'mask': "9999999999999", 'clearIncomplete': true});
         $('#shipInfo').perfectScrollbar({
             suppressScrollX : true,
             theme: 'dark',

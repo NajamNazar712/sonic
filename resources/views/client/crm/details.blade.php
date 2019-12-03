@@ -9,6 +9,15 @@
                 <div class="content-body">
                     <h1 class="mb-1">
                         Request Details ({{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}})
+                        <div class="text-right mb-1">
+                            @if($crm_details['status_id'] == 4 && $reopen_check == true)
+                                <form action="{{route('cod.crm.request.re_open')}}" method="post" class="mt-2" id="reopen_form" novalidate="novalidate">
+                                    {{csrf_field()}}
+                                    <input type="hidden" name="req_id" value="{{$crm_details->id}}">
+                                    <button type="submit" class="btn btn-primary width-10-per" id="re_open"><span class="d-lg-block" style="color: white">Re-Open</span></button>
+                                </form>
+                            @endif
+                        </div>
                     </h1>
 
                     <div class="card">
@@ -203,6 +212,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/pages/chat-application.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
     <style>
         .chat-application .chat-app-window {
             padding: 20px 10px;
@@ -234,7 +244,9 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/ui/scrollable.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
@@ -348,6 +360,47 @@
             setInterval(function () {
                 window.location.reload();
             }, 500000);
+        });
+
+        $('#reopen_form').on('submit', function(e){
+            e.preventDefault();
+        }).validate({
+            submitHandler: function(form) {
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Re-Open the request!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Request is being Re-Open!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        form.submit();
+                    }
+                });
+            }
         });
 
     </script>
