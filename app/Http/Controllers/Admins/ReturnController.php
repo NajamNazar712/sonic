@@ -2106,7 +2106,7 @@ class ReturnController extends Controller
             })
             ->editColumn('image', function ($deliveries) {
                 $now = Carbon::now();
-                if ($deliveries->image != null && ($now->diffInDays($deliveries->updated_at) < 30)) {
+                if ($deliveries->image != null && ($now->diffInDays($deliveries->updated_at) < 1)) {
                     $img = asset('uploads/return_notes/' . $deliveries->image);
                     return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
 
@@ -2234,7 +2234,7 @@ class ReturnController extends Controller
             if (is_file($file)) {
                $created = date("F d Y H:i:s.",filemtime($file));
                 $file_name = pathinfo($file);
-               if($now->diffInDays($created) > 30){
+               if($now->diffInDays($created) > 1){
                    Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
                    File::delete($file);
                }
