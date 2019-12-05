@@ -96,7 +96,7 @@ class AdminCorporateAccountsController extends Controller
             $insurance = CorporateStandardInsuranceCharge::all()->groupBy('shipping_mode_id');
             $return = CorporateStandardReturnCharge::all()->groupBy('shipping_mode_id');
             $fuel = CorporateStandardFuelSurcharge::all()->groupBy('shipping_mode_id');
-            $invoicing_cycles = InvoicingCycle::all();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types]);
@@ -1197,7 +1197,7 @@ class AdminCorporateAccountsController extends Controller
             $wms_user_info->user_id = $id;
             $wms_user_info->warehousing = 1;
             $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-            $wms_user_info->invoicing_date = ($request->input('invoicing_date')) ? $request->invoicing_date : null;
+            $wms_user_info->invoicing_date = 1;
             $wms_user_info->per_product_charges = ($request->has('ppc_switch')) ? 1 : 0;
             $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
             $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
@@ -1271,7 +1271,7 @@ class AdminCorporateAccountsController extends Controller
             $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
             $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
-            $invoicing_cycles = InvoicingCycle::all();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             $rate_status = $user['rate_status'];
 
@@ -1314,7 +1314,7 @@ class AdminCorporateAccountsController extends Controller
             $wms_labelling_charges = WmsPendingLabellingCharge::where('user_id', $id)->first();
             $wms_storage_charges = WmsPendingStorageTypeCharge::where('user_id', $id)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
-            $invoicing_cycles = InvoicingCycle::all();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
 
             $rate_status = $user['rate_status'];
@@ -3012,7 +3012,7 @@ class AdminCorporateAccountsController extends Controller
                 if ($wms_user_info->exists()) {
                     $wms_user_info = $wms_user_info->first();
                     $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-                    $wms_user_info->invoicing_date = ($request->input('invoicing_date')) ? $request->invoicing_date : null;
+                    $wms_user_info->invoicing_date = 1;
                     $wms_user_info->per_product_charges = ($request->has('ppc_switch')) ? 1 : 0;
                     $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
                     $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
@@ -3022,7 +3022,7 @@ class AdminCorporateAccountsController extends Controller
                     $wms_user_info->user_id = $id;
                     $wms_user_info->warehousing = 1;
                     $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-                    $wms_user_info->invoicing_date = ($request->input('invoicing_date')) ? $request->invoicing_date : null;
+                    $wms_user_info->invoicing_date = 1;
                     $wms_user_info->per_product_charges = ($request->has('ppc_switch')) ? 1 : 0;
                     $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
                     $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
@@ -4189,7 +4189,7 @@ class AdminCorporateAccountsController extends Controller
                 $wms_user_info->user_id = $id;
                 $wms_user_info->warehousing = 1;
                 $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-                $wms_user_info->invoicing_date = ($request->input('invoicing_date')) ? $request->invoicing_date : null;
+                $wms_user_info->invoicing_date = 1;
                 $wms_user_info->per_product_charges = ($request->has('ppc_switch')) ? 1 : 0;
                 $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
                 $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
@@ -4777,7 +4777,7 @@ class AdminCorporateAccountsController extends Controller
                     $wms_user_information->user_id = $id;
                     $wms_user_information->warehousing = $wms_user_info['warehousing'];
                     $wms_user_information->invoicing_cycle = $wms_user_info['invoicing_cycle'];
-                    $wms_user_information->invoicing_date = $wms_user_info['invoicing_date'];
+                    $wms_user_information->invoicing_date = 1;
                     $wms_user_information->per_product_charges = $wms_user_info['per_product_charges'];
                     $wms_user_information->per_square_foot_charges = $wms_user_info['per_square_foot_charges'];
                     $wms_user_information->packing_charges = $wms_user_info['packing_charges'];
@@ -5365,7 +5365,7 @@ class AdminCorporateAccountsController extends Controller
                     $wms_user_information->user_id = $id;
                     $wms_user_information->warehousing = $wms_user_info['warehousing'];
                     $wms_user_information->invoicing_cycle = $wms_user_info['invoicing_cycle'];
-                    $wms_user_information->invoicing_date = $wms_user_info['invoicing_date'];
+                    $wms_user_information->invoicing_date = 1;
                     $wms_user_information->per_product_charges = $wms_user_info['per_product_charges'];
                     $wms_user_information->per_square_foot_charges = $wms_user_info['per_square_foot_charges'];
                     $wms_user_information->packing_charges = $wms_user_info['packing_charges'];
@@ -5457,7 +5457,7 @@ class AdminCorporateAccountsController extends Controller
         $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
         $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
         $storage_types = WmsStorageType::all()->where('status', 1);
-        $invoicing_cycles = InvoicingCycle::all();
+        $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
         if (session('department_id') == 7) {
             if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4) {
                 return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types]);

@@ -1193,7 +1193,7 @@ class AdminDashboardController extends Controller
             $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             $packaging_sizes = array();
-            $invoicing_cycles = InvoicingCycle::all();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
             if(count($packaging_material_types) > 0){
 
@@ -1240,7 +1240,7 @@ class AdminDashboardController extends Controller
         $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
         $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
         $storage_types = WmsStorageType::all()->where('status', 1);
-        $invoicing_cycles = InvoicingCycle::all();
+        $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
         $packaging_charges = array();
         if(count($packaging) > 0){
 
@@ -1284,7 +1284,7 @@ if(session('department_id') == 7){
             $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
             $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
-            $invoicing_cycles = InvoicingCycle::all();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
             $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
@@ -1331,7 +1331,7 @@ if(session('department_id') == 7){
             $e_wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
             $e_wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
             $e_storage_types = WmsStorageType::all()->where('status', 1);
-            $e_invoicing_cycles = InvoicingCycle::all();
+            $e_invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $e_discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_rate_status = $user['rate_status'];
             $e_packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
@@ -1365,7 +1365,7 @@ if(session('department_id') == 7){
             $wms_labelling_charges = WmsPendingLabellingCharge::where('user_id', $id)->first();
             $wms_storage_charges = WmsPendingStorageTypeCharge::where('user_id', $id)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
-            $invoicing_cycles = InvoicingCycle::all();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $packaging_charges = array();
 
             if(count($packaging) > 0){
@@ -2880,7 +2880,7 @@ if(session('department_id') == 7){
                 if($wms_user_info->exists()){
                     $wms_user_info = $wms_user_info->first();
                     $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-                    $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+                    $wms_user_info->invoicing_date = 1;
                     $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
                     $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
                     $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
@@ -2890,7 +2890,7 @@ if(session('department_id') == 7){
                     $wms_user_info->user_id = $id;
                     $wms_user_info->warehousing = 1;
                     $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-                    $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+                    $wms_user_info->invoicing_date = 1;
                     $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
                     $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
                     $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
@@ -4064,7 +4064,7 @@ if(session('department_id') == 7){
             $wms_user_info->user_id = $id;
             $wms_user_info->warehousing = 1;
             $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-            $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+            $wms_user_info->invoicing_date = 1;
             $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
             $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
             $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
@@ -4567,7 +4567,7 @@ if(session('department_id') == 7){
                     $wms_user_information->user_id = $id;
                     $wms_user_information->warehousing = $wms_user_info['warehousing'];
                     $wms_user_information->invoicing_cycle = $wms_user_info['invoicing_cycle'];
-                    $wms_user_information->invoicing_date = $wms_user_info['invoicing_date'];
+                    $wms_user_information->invoicing_date = 1;
                     $wms_user_information->per_product_charges = $wms_user_info['per_product_charges'];
                     $wms_user_information->per_square_foot_charges = $wms_user_info['per_square_foot_charges'];
                     $wms_user_information->packing_charges = $wms_user_info['packing_charges'];
@@ -5073,7 +5073,7 @@ if(session('department_id') == 7){
                     $wms_user_information->user_id = $id;
                     $wms_user_information->warehousing = $wms_user_info['warehousing'];
                     $wms_user_information->invoicing_cycle = $wms_user_info['invoicing_cycle'];
-                    $wms_user_information->invoicing_date = $wms_user_info['invoicing_date'];
+                    $wms_user_information->invoicing_date = 1;
                     $wms_user_information->per_product_charges = $wms_user_info['per_product_charges'];
                     $wms_user_information->per_square_foot_charges = $wms_user_info['per_square_foot_charges'];
                     $wms_user_information->packing_charges = $wms_user_info['packing_charges'];
@@ -6217,7 +6217,7 @@ if(session('department_id') == 7){
             $wms_user_info->user_id = $id;
             $wms_user_info->warehousing = 1;
             $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-            $wms_user_info->invoicing_date = ($request->input('invoicing_date'))? $request->invoicing_date:null;
+            $wms_user_info->invoicing_date = 1;
             $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
             $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
             $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;

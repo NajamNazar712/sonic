@@ -3434,12 +3434,6 @@
                                                     $class = 'd-none';
                                                 }
                                             @endphp
-                                            <div id="invoicing_date_div" class="col-3 {{ $class }}">
-                                                <div class="form-group">
-                                                    <select name="invoicing_date" id="invoicing_date_select" class="select2 form-control" data-rule-required="true" data-msg-required="Date is required"></select>
-                                                </div>
-                                                
-                                            </div>
 
                                         </div>
                                         <div class="col-12">
@@ -3669,12 +3663,6 @@
                                                         <option value="{{ $cycle->id }}">{{ $cycle->name }}</option>
                                                     @endforeach
                                                 </select>
-                                            </div>
-                                            <div id="invoicing_date_div" class="col-3 d-none">
-                                                <div class="form-group">
-                                                    <select name="invoicing_date" id="invoicing_date_select" class="select2 form-control" data-rule-required="true" data-msg-required="Date is required"></select>
-                                                </div>
-                                                
                                             </div>
 
                                         </div>
@@ -4944,45 +4932,11 @@
         $('#invoicing_cycle_select').prepend('<option value="" selected></option>').select2({
             placeholder: "Select Invoicing Cycle",
             width:'100%'
-        }).bind('change', function() {
-
-           if (this.value == 1) {
-               $('#invoicing_date_div').removeClass('d-none');
-               $('#invoicing_date_select').empty().trigger('change');
-               $('#invoicing_date_select').select2({data:weekly,placeholder:'Select Date'});
-           }
-           else if(this.value == 3){
-               $('#invoicing_date_div').removeClass('d-none');
-               $('#invoicing_date_select').empty().trigger('change');
-               $('#invoicing_date_select').select2({data:monthly,placeholder:'Select Date'});
-           }else if(this.value == 2){
-               $('#invoicing_date_div').addClass('d-none');
-           }
-       });
+        });
         var storage_type_selected = [];
         var packing_type_selected = [];
         @if(!empty($wms_user_info))
         $('#invoicing_cycle_select').val({{$wms_user_info->invoicing_cycle}}).trigger('change');
-            @if($wms_user_info->invoicing_cycle == 1)
-            $('#invoicing_date_select').prepend('<option value="" selected="selected"></option>').select2({
-                data:weekly,
-                width:'100%',
-                placeholder:'Select Date'
-            });
-            $('#invoicing_date_select').val({{$wms_user_info->invoicing_date}}).trigger('change');
-            @elseif($wms_user_info->invoicing_cycle == 3)
-            $('#invoicing_date_select').prepend('<option value="" selected="selected"></option>').select2({
-                data:monthly,
-                width:'100%',
-                placeholder:'Select Date'
-            });
-            $('#invoicing_date_select').val({{$wms_user_info->invoicing_date}}).trigger('change');
-            @else
-            $('#invoicing_date_select').prepend('<option value="" selected="selected"></option>').select2({
-                width:'100%',
-                placeholder:'Select Date'
-            });
-            @endif
 
             @foreach($wms_storage_charges as $skey => $storage)
                 $('select[name="storage_type[{{$skey}}]"]').select2({

@@ -2852,12 +2852,6 @@
                                                     $class = 'd-none';
                                                 }
                                             @endphp
-                                            <div id="invoicing_date_div" class="col-3 {{ $class }}">
-                                                <div class="form-group">
-                                                    <select name="invoicing_date" id="invoicing_date_select" class="select2 form-control" data-rule-required="true" data-msg-required="Date is required" disabled="disabled"></select>
-                                                </div>
-                                                
-                                            </div>
 
                                         </div>
                                         <div class="col-12">
@@ -3073,18 +3067,8 @@
         @isset($wms_user_info->warehousing)
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
-        $('#invoicing_date_select').select2({
-            data:monthly,
-            width:'100%',
-            placeholder:'Select Date'
-        });
         var invoicing_cycle = '{{$wms_user_info->invoicing_cycle}}';
-        var invoicing_date = '{{$wms_user_info->invoicing_date}}';
         invoicing_cycle = parseInt(invoicing_cycle);
-        invoicing_date = parseInt(invoicing_date);
-        if(invoicing_cycle == 1 || invoicing_cycle == 3){
-             $('#invoicing_date_select').val(invoicing_date).trigger('change');
-        }
         
         $('#invoicing_cycle_select').select2({
             placeholder: "Select Invoicing Cycle",

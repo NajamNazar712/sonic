@@ -2066,12 +2066,6 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div id="invoicing_date_div" class="col-3 d-none">
-                                                <div class="form-group">
-                                                    <select name="invoicing_date" id="invoicing_date_select" class="select2 form-control" data-rule-required="true" data-msg-required="Date is required"></select>
-                                                </div>
-                                                
-                                            </div>
 
                                         </div>
                                         <div class="col-12">
@@ -3331,29 +3325,10 @@
             });
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
-        $('#invoicing_date_select').prepend('<option value="" selected="selected"></option>').select2({
-            width:'100%',
-            placeholder:'Select Date'
-        });
-        
         $('#invoicing_cycle_select').prepend('<option value="" selected></option>').select2({
             placeholder: "Select Invoicing Cycle",
             width:'100%'
-        }).bind('change', function() {
-
-           if (this.value == 1) {
-               $('#invoicing_date_div').removeClass('d-none');
-               $('#invoicing_date_select').empty().trigger('change');
-               $('#invoicing_date_select').select2({data:weekly,placeholder:'Select Date'});
-           }
-           else if(this.value == 3){
-               $('#invoicing_date_div').removeClass('d-none');
-               $('#invoicing_date_select').empty().trigger('change');
-               $('#invoicing_date_select').select2({data:monthly,placeholder:'Select Date'});
-           }else if(this.value == 2){
-               $('#invoicing_date_div').addClass('d-none');
-           }
-       });
+        });
         var current_selection = null;
         var storage_type_selected = [];
         var storage_type_data = @json($storage_types);
