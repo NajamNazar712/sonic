@@ -212,6 +212,15 @@
                                                                    value="1">
                                                         @endif
                                                         @if($crm_details['status_id'] != 4)
+                                                            @if($crm_details['status_id'] == 3)
+                                                                <input type="hidden" id="resolved" name="resolved"
+                                                                       value="1">
+                                                                <button id="invalid" type="submit" class="btn btn-danger mr-3">
+                                                                    <span class="d-none d-lg-block">
+                                                                        Close
+                                                                    </span>
+                                                                </button>
+                                                            @endif
                                                             <button id="invalid" type="submit" class="btn btn-danger">
                                                                 <span class="d-none d-lg-block">
                                                                     @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 2 ||$crm_details['status_id'] == 3 || $crm_details['status_id'] == 5)
@@ -221,15 +230,6 @@
                                                                     @endif
                                                                 </span>
                                                             </button>
-                                                            @if($crm_details['status_id'] == 3)
-                                                                <input type="hidden" id="resolved" name="resolved"
-                                                                       value="1">
-                                                                <button id="invalid" type="submit" class="btn btn-danger ml-1">
-                                                                    <span class="d-none d-lg-block">
-                                                                        Close
-                                                                    </span>
-                                                                </button>
-                                                            @endif
                                                         @endif
                                                     </form>
                                                 </div>
