@@ -2106,7 +2106,9 @@ class ReturnController extends Controller
             })
             ->editColumn('image', function ($deliveries) {
                 $now = Carbon::now();
-                if ($deliveries->image != null && ($now->diffInDays($deliveries->updated_at) < 1)) {
+                if($deliveries->image == null){
+                    return "-";
+                }else if ($now->diffInDays($deliveries->updated_at) < 1){
                     $img = asset('uploads/return_notes/' . $deliveries->image);
                     return "<a href='{$img}' class='btn btn-block btn-outline-info mr-1' target='_blank'><i class='la la-image'></i></a>";
 
