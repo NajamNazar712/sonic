@@ -11,9 +11,7 @@
                 <h1 class="mb-1">
                     User Information
                 </h1>
-
                 <div class="card">
-
                     @include('client.inc.messages')
                     <div class="card-content">
                         <div id="tabs" class="card-body">
@@ -105,6 +103,12 @@
                                                 <td><b>Average Shipments</b></td>
                                                 <td>{{$user->average_shipments}}</td>
                                             </tr>
+                                            @if($reference)
+                                            <tr>
+                                                <td><b>Reference</b></td>
+                                                <td>{{$reference->name}}</td>
+                                            </tr>
+                                            @endif
                                             <tr>
                                                 <td><b>API Key</b></td>
                                                 <td>{{$user->api_token}}</td>

@@ -22,6 +22,7 @@
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No</th>
                                         <th class="border-primary border-darken-1">Account ID</th>
+                                        <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
                                         <th class="border-primary border-darken-1">City Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
@@ -104,6 +105,7 @@
 
                         head.push('S.No');
                         head.push('Account ID');
+                        head.push('Account Type');
                         head.push('Company Name');
                         head.push('City Name');
                         head.push('Contact Person');
@@ -128,6 +130,7 @@
 
                             row.push(index + 1);
                             row.push(values.id_padded);
+                            row.push(values.account_type);
                             row.push(values.name);
                             row.push(values.city);
                             row.push(values.poc);
@@ -183,6 +186,7 @@
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
+                {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
@@ -489,9 +493,49 @@
 
         });
 
-       // $('#datatable tbody').on('click', '.view_crf', function () {
-       //    alert(123);
-       // });
+        $('#datatable').on('click', 'button.warehousing_enable', function(){
+            var id = $(this).parents('tr').attr('id');
+            if(id){
+               $.ajax({
+                   url: '{!! route('admin.accounts.warehousing.active') !!}',
+                   method: 'POST',
+                   data: {
+                       'id':id,
+                       '_token': '{{ csrf_token() }}'
+                   }
+               }).done(function (data) {
+                   if(data.status == 1){
+                       table.draw('false');
+                       toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                   }else{
+                       toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                   }
+
+               });
+            }
+        });
+
+        $('#datatable').on('click', 'button.warehousing_disable', function(){
+            var id = $(this).parents('tr').attr('id');
+            if(id){
+               $.ajax({
+                   url: '{!! route('admin.accounts.warehousing.inactive') !!}',
+                   method: 'POST',
+                   data: {
+                       'id':id,
+                       '_token': '{{ csrf_token() }}'
+                   }
+               }).done(function (data) {
+                   if(data.status == 1){
+                       table.draw('false');
+                       toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                   }else{
+                       toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                   }
+
+               });
+            }
+        });
     });
 
 </script>

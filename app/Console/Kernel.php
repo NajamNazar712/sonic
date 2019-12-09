@@ -28,6 +28,9 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\DebriefingEmail',
         '\App\Console\Commands\ClearPickupRequest',
         '\App\Console\Commands\ClearPickupNote',
+        '\App\Console\Commands\SalePersonShipmentNumbers',
+        '\App\Console\Commands\MonthAverageReportEmail',
+        '\App\Console\Commands\HubWiseSplitEmail',
     ];
 
     /**
@@ -65,7 +68,7 @@ class Kernel extends ConsoleKernel
             $schedule->command('invoice:generate')->dailyAt($time)->runInBackground();
         }
 
-        $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
+        // $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
 
         $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
 
@@ -82,8 +85,11 @@ class Kernel extends ConsoleKernel
             $schedule->command('email:returndeliveredtoshipper')->dailyAt($rdts_time)->runInBackground();
         }
 
-        $schedule->command('pickuprequest:clear')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
-        $schedule->command('pickupnote:clear')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
+        $schedule->command('pickuprequest:clear')->everyFifteenMinutes()->withoutOverlapping()->runInBackground();
+        $schedule->command('pickupnote:clear')->everyThirtyMinutes()->withoutOverlapping()->runInBackground();
+        $schedule->command('saleperson:numbers')->dailyAt('08:00')->runInBackground();
+        $schedule->command('month:average')->dailyAt('08:00')->runInBackground();
+        $schedule->command('hubwise:split')->dailyAt('08:00')->runInBackground();
     }
 
     /**

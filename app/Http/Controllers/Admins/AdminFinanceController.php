@@ -2144,7 +2144,8 @@ class AdminFinanceController extends Controller
 
     public function make_payments_index() {
         $banks = BanksList::all();
-        return view('admin.finance.make_payments')->with(['banks'=>$banks]);
+        $shipper_status = [1 => 'Active', 2 => 'Inactive'];
+        return view('admin.finance.make_payments')->with(['banks'=>$banks, 'shipper_status' => $shipper_status]);
     }
 
     public function make_payments_list(Request $request) {
@@ -2336,6 +2337,15 @@ class AdminFinanceController extends Controller
             }
             else if ($positive_negative_filter == 2) {
                 $datatables->having('total_payable', '<', 0);
+            }
+        }
+
+        if ($shipper_status = $request->get('shipper_status')) {
+            if ($shipper_status == 1) {
+                $datatables->where('u.status', '=', 3)->where('u.blacklist', 0);
+            }
+            else {
+                $datatables->where('u.status', '!=', 3);
             }
         }
 
@@ -2926,13 +2936,14 @@ class AdminFinanceController extends Controller
     }
 
     public function done_payments_index() {
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $shippers = User::select('id', 'name')->get();
+        $shipper_status = [1 => 'Active', 2 => 'Inactive'];
 
         $banks = BanksList::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
 
-        return view('admin.finance.done_payments')->with(['banks'=>$banks,'company_banks'=>$company_banks, 'shippers'=>$shippers, 'case_nature_channels'=>$case_nature_channels]);
+        return view('admin.finance.done_payments')->with(['banks'=>$banks,'company_banks'=>$company_banks, 'shippers'=>$shippers, 'case_nature_channels'=>$case_nature_channels, 'shipper_status' => $shipper_status]);
     }
 
     public function done_payments_list(Request $request) {
@@ -3153,6 +3164,15 @@ class AdminFinanceController extends Controller
 
         if ($shipper = $request->get('search_shipper')) {
             $datatables->where('u.id', '=', $shipper);
+        }
+
+        if ($shipper_status = $request->get('search_shipper_status')) {
+            if ($shipper_status == 1) {
+                $datatables->where('u.status', '=', 3)->where('u.blacklist', 0);
+            }
+            else {
+                $datatables->where('u.status', '!=', 3);
+            }
         }
 
         if ($request->get('search_from') && $request->get('search_to')) {
@@ -3570,8 +3590,10 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->tracking_number . '</td>
                               <td>' . $type . '</td>
                               <td>' . $shipment->order_id . '</td>
-                              <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
+                              <td>' . $shipment->pickup_address->city->name . '</td>
                               <td>' . $shipment->consignee_city->name . '</td>
+                              <td>' . $shipment->shipping_mode->mode . '</td>
+                              <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
@@ -3636,7 +3658,7 @@ class AdminFinanceController extends Controller
 
         $shipment_details .= '
                             <tr>
-                                <td colspan="7"></td>
+                                <td colspan="9"></td>
                                 <td class="color primary"><strong>Total</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_weight_charges, 2) . '</strong></td>
@@ -3665,8 +3687,10 @@ class AdminFinanceController extends Controller
                               <td class="color primary"><strong>Tracking No.</strong></td>
                               <td class="color primary"><strong>Type</strong></td>
                               <td class="color primary"><strong>Order ID</strong></td>
-                              <td class="color primary"><strong>Consignee</strong></td>
+                              <td class="color primary"><strong>Origin</strong></td>
                               <td class="color primary"><strong>Destination</strong></td>
+                              <td class="color primary"><strong>Shipping Mode</strong></td>
+                              <td class="color primary"><strong>Consignee</strong></td>
                               <td class="color primary"><strong>Service Type</strong></td>
                               <td class="color primary"><strong>Weight (kg)</strong></td>
                               <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
@@ -4229,6 +4253,7 @@ class AdminFinanceController extends Controller
                           <td>' . $serial_number[$origin] . '</td>
                           <td>' . $shipment->tracking_number . '</td>
                           <td>' . $shipment->consignee_city->name . '</td>
+                          <td>' . $shipment->shipping_mode->mode . '</td>
                           <td>' . $date . '</td>
                           <td>' . $shipment->actual_weight . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
@@ -4430,6 +4455,7 @@ class AdminFinanceController extends Controller
                           <th class="color secondary">S. No.</th>
                           <th class="color secondary">Tracking No.</th>
                           <th class="color secondary">Destination</th>
+                          <th class="color secondary">Shipping Mode</th>
                           <th class="color secondary">Arrival Date</th>
                           <th class="color secondary">Weight (kg)</th>
                           <th class="color secondary">Weight Charges (PKR)</th>
@@ -4707,7 +4733,7 @@ class AdminFinanceController extends Controller
     public function invoice_for_reimbursement_index(Request $request) {
         $payment_types = [['id' => 0, 'name' => 'Make'], ['id' => 1, 'name' => 'Done']];
 
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $shippers = User::select('id', 'name')->get();
 
         return view('admin.finance.invoice_for_reimbursement')->with(['payment_types' => $payment_types, 'shippers' => $shippers]);
     }
@@ -4814,6 +4840,7 @@ class AdminFinanceController extends Controller
                                       <td>' . $shipment->tracking_number . '</td>
                                       <td>' . $shipment->pickup_address->city->name . '</td>
                                       <td>' . $shipment->consignee_city->name . '</td>
+                                      <td>' . $shipment->shipping_mode->mode . '</td>
                                       <td>' . $date . '</td>
                                       <td>' . $shipment->actual_weight . '</td>
                                       <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
@@ -5046,13 +5073,14 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="13">Shipment(s) Summary</th>
+                            <th class="color primary text-center" colspan="15">Shipment(s) Summary</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
                           <th class="color secondary">Tracking No.</th>
                           <th class="color secondary">Origin</th>
                           <th class="color secondary">Destination</th>
+                          <th class="color secondary">Shipping Mode</th>
                           <th class="color secondary">Arrival Date</th>
                           <th class="color secondary">Weight (kg)</th>
                           <th class="color secondary">Weight Charges (PKR)</th>

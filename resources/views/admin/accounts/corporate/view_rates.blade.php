@@ -3181,6 +3181,225 @@
                                         </div>
                                     </div>
 
+                                   @isset($wms_user_info->warehousing)
+                            <div id="" class="card-header mt-1 border-primary">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3 class="display-inline card-title lead primary">Warehousing</h3>
+                                        
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info" {{ ($wms_user_info->warehousing)? 'checked':'' }} disabled/></a>
+                                    </div>
+                                </div>
+
+                            </div>
+                            
+                            <div id="warehousing" class="border-primary no-border-top card {{ ($wms_user_info->warehousing)? '':'hide' }}">
+                                <div class="card-content">
+                                    <div class="card-body pb-0">
+                                        <div class="row">
+                                            <div class="col-3 form-group">
+                                                <select name="invoicing_cycle" class="select2" id="invoicing_cycle_select" data-rule-required="true" data-msg-required="Invoicing cycle is required" disabled="disabled">
+                                                    @foreach($invoicing_cycles as $cycle)
+                                                        @if($cycle->id == $wms_user_info->invoicing_cycle)
+                                                            <option value="{{ $cycle->id }}" selected="selected">{{ $cycle->name }}</option>
+                                                        @else
+                                                            <option value="{{ $cycle->id }}">{{ $cycle->name }}</option>
+                                                        @endif
+                                                        
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            @php
+                                            $class = '';
+                                                if($wms_user_info->invoicing_cycle == 2){
+                                                    $class = 'd-none';
+                                                }
+                                            @endphp
+                                            <div id="invoicing_date_div" class="col-3 {{ $class }}">
+                                                <div class="form-group">
+                                                    <select name="invoicing_date" id="invoicing_date_select" class="select2 form-control" data-rule-required="true" data-msg-required="Date is required" disabled="disabled"></select>
+                                                </div>
+                                                
+                                            </div>
+
+                                        </div>
+                                        <div class="col-12">
+                                                    <h3 class="card-title">Stocking Charges</h3>
+                                                </div>
+
+                                        <div class="card border-primary p-2">
+                                            <div class="row">
+                        
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <div class="col-4 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text" id="">Per Product Charges</span>
+                                                                    </div>
+                                                                    <div class="input-group-prepend">
+                                                                          <span class="input-group-text" id="">
+                                                                            <input type="checkbox" name="ppc_switch" data-color="info" class="switchery PPCSwitch" data-size="xs" {{ ($wms_user_info->per_product_charges)? 'checked':'' }} disabled/>
+                                                                          </span>
+                                                                    </div>
+                                                                    <input type="text"  class="form-control numeric ppc-inp" value="{{ isset($wms_product_charges)? $wms_product_charges->charges:0}}"  data-rule-required="true" data-msg-required="This field is required" name="ppc_charges"disabled >
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col-4 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text" id="">Per Square Foot Charges</span>
+                                                                    </div>
+                                                                    <div class="input-group-prepend">
+                                                                          <span class="input-group-text" id="">
+                                                                            <input type="checkbox" name="psf_switch" data-color="info" class="switchery PSFSwitch" data-size="xs" {{ ($wms_user_info->per_square_foot_charges)? 'checked':'' }} disabled/>
+                                                                          </span>
+                                                                    </div>
+                                                                    <input type="text"  class="form-control numeric psf-inp" value="{{ isset($wms_square_foot_charges)? $wms_square_foot_charges->charges:0 }}"  data-rule-required="true" data-msg-required="This field is required" name="psf_charges" disabled>
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <h3 class="card-title">Storage Type Charges</h3>
+                                                        </div>
+
+                                                        <div class="col-12" id="wms_storage_types_div">
+                                                            @foreach($wms_storage_charges as $key => $storage)
+                                                            <div class="row">
+                                                                
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control storage_type" name="storage_type[{{$key}}]" data-rule-required="true" data-msg-required="This field is required" disabled>
+                                                                            @foreach($storage_types as $types)
+                                                                               <option value="{{$types->id}}">{{$types->name}}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="storage_type_charges[0]" data-rule-required="true" data-msg-required="Charges are required" type="text" class="form-control numeric" placeholder="Charges" value="{{$storage->charges}}" disabled="disabled">
+                                                                    </fieldset>
+                                                                </div>
+                                                            </div>
+                                                            @endforeach
+                                                            
+                                                        </div>
+                                                        
+                                                    </div>
+
+                                                </div>
+                                               
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card-body">
+                                                <div>
+                                                    <h3 class="card-title">Fulfillment Charges</h3>
+                                                </div>
+
+                                            <div class="card border-primary p-2">
+                                            <div class="row">
+                                                
+                                                <div class="col-12">
+                                                    
+
+                                                    <div class="row">
+                                                        <div class="col-3">
+                                                            <h3 class="card-title">Packing Charges</h3>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="packing_charges_switch" class="switchery packingCharges" data-color="info" data-size="sm" {{ ($wms_user_info->packing_charges)? 'checked':''}} disabled="disabled"/>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12" id="wms_packing_charges_div">
+                                                            @if($wms_user_info->packing_charges)
+                                                            @foreach($wms_packing_charges as $key => $packing)
+                                                            <div class="row">
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control packing_type" name="packing_type[{{$key}}]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
+                                                                           @foreach($packaging_material_types as $mtype)
+                                                                                <option value="{{$mtype->id}}">{{$mtype->type}}</option>
+                                                                           @endforeach
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
+
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <input name="packing_charges[0]" value="{{$packing->charges}}" type="text" class="form-control numeric" placeholder="Charges" disabled="disabled">
+                                                                    </fieldset>
+                                                                </div>
+                                                            </div>
+                                                            @endforeach
+                                                            @endif
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-2">
+                                                            <h3 class="card-title">Labelling Charges</h3>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group ">
+                                                                <input type="checkbox" name="labelling_charges_switch" class="switchery labellingSwitch" data-color="info" data-size="sm" {{ ($wms_user_info->labelling_charges)? 'checked':''}} disabled/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                        
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <fieldset class="form-group">
+                                                                @if($wms_user_info->labelling_charges)
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{ $wms_labelling_charges->charges }}" disabled="disabled">
+                                                                @else
+                                                                <input name="labelling_charges" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="0" disabled="disabled">
+                                                                @endif
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+                                                            
+                                                        
+                                                    </div>
+
+
+                                                </div>
+                                               
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                            @else
+                            <div id="" class="card-header mt-1 border-primary">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3 class="display-inline card-title lead primary">Warehousing</h3>
+                                        
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info" disabled/></a>
+                                    </div>
+                                </div>
+
+                            </div>
+                            @endisset
 
 
 
@@ -3202,6 +3421,8 @@
     @endif
 @endsection
 @section('css')
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+
     <style type="text/css">
         .hide{
             display:none;
@@ -3212,968 +3433,52 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('input[name="on_door_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="on_door_range_down[0]"]').val(maxvalue);
-                $('input[name="on_door_range_up[1]"]').val(minvalue);
-            });
-
-            $('input[name="on_hub_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="on_hub_range_down[0]"]').val(maxvalue);
-                $('input[name="on_hub_range_up[1]"]').val(minvalue);
-            });
-            $('input[name="ol_door_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="ol_door_range_down[0]"]').val(maxvalue);
-                $('input[name="ol_door_range_up[1]"]').val(minvalue);
-            });
-            $('input[name="ol_hub_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="ol_hub_range_down[0]"]').val(maxvalue);
-                $('input[name="ol_hub_range_up[1]"]').val(minvalue);
-            });
-            $('input[name="detain_door_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="detain_door_range_down[0]"]').val(maxvalue);
-                $('input[name="detain_door_range_up[1]"]').val(minvalue);
-            });
-            $('input[name="detain_hub_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="detain_hub_range_down[0]"]').val(maxvalue);
-                $('input[name="detain_hub_range_up[1]"]').val(minvalue);
-            });
-            $('input[name="sameday_door_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="sameday_door_range_down[0]"]').val(maxvalue);
-                $('input[name="sameday_door_range_up[1]"]').val(minvalue);
-            });
-            $('input[name="sameday_hub_mcw_charges"]').on('change', function () {
-                var value = $(this).val();
-                var maxvalue = parseFloat(value);
-                var minvalue = maxvalue + 0.01;
-                $('input[name="sameday_hub_range_down[0]"]').val(maxvalue);
-                $('input[name="sameday_hub_range_up[1]"]').val(minvalue);
-            });
-
-            // var on_main_switch = document.querySelector('#on_main_switch');
-            $('#on_main_switch').on('change',function(){
-
-                var onmainswitch = document.querySelector('.switchery.on-main-switch');
-                if (onmainswitch.checked === true) {
-                    $('#overnight').slideDown('slow');
-
-                } else if (onmainswitch.checked === false) {
-                    $('#overnight').slideUp('slow');
-
-
-                }
-            });
-            $('#ol_main_switch').on('change',function(){
-
-                var olmainswitch = document.querySelector('.switchery.ol-main-switch');
-                if (olmainswitch.checked === true) {
-                    $('#overland').slideDown('slow');
-
-                } else if (olmainswitch.checked === false) {
-                    $('#overland').slideUp('slow');
-
-
-                }
-            });
-            $('#detain_main_switch').on('change',function(){
-                var detainmainswitch = document.querySelector('.switchery.detain-main-switch');
-                if (detainmainswitch.checked === true) {
-                    $('#detain').slideDown('slow');
-
-                } else if (detainmainswitch.checked === false) {
-                    $('#detain').slideUp('slow');
-
-
-                }
-            });
-            $('#sameday_main_switch').on('change',function(){
-                var samedaymainswitch = document.querySelector('.switchery.sameday-main-switch');
-                if (samedaymainswitch.checked === true) {
-                    $('#sameday').slideDown('slow');
-
-                } else if (samedaymainswitch.checked === false) {
-                    $('#sameday').slideUp('slow');
-
-
-                }
-            });
-
-
-
-        $('.decimal').inputmask({
-            'alias': 'decimal',
-            'allowMinus': false,
-            'allowPlus': false,
-            'rightAlign': false,
-            'digits': 3,
-            'min': 0.00,
-            'max': 10000
+        @isset($wms_user_info->warehousing)
+        var weekly = [1, 2, 3, 4, 5, 6, 7];
+        var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+        $('#invoicing_date_select').select2({
+            data:monthly,
+            width:'100%',
+            placeholder:'Select Date'
         });
-        $('.amount').inputmask({
-            'alias': 'decimal',
-            'allowMinus': false,
-            'allowPlus': false,
-            'rightAlign': false,
-            'digits': 2,
-            'min': 0.00,
-            'max': 1000000.00
-        });
-
-        $('.percent').inputmask({
-            'alias': 'numeric',
-            'allowMinus': false,
-            'allowPlus': false,
-            'rightAlign': false,
-            'min': 0,
-            'max': 500
-        });
-        $('.numeric').inputmask({
-            'alias': 'integer',
-            'allowMinus': false,
-            'allowPlus': false,
-            'rightAlign': false,
-            'min': 0,
-            'max': 1000000
-        });
-        $('.dec-percent').inputmask("Regex",{
-            'allowMinus': false,
-            'allowPlus': false,
-            'rightAlign': false,
-            regex: '^\\d{1,9}(\\.\\d{1,2})?%?$'
-        });
-
-        $(".daterange").daterangepicker();
-
-        //Overnight
-
-        var cashhandlingswitch = document.querySelector('.switchery.cashChargesOvernight');
-        var insuranceChargesSwitch = document.querySelector('.switchery.insuranceChargesOvernight');
-        var returnChargesSwitch = document.querySelector('.switchery.returnChargesOvernight');
-        var fuelChargesSwitch = document.querySelector('.switchery.fuelSurchargeOvernight');
-
-
-
-
-        function masks() {
-
-            $('.decimal').inputmask({
-                'alias': 'decimal',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'digits': 3,
-                'min': 0.00,
-                'max': 10000
-            });
-            $('.amount').inputmask({
-                'alias': 'decimal',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'digits': 2,
-                'min': 0.00,
-                'max': 1000000.00
-            });
-            $('.numeric').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'min': 0,
-                'max': 1000000
-            });
-            $('.dec-percent').inputmask("Regex",{
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                regex: '^\\d{1,9}(\\.\\d{1,2})?%?$'
-            });
+        var invoicing_cycle = '{{$wms_user_info->invoicing_cycle}}';
+        var invoicing_date = '{{$wms_user_info->invoicing_date}}';
+        invoicing_cycle = parseInt(invoicing_cycle);
+        invoicing_date = parseInt(invoicing_date);
+        if(invoicing_cycle == 1 || invoicing_cycle == 3){
+             $('#invoicing_date_select').val(invoicing_date).trigger('change');
         }
-
-        $('body').on('click','.on_weight_close',function () {
-            $(this).parent().parent().remove();
-        });
-        var on_door_count = $('.on_door_weight_row').length;
-        $('body').on('click','#waddition_btn',function () {
-
-            let htmdiv = '<div class="row on_door_weight_row" id="on_door_weight_row'+on_door_count+'"><input type="hidden" name="on_door_weight_record['+on_door_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_range_up['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_range_down['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_door_local_charges['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="on_door_class_0_charges['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_door_class_1_charges['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_door_class_2_charges['+on_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_door_class_3_charges['+on_door_count+']"></fieldset></div><div class="col-1">\n' +
-                '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span></div></div>';
-            $('.weight-addition-overnight').append(htmdiv);
-
-            masks();
-
-            $("#on_door_weight_row"+on_door_count+" .validated").each(function(){
-                $( this ).rules( "add", {
-                    required: true,
-                });
-
-            });
-            on_door_count++;
-        });
-        var on_hub_count = $('.on_hub_weight_row').length;
-
-        $('body').on('click','#hub_waddition_btn',function () {
-
-            let htmdiv = '<div class="row on_hub_weight_row" id="on_hub_weight_row'+on_hub_count+'"><input type="hidden" name="on_hub_weight_record['+on_hub_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_range_up['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_range_down['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_hub_local_charges['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="on_hub_class_0_charges['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_hub_class_1_charges['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_hub_class_2_charges['+on_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_hub_class_3_charges['+on_hub_count+']"></fieldset></div><div class="col-1">\n' +
-                '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span></div></div>';
-            $('.hub-weight-addition-overnight').append(htmdiv);
-
-            masks();
-
-            $("#on_hub_weight_row"+on_hub_count+" .validated").each(function(){
-                $( this ).rules( "add", {
-                    required: true,
-                });
-
-            });
-            on_hub_count++;
+        
+        $('#invoicing_cycle_select').select2({
+            placeholder: "Select Invoicing Cycle",
+            width:'100%'
         });
 
-        // var switchery = new Switchery('.switchery.weightAddition'+count, { color: '#37BC9B' });
-
-
-        //addMoreSlabs
-        var on_slab_count = 5;
-        $('body').on('click','#addMoreSlabs',function () {
-            let htmdiv = '<div class="row" id="on_insurance_handle_'+on_slab_count+'">\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="on_cash_range_up['+on_slab_count+']" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric validated" >\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="on_cash_range_down['+on_slab_count+']" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric validated">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="on_cash_charges['+on_slab_count+']" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent validated"></fieldset></div><div class="col">\n' +
-                '<span class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span></div></div>';
-            $('.cash-handling-div-overnight').append(htmdiv);
-            masks();
-            $("#on_insurance_handle_"+on_slab_count+" .validated").each(function(){
-                $( this ).rules( "add", {
-                    required: true,
-                });
-
-            });
-            // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
-            on_slab_count++;
+        @foreach($wms_storage_charges as $index => $storage)
+        $('select[name="storage_type[{{$index}}]"]').select2({
+            width:'100%',
+            placeholder:'Select Storage Type'
         });
-        //add more slabs insurance
-        var on_ins_count = 3;
-        $('body').on('click','#addMoreSlabsInsurance',function () {
-            let htmdiv = '<div class="row" id="on_insurance_charge_'+on_ins_count+'">\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="on_ins_range_up['+on_ins_count+']" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric validated">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="on_ins_range_down['+on_ins_count+']" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric validated">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="on_ins_charges['+on_ins_count+']" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent validated">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '<div class="col">\n' +
-                '<span class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span></div></div>';
-            $('.insurance-charges-div-overnight').append(htmdiv);
-            masks();
-            $("#on_insurance_charge_"+on_ins_count+" .validated").each(function(){
-                $( this ).rules( "add", {
-                    required: true,
-                });
+        $('select[name="storage_type[{{$index}}]"]').val({{$storage->storage_type_id}}).trigger('change');
+        @endforeach
 
-            });
-            on_ins_count++;
+        @foreach($wms_packing_charges as $ind => $packing)
+        $('select[name="packing_type[{{$ind}}]"]').select2({
+            width:'100%',
+            placeholder:'Select Packing Type'
         });
-        //Cash handling
-        // cashChargesOvernight
-        cashhandlingswitch.onchange = function () {
-            console.log(cashhandlingswitch);
-            if(cashhandlingswitch.checked === true){
-                $('.cash-handling-div-overnight').find('input').prop('disabled',false);
-                $('.cash-handling-btn-overnight').find('button').prop('disabled',false);
-            }else if(cashhandlingswitch.checked === false){
-                $('.cash-handling-div-overnight').find('input').prop('disabled',true);
-                $('.cash-handling-btn-overnight').find('button').prop('disabled',true);
-
-            }
-        };
-
-        // InsuranceOvernight
-        insuranceChargesSwitch.onchange = function () {
-            if(insuranceChargesSwitch.checked === true){
-                $('.insurance-charges-div-overnight').find('input').prop('disabled',false);
-                $('.insurance-charges-btn-overnight').find('button').prop('disabled',false);
-            }else if(insuranceChargesSwitch.checked === false){
-                $('.insurance-charges-div-overnight').find('input').prop('disabled',true);
-                $('.insurance-charges-btn-overnight').find('button').prop('disabled',true);
-
-            }
-        };
-        // Return Overnight
-        returnChargesSwitch.onchange = function () {
-            if(returnChargesSwitch.checked === true){
-                $('.return-charges-div-overnight').find('input').prop('disabled',false);
-            }else if(returnChargesSwitch.checked === false){
-                $('.return-charges-div-overnight').find('input').prop('disabled',true);
-
-            }
-        };
-        fuelChargesSwitch.onchange = function () {
-            if(fuelChargesSwitch.checked === true){
-                $('.fuel-surcharge-div-overnight').find('input').prop('disabled',false);
-            }else if(fuelChargesSwitch.checked === false){
-                $('.fuel-surcharge-div-overnight').find('input').prop('disabled',true);
-
-            }
-        };
-
-        //Overland
-        //var weightAdditionOverland = document.querySelector('.switchery.weightAdditionOverland0');
-        var cashhandlingswitchOverland = document.querySelector('.switchery.cashChargesOverland');
-        var insuranceChargesSwitchOverland = document.querySelector('.switchery.insuranceChargesoverland');
-        var returnChargesSwitchOverland = document.querySelector('.switchery.returnChargesOverland');
-        var fuelChargesSwitchOL = document.querySelector('.switchery.fuelSurchargeOverland');
-
-        //Overland
-
-
-        var overland_door_count = $('.ol_door_weight_row').length;
-        $('body').on('click','#overland_door_weightadd',function () {
-
-            let htmdiv1 = '<div class="row ol_door_weight_row" id="ol_door_weight_row'+overland_door_count+'"><input type="hidden" name="ol_door_weight_record['+overland_door_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_range_up['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_range_down['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_door_local_charges['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_door_class_0_charges['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_door_class_1_charges['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_door_class_2_charges['+overland_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_door_class_3_charges['+overland_door_count+']"></fieldset></div><div class="col-1">\n' +
-                '<span class="btn btn-danger rounded btn-sm-width mr-1 mb-1 ol_weight_close"><i class="ft-x"></i></span></div></div>';
-            $('.weight-addition-overland').append(htmdiv1);
-
-            masks();
-
-            $("#ol_door_weight_row"+overland_door_count+" .validated").each(function(){
-                $( this ).rules( "add", {
-                    required: true,
-                });
-
-            });
-            overland_door_count++;
-        });
-        var overland_hub_count = $('.ol_hub_weight_row').length;
-        $('body').on('click','#overland_hub_weightadd',function () {
-
-            let htmdiv1 = '<div class="row ol_hub_weight_row" id="ol_hub_weight_row'+overland_hub_count+'"><input type="hidden" name="ol_hub_weight_record['+overland_hub_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_range_up['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_range_down['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_hub_local_charges['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_hub_class_0_charges['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_hub_class_1_charges['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_hub_class_2_charges['+overland_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_hub_class_3_charges['+overland_hub_count+']"></fieldset></div><div class="col-1">\n' +
-                '<span class="btn btn-danger rounded btn-sm-width mr-1 mb-1 ol_weight_close"><i class="ft-x"></i></span></div></div>';
-            $('.hub-weight-addition-overland').append(htmdiv1);
-
-            masks();
-
-            $("#ol_hub_weight_row"+overland_hub_count+" .validated").each(function(){
-                $( this ).rules( "add", {
-                    required: true,
-                });
-
-            });
-            overland_hub_count++;
-        });
-
-        //addMoreSlabs
-        $('body').on('click','.ol_weight_close',function () {
-            $(this).parent().parent().remove();
-        });
-        $('body').on('click','.ol_row_delete',function () {
-            $(this).parent().parent().remove();
-        });
-        var ol_slab_count = 5;
-        $('body').on('click','#overlandaddMoreSlabs',function () {
-            let htmdiv = '<div class="row" id="ol_cash_handle_'+ol_slab_count+'">\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="ol_cash_range_up['+ol_slab_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="ol_cash_range_down['+ol_slab_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '                                                <div class="col-md-2">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="ol_cash_charges['+ol_slab_count+']" type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '<div class="col">\n' +
-                '<span class="ol_row_delete btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
-            $('.cash-handling-div-overland').append(htmdiv);
-            ol_slab_count++;
-            masks();
-            // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
-
-        });
-        //add more slabs insurance
-        var ol_ins_count = 3;
-        $('body').on('click','#oladdMoreSlabsInsurance',function () {
-            let htmdiv = '<div class="row" id="ol_insurance_charge_'+ol_ins_count+'">\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="ol_ins_range_up['+ol_ins_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="ol_ins_range_down['+ol_ins_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="ol_ins_charges['+ol_ins_count+']" type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '<div class="col">\n' +
-                '<span  class="ol_row_delete btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
-            $('.insurance-charges-div-overland').append(htmdiv);
-            ol_ins_count++;
-            masks();
-            // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
-
-        });
-        //Cash handling
-        // cashChargesOvernight
-        cashhandlingswitchOverland.onchange = function () {
-            if(cashhandlingswitchOverland.checked === true){
-                // $('.cash-handling-div').
-                $('.cash-handling-div-overland').find('input').prop('disabled',false);
-                $('.cash-handling-btn-overland').find('button').prop('disabled',false);
-            }else if(cashhandlingswitchOverland.checked === false){
-                $('.cash-handling-div-overland').find('input').prop('disabled',true);
-                $('.cash-handling-btn-overland').find('button').prop('disabled',true);
-
-            }
-        };
-
-        // InsuranceOvernight
-        insuranceChargesSwitchOverland.onchange = function () {
-            if(insuranceChargesSwitchOverland.checked === true){
-                // $('.cash-handling-div').
-                $('.insurance-charges-div-overland').find('input').prop('disabled',false);
-                $('.insurance-charges-btn-overland').find('button').prop('disabled',false);
-            }else if(insuranceChargesSwitchOverland.checked === false){
-                $('.insurance-charges-div-overland').find('input').prop('disabled',true);
-                $('.insurance-charges-btn-overland').find('button').prop('disabled',true);
-
-            }
-        };
-        // Return Overnight
-        returnChargesSwitchOverland.onchange = function () {
-            if(returnChargesSwitchOverland.checked === true){
-                $('.return-charges-div-overland').find('input').prop('disabled',false);
-            }else if(returnChargesSwitchOverland.checked === false){
-                $('.return-charges-div-overland').find('input').prop('disabled',true);
-
-            }
-        };
-        fuelChargesSwitchOL.onchange = function () {
-            if(fuelChargesSwitchOL.checked === true){
-                $('.fuel-surcharge-div-overland').find('input').prop('disabled',false);
-            }else if(fuelChargesSwitchOL.checked === false){
-                $('.fuel-surcharge-div-overland').find('input').prop('disabled',true);
-
-            }
-        };
-        //overland end
-        //detain
-        //var weightAdditionDetain = document.querySelector('.switchery.weightAdditionDetain0');
-        var cashhandlingswitchDetain = document.querySelector('.switchery.cashChargesDetain');
-        var insuranceChargesSwitchDetain = document.querySelector('.switchery.insuranceChargesdetain');
-        var returnChargesSwitchDetain = document.querySelector('.switchery.returnChargesDetain');
-        var fuelChargesSwitchDetain = document.querySelector('.switchery.fuelSurchargeDetain');
-
-        //detain
-
-
-        var detain_door_count = $('.detain_door_weight_row').length;
-        $('body').on('click','#detain_door_weightadd',function () {
-
-            let htmdiv1 = '<div class="row detain_door_weight_row" id="detain_door_weight_row'+detain_door_count+'"><input type="hidden" name="detain_door_weight_record['+overland_door_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_range_up['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_range_down['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_door_local_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_0_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_1_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_2_charges['+detain_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_door_class_3_charges['+detain_door_count+']"></fieldset></div><div class="col-1">\n' +
-                '<span id="detain_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 detain_weight_close"><i class="ft-x"></i></span></div></div>';
-            $('.weight-addition-detain').append(htmdiv1);
-
-            masks();
-
-            $("#detain_door_weight_row"+detain_door_count+" .validated").each(function(){
-                $( this ).rules( "add", {
-                    required: true,
-                });
-
-            });
-            detain_door_count++;
-        });
-        var detain_hub_count = $('.detain_hub_weight_row').length;
-        $('body').on('click','#detain_hub_weightadd',function () {
-
-            let htmdiv1 = '<div class="row detain_hub_weight_row" id="detain_hub_weight_row'+detain_hub_count+'"><input type="hidden" name="detain_hub_weight_record['+detain_hub_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_range_up['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_range_down['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_hub_local_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_0_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_1_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_2_charges['+detain_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_hub_class_3_charges['+detain_hub_count+']"></fieldset></div><div class="col-1">\n' +
-                '<span id="detain_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 detain_weight_close"><i class="ft-x"></i></span></div></div>';
-            $('.hub-weight-addition-detain').append(htmdiv1);
-
-            masks();
-
-            $("#detain_hub_weight_row"+detain_hub_count+" .validated").each(function(){
-                $( this ).rules( "add", {
-                    required: true,
-                });
-
-            });
-            detain_hub_count++;
-        });
-
-        //addMoreSlabs
-        $('body').on('click','.detain_weight_close',function () {
-            $(this).parent().parent().remove();
-        });
-        $('body').on('click','.detain_row_delete',function () {
-            $(this).parent().parent().remove();
-        });
-        var detain_slab_count = 5;
-        $('body').on('click','#detainaddMoreSlabs',function () {
-            let htmdiv = '<div class="row" id="detain_cash_handle_'+detain_slab_count+'">\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="detain_cash_range_up['+detain_slab_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="detain_cash_range_down['+detain_slab_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '                                                <div class="col-md-2">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="detain_cash_charges['+detain_slab_count+']" type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '<div class="col">\n' +
-                '<span class="detain_row_delete btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
-            $('.cash-handling-div-detain').append(htmdiv);
-            detain_slab_count++;
-            masks();
-            // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
-
-        });
-        //add more slabs insurance
-        var detain_ins_count = 3;
-        $('body').on('click','#detainaddMoreSlabsInsurance',function () {
-            let htmdiv = '<div class="row" id="detain_insurance_charge_'+detain_ins_count+'">\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="detain_ins_range_up['+detain_ins_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="detain_ins_range_down['+detain_ins_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="detain_ins_charges['+detain_ins_count+']" type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '<div class="col">\n' +
-                '<span  class="detain_row_delete btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
-            $('.insurance-charges-div-detain').append(htmdiv);
-            detain_ins_count++;
-            masks();
-            // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
-
-        });
-        //Cash handling
-        // cashChargesOvernight
-        cashhandlingswitchDetain.onchange = function () {
-            if(cashhandlingswitchDetain.checked === true){
-                // $('.cash-handling-div').
-                $('.cash-handling-div-detain').find('input').prop('disabled',false);
-                $('.cash-handling-btn-detain').find('button').prop('disabled',false);
-            }else if(cashhandlingswitchDetain.checked === false){
-                $('.cash-handling-div-detain').find('input').prop('disabled',true);
-                $('.cash-handling-btn-detain').find('button').prop('disabled',true);
-
-            }
-        };
-
-        // InsuranceOvernight
-        insuranceChargesSwitchDetain.onchange = function () {
-            if(insuranceChargesSwitchDetain.checked === true){
-                // $('.cash-handling-div').
-                $('.insurance-charges-div-detain').find('input').prop('disabled',false);
-                $('.insurance-charges-btn-detain').find('button').prop('disabled',false);
-            }else if(insuranceChargesSwitchDetain.checked === false){
-                $('.insurance-charges-div-detain').find('input').prop('disabled',true);
-                $('.insurance-charges-btn-detain').find('button').prop('disabled',true);
-
-            }
-        };
-        // Return Overnight
-        returnChargesSwitchDetain.onchange = function () {
-            if(returnChargesSwitchDetain.checked === true){
-                $('.return-charges-div-detain').find('input').prop('disabled',false);
-            }else if(returnChargesSwitchDetain.checked === false){
-                $('.return-charges-div-detain').find('input').prop('disabled',true);
-
-            }
-        };
-        fuelChargesSwitchDetain.onchange = function () {
-            if(fuelChargesSwitchDetain.checked === true){
-                $('.fuel-surcharge-div-detain').find('input').prop('disabled',false);
-            }else if(fuelChargesSwitchDetain.checked === false){
-                $('.fuel-surcharge-div-detain').find('input').prop('disabled',true);
-
-            }
-        };
-
-
-        //Detain end
-        //sameday start
-        //var weightAdditionSameday = document.querySelector('.switchery.weightAdditionSameday0');
-        var cashhandlingswitchSameday = document.querySelector('.switchery.cashChargesSameday');
-        var insuranceChargesSwitchSameday = document.querySelector('.switchery.insuranceChargessameday');
-        var returnChargesSwitchSameday = document.querySelector('.switchery.returnChargesSameday');
-        var fuelChargesSwitchSameday = document.querySelector('.switchery.fuelSurchargeSameday');
-
-        //detain
-
-
-        var sameday_door_count = $('.sameday_door_weight_row').length;
-        $('body').on('click','#sameday_door_weightadd',function () {
-
-            let htmdiv1 = '<div class="row sameday_door_weight_row" id="sameday_door_weight_row'+sameday_door_count+'"><input type="hidden" name="sameday_door_weight_record['+sameday_door_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_range_up['+sameday_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_range_down['+sameday_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_door_local_charges['+sameday_door_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_door_class_0_charges['+sameday_door_count+']"></fieldset></div><div class="col-1">\n' +
-                '<span id="sameday_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 sameday_weight_close"><i class="ft-x"></i></span></div></div>';
-            $('.weight-addition-sameday').append(htmdiv1);
-
-            masks();
-
-            $("#sameday_door_weight_row"+sameday_door_count+" .validated").each(function(){
-                $( this ).rules( "add", {
-                    required: true,
-                });
-
-            });
-            sameday_door_count++;
-        });
-        var sameday_hub_count = $('.sameday_hub_weight_row').length;
-        $('body').on('click','#sameday_hub_weightadd',function () {
-
-            let htmdiv1 = '<div class="row sameday_hub_weight_row" id="sameday_hub_weight_row'+sameday_hub_count+'"><input type="hidden" name="sameday_hub_weight_record['+sameday_hub_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_range_up['+sameday_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_range_down['+sameday_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_hub_local_charges['+sameday_hub_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_hub_class_0_charges['+sameday_hub_count+']"></fieldset></div><div class="col-1">\n' +
-                '<span id="sameday_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 sameday_weight_close"><i class="ft-x"></i></span></div></div>';
-            $('.hub-weight-addition-sameday').append(htmdiv1);
-
-            masks();
-
-            $("#sameday_hub_weight_row"+sameday_hub_count+" .validated").each(function(){
-                $( this ).rules( "add", {
-                    required: true,
-                });
-
-            });
-            sameday_hub_count++;
-        });
-
-        //addMoreSlabs
-        $('body').on('click','.sameday_weight_close',function () {
-            $(this).parent().parent().remove();
-        });
-        $('body').on('click','.sameday_row_delete',function () {
-            $(this).parent().parent().remove();
-        });
-        var sameday_slab_count = 5;
-        $('body').on('click','#samedayaddMoreSlabs',function () {
-            let htmdiv = '<div class="row" id="sameday_cash_handle_'+sameday_slab_count+'">\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="sameday_cash_range_up['+sameday_slab_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="sameday_cash_range_down['+sameday_slab_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '                                                <div class="col-md-2">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="sameday_cash_charges['+sameday_slab_count+']" type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '<div class="col">\n' +
-                '<span class="sameday_row_delete btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
-            $('.cash-handling-div-sameday').append(htmdiv);
-            sameday_slab_count++;
-            masks();
-            // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
-
-        });
-        //add more slabs insurance
-        var sameday_ins_count = 3;
-        $('body').on('click','#samedayaddMoreSlabsInsurance',function () {
-            let htmdiv = '<div class="row" id="sameday_insurance_charge_'+sameday_ins_count+'">\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="sameday_ins_range_up['+sameday_ins_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="sameday_ins_range_down['+sameday_ins_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '\n' +
-                '                                                <div class="col-md-2 text-center">\n' +
-                '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="sameday_ins_charges['+sameday_ins_count+']" type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required">\n' +
-                '                                                    </fieldset>\n' +
-                '                                                </div>\n' +
-                '<div class="col">\n' +
-                '<span  class="sameday_row_delete btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
-            $('.insurance-charges-div-sameday').append(htmdiv);
-            sameday_ins_count++;
-            masks();
-            // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
-
-        });
-        //Cash handling
-        // cashChargesOvernight
-        cashhandlingswitchSameday.onchange = function () {
-            if(cashhandlingswitchSameday.checked === true){
-                // $('.cash-handling-div').
-                $('.cash-handling-div-sameday').find('input').prop('disabled',false);
-                $('.cash-handling-btn-sameday').find('button').prop('disabled',false);
-            }else if(cashhandlingswitchSameday.checked === false){
-                $('.cash-handling-div-sameday').find('input').prop('disabled',true);
-                $('.cash-handling-btn-sameday').find('button').prop('disabled',true);
-
-            }
-        };
-
-        // InsuranceOvernight
-        insuranceChargesSwitchSameday.onchange = function () {
-            if(insuranceChargesSwitchSameday.checked === true){
-                // $('.cash-handling-div').
-                $('.insurance-charges-div-sameday').find('input').prop('disabled',false);
-                $('.insurance-charges-btn-sameday').find('button').prop('disabled',false);
-            }else if(insuranceChargesSwitchSameday.checked === false){
-                $('.insurance-charges-div-sameday').find('input').prop('disabled',true);
-                $('.insurance-charges-btn-sameday').find('button').prop('disabled',true);
-
-            }
-        };
-        // Return Overnight
-        returnChargesSwitchSameday.onchange = function () {
-            if(returnChargesSwitchSameday.checked === true){
-                $('.return-charges-div-sameday').find('input').prop('disabled',false);
-            }else if(returnChargesSwitchSameday.checked === false){
-                $('.return-charges-div-sameday').find('input').prop('disabled',true);
-
-            }
-        };
-        fuelChargesSwitchSameday.onchange = function () {
-            if(fuelChargesSwitchSameday.checked === true){
-                $('.fuel-surcharge-div-sameday').find('input').prop('disabled',false);
-            }else if(fuelChargesSwitchSameday.checked === false){
-                $('.fuel-surcharge-div-sameday').find('input').prop('disabled',true);
-
-            }
-        };
-
-        //Detain end
-        //end sameday
-        //for discounts Overnight
-        var ondiscountSwitch = Array.prototype.slice.call(document.querySelectorAll('.discountSwitchesOvernight'));
-
-
-        ondiscountSwitch[0].onchange = function () {
-            ONdiscount(ondiscountSwitch[0]);
-        };
-        ondiscountSwitch[1].onchange = function () {
-            ONdiscount(ondiscountSwitch[1]);
-        };
-        ondiscountSwitch[2].onchange = function () {
-            ONdiscount(ondiscountSwitch[2]);
-        };
-        ondiscountSwitch[3].onchange = function () {
-            ONdiscount(ondiscountSwitch[3]);
-        };
-        // ondiscountSwitch[4].onchange = function () {
-        //     ONdiscount(ondiscountSwitch[4]);
-        // };
-
-        function ONdiscount(eve) {
-            if(eve.checked === true){
-
-                $(eve).parent().parent().next().prop('disabled',false);
-                $('input[name="on_discount_title"]').prop('disabled',false);
-                $('input[name="on_daterange"]').prop('disabled',false);
-
-            }else if(eve.checked === false){
-                $(eve).parent().parent().next().prop('disabled',true);
-
-                if(ondiscountSwitch[0].checked === true || ondiscountSwitch[1].checked === true || ondiscountSwitch[2].checked === true || ondiscountSwitch[3].checked === true){
-                    $('input[name="on_discount_title"]').prop('disabled',false);
-                    $('input[name="on_daterange"]').prop('disabled',false);
-                }else{
-                    $('input[name="on_discount_title"]').prop('disabled',true);
-                    $('input[name="on_daterange"]').prop('disabled',true);
-                }
-
-            }
-        }
-        //for discounts Overland
-        var overlandDiscountSwitch = Array.prototype.slice.call(document.querySelectorAll('.discountSwitchesOverland'));
-
-
-        overlandDiscountSwitch[0].onchange = function () {
-            OLdiscount(overlandDiscountSwitch[0]);
-        };
-        overlandDiscountSwitch[1].onchange = function () {
-            OLdiscount(overlandDiscountSwitch[1]);
-        };
-        overlandDiscountSwitch[2].onchange = function () {
-            OLdiscount(overlandDiscountSwitch[2]);
-        };
-        overlandDiscountSwitch[3].onchange = function () {
-            OLdiscount(overlandDiscountSwitch[3]);
-        };
-
-        function OLdiscount(eveOver) {
-            if(eveOver.checked === true){
-
-                $(eveOver).parent().parent().next().prop('disabled',false);
-                $('input[name="ol_discount_title"]').prop('disabled',false);
-                $('input[name="ol_daterange"]').prop('disabled',false);
-
-            }else if(eveOver.checked === false){
-                $(eveOver).parent().parent().next().prop('disabled',true);
-
-                if(overlandDiscountSwitch[0].checked === true || overlandDiscountSwitch[1].checked === true || overlandDiscountSwitch[2].checked === true || overlandDiscountSwitch[3].checked === true){
-                    $('input[name="ol_discount_title"]').prop('disabled',false);
-                    $('input[name="ol_daterange"]').prop('disabled',false);
-                }else{
-                    $('input[name="ol_discount_title"]').prop('disabled',true);
-                    $('input[name="ol_daterange"]').prop('disabled',true);
-                }
-
-            }
-        }
-
-        //for discounts Overland
-        var detainDiscountSwitch = Array.prototype.slice.call(document.querySelectorAll('.discountSwitchesDetain'));
-
-
-        detainDiscountSwitch[0].onchange = function () {
-            Detaindiscount(detainDiscountSwitch[0]);
-        };
-        detainDiscountSwitch[1].onchange = function () {
-            Detaindiscount(detainDiscountSwitch[1]);
-        };
-        detainDiscountSwitch[2].onchange = function () {
-            Detaindiscount(detainDiscountSwitch[2]);
-        };
-        detainDiscountSwitch[3].onchange = function () {
-            Detaindiscount(detainDiscountSwitch[3]);
-        };
-
-        function Detaindiscount(eveDet) {
-            if(eveDet.checked === true){
-
-                $(eveDet).parent().parent().next().prop('disabled',false);
-                $('input[name="detain_discount_title"]').prop('disabled',false);
-                $('input[name="detain_daterange"]').prop('disabled',false);
-
-            }else if(eveDet.checked === false){
-                $(eveDet).parent().parent().next().prop('disabled',true);
-
-                if(detainDiscountSwitch[0].checked === true || detainDiscountSwitch[1].checked === true || detainDiscountSwitch[2].checked === true || detainDiscountSwitch[3].checked === true){
-                    $('input[name="detain_discount_title"]').prop('disabled',false);
-                    $('input[name="detain_daterange"]').prop('disabled',false);
-                }else{
-                    $('input[name="detain_discount_title"]').prop('disabled',true);
-                    $('input[name="detain_daterange"]').prop('disabled',true);
-                }
-
-            }
-        }
-        //for discounts Overland
-        var samedayDiscountSwitch = Array.prototype.slice.call(document.querySelectorAll('.discountSwitchesSameday'));
-
-
-        samedayDiscountSwitch[0].onchange = function () {
-            SamedayDiscount(samedayDiscountSwitch[0]);
-        };
-        samedayDiscountSwitch[1].onchange = function () {
-            SamedayDiscount(samedayDiscountSwitch[1]);
-        };
-        samedayDiscountSwitch[2].onchange = function () {
-            SamedayDiscount(samedayDiscountSwitch[2]);
-        };
-        samedayDiscountSwitch[3].onchange = function () {
-            SamedayDiscount(samedayDiscountSwitch[3]);
-        };
-
-        function SamedayDiscount(eveSameday) {
-            if(eveSameday.checked === true){
-
-                $(eveSameday).parent().parent().next().prop('disabled',false);
-                $('input[name="sameday_discount_title"]').prop('disabled',false);
-                $('input[name="sameday_daterange"]').prop('disabled',false);
-
-            }else if(eveSameday.checked === false){
-                $(eveSameday).parent().parent().next().prop('disabled',true);
-
-                if(samedayDiscountSwitch[0].checked === true || samedayDiscountSwitch[1].checked === true || samedayDiscountSwitch[2].checked === true || samedayDiscountSwitch[3].checked === true ){
-                    $('input[name="sameday_discount_title"]').prop('disabled',false);
-                    $('input[name="sameday_daterange"]').prop('disabled',false);
-                }else{
-                    $('input[name="sameday_discount_title"]').prop('disabled',true);
-                    $('input[name="sameday_daterange"]').prop('disabled',true);
-                }
-
-            }
-        }
+        $('select[name="packing_type[{{$ind}}]"]').val({{$packing->packing_type_id}}).trigger('change');
+        @endforeach
+
+        
+        @endisset
 
         });
 

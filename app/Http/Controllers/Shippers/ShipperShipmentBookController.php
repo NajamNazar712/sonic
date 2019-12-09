@@ -593,7 +593,8 @@ class ShipperShipmentBookController extends Controller
             $user_name = User::find($user_id)->name . ' (Shipper)';
         }
         else if ($user_type == 2) {
-            $user_name = SubstituteUser::where('user_id',$user_id)->select('name')->first() . ' (Sub-Shipper)';
+            $sub_shipper = SubstituteUser::where('user_id',$user_id)->select('name')->first();
+            $user_name = $sub_shipper->name . ' (Sub-Shipper)';
         }
         else if ($user_type == 4) {
             $user_name = User::find($user_id)->name . ' (API)';
@@ -718,6 +719,47 @@ class ShipperShipmentBookController extends Controller
                   <body>
                     <div>
             ';
+
+            if ($user_type != 4 && $type != 'pdf') {
+                $html .= '
+                    <style>
+                      @font-face {
+                        font-family: "Fajer Noori Nastalique";
+                        src: url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.eot') . '");
+                        src: url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.eot?#iefix') . '") format("embedded-opentype"),
+                        url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.woff') . '") format("woff"),
+                        url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.otf') . '") format("opentype"),
+                        url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.ttf') . '") format("truetype"),
+                        url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.svg#FajerNooriNastalique') . '") format("svg");
+                        font-weight: normal;
+                        font-style: normal;
+                        unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+                      }
+
+                      .urdu {
+                        font-family: "Fajer Noori Nastalique";
+                      }
+                    </style>
+                ';
+            }
+            else {
+                $html .= '
+                    <style>
+                      @font-face {
+                        font-family: "Fajer Noori Nastalique";
+                        src: url("data:font/truetype;charset=utf-8;base64,' . base64_encode(file_get_contents(public_path('fonts/urdu/Fajer-Noori-Nastalique.ttf'))) . '") format("truetype");
+                        font-weight: normal;
+                        font-style: normal;
+                        unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+                      }
+
+                      .urdu {
+                        font-family: "Fajer Noori Nastalique";
+                        padding-bottom: .75rem !important;
+                      }
+                    </style>
+                ';
+            }
 
             if ($type == 'pdf') {
                 $html .= '
@@ -1053,7 +1095,10 @@ class ShipperShipmentBookController extends Controller
                 $table_end .= '
                               </tr>
                               <tr>
-                                <td colspan="8" class="text-center border twice-top font-small"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
+                                <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>برائے مہربانی رائڈر / کورئیر کو کوئی اضافی پیسہ نہ دیں۔ اگر پارسل / پیکٹ خراب یا خراب حالت میں ہے تو ، براہ کرم اسے وصول نہ کریں۔</em></td>
+                              </tr>
+                              <tr>
+                                <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>ٹریکس لاجسٹک کا اس پارسل / پیکٹ میں موجود کسی آئٹم یا مواد سے کوئی تعلق نہیں ہے۔ ہم سامان ایک جگہ سے دوسری جگہ بھیجتے ہیں۔ اگر آپ کو اس بارے میں کوئی شکایت ہے تو ، براہ کرم متعلقہ آن لائن اسٹور سے رابطہ کریں۔</em></td>
                               </tr>
                             </tbody>
                         </table>
