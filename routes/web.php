@@ -175,6 +175,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('adjusted_shipments', 'Shippers\ShipperFinanceController@payments_adjusted_shipments')->name('adjusted_shipments');
             Route::post('details_print', 'Shippers\ShipperFinanceController@payments_details_print')->name('details_print');
             Route::get('export_to_excel', 'Shippers\ShipperFinanceController@payments_export_to_excel')->name('export_to_excel');
+
+            Route::prefix('reconcile_through_receiving_sheet')->name('reconcile_through_receiving_sheet.')->group(function () {
+                Route::get('', 'Shippers\ShipperFinanceController@payments_reconcile_through_receiving_sheet_index')->name('index');
+                Route::get('list', 'Shippers\ShipperFinanceController@payments_reconcile_through_receiving_sheet_list')->name('list');
+            });
         });
     });
 

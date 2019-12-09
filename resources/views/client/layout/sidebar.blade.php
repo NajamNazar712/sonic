@@ -52,7 +52,12 @@
             @endif
 
             @if (session('user_type') == 1 || in_array(5, session('permissions')))
-                <li class=" nav-item"><a href="{{ route('cod.finance.payments.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-money"></i>Finance Payments</span></a></li>
+                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-money"></i>Finance</span></a>
+                    <ul class="menu-content">
+                        <li><a href="{{ route('cod.finance.payments.index') }}">Payments</a></li>
+                        <li><a href="{{ route('cod.finance.payments.reconcile_through_receiving_sheet.index') }}">Payments Reconcile through Receiving Sheet</a></li>
+                    </ul>
+                </li>
             @endif
 
             {{--<li class=" nav-item"><a href="https://form.jotform.me/81993400128456" target="_blank"><span class="menu-title" data-i18n="nav.dash.main">Complain Form</span></a></li>--}}
