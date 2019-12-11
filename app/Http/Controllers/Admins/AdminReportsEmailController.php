@@ -25,7 +25,7 @@ class AdminReportsEmailController extends Controller
         $avg_revenue = array();
         $contribution = array();
         $sale_person_array = array();
-        $sale_person_shipments = SalePersonTag::leftjoin('admins as a', 'a.id', '=', 'sale_person_tags.admin_id')->leftjoin('shipments as s', 's.user_id', '=', 'sale_person_tags.user_id')->select('a.id as admin_id', 'a.name as admin', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.weight_charges) as weight_charges'), DB::raw('sum(s.cash_handling_charges) as cash_handling_charges'), DB::raw('sum(s.insurance_charges) as insurance_charges'), DB::raw('sum(s.return_charges) as return_charges'), DB::raw('sum(s.fuel_surcharge) as fuel_surcharge'), DB::raw('sum(s.replacement_charges) as replacement_charges'), DB::raw('sum(s.try_and_buy_charges) as try_and_buy_charges'), DB::raw('sum(s.packaging_material_charges) as packaging_material_charges'), DB::raw('sum(s.intercept_charges) as intercept_charges'), DB::raw('sum(s.nsa_osa_charges) as nsa_osa_charges'))->groupBy('sale_person_tags.admin_id')->where('sale_person_tags.status', 0)->whereBetween('s.created_at', [$date_from, $date_to])->get();
+        $sale_person_shipments = SalePersonTag::leftjoin('admins as a', 'a.id', '=', 'sale_person_tags.admin_id')->leftjoin('shipments as s', 's.user_id', '=', 'sale_person_tags.user_id')->leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')->select('a.id as admin_id', 'a.name as admin', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.weight_charges) as weight_charges'), DB::raw('sum(s.cash_handling_charges) as cash_handling_charges'), DB::raw('sum(s.insurance_charges) as insurance_charges'), DB::raw('sum(s.return_charges) as return_charges'), DB::raw('sum(s.fuel_surcharge) as fuel_surcharge'), DB::raw('sum(s.replacement_charges) as replacement_charges'), DB::raw('sum(s.try_and_buy_charges) as try_and_buy_charges'), DB::raw('sum(s.packaging_material_charges) as packaging_material_charges'), DB::raw('sum(s.intercept_charges) as intercept_charges'), DB::raw('sum(s.nsa_osa_charges) as nsa_osa_charges'))->groupBy('sale_person_tags.admin_id')->where('sale_person_tags.status', 0)->where('sj.shipper_status_id', 2)->whereBetween('sj.created_at', [$date_from, $date_to])->get();
 
         foreach ($sale_person_shipments as $sale_person_shipment){
             $revenue[$sale_person_shipment->admin_id] = $sale_person_shipment->weight_charges + $sale_person_shipment->cash_handling_charges + $sale_person_shipment->insurance_charges + $sale_person_shipment->return_charges + $sale_person_shipment->fuel_surcharge + $sale_person_shipment->replacement_charges + $sale_person_shipment->try_and_buy_charges + $sale_person_shipment->packaging_material_charges + $sale_person_shipment->intercept_charges + $sale_person_shipment->nsa_osa_charges;
@@ -108,15 +108,16 @@ class AdminReportsEmailController extends Controller
         $hub_wise_split_array = array();
 
         $hub_wise_splits = City::leftjoin('cities as h', 'h.id', '=', 'cities.hub_id')
-            ->leftjoin('shipments as s', function($join) use($date_from, $date_to){
+                ->leftjoin('shipments as s', function($join){
                 $join->on('s.consignee_city_id', '=', 'cities.id')
-                    ->where('s.shipper_status_id', 2)
-                    ->where('s.packaging_material_request', 0)
-                    ->whereBetween('s.created_at', [$date_from, $date_to]);
+                    ->where('s.packaging_material_request', 0);
                     })
-            ->select('h.id as hub_id', 'h.name as hub', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.actual_weight) as actual_weight'))
-            ->groupBy('h.id')
-            ->get();
+                ->leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
+                ->select('h.id as hub_id', 'h.name as hub', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.actual_weight) as actual_weight'))
+                ->where('sj.shipper_status_id', 2)
+                ->whereBetween('sj.created_at', [$date_from, $date_to])
+                ->groupBy('h.id')
+                ->get();
         foreach ($hub_wise_splits as $hub_wise_split){
             $total_shipments = $total_shipments + $hub_wise_split->shipment_count;
         }
