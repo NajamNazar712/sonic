@@ -3522,37 +3522,37 @@ class NotificationsController extends Controller
                     $body = str_replace('[preview]', $html, $body);
                 }
 
-                $to = array();
+//                $to = array();
+//
+//                $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
+//
+//                if ($admins->exists()) {
+//                    $to = array_merge($to, $admins->pluck('email')->toArray());
+//                }
+//
+//                $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
+//
+//                if ($admins->exists()) {
+//                    $to = array_merge($to, $admins->pluck('admins.email')->toArray());
+//                }
+//
+//                $ceo = Admin::find(8);
+//
+//                $cc = array();
+//                $cc = [$ceo->email, 'asad@trax.pk'];
+//
+//                self::email($subject, $body, $to, $cc);
 
-                $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
+                $to = array();
+                $cc = array();
+
+                $admins = Admin::whereIn('id', [36, 7])->where('status', 1);
 
                 if ($admins->exists()) {
                     $to = array_merge($to, $admins->pluck('email')->toArray());
                 }
 
-                $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
-
-                if ($admins->exists()) {
-                    $to = array_merge($to, $admins->pluck('admins.email')->toArray());
-                }
-
-                $ceo = Admin::find(8);
-
-                $cc = array();
-                $cc = [$ceo->email, 'asad@trax.pk'];
-
-                self::email($subject, $body, $to, $cc);
-
-//                $to = array();
-//                $cc = array();
-//
-//                $admins = Admin::whereIn('id', [36, 7])->where('status', 1);
-//
-//                if ($admins->exists()) {
-//                    $to = array_merge($to, $admins->pluck('email')->toArray());
-//                }
-
-//                self::email($subject, $body, $to);
+                self::email($subject, $body, $to);
             }
         }
       }

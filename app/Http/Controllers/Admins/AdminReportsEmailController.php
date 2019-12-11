@@ -255,6 +255,7 @@ class AdminReportsEmailController extends Controller
             $first_day->addDay();
         }
         $weekdays_count = count($dates);
+        $weekdays_count = $weekdays_count - 1;
         $total_month_weekdays_count = count($total_dates);
 
         $months_average = City::leftjoin('shipments_journey as sj', 'sj.city_id', '=', 'cities.id')
@@ -262,6 +263,7 @@ class AdminReportsEmailController extends Controller
                 ->select('cities.id as origin_id', 'cities.name as origin', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.weight_charges) as weight_charges'), DB::raw('sum(s.cash_handling_charges) as cash_handling_charges'), DB::raw('sum(s.insurance_charges) as insurance_charges'), DB::raw('sum(s.return_charges) as return_charges'), DB::raw('sum(s.fuel_surcharge) as fuel_surcharge'), DB::raw('sum(s.replacement_charges) as replacement_charges'), DB::raw('sum(s.try_and_buy_charges) as try_and_buy_charges'), DB::raw('sum(s.packaging_material_charges) as packaging_material_charges'), DB::raw('sum(s.intercept_charges) as intercept_charges'), DB::raw('sum(s.nsa_osa_charges) as nsa_osa_charges'))
                 ->groupBy('cities.id')
                 ->where('cities.pickup', 1)
+                ->where('s.packaging_material_request', 0)
                 ->where('sj.shipper_status_id', 2)
                 ->whereBetween('sj.created_at', [$new_date_from, $new_date_to])
                 ->get();
