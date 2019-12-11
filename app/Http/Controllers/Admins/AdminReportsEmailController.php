@@ -181,9 +181,9 @@ class AdminReportsEmailController extends Controller
             $hub_wise_split_entry = new HubWiseSplit();
             $hub_wise_split_entry->hub_id = $hub_wise_split->hub_id;
             $hub_wise_split_entry->shipments = $hub_wise_split->shipment_count;
-            $hub_wise_split_entry->ratio = round($ratio[$hub_wise_split->hub_id], 2);
+            $hub_wise_split_entry->ratio = $ratio[$hub_wise_split->hub_id];
             $hub_wise_split_entry->actual_weight = round($actual_weight, 2);
-            $hub_wise_split_entry->avg_actual_weight = round($avg_actual_weight[$hub_wise_split->hub_id], 2);
+            $hub_wise_split_entry->avg_actual_weight = $avg_actual_weight[$hub_wise_split->hub_id];
             $hub_wise_split_entry->save();
             $serial++;
 
@@ -232,7 +232,7 @@ class AdminReportsEmailController extends Controller
         $holiday_date_from = $new_date_from->format('Y-m-d');
         $new_date_from = $new_date_from->format('Y-m-d 08:00A');
         $new_date_to = $date_to;
-        $week_holiday_date_to = $last_day->format('Y-m-d');
+        $week_holiday_date_to = Carbon::createFromFormat("Y-m-d",$date);
         $holiday_date_to = $new_date_to->format('Y-m-d');
         $new_date_to = $new_date_to->format('Y-m-d 07:59A');
         $total_shipments = 0;
