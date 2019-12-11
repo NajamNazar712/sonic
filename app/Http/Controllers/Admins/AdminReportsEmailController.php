@@ -56,7 +56,7 @@ class AdminReportsEmailController extends Controller
             }
         }
 
-        $sale_person_array['header'] = ['S. No.','Admin', 'Shipments', 'Revenue', 'Avg Revenue', 'Contribution'];
+        $sale_person_array['header'] = ['S. No.','Admin', 'Shipments', 'Revenue', 'Avg Revenue/Parcel', 'Contribution'];
         $serial = 1;
 
         $total_shipments_count = 0;
@@ -64,7 +64,7 @@ class AdminReportsEmailController extends Controller
         $total_contribution_count = 0;
         SalePersonNumbers::truncate();
         foreach ($sale_person_shipments as $sale_person_shipment) {
-            $sale_person_array[] = ['serial' => $serial, 'Admin' => $sale_person_shipment->admin, 'Shipments' => $sale_person_shipment->shipment_count, 'Revenue' => $revenue[$sale_person_shipment->admin_id], 'Avg Revenue' => round($avg_revenue[$sale_person_shipment->admin_id], 2), 'Contribution' => round($contribution[$sale_person_shipment->admin_id], 2)];
+            $sale_person_array[] = ['serial' => $serial, 'Admin' => $sale_person_shipment->admin, 'Shipments' => $sale_person_shipment->shipment_count, 'Revenue' => $revenue[$sale_person_shipment->admin_id], 'Avg Revenue/Parcel' => round($avg_revenue[$sale_person_shipment->admin_id], 2), 'Contribution' => round($contribution[$sale_person_shipment->admin_id], 2)];
             $sale_person_entry = new SalePersonNumbers();
             $sale_person_entry->admin_id = $sale_person_shipment->admin_id;
             $sale_person_entry->shipments = $sale_person_shipment->shipment_count;
@@ -79,7 +79,7 @@ class AdminReportsEmailController extends Controller
             $total_contribution_count = $total_contribution_count + $contribution[$sale_person_shipment->admin_id];
         }
         foreach ($walk_in_shipments as $walk_in_shipment) {
-            $sale_person_array[] = ['serial' => $serial, 'Admin' => 'Walk-In', 'Shipments' => $walk_in_shipment->shipment_count, 'Revenue' => $revenue[0], 'Avg Revenue' => round($avg_revenue[0], 2), 'Contribution' => round($contribution[0], 2)];
+            $sale_person_array[] = ['serial' => $serial, 'Admin' => 'Walk-In', 'Shipments' => $walk_in_shipment->shipment_count, 'Revenue' => $revenue[0], 'Avg Revenue/Parcel' => round($avg_revenue[0], 2), 'Contribution' => round($contribution[0], 2)];
             $sale_person_entry = new SalePersonNumbers();
             $sale_person_entry->admin_id = 0;
             $sale_person_entry->shipments = $walk_in_shipment->shipment_count;
@@ -94,8 +94,8 @@ class AdminReportsEmailController extends Controller
             $total_contribution_count = $total_contribution_count + $contribution[0];
         }
         $total_avg_revenue_count = $total_revenue / $total_shipments_count;
-        $sale_person_array[] = ['serial' => '', 'Admin' => '', 'Shipments' => '', 'Revenue' => '', 'Avg Revenue' => '', 'Contribution' => ''];
-        $sale_person_array[] = ['serial' => 'Total', 'Admin' => '', 'Shipments' => $total_shipments_count, 'Revenue' => $total_revenue, 'Avg Revenue' => round($total_avg_revenue_count, 2), 'Contribution' => round($total_contribution_count, 2)];
+        $sale_person_array[] = ['serial' => '', 'Admin' => '', 'Shipments' => '', 'Revenue' => '', 'Avg Revenue/Parcel' => '', 'Contribution' => ''];
+        $sale_person_array[] = ['serial' => 'Total', 'Admin' => '', 'Shipments' => $total_shipments_count, 'Revenue' => $total_revenue, 'Avg Revenue/Parcel' => round($total_avg_revenue_count, 2), 'Contribution' => round($total_contribution_count, 2)];
         $cell_st =[
             'font' =>['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -162,7 +162,7 @@ class AdminReportsEmailController extends Controller
             }
         }
 
-        $hub_wise_split_array['header'] = ['S. No.','Hub', 'Count of Parcels', 'Ratio', 'Actual Weight', 'Avg Actual Weight'];
+        $hub_wise_split_array['header'] = ['S. No.','Hub', 'Count of Parcels', 'Ratio', 'Actual Weight', 'Avg Actual Weight/Shipment'];
         $serial = 1;
 
         $total_shipments_count = 0;
@@ -177,7 +177,7 @@ class AdminReportsEmailController extends Controller
             else{
                 $actual_weight = 0;
             }
-            $hub_wise_split_array[] = ['serial' => $serial, 'Hub' => $hub_wise_split->hub, 'Count of Parcels' => $hub_wise_split->shipment_count, 'Ratio' => $ratio[$hub_wise_split->hub_id], 'Actual Weight' => round($actual_weight, 2), 'Avg Actual Weight' => round($avg_actual_weight[$hub_wise_split->hub_id], 2)];
+            $hub_wise_split_array[] = ['serial' => $serial, 'Hub' => $hub_wise_split->hub, 'Count of Parcels' => $hub_wise_split->shipment_count, 'Ratio' => $ratio[$hub_wise_split->hub_id], 'Actual Weight' => round($actual_weight, 2), 'Avg Actual Weight/Shipment' => round($avg_actual_weight[$hub_wise_split->hub_id], 2)];
             $hub_wise_split_entry = new HubWiseSplit();
             $hub_wise_split_entry->hub_id = $hub_wise_split->hub_id;
             $hub_wise_split_entry->shipments = $hub_wise_split->shipment_count;
@@ -193,8 +193,8 @@ class AdminReportsEmailController extends Controller
             $total_actual_weight_count = $total_actual_weight_count + $hub_wise_split->actual_weight;
         }
         $total_avg_actual_weight_count = $total_actual_weight_count / $total_shipments_count;
-        $hub_wise_split_array[] = ['serial' => '', 'Hub' => '', 'Count of Parcels' => '', 'Ratio' => '', 'Actual Weight' => '', 'Avg Actual Weight' => ''];
-        $hub_wise_split_array[] = ['serial' => 'Total', 'Hub' => '', 'Count of Parcels' => $total_shipments_count, 'Ratio' => $total_avg_ratio_count, 'Actual Weight' => round($total_actual_weight_count, 2), 'Avg Actual Weight' => round($total_avg_actual_weight_count, 2)];
+        $hub_wise_split_array[] = ['serial' => '', 'Hub' => '', 'Count of Parcels' => '', 'Ratio' => '', 'Actual Weight' => '', 'Avg Actual Weight/Shipment' => ''];
+        $hub_wise_split_array[] = ['serial' => 'Total', 'Hub' => '', 'Count of Parcels' => $total_shipments_count, 'Ratio' => $total_avg_ratio_count, 'Actual Weight' => round($total_actual_weight_count, 2), 'Avg Actual Weight/Shipment' => round($total_avg_actual_weight_count, 2)];
         $cell_st =[
             'font' =>['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -291,7 +291,7 @@ class AdminReportsEmailController extends Controller
             $total_shipments = $total_shipments + $month_average->shipment_count;
         }
 
-        $month_average_array['header'] = ['S. No.','Origin', 'Total Parcel', 'Revenue', 'Avg Revenue', 'Avg Shipments', 'Month Speed'];
+        $month_average_array['header'] = ['S. No.','Origin', 'Total Parcel', 'Revenue', 'Avg Revenue/Parcel', 'Avg Shipments/Day', 'Month Speed'];
         $serial = 1;
 
         $total_shipments_count = 0;
@@ -301,7 +301,7 @@ class AdminReportsEmailController extends Controller
         $total_month_speed_count = 0;
         MonthAverage::truncate();
         foreach ($months_average as $month_average) {
-            $month_average_array[] = ['serial' => $serial, 'Origin' => $month_average->origin, 'Total Parcel' => $month_average->shipment_count, 'Revenue' => round($revenue[$month_average->origin_id], 2), 'Avg Revenue' => round($avg_revenue[$month_average->origin_id], 2), 'Avg Shipments' => round($avg_shipment[$month_average->origin_id], 2), 'Month Speed' => round($month_speed[$month_average->origin_id], 2)];
+            $month_average_array[] = ['serial' => $serial, 'Origin' => $month_average->origin, 'Total Parcel' => $month_average->shipment_count, 'Revenue' => round($revenue[$month_average->origin_id], 2), 'Avg Revenue/Parcel' => round($avg_revenue[$month_average->origin_id], 2), 'Avg Shipments/Day' => round($avg_shipment[$month_average->origin_id], 2), 'Month Speed' => round($month_speed[$month_average->origin_id], 2)];
             $month_average_entry = new MonthAverage();
             $month_average_entry->origin_id = $month_average->origin_id;
             $month_average_entry->shipments = $month_average->shipment_count;
@@ -320,8 +320,8 @@ class AdminReportsEmailController extends Controller
         }
         $total_avg_revenue_count = $total_revenue_count / $total_shipments_count;
 
-        $month_average_array[] = ['serial' => '', 'Origin' => '', 'Total Parcel' => '', 'Revenue' => '', 'Avg Revenue' => '', 'Avg Shipments' => '', 'Month Speed' => ''];
-        $month_average_array[] = ['serial' => 'Total', 'Origin' => '', 'Total Parcel' => $total_shipments_count, 'Revenue' => round($total_revenue_count, 2), 'Avg Revenue' => round($total_avg_revenue_count, 2), 'Avg Shipments' => round($total_avg_shipment_count, 2), 'Month Speed' => round($total_month_speed_count, 2)];
+        $month_average_array[] = ['serial' => '', 'Origin' => '', 'Total Parcel' => '', 'Revenue' => '', 'Avg Revenue/Parcel' => '', 'Avg Shipments/Day' => '', 'Month Speed' => ''];
+        $month_average_array[] = ['serial' => 'Total', 'Origin' => '', 'Total Parcel' => $total_shipments_count, 'Revenue' => round($total_revenue_count, 2), 'Avg Revenue/Parcel' => round($total_avg_revenue_count, 2), 'Avg Shipments/Day' => round($total_avg_shipment_count, 2), 'Month Speed' => round($total_month_speed_count, 2)];
         $cell_st =[
             'font' =>['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
