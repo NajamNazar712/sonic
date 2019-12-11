@@ -228,9 +228,9 @@ class AdminReportsEmailController extends Controller
         $last_day = Carbon::parse($date)->lastOfMonth();
         $date_from = Carbon::createFromFormat("Y-m-d H:i:s",$first_day);
         $new_date_from = $date_from;
-        $new_date_from = $new_date_from->format('Y-m-d 00:00:00');
+        $new_date_from = $new_date_from->format('Y-m-d 08:00A');
         $new_date_to = $date_to;
-        $new_date_to = $new_date_to->format('Y-m-d 23:59:59');
+        $new_date_to = $new_date_to->format('Y-m-d 07:59A');
         $total_shipments = 0;
         $revenue = array();
         $avg_revenue = array();
