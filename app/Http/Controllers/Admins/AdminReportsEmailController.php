@@ -6,6 +6,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
+use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
@@ -228,8 +229,10 @@ class AdminReportsEmailController extends Controller
         $last_day = Carbon::parse($date)->lastOfMonth();
         $date_from = Carbon::createFromFormat("Y-m-d H:i:s",$first_day);
         $new_date_from = $date_from;
+        $holiday_date_from = $new_date_from->format('Y-m-d');
         $new_date_from = $new_date_from->format('Y-m-d 08:00A');
         $new_date_to = $date_to;
+        $holiday_date_to = $new_date_to->format('Y-m-d');
         $new_date_to = $new_date_to->format('Y-m-d 07:59A');
         $total_shipments = 0;
         $revenue = array();
@@ -239,7 +242,7 @@ class AdminReportsEmailController extends Controller
         $month_average_array = array();
         $dates = [];
         $total_dates = [];
-
+        $holidays = CrmTatHolidays::whereBetween('holiday', [$holiday_date_from, $holiday_date_to])->count();
         while ($date_from->lte($date_to)) {
             if($date_from->isWeekday() || $date_from->isSaturday()) {
                 $dates[] = $date_from->copy()->format('Y-m-d');
@@ -254,8 +257,9 @@ class AdminReportsEmailController extends Controller
 
             $first_day->addDay();
         }
+
         $weekdays_count = count($dates);
-        $weekdays_count = $weekdays_count - 1;
+        $weekdays_count = ($weekdays_count - 1 - $holidays);
         $total_month_weekdays_count = count($total_dates);
 
         $months_average = City::leftjoin('shipments_journey as sj', 'sj.city_id', '=', 'cities.id')
@@ -310,10 +314,10 @@ class AdminReportsEmailController extends Controller
 
             $total_shipments_count = $total_shipments_count + $month_average->shipment_count;
             $total_revenue_count = $total_revenue_count + $revenue[$month_average->origin_id];
-            $total_avg_revenue_count = $total_avg_revenue_count + $avg_revenue[$month_average->origin_id];
             $total_avg_shipment_count = $total_avg_shipment_count + $avg_shipment[$month_average->origin_id];
             $total_month_speed_count = $total_month_speed_count + $month_speed[$month_average->origin_id];
         }
+        $total_avg_revenue_count = $total_revenue_count / $total_shipments_count;
 
         $month_average_array[] = ['serial' => '', 'Origin' => '', 'Total Parcel' => '', 'Revenue' => '', 'Avg Revenue' => '', 'Avg Shipments' => '', 'Month Speed' => ''];
         $month_average_array[] = ['serial' => 'Total', 'Origin' => '', 'Total Parcel' => $total_shipments_count, 'Revenue' => round($total_revenue_count, 2), 'Avg Revenue' => round($total_avg_revenue_count, 2), 'Avg Shipments' => round($total_avg_shipment_count, 2), 'Month Speed' => round($total_month_speed_count, 2)];
