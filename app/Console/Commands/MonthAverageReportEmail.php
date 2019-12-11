@@ -40,7 +40,7 @@ class MonthAverageReportEmail extends Command
      */
     public function handle()
     {
-        $date = Carbon::yesterday()->format('Y-m-d');
+        $date = Carbon::today()->format('Y-m-d');
         $response = AdminReportsEmailController::month_average($date . ' 00:00:00');
         NotificationsController::send(49, $date, $response);
     }
