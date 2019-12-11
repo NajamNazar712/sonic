@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
+use App\Http\Models\Shipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -26,11 +28,19 @@ class AdminReportsEmailController extends Controller
         $contribution = array();
         $sale_person_array = array();
         $sale_person_shipments = SalePersonTag::leftjoin('admins as a', 'a.id', '=', 'sale_person_tags.admin_id')->leftjoin('shipments as s', 's.user_id', '=', 'sale_person_tags.user_id')->leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')->select('a.id as admin_id', 'a.name as admin', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.weight_charges) as weight_charges'), DB::raw('sum(s.cash_handling_charges) as cash_handling_charges'), DB::raw('sum(s.insurance_charges) as insurance_charges'), DB::raw('sum(s.return_charges) as return_charges'), DB::raw('sum(s.fuel_surcharge) as fuel_surcharge'), DB::raw('sum(s.replacement_charges) as replacement_charges'), DB::raw('sum(s.try_and_buy_charges) as try_and_buy_charges'), DB::raw('sum(s.packaging_material_charges) as packaging_material_charges'), DB::raw('sum(s.intercept_charges) as intercept_charges'), DB::raw('sum(s.nsa_osa_charges) as nsa_osa_charges'))->groupBy('sale_person_tags.admin_id')->where('sale_person_tags.status', 0)->where('s.packaging_material_request', 0)->where('sj.shipper_status_id', 2)->whereBetween('sj.created_at', [$date_from, $date_to])->get();
+        $walkin = GlobalSettings::where('type', 'Walk-In')->first();
+        $walk_in_shipments = Shipment::leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+            ->select(DB::raw('count(shipments.id) as shipment_count'), DB::raw('sum(shipments.weight_charges) as weight_charges'), DB::raw('sum(shipments.cash_handling_charges) as cash_handling_charges'), DB::raw('sum(shipments.insurance_charges) as insurance_charges'), DB::raw('sum(shipments.return_charges) as return_charges'), DB::raw('sum(shipments.fuel_surcharge) as fuel_surcharge'), DB::raw('sum(shipments.replacement_charges) as replacement_charges'), DB::raw('sum(shipments.try_and_buy_charges) as try_and_buy_charges'), DB::raw('sum(shipments.packaging_material_charges) as packaging_material_charges'), DB::raw('sum(shipments.intercept_charges) as intercept_charges'), DB::raw('sum(shipments.nsa_osa_charges) as nsa_osa_charges'))->where('shipments.user_id', $walkin->setting_value)->where('sj.shipper_status_id', 2)->whereBetween('sj.created_at', [$date_from, $date_to])->get();
 
         foreach ($sale_person_shipments as $sale_person_shipment){
             $revenue[$sale_person_shipment->admin_id] = $sale_person_shipment->weight_charges + $sale_person_shipment->cash_handling_charges + $sale_person_shipment->insurance_charges + $sale_person_shipment->return_charges + $sale_person_shipment->fuel_surcharge + $sale_person_shipment->replacement_charges + $sale_person_shipment->try_and_buy_charges + $sale_person_shipment->packaging_material_charges + $sale_person_shipment->intercept_charges + $sale_person_shipment->nsa_osa_charges;
 
             $avg_revenue[$sale_person_shipment->admin_id] = $revenue[$sale_person_shipment->admin_id] / $sale_person_shipment->shipment_count;
+        }
+        foreach ($walk_in_shipments as $walk_in_shipment){
+            $revenue[0] = $walk_in_shipment->weight_charges + $walk_in_shipment->cash_handling_charges + $walk_in_shipment->insurance_charges + $walk_in_shipment->return_charges + $walk_in_shipment->fuel_surcharge + $walk_in_shipment->replacement_charges + $walk_in_shipment->try_and_buy_charges + $walk_in_shipment->packaging_material_charges + $walk_in_shipment->intercept_charges + $walk_in_shipment->nsa_osa_charges;
+
+            $avg_revenue[0] = $revenue[0] / $walk_in_shipment->shipment_count;
         }
         $total_revenue = 0;
         foreach ($revenue as $rev){
@@ -67,6 +77,22 @@ class AdminReportsEmailController extends Controller
             $total_shipments_count = $total_shipments_count + $sale_person_shipment->shipment_count;
             $total_avg_revenue_count = $total_avg_revenue_count + $avg_revenue[$sale_person_shipment->admin_id];
             $total_contribution_count = $total_contribution_count + $contribution[$sale_person_shipment->admin_id];
+        }
+        foreach ($walk_in_shipments as $walk_in_shipment) {
+            $sale_person_array[] = ['serial' => $serial, 'Admin' => 'Walk-In', 'Shipments' => $walk_in_shipment->shipment_count, 'Revenue' => $revenue[0], 'Avg Revenue' => round($avg_revenue[0], 2), 'Contribution' => round($contribution[0], 2)];
+            $sale_person_entry = new SalePersonNumbers();
+            $sale_person_entry->admin_id = 0;
+            $sale_person_entry->shipments = $walk_in_shipment->shipment_count;
+            $sale_person_entry->revenue = $revenue[0];
+            $sale_person_entry->avg_revenue = $avg_revenue[0];
+            $sale_person_entry->contribution = $contribution[0];
+            $sale_person_entry->save();
+            $serial++;
+
+
+            $total_shipments_count = $total_shipments_count + $walk_in_shipment->shipment_count;
+            $total_avg_revenue_count = $total_avg_revenue_count + $avg_revenue[0];
+            $total_contribution_count = $total_contribution_count + $contribution[0];
         }
         $sale_person_array[] = ['serial' => '', 'Admin' => '', 'Shipments' => '', 'Revenue' => '', 'Avg Revenue' => '', 'Contribution' => ''];
         $sale_person_array[] = ['serial' => 'Total', 'Admin' => '', 'Shipments' => $total_shipments_count, 'Revenue' => $total_revenue, 'Avg Revenue' => round($total_avg_revenue_count, 2), 'Contribution' => round($total_contribution_count, 2)];
