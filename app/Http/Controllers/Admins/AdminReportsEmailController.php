@@ -228,9 +228,11 @@ class AdminReportsEmailController extends Controller
         $last_day = Carbon::parse($date)->lastOfMonth();
         $date_from = Carbon::createFromFormat("Y-m-d H:i:s",$first_day);
         $new_date_from = $date_from;
+        $week_holiday_date_from = $first_day->format('Y-m-d');
         $holiday_date_from = $new_date_from->format('Y-m-d');
         $new_date_from = $new_date_from->format('Y-m-d 08:00A');
         $new_date_to = $date_to;
+        $week_holiday_date_to = $last_day->format('Y-m-d');
         $holiday_date_to = $new_date_to->format('Y-m-d');
         $new_date_to = $new_date_to->format('Y-m-d 07:59A');
         $total_shipments = 0;
@@ -241,6 +243,7 @@ class AdminReportsEmailController extends Controller
         $month_average_array = array();
         $dates = [];
         $total_dates = [];
+        $week_holidays = CrmTatHolidays::whereBetween('holiday', [$week_holiday_date_from, $week_holiday_date_to])->count();
         $holidays = CrmTatHolidays::whereBetween('holiday', [$holiday_date_from, $holiday_date_to])->count();
         while ($date_from->lte($date_to)) {
             if($date_from->isWeekday() || $date_from->isSaturday()) {
@@ -256,14 +259,13 @@ class AdminReportsEmailController extends Controller
 
             $first_day->addDay();
         }
-
         $weekdays_count = count($dates);
-        $weekdays_count = ($weekdays_count - ($holidays - 1));
-        $total_month_weekdays_count = count($total_dates) - ($holidays - 1);
+        $weekdays_count = ($weekdays_count - ($week_holidays + 1));
+        $total_month_weekdays_count = count($total_dates) - ($holidays + 1);
 
         $months_average = City::leftjoin('shipments_journey as sj', 'sj.city_id', '=', 'cities.id')
                 ->leftjoin('shipments as s', 's.id', '=', 'sj.shipment_id')
-                ->select('cities.id as origin_id', 'cities.name as origin', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.weight_charges) as weight_charges'), DB::raw('sum(s.cash_handling_charges) as cash_handling_charges'), DB::raw('sum(s.insurance_charges) as insurance_charges'), DB::raw('sum(s.fuel_surcharge) as fuel_surcharge'), DB::raw('sum(s.replacement_charges) as replacement_charges'), DB::raw('sum(s.try_and_buy_charges) as try_and_buy_charges'))
+                ->select('cities.id as origin_id', 'cities.name as origin', DB::raw('count(s.id) as shipment_count'), DB::raw('sum(s.weight_charges) as weight_charges'), DB::raw('sum(s.insurance_charges) as insurance_charges'), DB::raw('sum(s.fuel_surcharge) as fuel_surcharge'), DB::raw('sum(s.replacement_charges) as replacement_charges'), DB::raw('sum(s.try_and_buy_charges) as try_and_buy_charges'))
                 ->groupBy('cities.id')
                 ->where('cities.pickup', 1)
                 ->where('s.packaging_material_request', 0)
@@ -272,7 +274,7 @@ class AdminReportsEmailController extends Controller
                 ->get();
 
         foreach ($months_average as $month_average){
-            $revenue[$month_average->origin_id] = $month_average->weight_charges + $month_average->cash_handling_charges + $month_average->insurance_charges+ $month_average->fuel_surcharge + $month_average->replacement_charges + $month_average->try_and_buy_charges;
+            $revenue[$month_average->origin_id] = $month_average->weight_charges + $month_average->insurance_charges+ $month_average->fuel_surcharge + $month_average->replacement_charges + $month_average->try_and_buy_charges;
             if($month_average->shipment_count != 0){
                 $avg_revenue[$month_average->origin_id] = $revenue[$month_average->origin_id] / $month_average->shipment_count;
             }
