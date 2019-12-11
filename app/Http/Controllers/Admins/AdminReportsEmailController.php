@@ -76,7 +76,6 @@ class AdminReportsEmailController extends Controller
 
 
             $total_shipments_count = $total_shipments_count + $sale_person_shipment->shipment_count;
-            $total_avg_revenue_count = $total_avg_revenue_count + $avg_revenue[$sale_person_shipment->admin_id];
             $total_contribution_count = $total_contribution_count + $contribution[$sale_person_shipment->admin_id];
         }
         foreach ($walk_in_shipments as $walk_in_shipment) {
@@ -92,9 +91,9 @@ class AdminReportsEmailController extends Controller
 
 
             $total_shipments_count = $total_shipments_count + $walk_in_shipment->shipment_count;
-            $total_avg_revenue_count = $total_avg_revenue_count + $avg_revenue[0];
             $total_contribution_count = $total_contribution_count + $contribution[0];
         }
+        $total_avg_revenue_count = $total_revenue / $total_shipments_count;
         $sale_person_array[] = ['serial' => '', 'Admin' => '', 'Shipments' => '', 'Revenue' => '', 'Avg Revenue' => '', 'Contribution' => ''];
         $sale_person_array[] = ['serial' => 'Total', 'Admin' => '', 'Shipments' => $total_shipments_count, 'Revenue' => $total_revenue, 'Avg Revenue' => round($total_avg_revenue_count, 2), 'Contribution' => round($total_contribution_count, 2)];
         $cell_st =[
@@ -192,8 +191,8 @@ class AdminReportsEmailController extends Controller
             $total_shipments_count = $total_shipments_count + $hub_wise_split->shipment_count;
             $total_avg_ratio_count = $total_avg_ratio_count + $ratio[$hub_wise_split->hub_id];
             $total_actual_weight_count = $total_actual_weight_count + $hub_wise_split->actual_weight;
-            $total_avg_actual_weight_count = $total_avg_actual_weight_count + $avg_actual_weight[$hub_wise_split->hub_id];
         }
+        $total_avg_actual_weight_count = $total_actual_weight_count / $total_shipments_count;
         $hub_wise_split_array[] = ['serial' => '', 'Hub' => '', 'Count of Parcels' => '', 'Ratio' => '', 'Actual Weight' => '', 'Avg Actual Weight' => ''];
         $hub_wise_split_array[] = ['serial' => 'Total', 'Hub' => '', 'Count of Parcels' => $total_shipments_count, 'Ratio' => $total_avg_ratio_count, 'Actual Weight' => round($total_actual_weight_count, 2), 'Avg Actual Weight' => round($total_avg_actual_weight_count, 2)];
         $cell_st =[
@@ -259,8 +258,8 @@ class AdminReportsEmailController extends Controller
         }
 
         $weekdays_count = count($dates);
-        $weekdays_count = ($weekdays_count - 1 - $holidays);
-        $total_month_weekdays_count = count($total_dates);
+        $weekdays_count = ($weekdays_count - ($holidays - 1));
+        $total_month_weekdays_count = count($total_dates) - ($holidays - 1);
 
         $months_average = City::leftjoin('shipments_journey as sj', 'sj.city_id', '=', 'cities.id')
                 ->leftjoin('shipments as s', 's.id', '=', 'sj.shipment_id')

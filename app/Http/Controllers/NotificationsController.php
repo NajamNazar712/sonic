@@ -3309,10 +3309,10 @@ class NotificationsController extends Controller
                     $html .= '</tr>';
                     $shipments_count = $shipments_count + $sale_person_number->shipments;
                     $revenue_count = $revenue_count + $sale_person_number->revenue;
-                    $avg_revenue_count = $avg_revenue_count + $sale_person_number->avg_revenue;
                     $contribution_count = $contribution_count + $sale_person_number->contribution;
                     $serial++;
                 }
+                $avg_revenue_count = $revenue_count / $shipments_count;
                 $html .= '<tr>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
@@ -3329,44 +3329,44 @@ class NotificationsController extends Controller
                     $body = str_replace('[preview]', $html, $body);
                 }
 
-                $to = array();
-
-                $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
-
-                if ($admins->exists()) {
-                    $to = array_merge($to, $admins->pluck('email')->toArray());
-                }
-
-                $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
-
-                if ($admins->exists()) {
-                    $to = array_merge($to, $admins->pluck('admins.email')->toArray());
-                }
-
-                $ceo = Admin::find(8);
-
-                if ($ceo) {
-                    $to[] = $ceo->email;
-                }
-                $sup_admin = Admin::find(7);
-
-                if ($sup_admin) {
-                    $to[] = $sup_admin->email;
-                }
-
-                self::email($subject, $body, $to);
-//
-//
 //                $to = array();
-//                $cc = array();
 //
-//                $admins = Admin::whereIn('id', [36, 7])->where('status', 1);
+//                $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
 //
 //                if ($admins->exists()) {
 //                    $to = array_merge($to, $admins->pluck('email')->toArray());
 //                }
 //
+//                $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
+//
+//                if ($admins->exists()) {
+//                    $to = array_merge($to, $admins->pluck('admins.email')->toArray());
+//                }
+//
+//                $ceo = Admin::find(8);
+//
+//                if ($ceo) {
+//                    $to[] = $ceo->email;
+//                }
+//                $sup_admin = Admin::find(7);
+//
+//                if ($sup_admin) {
+//                    $to[] = $sup_admin->email;
+//                }
+//
 //                self::email($subject, $body, $to);
+//
+//
+                $to = array();
+                $cc = array();
+
+                $admins = Admin::whereIn('id', [36, 7])->where('status', 1);
+
+                if ($admins->exists()) {
+                    $to = array_merge($to, $admins->pluck('email')->toArray());
+                }
+
+                self::email($subject, $body, $to);
             }
             else if ($id == 48) {
                 if (strpos($subject, '[date]') !== FALSE) {
@@ -3408,9 +3408,9 @@ class NotificationsController extends Controller
                     $shipments_count = $shipments_count + $hub_wise_split->shipments;
                     $ratio_count = $ratio_count + $hub_wise_split->ratio;
                     $actual_weight_count = $actual_weight_count + $hub_wise_split->actual_weight;
-                    $avg_actual_weight_count = $avg_actual_weight_count + $hub_wise_split->avg_actual_weight;
                     $serial++;
                 }
+                $avg_actual_weight_count = $actual_weight_count / $shipments_count;
                 $html .= '<tr>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
@@ -3429,35 +3429,35 @@ class NotificationsController extends Controller
 
                 $to = array();
 
-                $cc = array();
-
-                $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
-
-                if ($admins->exists()) {
-                    $cc = array_merge($to, $admins->pluck('email')->toArray());
-                }
-
-                $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
-
-                if ($admins->exists()) {
-                    $to = array_merge($to, $admins->pluck('admins.email')->toArray());
-                }
-
-                $ceo = Admin::find(8);
-                if ($ceo) {
-                    $cc[] = $ceo->email;
-                }
-
-                self::email($subject, $body, $to, $cc);
 //                $cc = array();
 //
-//                $admins = Admin::whereIn('id', [36, 7])->where('status', 1);
+//                $admins = Admin::whereIn('role_id', [2, 3, 4, 6, 20])->where('status', 1);
 //
 //                if ($admins->exists()) {
-//                    $to = array_merge($to, $admins->pluck('email')->toArray());
+//                    $cc = array_merge($to, $admins->pluck('email')->toArray());
 //                }
 //
-//                self::email($subject, $body, $to);
+//                $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
+//
+//                if ($admins->exists()) {
+//                    $to = array_merge($to, $admins->pluck('admins.email')->toArray());
+//                }
+//
+//                $ceo = Admin::find(8);
+//                if ($ceo) {
+//                    $cc[] = $ceo->email;
+//                }
+//
+//                self::email($subject, $body, $to, $cc);
+                $cc = array();
+
+                $admins = Admin::whereIn('id', [36, 7])->where('status', 1);
+
+                if ($admins->exists()) {
+                    $to = array_merge($to, $admins->pluck('email')->toArray());
+                }
+
+                self::email($subject, $body, $to);
             }
             else if ($id == 49) {
                 if (strpos($subject, '[date]') !== FALSE) {
@@ -3500,11 +3500,11 @@ class NotificationsController extends Controller
                     $html .= '</tr>';
                     $shipments_count = $shipments_count + $month_average->shipments;
                     $revenue_count = $revenue_count + $month_average->revenue;
-                    $avg_revenue_count = $avg_revenue_count + $month_average->avg_revenue;
                     $avg_shipments_count = $avg_shipments_count + $month_average->avg_shipments;
                     $month_speed_count = $month_speed_count + $month_average->month_speed;
                     $serial++;
                 }
+                $avg_revenue_count = $revenue_count / $shipments_count;
                 $html .= '<tr>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
