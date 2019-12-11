@@ -2966,7 +2966,17 @@
                                                                         </select>
                                                                     </fieldset>
                                                                 </div>
-
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control packing_size" name="packing_size[{{$key}}]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
+                                                                           @foreach($packaging_material_types as $material_type)
+                                                                                @foreach($material_type->sizes as $size)
+                                                                                    <option value="{{$size->id}}">{{$size->size}}</option>
+                                                                                @endforeach
+                                                                           @endforeach
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
                                                                         <input name="packing_charges[0]" value="{{$packing->charges}}" type="text" class="form-control numeric" placeholder="Charges" disabled="disabled">
@@ -3089,6 +3099,11 @@
             placeholder:'Select Packing Type'
         });
         $('select[name="packing_type[{{$ind}}]"]').val({{$packing->packing_type_id}}).trigger('change');
+        $('select[name="packing_size[{{$ind}}]"]').select2({
+            width:'100%',
+            placeholder:'Select Packing Size'
+        });
+        $('select[name="packing_size[{{$ind}}]"]').val({{$packing->packing_size_id}}).trigger('change');
         @endforeach
 
         var PPCSwitch = document.querySelector('.switchery.PPCSwitch');

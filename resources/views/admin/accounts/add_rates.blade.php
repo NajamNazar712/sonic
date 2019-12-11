@@ -1908,6 +1908,13 @@
                                                                         </select>
                                                                     </fieldset>
                                                                 </div>
+                                                                <input type="hidden" id="packing_size_input0" name="packing_size[0]">
+                                                                <div class="col-md-2">
+                                                                    <fieldset class="form-group">
+                                                                        <select class="select2 form-control packing_size" name="packing_size[0]" data-rule-required="true" data-msg-required="This field is required">
+                                                                        </select>
+                                                                    </fieldset>
+                                                                </div>
 
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
@@ -3261,23 +3268,41 @@
             row_selector.remove();
         });
 
-
+        var packing_sizes = @json($packaging_material_type_sizes);
         var packing_type_rows = 1;
         var packing_type_selected = [];
+        var packing_size_selected = [];
         var packing_material_data = @json($packaging_material_types);
         var packing_data = $.map(packing_material_data, function (obj) {
                 obj.id = obj.id;
                 obj.text = obj.type;
                 return obj;
             });
-
+        
         $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
                 data:packing_data,
                 width:'100%',
-                placeholder:'Select Storage Type'
+                placeholder:'Select Packing Type'
             }).bind('select2:select', function(){
+                var packing_id = $(this).val();
                 $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
-                $('input[name="packing_type[0]"]').val($(this).val());
+                $('input[name="packing_type[0]"]').val(packing_id);
+                
+                var packing_sizes_data = $.map(packing_sizes[packing_id], function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.size;
+                return obj;
+                });
+                $('select[name="packing_size[0]"]').empty().select2({data:packing_sizes_data, placeholder: 'Select Packing Size'}).val(null).trigger('change');
+            });
+
+        
+        $('select[name="packing_size[0]"]').select2({
+                width:'100%',
+                placeholder:'Select Packing Size'
+            }).bind('select2:select', function(){
+                var packing_size = $(this).val();
+                $('input[name="packing_size[0]"]').val(packing_size);
 
             });
 
@@ -3301,28 +3326,34 @@
             var previous_row = packing_type_rows - 1;
             $(this).addClass('d-none');
 
-            var previous_select = $('select[name="packing_type['+ previous_row +']"]');
-            packing_type_selected.push(previous_select.val());
-            previous_select.prop('disabled', true);
+            var previous_type = $('select[name="packing_type['+ previous_row +']"]');
+            var previous_size = $('select[name="packing_size['+ previous_row +']"]');
+            // packing_type_selected.push(previous_type.val());
+            packing_size_selected.push(previous_size.val());
+            previous_type.prop('disabled', true);
+            previous_size.prop('disabled', true);
 
-            var packing_data_new = $.map(packing_material_data, function (obj) {
-                var current_id = obj.id.toString();
-                var index = $.inArray(current_id, packing_type_selected);
-                
-                if(index === -1){
-                    obj.id = obj.id;
-                    obj.text = obj.type;
-                    return obj;
-                }
-                
-            });
-            if(packing_data_new.length !== 0){
+            // var packing_size_data_new = $.map(packing_material_data, function (obj) {
+            //     var current_id = obj.id.toString();
+            //     var index = $.inArray(current_id, packing_type_selected);
+            //     if(index === -1){
+            //         obj.id = obj.id;
+            //         obj.text = obj.type;
+            //         return obj;
+            //     }  
+            // });
+            
+            if(packing_data.length !== 0){
                 var htmldiv = '<div class="row packing_type_row" id="packing_type_row'+packing_type_rows+'">\n' +
                 '                                                <input id="packing_type_input'+ packing_type_rows +'" type="hidden" name="packing_type['+ packing_type_rows +']" value=""><div class="col-md-2">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <select class="select2 form-control storage_type" name="packing_type['+ packing_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
                 '                                                    </fieldset>\n' +
                 '                                                </div>\n' +
+                '                                                <input id="packing_size_input'+ packing_type_rows +'" type="hidden" name="packing_size['+ packing_type_rows +']" value=""><div class="col-md-2">\n' +
+                '                                                    <fieldset class="form-group">\n' +
+                '                                                        <select class="select2 form-control storage_type" name="packing_size['+ packing_type_rows +']" data-rule-required="true" data-msg-required="This field is required"></select>\n' +
+                '                                                    </fieldset></div>\n' +
                 '                                                <div class="col-md-2">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <input name="packing_charges['+packing_type_rows+']" type="text" class="form-control validated" data-rule-required="true" data-msg-required="Charges are required" placeholder="Charges">\n' +
@@ -3336,15 +3367,32 @@
             
             var last_id = packing_type_rows;
             $('select[name="packing_type['+ packing_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
-                data:packing_data_new,
+                data:packing_data,
                 width:'100%',
                 placeholder:'Select Packing Type'
             }).on('change', function(){
                 var packing_id = $(this).val();
                 $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
                 $(this).parents('div.packing_type_row').find('input#packing_type_input'+last_id).val(packing_id);
+                var packing_sizes_data = $.map(packing_sizes[packing_id], function (obj) {
+                    var current_id = obj.id.toString();
+                    var index = $.inArray(current_id, packing_size_selected);
+                    if(index === -1){
+                        obj.id = obj.id;
+                        obj.text = obj.size;
+                        return obj;
+                    }  
+                });
+                $('select[name="packing_size['+ last_id +']"]').empty().select2({data:packing_sizes_data, placeholder: 'Select Storage Size'}).val(null).trigger('change');
             });
-            $('input[name="storage_type_charges['+packing_type_rows+']"]').inputmask({
+            $('select[name="packing_size['+ packing_type_rows +']"]').select2({
+                width:'100%',
+                placeholder:'Select Packing Type'
+            }).on('change', function(){
+                var packing_size = $(this).val();
+                $(this).parents('div.packing_type_row').find('input#packing_size_input'+last_id).val(packing_size);
+            });
+            $('input[name="packing_charges['+packing_type_rows+']"]').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false,
@@ -3362,10 +3410,15 @@
         $('body').on('click','span.packing_type_row_delete', function(){
             var row_id = $(this).parent().parent().attr('row');
             var selected = $('select[name="packing_type['+ row_id +']"]').val();
+            var size_selected = $('select[name="packing_size['+ row_id +']"]').val();
             if(selected !== ''){
                 var index = $.inArray(selected, packing_type_selected);
                 if(index !== -1){
                     packing_type_selected.splice(index, 1);
+                }
+                var index = $.inArray(size_selected, packing_size_selected);
+                if(index !== -1){
+                    packing_size_selected.splice(index, 1);
                 }
             }
             $(this).parent().parent().remove();

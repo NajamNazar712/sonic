@@ -1230,6 +1230,7 @@ class AdminCorporateAccountsController extends Controller
                     $ptype = new WmsPackingCharge();
                     $ptype->user_id = $id;
                     $ptype->packing_type_id = $packing;
+                    $ptype->packing_type_id = $request->packing_size[$key];
                     $ptype->charges = $request->packing_charges[$key];
                     $ptype->save();
                 }
@@ -3073,6 +3074,7 @@ class AdminCorporateAccountsController extends Controller
                         $ptype = new WmsPackingCharge();
                         $ptype->user_id = $id;
                         $ptype->packing_type_id = $packing;
+                        $ptype->packing_type_id = $request->packing_size[$key];
                         $ptype->charges = $request->packing_charges[$key];
                         $ptype->save();
                     }
@@ -4222,6 +4224,7 @@ class AdminCorporateAccountsController extends Controller
                         $ptype = new WmsPendingPackingCharge();
                         $ptype->user_id = $id;
                         $ptype->packing_type_id = $packing;
+                        $ptype->packing_type_id = $request->packing_size[$key];
                         $ptype->charges = $request->packing_charges[$key];
                         $ptype->save();
                     }
@@ -4812,6 +4815,7 @@ class AdminCorporateAccountsController extends Controller
                         $history_packing_charge = new WmsHistoryPackingCharge();
                         $history_packing_charge->user_id = $id;
                         $history_packing_charge->packing_type_id = $packing_charges['packing_type_id'];
+                        $history_packing_charge->packing_size_id = $packing_charges['packing_size_id'];
                         $history_packing_charge->charges = $packing_charges['charges'];
                         $history_packing_charge->save();
                     }
@@ -5400,6 +5404,7 @@ class AdminCorporateAccountsController extends Controller
                         $history_packing_charge = new WmsPackingCharge();
                         $history_packing_charge->user_id = $id;
                         $history_packing_charge->packing_type_id = $packing_charges['packing_type_id'];
+                        $history_packing_charge->packing_size_id = $packing_charges['packing_size_id'];
                         $history_packing_charge->charges = $packing_charges['charges'];
                         $history_packing_charge->save();
                     }

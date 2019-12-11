@@ -641,7 +641,7 @@
 
        $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select City',
-           dropdownParent:$('#registership')
+        
        });
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
@@ -649,12 +649,12 @@
         $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
             width:'100%',
             placeholder:'Select Date',
-            dropdownParent:$('#registership')
+            // dropdownParent:$('#registership')
         });
         $('#cycle_of_invoicing').prepend('<option value="" selected="selected"></option>').select2({
            width:'100%',
            placeholder:'Select Cycle Of Invoicing',
-           dropdownParent:$('#registership')
+        
        }).bind('change', function() {
 
            if (this.value == 1) {
@@ -679,12 +679,12 @@
 
        $('#bank_name').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank',
-           dropdownParent:$('#registership')
+        
        });
        $('#nature_of_account').prepend('<option value="" selected="selected"></option>').select2({
            width:'100%',
            placeholder:'Select Nature of Account',
-           dropdownParent:$('#registership')
+        
        }).bind('change', function() {
 
            if (this.value == 2) {
@@ -706,28 +706,28 @@
         {{--});--}}
        $('#bank_city').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank City',
-           dropdownParent:$('#registership')
+        
        });
        $('#cycle_of_payment').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Cycle of Payment',
-           dropdownParent:$('#registership')
+        
        });
 
        $('select[name="shipping_city[]"]').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Pickup City',
-           dropdownParent:$('#registership')
+        
        });
         $('select[name="product_type[]"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Product Type',
-            dropdownParent:$('#registership')
+            // dropdownParent:$('#registership')
         });
         $('select[name="shipper_product_type"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Product Type',
-            dropdownParent:$('#registership')
+            // dropdownParent:$('#registership')
         });
         $('select[name="reference"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Reference',
-            dropdownParent:$('#registership')
+            // dropdownParent:$('#registership')
         });
         $("input[name='average_shipment']").inputmask({
             'alias': 'integer',
@@ -779,7 +779,7 @@
                 $("input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
 
                 $('#shipping_' + count + ' .select2').select2({
-                    dropdownParent:$('#registership')
+                    // dropdownParent:$('#registership')
                 });
                 $('#shipping_' + count + ' a[data-action="close"]').on('click',function(){
                   //  $(this).closest('.card').removeClass().slideUp('fast'); // comenting this because display none will allow values to be posted
