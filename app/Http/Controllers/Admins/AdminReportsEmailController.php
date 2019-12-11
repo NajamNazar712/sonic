@@ -232,7 +232,7 @@ class AdminReportsEmailController extends Controller
         $holiday_date_from = $new_date_from->format('Y-m-d');
         $new_date_from = $new_date_from->format('Y-m-d 08:00A');
         $new_date_to = $date_to;
-        $week_holiday_date_to = Carbon::today()->format('Y-m-d');
+        $week_holiday_date_to = Carbon::yesterday()->format('Y-m-d');
         $holiday_date_to = $new_date_to->format('Y-m-d');
         $new_date_to = $new_date_to->format('Y-m-d 07:59A');
         $total_shipments = 0;
