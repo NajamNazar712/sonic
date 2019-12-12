@@ -3305,7 +3305,7 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->shipments) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->revenue)) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->avg_revenue)) . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . round($sale_person_number->contribution * 100) . '%</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $sale_person_number->contribution * 100 . '%</td>';
                     $html .= '</tr>';
                     $shipments_count = $shipments_count + $sale_person_number->shipments;
                     $revenue_count = $revenue_count + $sale_person_number->revenue;
@@ -3402,7 +3402,7 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->city->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($hub_wise_split->shipments) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->ratio * 100 . '%</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($hub_wise_split->actual_weight)) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($hub_wise_split->actual_weight) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($hub_wise_split->avg_actual_weight) . '</td>';
                     $html .= '</tr>';
                     $shipments_count = $shipments_count + $hub_wise_split->shipments;
@@ -3415,8 +3415,8 @@ class NotificationsController extends Controller
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $ratio_count * 100 . '</td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($actual_weight_count)) . '</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $ratio_count * 100 . '%</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($actual_weight_count) . '</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($avg_actual_weight_count) . '</td>';
                 $html .= '</tr>';
 
