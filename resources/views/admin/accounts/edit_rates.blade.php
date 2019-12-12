@@ -4828,7 +4828,6 @@
                 width:'100%',
                 placeholder:'Select Packing Type'
             }).bind('select2:select', function(){
-                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
                 $('input[name="packing_type[0]"]').val($(this).val());
 
                 var packing_sizes_data = $.map(packing_sizes[packing_id], function (obj) {
@@ -4842,6 +4841,7 @@
                 width:'100%',
                 placeholder:'Select Packing Size'
             }).bind('select2:select', function(){
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
                 $('input[name="packing_size[0]"]').val($(this).val());
 
             });
@@ -4989,7 +4989,6 @@
                 width:'100%',
                 placeholder:'Select Storage Type'
             }).bind('select2:select', function(){
-                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
                 $('input[name="packing_type[0]"]').val($(this).val());
                 var packing_sizes_data = $.map(packing_sizes[$(this).val()], function (obj) {
                 obj.id = obj.id;
@@ -5004,6 +5003,7 @@
             }).bind('select2:select', function(){
                var packing_size = $(this).val();
                 $(this).parents('div.packing_type_row').find('input#packing_size_input'+last_id).val(packing_size);
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
 
             });
         @endif
@@ -5069,9 +5069,8 @@
                 data:packing_data,
                 width:'100%',
                 placeholder:'Select Packing Type'
-            }).on('change', function(){
+            }).on('select2:select', function(){
                 var packing_id = $(this).val();
-                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
                 $(this).parents('div.packing_type_row').find('input#packing_type_input'+last_id).val(packing_id);
                 var packing_sizes_data = $.map(packing_sizes[packing_id], function (obj) {
                     var current_id = obj.id.toString();
@@ -5087,9 +5086,11 @@
              $('select[name="packing_size['+ packing_type_rows +']"]').select2({
                 width:'100%',
                 placeholder:'Select Packing Type'
-            }).on('change', function(){
+            }).on('select2:select', function(){
                 var packing_size = $(this).val();
                 $(this).parents('div.packing_type_row').find('input#packing_size_input'+last_id).val(packing_size);
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
+
             });
             $('input[name="packing_charges['+packing_type_rows+']"]').inputmask({
                 'alias': 'integer',

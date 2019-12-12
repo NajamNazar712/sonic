@@ -2,77 +2,78 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\NotificationsController;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\InvoicingCycle;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\WMS\WmsStorageType;
 use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\StandardBookingTypeCharge;
-use App\Http\Models\Admin\StandardCashHandlingCharge;
-use App\Http\Models\Admin\StandardFuelSurcharge;
-use App\Http\Models\Admin\StandardInsuranceCharge;
-use App\Http\Models\Admin\StandardPackagingCharge;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\WMS\WmsPackingCharge;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\CorporateReturnCharge;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CorporateFuelSurcharge;
+use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\WMS\WmsLabellingCharge;
+use App\Http\Models\WMS\WmsUserInformation;
+use App\Http\Models\CorporateDiscountCharge;
+use App\Http\Models\WMS\WmsPerProductCharge;
+use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\WMS\WmsStorageTypeCharge;
 use App\Http\Models\Admin\StandardReturnCharge;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\CorporateBookingTypeCharge;
+use App\Http\Models\PackagingMaterialTypeSizes;
+use App\Http\Models\Rates\CorporateRateHistory;
+use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\CorporateCashHandlingCharge;
-use App\Http\Models\CorporateDiscountCharge;
-use App\Http\Models\CorporateFuelSurcharge;
-use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\WMS\WmsHistoryPackingCharge;
+use App\Http\Models\WMS\WmsPendingPackingCharge;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\CorporateMinChargeableWeight;
-use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\CorporateReturnCharge;
-use App\Http\Models\CorporateStandardBookingTypeCharge;
-use App\Http\Models\CorporateStandardCashHandlingCharge;
-use App\Http\Models\CorporateStandardFuelSurcharge;
-use App\Http\Models\CorporateStandardInsuranceCharge;
-use App\Http\Models\CorporateStandardMinChargeableWeight;
+use App\Http\Models\Admin\StandardInsuranceCharge;
+use App\Http\Models\Admin\StandardPackagingCharge;
 use App\Http\Models\CorporateStandardReturnCharge;
 use App\Http\Models\CorporateStandardWeightCharge;
-use App\Http\Models\CorporateWeightCharge;
-use App\Http\Models\PackagingMaterialTypes;
-use App\Http\Models\WMS\WmsUserInformation;
-use App\Http\Models\WMS\WmsPerProductCharge;
-use App\Http\Models\WMS\WmsPerSquareFootCharge;
-use App\Http\Models\WMS\WmsLabellingCharge;
-use App\Http\Models\WMS\WmsPackingCharge;
-use App\Http\Models\WMS\WmsStorageTypeCharge;
-use App\Http\Models\WMS\WmsPendingUserInformation;
-use App\Http\Models\WMS\WmsPendingPerProductCharge;
-use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
-use App\Http\Models\WMS\WmsPendingLabellingCharge;
-use App\Http\Models\WMS\WmsPendingPackingCharge;
-use App\Http\Models\WMS\WmsPendingStorageTypeCharge;
-use App\Http\Models\WMS\WmsHistoryUserInformation;
-use App\Http\Models\WMS\WmsHistoryPerProductCharge;
-use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
 use App\Http\Models\WMS\WmsHistoryLabellingCharge;
-use App\Http\Models\WMS\WmsHistoryPackingCharge;
+use App\Http\Models\WMS\WmsHistoryUserInformation;
+use App\Http\Models\WMS\WmsPendingLabellingCharge;
+use App\Http\Models\WMS\WmsPendingUserInformation;
+use App\Http\Models\CorporateStandardFuelSurcharge;
+use App\Http\Models\WMS\WmsHistoryPerProductCharge;
+use App\Http\Models\WMS\WmsPendingPerProductCharge;
+use App\Http\Models\Admin\StandardBookingTypeCharge;
 use App\Http\Models\WMS\WmsHistoryStorageTypeCharge;
-use App\Http\Models\WMS\WmsStorageType;
-use App\Http\Models\InvoicingCycle;
-use App\Http\Models\Rates\CorporateRateHistory;
-use App\Http\Models\Rates\HistoryCorporateBookingTypeCharges;
-use App\Http\Models\Rates\HistoryCorporateMinChargeableWeight;
-use App\Http\Models\Rates\PendingCorporateBookingTypeCharges;
-use App\Http\Models\Rates\PendingCorporateCashHandlingCharge;
-use App\Http\Models\Rates\PendingCorporateDiscountCharge;
-use App\Http\Models\Rates\PendingCorporateFuelSurcharge;
-use App\Http\Models\Rates\PendingCorporateInsuranceCharge;
-use App\Http\Models\Rates\PendingCorporateMinChargeableWeight;
-use App\Http\Models\Rates\PendingCorporateRateStatus;
-use App\Http\Models\Rates\PendingCorporateReturnCharge;
-use App\Http\Models\Rates\PendingCorporateWeightCharge;
-use App\Http\Models\Rates\HistoryCorporateCashHandlingCharge;
-use App\Http\Models\Rates\HistoryCorporateDiscountCharge;
-use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
-use App\Http\Models\Rates\HistoryCorporateInsuranceCharge;
+use App\Http\Models\WMS\WmsPendingStorageTypeCharge;
+use App\Http\Models\Admin\StandardCashHandlingCharge;
+use App\Http\Models\CorporateStandardInsuranceCharge;
 use App\Http\Models\Rates\HistoryCorporateRateStatus;
+use App\Http\Models\Rates\PendingCorporateRateStatus;
+use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
+use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
+use App\Http\Models\CorporateStandardBookingTypeCharge;
 use App\Http\Models\Rates\HistoryCorporateReturnCharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
-use App\Http\Models\Shipper\User;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Rates\PendingCorporateReturnCharge;
+use App\Http\Models\Rates\PendingCorporateWeightCharge;
+use App\Http\Models\CorporateStandardCashHandlingCharge;
+use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
+use App\Http\Models\Rates\PendingCorporateFuelSurcharge;
+use App\Http\Models\CorporateStandardMinChargeableWeight;
+use App\Http\Models\Rates\HistoryCorporateDiscountCharge;
+use App\Http\Models\Rates\PendingCorporateDiscountCharge;
+use App\Http\Models\Rates\HistoryCorporateInsuranceCharge;
+use App\Http\Models\Rates\PendingCorporateInsuranceCharge;
+use App\Http\Models\Rates\HistoryCorporateBookingTypeCharges;
+use App\Http\Models\Rates\HistoryCorporateCashHandlingCharge;
+use App\Http\Models\Rates\PendingCorporateBookingTypeCharges;
+use App\Http\Models\Rates\PendingCorporateCashHandlingCharge;
+use App\Http\Models\Rates\HistoryCorporateMinChargeableWeight;
+use App\Http\Models\Rates\PendingCorporateMinChargeableWeight;
 
 
 class AdminCorporateAccountsController extends Controller
@@ -86,6 +87,7 @@ class AdminCorporateAccountsController extends Controller
 
     public function add_rates_index($id)
     {
+
         $user = User::find($id);
         if (!CorporateRateStatus::where('user_id', $user->id)->exists()) {
             $sale_person = SalePersonTag::where('user_id', $id)->first();
@@ -99,7 +101,13 @@ class AdminCorporateAccountsController extends Controller
             $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
-            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types]);
+            if(count($packaging_material_types) > 0){
+
+                foreach($packaging_material_types as $type){
+                    $packaging_sizes[$type->id] = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                }
+            }
+            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes]);
         }
         return redirect()->back()->with('error', 'User rates not found!');
     }
