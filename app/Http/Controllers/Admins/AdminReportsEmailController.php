@@ -163,7 +163,6 @@ class AdminReportsEmailController extends Controller
             else{
                 $ratio[$hub_wise_split->hub_id] = 0;
             }
-            dd($ratio);
             if($hub_wise_split->shipment_count != 0){
                 $avg_actual_weight[$hub_wise_split->hub_id] = $hub_wise_split->actual_weight / $hub_wise_split->shipment_count;
             }
