@@ -186,7 +186,7 @@ class AdminReportsEmailController extends Controller
             else{
                 $actual_weight = 0;
             }
-            $hub_wise_split_array[] = ['serial' => $serial, 'Hub' => $hub_wise_split->hub, 'Count of Parcels' => $hub_wise_split->shipment_count, 'Ratio' => $ratio[$hub_wise_split->hub_id], 'Actual Weight' => round($actual_weight, 2), 'Avg Actual Weight/Shipment' => round($avg_actual_weight[$hub_wise_split->hub_id], 2)];
+            $hub_wise_split_array[] = ['serial' => $serial, 'Hub' => $hub_wise_split->hub, 'Count of Parcels' => $hub_wise_split->shipment_count, 'Ratio' => $ratio[$hub_wise_split->hub_id] * 100, 'Actual Weight' => round($actual_weight, 2), 'Avg Actual Weight/Shipment' => round($avg_actual_weight[$hub_wise_split->hub_id], 2)];
             $hub_wise_split_entry = new HubWiseSplit();
             $hub_wise_split_entry->hub_id = $hub_wise_split->hub_id;
             $hub_wise_split_entry->shipments = $hub_wise_split->shipment_count;
@@ -203,7 +203,7 @@ class AdminReportsEmailController extends Controller
         }
         $total_avg_actual_weight_count = $total_actual_weight_count / $total_shipments_count;
         $hub_wise_split_array[] = ['serial' => '', 'Hub' => '', 'Count of Parcels' => '', 'Ratio' => '', 'Actual Weight' => '', 'Avg Actual Weight/Shipment' => ''];
-        $hub_wise_split_array[] = ['serial' => 'Total', 'Hub' => '', 'Count of Parcels' => $total_shipments_count, 'Ratio' => $total_avg_ratio_count, 'Actual Weight' => round($total_actual_weight_count, 2), 'Avg Actual Weight/Shipment' => round($total_avg_actual_weight_count, 2)];
+        $hub_wise_split_array[] = ['serial' => 'Total', 'Hub' => '', 'Count of Parcels' => $total_shipments_count, 'Ratio' => $total_avg_ratio_count * 100, 'Actual Weight' => round($total_actual_weight_count, 2), 'Avg Actual Weight/Shipment' => round($total_avg_actual_weight_count, 2)];
         $cell_st =[
             'font' =>['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
