@@ -3324,7 +3324,7 @@ class NotificationsController extends Controller
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($revenue_count)) . '</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_revenue_count)) . '</td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . round($contribution_count,2) . '%</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ceil($contribution_count) . '%</td>';
                 $html .= '</tr>';
 
                 $html .= '</tr>';
@@ -3420,7 +3420,7 @@ class NotificationsController extends Controller
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . round($ratio_count * 100, 2) . '%</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ceil($ratio_count) . '%</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float) $actual_weight_count,2,'.','') . '</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float) $avg_actual_weight_count,2,'.','') . '</td>';
                 $html .= '</tr>';
