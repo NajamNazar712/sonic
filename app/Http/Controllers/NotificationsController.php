@@ -3305,21 +3305,26 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->shipments) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->revenue)) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->avg_revenue)) . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float) ($sale_person_number->contribution * 100),2,'.','') . '%</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->contribution,2,'.','') . '%</td>';
                     $html .= '</tr>';
                     $shipments_count = $shipments_count + $sale_person_number->shipments;
                     $revenue_count = $revenue_count + $sale_person_number->revenue;
                     $contribution_count = $contribution_count + $sale_person_number->contribution;
                     $serial++;
                 }
-                $avg_revenue_count = $revenue_count / $shipments_count;
+                if($shipments_count != 0){
+                    $avg_revenue_count = $revenue_count / $shipments_count;
+                }
+                else{
+                    $avg_revenue_count = 0;
+                }
                 $html .= '<tr>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($revenue_count)) . '</td>';
                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_revenue_count)) . '</td>';
-                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float) ($contribution_count * 100),2,'.','') * 100 . '%</td>';
+                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($contribution_count,2,'.','') . '%</td>';
                 $html .= '</tr>';
 
                 $html .= '</tr>';
