@@ -88,6 +88,15 @@
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
                         </div>
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_types" id="search_types" class="form-control select2">
+                                @foreach($types as $id => $type)
+                                    <option value="{{ $id }}">{{ $type }}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -213,6 +222,10 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_types').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Type',
+                width:'100%'
+            });
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
@@ -266,7 +279,8 @@
                             'search_hub': $('#search_hub').val(),
                             'search_shipping_mode': $('#search_shippimg_modes').val(),
                             'search_from': $('input[name="from_date_formatted"]').val(),
-                            'search_to': $('input[name="to_date_formatted"]').val()
+                            'search_to': $('input[name="to_date_formatted"]').val(),
+                            'search_types': $('input[name="search_types"]').val()
                         },
                         success: function (result) {
                             head = [];
@@ -355,6 +369,7 @@
                         d.search_shipping_mode = $('#search_shippimg_modes').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.search_types = $('#search_types').val();
                     }
                 },
                 rowId: 'shId',
