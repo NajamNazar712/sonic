@@ -788,7 +788,7 @@ class ShipperFinanceController extends Controller
       ->join('shipment_status as ss', 'sj.consignee_status_id', 'ss.id')
       ->leftJoin('shipment_payment_status as sps', 's.payment_status_id', 'sps.id')
       ->leftJoin('done_payment_shipments as dps', 's.id', 'dps.shipment_id')
-      ->select('s.tracking_number', 's.order_id', 'bt.booking_type as service_type', 's.consignee_name', 's.consignee_phone_number_1', 's.consignee_phone_number_2', 's.created_at', 'c.name as destination', 's.actual_weight', 'ss.name as shipment_status', 'sps.name as shipment_payment_status', DB::raw('IF(s.tracking_number IS NULL, NULL, IFNULL(GROUP_CONCAT(dps.done_payment_id SEPARATOR ", "), NULL)) AS payment_ids'));
+      ->select('s.id', 's.tracking_number', 's.order_id', 'bt.booking_type as service_type', 's.consignee_name', 's.consignee_phone_number_1', 's.consignee_phone_number_2', 's.created_at', 'c.name as destination', 's.actual_weight', 'ss.name as shipment_status', 'sps.name as shipment_payment_status', DB::raw('IF(s.tracking_number IS NULL, NULL, IFNULL(GROUP_CONCAT(dps.done_payment_id SEPARATOR ", "), NULL)) AS payment_ids'));
 
       $shipments = $shipments->where(function ($query) {
         $query->where('rs.user_id', session('user_id'))
@@ -802,11 +802,11 @@ class ShipperFinanceController extends Controller
         $shipments = $shipments->where('receiving_sheet_shipments.receiving_sheet_id', 0);
       }
 
-      $shipments = $shipments->groupBy('s.id')->orderBy('s.id');
+      $shipments = $shipments->groupBy('s.id');
 
       $datatables = Datatables::of($shipments)
       ->editColumn('tracking_number', function($shipment) use ($tracking_route) {
-        return '<a href="' . $tracking_route . '?tracking_number=' . $shipment->tracking_number . '" target="_blank">' . $shipment->tracking_number . '</a>';
+        return '<u><a href="' . $tracking_route . '?tracking_number=' . $shipment->tracking_number . '" target="_blank">' . $shipment->tracking_number . '</a></u>';
       })
       ->addColumn('consignee_phone', function ($shipment) {
           $consignee_phone = $shipment->consignee_phone_number_1;

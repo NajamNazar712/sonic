@@ -30,6 +30,7 @@
 									<thead>
 										<tr role="row" class="bg-primary white">
 											<th class="border-primary border-darken-1">S. No.</th>
+											<th class="border-primary border-darken-1">Shipment ID</th>
 											<th class="border-primary border-darken-1">Tracking No.</th>
 											<th class="border-primary border-darken-1">Order ID</th>
 											<th class="border-primary border-darken-1">Service Type</th>
@@ -98,18 +99,20 @@
 					}
 				},
 				rowId: 'id',
+				order: [[1, 'desc']],
 				columns: [
 					{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+					{data: 'id', name: 's.id', class: 'align-middle id', visible: false},
 					{data: 'tracking_number', name: 's.tracking_number', class: 'align-middle tracking_number'},
 					{data: 'order_id', name: 's.order_id', class: 'align-middle order_id'},
-					{data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
+					{data: 'service_type', name: 's.booking_type_id', class: 'align-middle service_type'},
 					{data: 'consignee_name', name: 's.consignee_name', class: 'align-middle consignee_name'},
 					{data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
 					{data: 'created_at', name: 's.created_at', class: 'align-middle created_at'},
 					{data: 'destination', name: 'c.name', class: 'align-middle destination'},
 					{data: 'actual_weight', name: 's.actual_weight', class: 'align-middle actual_weight'},
-					{data: 'shipment_status', name: 'ss.name', class: 'align-middle shipment_status'},
-					{data: 'shipment_payment_status', name: 'sps.name', class: 'align-middle shipment_payment_status'},
+					{data: 'shipment_status', name: 'sj.consignee_status_id', class: 'align-middle shipment_status'},
+					{data: 'shipment_payment_status', name: 's.payment_status_id', class: 'align-middle shipment_payment_status'},
 					{data: 'payment_ids', name: 'payment_ids', class: 'align-middle payment_ids'}
 				],
 				rowCallback: function (row, data, index) {
@@ -148,7 +151,7 @@
 								column.search($(this).val(), false, false, true).draw();
 							}).wrap(td);
 						}
-						else {
+						else if(!$(header).is('.id')) {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
 							}).wrap(td).after(icon);
