@@ -3559,6 +3559,45 @@ class NotificationsController extends Controller
 //
 //                self::email($subject, $body, $to);
             }
+            else if ($id == 52) {
+              $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+
+              $pickup_note = PickupNote::find($reference_1_id);
+
+              $rider = $pickup_note->rider;
+
+              $shipment = Shipment::find($reference_2_id);
+
+              $shipper = $shipment->user;
+
+              $pickup_address = $shipment->pickup_address;
+
+              $to = $pickup_address->phone;
+
+              foreach ($shipment_fields as $key => $field) {
+                if (strpos($body, '[' . $key . ']') !== FALSE) {
+                  $body = str_replace('[' . $key . ']', $shipment[$field], $body);
+                }
+              }
+
+              if (strpos($body, '[company_name]') !== FALSE) {
+                $body = str_replace('[company_name]', $shipper->name, $body);
+              }
+
+              if (strpos($body, '[contact_person]') !== FALSE) {
+                $body = str_replace('[contact_person]', $pickup_address->poc, $body);
+              }
+
+              if (strpos($body, '[rider_name]') !== FALSE) {
+                $body = str_replace('[rider_name]', $rider->name, $body);
+              }
+
+              if (strpos($body, '[rider_phone_number]') !== FALSE) {
+                $body = str_replace('[rider_phone_number]', $rider->phone, $body);
+              }
+
+              self::sms($body, $to);
+            }
         }
       }
     }

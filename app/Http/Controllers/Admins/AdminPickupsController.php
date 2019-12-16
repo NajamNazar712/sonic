@@ -850,8 +850,12 @@ class AdminPickupsController extends Controller
               foreach ($assigned_shipments as $assigned_shipment) {
                 $shipment = $assigned_shipment->shipment;
 
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 53) {
+                if ($shipment->shipper_status_id == 1) {
                   ShipmentsPickupJourneyController::add($shipment->id, 3, Auth::id(), $pickup_note->id);
+                }
+
+                if ($shipment->booking_type_id == 4) {
+                  NotificationsController::send(52, $pickup_note->id, $shipment->id);
                 }
               }
             }
@@ -985,6 +989,10 @@ class AdminPickupsController extends Controller
 
             if ($shipment->shipper_status_id == 1) {
               ShipmentsPickupJourneyController::add($shipment->id, 3, Auth::id(), $pickup_note->id);
+            }
+
+            if ($shipment->booking_type_id == 4) {
+              NotificationsController::send(52, $pickup_note->id, $shipment->id);
             }
           }
         }
