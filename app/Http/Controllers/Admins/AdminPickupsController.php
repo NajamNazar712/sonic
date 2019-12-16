@@ -854,7 +854,7 @@ class AdminPickupsController extends Controller
                   ShipmentsPickupJourneyController::add($shipment->id, 3, Auth::id(), $pickup_note->id);
                 }
 
-                if ($shipment->booking_type_id == 4) {
+                if ($shipment->booking_type_id == 5) {
                   NotificationsController::send(52, $pickup_note->id, $shipment->id);
                 }
               }
@@ -991,7 +991,7 @@ class AdminPickupsController extends Controller
               ShipmentsPickupJourneyController::add($shipment->id, 3, Auth::id(), $pickup_note->id);
             }
 
-            if ($shipment->booking_type_id == 4) {
+            if ($shipment->booking_type_id == 5) {
               NotificationsController::send(52, $pickup_note->id, $shipment->id);
             }
           }
