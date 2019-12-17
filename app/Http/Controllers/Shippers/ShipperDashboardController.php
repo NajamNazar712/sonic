@@ -27,6 +27,7 @@ use App\Http\Models\City;
 use Auth;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
@@ -479,6 +480,26 @@ class ShipperDashboardController extends Controller
 
 
         return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
+    }
+
+    public function update_profile_password(Request $request)
+    {
+        if (session('user_type') == 1) {
+                $request->validate([
+                    'password' => 'required|string|min:6',
+                ]);
+                if($request->password == $request->confirm_password){
+                    User::where('id', session('user_id'))->update(['password' => Hash::make($request->password), 'updated_by_type' => 0, 'updated_by_id' => session('user_id')]);
+                    return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
+                }
+                else{
+                    return redirect()->back()->with(['error'=>"The password and confirmation password do not match"]);
+                }
+            }
+        else{
+            return redirect()->back()->with(['error'=>"You are not allowed to change password"]);
+        }
+
     }
 
 

@@ -213,6 +213,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     //user profile
     Route::get('/profile','Shippers\ShipperDashboardController@userProfile')->name('edit.profile');
     Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
+    Route::post('update/profile/password','Shippers\ShipperDashboardController@update_profile_password')->name('update.profile.password');
     Route::get('getpickups','Shippers\ShipperDashboardController@getPickups')->name('get.pickups');
     Route::post('changepickupstatus','Shippers\ShipperDashboardController@pickupStatusChange')->name('change.pickup.status');
     Route::post('addpickup','Shippers\ShipperDashboardController@addPickup')->name('add.pickup');
@@ -289,6 +290,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{from?}/{to?}/{customer_id?}', 'Admins\AdminDashboardController@outgoing_shipments_list')->name('shipments_list');
         });
     });
+
+
+    Route::get('update/profile/password','Admins\AdminDashboardController@update_profile_password')->name('update.profile.password');
+    Route::post('update/profile/password/submit','Admins\AdminDashboardController@update_profile_password_submit')->name('update.profile.password.submit');
 
 
     Route::prefix('orders')->name('orders.')->group(function () {

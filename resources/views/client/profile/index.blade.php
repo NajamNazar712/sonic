@@ -309,9 +309,63 @@
                                             </div>
                                         @endif
                                     </div>
+
+                                    @if(session('user_type') == 1)
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <button id="edit-3" type="button" class="btn btn-primary btn-block">Change Password</button>
+                                            </div>
+                                        </div>
+                                    @endif
+                                    <div class="form-actions right">
+                                        <button id="cancel-button" type="button" class="btn btn-warning mr-1">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            Update
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                            <form id="password-form" class="form form-horizontal" style="display: none" method="post" action="{{route('cod.update.profile.password')}}">
+                                @csrf
+                                <div class="form-body">
+                                    <h4 class="form-section">Change Password</h4>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <div class="form-group col-md-9">
+                                                    <label for="password">Enter Password:<span class="danger">*</span>
+                                                    </label>
+                                                    <div class="form-group position-relative">
+                                                        <input type="password" class="form-control required" id="new_password" placeholder="Minimum 6 Character" value="" name="password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
+                                                        <div class="form-control-position" id="peye">
+                                                            <i class="la la-eye success"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <div class="form-group col-md-9">
+                                                    <label for="password">Confirm Password:<span class="danger">*</span>
+                                                    </label>
+                                                    <div class="form-group position-relative">
+                                                        <input type="password" class="form-control required" id="confirm_password" placeholder="Minimum 6 Character" value="" name="confirm_password">
+                                                        <div class="form-control-position" id="cpeye">
+                                                            <i class="la la-eye success"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="form-actions right">
-                                    <button id="cancel-button" type="button" class="btn btn-warning mr-1">
+                                    <button id="cancel-button2" type="button" class="btn btn-warning mr-1">
                                         Cancel
                                     </button>
                                     <button type="submit" class="btn btn-primary">
@@ -503,12 +557,23 @@
             $('#edit-1').click(function () {
                 $("#main-form").show();
                 $("#tabs").hide();
+                $("#password-form").hide();
             });
             $('#edit-2').click(function () {
                 $("#main-form").show();
                 $("#tabs").hide();
+                $("#password-form").hide();
             });
+            $('#edit-3').click(function () {
+                $("#password-form").show();
+                $("#main-form").hide();
+                $("#tabs").hide();
+            });
+
+            $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
+            $('#cpeye').on('mousedown',function(){$('input[name="confirm_password"]').attr('type','text')}).on('mouseup',function(){$('input[name="confirm_password"]').attr('type','password')});
             $('#cancel-button').click(function () {
+                $("#password-form").hide();
                 $("#main-form").hide();
                 $("#main-form").validate().resetForm();
                 $("#main-form")[0].reset();
@@ -521,6 +586,25 @@
                 $("#poc").val("{{$user->poc}}");
                 $("#email").val("");
                 $("#email").val("{{$user->email}}");
+                $("#new_password").val("");
+                $("#tabs").show();
+            });
+
+            $('#cancel-button2').click(function () {
+                $("#password-form").hide();
+                $("#main-form").hide();
+                $("#main-form").validate().resetForm();
+                $("#main-form")[0].reset();
+                $("#main-form").find(".danger").removeClass("danger");
+                $("#phone").val("");
+                $("#phone").val("{{$user->phone}}");
+                $("#phone2").val("");
+                $("#phone2").val("{{$user->phone2}}");
+                $("#poc").val("");
+                $("#poc").val("{{$user->poc}}");
+                $("#email").val("");
+                $("#email").val("{{$user->email}}");
+                $("#new_password").val("");
                 $("#tabs").show();
             });
 
@@ -806,6 +890,50 @@
                 submitHandler: function(form) {
 
                     form.submit();
+
+                }
+            });
+            $( "#password-form" ).validate({
+                errorClass:"danger",
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    var new_password = $('#new_password').val();
+                    var confirm_password = $('#confirm_password').val();
+                    if(new_password === confirm_password){
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to update password',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            form.submit();
+                        });
+                    }
+                    else{
+                        var error = "The password and confirmation password do not match";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
 
                 }
             });

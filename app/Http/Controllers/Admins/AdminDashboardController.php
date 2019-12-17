@@ -7807,5 +7807,22 @@ if(session('department_id') == 7){
             return response()->json(['status' => 0, 'error' => 'Warehousing already deactivated!']);
         }
     }
+
+    public function update_profile_password(Request $request){
+        return view('admin.profile.change_password');
+    }
+
+    public function update_profile_password_submit(Request $request){
+        $request->validate([
+            'password' => 'required|string|min:6',
+        ]);
+        if($request->password == $request->confirm_password){
+            Admin::where('id',Auth::id())->update(['password' => Hash::make($request->password), 'updated_by' => Auth::id()]);
+            return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
+        }
+        else{
+            return redirect()->back()->with(['error'=>"The password and confirmation password do not match!"]);
+        }
+    }
 }
 
