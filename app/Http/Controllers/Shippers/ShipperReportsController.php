@@ -58,7 +58,7 @@ class ShipperReportsController extends Controller
                 ->leftJoin('shipments_journey as dr', function ($join) {
                     $join->on('dr.shipment_id', '=', 'shipments.id')
                         ->where('dr.id', '=',
-                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 20, 30, 36, 37))'));
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 25, 30, 36, 37))'));
                 })
                 ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned')
                 ->whereNotIn('shipments.shipper_status_id',[1,17]);
