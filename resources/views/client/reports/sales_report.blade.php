@@ -13,12 +13,12 @@
                 @include('admin.inc.messages')
 
                 <div id="search_form" class="row mb-2 justify-content-center">
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
                                 @foreach($cities as $origin)
@@ -27,7 +27,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_destination" id="search_destination" class="form-control select2">
                                 @foreach($cities as $destination)
@@ -36,7 +36,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_status" id="search_status" class="form-control select2">
                                 @foreach($statuses as $status)
@@ -45,7 +45,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
                                 @foreach($shipping_modes as $shipping_mode)
@@ -56,28 +56,51 @@
                     </div>
 
                     <div class="col-4">
-
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Arrival Date (From)">
                         </div>
                     </div>
-                    <div class="col-4 ">
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
                             </div>
 
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Arrival Date (To)">
                         </div>
+                    </div>
 
+                    <div class="w-100"></div>
+
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                            </div>
+
+                            <input type="text" name="dr_search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_from" placeholder="Delivered/Returned Date (From)">
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                            </div>
+
+                            <input type="text" name="dr_search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="dr_search_date_to" placeholder="Delivered/Returned Date (To)">
+                        </div>
                     </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -104,6 +127,7 @@
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Weight Charges</th>
                         <th class="border-primary border-darken-1">Cash Handling Charges</th>
+                        <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                     </tr>
                     </thead>
                 </table>
@@ -267,6 +291,57 @@
                 }
             });
 
+            var from_date = $('#dr_search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        var old_date_formatted = $('input[name="dr_search_date_from_formatted"]').val();
+                        var currentDate = moment(old_date_formatted);
+
+                        var to_date_formatted = $('input[name="dr_search_date_to_formatted"]').val();
+                        var toDate = moment(to_date_formatted);
+
+                        if (currentDate.format('x') > toDate.format('x')) {
+                            to_date.pickadate('picker').clear();
+                        }
+
+                        var afterDate = currentDate.add(30, 'days');
+                        to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
+
+
+                    }
+                }
+            });
+            var to_date = $('#dr_search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        var current_date_formatted = $('input[name="dr_search_date_to_formatted"]').val();
+                        var currentDate = moment(current_date_formatted);
+
+                        var from_date_formatted = $('input[name="dr_search_date_from_formatted"]').val();
+                        var fromDate = moment(from_date_formatted);
+
+                        if (currentDate.format('x') < fromDate.format('x')) {
+                            from_date.pickadate('picker').clear();
+                        }
+
+                        var beforeDate = currentDate.subtract(30, 'days');
+                        from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
+                    }
+                }
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -281,7 +356,9 @@
                             'search_status': $('#search_status').val(),
                             'search_shipping_mode': $('#search_shipping_mode').val(),
                             'search_date_from': $('input[name="search_date_from_formatted"]').val(),
-                            'search_date_to': $('input[name="search_date_to_formatted"]').val()
+                            'search_date_to': $('input[name="search_date_to_formatted"]').val(),
+                            'dr_search_date_from': $('input[name="dr_search_date_from_formatted"]').val(),
+                            'dr_search_date_to': $('input[name="dr_search_date_to_formatted"]').val()
                         },
                         success: function (result) {
                             head = [];
@@ -304,6 +381,7 @@
                             head.push('Actual Weight');
                             head.push('Weight Charges');
                             head.push('Cash Handling Charges');
+                            head.push('Delivered/Returned Date');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -326,6 +404,7 @@
                                 row.push(values.actual_weight);
                                 row.push(values.weight_charges);
                                 row.push(values.cash_handling_charges);
+                                row.push(values.delivered_or_returned);
 
                                 body.push(row);
                             });
@@ -364,6 +443,8 @@
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.dr_search_date_from = $('input[name="dr_search_date_from_formatted"]').val();
+                        d.dr_search_date_to = $('input[name="dr_search_date_to_formatted"]').val();
                     }
                 },
                 order: [[10, 'desc']],
@@ -385,7 +466,8 @@
                     { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
-                    { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'}
+                    { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
+                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

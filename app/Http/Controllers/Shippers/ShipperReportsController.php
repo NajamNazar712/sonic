@@ -38,24 +38,29 @@ class ShipperReportsController extends Controller
                 ->leftJoin('shipments_journey as sj', function ($join) {
                     $join->on('sj.shipment_id', '=', 'shipments.id')
                         ->where('sj.created_at','=',
-                            DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                            DB::connection('reports')->raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
                 })
                 ->leftJoin('pending_payment_shipments as pps', function ($join) {
                     $join->on('pps.shipment_id', '=', 'shipments.id')
                         ->where('pps.created_at','=',
-                            DB::raw('(select max(created_at) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id)'));
+                            DB::connection('reports')->raw('(select max(created_at) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id)'));
                 })
                 ->leftJoin('done_payment_shipments as dps', function ($join) {
                     $join->on('dps.shipment_id', '=', 'shipments.id')
                         ->where('dps.created_at','=',
-                            DB::raw('(select max(created_at) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
+                            DB::connection('reports')->raw('(select max(created_at) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
                 })
                 ->leftjoin('shipment_items as si', function ($join) {
                     $join->on('si.shipment_id', '=', 'shipments.id')
                         ->where('si.type','=',0);
                 })
                 ->leftjoin('products as p','p.id','=','si.product_type_id')
-                ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode')
+                ->leftJoin('shipments_journey as dr', function ($join) {
+                    $join->on('dr.shipment_id', '=', 'shipments.id')
+                        ->where('dr.id', '=',
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 20, 30, 36, 37))'));
+                })
+                ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned')
                 ->whereNotIn('shipments.shipper_status_id',[1,17]);
 //                ->where('u.id', session('user_id'))
 //                ->orwhereIn('shipments.user_id', session('sister_users'));
@@ -109,6 +114,12 @@ class ShipperReportsController extends Controller
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
                 $datatable->whereBetween('sj.created_at', [$from,$to]);
+            }
+
+            if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+                $from = $request->get('dr_search_date_from');
+                $to = $request->get('dr_search_date_to');
+                $datatable->whereBetween('dr.created_at', [$from, $to]);
             }
             return $datatable->make(true);
     }
