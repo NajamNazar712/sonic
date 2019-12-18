@@ -6370,6 +6370,13 @@ if(session('department_id') == 7){
                 }
             })
             ->addColumn("action", function ($result) {
+                if(in_array($result->id, session('tagged_shippers'))){
+                    $multiple_sale_check = true;
+                }
+                else{
+                    $multiple_sale_check = false;
+                }
+
                 $sale_check= SalePersonTag::where('user_id',$result->id)->first();
                 $dropdown = '
                   <div class="btn-group">
@@ -6427,7 +6434,7 @@ if(session('department_id') == 7){
 
                 $merged = MergedSisterAccount::where('user_id', $result->id);
                 if(!$merged->exists()){
-                    if(session('role_id') == 1 || session('role_id') == 4 || (($sale_check) && ($sale_check->user_id == Auth::id()) || in_array(241, session('permissions'))))
+                    if(session('role_id') == 1 || session('role_id') == 4 || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions'))))
                     {
                         $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                     }
@@ -6517,6 +6524,12 @@ if(session('department_id') == 7){
                 }
             })
             ->addColumn("action", function ($result) {
+                if(in_array($result->id, session('tagged_shippers'))){
+                    $multiple_sale_check = true;
+                }
+                else{
+                    $multiple_sale_check = false;
+                }
                 $sale_check= SalePersonTag::where('user_id',$result->id)->first();
                 $dropdown = '
                   <div class="btn-group">
@@ -6585,7 +6598,7 @@ if(session('department_id') == 7){
                 $merged = MergedSisterAccount::where('user_id', $result->id);
                 if($sale_check != null) {
                     if (!$merged->exists()) {
-                        if (session('role_id') == 1 || session('role_id') == 4 || (($sale_check->user_id == Auth::id()) || in_array(241, session('permissions')))) {
+                        if (session('role_id') == 1 || session('role_id') == 4 || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions')))) {
                             $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                         }
                     }

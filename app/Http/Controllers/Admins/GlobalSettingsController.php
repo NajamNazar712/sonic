@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
@@ -19,6 +20,8 @@ use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\FuelSurcharge;
+use App\Http\Models\MultipleSaleLead;
+use App\Http\Models\MultipleSaleTagging;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
@@ -32,6 +35,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 class GlobalSettingsController extends Controller
 {
@@ -1367,5 +1371,105 @@ class GlobalSettingsController extends Controller
         $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+    public function multiple_sale_tagging_index() {
+        $lead_admins = MultipleSaleLead::select('admin_id')->pluck('admin_id')->toArray();
+        $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+            ->where('admin_roles.department_id', 7)
+            ->where('admin_roles.id', '!=', 4)
+            ->where('a.status', 1)
+            ->whereNotIn('a.id', $lead_admins)
+            ->select('a.id as id', 'a.name as name')
+            ->get();
+        return view('admin.settings.multiple_sale_person')->with(['admins' => $admins]);
+    }
+
+    public function multiple_sale_tagging_list(Request $request) {
+        $multiple_sale_tagging = MultipleSaleLead::leftjoin('admins as a', 'a.id', '=', 'multiple_sale_leads.admin_id')
+            ->leftjoin('admins as ua', 'ua.id', '=', 'multiple_sale_leads.updated_by')
+            ->leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
+            ->select('multiple_sale_leads.id as id', 'a.name as head_admin', 'a.id as head_admin_id', DB::raw('count(mst.id) as tagged_admins'), 'ua.name as updated_by', 'multiple_sale_leads.updated_at as updated_at')
+            ->groupBy('a.name');
+
+        return Datatables::of($multiple_sale_tagging)
+            ->editColumn('tagged_admins_count', function($leads) {
+                if ($leads->tagged_admins != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle tagged" data-target-id=' . $leads->id . '>' . $leads->tagged_admins . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->addColumn('action', function ($leads){
+                    $dropdown = '
+              <div class="btn-group col">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                    $dropdown .= '<button type="button" data-target-id=' . $leads->head_admin_id . ' class="dropdown-item assign" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Assign</div></button>';
+
+                    return $dropdown;
+            })->make(true);
+    }
+    public function multiple_sale_tagging_submit(Request $request) {
+        $admin = Admin::find($request->lead);
+        $existing_lead = MultipleSaleLead::where('admin_id', $admin->id)->first();
+        if(!$existing_lead){
+            $new_lead = new MultipleSaleLead();
+            $new_lead->admin_id = $admin->id;
+            $new_lead->updated_by = Auth::id();
+            $new_lead->save();
+            return redirect()->back()->with('success', 'New Lead added successfully!');
+        }
+        else{
+            return redirect()->back()->with('error', 'Same Lead already Exists!');
+        }
+    }
+    public function multiple_sale_tagging_assign_view(Request $request) {
+        $tagged_admins = MultipleSaleLead::leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')->select('mst.admin_id')->where('multiple_sale_leads.admin_id', 47)->whereNotNull('mst.admin_id')->pluck('mst.admin_id')->toArray();
+        $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+            ->where('admin_roles.department_id', 7)
+            ->where('admin_roles.id', '!=', 4)
+            ->where('a.status', 1)
+            ->where('a.id', '!=', $request->head_id)
+            ->whereNotIn('a.id', $tagged_admins)
+            ->select('a.id as id', 'a.name as name')
+            ->get();
+//        if($tagged_admins){
+//            $admins->whereNotIn('a.id', $tagged_admins);
+//        }
+        if($admins){
+            return response()->json(['status' => 1, 'admins' => $admins]);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'No Admins to assign!']);
+        }
+    }
+    public function multiple_sale_tagging_assign_submit(Request $request) {
+        $lead = MultipleSaleLead::where('admin_id', $request->lead_id)->first();
+        $admins = $request->admins;
+        if($lead){
+            if($admins){
+                $lead->updated_by = Auth::id();
+                $lead->save();
+                foreach ($admins as $admin_id) {
+                    $new_users = new MultipleSaleTagging();
+                    $new_users->lead_id = $lead->id;
+                    $new_users->admin_id = $admin_id;
+                    $new_users->save();
+                }
+                return redirect()->back()->with('success', 'Users assigned Successfully!');
+            }
+            else{
+                return redirect()->back()->with('error', 'No Users selected!');
+            }
+        }
+        else{
+            return redirect()->back()->with('error', 'Invalid Lead selected!');
+        }
+    }
+    public function multiple_sale_tagging_assign_view_assigned(Request $request) {
+        $tagged_users = MultipleSaleTagging::leftjoin('admins as a', 'a.id', '=', 'multiple_sale_taggings.admin_id')->where('lead_id', $request->id)->select('a.name')->pluck('a.name')->toArray();
+        return response()->json(['status' => 1, 'tagged_users' => $tagged_users]);
     }
 }

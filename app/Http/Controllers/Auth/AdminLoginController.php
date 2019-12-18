@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\MultipleSaleLead;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -48,6 +49,14 @@ class AdminLoginController extends Controller
 
             $hubs = AdminHub::where('admin_id', $id)->pluck('hub_id')->toArray();
             $shippers = SalePersonTag::where('admin_id', $id)->where('status', 0)->pluck('user_id')->toArray();
+            $assigned_admins = MultipleSaleLead::leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
+                ->leftjoin('sale_person_tags as spt', 'spt.admin_id', '=', 'mst.admin_id')
+                ->where('multiple_sale_leads.admin_id', $id)
+                ->where('spt.status', 0)
+                ->whereNotNull('spt.user_id')->select('spt.user_id')->pluck('spt.user_id')->toArray();
+            if($assigned_admins) {
+                $shippers = array_merge($shippers, $assigned_admins);
+            }
             $permissions = AdminRoleModulePermission::where('role_id', $role_id)->pluck('permission_id')->toArray();
             $department = AdminRole::find($role_id)->department_id;
             session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers]);

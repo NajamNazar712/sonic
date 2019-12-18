@@ -1377,6 +1377,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@crm_reopen_count_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@crm_reopen_count_submit')->name('update');
         });
+
+        Route::prefix('multiple_sale_tagging')->name('multiple_sale_tagging.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@multiple_sale_tagging_index')->name('index');
+            Route::post('list', 'Admins\GlobalSettingsController@multiple_sale_tagging_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@multiple_sale_tagging_submit')->name('submit');
+            Route::post('assign_admin/view', 'Admins\GlobalSettingsController@multiple_sale_tagging_assign_view')->name('assign_admin.view');
+            Route::post('assign_admin/submit', 'Admins\GlobalSettingsController@multiple_sale_tagging_assign_submit')->name('assign_admin.submit');
+            Route::post('assign_admin/view_assigned', 'Admins\GlobalSettingsController@multiple_sale_tagging_assign_view_assigned')->name('assign_admin.view_assigned');
+        });
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
