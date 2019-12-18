@@ -1386,7 +1386,16 @@ use Yajra\Datatables\Datatables;
                             })->where('shipments.packaging_material_request', '=', 0)->whereIn('shipments.user_id', session('tagged_shippers'))->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                         }else{
                             if($sales_person != null){
-                                $tagged_shippers = DB::connection('reports')->table('sale_person_tags')->where('admin_id', $sales_person)->select('user_id')->get();
+                                $tagged_shippers = DB::connection('reports')->table('sale_person_tags')->where('admin_id', $sales_person)->select('user_id')->pluck('user_id')->toArray();
+
+                                $assigned_admins = DB::connection('reports')->table('multiple_sale_leads')->leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
+                                    ->leftjoin('sale_person_tags as spt', 'spt.admin_id', '=', 'mst.admin_id')
+                                    ->where('multiple_sale_leads.admin_id', $sales_person)
+                                    ->where('spt.status', 0)
+                                    ->whereNotNull('spt.user_id')->select('spt.user_id')->pluck('spt.user_id')->toArray();
+                                if($assigned_admins) {
+                                    $tagged_shippers = array_merge($tagged_shippers, $assigned_admins);
+                                }
 
                                 $booked = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                                     $query->from('user_shipping_infos')
@@ -3252,7 +3261,13 @@ use Yajra\Datatables\Datatables;
                     $hubs = DB::connection('reports')->table('cities')->select('id','name')->whereIn('id',session('hubs'))->get();
                 }else{
                     if(session('role_id') != 4){
-                        $sales_persons = DB::connection('reports')->table('admins')->where('id', Auth::id())->select('id', 'name')->get();
+                        $admins = array();
+                        $admins[0] = Auth::id();
+                        $tagged_admins =  DB::connection('reports')->table('multiple_sale_leads')->leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')->select('mst.admin_id')->where('multiple_sale_leads.admin_id', Auth::id())->whereNotNull('mst.admin_id')->pluck('mst.admin_id')->toArray();
+                        if($tagged_admins){
+                            $admins = array_merge($admins, $tagged_admins);
+                        }
+                        $sales_persons = DB::connection('reports')->table('admins')->whereIn('id', $admins)->select('id', 'name')->get();
                         $hubs = DB::connection('reports')->table('cities')->select('id','name')->whereIn('id',session('hubs'))->get();
                     }else{
                         $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();

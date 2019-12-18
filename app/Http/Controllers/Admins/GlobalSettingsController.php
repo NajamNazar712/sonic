@@ -1426,7 +1426,7 @@ class GlobalSettingsController extends Controller
         }
     }
     public function multiple_sale_tagging_assign_view(Request $request) {
-        $tagged_admins = MultipleSaleLead::leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')->select('mst.admin_id')->where('multiple_sale_leads.admin_id', 47)->whereNotNull('mst.admin_id')->pluck('mst.admin_id')->toArray();
+        $tagged_admins = MultipleSaleLead::leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')->select('mst.admin_id')->where('multiple_sale_leads.admin_id', $request->head_id)->whereNotNull('mst.admin_id')->pluck('mst.admin_id')->toArray();
         $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id', 7)
             ->where('admin_roles.id', '!=', 4)
