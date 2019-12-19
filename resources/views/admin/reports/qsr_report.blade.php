@@ -280,7 +280,7 @@
                             'search_shipping_mode': $('#search_shippimg_modes').val(),
                             'search_from': $('input[name="from_date_formatted"]').val(),
                             'search_to': $('input[name="to_date_formatted"]').val(),
-                            'search_types': $('input[name="search_types"]').val()
+                            'search_types': $('#search_types').val()
                         },
                         success: function (result) {
                             head = [];
