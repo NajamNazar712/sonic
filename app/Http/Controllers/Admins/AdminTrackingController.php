@@ -441,7 +441,14 @@ class AdminTrackingController extends Controller
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
-        $shippers = User::select('id', 'name')->get();
+
+        if (session('department_id') == 7 && session('role_id') != 4) {
+            $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
+        }
+        else {
+            $shippers = User::select('id', 'name')->get();
+        }
+
 //        dd($shippers);
         return view('admin.tracking.cx_quick_tracking')->with(['shippers' => $shippers, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels]);
     }
