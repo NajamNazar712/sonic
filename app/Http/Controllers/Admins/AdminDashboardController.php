@@ -208,7 +208,13 @@ class AdminDashboardController extends Controller
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
 
-        $shippers = User::where('status',3)->where('blacklist',0)->select('id','name')->get();
+        if (session('department_id') == 7 && session('role_id') != 4) {
+            $shippers = User::whereIn('id', session('tagged_shippers'))->where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        }
+        else {
+            $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
+        }
+
         $cities = City::where('status',1)->select('id','name')->get();
         $service_type = BookingType::where('id', '!=', 3)->select('id','booking_type')->get();
 
