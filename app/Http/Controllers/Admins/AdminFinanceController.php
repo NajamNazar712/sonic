@@ -2936,7 +2936,13 @@ class AdminFinanceController extends Controller
     }
 
     public function done_payments_index() {
-        $shippers = User::select('id', 'name')->get();
+        if (session('department_id') == 7 && session('role_id') != 4) {
+            $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
+        }
+        else {
+            $shippers = User::select('id', 'name')->get();
+        }
+
         $shipper_status = [1 => 'Active', 2 => 'Inactive'];
 
         $banks = BanksList::all();

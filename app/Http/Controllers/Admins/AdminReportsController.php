@@ -33,7 +33,13 @@ use Yajra\Datatables\Datatables;
             $this->middleware('Permission');
         }
         public function qsr_index(Request $request){
-            $shippers = DB::connection('reports')->table('users')->whereIn('status',[3,4])->select('id','name')->get();
+            if (session('department_id') == 7 && session('role_id') != 4) {
+                $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status',[3, 4])->select('id','name')->get();
+            }
+            else {
+                $shippers = DB::connection('reports')->table('users')->whereIn('status',[3, 4])->select('id','name')->get();
+            }
+
             $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
             $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
             $shippimg_modes = DB::connection('reports')->table('shipping_modes')->get();
