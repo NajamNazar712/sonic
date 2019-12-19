@@ -927,7 +927,9 @@
                             closeOnEsc: false,
                             dangerMode: true
                         }).then(function (confirm) {
-                            form.submit();
+                            if(confirm){
+                                form.submit();
+                            }
                         });
                     }
                     else{

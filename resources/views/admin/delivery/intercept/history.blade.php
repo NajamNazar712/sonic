@@ -18,6 +18,7 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Changed On</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Old Consignee City</th>
@@ -73,6 +74,7 @@
 
                             head.push('S.No');
                             head.push('Tracking .No');
+                            head.push('Shipper');
                             head.push('Changed On');
                             head.push('Origin');
                             head.push('Old Consignee City');
@@ -96,6 +98,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
+                                row.push(values.shipper);
                                 row.push(values.created_at);
                                 row.push(values.origin);
                                 row.push(values.old_consignee_city);
@@ -143,10 +146,11 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.intercept.history.list') }}',
-                order: [[2, 'desc']],
+                order: [[3, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
+                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'created_at', name: 'intercept_re_book_request_histories.created_at', class: 'align-middle created_at'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'old_consignee_city', name: 'odc.name', class: 'align-middle old_consignee_city'},
