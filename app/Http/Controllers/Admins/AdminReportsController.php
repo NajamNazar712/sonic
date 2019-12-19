@@ -2992,7 +2992,13 @@ use Yajra\Datatables\Datatables;
             return Response::download($file, 'customer_retention_report.xlsx',$headers);
         }
         public function overall_sales_index(){
-            $shippers = DB::connection('reports')->table('users')->whereIn('status',[3,4])->select('id','name')->get();
+            if (session('department_id') == 7 && session('role_id') != 4) {
+                $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status',[3, 4])->select('id','name')->get();
+            }
+            else {
+                $shippers = DB::connection('reports')->table('users')->whereIn('status',[3, 4])->select('id','name')->get();
+            }
+
             $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
             $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
             $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
