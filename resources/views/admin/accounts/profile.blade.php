@@ -99,7 +99,7 @@
                                 </tr>
                                 <tr>
                                     <td><b>Average Shipments</b></td>
-                                    <td>{{$user->average_shipments}}</td>
+                                    <td>{{$user->average_shipments}}@if($average_shipment_duration != null) / {{$average_shipment_duration->name}}@endif</td>
                                 </tr>
                                 @if($reference)
                                     <tr>

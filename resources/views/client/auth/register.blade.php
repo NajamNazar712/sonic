@@ -213,7 +213,7 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="nature_of_account">Average Shipments:
+                                                        <label for="average_shipment">Average Shipments:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
@@ -223,11 +223,41 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
+                                                        <label for="average_shipment_duration">Average Shipment Duration:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="average_shipment_duration" id="average_shipment_duration" class="select2 form-control required" style="width: 100%">
+                                                                @foreach($average_shipment_durations as $average_shipment_duration)
+                                                                    <option value="{{$average_shipment_duration->id}}" {{ old('reference') == $average_shipment_duration->id ? 'selected' : '' }} >{{$average_shipment_duration->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
                                                         <label for="reference">Reference:</label>
                                                         <div>
                                                             <select name="reference" id="reference" class="select2 form-control" style="width: 100%">
                                                                 @foreach($references as $reference)
                                                                     <option value="{{$reference->id}}" {{ old('reference') == $reference->id ? 'selected' : '' }} >{{$reference->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 d-none" id="sale_person_div">
+                                                    <div class="form-group">
+                                                        <label for="sale_person">Sale Person:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="sale_person" id="sale_person" class="select2 form-control required" style="width: 100%">
+                                                                @foreach($sales_persons as $sales_person)
+                                                                    <option value="{{$sales_person->id}}" {{ old('sale_person') == $sales_person->id ? 'selected' : '' }} >{{$sales_person->name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -725,8 +755,25 @@
             placeholder:'Select Product Type',
             // dropdownParent:$('#registership')
         });
+        $('select[name="average_shipment_duration"]').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Duration',
+            // dropdownParent:$('#registership')
+        });
         $('select[name="reference"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Reference',
+            // dropdownParent:$('#registership')
+        }).bind('change', function() {
+            if (this.value == 1) {
+                $('#sale_person_div').removeClass('d-none');
+                $('#sale_person').addClass('required');
+            }
+            else{
+                $('#sale_person_div').addClass('d-none');
+                $('#sale_person').removeClass('required');
+            }
+        });
+        $('select[name="sale_person"]').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Sale Person',
             // dropdownParent:$('#registership')
         });
         $("input[name='average_shipment']").inputmask({

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Models\AccountType;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
 use App\Http\Models\CRFTermsConditions;
@@ -60,10 +63,12 @@ class RegisterController extends Controller
         $city_list = City::where('status',1)->get();
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $references = Reference::all();
+        $average_shipment_durations = AverageShipmentCycle::all();
+        $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->get();
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
 
-        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'invoicing_cycle' => $invoicing_cycle, 'references' => $references]);
+        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'invoicing_cycle' => $invoicing_cycle, 'references' => $references, 'sales_persons' => $sales_persons, 'average_shipment_durations' => $average_shipment_durations]);
     }
     /**
      * Get a validator for an incoming registration request.
@@ -83,6 +88,7 @@ class RegisterController extends Controller
                 'shipper_phone'=>'required|string|max:255',
                 'nature_of_account' => 'required',
                 'average_shipment' => 'required',
+                'average_shipment_duration' => 'required',
                 'cnic'=>'required|string|max:255',
 				'url'=>'required|string|max:255',
                 'shipper_city'=>'required|string|max:255',
@@ -112,6 +118,7 @@ class RegisterController extends Controller
                 'shipper_phone'=>'required|string|max:255',
                 'nature_of_account' => 'required',
                 'average_shipment' => 'required',
+                'average_shipment_duration' => 'required',
                 'cnic'=>'required|string|max:255',
 				'url'=>'required|string|max:255',
                 'shipper_city'=>'required|string|max:255',
@@ -143,6 +150,7 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
+//        dd($request);
 //        $products = implode(',',$request->product_type);
 //
 //        return $request;
@@ -181,12 +189,19 @@ class RegisterController extends Controller
             'product_id'=>$data['shipper_product_type'],
             'account_type_id' => $data['nature_of_account'],
             'average_shipments' => $data['average_shipment'],
+            'average_shipment_duration_id' => $data['average_shipment_duration'],
             'reference_id' => $data['reference'],
             'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);
-
+        if($data['sale_person']){
+            $sale_person = new SalePersonTag();
+            $sale_person->admin_id = $data['sale_person'];
+            $sale_person->user_id = $newUser->id;
+            $sale_person->status = 0;
+            $sale_person->save();
+        }
         $first = TRUE;
 
         foreach ($data['pickup_address'] as $index => $pickup_address) {
