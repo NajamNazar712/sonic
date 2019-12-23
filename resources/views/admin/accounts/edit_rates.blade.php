@@ -4902,7 +4902,6 @@
             var previous_select = $('select[name="storage_type['+ previous_row +']"]');
             var index = $.inArray(previous_select.val(), storage_type_selected);
             if(index === -1){
-                console.log(previous_select.val())
                 storage_type_selected.push(previous_select.val());
             }
             previous_select.prop('disabled', true);
@@ -5082,7 +5081,7 @@
                         return obj;
                     }  
                 });
-                $('select[name="packing_size['+ last_id +']"]').empty().select2({data:packing_sizes_data, placeholder: 'Select Storage Size'}).val(null).trigger('change');
+                $('select[name="packing_size['+ last_id +']"]').empty().select2({data:packing_sizes_data, placeholder: 'Select Packing Size'}).val(null).trigger('change');
             });
              $('select[name="packing_size['+ packing_type_rows +']"]').select2({
                 width:'100%',

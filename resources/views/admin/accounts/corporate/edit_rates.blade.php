@@ -3576,6 +3576,7 @@
                                                                         </select>
                                                                     </fieldset>
                                                                 </div>
+
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
                                                                         <input name="packing_charges[{{$pkey}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" value="{{$packing->charges}}" {{ ($wms_user_info->packing_charges)? '':'disabled'}}>
@@ -3732,7 +3733,7 @@
                                                                         </select>
                                                                     </fieldset>
                                                                 </div>
-
+                                                                
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
                                                                         <input name="storage_type_charges[0]" data-rule-required="true" data-msg-required="Charges are required" type="text" class="form-control numeric" placeholder="Charges">
@@ -3792,6 +3793,7 @@
                                                                         </select>
                                                                     </fieldset>
                                                                 </div>
+
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
                                                                         <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges">
@@ -5163,13 +5165,34 @@
         var packing_type_rows = 1;
         @endif
        
-        // var packing_material_data = @json($packaging_material_types);
-        // var packing_data = $.map(packing_material_data, function (obj) {
-        //         obj.id = obj.id;
-        //         obj.text = obj.type;
-        //         return obj;
-        //     });
         
+        @isset($wms_user_info->warehousing)
+        @if(!$wms_user_info->packing_charges)
+
+            $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+                data:packing_data,
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).bind('select2:select', function(){
+                $('input[name="packing_type[0]"]').val($(this).val());
+                var packing_sizes_data = $.map(packing_sizes[$(this).val()], function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.size;
+                return obj;
+                });
+                $('select[name="packing_size[0]"]').empty().select2({data:packing_sizes_data, placeholder: 'Select Packing Size'}).val(null).trigger('change');
+            });
+            $('select[name="packing_size[0]"]').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:'Select Storage Type'
+            }).bind('select2:select', function(){
+               var packing_size = $(this).val();
+                $(this).parents('div.packing_type_row').find('input#packing_size_input'+last_id).val(packing_size);
+                $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
+
+            });
+        @endif
+        @endisset
         var packingSwitch = document.querySelector('.switchery.packingCharges');
         packingSwitch.onchange = function () {
             if(packingSwitch.checked === true){
@@ -5193,17 +5216,7 @@
             previous_type.prop('disabled', true);
             previous_size.prop('disabled', true);
 
-            // var packing_data_new = $.map(packing_material_data, function (obj) {
-            //     var current_id = obj.id.toString();
-            //     var index = $.inArray(current_id, packing_type_selected);
-                
-            //     if(index === -1){
-            //         obj.id = obj.id;
-            //         obj.text = obj.type;
-            //         return obj;
-            //     }
-                
-            // });
+            
             // if(packing_data.length !== 0){
                 var htmldiv = '<div class="row packing_type_row" id="packing_type_row'+packing_type_rows+'">\n' +
                 '                                                <input id="packing_type_input'+ packing_type_rows +'" type="hidden" name="packing_type['+ packing_type_rows +']" value=""><div class="col-md-2">\n' +
@@ -5243,7 +5256,7 @@
                         return obj;
                     }  
                 });
-                $('select[name="packing_size['+ last_id +']"]').empty().select2({data:packing_sizes_data, placeholder: 'Select Storage Size'}).val(null).trigger('change');
+                $('select[name="packing_size['+ last_id +']"]').empty().select2({data:packing_sizes_data, placeholder: 'Select Packing Size'}).val(null).trigger('change');
             });
              $('select[name="packing_size['+ packing_type_rows +']"]').select2({
                 width:'100%',
