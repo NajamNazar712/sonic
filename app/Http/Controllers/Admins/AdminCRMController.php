@@ -1777,4 +1777,59 @@ class AdminCRMController extends Controller
             return ['status' => 1, 'error' => 'Tracking Number: ' . $request->tracking_number . ' doesn\'t exists'];
         }
     }
+    public function bulk_valid_invalid(Request $request){
+        foreach ($request->crm_request_ids as $crm_request_id)
+        {
+            $crm_request = CrmRequest::find($crm_request_id);
+            if ($crm_request->agent_id != null) {
+                if (session('role_id') == 1 || session('role_id') == 6 || $crm_request->agent_id == Auth::id() || in_array(184, session('permissions')))
+                    {
+                    if ($crm_request->status_id == 1 || $crm_request->status_id == 5) {
+                        if($request->valid == 1){
+                            CrmRequest::where('id', $crm_request->id)->update([
+                                'status_id' => 2,
+                            ]);
+                            CrmRequestStatusHistory::create([
+                                'crm_request_id' => $crm_request->id,
+                                'status_id' => 6,
+                                'agent_id' => Auth::id()
+                            ]);
+                            NotificationsController::send(41, $crm_request->id);
+                            CrmRequestStatusHistory::create([
+                                'crm_request_id' => $crm_request->id,
+                                'status_id' => 2,
+                                'agent_id' => Auth::id()
+                            ]);
+                        }
+                        elseif ($request->valid == 0){
+                            CrmRequest::where('id', $crm_request->id)->update([
+                                'status_id' => 4,
+                            ]);
+                            CrmRequestStatusHistory::create([
+                                'crm_request_id' => $crm_request->id,
+                                'status_id' => 7,
+                                'agent_id' => Auth::id()
+                            ]);
+                            CrmRequestStatusHistory::create([
+                                'crm_request_id' => $crm_request->id,
+                                'status_id' => 4,
+                                'agent_id' => Auth::id()
+                            ]);
+
+                            CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+                        }
+                    }
+                }
+            }
+        }
+        if($request->valid == 1){
+            return ['status' => 1, 'success' => 'Request(s) has been marked as Valid'];
+        }
+        elseif ($request->valid == 0){
+            return ['status' => 1, 'success' => 'Request(s) has been marked as In-Valid'];
+        }
+        else{
+            return ['status' => 0, 'error' => 'Something went wrong'];
+        }
+    }
 }

@@ -1451,6 +1451,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@crm_update_index')->name('index');
             Route::post('', 'Admins\AdminCRMController@crm_update_store')->name('store');
         });
+        Route::post('bulk_valid_invalid', 'Admins\AdminCRMController@bulk_valid_invalid')->name('bulk_valid_invalid');
     });
 
     Route::prefix('intercept')->name('intercept.')->group(function (){
