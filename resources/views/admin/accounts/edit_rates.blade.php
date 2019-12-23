@@ -3284,17 +3284,22 @@
                                                                             </select>
                                                                         </fieldset>
                                                                     </div>
-
+                                                                    <input type="hidden" id="packing_size_input0" name="packing_size[0]">
+                                                                    <div class="col-md-2">
+                                                                        <fieldset class="form-group">
+                                                                            <select class="select2 form-control packing_size" name="packing_size[0]" data-rule-required="true" data-msg-required="This field is required" disabled="disabled">
+                                                                            </select>
+                                                                        </fieldset>
+                                                                    </div>
                                                                     <div class="col-md-2">
                                                                         <fieldset class="form-group">
                                                                             <input name="packing_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric" placeholder="Charges" disabled="disabled">
                                                                         </fieldset>
                                                                     </div>
                                                                     <div class="col-md-2">
-                                                                       
-                                                                            <span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
-                                                                            <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
-                                                                        
+                                                                       <span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
+                                                                        <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
+                                                                            
                                                                     </div>
                                                                 </div>
                                                                     
@@ -5002,7 +5007,7 @@
                 placeholder:'Select Storage Type'
             }).bind('select2:select', function(){
                var packing_size = $(this).val();
-                $(this).parents('div.packing_type_row').find('input#packing_size_input'+last_id).val(packing_size);
+                $(this).parents('div.packing_type_row').find('input#packing_size_input0').val(packing_size);
                 $(this).parents('div.packing_type_row').find('span#packing_type_add').removeClass('d-none');
 
             });
@@ -5085,7 +5090,7 @@
             });
              $('select[name="packing_size['+ packing_type_rows +']"]').select2({
                 width:'100%',
-                placeholder:'Select Packing Type'
+                placeholder:'Select Packing Size'
             }).on('select2:select', function(){
                 var packing_size = $(this).val();
                 $(this).parents('div.packing_type_row').find('input#packing_size_input'+last_id).val(packing_size);
