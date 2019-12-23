@@ -2,77 +2,78 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\NotificationsController;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\InvoicingCycle;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\WMS\WmsStorageType;
 use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\StandardBookingTypeCharge;
-use App\Http\Models\Admin\StandardCashHandlingCharge;
-use App\Http\Models\Admin\StandardFuelSurcharge;
-use App\Http\Models\Admin\StandardInsuranceCharge;
-use App\Http\Models\Admin\StandardPackagingCharge;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\WMS\WmsPackingCharge;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\CorporateReturnCharge;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CorporateFuelSurcharge;
+use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\WMS\WmsLabellingCharge;
+use App\Http\Models\WMS\WmsUserInformation;
+use App\Http\Models\CorporateDiscountCharge;
+use App\Http\Models\WMS\WmsPerProductCharge;
+use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\WMS\WmsStorageTypeCharge;
 use App\Http\Models\Admin\StandardReturnCharge;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\CorporateBookingTypeCharge;
+use App\Http\Models\PackagingMaterialTypeSizes;
+use App\Http\Models\Rates\CorporateRateHistory;
+use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\CorporateCashHandlingCharge;
-use App\Http\Models\CorporateDiscountCharge;
-use App\Http\Models\CorporateFuelSurcharge;
-use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\WMS\WmsHistoryPackingCharge;
+use App\Http\Models\WMS\WmsPendingPackingCharge;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\CorporateMinChargeableWeight;
-use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\CorporateReturnCharge;
-use App\Http\Models\CorporateStandardBookingTypeCharge;
-use App\Http\Models\CorporateStandardCashHandlingCharge;
-use App\Http\Models\CorporateStandardFuelSurcharge;
-use App\Http\Models\CorporateStandardInsuranceCharge;
-use App\Http\Models\CorporateStandardMinChargeableWeight;
+use App\Http\Models\Admin\StandardInsuranceCharge;
+use App\Http\Models\Admin\StandardPackagingCharge;
 use App\Http\Models\CorporateStandardReturnCharge;
 use App\Http\Models\CorporateStandardWeightCharge;
-use App\Http\Models\CorporateWeightCharge;
-use App\Http\Models\PackagingMaterialTypes;
-use App\Http\Models\WMS\WmsUserInformation;
-use App\Http\Models\WMS\WmsPerProductCharge;
-use App\Http\Models\WMS\WmsPerSquareFootCharge;
-use App\Http\Models\WMS\WmsLabellingCharge;
-use App\Http\Models\WMS\WmsPackingCharge;
-use App\Http\Models\WMS\WmsStorageTypeCharge;
-use App\Http\Models\WMS\WmsPendingUserInformation;
-use App\Http\Models\WMS\WmsPendingPerProductCharge;
-use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
-use App\Http\Models\WMS\WmsPendingLabellingCharge;
-use App\Http\Models\WMS\WmsPendingPackingCharge;
-use App\Http\Models\WMS\WmsPendingStorageTypeCharge;
-use App\Http\Models\WMS\WmsHistoryUserInformation;
-use App\Http\Models\WMS\WmsHistoryPerProductCharge;
-use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
 use App\Http\Models\WMS\WmsHistoryLabellingCharge;
-use App\Http\Models\WMS\WmsHistoryPackingCharge;
+use App\Http\Models\WMS\WmsHistoryUserInformation;
+use App\Http\Models\WMS\WmsPendingLabellingCharge;
+use App\Http\Models\WMS\WmsPendingUserInformation;
+use App\Http\Models\CorporateStandardFuelSurcharge;
+use App\Http\Models\WMS\WmsHistoryPerProductCharge;
+use App\Http\Models\WMS\WmsPendingPerProductCharge;
+use App\Http\Models\Admin\StandardBookingTypeCharge;
 use App\Http\Models\WMS\WmsHistoryStorageTypeCharge;
-use App\Http\Models\WMS\WmsStorageType;
-use App\Http\Models\InvoicingCycle;
-use App\Http\Models\Rates\CorporateRateHistory;
-use App\Http\Models\Rates\HistoryCorporateBookingTypeCharges;
-use App\Http\Models\Rates\HistoryCorporateMinChargeableWeight;
-use App\Http\Models\Rates\PendingCorporateBookingTypeCharges;
-use App\Http\Models\Rates\PendingCorporateCashHandlingCharge;
-use App\Http\Models\Rates\PendingCorporateDiscountCharge;
-use App\Http\Models\Rates\PendingCorporateFuelSurcharge;
-use App\Http\Models\Rates\PendingCorporateInsuranceCharge;
-use App\Http\Models\Rates\PendingCorporateMinChargeableWeight;
-use App\Http\Models\Rates\PendingCorporateRateStatus;
-use App\Http\Models\Rates\PendingCorporateReturnCharge;
-use App\Http\Models\Rates\PendingCorporateWeightCharge;
-use App\Http\Models\Rates\HistoryCorporateCashHandlingCharge;
-use App\Http\Models\Rates\HistoryCorporateDiscountCharge;
-use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
-use App\Http\Models\Rates\HistoryCorporateInsuranceCharge;
+use App\Http\Models\WMS\WmsPendingStorageTypeCharge;
+use App\Http\Models\Admin\StandardCashHandlingCharge;
+use App\Http\Models\CorporateStandardInsuranceCharge;
 use App\Http\Models\Rates\HistoryCorporateRateStatus;
+use App\Http\Models\Rates\PendingCorporateRateStatus;
+use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
+use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
+use App\Http\Models\CorporateStandardBookingTypeCharge;
 use App\Http\Models\Rates\HistoryCorporateReturnCharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
-use App\Http\Models\Shipper\User;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Rates\PendingCorporateReturnCharge;
+use App\Http\Models\Rates\PendingCorporateWeightCharge;
+use App\Http\Models\CorporateStandardCashHandlingCharge;
+use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
+use App\Http\Models\Rates\PendingCorporateFuelSurcharge;
+use App\Http\Models\CorporateStandardMinChargeableWeight;
+use App\Http\Models\Rates\HistoryCorporateDiscountCharge;
+use App\Http\Models\Rates\PendingCorporateDiscountCharge;
+use App\Http\Models\Rates\HistoryCorporateInsuranceCharge;
+use App\Http\Models\Rates\PendingCorporateInsuranceCharge;
+use App\Http\Models\Rates\HistoryCorporateBookingTypeCharges;
+use App\Http\Models\Rates\HistoryCorporateCashHandlingCharge;
+use App\Http\Models\Rates\PendingCorporateBookingTypeCharges;
+use App\Http\Models\Rates\PendingCorporateCashHandlingCharge;
+use App\Http\Models\Rates\HistoryCorporateMinChargeableWeight;
+use App\Http\Models\Rates\PendingCorporateMinChargeableWeight;
 
 
 class AdminCorporateAccountsController extends Controller
@@ -86,6 +87,7 @@ class AdminCorporateAccountsController extends Controller
 
     public function add_rates_index($id)
     {
+
         $user = User::find($id);
         if (!CorporateRateStatus::where('user_id', $user->id)->exists()) {
             $sale_person = SalePersonTag::where('user_id', $id)->first();
@@ -96,10 +98,16 @@ class AdminCorporateAccountsController extends Controller
             $insurance = CorporateStandardInsuranceCharge::all()->groupBy('shipping_mode_id');
             $return = CorporateStandardReturnCharge::all()->groupBy('shipping_mode_id');
             $fuel = CorporateStandardFuelSurcharge::all()->groupBy('shipping_mode_id');
-            $invoicing_cycles = InvoicingCycle::all();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
-            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types]);
+            if(count($packaging_material_types) > 0){
+
+                foreach($packaging_material_types as $type){
+                    $packaging_sizes[$type->id] = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                }
+            }
+            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes]);
         }
         return redirect()->back()->with('error', 'User rates not found!');
     }
@@ -1197,7 +1205,7 @@ class AdminCorporateAccountsController extends Controller
             $wms_user_info->user_id = $id;
             $wms_user_info->warehousing = 1;
             $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-            $wms_user_info->invoicing_date = ($request->input('invoicing_date')) ? $request->invoicing_date : null;
+            $wms_user_info->invoicing_date = 1;
             $wms_user_info->per_product_charges = ($request->has('ppc_switch')) ? 1 : 0;
             $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
             $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
@@ -1230,6 +1238,7 @@ class AdminCorporateAccountsController extends Controller
                     $ptype = new WmsPackingCharge();
                     $ptype->user_id = $id;
                     $ptype->packing_type_id = $packing;
+                    $ptype->packing_type_id = $request->packing_size[$key];
                     $ptype->charges = $request->packing_charges[$key];
                     $ptype->save();
                 }
@@ -1271,7 +1280,7 @@ class AdminCorporateAccountsController extends Controller
             $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
             $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
-            $invoicing_cycles = InvoicingCycle::all();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
             $rate_status = $user['rate_status'];
 
@@ -1314,7 +1323,7 @@ class AdminCorporateAccountsController extends Controller
             $wms_labelling_charges = WmsPendingLabellingCharge::where('user_id', $id)->first();
             $wms_storage_charges = WmsPendingStorageTypeCharge::where('user_id', $id)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
-            $invoicing_cycles = InvoicingCycle::all();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
 
             $rate_status = $user['rate_status'];
@@ -3012,7 +3021,7 @@ class AdminCorporateAccountsController extends Controller
                 if ($wms_user_info->exists()) {
                     $wms_user_info = $wms_user_info->first();
                     $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-                    $wms_user_info->invoicing_date = ($request->input('invoicing_date')) ? $request->invoicing_date : null;
+                    $wms_user_info->invoicing_date = 1;
                     $wms_user_info->per_product_charges = ($request->has('ppc_switch')) ? 1 : 0;
                     $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
                     $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
@@ -3022,7 +3031,7 @@ class AdminCorporateAccountsController extends Controller
                     $wms_user_info->user_id = $id;
                     $wms_user_info->warehousing = 1;
                     $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-                    $wms_user_info->invoicing_date = ($request->input('invoicing_date')) ? $request->invoicing_date : null;
+                    $wms_user_info->invoicing_date = 1;
                     $wms_user_info->per_product_charges = ($request->has('ppc_switch')) ? 1 : 0;
                     $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
                     $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
@@ -3073,6 +3082,7 @@ class AdminCorporateAccountsController extends Controller
                         $ptype = new WmsPackingCharge();
                         $ptype->user_id = $id;
                         $ptype->packing_type_id = $packing;
+                        $ptype->packing_type_id = $request->packing_size[$key];
                         $ptype->charges = $request->packing_charges[$key];
                         $ptype->save();
                     }
@@ -4189,7 +4199,7 @@ class AdminCorporateAccountsController extends Controller
                 $wms_user_info->user_id = $id;
                 $wms_user_info->warehousing = 1;
                 $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
-                $wms_user_info->invoicing_date = ($request->input('invoicing_date')) ? $request->invoicing_date : null;
+                $wms_user_info->invoicing_date = 1;
                 $wms_user_info->per_product_charges = ($request->has('ppc_switch')) ? 1 : 0;
                 $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
                 $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
@@ -4222,6 +4232,7 @@ class AdminCorporateAccountsController extends Controller
                         $ptype = new WmsPendingPackingCharge();
                         $ptype->user_id = $id;
                         $ptype->packing_type_id = $packing;
+                        $ptype->packing_type_id = $request->packing_size[$key];
                         $ptype->charges = $request->packing_charges[$key];
                         $ptype->save();
                     }
@@ -4777,7 +4788,7 @@ class AdminCorporateAccountsController extends Controller
                     $wms_user_information->user_id = $id;
                     $wms_user_information->warehousing = $wms_user_info['warehousing'];
                     $wms_user_information->invoicing_cycle = $wms_user_info['invoicing_cycle'];
-                    $wms_user_information->invoicing_date = $wms_user_info['invoicing_date'];
+                    $wms_user_information->invoicing_date = 1;
                     $wms_user_information->per_product_charges = $wms_user_info['per_product_charges'];
                     $wms_user_information->per_square_foot_charges = $wms_user_info['per_square_foot_charges'];
                     $wms_user_information->packing_charges = $wms_user_info['packing_charges'];
@@ -4812,6 +4823,7 @@ class AdminCorporateAccountsController extends Controller
                         $history_packing_charge = new WmsHistoryPackingCharge();
                         $history_packing_charge->user_id = $id;
                         $history_packing_charge->packing_type_id = $packing_charges['packing_type_id'];
+                        $history_packing_charge->packing_size_id = $packing_charges['packing_size_id'];
                         $history_packing_charge->charges = $packing_charges['charges'];
                         $history_packing_charge->save();
                     }
@@ -5365,7 +5377,7 @@ class AdminCorporateAccountsController extends Controller
                     $wms_user_information->user_id = $id;
                     $wms_user_information->warehousing = $wms_user_info['warehousing'];
                     $wms_user_information->invoicing_cycle = $wms_user_info['invoicing_cycle'];
-                    $wms_user_information->invoicing_date = $wms_user_info['invoicing_date'];
+                    $wms_user_information->invoicing_date = 1;
                     $wms_user_information->per_product_charges = $wms_user_info['per_product_charges'];
                     $wms_user_information->per_square_foot_charges = $wms_user_info['per_square_foot_charges'];
                     $wms_user_information->packing_charges = $wms_user_info['packing_charges'];
@@ -5400,6 +5412,7 @@ class AdminCorporateAccountsController extends Controller
                         $history_packing_charge = new WmsPackingCharge();
                         $history_packing_charge->user_id = $id;
                         $history_packing_charge->packing_type_id = $packing_charges['packing_type_id'];
+                        $history_packing_charge->packing_size_id = $packing_charges['packing_size_id'];
                         $history_packing_charge->charges = $packing_charges['charges'];
                         $history_packing_charge->save();
                     }
@@ -5457,7 +5470,7 @@ class AdminCorporateAccountsController extends Controller
         $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
         $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
         $storage_types = WmsStorageType::all()->where('status', 1);
-        $invoicing_cycles = InvoicingCycle::all();
+        $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
         if (session('department_id') == 7) {
             if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4) {
                 return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types]);
