@@ -4828,7 +4828,8 @@
                 width:'100%',
                 placeholder:'Select Packing Type'
             }).bind('select2:select', function(){
-                $('input[name="packing_type[0]"]').val($(this).val());
+                var packing_id = $(this).val();
+                $('input[name="packing_type[0]"]').val(packing_id);
 
                 var packing_sizes_data = $.map(packing_sizes[packing_id], function (obj) {
                 obj.id = obj.id;
