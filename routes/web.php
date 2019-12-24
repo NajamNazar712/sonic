@@ -1452,6 +1452,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\AdminCRMController@crm_update_store')->name('store');
         });
         Route::post('bulk_valid_invalid', 'Admins\AdminCRMController@bulk_valid_invalid')->name('bulk_valid_invalid');
+        Route::prefix('claim')->name('claim.')->group(function(){
+            Route::get('product_image/{id}', 'Admins\AdminCRMController@product_image')->name('product_image');
+            Route::get('invoice_image/{id}', 'Admins\AdminCRMController@invoice_image')->name('invoice_image');
+        });
     });
 
     Route::prefix('intercept')->name('intercept.')->group(function (){

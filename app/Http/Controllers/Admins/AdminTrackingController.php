@@ -34,8 +34,9 @@ class AdminTrackingController extends Controller
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
 
-        return view('admin.tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels]);
+        return view('admin.tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
     }
 
     public function track(Request $request) {
@@ -442,8 +443,9 @@ class AdminTrackingController extends Controller
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
         $shippers = User::select('id', 'name')->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
 //        dd($shippers);
-        return view('admin.tracking.cx_quick_tracking')->with(['shippers' => $shippers, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels]);
+        return view('admin.tracking.cx_quick_tracking')->with(['shippers' => $shippers, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
     }
     public function cx_quick_tracking_list(Request $request){
         $quick_tracking = Shipment::leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')

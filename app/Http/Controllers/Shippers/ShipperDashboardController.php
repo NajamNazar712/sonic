@@ -57,8 +57,9 @@ class ShipperDashboardController extends Controller
         $case_nature = CrmRequestCaseNature::get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
 
-      return view('client.dashboard')->with(['cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests]);
+      return view('client.dashboard')->with(['cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims]);
     }
     public function orders_list(Request $request) {
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
