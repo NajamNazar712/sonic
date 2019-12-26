@@ -9,14 +9,23 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-
-                        @include('admin.inc.messages')
-
-                    </div>
-
+                    @include('admin.inc.messages')
                     <div class="card-content">
                         <div class="card-body card-dashboard">
+                            <div id="search_form" class="row mb-2 justify-content-center">
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_admins[]" id="search_admins" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                            @foreach($sale_name as $admin)
+                                                <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                </div>
+                            </div>
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3">
                                 <thead>
                                     <tr class="bg-primary white">
@@ -78,6 +87,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
 
 
@@ -87,10 +97,18 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
     $(document).ready(function() {
+
+        $('#search_admins').select2({
+            width:'100%',
+            placeholder:"Select Sale Persons",
+            allowClear:true,
+            dropdownParent:$('#search_form')
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -99,6 +117,7 @@
                     url: '{{ route('admin.accounts.active.ajax') }}',
                     data: {
                         'page': 'all',
+                        'sale_persons': $('#search_admins').val(),
                     },
                     success: function (result) {
                         head = [];
@@ -182,7 +201,12 @@
             serverSide: true,
             rowId: 'id',
             order: [[1, 'desc']],
-            ajax: '{{ route('admin.accounts.active.ajax') }}',
+            ajax: {
+               url: '{{ route('admin.accounts.active.ajax') }}',
+               data: function (d) {
+                   d.sale_persons = $('#search_admins').val();
+               }
+           },
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
@@ -276,6 +300,10 @@
                 });
                 this.api().table().columns.adjust();
             }
+        });
+
+        $('#search_filter_btn').on('click',function () {
+            table.draw();
         });
         $('body').on('change','.blacklist_reason',function() {
             $(this).val($(this).val().trim());

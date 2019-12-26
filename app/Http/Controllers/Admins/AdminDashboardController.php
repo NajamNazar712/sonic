@@ -1025,7 +1025,8 @@ class AdminDashboardController extends Controller
 
     }
     public function blockAccountsList(){
-        return view('admin.accounts.block_accounts_list');
+        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('ar.department_id',7)->get();
+        return view('admin.accounts.block_accounts_list')->with(['sale_name'=>$salesperson]);
     }
     public function UserStatus(Request $request){
 //        return $request;
@@ -6290,7 +6291,7 @@ if(session('department_id') == 7){
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
 
-    public function activeAccountListAjax(){		
+    public function activeAccountListAjax(Request $request){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
            ->leftjoin('products as p','p.id','=','users.product_id')
            ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
@@ -6313,6 +6314,10 @@ if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
+        }
+
+        if($sale_persons = $request->get('sale_persons')){
+            $users = $users->whereIn('ad.id', $sale_persons);
         }
 
         return Datatables::of($users)
@@ -6452,7 +6457,7 @@ if(session('department_id') == 7){
     }
 
 
-    public function pendingAccountListAjax(){
+    public function pendingAccountListAjax(Request $request){
 
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products','products.id','=','users.product_id')
@@ -6473,6 +6478,9 @@ if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
+        }
+        if($sale_persons = $request->get('sale_persons')){
+            $users = $users->whereIn('ad.id', $sale_persons);
         }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
@@ -6620,9 +6628,14 @@ if(session('department_id') == 7){
             ->make(true);
 
     }
-    public function blockAccountListAjax(){
+    public function blockAccountListAjax(Request $request){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason'])->where('blacklist',1);
+            ->leftjoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'users.id')
+                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
+                    ->where('spt.status','=',0);
+            })
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason','ad.name as admin_tag_id'])->where('blacklist',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -6631,6 +6644,9 @@ if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
+        }
+        if($sale_persons = $request->get('sale_persons')){
+            $users = $users->whereIn('ad.id', $sale_persons);
         }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
