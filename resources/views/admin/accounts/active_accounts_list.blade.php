@@ -12,6 +12,7 @@
                     @include('admin.inc.messages')
                     <div class="card-content">
                         <div class="card-body card-dashboard">
+                            @if (session('role_id') == 1 || in_array(276, session('permissions')))
                             <div id="search_form" class="row mb-2 justify-content-center">
                                 <div class="col-4">
                                     <fieldset class="form-group">
@@ -26,6 +27,7 @@
                                     <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
                             </div>
+                            @endif
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3">
                                 <thead>
                                     <tr class="bg-primary white">

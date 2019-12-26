@@ -10,20 +10,22 @@
                     <div class="card-header">
                         @include('admin.inc.messages')
                     </div>
-                    <div id="search_form" class="row mb-2 justify-content-center">
-                        <div class="col-4">
-                            <fieldset class="form-group">
-                                <select name="search_admins[]" id="search_admins" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                    @foreach($sale_name as $admin)
-                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
+                    @if (session('role_id') == 1 || in_array(276, session('permissions')))
+                        <div id="search_form" class="row mb-2 justify-content-center">
+                            <div class="col-4">
+                                <fieldset class="form-group">
+                                    <select name="search_admins[]" id="search_admins" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($sale_name as $admin)
+                                            <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-2">
+                                <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                            </div>
                         </div>
-                        <div class="col-2">
-                            <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                        </div>
-                    </div>
+                    @endif
 
                     <div class="card-content">
                         <div class="card-body card-dashboard">
