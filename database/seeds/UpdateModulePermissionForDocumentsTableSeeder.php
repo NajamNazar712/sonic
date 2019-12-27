@@ -13,8 +13,8 @@ class UpdateModulePermissionForDocumentsTableSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 257, 'name' => 'Upload Documents', 'module_id' => 2),
-            array('id' => 258, 'name' => 'Approve/Reject Documents', 'module_id' => 2)
+            array('id' => 277, 'name' => 'Upload Documents', 'module_id' => 2),
+            array('id' => 278, 'name' => 'Approve/Reject Documents', 'module_id' => 2)
         ));
     }
 }
