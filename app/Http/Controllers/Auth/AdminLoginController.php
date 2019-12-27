@@ -53,8 +53,9 @@ class AdminLoginController extends Controller
                 ->leftjoin('sale_person_tags as spt', 'spt.admin_id', '=', 'mst.admin_id')
                 ->where('multiple_sale_leads.admin_id', $id)
                 ->where('spt.status', 0)
-                ->whereNotNull('spt.user_id')->select('spt.user_id')->pluck('spt.user_id')->toArray();
-            if($assigned_admins) {
+                ->whereNotNull('spt.user_id')->select('spt.user_id');
+            if($assigned_admins->exists()) {
+                $assigned_admins = $assigned_admins->pluck('spt.user_id')->toArray();
                 $shippers = array_merge($shippers, $assigned_admins);
             }
             $permissions = AdminRoleModulePermission::where('role_id', $role_id)->pluck('permission_id')->toArray();
